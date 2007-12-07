@@ -1,0 +1,114 @@
+<?php
+/**
+ * @file
+ * Apache provisioning module
+ * This module simply serves to generate the virtual host entry, and make sure apache gets reloaded properly.
+ * Because Drupal is running via the command line for the entirety of this process, it is only necessary to make
+ * it available online once everything has been completed.
+ *
+ * This module still requires configuration and sanity checks. Need to figure out a way to inspect the apache configuration, 
+ * to ensure that the sites are getting loaded up correctly.
+ */
+
+function provision_apache_provision_service() {
+  return t("Apache webserver");
+}
+
+/**
+ * Hook into central configuration form for provisioning framework.
+ */
+function provision_apache_provision_configure() {
+
+  $form['provision_apache_vhost_template'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Virtual Host configuration template'),
+    '#description' => t('The text to use when generating a virtual host configuration file for apache'),
+    '#default_value' => variable_get('provision_apache_vhost_template', _provision_apache_default_template()),
+    '#cols' => 60,
+    '#rows' => 5,
+  );
+  
+  $default_path = variable_get('provision_root', ereg_replace("/webroot$", "", $_SERVER['DOCUMENT_ROOT'])) . '/vhost.d';
+  $form['provision_apache_vhost_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path to the directory to store apache configuration files for hosted sites'),
+    '#size' => 40,
+    '#value' => variable_get('provision_apache_vhost_path', $default_path),
+    '#maxlength' => 255,
+  );
+  $form['provision_apache_restart_cmd'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Apache restart command'),
+    '#description' => t('The command to run to restart apache for new changes to take effect. This is required for the new site to become live'),
+    '#size' => 40,
+    '#maxlength' => 255,
+    '#default_value' => variable_get('provision_apache_restart_cmd', 'sudo apachectl graceful')
+  );
+
+  return $form;
+}
+function _provision_apache_default_template() {
+  return <<<EOF
+ <VirtualHost *:80>
+     ServerAdmin [site-email]
+     DocumentRoot [site-document-root]
+     ServerName [site-url]
+     ServerAlias [site-temporary-url]
+     ServerAlias www.[site-url]
+
+     # Error handler for Drupal > 4.6.7
+     <Directory "[site-document-root]/sites/[site-url]/files">
+       SetHandler This_is_a_Drupal_security_line_do_not_remove
+     </Directory>
+
+ </VirtualHost>
+EOF;
+}
+function provision_apache_provision_pre_install($url, &$data) {
+  return _provision_apache_create_vhost_config($url, $data);
+}
+function provision_apache_provision_post_install($url, &$data) {
+  return _provision_apache_restart_apache();  
+}
+
+function provision_apache_provision_enable($url, &$data) {
+  _provision_apache_create_vhost_config($url, $data);
+  _provision_apache_restart_apache();
+}
+
+function provision_apache_provision_regenerate($url, &$data) {
+  _provision_apache_create_vhost_config($url, $data);
+  _provision_apache_restart_apache();
+}
+
+function _provision_apache_delete_vhost_config($url, $data) {
+ $vhost_path = variable_get('provision_apache_vhost_path', 'vhost.d');
+ if (file_exists()) {
+   unlink($vhost_path . '/' . $url);
+ }
+}
+
+function _provision_apache_create_vhost_config($url, $data) {
+ $vhost_path = variable_get('provision_apache_vhost_path', 'vhost.d');
+ $file = fopen($vhost_path . '/' . $url, "w");
+ if (!$file) {
+   provision_log("error", "Could not create apache configuration file.");
+   provision_set_error(PROVISION_WEB_ERROR | PROVISION_PERM_ERROR);
+   return false;
+ }
+ $text = token_replace(variable_get('provision_apache_vhost_template', _provision_apache_default_template()) , 'site', $data);
+
+ fwrite($file, $text);
+ fclose($file);
+}
+ 
+function _provision_apache_restart_apache() {
+  # This is required to be configurable, due to the fact that different hosts might need to do this differently.
+  # TODO : add configuration / test for this
+  $apache_restart_cmd = escapeshellcmd(variable_get('provision_apache_restart_cmd', 'sudo apachectl graceful'));
+  $code = drush_shell_exec($apache_restart_cmd);
+  if ($code) {
+    provision_set_error(PROVISION_WEB_ERROR);
+    provision_log("error", "Web server could not be restarted. Changes might not be available until this has been done.");
+  }
+}

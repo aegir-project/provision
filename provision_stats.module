@@ -1,0 +1,40 @@
+<?php
+
+function provision_stats_drush_command() {
+  $items['provision stats'] = array(
+    'callback' => '_provision_stats',
+    'description' => 'Return statistics from a running site.'
+  );
+  return $items;
+}
+
+function _provision_stats($url) {
+  $data = provision_get_site_data($url);
+  if (!$data['site-installed']) {
+    print t('The site %site has not been installed yet.',  array('%site' => $url));
+    exit(PROVISION_FRAMEWORK_ERROR); #exit with error, so front end can catch it
+  }
+  #needs to be done on active database
+  $modules = module_implements('provision_stats');
+  drupal_get_messages(); # clear the messages being saved so far.
+  
+  # Change headers and db info, also backs up to restore later
+  _provision_drupal_switch_active_site($url);
+
+  #TODO: add some required modules here, possibly update_status if not enabled.
+  #Load the modules from the hosted site
+  module_list(TRUE);
+  
+  $stats['node_count'] = db_result(db_query("select max(nid) from {node}"));
+  $stats['user_count'] = db_result(db_query("select max(uid) from {users}"));
+
+  foreach ($modules as $name) {
+    $func = $name . "_provision_stats";
+    $stats = array_merge($stats, $func($url, $data));
+  }
+  
+  _provision_switch_active_site();
+  module_list(TRUE);
+  
+  return provision_output($url, $data, array('stats' => $stats));
+}

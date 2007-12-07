@@ -1,0 +1,364 @@
+<?php
+/**
+* @file
+*   Provisioning Framework
+*
+* This module provides a framework for a Drupal site to manage and install new Drupal sites, using the command line
+* Drush utility. 
+*
+* It allows for pluggable 'provisioning modules' that can extend and modify the actions that are taken during installation.
+*
+* Each site has the following commands that can be run on it.
+*
+* Implemented : 
+*   install - Install a new Drupal site. The install command uses 3 separate hooks to do it's job, 
+*              namely hook_provision_pre_install(), hook_provision_install() and hook_provision_post_install()
+*   synch   - Recreate all configuration files, to be in synch with changes in the front end.
+*   stats   - Return an associated array of site statistics. (implemented in provision_stats module, is thus optional)
+*   import  - Import the details of an already existing site into the provisioning framework.
+*             This command inspects the settings.php and generates the site.php file that the framework uses for configuration.
+*
+* Not implemented yet :
+*   disable - Disable an installed Drupal site. This is done by removing the virtual host file, so that Apache no longer serves it.
+*   enable  - Re-enable a site that has already been disabled. Recreates the virtual host file.
+*   upgrade - Accepts a site package (backup) as argument, and redeploys it, running the upgrade processes on it.
+*             Uses hook_provision_pre_upgrade(), hook_provision_upgrade() and hook_provision_post_upgrade() hooks,
+*             and allows clean roll back if any errors occur. Will include stringent checking of module versions,
+*             and allow unit tests to be run.
+*   backup  - Generates a tarball containing the sites directory, the site data configuration and the database dump.
+*             This allows the tarball to act as a 'site package', which can be redeployed on other installations,
+*             or used for an upgrade.
+*   rollback - Revert to a previous backup of the site.
+*   rename  - Change the url of a site. This requires moving of files, and numerous other issues.
+*   delete -  Generates a back up of the site, and then removes all references to it.
+*/
+
+
+/** Include the provisioning API. */
+include_once('provision.inc');
+
+/**
+ * Implementation of hook_perm().
+ */
+function hook_perm() {
+  return array("administer provisioning");
+}
+
+
+/**
+ * @defgroup provisionui Configure provisioning framework.
+ * @{
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function provision_menu($items, $may_cache = true) {
+  if ($may_cache) {
+    $items[] = array(
+      'path' => 'admin/settings/provision',
+      'title' => t('Provisioning'),
+      'description' => t("Configure how new Drupal sites will be provisioned."),
+      'callback' => 'drupal_get_form',
+      'callback arguments' => array('provision_configure'),
+      'access' => user_access('administer provisioning'),
+    );
+  }
+  return $items;
+}
+
+/**
+ * Menu callback.
+ * 
+ * Configuration screen for the provisioning framework.
+ */
+function provision_configure() {
+  
+  $form['provision_root'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Provision root'),
+    '#description' => t('The path where the provision platform is based.'),
+    '#default_value' => variable_get('provision_root', ereg_replace("/webroot$", "", $_SERVER['DOCUMENT_ROOT'])),
+    '#size' => 40,
+    '#maxlength' => 255,
+  );
+
+  $form['provision_tempurl_base'] = array(
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#title' => t('Temporary URL base'),
+    '#description' => t('Each new domain that gets created gets created with a temporary url base that allows it to be immediately accessible.'),
+    '#default_value' => variable_get('provision_tempurl_base', $_SERVER['HTTP_HOST']),
+    '#size' => 40,
+    '#maxlength' => 255,
+  );
+  
+  $form['provision_user'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Provision user'),
+    '#description' => t('The owner of the files. must not be the web server user.'),
+    '#default_value' => variable_get('provision_user', 'hosting'),
+    '#size' => 40,
+    '#maxlength' => 255,
+  );
+  
+  $form['provision_group'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Provision group'),
+    '#description' => t('The group owner of the files. should be the group the web server is running as.'),
+    '#default_value' => variable_get('provision_group', 'apache'),
+    '#size' => 40,
+    '#maxlength' => 255,
+  );
+
+  foreach (module_implements('provision_configure') as $module) {
+    $form[$module] = array(
+      '#type' => 'fieldset',
+      '#title' => module_invoke($module, 'provision_service'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#access' => user_access('administer provisioning'),
+    );
+    $form[$module] = array_merge($form[$module], module_invoke($module, "provision_configure"));
+  }
+  return system_settings_form($form);
+}
+
+/**
+ * @} End of "defgroup provisionui"
+ */
+
+
+/**
+ * @defgroup provisiondrush Command line interface for Provision.
+ * @{
+ */
+/**
+ * Implementation of hook_drush_command().
+ */
+function provision_drush_command() {
+  $items['provision install'] = array(
+    'callback' => 'provision_install_cmd',
+    'description' => 'Provision a new site using the provided data.'
+  );
+
+  $items['provision synch'] = array(
+    'callback' => '_provision_synch',
+    'description' => 'Regenerate all the config files for a site.'
+  );  
+  $items['provision import'] = array(
+    'callback' => '_provision_import',
+    'description' => 'Turn an already running site into a provisioned site.'
+  );  
+  /*
+  $items['provision enable'] = array(
+    'callback' => '_provision_enable',
+    'description' => 'Enable a disabled site.'
+  );
+  $items['provision disable'] = array(
+    'callback' => '_provision_disable',
+    'description' => 'Disable a site.'
+  );  
+  // Not implemented yet.
+  $items['provision delete'] = array(
+    'callback' => '_provision_delete',
+    'description' => 'Delete a site.'
+  );
+
+  $items['provision backup'] = array(
+    'callback' => '_provision_backup',
+    'description' => 'Generate a back up for the site.'
+  );
+  $items['provision rollback'] = array(
+    'callback' => '_provision_rollback',
+    'description' => 'Roll back the site to a previous backup.'
+  );
+  $items['provision deploy'] = array(
+    'callback' => '_provision_deploy',
+    'description' => 'Deploy a backup made on another provisioning platform on this one.'
+  );
+  $items['provision rename'] = array(
+    'callback' => '_provision_rename',
+    'description' => 'Change the url of an existing site.'
+  );
+
+  */
+  return $items;
+}
+
+/**
+ * Drush callback function
+ *
+ * Installs a new site at $url.
+ * It does so by calling hook_provision_pre_install(), hook_provision_install() and hook_provision_post_install().
+ *
+ * @param url
+ *    The url of the site being installed.
+ * @return
+ *    Returns provision_output on success or error. 
+ *    Will exit with a PROVISION_SITE_INSTALLED error if the site already exists.
+ *    Will exit with a PROVISION_FRAMEWORK_ERROR if the command is incorrectly used.
+ */
+function provision_install_cmd($url) {
+  global $args;
+  $data = provision_get_site_data($url);
+
+  if (!$args['commands'][2]) {
+    print "Usage: drush.php provision install DOMAIN [OPTIONS]\n";
+    print "Install a new site for the domain DOMAIN.\n";
+    print "Example: drush.php provision install mydomain.com --site-db-host=localhost\n";
+    provision_set_log("error", "Incorrect usage of the provisioning framework");
+    drupal_set_error(PROVISION_FRAMEWORK_ERROR);
+    provision_output($url, $data);
+  }
+  $ops = array('pre_install', 'install', 'post_install'); # these are the provision hooks that will get triggered.
+
+  if ($data['site-installed'] == TRUE) {
+    print "The site $url is already installed.\nIf you want to re-install it, you will need to delete it first.";
+    drupal_set_error(PROVISION_SITE_INSTALLED);
+    provision_output($url, $data);
+  }
+
+  foreach ($ops as $op ) {
+    $func = "_provision_$op";
+    $func($url, $data);
+  }
+
+  provision_save_site_data($url, $data);
+  provision_output($url, $data);
+}
+
+/**
+ * Drush action. 
+ *
+ * Calls hook_provision_pre_install().
+ * Also responsible for calling creating site directory layout, and the drupal settings file.
+ *
+ * @param url
+ *   The url of the site being invoked.
+ * @param data
+ *   A reference to the associated array containing the data for the site. This needs to be a reference, 
+ *   because the modules might provide additional information about the site.
+ * @return
+ *   Boolean denoting whether the provision_invoke rolled back changes made. 
+ */
+function _provision_pre_install($url, &$data) {  
+  $rolled_back = provision_invoke("pre_install", $url, $data);
+
+  if (!provision_get_error()) {
+    // This is the actual drupal provisioning requirements. 
+    _provision_drupal_create_directories($url, $data['profile']);
+    // Requires at least the database settings to complete.
+    _provision_drupal_create_settings_file($url, $data);
+  }
+  return $rolled_back;
+}
+
+/**
+ * Install drupal site
+ *
+ * The magic here is that we need to drive the install api through this code. 
+ * At this point, we no longer have access to the central database, and we need to be able
+ * to drive this code blind, without causing bad stuff to happen.
+ *
+ * Install profile gets triggered at the end of this code.
+ *
+ * @param url
+ *   The url of the site being invoked.
+ * @param data
+ *   A reference to the associated array containing the data for the site. This needs to be a reference, 
+ *   because the modules might provide additional information about the site.
+ * @return
+ *   Boolean denoting whether the provision_invoke rolled back changes made. 
+ */
+function _provision_install($url, &$data) {
+  $rolled_back = provision_invoke("install", $url, $data);
+
+  if (!$rolled_back) {
+    _provision_drupal_switch_active_site($url); # Change headers and db info, also backs up
+    _provision_drupal_force_load_modules($url);
+    _provision_drupal_install_schema($data['site-profile']);
+    _provision_drupal_force_load_modules();
+    _provision_drupal_switch_active_site(); # This *should* bring the site back to where we were before installing
+  }
+  return $rolled_back;
+}
+
+/** 
+ * Clean up after installation.
+ *
+ * Most notably give the web server the opportunity to recheck it's configuration files.
+ *
+ * @param url
+ *   The url of the site being installed.
+ * @param data
+ *   A reference to the associated array containing the data for the site. This needs to be a reference, 
+ *   because the modules might provide additional information about the site.
+ * @return
+ *   Boolean denoting whether the provision_invoke rolled back changes made. 
+ */
+function _provision_post_install($url, &$data) {
+  $rolled_back = provision_invoke("post_install", $url, $data);
+  if (!$rolled_back) {
+    $data['site-installed'] = true;  
+  }
+  return $rolled_back;
+}
+
+/**
+ * Regenerate the config files of an already running site.
+ *
+ * @param url
+ *   The url of the site being synched.
+ * @return
+ *   Output of drupal_output() function.
+ *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
+ */
+function _provision_synch($url) {
+  if (!_provision_drupal_site_exists($url)) {
+    provision_log("Error", "Site has not been installed yet.");
+    drupal_set_error(PROVISION_SITE_NOT_FOUND);
+    drupal_output($url, $data);
+  }
+  $data = provision_get_site_data($url);
+  // This is the actual drupal provisioning requirements. 
+  _provision_drupal_create_directories($url, $data['profile']);
+  $rolled_back = provision_invoke("synch", $url, $data);
+   // Requires at least the database settings to complete.
+   _provision_drupal_create_settings_file($url, $data);
+   provision_save_site_data($url, $data);
+   drupal_output($url, $data);
+}
+
+/**
+ * Import a running Drupal site into a provisioned site.
+ *
+ * This is accomplished by inspecting the settings.php file and generating a site.php file.
+ *
+ * @param url
+ *   The url of the site being synched.
+ * @return
+ *   Output of drupal_output() function.
+ *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
+ */
+function _provision_import($url) {
+  if (!_provision_drupal_site_exists($url)) {
+    provision_log("Error", "Site directory is not present, and can not be imported.");
+    drupal_set_error(PROVISION_SITE_NOT_FOUND);
+    drupal_output($url, $data);
+  }
+  $data = provision_get_site_data($url);
+  
+  include_once("sites/$url/settings.php");
+  
+  $parts = parse_url($db_url);
+  $data['site-db-type'] = $parts['scheme'];
+  $data['site-db-user'] = $parts['user'];
+  $data['site-db-host'] = $parts['host'];
+  $data['site-db-passwd'] = $parts['pass'];
+  $data['site-db-name'] = substr($parts['path'], 1);
+  $data['site-profile'] = $installed_profile;
+  
+  provision_save_site_data($url, $data);
+  provision_output($url, $data);
+}
