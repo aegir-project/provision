@@ -370,7 +370,7 @@ function _provision_backup($url) {
     $suggested = "$backup_path/$url-" . date("Y-m-d", mktime()) . "_$count.tar";
   }
 
-  $data['backup_file'] = (!empty($file)) ? $file : $suggested;
+  $data['backup_file'] = (!empty($file)) ? ereg_replace('.gz$', '', $file) : $suggested;
   $rolled_back = provision_invoke("backup", $url, $data);
   provision_shell_exec("gzip %s", $data['backup_file']);
   $data['backup_file'] = $data['backup_file'] . '.gz';

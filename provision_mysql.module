@@ -103,6 +103,6 @@ function provision_mysql_provision_pre_install($url, &$data) {
 function provision_mysql_provision_backup($url, &$data) {
   provision_log("backup", "Generating mysql dump for $url.");
   provision_shell_exec("mysqldump -u%s -p%s %s > sites/%s/database.sql", $data['site-db-username'], $data['site-db-passwd'], $data['site-db-name'], $url); 
-  provision_shell_exec("cd sites/%; tar -rf %s database.sql", $url, $data['backup_file']);
-  provision_shell_exec("rm sites/%s/database.sql", $url);
+  provision_shell_exec("cd sites/%; tar -rf %s database.sql; rm database.sql", $url, $data['backup_file']);
+
 }
