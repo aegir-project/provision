@@ -33,7 +33,7 @@ function provision_apache_provision_configure() {
     '#type' => 'textfield',
     '#title' => t('Path to the directory to store apache configuration files for hosted sites'),
     '#size' => 40,
-    '#value' => variable_get('provision_apache_vhost_path', $default_path),
+    '#default_value' => variable_get('provision_apache_vhost_path', $default_path),
     '#maxlength' => 255,
   );
   $form['provision_apache_restart_cmd'] = array(
@@ -106,7 +106,7 @@ function _provision_apache_restart_apache() {
   # This is required to be configurable, due to the fact that different hosts might need to do this differently.
   # TODO : add configuration / test for this
   $apache_restart_cmd = escapeshellcmd(variable_get('provision_apache_restart_cmd', 'sudo apachectl graceful'));
-  $code = drush_shell_exec($apache_restart_cmd);
+  $code = drush_shell_exec(escapeshellcmd($apache_restart_cmd));
   if ($code) {
     provision_set_error(PROVISION_WEB_ERROR);
     provision_log("error", "Web server could not be restarted. Changes might not be available until this has been done.");

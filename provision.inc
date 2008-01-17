@@ -114,31 +114,10 @@ function provision_output($url, $data, $extra = null) {
  * on how to diagnose any problems that may have occurred.
  */
 
-/**
-* @name Error status definitions
-* @{
-* Bitmask values used to generate the error code to return.
-* @see provision_set_error(), provision_get_error(), provision_cmp_error()
-*/
 
-/** Database could not be accessed, or configured */
-define('PROVISION_DB_ERROR', 1);
-/** Drupal was unable to complete it's installation */
-define('PROVISION_INSTALL_ERROR', 2);
-/** Could not create files due to permission error - potentially less severe */ 
-define('PROVISION_PERM_ERROR', 4); 
-/** Web server could not be restarted, or other server related issues - less severe */
-define('PROVISION_WEB_ERROR', 8);
-/** To be used while testing if the provision framework is actually working. */
-define('PROVISION_FRAMEWORK_ERROR', 16);
-/** When the site is not available on this platform, or has not been installed. */
-define('PROVISION_SITE_NOT_FOUND', 32);
-/** When the site is already installed, ie: there is a conflict. */
-define('PROVISION_SITE_INSTALLED', 64);
-
-/**
- * @} End of "name Error status defintions".
- */
+if (PROVISION_SUCCESS != -1) {
+  include_once('provision_errors.inc');
+}
 
 /**
  * Set an error code for the error handling system.
@@ -338,7 +317,6 @@ function provision_save_site_data($url, $data) {
         fwrite($fp, $line);  
       }
     }
-    fwrite($fp, "?>");
     fclose($fp);
   }
 }
@@ -389,12 +367,12 @@ function provision_token_list($type = 'all') {
   if ($type == 'site') {
     /** TODO: Complete the token list to allow the front end to more easily edit the settings. */
     $tokens['site']['site-url'] = t("The domain name used to access the site.");
-    $tokens['site']['site-db-type'] = t("");
-    $tokens['site']['site-db-username'] = t("");
-    $tokens['site']['site-db-password'] = t("");
-    $tokens['site']['site-db-name'] = t("");
-    $tokens['site']['site-profile'] = t("");
-    $tokens['site']['site-action-type'] = t("");
+    $tokens['site']['site-db-type'] = t("The type of database server used");
+    $tokens['site']['site-db-username'] = t("Username to access database for site");
+    $tokens['site']['site-db-password'] = t("Password to access database for site");
+    $tokens['site']['site-db-name'] = t("Database name for the site");
+    $tokens['site']['site-profile'] = t("Installation Profile");
+    $tokens['site']['site-action-type'] = t("What type of action has been used");
   }
   return $tokens;
 }
@@ -415,3 +393,24 @@ function _provision_confirm_drush() {
   #confirm that code is running through the command line.
 }
 
+/**
+ * Get the root path of the Provision installation
+ */
+function _provision_root_path() {
+  return variable_get('provision_root', ereg_replace("/webroot$", "", $_SERVER['DOCUMENT_ROOT']));
+}
+
+/**
+ * Wrapper around drush_shell_exec to provide sprintf functionality with some more safety.
+ */
+function provision_shell_exec() {
+  $args = func_get_args();
+  
+  #do not change the command itself, just the parameters.
+  for ($x = 1; $x < sizeof($args); $x++) {
+    $args[$x] = escapeshellcmd($args[$x]);
+  }
+  $command = call_user_func_array("sprintf", $args);
+ 
+  return drush_shell_exec($command);
+}

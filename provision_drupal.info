@@ -1,4 +1,4 @@
 name = Provision: Drupal
 description = Allows for Drupal sites to be provisioned using the provisioning framework.
 package = Provision
-dependencies = drush provision_drupal provision_mysql provision_apache
+dependencies = drush provision

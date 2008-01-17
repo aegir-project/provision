@@ -53,7 +53,7 @@ function hook_perm() {
 /**
  * Implementation of hook_menu().
  */
-function provision_menu($items, $may_cache = true) {
+function provision_menu($may_cache = true) {
   if ($may_cache) {
     $items[] = array(
       'path' => 'admin/settings/provision',
@@ -149,6 +149,10 @@ function provision_drush_command() {
   $items['provision import'] = array(
     'callback' => '_provision_import',
     'description' => 'Turn an already running site into a provisioned site.'
+  );
+  $items['provision backup'] = array(
+    'callback' => '_provision_backup',
+    'description' => 'Generate a back up for the site.'
   );  
   /*
   $items['provision enable'] = array(
@@ -165,10 +169,7 @@ function provision_drush_command() {
     'description' => 'Delete a site.'
   );
 
-  $items['provision backup'] = array(
-    'callback' => '_provision_backup',
-    'description' => 'Generate a back up for the site.'
-  );
+
   $items['provision rollback'] = array(
     'callback' => '_provision_rollback',
     'description' => 'Roll back the site to a previous backup.'
@@ -311,14 +312,14 @@ function _provision_post_install($url, &$data) {
  * @param url
  *   The url of the site being synched.
  * @return
- *   Output of drupal_output() function.
+ *   Output of provision_output() function.
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
 function _provision_synch($url) {
   if (!_provision_drupal_site_exists($url)) {
     provision_log("Error", "Site has not been installed yet.");
     drupal_set_error(PROVISION_SITE_NOT_FOUND);
-    drupal_output($url, $data);
+    provision_output($url, $data);
   }
   $data = provision_get_site_data($url);
   // This is the actual drupal provisioning requirements. 
@@ -327,7 +328,55 @@ function _provision_synch($url) {
    // Requires at least the database settings to complete.
    _provision_drupal_create_settings_file($url, $data);
    provision_save_site_data($url, $data);
-   drupal_output($url, $data);
+   provision_output($url, $data);
+}
+
+/**
+ * Generate a backup of the site using a site package.
+ *
+ * @param url
+ *   The url of the site being backed up.
+ * @return
+ *   Output of provision_output() function.
+ *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
+ */
+function _provision_backup($url) {
+  if (!_provision_drupal_site_exists($url)) {
+    provision_log("Error", "Site has not been installed yet.");
+    provision_set_error(PROVISION_SITE_NOT_FOUND);
+    provision_output($url, $data);
+  }
+  $data = provision_get_site_data($url);
+  $backup_path = variable_get('provision_backup_path', _provision_root_path() . '/backups' );
+  // This is the actual drupal provisioning requirements. 
+  if (!is_dir($backup_path)) {
+    provision_log("Backup directory does not exist.");
+    provision_set_error(PROVISION_PERM_ERROR);
+    provision_output($url, $data);
+  }
+  $args = func_get_args();
+  array_shift($args);
+  $file = array_shift($args);
+  if (is_file($file)) {
+    provision_log("File specified already exists.");
+    provision_set_error(PROVISION_PERM_ERROR);
+    provision_output($url, $data);
+  }
+  $suggested = "$backup_path/$url-" . date("Y-m-d",mktime()) . ".tar";
+
+  // Use format of mysite.com-2008-01-02, if already existing, add number.
+  while (is_file($suggested . '.gz')) {
+    $count++;
+    $suggested = "$backup_path/$url-" . date("Y-m-d", mktime()) . "_$count.tar";
+  }
+
+  $data['backup_file'] = (!empty($file)) ? $file : $suggested;
+  $rolled_back = provision_invoke("backup", $url, $data);
+  provision_shell_exec("gzip %s", $data['backup_file']);
+  $data['backup_file'] = $data['backup_file'] . '.gz';
+  provision_save_site_data($url, $data);
+  
+  provision_output($url, $data);
 }
 
 /**
@@ -338,14 +387,14 @@ function _provision_synch($url) {
  * @param url
  *   The url of the site being synched.
  * @return
- *   Output of drupal_output() function.
+ *   Output of provision_output() function.
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
 function _provision_import($url) {
   if (!_provision_drupal_site_exists($url)) {
     provision_log("Error", "Site directory is not present, and can not be imported.");
     drupal_set_error(PROVISION_SITE_NOT_FOUND);
-    drupal_output($url, $data);
+    provision_output($url, $data);
   }
   $data = provision_get_site_data($url);
   
