@@ -65,7 +65,7 @@ function provision_mysql_provision_pre_install($url, &$data) {
     $data['site-db-username'] = $data['site-db-name']; // mysql has some really really stupid rules about who db / usernames, so site id is the safest.
   }
   else {
-    $data['site-db-name'] = substr(ereg_replace("^www\.", "", str_replace(".", "", $url)), 0, 10);
+    $data['site-db-name'] = substr(ereg_replace("^www\.", "", str_replace('-', '_', str_replace(".", "", $url))), 0, 10);
     $data['site-db-username'] = $data['site-db-name'];
     // TODO : A reasonable fallback if the site id isn't available. This is going to make it a bit harder to test at first, but that's ok.
   }
