@@ -87,8 +87,8 @@ function provision_mysql_provision_pre_install($url, &$data) {
    return FALSE;
   }
   
-  db_query("GRANT ALL PRIVILEGES ON %s.* TO %s@`%%` IDENTIFIED BY '%s'", $data['site-db-name'], $data['site-db-username'], $data['mysql_passwd']);
-  db_query("GRANT ALL PRIVILEGES ON %s.* TO %s@%s IDENTIFIED BY '%s'",$data['site-db-name'], $data['site-db-username'], $data['site-db-host'], $data['mysql_passwd']);
+  db_query("GRANT ALL PRIVILEGES ON %s.* TO %s@`%%` IDENTIFIED BY '%s'", $data['site-db-name'], $data['site-db-username'], $data['site-db-passwd']);
+  db_query("GRANT ALL PRIVILEGES ON %s.* TO %s@%s IDENTIFIED BY '%s'",$data['site-db-name'], $data['site-db-username'], $data['site-db-host'], $data['site-db-passwd']);
 
 
   if ($data['site-mysql-old-passwords']) {
