@@ -11,7 +11,21 @@
  * @ingroup provisionui
  * @{
  */
-  
+
+ /**
+  * Implementation of hook_help().
+  */
+ function provision_mysql_help($section) {
+   switch ($section) {
+     case 'admin/help/provision#requirements':
+       $output .= "<ol>";
+       $output .= '<li>' . t('<strong>Mysql user account capable of creating new databases.</strong> To be able to create new sites, the provisioning framework will need to be able to create new databases and users. It is not recommended using the mysql root password for this, but any account with the correct permissions will do.') . '</li>';            
+       $output .= "</ol>";
+       return $output;
+       break;
+   }
+}
+
 /**
  * Implementation of provision_service()
  */

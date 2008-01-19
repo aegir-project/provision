@@ -17,6 +17,9 @@
 *   stats   - Return an associated array of site statistics. (implemented in provision_stats module, is thus optional)
 *   import  - Import the details of an already existing site into the provisioning framework.
 *             This command inspects the settings.php and generates the site.php file that the framework uses for configuration.
+*   backup  - Generates a tarball containing the sites directory, the site data configuration and the database dump.
+*             This allows the tarball to act as a 'site package', which can be redeployed on other installations,
+*             or used for an upgrade.
 *
 * Not implemented yet :
 *   disable - Disable an installed Drupal site. This is done by removing the virtual host file, so that Apache no longer serves it.
@@ -25,9 +28,6 @@
 *             Uses hook_provision_pre_upgrade(), hook_provision_upgrade() and hook_provision_post_upgrade() hooks,
 *             and allows clean roll back if any errors occur. Will include stringent checking of module versions,
 *             and allow unit tests to be run.
-*   backup  - Generates a tarball containing the sites directory, the site data configuration and the database dump.
-*             This allows the tarball to act as a 'site package', which can be redeployed on other installations,
-*             or used for an upgrade.
 *   rollback - Revert to a previous backup of the site.
 *   rename  - Change the url of a site. This requires moving of files, and numerous other issues.
 *   delete -  Generates a back up of the site, and then removes all references to it.
@@ -37,10 +37,73 @@
 /** Include the provisioning API. */
 include_once('provision.inc');
 
+
+/**
+ * Implementation of hook_help()
+ */
+function provision_help($section) {
+  switch ($section) {
+    case 'admin/help#provision':
+      $output .= t('<p>The Provision framework is a powerful set of modules that lets you to accomplish a lot of maintenance tasks through the unix command line such as installing new sites, backing them up, rolling back to previous backups and facilitating upgrades.</p>');
+      $output .= t('<p>Additionally, the Provision framework is one component of the distributed hosting infrastructure provided by the <code>hostmaster</code> install profile. 
+                    The Hostmaster profile is capable of driving several provision backends, in a distributed manner, and provides an interface for the functionality of provision.</p>');
+      $output .= t('<p>It is not required to run the hosting front end to use the Provision framework, but the system does not provide much in the way of a web accessible front end, by design.</p>');
+      $output .= t('<p>Unfortunately, due to the requirements of some of the functionality, significantly more access than is usually allowed on a shared hosting solution is required,
+                    and as such, a virtual server or dedicated hosting system will be required to run this system.</p>');
+
+      $output .= '<a name=\'requirements\'><h3>' . t('Requirements') . '</h3></a>';
+      $output .= '<dl>';
+      $modules = module_implements('provision_service');
+      foreach ($modules as $module) {
+        $name = module_invoke($module, 'provision_service');
+        $help = module_invoke($module, 'help', 'admin/help/provision#requirements');
+        if ($name && $help) {
+          $output .= '<dt>' . t($name) . '</dt>';
+          $output .= '<dd>' . $help . '</dd>';
+        }
+      }
+      $output .= '</dl>';
+      
+      $output .= '<a name=\'commands\'><h3>' . t('Commands') . '</h3></a>';
+      $commands = module_invoke_all('drush_command');
+      $output .= "<dl>";
+      foreach ($commands as $command => $info) {
+        if (preg_match('/^provision/', $command)) {
+          $command .= ' ' . implode(' ', (array) key($info['arguments']));
+          if (sizeof($info['optional arguments'])) {
+            $command .= ' [' . implode('] [', (array) key($info['optional arguments'])) . ']';  
+          }
+          $output .= '<dt>' . "<code>drush.php $command</code>" . '</dt>';
+          $output .= '<dd>' .  $info["description"] . '</dd>';
+        }
+      }
+      $output .= "</dl>";
+
+      $output .= '<a name=\'options\'><h3>' . t('Options') . '</h3></a>';
+      $output .= t('<p>All of these options are available as tokens for use in the generation of config files.</p>');
+      
+      $options = module_invoke_all('token_list', 'site');
+
+      $output .= "<dl>";
+      foreach ($options['site'] as $option => $description) {
+        $output .= '<dt>' . "<code>--$option</code>" . '</dt>';
+        $output .= '<dd>' .  $description . '</dd>';
+      }
+      $output .= "</dl>";
+      
+      return $output;
+
+    case 'admin/help/provision#requirements' :
+      return t("some text here");
+  }
+}
+
+
+
 /**
  * Implementation of hook_perm().
  */
-function hook_perm() {
+function provision_perm() {
   return array("administer provisioning");
 }
 
@@ -139,21 +202,27 @@ function provision_configure() {
 function provision_drush_command() {
   $items['provision install'] = array(
     'callback' => 'provision_install_cmd',
-    'description' => 'Provision a new site using the provided data.'
+    'arguments' => array('domain.com' => t('The domain of the site to install.')),
+    'description' => t('Provision a new site using the provided data.')
   );
 
   $items['provision synch'] = array(
     'callback' => '_provision_synch',
-    'description' => 'Regenerate all the config files for a site.'
+    'arguments' => array('domain.com' => t('The domain of the site to synch.')),
+    'description' => t('Regenerate all the config files for a site.')
   );  
   $items['provision import'] = array(
     'callback' => '_provision_import',
-    'description' => 'Turn an already running site into a provisioned site.'
+    'arguments' => array('domain.com' => t('The domain of the site to import.')),
+    'description' => t('Turn an already running site into a provisioned site.')
   );
   $items['provision backup'] = array(
     'callback' => '_provision_backup',
-    'description' => 'Generate a back up for the site.'
-  );  
+    'arguments' => array('domain.com' => t('The domain of the site to back up.')),
+    'optional arguments' => array('backup-file' => t('The file to save the backup to. This will be a gzipped tarball.')),
+    'description' => t('Generate a back up for the site.')
+  );
+  
   /*
   $items['provision enable'] = array(
     'callback' => '_provision_enable',
@@ -162,7 +231,7 @@ function provision_drush_command() {
   $items['provision disable'] = array(
     'callback' => '_provision_disable',
     'description' => 'Disable a site.'
-  );  
+  );
   // Not implemented yet.
   $items['provision delete'] = array(
     'callback' => '_provision_delete',

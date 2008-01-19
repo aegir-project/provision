@@ -365,13 +365,14 @@ function provision_token_values($type, $object = null) {
 function provision_token_list($type = 'all') {
   if ($type == 'site') {
     /** TODO: Complete the token list to allow the front end to more easily edit the settings. */
-    $tokens['site']['site-url'] = t("The domain name used to access the site.");
+    $tokens['site']['site-url'] = t("The domain name used to access the site. This is defaulted to the value used on the command line.");
     $tokens['site']['site-db-type'] = t("The type of database server used");
     $tokens['site']['site-db-username'] = t("Username to access database for site");
     $tokens['site']['site-db-password'] = t("Password to access database for site");
     $tokens['site']['site-db-name'] = t("Database name for the site");
-    $tokens['site']['site-profile'] = t("Installation Profile");
-    $tokens['site']['site-action-type'] = t("What type of action has been used");
+    $tokens['site']['site-profile'] = t("Install profile of site");
+    $tokens['site']['site-action-type'] = t("What type of action has been used. Only used in conjuction with hosting front end");
+    $tokens['site']['site-action-type'] = t("What type of action has been used. Only used in conjuction with hosting front end");    
   }
   return $tokens;
 }
