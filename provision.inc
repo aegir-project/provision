@@ -98,7 +98,6 @@ function provision_output($url, $data, $extra = null) {
       /** TODO : return a cleanly formatted display of all the necessary information */ 
       print_r($return);
     }
-    
   }
   exit(provision_get_error());
 }

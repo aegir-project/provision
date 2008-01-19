@@ -12,6 +12,8 @@
 * @see provision_set_error(), provision_get_error(), provision_cmp_error()
 */
 
+/** Succesful **/
+define('PROVISION_SUCCESS', -1);
 /** Database could not be accessed, or configured */
 define('PROVISION_DB_ERROR', 1);
 /** Drupal was unable to complete it's installation */
