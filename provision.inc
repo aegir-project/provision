@@ -384,13 +384,16 @@ function provision_token_list($type = 'all') {
 /**
  * Confirm that provision is running through Drush.
  *
- * This module requires a 'bootstrap' and 'configtest' feature, which is to be used during installation, to make sure that
- * all the provisioning modules have the correct permissions / access to be able to do their jobs. This bootstrap process should
- * be used when deploying new platforms (ie: new releases).
+ * A safety mechanism to ensure that the drush commands are not run through the web front end.
  */
 
-function _provision_confirm_drush() {
+function provision_confirm_drush() {
   #confirm that code is running through the command line.
+  if (php_isapi_name() != 'cli') {
+    drupal_set_message(t("This function should only be called via the command line Drush utility."));
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -413,4 +416,50 @@ function provision_shell_exec() {
   $command = call_user_func_array("sprintf", $args);
  
   return drush_shell_exec($command);
+}
+
+/**
+ * Set the active database.
+ *
+ * Wrapper around db_set_active, which provides switching out of db_url.
+ * @param new_db_url
+ *    The database url to set the connection to. If not provided, will switch back to Drupal default.
+ */
+function provision_set_active_db($new_db_url = null) {
+  static $old_db_url = null;
+  global $db_url;
+  
+  #initialize static
+  if (!$old_db_url) {
+    $old_db_url = $db_url;
+  }
+  
+  if ($new_db_url) {
+    $db_url = $new_db_url;
+    db_set_active();
+  }
+  else {
+    $db_url = $old_db_url;
+    db_set_active();
+  }
+}
+
+/**
+ * Return the user who owns this script.
+ *
+ * Used to generate permissions. Can be overridden by variable_set().
+ */
+function provision_get_script_owner() {
+  return variable_get('provision_user', get_current_user());   
+}
+
+
+/**
+ * Return the group who runs the httpd daemin.
+ *
+ * Used to generate permissions. Can be overridden by variable_set().
+ */
+function provision_get_group_name() {
+  $info = posix_getgrgid(posix_getgid());
+  return variable_get('provision_group', $info['name']); 
 }

@@ -21,9 +21,20 @@ function provision_apache_help($section) {
   switch ($section) {
     case 'admin/help/provision#requirements':
       $output .= "<ol>";
-      $output .= '<li>' . t('<strong>The user account running the script, and the group of the httpd daemon.</strong> The provision framework takes special care to make sure that the file permissions of the hosted sites are always as safe as can be, especially to make sure that the web server does not have the ability to modify the code of the site, therefor this information is required to assure that safety while keeping the sites accessible.') . '</li>';            
-      $output .= '<li>' . t('<strong>Access to the server\'s <code>httpd.conf</code> file.</strong> You are required to add a single line to the httpd.conf file, which allows the system to load the additional virtual hosts that are generated.') . '</li>';
-      $output .= '<li>' . t('<strong>Ability to reload the httpd daemon.</strong> As the provisioning framework should <strong>never</strong> be run as root, and the web server group should <strong>never</strong> be allowed access to the functionality to stop/start the web server, it is required that you provide access to the Apache restart command for the user account the script will be running as. If this is not configured, every command will ask for a sudo password when restarting the server.') . '</li>';
+      $output .= '<li>' . t('<strong>The user account running the script, and the group of the httpd daemon.</strong> 
+                            The provision framework takes special care to make sure that the file permissions of the 
+                            hosted sites are always as safe as can be, especially to make sure that the web server does 
+                            not have the ability to modify the code of the site, therefor this information is required 
+                            to assure that safety while keeping the sites accessible.') . '</li>';            
+      $output .= '<li>' . t('<strong>Access to the server\'s <code>httpd.conf</code> file.</strong> 
+                            You are required to add a single line to the httpd.conf file, which allows 
+                            the system to load the additional virtual hosts that are generated.') . '</li>';
+      $output .= '<li>' . t('<strong>Ability to reload the httpd daemon.</strong> 
+                             As the provisioning framework should <strong>never</strong> be run as root,
+                             and the web server group should <strong>never</strong> be allowed access to the 
+                             functionality to stop/start the web server, it is required that you provide access
+                             to the Apache restart command for the user account the script will be running as. 
+                             If this is not configured, every command will ask for a sudo password when restarting the server.') . '</li>';
       $output .= "</ol>";
       return $output;
       break;
@@ -81,28 +92,45 @@ function _provision_apache_default_template() {
 EOF;
 }
 function provision_apache_provision_pre_install($url, &$data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
   return _provision_apache_create_vhost_config($url, $data);
 }
+
 function provision_apache_provision_post_install($url, &$data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
   return _provision_apache_restart_apache();  
 }
 
 function provision_apache_provision_enable($url, &$data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+
   _provision_apache_create_vhost_config($url, $data);
   _provision_apache_restart_apache();
 }
 
 function provision_apache_provision_disable($url, &$data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+
   _provision_apache_delete_vhost_config($url, $data);
   _provision_apache_restart_apache();
 }
 
 function provision_apache_provision_regenerate($url, &$data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+
   _provision_apache_create_vhost_config($url, $data);
   _provision_apache_restart_apache();
 }
 
 function _provision_apache_delete_vhost_config($url, $data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+  
  $vhost_path = variable_get('provision_apache_vhost_path', 'vhost.d');
  if (file_exists()) {
    unlink($vhost_path . '/' . $url);
@@ -110,6 +138,9 @@ function _provision_apache_delete_vhost_config($url, $data) {
 }
 
 function _provision_apache_create_vhost_config($url, $data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+  
  $vhost_path = variable_get('provision_apache_vhost_path', 'vhost.d');
  $file = fopen($vhost_path . '/' . $url, "w");
  if (!$file) {
@@ -124,6 +155,9 @@ function _provision_apache_create_vhost_config($url, $data) {
 }
  
 function _provision_apache_restart_apache() {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+  
   # This is required to be configurable, due to the fact that different hosts might need to do this differently.
   # TODO : add configuration / test for this
   $apache_restart_cmd = escapeshellcmd(variable_get('provision_apache_restart_cmd', 'sudo apachectl graceful'));

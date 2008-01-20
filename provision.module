@@ -93,12 +93,8 @@ function provision_help($section) {
       
       return $output;
 
-    case 'admin/help/provision#requirements' :
-      return t("some text here");
   }
 }
-
-
 
 /**
  * Implementation of hook_perm().
@@ -223,15 +219,17 @@ function provision_drush_command() {
     'description' => t('Generate a back up for the site.')
   );
   
-  /*
   $items['provision enable'] = array(
     'callback' => '_provision_enable',
+    'arguments' => array('domain.com' => t('The domain of the site to enable (only if enabled).')),
     'description' => 'Enable a disabled site.'
   );
   $items['provision disable'] = array(
     'callback' => '_provision_disable',
+    'arguments' => array('domain.com' => t('The domain of the site to disable (only if disabled).')),    
     'description' => 'Disable a site.'
   );
+  /*
   // Not implemented yet.
   $items['provision delete'] = array(
     'callback' => '_provision_delete',
@@ -270,13 +268,15 @@ function provision_drush_command() {
  *    Will exit with a PROVISION_FRAMEWORK_ERROR if the command is incorrectly used.
  */
 function provision_install_cmd($url) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
   global $args;
   $data = provision_get_site_data($url);
 
   if (!$args['commands'][2]) {
     print "Usage: drush.php provision install DOMAIN [OPTIONS]\n";
     print "Install a new site for the domain DOMAIN.\n";
-    print "Example: drush.php provision install mydomain.com --site-db-host=localhost\n";
+    print "Example: drush.php provision install mydomain.com --site-db-host localhost\n";
     provision_set_log("error", "Incorrect usage of the provisioning framework");
     drupal_set_error(PROVISION_FRAMEWORK_ERROR);
     provision_output($url, $data);
@@ -312,7 +312,9 @@ function provision_install_cmd($url) {
  * @return
  *   Boolean denoting whether the provision_invoke rolled back changes made. 
  */
-function _provision_pre_install($url, &$data) {  
+function _provision_pre_install($url, &$data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null; 
   $rolled_back = provision_invoke("pre_install", $url, $data);
 
   if (!provision_get_error()) {
@@ -342,6 +344,8 @@ function _provision_pre_install($url, &$data) {
  *   Boolean denoting whether the provision_invoke rolled back changes made. 
  */
 function _provision_install($url, &$data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return;  
   $rolled_back = provision_invoke("install", $url, $data);
 
 #  if (!$rolled_back) {
@@ -368,6 +372,8 @@ function _provision_install($url, &$data) {
  *   Boolean denoting whether the provision_invoke rolled back changes made. 
  */
 function _provision_post_install($url, &$data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;  
   $rolled_back = provision_invoke("post_install", $url, $data);
   if (!$rolled_back) {
     $data['site-installed'] = true;  
@@ -385,6 +391,8 @@ function _provision_post_install($url, &$data) {
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
 function _provision_synch($url) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
   if (!_provision_drupal_site_exists($url)) {
     provision_log("Error", "Site has not been installed yet.");
     drupal_set_error(PROVISION_SITE_NOT_FOUND);
@@ -410,6 +418,8 @@ function _provision_synch($url) {
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
 function _provision_backup($url) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
   if (!_provision_drupal_site_exists($url)) {
     provision_log("Error", "Site has not been installed yet.");
     provision_set_error(PROVISION_SITE_NOT_FOUND);
@@ -460,6 +470,9 @@ function _provision_backup($url) {
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
 function _provision_import($url) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+  
   if (!_provision_drupal_site_exists($url)) {
     provision_log("Error", "Site directory is not present, and can not be imported.");
     drupal_set_error(PROVISION_SITE_NOT_FOUND);

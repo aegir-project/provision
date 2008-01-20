@@ -71,6 +71,9 @@ function provision_drupal_provision_configure() {
  *   If the file exists, return TRUE, else return FALSE.
  */
 function _provision_drupal_site_exists($url) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+    
   return file_exists("sites/$url/settings.php");
 }
 
@@ -79,6 +82,9 @@ function _provision_drupal_site_exists($url) {
  * Implentation of hook_provision_backup()
  */
 function provision_drupal_provision_backup($url, $data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+    
   // Adds the site directory into the backup file
   provision_log("backup", "Adding sites directory to $data[backup_file].gz");
   $result = provision_shell_exec("cd %s; tar -rf %s * ", "sites/$url",  $data['backup_file']);
@@ -119,6 +125,9 @@ END;
  *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file($url, &$data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+    
   $fp = fopen("sites/$url/settings.php", "w");
   $text = variable_get('provision_settings_template', _provision_drupal_default_template());
   fwrite($fp, token_replace($text, 'site', $data));
@@ -138,6 +147,9 @@ function _provision_drupal_create_settings_file($url, &$data) {
  * Also maintains permissions on existing directories.
  */
 function _provision_drupal_create_directories($url, $profile = null) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+    
   $paths = array(
     "sites/$url"                 => '0750',
     "sites/$url/files"           => '2750',
@@ -171,6 +183,9 @@ function _provision_drupal_create_directories($url, $profile = null) {
  * main provisioning site.
  */
 function _provision_drupal_switch_active_site($url = null) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+    
   static $backups;
   if ($url) {
     /* Pretend to be the site being installed */
@@ -242,6 +257,9 @@ function _provision_drupal_switch_active_site($url = null) {
  * Force drupal to load the modules it expects to find on an uninstalled site
  */
 function _provision_drupal_force_load_modules($url = null) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+    
   static $backup_list;
   if ($url) {
     $backup_list = module_list();
@@ -266,6 +284,9 @@ function _provision_drupal_force_load_modules($url = null) {
  * Install the drupal schema and install profile
  */
 function _provision_drupal_install_schema($profile) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+    
   // Load the profile.
   require_once "./profiles/$profile/$profile.profile";
 
@@ -301,3 +322,11 @@ function _provision_drupal_install_schema($profile) {
   } 
 }
 
+/**
+ * implementation of provision_verify
+ */
+function provision_drupal_provision_verify() {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+  
+}
