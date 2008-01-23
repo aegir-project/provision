@@ -397,10 +397,34 @@ function provision_confirm_drush() {
 }
 
 /**
- * Get the root path of the Provision installation
+ * Get the backup path of the Provision installation
  */
-function _provision_root_path() {
-  return variable_get('provision_root', ereg_replace("/webroot$", "", $_SERVER['DOCUMENT_ROOT']));
+function _provision_backup_path() {
+  $parts = explode("/", $_SERVER['DOCUMENT_ROOT']);
+  array_pop($parts);
+  return variable_get('provision_backup_path', implode("/" , $parts) . '/backups');
+}
+
+/**
+ * Get the drushrc path of the Provision installation
+ */
+function _provision_drushrc_path() {
+  $parts = explode("/", $_SERVER['DOCUMENT_ROOT']);
+  array_pop($parts);  
+  return variable_get('provision_drushrc_path', implode("/" , $parts) . '/platform.d');
+}
+
+/**
+ * Get the vhost path of the Provision installation
+ */
+function _provision_vhost_path() {
+  $parts = explode("/", $_SERVER['DOCUMENT_ROOT']);
+  array_pop($parts);  
+  return variable_get('provision_vhost_path', implode("/" , $parts) . '/vhost.d');
+}
+
+function _provision_path_can_be_created($path) {
+  
 }
 
 /**
@@ -452,7 +476,6 @@ function provision_set_active_db($new_db_url = null) {
 function provision_get_script_owner() {
   return variable_get('provision_user', get_current_user());   
 }
-
 
 /**
  * Return the group who runs the httpd daemin.

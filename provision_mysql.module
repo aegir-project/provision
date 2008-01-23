@@ -18,13 +18,10 @@
  function provision_mysql_help($section) {
    switch ($section) {
      case 'admin/help/provision#requirements':
+       $username = provision_get_script_owner();
        $output .= "<ol>";
        $command = <<<EOF
-     benton:~ adrian$ mysql -uroot -pXXXXXXXXX mysql
-     Welcome to the MySQL monitor.  Commands end with ; or \g.
-     Your MySQL connection id is 1329 to server version: 4.1.20
-
-     Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+     [$username@hm2 ~]$ mysql -uroot -pXXXXXXXXX mysql
 
      mysql> grant create, drop, grant option  on *.* to 'username_here'@'localhost'
          -> identified by 'mypassword';
@@ -33,7 +30,11 @@
      mysql> flush privileges;
      Query OK, 0 rows affected (0.00 sec)
 EOF;
-       $output .= '<li>' . t('<strong>Mysql user account capable of creating new databases.</strong> To be able to create new sites, the provisioning framework will need to be able to create new databases and users. It is not recommended using the mysql root password for this, but any account with the correct permissions will do. To create the account, log in to your server as root, and type in the following command: <pre>@command_text</pre>', array('@command_text' => $command)) . '</li>';            
+       $output .= '<li>' . t('<p><strong>Mysql user account capable of creating new databases.</strong>
+                To be able to create new sites, the provisioning framework will need to be able to create new databases and users. 
+                It is not recommended using the mysql root password for this, but any account with the correct permissions will do.</p>
+                <p><strong>To configure:</strong> Log in to your mysql server as root, and type in the following command:
+                <pre>@command_text</pre></p>', array('@command_text' => $command)) . '</li>';            
        $output .= "</ol>";
        return $output;
        break;
