@@ -102,17 +102,7 @@ function provision_drupal_provision_backup($url, $data) {
  *   The default template for the config file
  */
 function _provision_drupal_default_template() {
-  return <<<END
-  <?php
-    \$db_url = "[site-db-type]://[site-db-username]:[site-db-passwd]@[site-db-host]/[site-db-name]";
-    \$profile = "[site-profile]";
-
-    # Additional host wide configuration settings. Useful for safely specifying configuration settings.
-    if (file_exists('includes/global.inc')) {
-      include_once('includes/global.inc');
-    }
-  ?>
-END;
+  return file_get_contents(drupal_get_path('module', 'provision_drupal') . '/templates/drupal_settings.tpl.php');
 }
 
 /**
@@ -125,19 +115,16 @@ END;
  *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file($url, &$data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-    
   $fp = fopen("sites/$url/settings.php", "w");
-  $text = variable_get('provision_settings_template', _provision_drupal_default_template());
-  fwrite($fp, token_replace($text, 'site', $data));
+  $text = variable_get('provision_drupal_settings_template', _provision_drupal_default_template());
+  fwrite($fp, "<?php\n" . provision_render_config($text, $data));
   fclose($fp);
   
   # Change the ownership of the file
   #chown($path, variable_get('provision_user', 'hosting'), variable_get('provision_group', 'apache'));
   
   # Change the permissions of the file
-#  system("chmod 0550 sites/$url/settings.php");
+  system("chmod 0550 sites/$url/settings.php");
   # TODO: add md5 of the file created to $data
 }
 
@@ -146,31 +133,37 @@ function _provision_drupal_create_settings_file($url, &$data) {
  * 
  * Also maintains permissions on existing directories.
  */
-function _provision_drupal_create_directories($url, $profile = null) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-    
+function _provision_drupal_create_directories($url, $profile = null) {  
   $paths = array(
-    "sites/$url"                 => '0750',
-    "sites/$url/files"           => '2750',
-    "sites/$url/files/tmp"       => '2770',
-    "sites/$url/files/images"    => '2770',
-    "sites/$url/files/pictures"  => '2770',
-    "sites/$url/themes"          => '2750',
-    "sites/$url/modules"         => '2750',    
+    "sites/$url"                 => 0750,
+    "sites/$url/files"           => 2750,
+    "sites/$url/files/tmp"       => 2770,
+    "sites/$url/files/images"    => 2770,
+    "sites/$url/files/pictures"  => 2770,
+    "sites/$url/themes"          => 2750,
+    "sites/$url/modules"         => 2750,    
   );
 
   foreach ($paths as $path => $perm) {
     if (!is_dir($path)) {
-      mkdir($path);
+      provision_check_path($path, "mkdir", true, 
+        t("Created <code>%path</code>", array("%path" => $path)),
+        t("Could not create <code>%path</code>", array("%path" => $path)),
+        PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
     }
-    # Change the ownership of the files so that they are owned by the user the script is running as, and the
-    # web server has access to them.
-    # chown($path, variable_get('provision_user', 'hosting'), variable_get('provision_group', 'apache'));
-    
-    # Change the permissions to the optimal settings that were specified.
-#    system("chmod $perm $path");
 
+    provision_check_path($path, "chown", provision_get_script_owner(), 
+      t("Changed ownership of <code>%path</code>", array("%path" => $path)),
+      t("Could not change ownership <code>%path</code>", array("%path" => $path)),
+      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
+    provision_check_path($path, "chgrp", provision_get_group_name(),
+      t("Changed group ownership of <code>%path</code>", array("%path" => $path)),
+      t("Could not change group ownership <code>%path</code>", array("%path" => $path)),
+      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
+    provision_check_path($path, "chmod", $perm, 
+      t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => $perms)),
+      t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' => $perms)),
+      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );        
   }
 
 }
@@ -183,9 +176,6 @@ function _provision_drupal_create_directories($url, $profile = null) {
  * main provisioning site.
  */
 function _provision_drupal_switch_active_site($url = null) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-    
   static $backups;
   if ($url) {
     /* Pretend to be the site being installed */
@@ -257,9 +247,6 @@ function _provision_drupal_switch_active_site($url = null) {
  * Force drupal to load the modules it expects to find on an uninstalled site
  */
 function _provision_drupal_force_load_modules($url = null) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-    
   static $backup_list;
   if ($url) {
     $backup_list = module_list();
@@ -284,9 +271,6 @@ function _provision_drupal_force_load_modules($url = null) {
  * Install the drupal schema and install profile
  */
 function _provision_drupal_install_schema($profile) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-    
   // Load the profile.
   require_once "./profiles/$profile/$profile.profile";
 
@@ -325,8 +309,32 @@ function _provision_drupal_install_schema($profile) {
 /**
  * implementation of provision_verify
  */
-function provision_drupal_provision_verify() {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
+function provision_drupal_provision_verify($url, &$data) {
+  provision_check_path("sites", "writable", true, t("Drupal sites directory is writable by the provisioning script"),
+    t("Drupal sites directory is not writable by the provisioning script"), PROVISION_PERM_ERROR);
+
+  $path = _provision_drushrc_path();
+  $exists = provision_check_path($path, "exists", true ,
+    t("Virtual Host configuration path exists."),
+    t("Virtual Host configuration path does not exist."));
+  if (!$exists) {
+    $made = provision_check_path($path, "mkdir", true, 
+        t("Virtual host configuration path has been created."),
+        t("Virtual host configuration path could not be created."), 
+        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+  }
+  else {
+    $writable = provision_check_path($path, "writable", true ,
+        t("Virtual host configuration path is writable."),
+        t("Virtual host configuration path is not writable."), 
+        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+    if (!$writable) {
+      chmod($path, 0770);
+    }
+  }
+  $profiles = file_scan_directory('./profiles', '\.profile$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name', 0);
+  $data['profiles'] = $profiles;
+  $data['modules'] =  module_rebuild_cache();
   
+
 }

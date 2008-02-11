@@ -81,7 +81,7 @@ function provision_invoke($hook, $url, &$data, $rollback = false) {
  * @param extra
  *   An associative array containing additional data to be returned from the command. @see provision_stats_stats()
  */
-function provision_output($url, $data, $extra = null) {
+function provision_output($url = null, $data = array(), $extra = null) {
   $return = $extra;
   $return['site'] = $data;
   $return['error_status'] = provision_get_error(); // error code being returned
@@ -91,12 +91,13 @@ function provision_output($url, $data, $extra = null) {
     print serialize($return);
   }
   else {
-    foreach (provision_get_log() as $entry) {
-      printf("%10s|%10s|%10%s", $entry['timestamp'], $entry['type'], $entry['severity'], $entry['message']);
-    }
-    if ($data) {
-      /** TODO : return a cleanly formatted display of all the necessary information */ 
-      print_r($return);
+    if ($return) {
+      if ($output = theme("provision_" . $data['action_type'] . "_output", $url, $return)) {
+        return $output;
+      } else {
+        /** TODO : return a cleanly formatted display of all the necessary information */ 
+        print_r($return);
+      }
     }
   }
   exit(provision_get_error());
@@ -245,22 +246,22 @@ function provision_get_site_data($url) {
   global $args;
   #TODO: Accept serialized string via unix pipe.
   foreach ($args['options'] as $key => $value) {
-    if (preg_match("/^site-/", $key)) {
+    if (preg_match("/^site_/", $key)) {
       $site_data[$key] = $value;
     }
   }
-  $site_data['site-url'] = $url;
-  $site_data['site-action-type'] = $args['commands'][1];
-  $docroot = variable_get('provision_root', '');
-  $site_data['site-document-root'] =  ($docroot) ? $docroot . '/webroot' : $_SERVER['DOCUMENT_ROOT'];
-  $site_data['site-temporary-url'] = str_replace('.', '-', $url) . '.' . variable_get('provision_tempurl_base', $_SERVER['HTTP_HOST']);
-  $site_data['site-profile'] = ($site_data['site-profile']) ? $site_data['site-profile'] : variable_get('provision_default_profile', 'default');
-  $site_data['site-ip'] =  variable_get('provision_apache_server_ip', '127.0.0.1');
-  $site_data['site-port'] =  variable_get('provision_apache_server_ip', 80);
+  $site_data['site_url'] = $url;
+  $site_data['site_action_type'] = $args['commands'][1];
+  $docroot = drush_get_option("r", $_SERVER['PWD']);
+  $site_data['site_document_root'] =  ($docroot) ? $docroot . '/webroot' : $_SERVER['DOCUMENT_ROOT'];
+  $site_data['site_profile'] = ($site_data['site_profile']) ? $site_data['site_profile'] : variable_get('provision_default_profile', 'default');
+  $site_data['site_ip'] =  variable_get('provision_apache_server_ip', '127.0.0.1');
+  $site_data['site_port'] =  variable_get('provision_apache_server_ip', 80);
   if ($old_data = provision_load_site_data($url)) {
     # Merge previously saved data with the new data. This way, old parameters overwrite new ones.
     $site_data = array_merge(provision_load_site_data($url), $site_data);    
   }
+
   return $site_data;
 }
 
@@ -303,9 +304,9 @@ function provision_save_site_data($url, $data) {
   }
   else {
     fwrite($fp, "<?php\n");
-    $action = array('id' => $data['action-id'], 
+    $action = array('id' => $data['action_id'], 
                     'timestamp' => mktime(), 
-                    'action' => $data['site-action-type'], 
+                    'action' => $data['site_action_type'], 
                     'success' => $data['success']);
     $line = "\n\n\$actions[] = " . var_export($action, TRUE) . ';';
     fwrite($fp, $line);
@@ -342,16 +343,16 @@ function provision_save_site_data($url, $data) {
  *   A keyed array listing the substitution tokens. Elements should be
  *   in the form of: $list[$type][$token] = $description
  */
-function provision_token_values($type, $object = null) {
-  global $args;
-  switch ($type) {
-    case 'site':
-      $values = array_merge(provision_get_site_data($args['commands'][2]), $object) ;
-      break;
-  }
-  return (array) $values;  
-  
-}
+#function provision_token_values($type, $object = null) {
+#  global $args;
+#  switch ($type) {
+#    case 'site':
+#      $values = array_merge(provision_get_site_data($args['commands'][2]), $object) ;
+#      break;
+#  }
+#  return (array) $values;
+#}
+
 /**
  * Implementation of hook_token_list(). 
  *
@@ -365,16 +366,28 @@ function provision_token_values($type, $object = null) {
 function provision_token_list($type = 'all') {
   if ($type == 'site') {
     /** TODO: Complete the token list to allow the front end to more easily edit the settings. */
-    $tokens['site']['site-url'] = t("The domain name used to access the site. This is defaulted to the value used on the command line.");
-    $tokens['site']['site-db-type'] = t("The type of database server used");
-    $tokens['site']['site-db-username'] = t("Username to access database for site");
-    $tokens['site']['site-db-password'] = t("Password to access database for site");
-    $tokens['site']['site-db-name'] = t("Database name for the site");
-    $tokens['site']['site-profile'] = t("Install profile of site");
-    $tokens['site']['site-action-type'] = t("What type of action has been used. Only used in conjuction with hosting front end");
-    $tokens['site']['site-action-type'] = t("What type of action has been used. Only used in conjuction with hosting front end");    
+    $tokens['site']['site_url'] = t("The domain name used to access the site. This is defaulted to the value used on the command line.");
+    $tokens['site']['site_db_type'] = t("The type of database server used");
+    $tokens['site']['site_db_username'] = t("Username to access database for site");
+    $tokens['site']['site_db_password'] = t("Password to access database for site");
+    $tokens['site']['site_db_name'] = t("Database name for the site");
+    $tokens['site']['site_profile'] = t("Install profile of site");
+    $tokens['site']['site_action_type'] = t("What type of action has been used. Only used in conjuction with hosting front end");
+    $tokens['site']['site_action_type'] = t("What type of action has been used. Only used in conjuction with hosting front end");    
   }
   return $tokens;
+}
+
+/**
+ * Generate the text for a config file using php
+ */
+function provision_render_config($template, $variables) {
+  extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
+  ob_start();                      // Start output buffering
+  eval("?>" . $template);                 // Generate content
+  $contents = ob_get_contents();   // Get the contents of the buffer
+  ob_end_clean();                  // End buffering and discard
+  return $contents;                // Return the contents
 }
 
 /**
@@ -388,11 +401,6 @@ function provision_token_list($type = 'all') {
  */
 
 function provision_confirm_drush() {
-  #confirm that code is running through the command line.
-  if (php_isapi_name() != 'cli') {
-    drupal_set_message(t("This function should only be called via the command line Drush utility."));
-    return false;
-  }
   return true;
 }
 
@@ -405,27 +413,31 @@ function _provision_backup_path() {
   return variable_get('provision_backup_path', implode("/" , $parts) . '/backups');
 }
 
+
 /**
- * Get the drushrc path of the Provision installation
+ * Get the base configuration path for the system
  */
-function _provision_drushrc_path() {
-  $parts = explode("/", $_SERVER['DOCUMENT_ROOT']);
-  array_pop($parts);  
-  return variable_get('provision_drushrc_path', implode("/" , $parts) . '/platform.d');
+function _provision_config_path() {
+  $path = ($_SERVER['PWD']) ? $_SERVER['PWD'] : $_SERVER['DOCUMENT_ROOT'];
+  $parts = explode("/", $path);
+  array_pop($parts);
+  return variable_get('provision_apache_config_path', implode("/" , $parts) . '/config') ;
 }
 
 /**
  * Get the vhost path of the Provision installation
  */
 function _provision_vhost_path() {
-  $parts = explode("/", $_SERVER['DOCUMENT_ROOT']);
-  array_pop($parts);  
-  return variable_get('provision_vhost_path', implode("/" , $parts) . '/vhost.d');
+ return _provision_config_path() . '/vhost.d';
 }
 
-function _provision_path_can_be_created($path) {
-  
+/**
+ * Get the drushrc path of the Provision installation
+ */
+function _provision_drushrc_path() {
+ return _provision_config_path() . '/drush';
 }
+
 
 /**
  * Wrapper around drush_shell_exec to provide sprintf functionality with some more safety.
@@ -456,11 +468,13 @@ function provision_set_active_db($new_db_url = null) {
   #initialize static
   if (!$old_db_url) {
     $old_db_url = $db_url;
+    $db_url = array();
+    $db_url['default'] = $old_db_url;
   }
-  
+
   if ($new_db_url) {
-    $db_url = $new_db_url;
-    db_set_active();
+    $db_url['new'] = $new_db_url;
+    db_set_active('new');
   }
   else {
     $db_url = $old_db_url;
@@ -485,4 +499,58 @@ function provision_get_script_owner() {
 function provision_get_group_name() {
   $info = posix_getgrgid(posix_getgid());
   return variable_get('provision_group', $info['name']); 
+}
+
+/**
+ * Perform tests on directory.
+ *
+ * Perform test on path, and log error messages / codes on failure.
+ */
+function provision_check_path($path, $type, $test = true, $succeed_message = '', $fail_message = '', $error_codes = null) {
+  # The code style is a bit weird here, but it's a bit easier to read this way.
+  switch ($type) {
+    case "writeable" : 
+    case "writable" : $value = is_writable($path); 
+                      break;
+    case "exists"   : $value = file_exists($path); 
+                      break;
+    case "readable" : $value = is_readable($path); 
+                      break;
+    case "is_dir"   : $value = is_dir($path); 
+                      break;
+    case "owner"    : $value = fileowner($path); 
+                      break;        
+    case "group"    : $value = filegroup($path); 
+                      break;
+    case "mkdir"    : $value = mkdir($path, 0770, true); 
+                      break;
+    case "chmod"    : chmod($path, $test); 
+                      $value = sprintf("%o", fileperms($path));
+                      break;
+    case "chown"    : chown($path, $test);
+                      $value = fileowner($path);
+                      break;
+    case "chgrp"    : chgrp($path, $test);
+                      $value = filegroup($path);
+                      break;
+    case "unlink"   : $value = (file_exists($path)) ? unlink($path) : false; 
+                      break;
+    case "rmdir"    : $value = (file_exists($path) && is_dir($path)) ? rmdir($path) : false;
+                      break;
+  }
+  $status = ($value == $test) ? true : false;
+  if ($status) {
+    if ($succeed_message) {
+      provision_log("message", $succeed_message);      
+    }
+  }
+  else {
+    if ($error_codes) {
+      provision_set_error($error_codes);
+    }
+    if ($fail_message) {
+      provision_log("error", $fail_message);      
+    }
+  }
+  return $status;
 }

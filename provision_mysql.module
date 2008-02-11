@@ -52,30 +52,30 @@ function provision_mysql_provision_service() {
  * Implementation of provision_configure
  */
 function provision_mysql_provision_configure() {
-  $form['provision_mysql_user'] = array(
+  $form['provision_db_user'] = array(
     '#type' => 'textfield',
     '#required' => TRUE,
     '#title' => t('Mysql user account'),
     '#description' => t('The user that will be used to create users and databases for new sites.'),
     '#size' => 40,
-    '#default_value' => variable_get('provision_mysql_user', 'root'),
+    '#default_value' => variable_get('provision_db_user', 'root'),
     '#maxlength' => 255,
   );
-  $form['provision_mysql_password'] = array(
-    '#type' => 'password',
-    '#required' => TRUE,
+  $form['provision_db_password'] = array(
+    '#type' => 'password_confirm',
+    '#required' => (variable_get("provision_db_password", TRUE)) ? FALSE : TRUE,
     '#title' => t('Mysql user password'),
     '#description' => t('The user account that will be used to create new mysql users and databases for new sites'),
     '#size' => 30,
     '#maxlength' => 64,
   );
   
-  $form['provision_mysql_host'] = array(
+  $form['provision_db_host'] = array(
     '#type' => 'textfield',
     '#title' => t('Mysql server hostname'),
     '#description' => t('The mysql server to connect to.'),
     '#size' => 30,
-    '#default_value' => variable_get('provision_mysql_host', 'localhost'),
+    '#default_value' => variable_get('provision_db_host', 'localhost'),
     '#maxlength' => 64,
   );
   return $form;
@@ -86,42 +86,39 @@ function provision_mysql_provision_configure() {
 
 
 function provision_mysql_provision_pre_install($url, &$data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
-  $data['site-db-type'] = 'mysql'; # only support innodb. for now.
-  $data['site-db-host'] = ($data['site-db-host']) ? $data['site-db-host'] : variable_get('provision_mysql_host', 'localhost');
-  $data['site-db-passwd'] = user_password(); # generate a random password for use
-  if ($data['site-id']) {
-    $data['site-db-name'] = 'site_' . $data['site-id'];
-    $data['site-db-username'] = $data['site-db-name']; // mysql has some really really stupid rules about who db / usernames, so site id is the safest.
+  $data['site_db_type'] = 'mysql'; # only support innodb. for now.
+  $data['site_db_host'] = ($data['site_db_host']) ? $data['site_db_host'] : variable_get('provision_db_host', 'localhost');
+  $data['site_db_passwd'] = user_password(); # generate a random password for use
+  if ($data['site_id']) {
+    $data['site_db_name'] = 'site_' . $data['site_id'];
+    $data['site_db_username'] = $data['site_db_name']; // mysql has some really really stupid rules about who db / usernames, so site id is the safest.
   }
   else {
-    $data['site-db-name'] = ereg_replace("^www\.", "", str_replace('-', '_', str_replace(".", "", $url)));
-    $data['site-db-username'] = substr($data['site-db-name'], 0, 16);
+    $data['site_db_name'] = ereg_replace("^www\.", "", str_replace('-', '_', str_replace(".", "", $url)));
+    $data['site_db_username'] = substr($data['site_db_name'], 0, 16);
   }
 
   provision_set_active_db(_provision_master_db_url());
     
-  if ( _provision_mysql_database_exists($data['site-db-name']) ) {
-    _provision_drop_database($data['site-db-name']);
+  if ( _provision_mysql_database_exists($data['site_db_name']) ) {
+    _provision_mysql_drop_database($data['site_db_name']);
   }
   
-  _provision_create_database($data['site-db-name']);
+  _provision_mysql_create_database($data['site_db_name']);
   
-  if ( !_provision_mysql_database_exists($data['site-db-name']) ) {
+  if ( !_provision_mysql_database_exists($data['site_db_name']) ) {
    provision_set_error(PROVISION_DB_ERROR);
    provision_log("error", "Database could not be created.");
    provision_set_active_db();
    return FALSE;
   }
   
-  _provision_mysql_grant($data['site-db-name'], $data['site-db-username'], $data['site-db-passwd']);
-  _provision_mysql_grant($data['site-db-name'], $data['site-db-username'], $data['site-db-passwd'], $data['site-db-host']);
+  _provision_mysql_grant($data['site_db_name'], $data['site_db_username'], $data['site_db_passwd']);
+  _provision_mysql_grant($data['site_db_name'], $data['site_db_username'], $data['site_db_passwd'], $data['site_db_host']);
 
-  if ($data['site-mysql-old-passwords']) {
-    _provision_mysql_old_password($data['site-db-username'], $data['site-db-passwd']);
-    _provision_mysql_old_password($data['site-db-username'], $data['site-db-passwd'], $data['site-db-host']);
+  if ($data['site_mysql_old_passwords']) {
+    _provision_mysql_old_password($data['site_db_username'], $data['site_db_passwd']);
+    _provision_mysql_old_password($data['site_db_username'], $data['site_db_passwd'], $data['site_db_host']);
   }
   _provision_mysql_flush();
   provision_set_active_db();
@@ -130,39 +127,24 @@ function provision_mysql_provision_pre_install($url, &$data) {
 
 
 function provision_mysql_provision_backup($url, &$data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
   provision_log("backup", "Generating mysql dump for $url.");
-  provision_shell_exec("mysqldump -u%s -p%s %s > sites/%s/database.sql", $data['site-db-username'], $data['site-db-passwd'], $data['site-db-name'], $url); 
+  provision_shell_exec("mysqldump -u%s -p%s %s > sites/%s/database.sql", $data['site_db_username'], $data['site_db_passwd'], $data['site_db_name'], $url); 
   provision_shell_exec("cd sites/%; tar -rf %s database.sql; rm database.sql", $url, $data['backup_file']);
 }
 
 function _provision_mysql_database_exists($name) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
-  return db_result(db_query("SHOW DATABASES LIKE '%s'", $data['site-db-name']));
+  return db_result(db_query("SHOW DATABASES LIKE '%s'", $data['site_db_name']));
 }
 
 function _provision_mysql_drop_database($name) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
   db_query("DROP DATABASE %s", $name);
 }
 
 function _provision_mysql_create_database($name) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
   db_query("CREATE DATABASE %s", $name);  
 }
 
 function _provision_mysql_can_create_database() {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
   $test = 'provision_test';
   _provision_mysql_create_database($test);
   if (_provision_mysql_database_exists($test)) {
@@ -173,30 +155,21 @@ function _provision_mysql_can_create_database() {
 }
 
 function _provision_mysql_grant($name, $username, $password, $host = '') {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
   $host = ($host) ? $host : '%';
   db_query("GRANT ALL PRIVILEGES ON %s.* TO %s@`%s` IDENTIFIED BY '%s'", $name, $username, $host, $password);
 }
 
 function _provision_mysql_old_password($username, $password, $host = '') {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
   $host = ($host) ? $host : '%';  
   db_query("SET PASSWORD FOR '%s'@'%s' = OLD_PASSWORD('%s')", $username, $host, $password);
 }
 
 function _provision_mysql_flush() {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
   db_query("FLUSH PRIVILEGES");
 }
 
-function _provision_master_db_url() {
-  return sprintf("mysql://%s:%s@%s/mysql", variable_get('provision_mysql_user', 'root'), variable_get('provision_mysql_password', 'root'), $data['site-db-host']);
+function _provision_master_db_url($data = array()) {
+  return sprintf("mysql://%s:%s@%s/mysql", variable_get('provision_db_user', 'root'), variable_get('provision_db_password', 'root'), variable_get('provision_db_host', 'localhost'));
 }
 
 
@@ -204,13 +177,13 @@ function _provision_master_db_url() {
  * Implementation of hook_provision_verify
  */
 function provision_mysql_provision_verify() {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
   provision_set_active_db(_provision_master_db_url());
   if (!_provision_mysql_can_create_database()) {
     provision_set_error(PROVISION_DB_ERROR | PROVISION_FRAMEWORK_ERROR);
     provision_log('error', t('Unable to create new databases.'));
+  }
+  else {
+    provision_log("message", t('Mysql can create new databases.'));
   }
   provision_set_active_db();
 }

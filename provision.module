@@ -37,8 +37,48 @@
 /** Include the provisioning API. */
 include_once('provision.inc');
 
+/**
+ * Implementation of hook_provision_service
+ */
 function provision_provision_service() {
   return t("Basic configuration");
+}
+
+
+/**
+ * Implementation of hook_perm().
+ */
+function provision_perm() {
+  return array("administer provisioning");
+}
+
+/**
+ * @defgroup provisionui Configure provisioning framework.
+ * @{
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function provision_menu($may_cache = true) {
+  if ($may_cache) {
+    $items[] = array(
+      'path' => 'admin/settings/provision',
+      'title' => t('Provisioning'),
+      'description' => t("Configure how new Drupal sites will be provisioned."),
+      'callback' => 'drupal_get_form',
+      'callback arguments' => array('provision_configure'),
+      'access' => user_access('administer provisioning'),
+    );
+    $items[] = array(
+      'path' => 'admin/help/provision/requirements',
+      'title' => t('Provisioning requirements'),
+      'description' => t("Information of how to configure the provisioning system."),
+      'callback' => 'provision_help_requirements',
+      'type' => MENU_CALLBACK
+    );
+  }
+  return $items;
 }
 
 /**
@@ -60,7 +100,9 @@ function provision_help($section) {
       $output .= "<dl>";
       foreach ($commands as $command => $info) {
         if (preg_match('/^provision/', $command)) {
-          $command .= ' ' . implode(' ', (array) key($info['arguments']));
+          if (sizeof($info['arguments'])) {
+            $command .= ' ' . implode(' ', (array) key($info['arguments']));            
+          }
           if (sizeof($info['optional arguments'])) {
             $command .= ' [' . implode('] [', (array) key($info['optional arguments'])) . ']';  
           }
@@ -105,20 +147,23 @@ EOF;
                           username to "<code>@username</code>" and the group to "<code>@group</code>", 
                           but you can change these in the <a href="@provision_link">provisioning section</a>.</p>', array("@username" => $username, "@group" => $group, "@provision_link" => url('admin/settings/provision'))) . '</li>';
     
-    $output .= '<li>' . t('<strong>Write access to a directory to store backups.</strong> 
+    $output .= '<li>' . t('<p><strong>Write access to a directory to store backups.</strong> 
                           The drush user needs to be able to maintain the backups repository to ensure that your site is backed up successfully. 
                           It is incredibly important that this path is not accessible via the web server, so that no undesirables can get their
-                          hands on your database. The recommended path is directly above your platform path, but it can be anywhere.<br />
+                          hands on your database. The recommended path is directly above your platform path, but it can be anywhere.</p>
 
-                          Based on your server configuration we have determined that your path should be <code>@backup_path</code>, 
-                          but you can change it change them in the <a href="@provision_link">provisioning section</a><br />
-                          To create and configure this directory correctly, please enter the following commands :
+                          <p>Based on your server configuration we have determined that your path should be <code>@backup_path</code>, 
+                          but you can change this in the <a href="@provision_link">provisioning section</a>.</p>
+                          <strong>To configure: </strong> Please enter the following commands :
                           <pre>@mkdir_cmd</pre>',$mkdir_cmd) . '</li>';
     $output .= "</ol>";
     return $output;
   }
 }
 
+/**
+ * Page callback with in depth requirement documentation
+ */
 function provision_help_requirements() {
   $output .= t('<p>Unfortunately, due to the requirements of some of the functionality, significantly more access than is usually allowed on a shared hosting solution is required,
                 and as such, a virtual server or dedicated hosting system will be required to run this system.</p>');
@@ -128,7 +173,7 @@ function provision_help_requirements() {
     $name = module_invoke($module, 'provision_service');
     $help = module_invoke($module, 'help', 'admin/help/provision#requirements');
     if ($name && $help) {
-      $output .= '<h3>' . t($name) . '</h3>';
+      $output .= '<a href="requirements-$module"></a><h3>' . t($name) . '</h3>';
       $output .=  $help;
     }
   }
@@ -136,42 +181,6 @@ function provision_help_requirements() {
   return $output;
 }
 
-/**
- * Implementation of hook_perm().
- */
-function provision_perm() {
-  return array("administer provisioning");
-}
-
-
-/**
- * @defgroup provisionui Configure provisioning framework.
- * @{
- */
-
-/**
- * Implementation of hook_menu().
- */
-function provision_menu($may_cache = true) {
-  if ($may_cache) {
-    $items[] = array(
-      'path' => 'admin/settings/provision',
-      'title' => t('Provisioning'),
-      'description' => t("Configure how new Drupal sites will be provisioned."),
-      'callback' => 'drupal_get_form',
-      'callback arguments' => array('provision_configure'),
-      'access' => user_access('administer provisioning'),
-    );
-    $items[] = array(
-      'path' => 'admin/help/provision/requirements',
-      'title' => t('Provisioning requirements'),
-      'description' => t("Information of how to configure the provisioning system."),
-      'callback' => 'provision_help_requirements',
-      'type' => MENU_CALLBACK
-    );
-  }
-  return $items;
-}
 
 /**
  * Menu callback.
@@ -197,15 +206,7 @@ function provision_configure() {
  * Implementation of provision_configure
  */
 function provision_provision_configure() {
-  $form['provision_tempurl_base'] = array(
-    '#type' => 'textfield',
-    '#required' => TRUE,
-    '#title' => t('Temporary URL base'),
-    '#description' => t('Each new domain that gets created gets created with a temporary url base that allows it to be immediately accessible.'),
-    '#default_value' => variable_get('provision_tempurl_base', $_SERVER['HTTP_HOST']),
-    '#size' => 40,
-    '#maxlength' => 255,
-  );
+
   
   $form['provision_user'] = array(
     '#type' => 'textfield',
@@ -224,7 +225,15 @@ function provision_provision_configure() {
     '#size' => 40,
     '#maxlength' => 255,
   );
-
+  $form['provision_backup_path'] = array(
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#title' => t('Path to backup directory'),
+    '#description' => t('The file system location where backups will be stored.'),
+    '#default_value' => _provision_backup_path(),
+    '#size' => 40,
+    '#maxlength' => 255,
+  );
   return $form;
 }
 
@@ -241,6 +250,7 @@ function provision_provision_configure() {
  * Implementation of hook_drush_command().
  */
 function provision_drush_command() {
+  
   $items['provision install'] = array(
     'callback' => 'provision_install_cmd',
     'arguments' => array('domain.com' => t('The domain of the site to install.')),
@@ -251,12 +261,14 @@ function provision_drush_command() {
     'callback' => '_provision_synch',
     'arguments' => array('domain.com' => t('The domain of the site to synch.')),
     'description' => t('Regenerate all the config files for a site.')
-  );  
+  );
+  
   $items['provision import'] = array(
     'callback' => '_provision_import',
     'arguments' => array('domain.com' => t('The domain of the site to import.')),
     'description' => t('Turn an already running site into a provisioned site.')
   );
+  
   $items['provision backup'] = array(
     'callback' => '_provision_backup',
     'arguments' => array('domain.com' => t('The domain of the site to back up.')),
@@ -274,6 +286,12 @@ function provision_drush_command() {
     'arguments' => array('domain.com' => t('The domain of the site to disable (only if disabled).')),    
     'description' => 'Disable a site.'
   );
+  $items['provision verify'] = array(
+    'callback' => '_provision_verify',
+#    'arguments' => array('domain.com' => t('The domain of the site to disable (only if disabled).')),    
+    'description' => 'Verify that the provisioning framework is correctly installed.'
+  );
+  
   /*
   // Not implemented yet.
   $items['provision delete'] = array(
@@ -322,7 +340,7 @@ function provision_install_cmd($url) {
     print "Usage: drush.php provision install DOMAIN [OPTIONS]\n";
     print "Install a new site for the domain DOMAIN.\n";
     print "Example: drush.php provision install mydomain.com --site-db-host localhost\n";
-    provision_set_log("error", "Incorrect usage of the provisioning framework");
+    provision_log("error", "Incorrect usage of the provisioning framework");
     drupal_set_error(PROVISION_FRAMEWORK_ERROR);
     provision_output($url, $data);
   }
@@ -389,17 +407,17 @@ function _provision_pre_install($url, &$data) {
  *   Boolean denoting whether the provision_invoke rolled back changes made. 
  */
 function _provision_install($url, &$data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return;  
   $rolled_back = provision_invoke("install", $url, $data);
 
-#  if (!$rolled_back) {
+  if (!$rolled_back) {
     _provision_drupal_switch_active_site($url); # Change headers and db info, also backs up
     _provision_drupal_force_load_modules($url);
-    _provision_drupal_install_schema($data['site-profile']);
+    _provision_drupal_install_schema($data['site_profile']);
     _provision_drupal_force_load_modules();
     _provision_drupal_switch_active_site(); # This *should* bring the site back to where we were before installing
-#  }
+    
+  }
+
   return $rolled_back;
 }
 
@@ -528,13 +546,58 @@ function _provision_import($url) {
   include_once("sites/$url/settings.php");
   
   $parts = parse_url($db_url);
-  $data['site-db-type'] = $parts['scheme'];
-  $data['site-db-user'] = $parts['user'];
-  $data['site-db-host'] = $parts['host'];
-  $data['site-db-passwd'] = $parts['pass'];
-  $data['site-db-name'] = substr($parts['path'], 1);
-  $data['site-profile'] = $installed_profile;
+  $data['site_db_type'] = $parts['scheme'];
+  $data['site_db_user'] = $parts['user'];
+  $data['site_db_host'] = $parts['host'];
+  $data['site_db_passwd'] = $parts['pass'];
+  $data['site_db_name'] = substr($parts['path'], 1);
+  $data['site_profile'] = $installed_profile;
   
   provision_save_site_data($url, $data);
+  provision_output($url, $data);
+}
+
+
+/**
+ * Import a running Drupal site into a provisioned site.
+ *
+ * This is accomplished by inspecting the settings.php file and generating a site.php file.
+ *
+ * @param url
+ *   The url of the site being synched.
+ * @return
+ *   Output of provision_output() function.
+ *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
+ */
+function _provision_verify($url = '') {
+  $path = _provision_config_path();
+  $exists = provision_check_path($path, "exists", true ,
+    t("Provision configuration path exists."),
+    t("Provision configuration path does not exist."));
+  if (!$exists) {
+    $made = provision_check_path($path, "mkdir", true,
+        t("Provision configuration path has been created."),
+        t("Provision configuration could not be created."),
+        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+  }
+
+  provision_check_path($path, "writable", true ,
+      t("Provision configuration path is writable."),
+      t("Provision configuration path is not writable."), 
+      PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+  provision_check_path($path, "chown", provision_get_script_owner(), 
+    t("Changed ownership of <code>%path</code>", array("%path" => $path)),
+    t("Could not change ownership <code>%path</code>", array("%path" => $path)),
+    PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
+  provision_check_path($path, "chmod", 0700, 
+    t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => 0700)),
+    t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' => 0700)),
+    PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );        
+  
+  $data = array();
+  $rolled_back = provision_invoke("verify", $url, $data);
+  if ($url) {
+    provision_save_site_data($url, $data);    
+  }
   provision_output($url, $data);
 }

@@ -92,14 +92,15 @@ function provision_apache_provision_configure() {
     '#rows' => 5,
   );
   
-  $default_path = variable_get('provision_root', ereg_replace("/webroot$", "", $_SERVER['DOCUMENT_ROOT'])) . '/vhost.d';
-  $form['provision_apache_vhost_path'] = array(
+  $default_path = variable_get('provision_config_path', ereg_replace("/webroot$", "", $_SERVER['DOCUMENT_ROOT'])) . '/config';
+  $form['provision_apache_config_path'] = array(
     '#type' => 'textfield',
-    '#title' => t('Path to the directory to store apache configuration files for hosted sites'),
+    '#title' => t('Path to the directory to store configuration files for hosted sites.'),
     '#size' => 40,
-    '#default_value' => variable_get('provision_apache_vhost_path', $default_path),
+    '#default_value' => variable_get('provision_config_path', $default_path),
     '#maxlength' => 255,
   );
+  
   $form['provision_apache_restart_cmd'] = array(
     '#type' => 'textfield',
     '#title' => t('Apache restart command'),
@@ -116,21 +117,7 @@ function provision_apache_provision_configure() {
  * The default template provided for the virtual host configuration
  */
 function _provision_apache_default_template() {
-  return <<<EOF
- <VirtualHost *:80>
-     ServerAdmin [site-email]
-     DocumentRoot [site-document-root]
-     ServerName [site-url]
-     ServerAlias [site-temporary-url]
-     ServerAlias www.[site-url]
-
-     # Error handler for Drupal > 4.6.7
-     <Directory "[site-document-root]/sites/[site-url]/files">
-       SetHandler This_is_a_Drupal_security_line_do_not_remove
-     </Directory>
-
- </VirtualHost>
-EOF;
+  return file_get_contents(drupal_get_path('module', 'provision_apache') . "/templates/apache_vhost.tpl.php");
 }
 
 /**
@@ -176,10 +163,7 @@ function provision_apache_provision_disable($url, &$data) {
 /**
  * Implementation of hook_provision_sync
  */
-function provision_apache_provision_sync($url, &$data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-
+function provision_apache_provision_synch($url, &$data) {
   _provision_apache_create_vhost_config($url, $data);
   _provision_apache_restart_apache();
 }
@@ -188,42 +172,30 @@ function provision_apache_provision_sync($url, &$data) {
  * Delete virtual host file
  */
 function _provision_apache_delete_vhost_config($url, $data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
- $vhost_path = variable_get('provision_apache_vhost_path', 'vhost.d');
- if (file_exists()) {
-   unlink($vhost_path . '/' . $url);
- }
+  provision_check_path(_provision_vhost_path() . "/$url", "unlink", true, 
+      t("Removed apache virtual host configuration"));
 }
 
 /**
  * Generate virtual host file
  */
 function _provision_apache_create_vhost_config($url, $data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
- $vhost_path = variable_get('provision_apache_vhost_path', 'vhost.d');
- $file = fopen($vhost_path . '/' . $url, "w");
- if (!$file) {
-   provision_log("error", "Could not create apache configuration file.");
-   provision_set_error(PROVISION_WEB_ERROR | PROVISION_PERM_ERROR);
-   return false;
- }
- $text = token_replace(variable_get('provision_apache_vhost_template', _provision_apache_default_template()) , 'site', $data);
-
- fwrite($file, $text);
- fclose($file);
+  $writable = provision_check_path(_provision_vhost_path(), "writable", true ,
+      t("Virtual host configuration path is writable."),
+      t("Virtual host configuration path is not writable."), 
+      PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+  if ($writable) {
+    $file = fopen(_provision_vhost_path() . '/' . $url, "w");
+    $text = provision_render_config(variable_get('provision_apache_vhost_template', _provision_apache_default_template()), $data);
+    fwrite($file, $text);
+    fclose($file);
+  }
 }
  
 /**
  * Restart Apache
  */
 function _provision_apache_restart_apache() {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
   # This is required to be configurable, due to the fact that different hosts might need to do this differently.
   # TODO : add configuration / test for this
   $apache_restart_cmd = escapeshellcmd(variable_get('provision_apache_restart_cmd', 'sudo apachectl graceful'));
@@ -231,5 +203,34 @@ function _provision_apache_restart_apache() {
   if (!$return) {
     provision_set_error(PROVISION_WEB_ERROR);
     provision_log("error", "Web server could not be restarted. Changes might not be available until this has been done.");
+  }
+}
+
+function provision_apache_provision_verify() {
+  $path = _provision_vhost_path();
+  $exists = provision_check_path($path, "exists", true ,
+    t("Virtual Host configuration path exists."),
+    t("Virtual Host configuration path does not exist."));
+  if (!$exists) {
+    $made = provision_check_path($path, "mkdir", true, 
+        t("Virtual host configuration path has been created."),
+        t("Virtual host configuration path could not be created."), 
+        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+  }
+  else {
+    $writable = provision_check_path($path, "writable", true ,
+        t("Virtual host configuration path is writable."),
+        t("Virtual host configuration path is not writable."), 
+        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+    if (!$writable) {
+      provision_check_path($path, "chown", provision_get_script_owner(), 
+        t("Changed ownership of <code>%path</code>", array("%path" => $path)),
+        t("Could not change ownership <code>%path</code>", array("%path" => $path)),
+        PROVISION_PERM_ERROR);
+      provision_check_path($path, "chmod", 0700, 
+        t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => 0700)),
+        t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' => 0700)),
+        PROVISION_PERM_ERROR );
+    }
   }
 }
