@@ -1,4 +1,0 @@
-name = Provision: Apache
-description = Provides provisioning requirements for the Apache web server
-package = Provision
-dependencies = provision
