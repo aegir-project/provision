@@ -52,7 +52,16 @@ function provision_mysql_provision_service() {
  * Implementation of provision_configure
  */
 function provision_mysql_provision_configure() {
-  $form['provision_db_user'] = array(
+  $form['db_host'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Mysql server hostname'),
+    '#description' => t('The mysql server to connect to.'),
+    '#size' => 30,
+    '#default_value' => variable_get('provision_db_host', 'localhost'),
+    '#maxlength' => 64,
+  );
+  
+  $form['db_user'] = array(
     '#type' => 'textfield',
     '#required' => TRUE,
     '#title' => t('Mysql user account'),
@@ -61,7 +70,7 @@ function provision_mysql_provision_configure() {
     '#default_value' => variable_get('provision_db_user', 'root'),
     '#maxlength' => 255,
   );
-  $form['provision_db_password'] = array(
+  $form['db_passwd'] = array(
     '#type' => 'password_confirm',
     '#required' => (variable_get("provision_db_password", TRUE)) ? FALSE : TRUE,
     '#title' => t('Mysql user password'),
@@ -70,14 +79,6 @@ function provision_mysql_provision_configure() {
     '#maxlength' => 64,
   );
   
-  $form['provision_db_host'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Mysql server hostname'),
-    '#description' => t('The mysql server to connect to.'),
-    '#size' => 30,
-    '#default_value' => variable_get('provision_db_host', 'localhost'),
-    '#maxlength' => 64,
-  );
   return $form;
 }
 /**

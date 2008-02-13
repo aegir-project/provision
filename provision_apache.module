@@ -11,7 +11,7 @@
  */
 
 function provision_apache_provision_service() {
-  return t("Apache webserver");
+  return array( "web_server" => t("Web Server"));
 }
 
 /**
@@ -81,9 +81,64 @@ EOF;
 /**
  * Hook into central configuration form for provisioning framework.
  */
-function provision_apache_provision_configure() {
+function provision_apache_provision_configure($node = null) {
+  $form['ip_address'] = array(
+    '#type' => 'textfield',
+    '#title' => t('IP address'),
+    '#default_value' => $node->ip_address,
+    '#description' => t("The IP address the server can be accessed by. If this is empty, the hostname field will be used instead.")
+  );
+  
+  $form['script_user'] = array(
+    '#type' => 'textfield',
+    '#title' => t('System account'),
+    '#required' => TRUE,
+    '#description' => t('The system account that the hosted files will belong to, for security reasons, this should be a different to the account the web server is running as.'),
+    '#default_value' => ($node->script_user) ? $node->script_user : provision_get_script_owner(),
+    '#size' => 40,
+    '#maxlength' => 255,
+  );
+  
+  $form['web_group'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Web server group'),
+    '#required' => TRUE,
+    '#description' => t('The group that the hosted files will belong to. Should be the group the web server is running as.'),
+    '#default_value' => ($node->web_group) ? $node->web_group : provision_get_group_name(),
+    '#size' => 40,
+    '#maxlength' => 255,
+  );
+  
+  $form['config_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Configuration path'),
+    '#required' => TRUE,
+    '#size' => 40,
+    '#default_value' => ($node->config_path) ? $node->config_path : _provision_config_path(),
+    '#description' => t("The path on the server where configuration files will be stored.
+        It is essential that this directory should not be accessible via a web browser."),
+    '#maxlength' => 255,
+  );
+  
+  $form['backup_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Backup path'),
+    '#required' => TRUE,
+    '#size' => 40,
+    '#default_value' => ($node->backup_path) ? $node->backup_path : _provision_backup_path(),
+    '#description' => t("The path on the server where backups will be stored.
+        It is essential that this directory should not be accessible via a web browser."),
+    '#maxlength' => 255,
+  );
+  
+  return $form;
+}
 
-  $form['provision_apache_vhost_template'] = array(
+/**
+ * Implementation of hook_provision_templates
+ */
+provision_apache_provision_templates() {
+  $form['vhost_template'] = array(
     '#type' => 'textarea',
     '#title' => t('Virtual Host configuration template'),
     '#description' => t('The text to use when generating a virtual host configuration file for apache'),
@@ -91,26 +146,7 @@ function provision_apache_provision_configure() {
     '#cols' => 60,
     '#rows' => 5,
   );
-  
-  $default_path = variable_get('provision_config_path', ereg_replace("/webroot$", "", $_SERVER['DOCUMENT_ROOT'])) . '/config';
-  $form['provision_apache_config_path'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Path to the directory to store configuration files for hosted sites.'),
-    '#size' => 40,
-    '#default_value' => variable_get('provision_config_path', $default_path),
-    '#maxlength' => 255,
-  );
-  
-  $form['provision_apache_restart_cmd'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Apache restart command'),
-    '#description' => t('The command to run to restart apache for new changes to take effect. This is required for the new site to become live'),
-    '#size' => 40,
-    '#maxlength' => 255,
-    '#default_value' => variable_get('provision_apache_restart_cmd', 'sudo apachectl graceful')
-  );
-
-  return $form;
+  return $form; 
 }
 
 /**

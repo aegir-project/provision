@@ -190,52 +190,25 @@ function provision_help_requirements() {
  
 function provision_configure() {
   foreach (module_implements('provision_configure') as $module) {
-    $form[$module] = array(
+    $data = module_invoke($module, 'provision_service');
+    list($service, $title) = $data;
+    $form[$name] = array(
       '#type' => 'fieldset',
-      '#title' => module_invoke($module, 'provision_service'),
+      '#title' => $title,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#access' => user_access('administer provisioning'),
+      '#access' => user_access('administer $service provisioning'),
+      '#tree' => true
     );
-    $form[$module] = array_merge($form[$module], module_invoke($module, "provision_configure"));
+    $form[$service] = array_merge($form[$module], module_invoke($module, "provision_configure"));
   }
-  return system_settings_form($form);
-} 
-
-/**
- * Implementation of provision_configure
- */
-function provision_provision_configure() {
-
-  
-  $form['provision_user'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Provision user'),
-    '#description' => t('The owner of the files. must not be the web server user.'),
-    '#default_value' => provision_get_script_owner(),
-    '#size' => 40,
-    '#maxlength' => 255,
+  $form['submit'] = array(
+    '#type' => 'submit', 
+    '#value' => t('Save settings'),
   );
   
-  $form['provision_group'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Provision group'),
-    '#description' => t('The group owner of the files. should be the group the web server is running as.'),
-    '#default_value' => provision_get_group_name(),
-    '#size' => 40,
-    '#maxlength' => 255,
-  );
-  $form['provision_backup_path'] = array(
-    '#type' => 'textfield',
-    '#required' => TRUE,
-    '#title' => t('Path to backup directory'),
-    '#description' => t('The file system location where backups will be stored.'),
-    '#default_value' => _provision_backup_path(),
-    '#size' => 40,
-    '#maxlength' => 255,
-  );
   return $form;
-}
+} 
 
 /**
  * @} End of "defgroup provisionui"

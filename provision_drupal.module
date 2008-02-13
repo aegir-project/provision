@@ -21,14 +21,15 @@ function provision_drupal_provision_service() {
 
 /**
  * Implentation of hook_provision_configure()
- */
+ * @TODO: PROPER profile support
 function provision_drupal_provision_configure() {
+
   $template = _provision_drupal_default_template();
   $profiles = file_scan_directory('./profiles', '\.profile$', array('.', '..', 'CVS'), 0, TRUE, 'name', 0);
   // Don't need to choose profile if only one available.
   if (sizeof($profiles) == 1) {
     $profile = array_pop($profiles);
-    $form['provision_default_profile'] = array('#type' => 'value', '#value' => $profile->name);
+    $form['default_profile'] = array('#type' => 'value', '#value' => $profile->name);
   }
   elseif (sizeof($profiles) > 1) {
     foreach ($profiles as $profile) {
@@ -46,16 +47,16 @@ function provision_drupal_provision_configure() {
     
   }
 
-  $form['provision_settings_template'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Drupal settings template'),
-    '#description' => t('The template for the generated settings.php file.'),
-    '#default_value' => variable_get('provision_settings_template', $template),
-    '#cols' => 60,
-    '#rows' => 5,
-  );
+
   
   return $form;
+}
+//*/
+/**
+ * Implementation of hook_provision_templates
+ */
+function provision_drupal_provision_templates() {
+  // settings template
 }
 
 /**
