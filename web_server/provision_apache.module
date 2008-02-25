@@ -1,0 +1,272 @@
+<?php
+/**
+ * @file
+ * Apache provisioning module
+ * This module simply serves to generate the virtual host entry, and make sure apache gets reloaded properly.
+ * Because Drupal is running via the command line for the entirety of this process, it is only necessary to make
+ * it available online once everything has been completed.
+ *
+ * This module still requires configuration and sanity checks. Need to figure out a way to inspect the apache configuration, 
+ * to ensure that the sites are getting loaded up correctly.
+ */
+
+function provision_apache_provision_service() {
+  return array( "web_server" => t("Web Server"));
+}
+
+/**
+ * Implementation of hook_help().
+ */
+function provision_apache_help($section) {
+  switch ($section) {
+    case 'admin/help/provision#requirements':
+      $username = provision_get_script_owner();
+      $group = provision_get_group_name();
+      $vhost_path = _provision_vhost_path();
+      $mkdir_cmd['@vhost_path'] = $vhost_path;
+      $mkdir_cmd['@provision_link'] = url('admin/settings/provision');
+      $mkdir_cmd['@mkdir_cmd'] = <<<EOF
+    [$username@hm2 ~]$ mkdir $vhost_path
+    [$username@hm2 ~]$ chown $username:$username $vhost_path
+    [$username@hm2 ~]$ chmod 0700 $vhost_path
+EOF;
+      $visudo_cmd['@visudo_cmd'] = <<<EOF
+    [$username@hm2 ~]$ sudo su -
+    password:
+    [root@hm2 ~]$ visudo
+EOF;
+      $visudo_cmd['@visudo_line'] = <<<EOF
+    $username ALL=NOPASSWD: /usr/sbin/apachectl
+EOF;
+
+    $vhost_line = <<<EOF
+    Include $vhost_path
+EOF;
+      
+      $output .= "<ol>";
+
+      $output .= '<li>' . t('<p><strong>Web server inaccessible directory to store Virtual Host information.</strong> 
+                            The provision framework takes special care to make sure that the file permissions of the 
+                            hosted sites are always as safe as can be, especially to make sure that the web server does 
+                            not have the ability to modify the code of the site, therefor this information is required 
+                            to assure that safety while keeping the sites accessible. 
+                            The recommended path is directly above your platform path, but it can be anywhere.</p>
+                            <p>Based on your server configuration we have determined that your path should be <code>@vhost_path</code>, 
+                            but you can change it change them in the <a href="@provision_link">provisioning section</a></p>
+                            <p><strong>To configure:</strong> this directory correctly, please enter the following commands :
+                            <pre>@mkdir_cmd</pre></p>',$mkdir_cmd) . '</li>';
+
+      $output .= '<li>' . t('<p><strong>Access to the server\'s <code>httpd.conf</code> file.</strong> 
+                            You are required to add a single line to the httpd.conf file, which allows 
+                            the system to load the additional virtual hosts that are generated.</p>
+                            The location of this file differs between distributions, 
+                            but is most commonly found in <code>/etc/httpd</code> or <code>/etc/apache</a>.</p>
+                            <p><strong>To configure:</strong> Once you have determined the location of your httpd.conf file, add the following line to it :
+                            <pre>@vhost_line</pre></p>', array('@vhost_line' => $vhost_line)) . '</li>';
+      $output .= '<li>' . t('<p><strong>Ability to reload the httpd daemon.</strong> 
+                             As the provisioning framework should not be run as root,
+                             and the web server group should not be allowed access to the 
+                             functionality to stop/start the web server, it is required that you provide access
+                             to the Apache restart command for the user account the script will be running as. 
+                             If this is not configured, every command will ask for a sudo password when restarting the server.</p>
+                             <p><strong>To configure:</strong> Run the visudo command: <pre>@visudo_cmd</pre>
+                             Then add the following line to the file: <pre>@visudo_line</pre></p>', 
+                             $visudo_cmd) . '</li>';
+      $output .= "</ol>";
+      return $output;
+      break;
+  }
+}
+
+/**
+ * Hook into central configuration form for provisioning framework.
+ */
+function provision_apache_provision_configure($node = null) {
+  $form['ip_address'] = array(
+    '#type' => 'textfield',
+    '#title' => t('IP address'),
+    '#default_value' => $node->ip_address,
+    '#description' => t("The IP address the server can be accessed by. If this is empty, the hostname field will be used instead.")
+  );
+  
+  $form['script_user'] = array(
+    '#type' => 'textfield',
+    '#title' => t('System account'),
+    '#required' => TRUE,
+    '#description' => t('The system account that the hosted files will belong to, for security reasons, this should be a different to the account the web server is running as.'),
+    '#default_value' => ($node->script_user) ? $node->script_user : provision_get_script_owner(),
+    '#size' => 40,
+    '#maxlength' => 255,
+  );
+  
+  $form['web_group'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Web server group'),
+    '#required' => TRUE,
+    '#description' => t('The group that the hosted files will belong to. Should be the group the web server is running as.'),
+    '#default_value' => ($node->web_group) ? $node->web_group : provision_get_group_name(),
+    '#size' => 40,
+    '#maxlength' => 255,
+  );
+  
+  $form['config_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Configuration path'),
+    '#required' => TRUE,
+    '#size' => 40,
+    '#default_value' => ($node->config_path) ? $node->config_path : _provision_config_path(),
+    '#description' => t("The path on the server where configuration files will be stored.
+        It is essential that this directory should not be accessible via a web browser."),
+    '#maxlength' => 255,
+  );
+  
+  $form['backup_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Backup path'),
+    '#required' => TRUE,
+    '#size' => 40,
+    '#default_value' => ($node->backup_path) ? $node->backup_path : _provision_backup_path(),
+    '#description' => t("The path on the server where backups will be stored.
+        It is essential that this directory should not be accessible via a web browser."),
+    '#maxlength' => 255,
+  );
+  
+  return $form;
+}
+
+/**
+ * Implementation of hook_provision_templates
+ */
+function provision_apache_provision_templates() {
+  $form['vhost_template'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Virtual Host configuration template'),
+    '#description' => t('The text to use when generating a virtual host configuration file for apache'),
+    '#default_value' => variable_get('provision_apache_vhost_template', _provision_apache_default_template()),
+    '#cols' => 60,
+    '#rows' => 5,
+  );
+  return $form; 
+}
+
+/**
+ * The default template provided for the virtual host configuration
+ */
+function _provision_apache_default_template() {
+  return file_get_contents(drupal_get_path('module', 'provision_apache') . "/templates/apache_vhost.tpl.php");
+}
+
+/**
+ * Implementation of hook_provision_pre_install
+ */
+function provision_apache_provision_pre_install($url, &$data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+  return _provision_apache_create_vhost_config($url, $data);
+}
+
+/**
+ * Implementation of hook_provision_post_install
+ */
+function provision_apache_provision_post_install($url, &$data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+  return _provision_apache_restart_apache();  
+}
+
+/**
+ * Implementation of hook_provision_enable
+ */
+function provision_apache_provision_enable($url, &$data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+
+  _provision_apache_create_vhost_config($url, $data);
+  _provision_apache_restart_apache();
+}
+
+/**
+ * Implementation of hook_provision_disable
+ */
+function provision_apache_provision_disable($url, &$data) {
+  #safety mechanism to ensure back end calls are not made via the front end.
+  if (!provision_confirm_drush()) return null;
+
+  _provision_apache_delete_vhost_config($url, $data);
+  _provision_apache_restart_apache();
+}
+
+/**
+ * Implementation of hook_provision_sync
+ */
+function provision_apache_provision_synch($url, &$data) {
+  _provision_apache_create_vhost_config($url, $data);
+  _provision_apache_restart_apache();
+}
+
+/**
+ * Delete virtual host file
+ */
+function _provision_apache_delete_vhost_config($url, $data) {
+  provision_check_path(_provision_vhost_path() . "/$url", "unlink", true, 
+      t("Removed apache virtual host configuration"));
+}
+
+/**
+ * Generate virtual host file
+ */
+function _provision_apache_create_vhost_config($url, $data) {
+  $writable = provision_check_path(_provision_vhost_path(), "writable", true ,
+      t("Virtual host configuration path is writable."),
+      t("Virtual host configuration path is not writable."), 
+      PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+  if ($writable) {
+    $file = fopen(_provision_vhost_path() . '/' . $url, "w");
+    $text = provision_render_config(variable_get('provision_apache_vhost_template', _provision_apache_default_template()), $data);
+    fwrite($file, $text);
+    fclose($file);
+  }
+}
+ 
+/**
+ * Restart Apache
+ */
+function _provision_apache_restart_apache() {
+  # This is required to be configurable, due to the fact that different hosts might need to do this differently.
+  # TODO : add configuration / test for this
+  $apache_restart_cmd = escapeshellcmd(variable_get('provision_apache_restart_cmd', 'sudo apachectl graceful'));
+  $return = drush_shell_exec(escapeshellcmd($apache_restart_cmd));
+  if (!$return) {
+    provision_set_error(PROVISION_WEB_ERROR);
+    provision_log("error", "Web server could not be restarted. Changes might not be available until this has been done.");
+  }
+}
+
+function provision_apache_provision_verify() {
+  $path = _provision_vhost_path();
+  $exists = provision_check_path($path, "exists", true ,
+    t("Virtual Host configuration path exists."),
+    t("Virtual Host configuration path does not exist."));
+  if (!$exists) {
+    $made = provision_check_path($path, "mkdir", true, 
+        t("Virtual host configuration path has been created."),
+        t("Virtual host configuration path could not be created."), 
+        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+  }
+  else {
+    $writable = provision_check_path($path, "writable", true ,
+        t("Virtual host configuration path is writable."),
+        t("Virtual host configuration path is not writable."), 
+        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+    if (!$writable) {
+      provision_check_path($path, "chown", provision_get_script_owner(), 
+        t("Changed ownership of <code>%path</code>", array("%path" => $path)),
+        t("Could not change ownership <code>%path</code>", array("%path" => $path)),
+        PROVISION_PERM_ERROR);
+      provision_check_path($path, "chmod", 0700, 
+        t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => 0700)),
+        t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' => 0700)),
+        PROVISION_PERM_ERROR );
+    }
+  }
+}
