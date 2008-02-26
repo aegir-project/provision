@@ -45,20 +45,31 @@ EOF;
  * Implementation of provision_service()
  */
 function provision_mysql_provision_service() {
-  return t("Mysql database server");
+  return array("db_server" => t("Mysql database server"));
 }
 
 /**
  * Implementation of provision_configure
  */
-function provision_mysql_provision_configure() {
+function provision_mysql_provision_configure($node = null) {
+  $form['db_type'] = array('#type' => 'hidden', '#value' => 'mysql');
+  
   $form['db_host'] = array(
     '#type' => 'textfield',
     '#title' => t('Mysql server hostname'),
     '#description' => t('The mysql server to connect to.'),
     '#size' => 30,
-    '#default_value' => variable_get('provision_db_host', 'localhost'),
+    '#default_value' => ($node->db_host) ? $node->db_host : variable_get('provision_db_host', 'localhost'),
     '#maxlength' => 64,
+  );
+
+  $form['ip_address'] = array(
+    '#type' => 'textfield',
+    '#title' => t('IP address'),
+    '#default_value' => $node->ip_address,
+    '#size' => 15,
+    '#maxlength' => 15,
+    '#description' => t("The IP address the server can be accessed by.<br />If this is empty, the hostname will be used instead.")
   );
   
   $form['db_user'] = array(
@@ -67,7 +78,7 @@ function provision_mysql_provision_configure() {
     '#title' => t('Mysql user account'),
     '#description' => t('The user that will be used to create users and databases for new sites.'),
     '#size' => 40,
-    '#default_value' => variable_get('provision_db_user', 'root'),
+    '#default_value' => ($node->db_user) ? $node->db_user : variable_get('provision_db_user', 'root'),
     '#maxlength' => 255,
   );
   $form['db_passwd'] = array(

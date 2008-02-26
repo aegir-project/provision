@@ -82,20 +82,15 @@ EOF;
  * Hook into central configuration form for provisioning framework.
  */
 function provision_apache_provision_configure($node = null) {
-  $form['ip_address'] = array(
-    '#type' => 'textfield',
-    '#title' => t('IP address'),
-    '#default_value' => $node->ip_address,
-    '#description' => t("The IP address the server can be accessed by. If this is empty, the hostname field will be used instead.")
-  );
-  
+  // We need to define form elements for the node's title and body.
+
   $form['script_user'] = array(
     '#type' => 'textfield',
     '#title' => t('System account'),
     '#required' => TRUE,
-    '#description' => t('The system account that the hosted files will belong to, for security reasons, this should be a different to the account the web server is running as.'),
+    '#description' => t('The system account that the hosted files will belong to, for security reasons.<br />This should be a different to the account the web server is running as.'),
     '#default_value' => ($node->script_user) ? $node->script_user : provision_get_script_owner(),
-    '#size' => 40,
+    '#size' => 20,
     '#maxlength' => 255,
   );
   
@@ -103,10 +98,10 @@ function provision_apache_provision_configure($node = null) {
     '#type' => 'textfield',
     '#title' => t('Web server group'),
     '#required' => TRUE,
-    '#description' => t('The group that the hosted files will belong to. Should be the group the web server is running as.'),
+    '#description' => t('The group that the hosted files will belong to.<br />This should be the group the web server is running as.'),
     '#default_value' => ($node->web_group) ? $node->web_group : provision_get_group_name(),
-    '#size' => 40,
-    '#maxlength' => 255,
+    '#size' => 20,
+    '#maxlength' => 75,
   );
   
   $form['config_path'] = array(
@@ -115,7 +110,7 @@ function provision_apache_provision_configure($node = null) {
     '#required' => TRUE,
     '#size' => 40,
     '#default_value' => ($node->config_path) ? $node->config_path : _provision_config_path(),
-    '#description' => t("The path on the server where configuration files will be stored.
+    '#description' => t("The path on the server where configuration files will be stored.<br />
         It is essential that this directory should not be accessible via a web browser."),
     '#maxlength' => 255,
   );
@@ -126,7 +121,7 @@ function provision_apache_provision_configure($node = null) {
     '#required' => TRUE,
     '#size' => 40,
     '#default_value' => ($node->backup_path) ? $node->backup_path : _provision_backup_path(),
-    '#description' => t("The path on the server where backups will be stored.
+    '#description' => t("The path on the server where backups will be stored.<br />
         It is essential that this directory should not be accessible via a web browser."),
     '#maxlength' => 255,
   );
