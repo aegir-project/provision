@@ -113,12 +113,12 @@ function provision_help($section) {
       $output .= "</dl>";
 
       $output .= '<a name=\'options\'><h3>' . t('Options') . '</h3></a>';
-      $output .= t('<p>All of these options are available as tokens for use in the generation of config files.</p>');
+
       
-      $options = module_invoke_all('token_list', 'site');
+      $options = module_invoke_all('value_list');
 
       $output .= "<dl>";
-      foreach ($options['site'] as $option => $description) {
+      foreach ($options as $option => $description) {
         $output .= '<dt>' . "<code>--$option</code>" . '</dt>';
         $output .= '<dd>' .  $description . '</dd>';
       }

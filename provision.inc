@@ -8,7 +8,7 @@
  * @see errorhandling
  * @see logging
  * @see sitedata
- * @see provisiontokens
+ * @see provisionvalues
  */
 
 /**
@@ -327,55 +327,29 @@ function provision_save_site_data($url, $data) {
 
 
 /**
- * @defgroup provisiontokens Token replacement support for the provisioning framework
+ * @defgroup provisionvalues Value replacement support for the provisioning framework
  * @{
- * The provisioning framwork makes use of the token module for value replacement in configuration file templates.
  */
 
 
-/**
- * Implementation of hook_token_values(). 
- *
- * @param type
- *   A flag indicating the class of substitution tokens to return
- *   information on. 
- * @return
- *   A keyed array listing the substitution tokens. Elements should be
- *   in the form of: $list[$type][$token] = $description
- */
-#function provision_token_values($type, $object = null) {
-#  global $args;
-#  switch ($type) {
-#    case 'site':
-#      $values = array_merge(provision_get_site_data($args['commands'][2]), $object) ;
-#      break;
-#  }
-#  return (array) $values;
-#}
 
 /**
- * Implementation of hook_token_list(). 
+ * List of values available for the config files
  *
- * @param type
- *   A flag indicating the class of substitution tokens to return
- *   information on. 
  * @return
- *   A keyed array listing the substitution tokens. Elements should be
- *   in the form of: $list[$type][$token] = $description
+ *   A keyed array listing the substitution values.
  */
-function provision_token_list($type = 'all') {
-  if ($type == 'site') {
-    /** TODO: Complete the token list to allow the front end to more easily edit the settings. */
-    $tokens['site']['site_url'] = t("The domain name used to access the site. This is defaulted to the value used on the command line.");
-    $tokens['site']['site_db_type'] = t("The type of database server used");
-    $tokens['site']['site_db_username'] = t("Username to access database for site");
-    $tokens['site']['site_db_password'] = t("Password to access database for site");
-    $tokens['site']['site_db_name'] = t("Database name for the site");
-    $tokens['site']['site_profile'] = t("Install profile of site");
-    $tokens['site']['site_action_type'] = t("What type of action has been used. Only used in conjuction with hosting front end");
-    $tokens['site']['site_action_type'] = t("What type of action has been used. Only used in conjuction with hosting front end");    
-  }
-  return $tokens;
+function provision_value_list() {
+    /** TODO: Complete the value list to allow the front end to more easily edit the settings. */
+  $values['site_url'] = t("The domain name used to access the site. This is defaulted to the value used on the command line.");
+  $values['site_db_type'] = t("The type of database server used");
+  $values['site_db_username'] = t("Username to access database for site");
+  $values['site_db_password'] = t("Password to access database for site");
+  $values['site_db_name'] = t("Database name for the site");
+  $values['site_profile'] = t("Install profile of site");
+  $values['site_action_type'] = t("What type of action has been used. Only used in conjuction with hosting front end");
+
+  return $values;
 }
 
 /**
@@ -391,7 +365,7 @@ function provision_render_config($template, $variables) {
 }
 
 /**
- * @} End of "defgroup provisiontokens".
+ * @} End of "defgroup provisionvalues".
  */
 
 /**
