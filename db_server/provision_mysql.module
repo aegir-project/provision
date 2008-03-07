@@ -52,6 +52,9 @@ function provision_mysql_provision_service() {
  * Implementation of provision_configure
  */
 function provision_mysql_provision_configure($node = null) {
+  if (!is_object($node) && ($nid = variable_get('hosting_own_db_server', 0))) {
+    $node = node_load($nid);
+  }
   $form['db_type'] = array('#type' => 'hidden', '#value' => 'mysql');
   
   $form['db_host'] = array(
@@ -63,14 +66,6 @@ function provision_mysql_provision_configure($node = null) {
     '#maxlength' => 64,
   );
 
-  $form['ip_address'] = array(
-    '#type' => 'textfield',
-    '#title' => t('IP address'),
-    '#default_value' => $node->ip_address,
-    '#size' => 15,
-    '#maxlength' => 15,
-    '#description' => t("The IP address the server can be accessed by.<br />If this is empty, the hostname will be used instead.")
-  );
   
   $form['db_user'] = array(
     '#type' => 'textfield',
