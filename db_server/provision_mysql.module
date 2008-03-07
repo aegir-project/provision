@@ -65,7 +65,6 @@ function provision_mysql_provision_configure($node = null) {
     '#default_value' => ($node->db_host) ? $node->db_host : variable_get('provision_db_host', 'localhost'),
     '#maxlength' => 64,
   );
-
   
   $form['db_user'] = array(
     '#type' => 'textfield',
@@ -76,11 +75,14 @@ function provision_mysql_provision_configure($node = null) {
     '#default_value' => ($node->db_user) ? $node->db_user : variable_get('provision_db_user', 'root'),
     '#maxlength' => 255,
   );
+  if ($node->db_passwd) {
+    $passwd_description = t('<strong>You have already set a password for this database server.</strong><br />');
+  }
   $form['db_passwd'] = array(
     '#type' => 'password_confirm',
     '#required' => (variable_get("provision_db_password", TRUE)) ? FALSE : TRUE,
     '#title' => t('Mysql user password'),
-    '#description' => t('The user account that will be used to create new mysql users and databases for new sites'),
+    '#description' => $passwd_description . t('The user account that will be used to create new mysql users and databases for new sites'),
     '#size' => 30,
     '#maxlength' => 64,
   );
