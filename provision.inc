@@ -395,7 +395,7 @@ function _provision_config_path() {
   $path = ($_SERVER['PWD']) ? $_SERVER['PWD'] : $_SERVER['DOCUMENT_ROOT'];
   $parts = explode("/", $path);
   array_pop($parts);
-  return variable_get('provision_apache_config_path', implode("/" , $parts) . '/config') ;
+  return variable_get('provision_config_path', implode("/" , $parts) . '/config') ;
 }
 
 /**
