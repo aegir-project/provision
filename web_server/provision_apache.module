@@ -26,7 +26,7 @@ function provision_apache_help($section) {
       $mkdir_cmd['@vhost_path'] = $vhost_path;
       $mkdir_cmd['@provision_link'] = url('admin/settings/provision');
       $mkdir_cmd['@mkdir_cmd'] = <<<EOF
-    [$username@hm2 ~]$ mkdir $vhost_path
+    [$username@hm2 ~]$ mkdir -p $vhost_path
     [$username@hm2 ~]$ chown $username:$username $vhost_path
     [$username@hm2 ~]$ chmod 0700 $vhost_path
 EOF;
