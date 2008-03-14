@@ -41,7 +41,7 @@ include_once('provision.inc');
  * Implementation of hook_provision_service
  */
 function provision_provision_service() {
-  return t("Basic configuration");
+  return array('provision' => t("Basic configuration"));
 }
 
 

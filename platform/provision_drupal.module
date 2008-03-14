@@ -16,7 +16,7 @@
  * Implementation of hook_provision_service()
  */
 function provision_drupal_provision_service() {
-  return t("Drupal sites");
+  return array('drupal' => t("Drupal sites"));
 }
 
 /**
