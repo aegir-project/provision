@@ -84,7 +84,6 @@ function provision_mysql_provision_configure($node = null) {
     '#title' => t('Mysql user password'),
     '#description' => $passwd_description . t('The user account that will be used to create new mysql users and databases for new sites'),
     '#size' => 30,
-    '#maxlength' => 64,
   );
   
   return $form;
