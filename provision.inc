@@ -492,17 +492,20 @@ function provision_check_path($path, $type, $test = true, $succeed_message = '',
                       break;
     case "is_dir"   : $value = is_dir($path); 
                       break;
-    case "owner"    : $value = fileowner($path); 
+    case "owner"    : $info = posix_getpwuid(fileowner($path));
+                      $value = $info['name'];
                       break;        
     case "group"    : $value = filegroup($path); 
                       break;
     case "mkdir"    : $value = mkdir($path, 0770, true); 
                       break;
-    case "chmod"    : chmod($path, $test); 
-                      $value = sprintf("%o", fileperms($path));
+    case "chmod"    : chmod($path, $test);
+                      $test = (int) sprintf('%o', $test); # needs to be reset to oct
+                      $value =  (int) substr(sprintf('%o', fileperms($path)), -4);
                       break;
     case "chown"    : chown($path, $test);
-                      $value = fileowner($path);
+                      $info = posix_getpwuid(fileowner($path));
+                      $value = $info['name'];
                       break;
     case "chgrp"    : chgrp($path, $test);
                       $value = filegroup($path);

@@ -576,8 +576,8 @@ function _provision_verify($url = '') {
     t("Could not change ownership <code>%path</code>", array("%path" => $path)),
     PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
   provision_check_path($path, "chmod", 0700, 
-    t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => 0700)),
-    t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' => 0700)),
+    t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => sprintf('%o', 0700))),
+    t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' =>  sprintf('%o', 0700))),
     PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );        
   
   $data = array();
