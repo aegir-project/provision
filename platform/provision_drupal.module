@@ -97,7 +97,7 @@ function provision_drupal_provision_backup($url, $data) {
  *   The default template for the config file
  */
 function _provision_drupal_default_template() {
-  return file_get_contents(drupal_get_path('module', 'provision_drupal') . '/templates/drupal_settings.tpl.php');
+  return file_get_contents(drupal_get_path('module', 'provision_drupal') . '/provision_drupal_settings.tpl.php');
 }
 
 /**
@@ -110,17 +110,18 @@ function _provision_drupal_default_template() {
  *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file($url, &$data) {
+  if (provision_check_path("sites/$url/settings.php", "exists")) {
+    provision_check_path("sites/$url/settings.php","chmod",  0750);
+  }
+
   $fp = fopen("sites/$url/settings.php", "w");
   $text = variable_get('provision_drupal_settings_template', _provision_drupal_default_template());
   fwrite($fp, "<?php\n" . provision_render_config($text, $data));
   fclose($fp);
   
-  # Change the ownership of the file
-  #chown($path, variable_get('provision_user', 'hosting'), variable_get('provision_group', 'apache'));
   
   # Change the permissions of the file
-  system("chmod 0550 sites/$url/settings.php");
-  # TODO: add md5 of the file created to $data
+  provision_check_path("sites/$url/settings.php", "chmod", 0550);
 }
 
 /**
@@ -131,12 +132,12 @@ function _provision_drupal_create_settings_file($url, &$data) {
 function _provision_drupal_create_directories($url, $profile = null) {  
   $paths = array(
     "sites/$url"                 => 0750,
-    "sites/$url/files"           => 2750,
-    "sites/$url/files/tmp"       => 2770,
-    "sites/$url/files/images"    => 2770,
-    "sites/$url/files/pictures"  => 2770,
-    "sites/$url/themes"          => 2750,
-    "sites/$url/modules"         => 2750,    
+    "sites/$url/files"           => 02750,
+    "sites/$url/files/tmp"       => 02770,
+    "sites/$url/files/images"    => 02770,
+    "sites/$url/files/pictures"  => 02770,
+    "sites/$url/themes"          => 02750,
+    "sites/$url/modules"         => 02750,    
   );
 
   foreach ($paths as $path => $perm) {
@@ -146,7 +147,7 @@ function _provision_drupal_create_directories($url, $profile = null) {
         t("Could not create <code>%path</code>", array("%path" => $path)),
         PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
     }
-
+/*
     provision_check_path($path, "chown", provision_get_script_owner(), 
       t("Changed ownership of <code>%path</code>", array("%path" => $path)),
       t("Could not change ownership <code>%path</code>", array("%path" => $path)),
@@ -158,7 +159,7 @@ function _provision_drupal_create_directories($url, $profile = null) {
     provision_check_path($path, "chmod", $perm, 
       t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => $perms)),
       t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' => $perms)),
-      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );        
+      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );      */
   }
 
 }
@@ -191,10 +192,10 @@ function _provision_drupal_switch_active_site($url = null) {
 
     // Export the following settings.php variables to the global namespace
     global $base_url, $base_path, $base_root;
-    global $db_url, $db_prefix, $cookie_domain, $conf, $installed_profile, $active_db, $profile;
+    global  $cookie_domain, $conf, $installed_profile, $profile, $db_prefix;
  
     # This is just for backup, to be able to restore to the old DRUSH system.
-    $backups = compact("active_db", "base_url", "base_path", "db_url", "db_prefix", "cookie_domain", "conf", "installed_profile", "profile");
+    $backups = compact("active_db", "base_url", "base_path", "db_prefix", "cookie_domain", "conf", "installed_profile", "profile");
     
     $conf = array();
     include_once $_SERVER['DOCUMENT_ROOT'] .'sites/' . $url . '/settings.php';
@@ -210,12 +211,8 @@ function _provision_drupal_switch_active_site($url = null) {
      else {
        $base_path = '/';
      }
-    
-    unset($active_db);
-    $db_url['new'] = $db_url;
-    db_set_active('new'); 
-
-  }
+     provision_set_active_db($db_url);
+   }
   else {
     /**
     * Restore everything to the way it was before we switched sites.
@@ -230,10 +227,11 @@ function _provision_drupal_switch_active_site($url = null) {
     
     global $base_url, $base_path, $base_root;
      // Export the following settings.php variables to the global namespace
-    global $db_url, $db_prefix, $cookie_domain, $conf, $installed_profile, $profile;
+    global $db_prefix, $cookie_domain, $conf, $installed_profile, $profile;
 
     # This is just for backup, to be able to restore to the old DRUSH system.
     extract($backups, EXTR_OVERWRITE);
+    provision_set_active_db();
     
   }
 }

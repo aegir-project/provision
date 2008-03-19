@@ -148,7 +148,7 @@ function provision_apache_provision_templates() {
  * The default template provided for the virtual host configuration
  */
 function _provision_apache_default_template() {
-  return file_get_contents(drupal_get_path('module', 'provision_apache') . "/templates/apache_vhost.tpl.php");
+  return file_get_contents(drupal_get_path('module', 'provision_apache') . "/provision_apache_vhost.tpl.php");
 }
 
 /**

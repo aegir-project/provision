@@ -61,10 +61,10 @@ function provision_invoke($hook, $url, &$data, $rollback = false) {
         provision_set_log("Rollback", "Changes for $name module have been rolled back.");
       }
     }
-    return FALSE;
+    return TRUE;
   }
   else {
-    return TRUE;
+    return FALSE;
   }
 }
 
@@ -447,12 +447,11 @@ function provision_set_active_db($new_db_url = null) {
   }
 
   if ($new_db_url) {
-    $db_url['new'] = $new_db_url;
-    db_set_active('new');
+    $db_url[md5($new_db_url)] = $new_db_url;
+    db_set_active(md5($new_db_url));
   }
   else {
-    $db_url = $old_db_url;
-    db_set_active();
+    db_set_active('default');
   }
 }
 
