@@ -259,7 +259,7 @@ function provision_get_site_data($url) {
   $site_data['site_port'] =  variable_get('provision_apache_server_ip', 80);
   if ($old_data = provision_load_site_data($url)) {
     # Merge previously saved data with the new data. This way, old parameters overwrite new ones.
-    $site_data = array_merge(provision_load_site_data($url), $site_data);    
+    $site_data = array_merge($old_data, $site_data);    
   }
 
   return $site_data;

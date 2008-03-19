@@ -467,15 +467,13 @@ function _provision_synch($url) {
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
 function _provision_backup($url) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
   if (!_provision_drupal_site_exists($url)) {
     provision_log("Error", "Site has not been installed yet.");
     provision_set_error(PROVISION_SITE_NOT_FOUND);
     provision_output($url, $data);
   }
   $data = provision_get_site_data($url);
-  $backup_path = variable_get('provision_backup_path', _provision_root_path() . '/backups' );
+  $backup_path = _provision_backup_path(); 
   // This is the actual drupal provisioning requirements. 
   if (!is_dir($backup_path)) {
     provision_log("Backup directory does not exist.");
@@ -570,6 +568,30 @@ function _provision_verify($url = '') {
   provision_check_path($path, "writable", true ,
       t("Provision configuration path is writable."),
       t("Provision configuration path is not writable."), 
+      PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+  provision_check_path($path, "chown", provision_get_script_owner(), 
+    t("Changed ownership of <code>%path</code>", array("%path" => $path)),
+    t("Could not change ownership <code>%path</code>", array("%path" => $path)),
+    PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
+  provision_check_path($path, "chmod", 0700, 
+    t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => sprintf('%o', 0700))),
+    t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' =>  sprintf('%o', 0700))),
+    PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
+
+  $path = _provision_backup_path();
+  $exists = provision_check_path($path, "exists", true ,
+    t("Provision backup path exists."),
+    t("Provision backup path does not exist."));
+  if (!$exists) {
+    $made = provision_check_path($path, "mkdir", true,
+        t("Provision backup path has been created."),
+        t("Provision backup could not be created."),
+        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+  }
+
+  provision_check_path($path, "writable", true ,
+      t("Provision backup path is writable."),
+      t("Provision backup path is not writable."), 
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
   provision_check_path($path, "chown", provision_get_script_owner(), 
     t("Changed ownership of <code>%path</code>", array("%path" => $path)),
