@@ -232,7 +232,6 @@ function _provision_drupal_switch_active_site($url = null) {
     # This is just for backup, to be able to restore to the old DRUSH system.
     extract($backups, EXTR_OVERWRITE);
     provision_set_active_db();
-    
   }
 }
 
@@ -327,7 +326,21 @@ function provision_drupal_provision_verify($url, &$data) {
   }
   $profiles = file_scan_directory('./profiles', '\.profile$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name', 0);
   $data['profiles'] = $profiles;
-  $data['modules'] =  module_rebuild_cache();
-  
+  $modules = module_rebuild_cache();
+  foreach ($modules as $modulename => $file) {
+      $project = array();
+      $project['filename'] = $file->filename;
+      $project['name'] = $file->name;
+      if (empty($project['project'])) {
+        $project['project'] = cvs_deploy_get_project_name($project);
+      }
+      _cvs_deploy_version_alter($file->info['version'], $project);
+      $name = ($project['project']) ? $project['project'] : $modulename;
+      $modules[$name] = $file; 
+  }
+  $data['modules'] =  $modules;
+}
 
+function provision_drupal_restore($url, $backup_file, &$data) {
+  provision_shell_exec("tar -zxf %s -C sites/%s", $backup_file, $url); # checkout over old sites dir.
 }

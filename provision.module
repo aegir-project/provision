@@ -28,7 +28,7 @@
 *             Uses hook_provision_pre_upgrade(), hook_provision_upgrade() and hook_provision_post_upgrade() hooks,
 *             and allows clean roll back if any errors occur. Will include stringent checking of module versions,
 *             and allow unit tests to be run.
-*   rollback - Revert to a previous backup of the site.
+*   restore - Revert to a previous backup of the site.
 *   rename  - Change the url of a site. This requires moving of files, and numerous other issues.
 *   delete -  Generates a back up of the site, and then removes all references to it.
 */
@@ -272,12 +272,20 @@ function provision_drush_command() {
     'arguments' => array('domain.com' => t('The domain of the site to disable (only if disabled).')),    
     'description' => 'Disable a site.'
   );
+
   $items['provision verify'] = array(
     'callback' => '_provision_verify',
 #    'arguments' => array('domain.com' => t('The domain of the site to disable (only if disabled).')),    
     'description' => 'Verify that the provisioning framework is correctly installed.'
   );
-  
+ 
+  $items['provision restore'] = array(
+    'callback' => '_provision_restore',
+    'description' => 'Restore the site to a previous backup. This will also generate a backup of the site as it was.',
+    'arguments' => array('domain.com' => t('The domain of the site to be restored'),
+                    'site_backup.tar.gz' => t('The backup to restore the site to.'))
+  );
+ 
   /*
   // Not implemented yet.
   $items['provision delete'] = array(
@@ -285,11 +293,6 @@ function provision_drush_command() {
     'description' => 'Delete a site.'
   );
 
-
-  $items['provision rollback'] = array(
-    'callback' => '_provision_rollback',
-    'description' => 'Roll back the site to a previous backup.'
-  );
   $items['provision deploy'] = array(
     'callback' => '_provision_deploy',
     'description' => 'Deploy a backup made on another provisioning platform on this one.'
@@ -473,6 +476,19 @@ function _provision_backup($url) {
     provision_output($url, $data);
   }
   $data = provision_get_site_data($url);
+  $args = func_get_args();
+  array_shift($args);
+  $file = array_shift($args);
+  _provision_backup_site($url, $data, $file);
+  provision_save_site_data($url, $data);
+   
+  provision_output($url, $data);
+}
+
+/**
+ * Generate a backup tarbal for a site.
+ */
+function _provision_backup_site($url, &$data, $file = null) {
   $backup_path = _provision_backup_path(); 
   // This is the actual drupal provisioning requirements. 
   if (!is_dir($backup_path)) {
@@ -480,9 +496,7 @@ function _provision_backup($url) {
     provision_set_error(PROVISION_PERM_ERROR);
     provision_output($url, $data);
   }
-  $args = func_get_args();
-  array_shift($args);
-  $file = array_shift($args);
+  
   if (is_file($file)) {
     provision_log("File specified already exists.");
     provision_set_error(PROVISION_PERM_ERROR);
@@ -500,9 +514,6 @@ function _provision_backup($url) {
   $rolled_back = provision_invoke("backup", $url, $data);
   provision_shell_exec("gzip %s", $data['backup_file']);
   $data['backup_file'] = $data['backup_file'] . '.gz';
-  provision_save_site_data($url, $data);
-  
-  provision_output($url, $data);
 }
 
 /**
@@ -608,4 +619,15 @@ function _provision_verify($url = '') {
     provision_save_site_data($url, $data);    
   }
   provision_output($url, $data);
+}
+
+function _provision_restore($site, $backup_file) {
+  if (!_provision_drupal_site_exists($url)) {
+    provision_log("Error", "Site has not been installed yet.");
+    provision_set_error(PROVISION_SITE_NOT_FOUND);
+    provision_output($url, $data);
+  }
+  $data = provision_get_site_data($url);
+  _provision_backup_site($url, $data); # Backup site for posterity, before rolling back.
+  provision_save_site_data($url, $data);  
 }

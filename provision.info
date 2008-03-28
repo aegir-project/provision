@@ -1,4 +1,4 @@
 name = Provision
 description = Allows for the automated provisioning of hosted Drupal sites, via the command line
 package = Provision
-dependencies = drush provision_drupal provision_mysql provision_apache
+dependencies = drush provision_drupal provision_mysql provision_apache cvs_deploy
