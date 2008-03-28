@@ -253,7 +253,7 @@ function provision_get_site_data($url) {
   $site_data['site_url'] = $url;
   $site_data['site_action_type'] = $args['commands'][1];
   $docroot = drush_get_option("r", $_SERVER['PWD']);
-  $site_data['site_document_root'] =  ($docroot) ? $docroot . '/webroot' : $_SERVER['DOCUMENT_ROOT'];
+  $site_data['publish_path'] =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
   $site_data['site_profile'] = ($site_data['site_profile']) ? $site_data['site_profile'] : variable_get('provision_default_profile', 'default');
   $site_data['site_ip'] =  variable_get('provision_apache_server_ip', '127.0.0.1');
   $site_data['site_port'] =  variable_get('provision_apache_server_ip', 80);

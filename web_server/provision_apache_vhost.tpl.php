@@ -14,7 +14,7 @@
      endif; ?>
 
     # Error handler for Drupal > 4.6.7
-    <Directory "<?php print $site_document_root; ?>/sites/<?php print $site_url; ?>/files">
+    <Directory "<?php print $publish_path; ?>/sites/<?php print $site_url; ?>/files">
       SetHandler This_is_a_Drupal_security_line_do_not_remove
     </Directory>
 
