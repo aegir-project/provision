@@ -32,7 +32,7 @@ define('PROVISION_SITE_INSTALLED', 64);
 #  List of provisioning errors. This is a global so that other modules can reference it.
 global $provision_errors;
 $provision_errors = array(
-  PROVISION_SUCCESS => T("Successful"),
+  PROVISION_SUCCESS => t("Successful"),
   PROVISION_DB_ERROR => t("Database error"),
   PROVISION_INSTALL_ERROR => t("Drupal installation error"),
   PROVISION_PERM_ERROR => t("File permission error"),
