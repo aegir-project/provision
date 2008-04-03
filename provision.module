@@ -330,14 +330,14 @@ function provision_install_cmd($url) {
     print "Install a new site for the domain DOMAIN.\n";
     print "Example: drush.php provision install mydomain.com --site-db-host localhost\n";
     provision_log("error", "Incorrect usage of the provisioning framework");
-    drupal_set_error(PROVISION_FRAMEWORK_ERROR);
+    provision_set_error(PROVISION_FRAMEWORK_ERROR);
     provision_output($url, $data);
   }
   $ops = array('pre_install', 'install', 'post_install'); # these are the provision hooks that will get triggered.
 
   if ($data['site-installed'] == TRUE) {
     print "The site $url is already installed.\nIf you want to re-install it, you will need to delete it first.";
-    drupal_set_error(PROVISION_SITE_INSTALLED);
+    provision_set_error(PROVISION_SITE_INSTALLED);
     provision_output($url, $data);
   }
 
@@ -447,7 +447,7 @@ function _provision_synch($url) {
   if (!provision_confirm_drush()) return null;
   if (!_provision_drupal_site_exists($url)) {
     provision_log("Error", "Site has not been installed yet.");
-    drupal_set_error(PROVISION_SITE_NOT_FOUND);
+    provision_set_error(PROVISION_SITE_NOT_FOUND);
     provision_output($url, $data);
   }
   $data = provision_get_site_data($url);
@@ -533,7 +533,7 @@ function _provision_import($url) {
   
   if (!_provision_drupal_site_exists($url)) {
     provision_log("Error", "Site directory is not present, and can not be imported.");
-    drupal_set_error(PROVISION_SITE_NOT_FOUND);
+    provision_set_error(PROVISION_SITE_NOT_FOUND);
     provision_output($url, $data);
   }
   $data = provision_get_site_data($url);
