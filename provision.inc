@@ -461,7 +461,7 @@ function provision_set_active_db($new_db_url = null) {
  * Used to generate permissions. Can be overridden by variable_set().
  */
 function provision_get_script_owner() {
-  return variable_get('provision_user', get_current_user());   
+  return variable_get('provision_script_user', get_current_user());   
 }
 
 /**
@@ -471,7 +471,8 @@ function provision_get_script_owner() {
  */
 function provision_get_group_name() {
   $info = posix_getgrgid(posix_getgid());
-  return variable_get('provision_group', $info['name']); 
+  print_r($info);
+  return variable_get('provision_web_group', $info['name']); 
 }
 
 /**
