@@ -503,10 +503,17 @@ function provision_check_path($path, $type, $test = true, $succeed_message = '',
                       $value =  (int) substr(sprintf('%o', fileperms($path)), -4);
                       break;
     case "chown"    : chown($path, $test);
-                      $info = posix_getpwuid(fileowner($path));
-                      $value = $info['name'];
+                      if (!is_numeric($test)) {
+		        $info = posix_getpwnam($test);
+			$test = $info['uid'];
+		      }
+                      $value = fileowner($path);
                       break;
     case "chgrp"    : chgrp($path, $test);
+                      if (!is_numeric($test)) {
+		        $info = posix_getgrnam($test);
+			$test = $info['gid'];
+		      }
                       $value = filegroup($path);
                       break;
     case "unlink"   : $value = (file_exists($path)) ? unlink($path) : false; 
@@ -525,7 +532,7 @@ function provision_check_path($path, $type, $test = true, $succeed_message = '',
       provision_set_error($error_codes);
     }
     if ($fail_message) {
-      provision_log("error", $fail_message);      
+      provision_log("error", $fail_message . " ($value != $test");
     }
   }
   return $status;
