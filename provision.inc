@@ -514,7 +514,7 @@ function provision_check_path($path, $type, $test = true, $succeed_message = '',
     case "rmdir"    : $value = (file_exists($path) && is_dir($path)) ? rmdir($path) : false;
                       break;
   }
-  $status = ($value == $test) ? true : false;
+  $status = ($value == $test);
   if ($status) {
     if ($succeed_message) {
       provision_log("message", $succeed_message);      
