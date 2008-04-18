@@ -471,7 +471,6 @@ function provision_get_script_owner() {
  */
 function provision_get_group_name() {
   $info = posix_getgrgid(posix_getgid());
-  print_r($info);
   return variable_get('provision_web_group', $info['name']); 
 }
 
