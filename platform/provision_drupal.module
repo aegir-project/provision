@@ -119,9 +119,9 @@ function _provision_drupal_create_settings_file($url, &$data) {
   fwrite($fp, "<?php\n" . provision_render_config($text, $data));
   fclose($fp);
   
-  
   # Change the permissions of the file
   provision_check_path("sites/$url/settings.php", "chmod", 0550);
+  provision_check_path("sites/$url/settings.php", "chgrp", provision_get_group_name());
 }
 
 /**
