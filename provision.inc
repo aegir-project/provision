@@ -199,6 +199,7 @@ function _provision_set_log($entry = null) {
  *   String containing the message to be logged.
  */
 function provision_log($type, $message) {
+  if (DRUSH_VERBOSE) print $message;
   _provision_set_log(array(
      'type' => $type, 
      'message' => $message, 
