@@ -14,8 +14,8 @@
 
 /** Succesful **/
 define('PROVISION_SUCCESS', -1);
-/** Database could not be accessed, or configured */
-define('PROVISION_DB_ERROR', 1);
+/** Queue not run */
+define('PROVISION_NOT_RUN', 1);
 /** Drupal was unable to complete it's installation */
 define('PROVISION_INSTALL_ERROR', 2);
 /** Could not create files due to permission error - potentially less severe */ 
@@ -28,11 +28,14 @@ define('PROVISION_FRAMEWORK_ERROR', 16);
 define('PROVISION_SITE_NOT_FOUND', 32);
 /** When the site is already installed, ie: there is a conflict. */
 define('PROVISION_SITE_INSTALLED', 64);
+/** Database could not be accessed, or configured */
+define('PROVISION_DB_ERROR', 128);
 
 #  List of provisioning errors. This is a global so that other modules can reference it.
 global $provision_errors;
 $provision_errors = array(
   PROVISION_SUCCESS => t("Successful"),
+  PROVISION_NOT_RUN => t("Not run yet"),
   PROVISION_DB_ERROR => t("Database error"),
   PROVISION_INSTALL_ERROR => t("Drupal installation error"),
   PROVISION_PERM_ERROR => t("File permission error"),
