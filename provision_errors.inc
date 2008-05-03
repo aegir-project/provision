@@ -12,10 +12,10 @@
 * @see provision_set_error(), provision_get_error(), provision_cmp_error()
 */
 
-/** Succesful **/
-define('PROVISION_SUCCESS', -1);
 /** Queue not run */
-define('PROVISION_QUEUED', 1);
+define('PROVISION_QUEUED', 0);
+/** Succesful **/
+define('PROVISION_SUCCESS', 1);
 /** Drupal was unable to complete it's installation */
 define('PROVISION_INSTALL_ERROR', 2);
 /** Could not create files due to permission error - potentially less severe */ 

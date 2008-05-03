@@ -75,6 +75,14 @@ function _provision_drupal_site_exists($url) {
   return file_exists("sites/$url/settings.php");
 }
 
+function _provision_drupal_site_installed($url) {
+  if (_provision_drupal_site_exists($url)) {
+    if ($data = provision_load_site_data($url)) {
+      return isset($data['site_installed']) ? $data['site_installed'] : FALSE;
+    }
+  }
+  return false;
+}
 
 /**
  * Implentation of hook_provision_backup()
@@ -137,7 +145,7 @@ function _provision_drupal_create_directories($url, $profile = null) {
     "sites/$url/files/images"    => 02770,
     "sites/$url/files/pictures"  => 02770,
     "sites/$url/themes"          => 02750,
-    "sites/$url/modules"         => 02750,    
+    "sites/$url/modules"         => 02750,  
   );
 
   foreach ($paths as $path => $perm) {
@@ -153,11 +161,10 @@ function _provision_drupal_create_directories($url, $profile = null) {
       PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
     provision_check_path($path, "chgrp", provision_get_group_name(),
       t("Changed group ownership of <code>%path</code>", array("%path" => $path)),
-      t("Could not change group ownership <code>%path</code>", array("%path" => $path)),
-      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
+      t("Could not change group ownership <code>%path</code>", array("%path" => $path)));
     provision_check_path($path, "chmod", $perm, 
-      t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => $perms)),
-      t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' => $perms)),
+      t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => $perm)),
+      t("Could not change permissions <code>%path</code> to %perms", array("%path" => $path, '%perms' => $perm)),
       PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
   }
 }
@@ -261,6 +268,7 @@ function _provision_drupal_force_load_modules($url = null) {
  * Install the drupal schema and install profile
  */
 function _provision_drupal_install_schema($profile) {
+  provision_log("install", t("Installing Drupal schema"));
   // Load the profile.
   require_once "./profiles/$profile/$profile.profile";
 
@@ -284,7 +292,7 @@ function _provision_drupal_install_schema($profile) {
   if (!$modules) {
     return false;
   }
-
+  
   // Perform actual installation defined in the profile.
   drupal_install_profile($profile, $modules);
 

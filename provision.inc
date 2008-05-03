@@ -83,8 +83,13 @@ function provision_invoke($hook, $url, &$data, $rollback = false) {
  */
 function provision_output($url = null, $data = array(), $extra = null) {
   $return = $extra;
+
   $return['site'] = $data;
-  $return['error_status'] = provision_get_error(); // error code being returned
+  $error = provision_get_error();
+  if (!$error) {
+    $error = PROVISION_SUCCESS; // return 1 on success.
+  }
+  $return['error_status'] = $error; // error code being returned
   $return['log'] = provision_get_log(); // Append logging information
   $return['messages'] = drupal_get_messages();
   if (drush_get_option(array('b', 'backend'), FALSE)) {
@@ -100,7 +105,7 @@ function provision_output($url = null, $data = array(), $extra = null) {
       }
     }
   }
-  exit(provision_get_error());
+  exit($error);
 }
 
 
@@ -253,7 +258,7 @@ function provision_get_site_data($url) {
   }
   $site_data['site_url'] = $url;
   $site_data['site_action_type'] = $args['commands'][1];
-  $docroot = drush_get_option("r", $_SERVER['PWD']);
+  $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
   $site_data['publish_path'] =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
   $site_data['site_profile'] = ($site_data['site_profile']) ? $site_data['site_profile'] : variable_get('provision_default_profile', 'default');
   $site_data['site_ip'] =  variable_get('provision_apache_server_ip', '127.0.0.1');
@@ -383,7 +388,8 @@ function provision_confirm_drush() {
  * Get the backup path of the Provision installation
  */
 function _provision_backup_path() {
-  $parts = explode("/", $_SERVER['DOCUMENT_ROOT']);
+  $path = ($_SERVER['PWD']) ? $_SERVER['PWD'] : $_SERVER['DOCUMENT_ROOT'];
+  $parts = explode("/", rtrim($path, '/'));
   array_pop($parts);
   return variable_get('provision_backup_path', implode("/" , $parts) . '/backups');
 }
@@ -394,7 +400,7 @@ function _provision_backup_path() {
  */
 function _provision_config_path() {
   $path = ($_SERVER['PWD']) ? $_SERVER['PWD'] : $_SERVER['DOCUMENT_ROOT'];
-  $parts = explode("/", $path);
+  $parts = explode("/", rtrim($path, '/'));
   array_pop($parts);
   return variable_get('provision_config_path', implode("/" , $parts) . '/config') ;
 }
@@ -533,7 +539,7 @@ function provision_check_path($path, $type, $test = true, $succeed_message = '',
       provision_set_error($error_codes);
     }
     if ($fail_message) {
-      provision_log("error", $fail_message . " ($value != $test");
+      provision_log("error", $fail_message . " ($value != $test)");
     }
   }
   return $status;

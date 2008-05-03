@@ -320,8 +320,6 @@ function provision_drush_command() {
  *    Will exit with a PROVISION_FRAMEWORK_ERROR if the command is incorrectly used.
  */
 function provision_install_cmd($url) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
   global $args;
   $data = provision_get_site_data($url);
 
@@ -335,9 +333,9 @@ function provision_install_cmd($url) {
   }
   $ops = array('pre_install', 'install', 'post_install'); # these are the provision hooks that will get triggered.
 
-  if ($data['site-installed'] == TRUE) {
-    print "The site $url is already installed.\nIf you want to re-install it, you will need to delete it first.";
+  if (_provision_drupal_site_installed($url)) {
     provision_set_error(PROVISION_SITE_INSTALLED);
+    provision_log("error", t("Site has already been installed. Exiting."));
     provision_output($url, $data);
   }
 
@@ -365,10 +363,7 @@ function provision_install_cmd($url) {
  *   Boolean denoting whether the provision_invoke rolled back changes made. 
  */
 function _provision_pre_install($url, &$data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null; 
   $rolled_back = provision_invoke("pre_install", $url, $data);
-
   if (!provision_get_error()) {
     // This is the actual drupal provisioning requirements. 
     _provision_drupal_create_directories($url, $data['profile']);
@@ -424,11 +419,9 @@ function _provision_install($url, &$data) {
  *   Boolean denoting whether the provision_invoke rolled back changes made. 
  */
 function _provision_post_install($url, &$data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;  
   $rolled_back = provision_invoke("post_install", $url, $data);
   if (!$rolled_back) {
-    $data['site-installed'] = true;  
+    $data['site_installed'] = true;  
   }
   return $rolled_back;
 }
@@ -443,10 +436,8 @@ function _provision_post_install($url, &$data) {
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
 function _provision_synch($url) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  if (!_provision_drupal_site_exists($url)) {
-    provision_log("Error", "Site has not been installed yet.");
+  if (!_provision_drupal_site_installed($url)) {
+    provision_log("error", "Site has not been installed yet.");
     provision_set_error(PROVISION_SITE_NOT_FOUND);
     provision_output($url, $data);
   }
@@ -470,7 +461,7 @@ function _provision_synch($url) {
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
 function _provision_backup($url) {
-  if (!_provision_drupal_site_exists($url)) {
+  if (!_provision_drupal_site_installed($url)) {
     provision_log("Error", "Site has not been installed yet.");
     provision_set_error(PROVISION_SITE_NOT_FOUND);
     provision_output($url, $data);
@@ -528,8 +519,6 @@ function _provision_backup_site($url, &$data, $file = null) {
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
 function _provision_import($url) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
   
   if (!_provision_drupal_site_exists($url)) {
     provision_log("Error", "Site directory is not present, and can not be imported.");
@@ -622,7 +611,7 @@ function _provision_verify($url = '') {
 }
 
 function _provision_restore($site, $backup_file) {
-  if (!_provision_drupal_site_exists($url)) {
+  if (!_provision_drupal_site_installed($url)) {
     provision_log("Error", "Site has not been installed yet.");
     provision_set_error(PROVISION_SITE_NOT_FOUND);
     provision_output($url, $data);
