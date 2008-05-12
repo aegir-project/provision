@@ -84,6 +84,16 @@ EOF;
 function provision_apache_provision_configure($node = null) {
   // We need to define form elements for the node's title and body.
 
+  $form['restart_cmd'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Apache restart command'),
+      '#required' => TRUE,
+      '#description' => t('The command to run to restart apache for new changes to take effect. This is required for the new site to become live'),
+      '#default_value' => variable_get('provision_restart_cmd', 'sudo apachectl graceful'),
+      '#size' => 40,
+      '#maxlength' => 255,
+  );
+
   $form['script_user'] = array(
     '#type' => 'textfield',
     '#title' => t('System account'),
@@ -228,8 +238,8 @@ function _provision_apache_create_vhost_config($url, $data) {
  */
 function _provision_apache_restart_apache() {
   # This is required to be configurable, due to the fact that different hosts might need to do this differently.
-  # TODO : add configuration / test for this
-  $apache_restart_cmd = escapeshellcmd(variable_get('provision_apache_restart_cmd', 'sudo apachectl graceful'));
+  # TODO : test for this instead of relying on a configuration setting?
+  $apache_restart_cmd = escapeshellcmd(variable_get('provision_restart_cmd', 'sudo apachectl graceful'));
   $return = drush_shell_exec(escapeshellcmd($apache_restart_cmd));
   if (!$return) {
     provision_set_error(PROVISION_WEB_ERROR);
