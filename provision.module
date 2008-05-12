@@ -202,7 +202,7 @@ function provision_configure() {
       '#title' => $title,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#access' => user_access('administer $service provisioning'),
+      '#access' => user_access("administer $service provisioning"),
       '#tree' => true
     );
     $form[$service] = array_merge($form[$service], module_invoke($module, "provision_configure"));
