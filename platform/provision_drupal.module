@@ -343,6 +343,13 @@ function provision_drupal_provision_verify($url, &$data) {
   
 }
 
+
+function provision_drupal_find_sites() {
+  $sites = file_scan_directory('./sites', 'site\.php$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name', 0);
+  
+}
+
+
 function provision_drupal_restore($url, $backup_file, &$data) {
   provision_shell_exec("tar -zxf %s -C sites/%s", $backup_file, $url); # checkout over old sites dir.
 }
