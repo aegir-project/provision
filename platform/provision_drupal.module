@@ -157,15 +157,13 @@ function _provision_drupal_create_directories($url, $profile = null) {
     }
     provision_check_path($path, "chown", provision_get_script_owner(), 
       t("Changed ownership of <code>%path</code>", array("%path" => $path)),
-      t("Could not change ownership <code>%path</code>", array("%path" => $path)),
-      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
+      t("Could not change ownership <code>%path</code>", array("%path" => $path)));#, PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
     provision_check_path($path, "chgrp", provision_get_group_name(),
       t("Changed group ownership of <code>%path</code>", array("%path" => $path)),
       t("Could not change group ownership <code>%path</code>", array("%path" => $path)));
     provision_check_path($path, "chmod", $perm, 
       t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => $perm)),
-      t("Could not change permissions <code>%path</code> to %perms", array("%path" => $path, '%perms' => $perm)),
-      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
+      t("Could not change permissions <code>%path</code> to %perms", array("%path" => $path, '%perms' => $perm)));#, PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
   }
 }
 
