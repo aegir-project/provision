@@ -445,10 +445,11 @@ function _provision_synch($url) {
   // This is the actual drupal provisioning requirements. 
   _provision_drupal_create_directories($url, $data['profile']);
   $rolled_back = provision_invoke("synch", $url, $data);
-   // Requires at least the database settings to complete.
-   _provision_drupal_create_settings_file($url, $data);
-   provision_save_site_data($url, $data);
-   provision_output($url, $data);
+  // Requires at least the database settings to complete.
+  _provision_drupal_create_settings_file($url, $data);
+  $data['site_installed'] = TRUE;
+  provision_save_site_data($url, $data);
+  provision_output($url, $data);
 }
 
 /**
@@ -471,6 +472,8 @@ function _provision_backup($url) {
   array_shift($args);
   $file = array_shift($args);
   _provision_backup_site($url, $data, $file);
+
+  $data['site_installed'] = TRUE;
   provision_save_site_data($url, $data);
    
   provision_output($url, $data);
@@ -618,5 +621,7 @@ function _provision_restore($site, $backup_file) {
   }
   $data = provision_get_site_data($url);
   _provision_backup_site($url, $data); # Backup site for posterity, before rolling back.
+
+  $data['site_installed'] = TRUE;
   provision_save_site_data($url, $data);  
 }
