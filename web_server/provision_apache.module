@@ -83,13 +83,12 @@ EOF;
  */
 function provision_apache_provision_configure($node = null) {
   // We need to define form elements for the node's title and body.
-
   $form['restart_cmd'] = array(
       '#type' => 'textfield',
       '#title' => t('Apache restart command'),
       '#required' => TRUE,
       '#description' => t('The command to run to restart apache for new changes to take effect. This is required for the new site to become live'),
-      '#default_value' => $node->restart_cmd ? $node->restart_cmd : variable_get('provision_restart_cmd', 'sudo apachectl graceful'),
+      '#default_value' => ($node->restart_cmd) ? $node->restart_cmd : variable_get('provision_restart_cmd', 'sudo apachectl graceful'),
       '#size' => 40,
       '#maxlength' => 255,
   );
@@ -183,9 +182,7 @@ function provision_apache_provision_post_install($url, &$data) {
  * Implementation of hook_provision_enable
  */
 function provision_apache_provision_enable($url, &$data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-
+  provision_log("Notice", t("Generate virtual host configuration file."));
   _provision_apache_create_vhost_config($url, $data);
   _provision_apache_restart_apache();
 }
@@ -194,9 +191,7 @@ function provision_apache_provision_enable($url, &$data) {
  * Implementation of hook_provision_disable
  */
 function provision_apache_provision_disable($url, &$data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-
+  provision_log("Notice", t("Remove virtual host configuration file."));
   _provision_apache_delete_vhost_config($url, $data);
   _provision_apache_restart_apache();
 }
