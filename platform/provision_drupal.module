@@ -341,6 +341,40 @@ function provision_drupal_provision_verify($url, &$data) {
   
 }
 
+/**
+ * Remove files or directories, recursively
+ *
+ * This was taken from imagecache.module, with slight modifications:
+ * - carry error codes along the way (returns true only if all operations return true)
+ * - remove any type of files encountered (not just links, files and dirs)
+ * - safety checking since we don't necessarly trust the removed files
+ */
+function _provision_drupal_recursive_delete($path) {
+  if (is_dir($path)) {
+    $d = dir($path);
+    while (($entry = $d->read()) !== false) {
+      if ($entry == '.' || $entry == '..') continue;
+      $entry_path = $path .'/'. $entry;
+      if (file_check_location($entry_path, $path) {
+        $ret = _provision_drupal_recursive_delete($entry_path);
+      } else {
+        $ret = 0;
+      }
+    }
+    $ret = $ret && rmdir($path);
+  }
+  else {
+    $ret = $ret && unlink($path);
+  }
+  return $ret;
+}
+
+/**
+ * Remove any directories for the site in sites/
+ */
+function provision_drupal_provision_delete($url, $data) {
+  return _provision_drupal_recursive_delete("sites/$url");
+}
 
 function provision_drupal_find_sites() {
   $sites = file_scan_directory('./sites', 'site\.php$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name', 0);

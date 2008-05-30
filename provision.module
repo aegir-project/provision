@@ -298,13 +298,13 @@ function provision_drush_command() {
                     'site_backup.tar.gz' => t('The backup to restore the site to.'))
   );
  
-  /*
-  // Not implemented yet.
   $items['provision delete'] = array(
     'callback' => '_provision_delete',
     'description' => 'Delete a site.'
   );
 
+  /*
+  // Not implemented yet.
   $items['provision deploy'] = array(
     'callback' => '_provision_deploy',
     'description' => 'Deploy a backup made on another provisioning platform on this one.'
@@ -672,3 +672,13 @@ function _provision_enable($url) {
   provision_output($url, $data);
 }
 
+function _provision_delete($url) {
+  $data = provision_get_site_data($url);
+
+  $rolled_back = provision_invoke("delete", $url, $data);
+
+  $data['site_installed'] = FALSE;
+  $data['site_enabled'] = FALSE;
+  provision_save_site_data($url, $data);  
+  provision_output($url, $data);
+}

@@ -133,6 +133,31 @@ function provision_mysql_provision_pre_install($url, &$data) {
   #TODO : Test to confirm that the database is actually writeable. Taking this on faith for now.
 }
 
+/**
+ * Implementation of hook_provision_delete()
+ *
+ * This will drop the database, revoke the privileges and flush the privileges.
+ */
+function provision_mysql_provision_delete($url, &$data) {
+  provision_set_active_db(_provision_master_db_url());
+    
+  if ( _provision_mysql_database_exists($data['site_db_name']) ) {
+    _provision_mysql_drop_database($data['site_db_name']);
+  }
+  
+  if ( _provision_mysql_database_exists($data['site_db_name']) ) {
+   provision_set_error(PROVISION_DB_ERROR);
+   provision_log("error", "Database could not be destroyed.");
+   provision_set_active_db();
+   return FALSE;
+  }
+  
+  _provision_mysql_revoke($data['site_db_name'], $data['site_db_username']);
+  _provision_mysql_revoke($data['site_db_name'], $data['site_db_username'], $data['site_db_host']);
+
+  _provision_mysql_flush();
+  provision_set_active_db();
+}
 
 function provision_mysql_provision_backup($url, &$data) {
   provision_log("backup", "Generating mysql dump for $url.");
@@ -165,6 +190,11 @@ function _provision_mysql_can_create_database() {
 function _provision_mysql_grant($name, $username, $password, $host = '') {
   $host = ($host) ? $host : '%';
   db_query("GRANT ALL PRIVILEGES ON %s.* TO %s@`%s` IDENTIFIED BY '%s'", $name, $username, $host, $password);
+}
+
+function _provision_mysql_revoke($name, $username, $host = '') {
+  $host = ($host) ? $host : '%';
+  db_query("REVOKE ALL PRIVILEGES ON %s.* FROM %s@`%s`", $name, $username, $host);
 }
 
 function _provision_mysql_old_password($username, $password, $host = '') {
