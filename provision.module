@@ -77,6 +77,15 @@ function provision_menu($may_cache = true) {
       'callback' => 'provision_help_requirements',
       'type' => MENU_CALLBACK
     );
+  } else {
+    $items[] = array(
+      'path' => 'provision/disabled',
+      'title' => t('Site disabled'),
+      'description' => t('Page showed when a site is disabled.'),
+      'callback' => 'provision_disabled_site',
+      'type' => MENU_CALLBACK,
+      'access' => user_access('access content'),
+    );
   }
   return $items;
 }
@@ -182,6 +191,9 @@ function provision_help_requirements() {
   return $output;
 }
 
+function provision_disabled_site() {
+  return "<p>This site was disabled by the site administrators.</p>";
+}
 
 /**
  * Menu callback.
