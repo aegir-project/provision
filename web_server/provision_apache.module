@@ -191,7 +191,6 @@ function provision_apache_provision_enable($url, &$data) {
  * Implementation of hook_provision_disable
  */
 function provision_apache_provision_disable($url, &$data) {
-  provision_log("Notice", t("Remove virtual host configuration file."));
   _provision_apache_delete_vhost_config($url, $data);
   _provision_apache_restart_apache();
 }
