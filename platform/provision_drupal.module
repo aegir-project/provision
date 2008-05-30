@@ -355,7 +355,7 @@ function _provision_drupal_recursive_delete($path) {
     while (($entry = $d->read()) !== false) {
       if ($entry == '.' || $entry == '..') continue;
       $entry_path = $path .'/'. $entry;
-      if (file_check_location($entry_path, $path) {
+      if (file_check_location($entry_path, $path)) {
         $ret = _provision_drupal_recursive_delete($entry_path);
       } else {
         $ret = 0;
@@ -373,6 +373,7 @@ function _provision_drupal_recursive_delete($path) {
  * Remove any directories for the site in sites/
  */
 function provision_drupal_provision_delete($url, $data) {
+  provision_log('notice', "deleting sites/$url directory");
   return _provision_drupal_recursive_delete("sites/$url");
 }
 

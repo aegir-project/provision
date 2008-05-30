@@ -139,9 +139,19 @@ function provision_mysql_provision_pre_install($url, &$data) {
  * This will drop the database, revoke the privileges and flush the privileges.
  */
 function provision_mysql_provision_delete($url, &$data) {
+  $data['site_db_host'] = ($data['site_db_host']) ? $data['site_db_host'] : variable_get('provision_db_host', 'localhost');
+  if ($data['site_id']) {
+    $data['site_db_name'] = 'site_' . $data['site_id'];
+    $data['site_db_username'] = $data['site_db_name']; // mysql has some really really stupid rules about who db / usernames, so site id is the safest.
+  }
+  else {
+    $data['site_db_name'] = ereg_replace("^www\.", "", str_replace('-', '_', str_replace(".", "", $url)));
+    $data['site_db_username'] = substr($data['site_db_name'], 0, 16);
+  }
   provision_set_active_db(_provision_master_db_url());
     
   if ( _provision_mysql_database_exists($data['site_db_name']) ) {
+    provision_log("notice", "Dropping database");
     _provision_mysql_drop_database($data['site_db_name']);
   }
   
@@ -152,6 +162,7 @@ function provision_mysql_provision_delete($url, &$data) {
    return FALSE;
   }
   
+  provision_log("notice", "Revoking privileges");
   _provision_mysql_revoke($data['site_db_name'], $data['site_db_username']);
   _provision_mysql_revoke($data['site_db_name'], $data['site_db_username'], $data['site_db_host']);
 
@@ -166,11 +177,11 @@ function provision_mysql_provision_backup($url, &$data) {
 }
 
 function _provision_mysql_database_exists($name) {
-  return db_result(db_query("SHOW DATABASES LIKE '%s'", $data['site_db_name']));
+  return db_result(db_query("SHOW DATABASES LIKE '%s'", $name));
 }
 
 function _provision_mysql_drop_database($name) {
-  db_query("DROP DATABASE %s", $name);
+  db_query("DROP DATABASE `%s`", $name);
 }
 
 function _provision_mysql_create_database($name) {

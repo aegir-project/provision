@@ -674,6 +674,10 @@ function _provision_enable($url) {
 
 function _provision_delete($url) {
   $data = provision_get_site_data($url);
+  $args = func_get_args();
+  array_shift($args);
+  $file = array_shift($args);
+  _provision_backup_site($url, $data, $file);
 
   $rolled_back = provision_invoke("delete", $url, $data);
 
