@@ -361,10 +361,16 @@ function _provision_drupal_recursive_delete($path) {
         $ret = 0;
       }
     }
-    $ret = $ret && rmdir($path);
+    $rm = rmdir($path);
+    provision_log( ($rm) ? 'notice' : 'error', t("deleting @path directory @status", array('@path' => $path, '@status' => ($rm) ? 'successful' : 'failed')));
+    $ret = $ret && $rm;
   }
   else {
-    $ret = $ret && unlink($path);
+    $rm = unlink($path);
+    if (!$rm) {
+      provision_log('error', "deleting $path file failed");
+    }
+    $ret = $ret && $rm;
   }
   return $ret;
 }
@@ -373,15 +379,13 @@ function _provision_drupal_recursive_delete($path) {
  * Remove any directories for the site in sites/
  */
 function provision_drupal_provision_delete($url, $data) {
-  provision_log('notice', "deleting sites/$url directory");
   return _provision_drupal_recursive_delete("sites/$url");
 }
 
 function provision_drupal_find_sites() {
-  $sites = file_scan_directory('./sites', 'site\.php$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name', 0);
-  
+  $sitephp = file_scan_directory('./sites', 'site\.php$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name', 0);
+  $settingsphp = file_scan_directory('./sites', 'site\.php$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name', 0);
 }
-
 
 function provision_drupal_restore($url, $backup_file, &$data) {
   provision_shell_exec("tar -zxf %s -C sites/%s", $backup_file, $url); # checkout over old sites dir.

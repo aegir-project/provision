@@ -631,9 +631,17 @@ function _provision_restore($site, $backup_file) {
     provision_set_error(PROVISION_SITE_NOT_FOUND);
     provision_output($url, $data);
   }
+  if (!is_file($backup_file)) {
+    provision_log("File specified does not exist.");
+    provision_set_error(PROVISION_PERM_ERROR);
+    provision_output($url, $data);
+  }
   $data = provision_get_site_data($url);
   _provision_backup_site($url, $data); # Backup site for posterity, before rolling back.
+  
+  provision_shell_exec("tar -zxf %s -C %s/%s.tmp", $backup_file, provision_backup_path(), $url); # check out old directory.
 
+  $rolled_back = provision_invoke("restore", $url, $data);
   $data['site_installed'] = TRUE;
   provision_save_site_data($url, $data);  
 }
@@ -681,8 +689,5 @@ function _provision_delete($url) {
 
   $rolled_back = provision_invoke("delete", $url, $data);
 
-  $data['site_installed'] = FALSE;
-  $data['site_enabled'] = FALSE;
-  provision_save_site_data($url, $data);  
   provision_output($url, $data);
 }
