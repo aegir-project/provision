@@ -55,7 +55,7 @@ function provision_mysql_provision_configure($node = null) {
   if (!is_object($node) && ($nid = variable_get('hosting_own_db_server', 0))) {
     $node = node_load($nid);
   }
-  $form['db_type'] = array('#type' => 'hidden', '#value' => 'mysql');
+  $form['db_type'] = array('#type' => 'hidden', '#value' => ($node->db_type) ? $node->db_type : 'mysqli');
   
   $form['db_host'] = array(
     '#type' => 'textfield',
@@ -94,7 +94,7 @@ function provision_mysql_provision_configure($node = null) {
 
 
 function provision_mysql_provision_pre_install($url, &$data) {
-  $data['site_db_type'] = 'mysql'; # only support innodb. for now.
+  $data['site_db_type'] = ($data['site_db_type']) ? $data['site_db_type'] : 'mysql'; # only support innodb. for now.
   $data['site_db_host'] = ($data['site_db_host']) ? $data['site_db_host'] : variable_get('provision_db_host', 'localhost');
   $data['site_db_passwd'] = user_password(); # generate a random password for use
   if ($data['site_id']) {
@@ -218,7 +218,7 @@ function _provision_mysql_flush() {
 }
 
 function _provision_master_db_url($data = array()) {
-  return sprintf("mysql://%s:%s@%s/mysql", variable_get('provision_db_user', 'root'), variable_get('provision_db_passwd', 'root'), variable_get('provision_db_host', 'localhost'));
+  return sprintf("%s://%s:%s@%s/mysql", variable_get('provision_db_type', 'mysqli'), variable_get('provision_db_user', 'root'), variable_get('provision_db_passwd', 'root'), variable_get('provision_db_host', 'localhost'));
 }
 
 
