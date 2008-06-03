@@ -533,26 +533,8 @@ function _provision_backup_site($url, &$data, $file = null) {
  *   Output of provision_output() function.
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
-function _provision_import($url) {
-  
-  if (!_provision_drupal_site_exists($url)) {
-    provision_log("Error", "Site directory is not present, and can not be imported.");
-    provision_set_error(PROVISION_SITE_NOT_FOUND);
-    provision_output($url, $data);
-  }
-  $data = provision_get_site_data($url);
-  
-  include_once("sites/$url/settings.php");
-  
-  $parts = parse_url($db_url);
-  $data['site_db_type'] = $parts['scheme'];
-  $data['site_db_user'] = $parts['user'];
-  $data['site_db_host'] = $parts['host'];
-  $data['site_db_passwd'] = $parts['pass'];
-  $data['site_db_name'] = substr($parts['path'], 1);
-  $data['site_profile'] = $installed_profile;
-  
-  provision_save_site_data($url, $data);
+function _provision_import($url = null) {
+  $rolled_back = provision_invoke("import", $url, $data);
   provision_output($url, $data);
 }
 
