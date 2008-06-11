@@ -309,18 +309,17 @@ function provision_drupal_provision_verify($url, &$data) {
   provision_check_path("sites", "writable", true, t("Drupal sites directory is writable by the provisioning script"),
     t("Drupal sites directory is not writable by the provisioning script"), PROVISION_PERM_ERROR);
 
-  $path = _provision_drushrc_path();
-  $exists = provision_check_path($path, "exists", true ,
+  $exists = provision_check_path(PROVISION_DRUSHRC_PATH, "exists", true ,
     t("Virtual Host configuration path exists."),
     t("Virtual Host configuration path does not exist."));
   if (!$exists) {
-    $made = provision_check_path($path, "mkdir", true, 
+    $made = provision_check_path(PROVISION_DRUSHRC_PATH, "mkdir", true, 
         t("Virtual host configuration path has been created."),
         t("Virtual host configuration path could not be created."), 
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
   }
   else {
-    $writable = provision_check_path($path, "writable", true ,
+    $writable = provision_check_path(PROVISION_DRUSHRC_PATH, "writable", true ,
         t("Virtual host configuration path is writable."),
         t("Virtual host configuration path is not writable."), 
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);

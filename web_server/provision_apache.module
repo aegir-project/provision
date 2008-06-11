@@ -22,7 +22,7 @@ function provision_apache_help($section) {
     case 'admin/help/provision#requirements':
       $username = provision_get_script_owner();
       $group = provision_get_group_name();
-      $vhost_path = _provision_vhost_path();
+      $vhost_path = PROVISION_VHOST_PATH;
       $mkdir_cmd['@vhost_path'] = $vhost_path;
       $mkdir_cmd['@provision_link'] = url('admin/settings/provision');
       $mkdir_cmd['@mkdir_cmd'] = <<<EOF
@@ -118,7 +118,7 @@ function provision_apache_provision_configure($node = null) {
     '#title' => t('Configuration path'),
     '#required' => TRUE,
     '#size' => 40,
-    '#default_value' => ($node->config_path) ? $node->config_path : _provision_config_path(),
+    '#default_value' => ($node->config_path) ? $node->config_path : PROVISION_CONFIG_PATH,
     '#description' => t("The path on the server where configuration files will be stored.<br />
         It is essential that this directory should not be accessible via a web browser."),
     '#maxlength' => 255,
@@ -129,7 +129,7 @@ function provision_apache_provision_configure($node = null) {
     '#title' => t('Backup path'),
     '#required' => TRUE,
     '#size' => 40,
-    '#default_value' => ($node->backup_path) ? $node->backup_path : _provision_backup_path(),
+    '#default_value' => ($node->backup_path) ? $node->backup_path : PROVISION_BACKUP_PATH,
     '#description' => t("The path on the server where backups will be stored.<br />
         It is essential that this directory should not be accessible via a web browser."),
     '#maxlength' => 255,
@@ -221,7 +221,7 @@ function provision_apache_provision_synch($url, &$data) {
  * Delete virtual host file
  */
 function _provision_apache_delete_vhost_config($url, $data) {
-  provision_check_path(_provision_vhost_path() . "/$url", "unlink", true, 
+  provision_check_path(PROVISION_VHOST_PATH . "/$url", "unlink", true, 
       t("Removed apache virtual host configuration"));
 }
 
@@ -233,12 +233,12 @@ function _provision_apache_create_vhost_config($url, $data, $template = null) {
     $template = variable_get('provision_apache_vhost_template', _provision_apache_default_template());
   }
   provision_log("Notice", t("Generate virtual host configuration file."));
-  $writable = provision_check_path(_provision_vhost_path(), "writable", true ,
+  $writable = provision_check_path(PROVISION_VHOST_PATH, "writable", true ,
       t("Virtual host configuration path is writable."),
       t("Virtual host configuration path is not writable."), 
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
   if ($writable) {
-    $file = fopen(_provision_vhost_path() . '/' . $url, "w");
+    $file = fopen(PROVISION_VHOST_PATH . '/' . $url, "w");
     $text = provision_render_config($template, $data);
     fwrite($file, $text);
     fclose($file);
@@ -260,27 +260,26 @@ function _provision_apache_restart_apache() {
 }
 
 function provision_apache_provision_verify() {
-  $path = _provision_vhost_path();
-  $exists = provision_check_path($path, "exists", true ,
+  $exists = provision_check_path(PROVISION_VHOST_PATH, "exists", true ,
     t("Virtual Host configuration path exists."),
     t("Virtual Host configuration path does not exist."));
   if (!$exists) {
-    $made = provision_check_path($path, "mkdir", true, 
+    $made = provision_check_path(PROVISION_VHOST_PATH, "mkdir", true, 
         t("Virtual host configuration path has been created."),
         t("Virtual host configuration path could not be created."), 
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
   }
   else {
-    $writable = provision_check_path($path, "writable", true ,
+    $writable = provision_check_path(PROVISION_VHOST_PATH, "writable", true ,
         t("Virtual host configuration path is writable."),
         t("Virtual host configuration path is not writable."), 
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
     if (!$writable) {
-      provision_check_path($path, "chown", provision_get_script_owner(), 
+      provision_check_path(PROVISION_VHOST_PATH, "chown", provision_get_script_owner(), 
         t("Changed ownership of <code>%path</code>", array("%path" => $path)),
         t("Could not change ownership <code>%path</code>", array("%path" => $path)),
         PROVISION_PERM_ERROR);
-      provision_check_path($path, "chmod", 0700, 
+      provision_check_path(PROVISION_VHOST_PATH, "chmod", 0700, 
         t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => 0700)),
         t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' => 0700)),
         PROVISION_PERM_ERROR );

@@ -34,8 +34,16 @@
 */
 
 
-/** Include the provisioning API. */
-include_once('provision.inc');
+/** 
+ * Implementation of hook_init
+ */
+function provision_init() {
+  // Include the provisioning API. 
+  include_once('provision.inc');
+
+  // Set up defines for platform
+  provision_init_paths();
+}
 
 /**
  * Implementation of hook_provision_service
@@ -551,50 +559,48 @@ function _provision_import($url = null) {
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
 function _provision_verify($url = '') {
-  $path = _provision_config_path();
-  $exists = provision_check_path($path, "exists", true ,
+  $exists = provision_check_path(PROVISION_CONFIG_PATH, "exists", true ,
     t("Provision configuration path exists."),
     t("Provision configuration path does not exist."));
   if (!$exists) {
-    $made = provision_check_path($path, "mkdir", true,
+    $made = provision_check_path(PROVISION_CONFIG_PATH, "mkdir", true,
         t("Provision configuration path has been created."),
         t("Provision configuration could not be created."),
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
   }
 
-  provision_check_path($path, "writable", true ,
+  provision_check_path(PROVISION_CONFIG_PATH, "writable", true ,
       t("Provision configuration path is writable."),
       t("Provision configuration path is not writable."), 
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-  provision_check_path($path, "chown", provision_get_script_owner(), 
+  provision_check_path(PROVISION_CONFIG_PATH, "chown", provision_get_script_owner(), 
     t("Changed ownership of <code>%path</code>", array("%path" => $path)),
     t("Could not change ownership <code>%path</code>", array("%path" => $path)),
     PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
-  provision_check_path($path, "chmod", 0700, 
+  provision_check_path(PROVISION_CONFIG_PATH, "chmod", 0700, 
     t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => sprintf('%o', 0700))),
     t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' =>  sprintf('%o', 0700))),
     PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
 
-  $path = _provision_backup_path();
-  $exists = provision_check_path($path, "exists", true ,
+  $exists = provision_check_path(PROVISION_BACKUP_PATH, "exists", true ,
     t("Provision backup path exists."),
     t("Provision backup path does not exist."));
   if (!$exists) {
-    $made = provision_check_path($path, "mkdir", true,
+    $made = provision_check_path(PROVISION_BACKUP_PATH, "mkdir", true,
         t("Provision backup path has been created."),
         t("Provision backup could not be created."),
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
   }
 
-  provision_check_path($path, "writable", true ,
+  provision_check_path(PROVISION_BACKUP_PATH, "writable", true ,
       t("Provision backup path is writable."),
       t("Provision backup path is not writable."), 
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-  provision_check_path($path, "chown", provision_get_script_owner(), 
+  provision_check_path(PROVISION_BACKUP_PATH, "chown", provision_get_script_owner(), 
     t("Changed ownership of <code>%path</code>", array("%path" => $path)),
     t("Could not change ownership <code>%path</code>", array("%path" => $path)),
     PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
-  provision_check_path($path, "chmod", 0700, 
+  provision_check_path(PROVISION_BACKUP_PATH, "chmod", 0700, 
     t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => sprintf('%o', 0700))),
     t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' =>  sprintf('%o', 0700))),
     PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );        
@@ -622,8 +628,8 @@ function _provision_restore($site, $backup_file) {
   _provision_backup_site($url, $data); # Backup site for posterity, before rolling back.
   
   provision_shell_exec("tar -zxf %s -C %s/%s.tmp", $backup_file, provision_backup_path(), $url); # check out old directory.
-
   $rolled_back = provision_invoke("restore", $url, $data);
+
   $data['site_installed'] = TRUE;
   provision_save_site_data($url, $data);  
 }

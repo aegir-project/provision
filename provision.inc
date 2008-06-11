@@ -385,38 +385,18 @@ function provision_confirm_drush() {
 }
 
 /**
- * Get the backup path of the Provision installation
+ * Provide defines for all the major paths.
+ * Avoids duplication and possible errors in duplication
  */
-function _provision_backup_path() {
+function provision_init_paths() {
   $path = ($_SERVER['PWD']) ? $_SERVER['PWD'] : $_SERVER['DOCUMENT_ROOT'];
   $parts = explode("/", rtrim($path, '/'));
   array_pop($parts);
-  return variable_get('provision_backup_path', implode("/" , $parts) . '/backups');
-}
 
-
-/**
- * Get the base configuration path for the system
- */
-function _provision_config_path() {
-  $path = ($_SERVER['PWD']) ? $_SERVER['PWD'] : $_SERVER['DOCUMENT_ROOT'];
-  $parts = explode("/", rtrim($path, '/'));
-  array_pop($parts);
-  return variable_get('provision_config_path', implode("/" , $parts) . '/config') ;
-}
-
-/**
- * Get the vhost path of the Provision installation
- */
-function _provision_vhost_path() {
- return _provision_config_path() . '/vhost.d';
-}
-
-/**
- * Get the drushrc path of the Provision installation
- */
-function _provision_drushrc_path() {
- return _provision_config_path() . '/drush';
+  define('PROVISION_BACKUP_PATH', rtrim(variable_get('provision_backup_path', implode("/" , $parts) . '/backups'), '/'));
+  define('PROVISION_CONFIG_PATH', rtrim(variable_get('provision_config_path', implode("/" , $parts) . '/config'), '/')) ;
+  define('PROVISION_VHOST_PATH', PROVISION_CONFIG_PATH . '/vhost.d');
+  define('PROVISION_DRUSHRC_PATH', PROVISION_CONFIG_PATH . '/drushrc.d');
 }
 
 
