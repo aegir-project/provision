@@ -146,7 +146,7 @@ function provision_help($section) {
       $username = provision_get_script_owner();
       $group = provision_get_group_name();
       
-      $backup_path = _provision_backup_path();
+      $backup_path = PROVISION_BACKUP_PATH;
       $mkdir_cmd['@backup_path'] = $backup_path;      
       $mkdir_cmd['@provision_link'] = url('admin/settings/provision');
       $mkdir_cmd['@mkdir_cmd'] = <<<EOF
@@ -503,9 +503,8 @@ function _provision_backup($url) {
  * Generate a backup tarbal for a site.
  */
 function _provision_backup_site($url, &$data, $file = null) {
-  $backup_path = _provision_backup_path(); 
   // This is the actual drupal provisioning requirements. 
-  if (!is_dir($backup_path)) {
+  if (!is_dir(PROVISION_BACKUP_PATH)) {
     provision_log("Backup directory does not exist.");
     provision_set_error(PROVISION_PERM_ERROR);
     provision_output($url, $data);
@@ -516,12 +515,12 @@ function _provision_backup_site($url, &$data, $file = null) {
     provision_set_error(PROVISION_PERM_ERROR);
     provision_output($url, $data);
   }
-  $suggested = "$backup_path/$url-" . date("Y-m-d",mktime()) . ".tar";
+  $suggested = PROVISION_BACKUP_PATH . "/$url-" . date("Y-m-d",mktime()) . ".tar";
 
   // Use format of mysite.com-2008-01-02, if already existing, add number.
   while (is_file($suggested . '.gz')) {
     $count++;
-    $suggested = "$backup_path/$url-" . date("Y-m-d", mktime()) . "_$count.tar";
+    $suggested = PROVISION_BACKUP_PATH . "/$url-" . date("Y-m-d", mktime()) . "_$count.tar";
   }
 
   $data['backup_file'] = (!empty($file)) ? ereg_replace('.gz$', '', $file) : $suggested;
@@ -627,7 +626,7 @@ function _provision_restore($site, $backup_file) {
   $data = provision_get_site_data($url);
   _provision_backup_site($url, $data); # Backup site for posterity, before rolling back.
   
-  provision_shell_exec("tar -zxf %s -C %s/%s.tmp", $backup_file, provision_backup_path(), $url); # check out old directory.
+  provision_shell_exec("tar -zxf %s -C %s/%s.tmp", $backup_file, PROVISION_BACKUP_PATH, $url); # check out old directory.
   $rolled_back = provision_invoke("restore", $url, $data);
 
   $data['site_installed'] = TRUE;
