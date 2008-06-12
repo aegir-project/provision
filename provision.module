@@ -36,15 +36,50 @@
   // Include the provisioning API. 
   include_once('provision.inc');
   include_once('provision.path.inc');
+  include_once('provision.help.inc');
 
 
 /** 
  * Implementation of hook_init
+ *
+ * Provide defines for all the major paths and settings.
+ * These are settings that must not be modified during the running of the
+ * program, but are configurable.
  */
 function provision_init() {
   // Set up defines for platform
-  provision_init_paths();
+  if (function_exists('drush_get_option')) {
+    $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
+  }
+  else {
+    $docroot = $_SERVER['pwd'];
+  }
+
+  $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
+  define('PROVISION_DOCROOT_PATH', rtrim($path, '/'));
+  define('PROVISION_SITES_PATH', rtrim($path, '/'));
+  
+  $parts = explode("/", rtrim($path, '/'));
+  array_pop($parts);
+  define('PROVISION_PARENT_PATH', rtrim(implode("/" , $parts), '/'));
+
+  define('PROVISION_BACKUP_PATH', variable_get('provision_backup_path', PROVISION_PARENT_PATH . '/backups'));
+  define('PROVISION_CONFIG_PATH', variable_get('provision_config_path', PROVISION_PARENT_PATH . '/config')) ;
+  define('PROVISION_VHOST_PATH', PROVISION_CONFIG_PATH . '/vhost.d');
+  define('PROVISION_DRUSHRC_PATH', PROVISION_CONFIG_PATH . '/drushrc.d');
+
+  define('PROVISION_SCRIPT_USER', variable_get('provision_script_user', get_current_user()));   
+  
+  $info = posix_getgrgid(posix_getgid());
+  define('PROVISION_WEB_GROUP', variable_get('provision_web_group', $info['name']));
+
+  define('PROVISION_DB_TYPE', variable_get('provision_db_type', 'mysqli'));
+  define('PROVISION_DB_USER', variable_get('provision_db_user', 'root'));
+  define('PROVISION_DB_PASSWD', variable_get('provision_db_passwd', 'root'));
+  define('PROVISION_DB_HOST', variable_get('provision_db_host', 'localhost'));
+
 }
+
 
 /**
  * Implementation of hook_provision_service
@@ -108,106 +143,7 @@ function provision_menu($may_cache = true) {
   return $items;
 }
 
-/**
- * Implementation of hook_help()
- */
-function provision_help($section) {
-  switch ($section) {
-    case 'admin/help#provision':
-      $output .= t('<p>The Provision framework is a powerful set of modules that lets you to accomplish a lot of maintenance tasks through the unix command line such as installing new sites, backing them up, rolling back to previous backups and facilitating upgrades.</p>');
-      $output .= t('<p>Additionally, the Provision framework is one component of the distributed hosting infrastructure provided by the <code>hostmaster</code> install profile. 
-                    The Hostmaster profile is capable of driving several provision backends, in a distributed manner, and provides an interface for the functionality of provision.</p>');
-      $output .= t('<p>It is not required to run the hosting front end to use the Provision framework, but the system does not provide much in the way of a web accessible front end, by design.</p>');
 
-      $output .= '<a name=\'requirements\'><h3>' . t('Requirements') . '</h3></a>';
-      $output .= t('<p>For a more detailed breakdown of steps that need to be taken to configure Provisioning to run with your system, please read the <a href="@url">in depth requirement documentation</a></p>',
-                  array('@url' => url('admin/help/provision/requirements')));
-      $output .= '<a name=\'commands\'><h3>' . t('Commands') . '</h3></a>';
-      $commands = module_invoke_all('drush_command');
-      $output .= "<dl>";
-      foreach ($commands as $command => $info) {
-        if (preg_match('/^provision/', $command)) {
-          if (sizeof($info['arguments'])) {
-            $command .= ' ' . implode(' ', (array) key($info['arguments']));            
-          }
-          if (sizeof($info['optional arguments'])) {
-            $command .= ' [' . implode('] [', (array) key($info['optional arguments'])) . ']';  
-          }
-          $output .= '<dt>' . "<code>drush.php $command</code>" . '</dt>';
-          $output .= '<dd>' .  $info["description"] . '</dd>';
-        }
-      }
-      $output .= "</dl>";
-
-      $output .= '<a name=\'options\'><h3>' . t('Options') . '</h3></a>';
-
-      
-      $options = module_invoke_all('value_list');
-
-      $output .= "<dl>";
-      foreach ($options as $option => $description) {
-        $output .= '<dt>' . "<code>--$option</code>" . '</dt>';
-        $output .= '<dd>' .  $description . '</dd>';
-      }
-      $output .= "</dl>";
-      
-      return $output;
-    case 'admin/help/provision#requirements' :
-      $username = provision_get_script_owner();
-      $group = provision_get_group_name();
-      
-      $backup_path = PROVISION_BACKUP_PATH;
-      $mkdir_cmd['@backup_path'] = $backup_path;      
-      $mkdir_cmd['@provision_link'] = url('admin/settings/provision');
-      $mkdir_cmd['@mkdir_cmd'] = <<<EOF
-    [$username@hm2 ~]$ mkdir $backup_path
-    [$username@hm2 ~]$ chown $username:$username $backup_path
-    [$username@hm2 ~]$ chmod 0700 $backup_path
-EOF;
-    $output .= "<ol>";
-    $output .= '<li>' . t('<p><strong>The user account running the script, and the group of the httpd daemon.</strong> 
-                          The provision framework takes special care to make sure that the file permissions of the 
-                          hosted sites are always as safe as can be, especially to make sure that the web server does 
-                          not have the ability to modify the code of the site, therefor this information is required 
-                          to assure that safety while keeping the sites accessible.</p>
-                          <p>Based on your server configuration we have determined that you should set the 
-                          username to "<code>@username</code>" and the group to "<code>@group</code>", 
-                          but you can change these in the <a href="@provision_link">provisioning section</a>.</p>', array("@username" => $username, "@group" => $group, "@provision_link" => url('admin/settings/provision'))) . '</li>';
-    
-    $output .= '<li>' . t('<p><strong>Write access to a directory to store backups.</strong> 
-                          The drush user needs to be able to maintain the backups repository to ensure that your site is backed up successfully. 
-                          It is incredibly important that this path is not accessible via the web server, so that no undesirables can get their
-                          hands on your database. The recommended path is directly above your platform path, but it can be anywhere.</p>
-
-                          <p>Based on your server configuration we have determined that your path should be <code>@backup_path</code>, 
-                          but you can change this in the <a href="@provision_link">provisioning section</a>.</p>
-                          <strong>To configure: </strong> Please enter the following commands :
-                          <pre>@mkdir_cmd</pre>',$mkdir_cmd) . '</li>';
-    $output .= "</ol>";
-    return $output;
-  }
-}
-
-/**
- * Page callback with in depth requirement documentation
- */
-function provision_help_requirements() {
-  $output .= t('<p>Unfortunately, due to the requirements of some of the functionality, significantly more access than is usually allowed on a shared hosting solution is required,
-                and as such, a virtual server or dedicated hosting system will be required to run this system.</p>');
-  $output .= t('<p>Some of the features of the system also require the ability to create symlinks, which means that it needs to run on a unix-like operating system. There are no plans currently to add windows support.</p>');  
-  $modules = module_implements('provision_service');
-  foreach ($modules as $module) {
-    $service = module_invoke($module, 'provision_service');
-    $name = current($service);
-    $help = module_invoke($module, 'help', 'admin/help/provision#requirements');
-    if ($name && $help) {
-      $output .= '<a href="requirements-$module"></a><h3>' . t($name) . '</h3>';
-      $output .=  $help;
-    }
-  }
-
-  return $output;
-}
 
 function provision_disabled_site() {
   return "<p>This site was disabled by the site administrators.</p>";
@@ -588,7 +524,7 @@ function _provision_verify($url = '') {
       t("Provision configuration path is not writable."), 
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
 
-  provision_path("chown", PROVISION_CONFIG_PATH, provision_get_script_owner(), 
+  provision_path("chown", PROVISION_CONFIG_PATH, PROVISION_SCRIPT_USER, 
     t("Changed ownership of <code>@path</code>"),
     t("Could not change ownership <code>@path</code>"),
     PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
@@ -614,7 +550,7 @@ function _provision_verify($url = '') {
       t("Provision backup path is not writable."), 
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
 
-  provision_path("chown", PROVISION_BACKUP_PATH, provision_get_script_owner(), 
+  provision_path("chown", PROVISION_BACKUP_PATH, PROVISION_SCRIPT_USER, 
     t("Changed ownership of <code>@path</code>"),
     t("Could not change ownership <code>@path</code>"),
     PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
@@ -657,11 +593,13 @@ function _provision_restore($site, $backup_file) {
     provision_set_error(PROVISION_SITE_NOT_FOUND);
     provision_output($url, $data);
   }
-  if (!is_file($backup_file)) {
-    provision_path("exists", $backup_file, true,
+
+  $exists = !provision_path("exists", $backup_file, true,
       t("Restoring site from @path"),
       t("Could not find backup file @path"),
       PROVISION_FRAMEWORK_ERROR);
+
+  if (!$exists) {
     provision_output($url, $data);
   }
 
@@ -691,7 +629,6 @@ function _provision_disable($url) {
 
   $rolled_back = provision_invoke("disable", $url, $data);
 
-  $data['site_installed'] = TRUE;
   $data['site_enabled'] = FALSE;
   provision_save_site_data($url, $data);
   provision_output($url, $data);
@@ -708,7 +645,6 @@ function _provision_enable($url) {
 
   $rolled_back = provision_invoke("enable", $url, $data);
 
-  $data['site_installed'] = TRUE;
   $data['site_enabled'] = TRUE;
   provision_save_site_data($url, $data);  
   provision_output($url, $data);

@@ -128,7 +128,7 @@ function _provision_drupal_create_settings_file($url, &$data) {
   
   # Change the permissions of the file
   provision_path("chmod", "sites/$url/settings.php", 0550);
-  provision_path("chgrp", "sites/$url/settings.php", provision_get_group_name());
+  provision_path("chgrp", "sites/$url/settings.php", PROVISION_WEB_GROUP);
 }
 
 /**
@@ -154,11 +154,11 @@ function _provision_drupal_create_directories($url, $profile = null) {
         t("Could not create <code>@path</code>"),
         PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
     }
-    provision_path("chown", $path, provision_get_script_owner(), 
+    provision_path("chown", $path, PROVISION_SCRIPT_USER, 
       t("Changed ownership of <code>@path</code>"),
       t("Could not change ownership <code>@path</code>"),
       PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
-    provision_path("chgrp", $path, provision_get_group_name(),
+    provision_path("chgrp", $path, PROVISION_WEB_GROUP,
       t("Changed group ownership of <code>@path</code>"),
       t("Could not change group ownership <code>@path</code>"));
 

@@ -316,13 +316,12 @@ function provision_save_site_data($url, $data) {
     provision_set_error(PROVISION_PERM_ERROR);
   }
   else {
-    fwrite($fp, "\n\n#" . format_date(mktime(), "large"));
-    if ($data['action_id']) {
-      $action = array('id' => $data['action_id'], 
-                      'timestamp' => mktime(), 
-                      'action' => $data['site_action_type'], 
-                      'status' => provision_get_error());
-      $line = "\n\$actions[] = " . str_replace(array("  ", "\n"), "", var_export($action, TRUE)) . ";";
+    $timestamp = mktime();
+    $aid = $data['action_id'];
+    fwrite($fp, "\n\n#" . format_date($timestamp, "large"));
+    if ($aid) {
+      $action = array('action' => $data['site_action_type'], 'status' => provision_get_error());
+      $line = "\n\$actions[$aid][$timestamp] = " . str_replace(array("  ", "\n"), "", var_export($action, TRUE)) . ";";
       fwrite($fp, $line);
     }
     foreach ($data as $key => $value) {
@@ -384,31 +383,6 @@ function provision_render_config($template, $variables) {
 /**
  * @} End of "defgroup provisionvalues".
  */
-
-/**
- * Provide defines for all the major paths.
- * Avoids duplication and possible errors in duplication
- */
-function provision_init_paths() {
-  if (function_exists('drush_get_option')) {
-    $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
-  }
-  else {
-    $docroot = $_SERVER['pwd'];
-  }
-
-  $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
-  define('PROVISION_DOCROOT_PATH', rtrim($path, '/'));
-  define('PROVISION_SITES_PATH', rtrim($path, '/'));
-  
-  $parts = explode("/", rtrim($path, '/'));
-  array_pop($parts);
-
-  define('PROVISION_BACKUP_PATH', rtrim(variable_get('provision_backup_path', implode("/" , $parts) . '/backups'), '/'));
-  define('PROVISION_CONFIG_PATH', rtrim(variable_get('provision_config_path', implode("/" , $parts) . '/config'), '/')) ;
-  define('PROVISION_VHOST_PATH', PROVISION_CONFIG_PATH . '/vhost.d');
-  define('PROVISION_DRUSHRC_PATH', PROVISION_CONFIG_PATH . '/drushrc.d');
-}
 
 
 /**
@@ -487,26 +461,6 @@ function provision_set_active_db($new_db_url = null) {
     db_set_active('default');
   }
 }
-
-/**
- * Return the user who owns this script.
- *
- * Used to generate permissions. Can be overridden by variable_set().
- */
-function provision_get_script_owner() {
-  return variable_get('provision_script_user', get_current_user());   
-}
-
-/**
- * Return the group who runs the httpd daemin.
- *
- * Used to generate permissions. Can be overridden by variable_set().
- */
-function provision_get_group_name() {
-  $info = posix_getgrgid(posix_getgid());
-  return variable_get('provision_web_group', $info['name']); 
-}
-
 /**
  * Check whether a user is a member of a group.
  *

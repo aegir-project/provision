@@ -172,15 +172,14 @@ function provision_path_chown($path, &$owner, &$reason) {
 }
 
 function provision_path_chgrp($path, &$group, &$reason) {
-  $user = provision_get_script_owner();
   if ($group = provision_posix_groupname($group)) {
-    if (provision_user_in_group($user, $group)) {
+    if (provision_user_in_group(PROVISION_SCRIPT_USER, $group)) {
       if (chgrp($path, $group)) {
         $reason = t("chgrp failed"); 
       }
     }
     else {
-      $reason = t("@user is not in @group group", array("@user" => $user, "@group" => $group));
+      $reason = t("@user is not in @group group", array("@user" => PROVISION_SCRIPT_USER, "@group" => $group));
     }
   }
   else {

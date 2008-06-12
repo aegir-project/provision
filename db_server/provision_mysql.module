@@ -6,7 +6,10 @@
  * The goal of this module is to create mysql databases and user accounts, for sites that are about to be created.
  * It uses the provision API to tie into the right places in the site creation work flow.
  */
- 
+
+
+include_once('provision_mysql.inc');
+
 /**
  * @ingroup provisionui
  * @{
@@ -18,7 +21,7 @@
  function provision_mysql_help($section) {
    switch ($section) {
      case 'admin/help/provision#requirements':
-       $username = provision_get_script_owner();
+       $username = PROVISION_SCRIPT_USER;
        $output .= "<ol>";
        $command = <<<EOF
      [$username@hm2 ~]$ mysql -uroot -pXXXXXXXXX mysql
@@ -55,14 +58,14 @@ function provision_mysql_provision_configure($node = null) {
   if (!is_object($node) && ($nid = variable_get('hosting_own_db_server', 0))) {
     $node = node_load($nid);
   }
-  $form['db_type'] = array('#type' => 'hidden', '#value' => ($node->db_type) ? $node->db_type : 'mysqli');
+  $form['db_type'] = array('#type' => 'hidden', '#value' => ($node->db_type) ? $node->db_type : PROVISION_DB_TYPE);
   
   $form['db_host'] = array(
     '#type' => 'textfield',
     '#title' => t('Mysql server hostname'),
     '#description' => t('The mysql server to connect to.'),
     '#size' => 30,
-    '#default_value' => ($node->db_host) ? $node->db_host : variable_get('provision_db_host', 'localhost'),
+    '#default_value' => ($node->db_host) ? $node->db_host : PROVISION_DB_HOST,
     '#maxlength' => 64,
   );
   
@@ -72,7 +75,7 @@ function provision_mysql_provision_configure($node = null) {
     '#title' => t('Mysql user account'),
     '#description' => t('The user that will be used to create users and databases for new sites.'),
     '#size' => 40,
-    '#default_value' => ($node->db_user) ? $node->db_user : variable_get('provision_db_user', 'root'),
+    '#default_value' => ($node->db_user) ? $node->db_user : PROVISION_DB_USER,
     '#maxlength' => 255,
   );
   if ($node->db_passwd) {
@@ -80,7 +83,7 @@ function provision_mysql_provision_configure($node = null) {
   }
   $form['db_passwd'] = array(
     '#type' => 'password_confirm',
-    '#required' => (variable_get("provision_db_password", TRUE)) ? FALSE : TRUE,
+    '#required' => (PROVISION_DB_PASSWD) ? FALSE : TRUE,
     '#title' => t('Mysql user password'),
     '#description' => $passwd_description . t('The user account that will be used to create new mysql users and databases for new sites'),
     '#size' => 30,
@@ -94,43 +97,40 @@ function provision_mysql_provision_configure($node = null) {
 
 
 function provision_mysql_provision_pre_install($url, &$data) {
-  $data['site_db_type'] = ($data['site_db_type']) ? $data['site_db_type'] : 'mysql'; # only support innodb. for now.
-  $data['site_db_host'] = ($data['site_db_host']) ? $data['site_db_host'] : variable_get('provision_db_host', 'localhost');
-  $data['site_db_passwd'] = user_password(); # generate a random password for use
-  if ($data['site_id']) {
-    $data['site_db_name'] = 'site_' . $data['site_id'];
-    $data['site_db_username'] = $data['site_db_name']; // mysql has some really really stupid rules about who db / usernames, so site id is the safest.
-  }
-  else {
-    $data['site_db_name'] = ereg_replace("^www\.", "", str_replace('-', '_', str_replace(".", "", $url)));
-    $data['site_db_username'] = substr($data['site_db_name'], 0, 16);
+  $data['site_db_type'] = ($data['site_db_type']) ? $data['site_db_type'] : PROVISION_DB_TYPE;
+  $data['site_db_host'] = ($data['site_db_host']) ? $data['site_db_host'] : PROVISION_DB_HOST;
+
+  # generate a random password for use
+  $data['site_db_passwd'] = user_password(); 
+  $data['site_db_name'] = _provision_mysql_suggest_db_name($url, $data);
+  $data['site_db_user'] = $data['site_db_name']; 
+
+  return _provision_mysql_new_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
+
+}
+
+function provision_mysql_provision_pre_restore($url, $backup_file, &$data) {
+  // store a backup of the credentials of the site.
+  $keys = array('site_db_name', 'site_db_passwd', 'site_db_user', 'site_db_host');
+  foreach ($keys as $key) {
+    $data['old_' . $key] = $data[$key];
   }
 
-  provision_set_active_db(_provision_master_db_url());
-    
-  if ( _provision_mysql_database_exists($data['site_db_name']) ) {
-    _provision_mysql_drop_database($data['site_db_name']);
-  }
-  
-  _provision_mysql_create_database($data['site_db_name']);
-  
-  if ( !_provision_mysql_database_exists($data['site_db_name']) ) {
-   provision_set_error(PROVISION_DB_ERROR);
-   provision_log("error", "Database could not be created.");
-   provision_set_active_db();
-   return FALSE;
-  }
-  
-  _provision_mysql_grant($data['site_db_name'], $data['site_db_username'], $data['site_db_passwd']);
-  _provision_mysql_grant($data['site_db_name'], $data['site_db_username'], $data['site_db_passwd'], $data['site_db_host']);
+  # generate a random password for use
+  $data['site_db_passwd'] = user_password(); 
+  $data['site_db_name'] = _provision_mysql_suggest_db_name($url, $data);
+  $data['site_db_user'] = $data['site_db_name']; 
 
-  if ($data['site_mysql_old_passwords']) {
-    _provision_mysql_old_password($data['site_db_username'], $data['site_db_passwd']);
-    _provision_mysql_old_password($data['site_db_username'], $data['site_db_passwd'], $data['site_db_host']);
+  $success = _provision_mysql_new_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
+  if (!$success) {
+    // store a backup of the credentials of the site.
+    foreach ($keys as $key) {
+      $data[$key] = $data['old_' . $key];
+    }
+    return false; # i really really need to dust up on my rollback code.
   }
-  _provision_mysql_flush();
-  provision_set_active_db();
-  #TODO : Test to confirm that the database is actually writeable. Taking this on faith for now.
+  _provision_mysql_import_dump($url, $data);
+
 }
 
 /**
@@ -139,88 +139,19 @@ function provision_mysql_provision_pre_install($url, &$data) {
  * This will drop the database, revoke the privileges and flush the privileges.
  */
 function provision_mysql_provision_delete($url, &$data) {
-  $data['site_db_host'] = ($data['site_db_host']) ? $data['site_db_host'] : variable_get('provision_db_host', 'localhost');
-  if ($data['site_id']) {
-    $data['site_db_name'] = 'site_' . $data['site_id'];
-    $data['site_db_username'] = $data['site_db_name']; // mysql has some really really stupid rules about who db / usernames, so site id is the safest.
-  }
-  else {
-    $data['site_db_name'] = ereg_replace("^www\.", "", str_replace('-', '_', str_replace(".", "", $url)));
-    $data['site_db_username'] = substr($data['site_db_name'], 0, 16);
-  }
-  provision_set_active_db(_provision_master_db_url());
-    
-  if ( _provision_mysql_database_exists($data['site_db_name']) ) {
-    provision_log("notice", "Dropping database");
-    _provision_mysql_drop_database($data['site_db_name']);
-  }
-  
-  if ( _provision_mysql_database_exists($data['site_db_name']) ) {
-   provision_set_error(PROVISION_DB_ERROR);
-   provision_log("error", "Database could not be destroyed.");
-   provision_set_active_db();
-   return FALSE;
-  }
-  
-  provision_log("notice", "Revoking privileges");
-  _provision_mysql_revoke($data['site_db_name'], $data['site_db_username']);
-  _provision_mysql_revoke($data['site_db_name'], $data['site_db_username'], $data['site_db_host']);
-
-  _provision_mysql_flush();
-  provision_set_active_db();
+  return _provision_mysql_destroy_site_db($data['site_db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
 }
+
+function provision_mysql_provision_post_restore($url, &$data) {
+  return _provision_mysql_destroy_site_db($data['old_site_db_name'], $data['old_db_user'], $data['old_db_passwd'], $data['old_db_host']);
+}
+
 
 function provision_mysql_provision_backup($url, &$data) {
   provision_log("backup", "Generating mysql dump for $url.");
-  provision_shell_exec("mysqldump -u%s -p%s %s > sites/%s/database.sql", $data['site_db_username'], $data['site_db_passwd'], $data['site_db_name'], $url); 
+  provision_shell_exec("mysqldump -u%s -p%s %s > sites/%s/database.sql", $data['site_db_user'], $data['site_db_passwd'], $data['site_db_name'], $url); 
   provision_shell_exec("cd sites/%; tar -rf %s database.sql; rm database.sql", $url, $data['backup_file']);
 }
-
-function _provision_mysql_database_exists($name) {
-  return db_result(db_query("SHOW DATABASES LIKE '%s'", $name));
-}
-
-function _provision_mysql_drop_database($name) {
-  db_query("DROP DATABASE `%s`", $name);
-}
-
-function _provision_mysql_create_database($name) {
-  db_query("CREATE DATABASE %s", $name);  
-}
-
-function _provision_mysql_can_create_database() {
-  $test = 'provision_test';
-  _provision_mysql_create_database($test);
-  if (_provision_mysql_database_exists($test)) {
-    _provision_mysql_drop_database($test);
-    return true;
-  }
-  return false;
-}
-
-function _provision_mysql_grant($name, $username, $password, $host = '') {
-  $host = ($host) ? $host : '%';
-  db_query("GRANT ALL PRIVILEGES ON %s.* TO %s@`%s` IDENTIFIED BY '%s'", $name, $username, $host, $password);
-}
-
-function _provision_mysql_revoke($name, $username, $host = '') {
-  $host = ($host) ? $host : '%';
-  db_query("REVOKE ALL PRIVILEGES ON %s.* FROM %s@`%s`", $name, $username, $host);
-}
-
-function _provision_mysql_old_password($username, $password, $host = '') {
-  $host = ($host) ? $host : '%';  
-  db_query("SET PASSWORD FOR '%s'@'%s' = OLD_PASSWORD('%s')", $username, $host, $password);
-}
-
-function _provision_mysql_flush() {
-  db_query("FLUSH PRIVILEGES");
-}
-
-function _provision_master_db_url($data = array()) {
-  return sprintf("%s://%s:%s@%s/mysql", variable_get('provision_db_type', 'mysqli'), variable_get('provision_db_user', 'root'), variable_get('provision_db_passwd', 'root'), variable_get('provision_db_host', 'localhost'));
-}
-
 
 /**
  * Implementation of hook_provision_verify
@@ -237,11 +168,7 @@ function provision_mysql_provision_verify() {
   provision_set_active_db();
 }
 
-function provision_mysql_pre_restore($url, $backup_file, &$data) {
-  
-}
-
-function provision_mysql_import_dump($url, $backup_file, &$data) {
 
 
-}
+
+
