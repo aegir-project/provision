@@ -257,7 +257,8 @@ function provision_get_site_data($url) {
     }
   }
   $site_data['site_url'] = $url;
-  $site_data['site_action_type'] = $args['commands'][1];
+  $site_data['action_type'] = $args['commands'][1];
+  $site_data['action_id'] = drush_get_option('action_id', null);
   $site_data['publish_path'] = PROVISION_DOCROOT_PATH;
   $site_data['site_profile'] = ($site_data['site_profile']) ? $site_data['site_profile'] : variable_get('provision_default_profile', 'default');
   $site_data['site_ip'] =  variable_get('provision_apache_server_ip', '127.0.0.1');
@@ -282,7 +283,7 @@ function provision_load_site_data($url) {
   # Load the configuration data.
   $conf_file = "sites/$url/site.php";
   if (file_exists($conf_file) && is_readable($conf_file)) {
-    require_once($conf_file);
+    require($conf_file);
     return (array) $data;
   }
   return false;
@@ -298,28 +299,39 @@ function provision_load_site_data($url) {
  */
 function provision_save_site_data($url, $data) {
   global $args;
+  $conf_file = "sites/$url/site.php";
     
   $old_data = provision_load_site_data($url);
-  
-  $conf_file = "sites/$url/site.php";
-  $fp = fopen($conf_file, "w+"); # Append to the end of the config file.
+
+  //initialize the file. this is lame, i know. but it will work.
+  if (!file_exists($conf_file)) {
+    $fp = fopen($conf_file, "a+"); # Append to the end of the config file.
+    fwrite($fp, "<?php\n");
+    fclose($fp);
+  } 
+
+  $fp = fopen($conf_file, "a+");
   if (!$fp) {
     provision_log("error", "Site config file could not be written");
     provision_set_error(PROVISION_PERM_ERROR);
   }
   else {
-    fwrite($fp, "<?php\n");
-    $action = array('id' => $data['action_id'], 
-                    'timestamp' => mktime(), 
-                    'action' => $data['site_action_type'], 
-                    'success' => $data['success']);
-    $line = "\n\n\$actions[] = " . var_export($action, TRUE) . ';';
-    fwrite($fp, $line);
-
+    fwrite($fp, "\n\n#" . format_date(mktime(), "large"));
+    if ($data['action_id']) {
+      $action = array('id' => $data['action_id'], 
+                      'timestamp' => mktime(), 
+                      'action' => $data['site_action_type'], 
+                      'status' => provision_get_error());
+      $line = "\n\$actions[] = " . str_replace(array("  ", "\n"), "", var_export($action, TRUE)) . ";";
+      fwrite($fp, $line);
+    }
     foreach ($data as $key => $value) {
-      if ($data[$key] != $old_data[$key]) {
-        $line = "\n\$data['$key'] = " . var_export($value, true) . ';';
-        fwrite($fp, $line);  
+
+      if (preg_match("/^site_/", $key)) {
+        if ($data[$key] != $old_data[$key]) {
+          $line = "\n\$data['$key'] = " . var_export($value, true) . ';';
+          fwrite($fp, $line);  
+        }
       }
     }
     fclose($fp);

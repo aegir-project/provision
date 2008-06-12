@@ -237,6 +237,11 @@ function provision_mysql_provision_verify() {
   provision_set_active_db();
 }
 
-function provision_mysql_restore($url, $backup_file, &$data) {
+function provision_mysql_pre_restore($url, $backup_file, &$data) {
   
+}
+
+function provision_mysql_import_dump($url, $backup_file, &$data) {
+
+
 }
