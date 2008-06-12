@@ -128,7 +128,7 @@ function _provision_drupal_create_settings_file($url, &$data) {
   
   # Change the permissions of the file
   provision_path("chmod", "sites/$url/settings.php", 0550);
-  provision_path("chgrp", "sites/$url/settings.php", provision_get_group_name(), 'worky', 'no worky', PROVISION_PERM_ERROR);
+  provision_path("chgrp", "sites/$url/settings.php", provision_get_group_name());
 }
 
 /**
