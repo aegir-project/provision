@@ -111,6 +111,7 @@ function provision_apache_provision_configure($node = null) {
     '#default_value' => ($node->web_group) ? $node->web_group : provision_get_group_name(),
     '#size' => 20,
     '#maxlength' => 75,
+    '#validate' => array('provision_apache_validate_web_group' => array()),
   );
   
   $form['config_path'] = array(
@@ -137,6 +138,7 @@ function provision_apache_provision_configure($node = null) {
   
   return $form;
 }
+
 
 /**
  * Implementation of hook_provision_templates
@@ -171,8 +173,6 @@ function _provision_apache_redirect_template() {
  * Implementation of hook_provision_pre_install
  */
 function provision_apache_provision_pre_install($url, &$data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
   return _provision_apache_create_vhost_config($url, $data);
 }
 
@@ -180,14 +180,10 @@ function provision_apache_provision_pre_install($url, &$data) {
  * Implementation of hook_provision_post_install
  */
 function provision_apache_provision_post_install($url, &$data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
   return _provision_apache_restart_apache();  
 }
 
 function provision_apache_provision_delete($url, &$data) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
   return _provision_apache_delete_vhost_config($url, $data);
 }
 
@@ -221,8 +217,7 @@ function provision_apache_provision_synch($url, &$data) {
  * Delete virtual host file
  */
 function _provision_apache_delete_vhost_config($url, $data) {
-  provision_check_path(PROVISION_VHOST_PATH . "/$url", "unlink", true, 
-      t("Removed apache virtual host configuration"));
+  provision_path("unlink", PROVISION_VHOST_PATH . "/$url", true, t("Removed apache virtual host configuration"));
 }
 
 /**
@@ -233,7 +228,7 @@ function _provision_apache_create_vhost_config($url, $data, $template = null) {
     $template = variable_get('provision_apache_vhost_template', _provision_apache_default_template());
   }
   provision_log("Notice", t("Generate virtual host configuration file."));
-  $writable = provision_check_path(PROVISION_VHOST_PATH, "writable", true ,
+  $writable = provision_path("writable", PROVISION_VHOST_PATH, true ,
       t("Virtual host configuration path is writable."),
       t("Virtual host configuration path is not writable."), 
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
@@ -260,29 +255,46 @@ function _provision_apache_restart_apache() {
 }
 
 function provision_apache_provision_verify() {
-  $exists = provision_check_path(PROVISION_VHOST_PATH, "exists", true ,
+  $exists = provision_path("exists", PROVISION_VHOST_PATH, true ,
     t("Virtual Host configuration path exists."),
     t("Virtual Host configuration path does not exist."));
   if (!$exists) {
-    $made = provision_check_path(PROVISION_VHOST_PATH, "mkdir", true, 
+    $made = provision_path("mkdir", PROVISION_VHOST_PATH, true, 
         t("Virtual host configuration path has been created."),
         t("Virtual host configuration path could not be created."), 
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
   }
   else {
-    $writable = provision_check_path(PROVISION_VHOST_PATH, "writable", true ,
+    $writable = provision_path("writable", PROVISION_VHOST_PATH, true ,
         t("Virtual host configuration path is writable."),
         t("Virtual host configuration path is not writable."), 
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+
     if (!$writable) {
-      provision_check_path(PROVISION_VHOST_PATH, "chown", provision_get_script_owner(), 
-        t("Changed ownership of <code>%path</code>", array("%path" => $path)),
-        t("Could not change ownership <code>%path</code>", array("%path" => $path)),
+      provision_path("chown", PROVISION_VHOST_PATH, provision_get_script_owner(), 
+        t("Changed ownership of <code>@path</code>"),
+        t("Could not change ownership <code>@path</code>"),
         PROVISION_PERM_ERROR);
-      provision_check_path(PROVISION_VHOST_PATH, "chmod", 0700, 
-        t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => 0700)),
-        t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' => 0700)),
+
+      provision_path("chmod", PROVISION_VHOST_PATH, 0700, 
+        t("Changed permissions of <code>@path</code> to @confirm"),
+        t("Could not change ownership <code>@path</code> to @confirm"),
         PROVISION_PERM_ERROR );
     }
   }
+}
+
+/**
+ * Implementation of hook_provision_pre_restore
+ */
+function provision_apache_provision_pre_restore($url, &$data) {
+  global $base_url; # XXX: hack, i don't know where this comes from, but it's the url I want (hostmaster.koumbit.net)
+  $data['redirect_url'] = variable_get('provision_apache_maintenance_url', $base_url . '/provision/maintenance');
+  _provision_apache_create_vhost_config($url, $data, _provision_apache_redirect_template());
+  _provision_apache_restart_apache();
+}
+
+function provision_apache_provision_post_restore($url, &$data) {
+  _provision_apache_create_vhost_config($url, $data);
+  _provision_apache_restart_apache();
 }

@@ -33,14 +33,15 @@
 *   rename  - Change the url of a site. This requires moving of files, and numerous other issues.
 */
 
+  // Include the provisioning API. 
+  include_once('provision.inc');
+  include_once('provision.path.inc');
+
 
 /** 
  * Implementation of hook_init
  */
 function provision_init() {
-  // Include the provisioning API. 
-  include_once('provision.inc');
-
   // Set up defines for platform
   provision_init_paths();
 }
@@ -94,6 +95,15 @@ function provision_menu($may_cache = true) {
       'type' => MENU_CALLBACK,
       'access' => user_access('access content'),
     );
+    $items[] = array(
+      'path' => 'provision/maintenance',
+      'title' => t('Site is undergoing maintenance.'),
+      'description' => t('Page shown when a site is being restored or moved etc.'),
+      'callback' => 'provision_site_maintenance',
+      'type' => MENU_CALLBACK,
+      'access' => user_access('access content'),
+    );
+
   }
   return $items;
 }
@@ -201,6 +211,10 @@ function provision_help_requirements() {
 
 function provision_disabled_site() {
   return "<p>This site was disabled by the site administrators.</p>";
+}
+
+function provision_site_maintenance() {
+  return "<p>This site is being worked on presently. Check back later.</p>";
 }
 
 /**
@@ -558,50 +572,56 @@ function _provision_import($url = null) {
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
 function _provision_verify($url = '') {
-  $exists = provision_check_path(PROVISION_CONFIG_PATH, "exists", true ,
+  $exists = provision_path("exists",PROVISION_CONFIG_PATH, true ,
     t("Provision configuration path exists."),
     t("Provision configuration path does not exist."));
+
   if (!$exists) {
-    $made = provision_check_path(PROVISION_CONFIG_PATH, "mkdir", true,
+    $made = provision_path("mkdir", PROVISION_CONFIG_PATH, true,
         t("Provision configuration path has been created."),
         t("Provision configuration could not be created."),
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
   }
 
-  provision_check_path(PROVISION_CONFIG_PATH, "writable", true ,
+  provision_path("writable", PROVISION_CONFIG_PATH, true ,
       t("Provision configuration path is writable."),
       t("Provision configuration path is not writable."), 
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-  provision_check_path(PROVISION_CONFIG_PATH, "chown", provision_get_script_owner(), 
-    t("Changed ownership of <code>%path</code>", array("%path" => $path)),
-    t("Could not change ownership <code>%path</code>", array("%path" => $path)),
-    PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
-  provision_check_path(PROVISION_CONFIG_PATH, "chmod", 0700, 
-    t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => sprintf('%o', 0700))),
-    t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' =>  sprintf('%o', 0700))),
+
+  provision_path("chown", PROVISION_CONFIG_PATH, provision_get_script_owner(), 
+    t("Changed ownership of <code>@path</code>"),
+    t("Could not change ownership <code>@path</code>"),
     PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
 
-  $exists = provision_check_path(PROVISION_BACKUP_PATH, "exists", true ,
+  provision_path("chmod", PROVISION_CONFIG_PATH, 0700, 
+    t("Changed permissions of <code>@path</code> to @confirm"),
+    t("Could not change ownership <code>@path</code> to @confirm"),
+    PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
+
+  $exists = provision_path("exists", PROVISION_BACKUP_PATH, true ,
     t("Provision backup path exists."),
     t("Provision backup path does not exist."));
+
   if (!$exists) {
-    $made = provision_check_path(PROVISION_BACKUP_PATH, "mkdir", true,
+    $made = provision_path("mkdir", PROVISION_BACKUP_PATH, true,
         t("Provision backup path has been created."),
         t("Provision backup could not be created."),
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
   }
 
-  provision_check_path(PROVISION_BACKUP_PATH, "writable", true ,
+  provision_path("writable", PROVISION_BACKUP_PATH, true ,
       t("Provision backup path is writable."),
       t("Provision backup path is not writable."), 
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-  provision_check_path(PROVISION_BACKUP_PATH, "chown", provision_get_script_owner(), 
-    t("Changed ownership of <code>%path</code>", array("%path" => $path)),
-    t("Could not change ownership <code>%path</code>", array("%path" => $path)),
+
+  provision_path("chown", PROVISION_BACKUP_PATH, provision_get_script_owner(), 
+    t("Changed ownership of <code>@path</code>"),
+    t("Could not change ownership <code>@path</code>"),
     PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
-  provision_check_path(PROVISION_BACKUP_PATH, "chmod", 0700, 
-    t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => sprintf('%o', 0700))),
-    t("Could not change ownership <code>%path</code> to %perms", array("%path" => $path, '%perms' =>  sprintf('%o', 0700))),
+
+  provision_path("chmod", PROVISION_BACKUP_PATH, 0700, 
+    t("Changed permissions of <code>@path</code> to @confirm"),
+    t("Could not change ownership <code>@path</code> to @confirm"),
     PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );        
   
   $data = array();
@@ -612,6 +632,25 @@ function _provision_verify($url = '') {
   provision_output($url, $data);
 }
 
+/**
+ * Restore command implementation
+ *
+ * This command when called will 
+ *   1. Make a backup of the current site, before modifications are made.
+ *   2. Temporarily disable the site by causing apache to redirect to a help page. Restarting apache is required.
+ *   3. Extract the backup that is being restored to to a temporary folder in the sites directory.
+ *   4. Create a new database, belonging to the site's user, and switch it around with the current site's database.
+ *   5. Import the old database and site.php details.
+ *   6. Switch around the sites directory of the current site and the backup being restored.
+ *   7. Regenerate configuration files.
+ *   8. TODO: diagnostic to test that everything is ok?
+ *   9. Remove the temporary redirect and restart apache so the previous site is available again.
+ *   10. Remove the extranuous db and duplicate site directory.
+ *
+ * If at any time an error occurs, before step 9. It should reverse all the changes it has made,
+ * and leave the current site directory and database in the right place, and remove all cruft that
+ * was created by this process.
+ */
 function _provision_restore($site, $backup_file) {
   if (!_provision_drupal_site_installed($url)) {
     provision_log("Error", "Site has not been installed yet.");
@@ -619,15 +658,23 @@ function _provision_restore($site, $backup_file) {
     provision_output($url, $data);
   }
   if (!is_file($backup_file)) {
-    provision_log("File specified does not exist.");
-    provision_set_error(PROVISION_PERM_ERROR);
+    provision_path("exists", $backup_file, true,
+      t("Restoring site from @path"),
+      t("Could not find backup file @path"),
+      PROVISION_FRAMEWORK_ERROR);
     provision_output($url, $data);
   }
+
   $data = provision_get_site_data($url);
   _provision_backup_site($url, $data); # Backup site for posterity, before rolling back.
+
+  $rolled_back = provision_invoke("pre_restore", $url, $data); // if we need to make the site unavailable etc.
   
-  provision_shell_exec("tar -zxf %s -C %s/%s.tmp", $backup_file, PROVISION_BACKUP_PATH, $url); # check out old directory.
-  $rolled_back = provision_invoke("restore", $url, $data);
+  provision_shell_exec("tar -zxf %s -C %s/%s.restore", $backup_file, PROVISION_SITES_PATH, $url); # check out old directory.
+  $rolled_back = provision_invoke("restore", $url, $data); // do the actual database/file manipulation
+  _provision_recursive_delete(PROVISION_BACKUP_PATH . '/' . $url . '.tmp');
+
+  $rolled_back = provision_invoke("post_restore", $url, $data); // do the actual database/file manipulation
 
   $data['site_installed'] = TRUE;
   provision_save_site_data($url, $data);  

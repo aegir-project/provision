@@ -258,8 +258,7 @@ function provision_get_site_data($url) {
   }
   $site_data['site_url'] = $url;
   $site_data['site_action_type'] = $args['commands'][1];
-  $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
-  $site_data['publish_path'] =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
+  $site_data['publish_path'] = PROVISION_DOCROOT_PATH;
   $site_data['site_profile'] = ($site_data['site_profile']) ? $site_data['site_profile'] : variable_get('provision_default_profile', 'default');
   $site_data['site_ip'] =  variable_get('provision_apache_server_ip', '127.0.0.1');
   $site_data['site_port'] =  variable_get('provision_apache_server_ip', 80);
@@ -375,21 +374,21 @@ function provision_render_config($template, $variables) {
  */
 
 /**
- * Confirm that provision is running through Drush.
- *
- * A safety mechanism to ensure that the drush commands are not run through the web front end.
- */
-
-function provision_confirm_drush() {
-  return true;
-}
-
-/**
  * Provide defines for all the major paths.
  * Avoids duplication and possible errors in duplication
  */
 function provision_init_paths() {
-  $path = ($_SERVER['PWD']) ? $_SERVER['PWD'] : $_SERVER['DOCUMENT_ROOT'];
+  if (function_exists('drush_get_option')) {
+    $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
+  }
+  else {
+    $docroot = $_SERVER['pwd'];
+  }
+
+  $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
+  define('PROVISION_DOCROOT_PATH', rtrim($path, '/'));
+  define('PROVISION_SITES_PATH', rtrim($path, '/'));
+  
   $parts = explode("/", rtrim($path, '/'));
   array_pop($parts);
 
@@ -399,6 +398,41 @@ function provision_init_paths() {
   define('PROVISION_DRUSHRC_PATH', PROVISION_CONFIG_PATH . '/drushrc.d');
 }
 
+
+/**
+ * Remove files or directories, recursively
+ *
+ * This was taken from imagecache.module, with slight modifications:
+ * - carry error codes along the way (returns true only if all operations return true)
+ * - remove any type of files encountered (not just links, files and dirs)
+ * - safety checking since we don't necessarly trust the removed files
+ */
+function _provision_recursive_delete($path) {
+  if (is_dir($path)) {
+    $d = dir($path);
+    while (($entry = $d->read()) !== false) {
+      if ($entry == '.' || $entry == '..') continue;
+      $entry_path = $path .'/'. $entry;
+      if (file_check_location($entry_path, $path)) {
+        $ret = _provision_recursive_delete($entry_path);
+      } else {
+        $ret = 0;
+      }
+    }
+
+    $rm = provision_path("rmdir", $path, true,
+      t("Deleting @path directory sucessful.", array('@path' => $path)),
+      t("Deleting @path directory failed.", array('@path' => $path)));
+
+    $ret = $ret && $rm;
+  }
+  else {
+    $rm = provision_path("unlink", $path, true, null, 
+      t("Deleting @path file failed.", array('@path' => $path)));
+    $ret = $ret && $rm;
+  }
+  return $ret;
+}
 
 /**
  * Wrapper around drush_shell_exec to provide sprintf functionality with some more safety.
@@ -462,65 +496,68 @@ function provision_get_group_name() {
 }
 
 /**
- * Perform tests on directory.
+ * Check whether a user is a member of a group.
  *
- * Perform test on path, and log error messages / codes on failure.
+ * @param user
+ *   username or user id of user.
+ * @param group
+ *   groupname or group id of group.
+ *
+ * @return
+ *   Boolean. True if user does belong to group, 
+ *   and false if the user does not belong to the group, or either the user or group do not exist.
  */
-function provision_check_path($path, $type, $test = true, $succeed_message = '', $fail_message = '', $error_codes = null) {
-  # The code style is a bit weird here, but it's a bit easier to read this way.
-  switch ($type) {
-    case "writeable" : 
-    case "writable" : $value = is_writable($path); 
-                      break;
-    case "exists"   : $value = file_exists($path); 
-                      break;
-    case "readable" : $value = is_readable($path); 
-                      break;
-    case "is_dir"   : $value = is_dir($path); 
-                      break;
-    case "owner"    : $info = posix_getpwuid(fileowner($path));
-                      $value = $info['name'];
-                      break;        
-    case "group"    : $value = filegroup($path); 
-                      break;
-    case "mkdir"    : $value = mkdir($path, 0770, true); 
-                      break;
-    case "chmod"    : chmod($path, $test);
-                      $test = (int) sprintf('%o', $test); # needs to be reset to oct
-                      $value =  (int) substr(sprintf('%o', fileperms($path)), -4);
-                      break;
-    case "chown"    : chown($path, $test);
-                      if (!is_numeric($test)) {
-		        $info = posix_getpwnam($test);
-			$test = $info['uid'];
-		      }
-                      $value = fileowner($path);
-                      break;
-    case "chgrp"    : chgrp($path, $test);
-                      if (!is_numeric($test)) {
-		        $info = posix_getgrnam($test);
-			$test = $info['gid'];
-		      }
-                      $value = filegroup($path);
-                      break;
-    case "unlink"   : $value = (file_exists($path)) ? unlink($path) : false; 
-                      break;
-    case "rmdir"    : $value = (file_exists($path) && is_dir($path)) ? rmdir($path) : false;
-                      break;
-  }
-  $status = ($value == $test);
-  if ($status) {
-    if ($succeed_message) {
-      provision_log("message", $succeed_message);      
+function provision_user_in_group($user, $group) {
+  // TODO: make these singletons with static variables for caching.
+  $user = provision_posix_username($user);
+  $group = provision_posix_groupname($group);
+  if ($user && $group) {
+    $info = posix_getgrnam($group);
+    if (in_array($user, $info['members'])) {
+      return TRUE;
     }
+  }
+  return false;
+}
+
+/**
+ * Return the valid system username for $user.
+ *
+ * @return
+ *   Returns the username if found, otherwise returns false
+ */
+function provision_posix_username($user) {
+  // TODO: make these singletons with static variables for caching.
+  // we do this both ways, so that the function returns null if no such user was found.
+  if (is_numeric($user)) {
+    $info = posix_getpwuid($user);
+    $user = $info['name'];
   }
   else {
-    if ($error_codes) {
-      provision_set_error($error_codes);
-    }
-    if ($fail_message) {
-      provision_log("error", $fail_message . " ($value != $test)");
-    }
+    $info = posix_getpwnam($user);
+    $user = $info['name'];
   }
-  return $status;
+  return $user;
 }
+
+/**
+ * Return the valid system groupname for $group.
+ *
+ * @return
+ *   Returns the groupname if found, otherwise returns false
+ */
+function provision_posix_groupname($group) {
+  // TODO: make these singletons with static variables for caching.
+  // we do this both ways, so that the function returns null if no such user was found.
+  if (is_numeric($user)) {
+    $info = posix_getgrgid($group);
+    $group = $info['name'];
+  }
+  else {
+    $info = posix_getgrnam($group);
+    $group = $info['name'];
+  }
+  return $group;
+}
+
+

@@ -24,7 +24,6 @@ function provision_drupal_provision_service() {
  * @TODO: PROPER profile support
 function provision_drupal_provision_configure() {
 
-  $template = _provision_drupal_default_template();
   $profiles = file_scan_directory('./profiles', '\.profile$', array('.', '..', 'CVS'), 0, TRUE, 'name', 0);
   // Don't need to choose profile if only one available.
   if (sizeof($profiles) == 1) {
@@ -118,8 +117,8 @@ function _provision_drupal_default_template() {
  *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file($url, &$data) {
-  if (provision_check_path("sites/$url/settings.php", "exists")) {
-    provision_check_path("sites/$url/settings.php","chmod",  0750);
+  if (provision_path("exists", "sites/$url/settings.php")) {
+    provision_path("chmod", "sites/$url/settings.php", 0750);
   }
 
   $fp = fopen("sites/$url/settings.php", "w");
@@ -128,8 +127,8 @@ function _provision_drupal_create_settings_file($url, &$data) {
   fclose($fp);
   
   # Change the permissions of the file
-  provision_check_path("sites/$url/settings.php", "chmod", 0550);
-  provision_check_path("sites/$url/settings.php", "chgrp", provision_get_group_name());
+  provision_path("chmod", "sites/$url/settings.php", 0550);
+  provision_path("chgrp", "sites/$url/settings.php", provision_get_group_name(), 'worky', 'no worky', PROVISION_PERM_ERROR);
 }
 
 /**
@@ -150,20 +149,23 @@ function _provision_drupal_create_directories($url, $profile = null) {
 
   foreach ($paths as $path => $perm) {
     if (!is_dir($path)) {
-      provision_check_path($path, "mkdir", true, 
-        t("Created <code>%path</code>", array("%path" => $path)),
-        t("Could not create <code>%path</code>", array("%path" => $path)),
+      provision_path("mkdir", $path, true, 
+        t("Created <code>@path</code>"),
+        t("Could not create <code>@path</code>"),
         PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
     }
-    provision_check_path($path, "chown", provision_get_script_owner(), 
-      t("Changed ownership of <code>%path</code>", array("%path" => $path)),
-      t("Could not change ownership <code>%path</code>", array("%path" => $path)));#, PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
-    provision_check_path($path, "chgrp", provision_get_group_name(),
-      t("Changed group ownership of <code>%path</code>", array("%path" => $path)),
-      t("Could not change group ownership <code>%path</code>", array("%path" => $path)));
-    provision_check_path($path, "chmod", $perm, 
-      t("Changed permissions of <code>%path</code> to %perms", array("%path" => $path, '%perms' => $perm)),
-      t("Could not change permissions <code>%path</code> to %perms", array("%path" => $path, '%perms' => $perm)));#, PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
+    provision_path("chown", $path, provision_get_script_owner(), 
+      t("Changed ownership of <code>@path</code>"),
+      t("Could not change ownership <code>@path</code>"),
+      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
+    provision_path("chgrp", $path, provision_get_group_name(),
+      t("Changed group ownership of <code>@path</code>"),
+      t("Could not change group ownership <code>@path</code>"));
+
+    provision_path("chmod", $path, $perm, 
+      t("Changed permissions of <code>@path</code> to @confirm"),
+      t("Could not change permissions <code>@path</code> to @confirm"),
+      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
   }
 }
 
@@ -186,7 +188,6 @@ function _provision_drupal_switch_active_site($url = null) {
     $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF'];
     $_SERVER['REMOTE_ADDR'] = NULL;
     $_SERVER['REQUEST_METHOD'] = NULL;
-
 
     /**
      * This code is sourced from bootstrap.inc. I am trying to avoid patching core, but it might
@@ -306,20 +307,20 @@ function _provision_drupal_install_schema($profile) {
  * implementation of provision_verify
  */
 function provision_drupal_provision_verify($url, &$data) {
-  provision_check_path("sites", "writable", true, t("Drupal sites directory is writable by the provisioning script"),
+  provision_path("writable", "sites", true, t("Drupal sites directory is writable by the provisioning script"),
     t("Drupal sites directory is not writable by the provisioning script"), PROVISION_PERM_ERROR);
 
-  $exists = provision_check_path(PROVISION_DRUSHRC_PATH, "exists", true ,
+  $exists = provision_path("exists", PROVISION_DRUSHRC_PATH, true ,
     t("Virtual Host configuration path exists."),
     t("Virtual Host configuration path does not exist."));
   if (!$exists) {
-    $made = provision_check_path(PROVISION_DRUSHRC_PATH, "mkdir", true, 
+    $made = provision_path("mkdir", PROVISION_DRUSHRC_PATH, true, 
         t("Virtual host configuration path has been created."),
         t("Virtual host configuration path could not be created."), 
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
   }
   else {
-    $writable = provision_check_path(PROVISION_DRUSHRC_PATH, "writable", true ,
+    $writable = provision_path("writable", PROVISION_DRUSHRC_PATH, true ,
         t("Virtual host configuration path is writable."),
         t("Virtual host configuration path is not writable."), 
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
@@ -334,7 +335,6 @@ function provision_drupal_provision_verify($url, &$data) {
   // Find theme engines
   $data['engines'] = drupal_system_listing('\.engine$', 'themes/engines');
 
-
   $data['themes'] = system_theme_data();
   
   $sites = provision_drupal_find_sites(); 
@@ -343,44 +343,10 @@ function provision_drupal_provision_verify($url, &$data) {
 }
 
 /**
- * Remove files or directories, recursively
- *
- * This was taken from imagecache.module, with slight modifications:
- * - carry error codes along the way (returns true only if all operations return true)
- * - remove any type of files encountered (not just links, files and dirs)
- * - safety checking since we don't necessarly trust the removed files
- */
-function _provision_drupal_recursive_delete($path) {
-  if (is_dir($path)) {
-    $d = dir($path);
-    while (($entry = $d->read()) !== false) {
-      if ($entry == '.' || $entry == '..') continue;
-      $entry_path = $path .'/'. $entry;
-      if (file_check_location($entry_path, $path)) {
-        $ret = _provision_drupal_recursive_delete($entry_path);
-      } else {
-        $ret = 0;
-      }
-    }
-    $rm = rmdir($path);
-    provision_log( ($rm) ? 'notice' : 'error', t("deleting @path directory @status", array('@path' => $path, '@status' => ($rm) ? 'successful' : 'failed')));
-    $ret = $ret && $rm;
-  }
-  else {
-    $rm = unlink($path);
-    if (!$rm) {
-      provision_log('error', "deleting $path file failed");
-    }
-    $ret = $ret && $rm;
-  }
-  return $ret;
-}
-
-/**
  * Remove any directories for the site in sites/
  */
 function provision_drupal_provision_delete($url, $data) {
-  return _provision_drupal_recursive_delete("sites/$url");
+  return _provision_recursive_delete("sites/$url");
 }
 
 function provision_drupal_find_sites() {
@@ -389,14 +355,14 @@ function provision_drupal_find_sites() {
     $path = explode("/", $file);
     array_pop($path);
     $sites[array_pop($path)] = $file;
-
   }
   return $sites;
 }
 
-function provision_drupal_restore($url, $backup_file, &$data) {
-  provision_shell_exec("tar -zxf %s -C sites/%s", $backup_file, $url); # checkout over old sites dir.
+function provision_drupal_provision_pre_restore($url, $backup_file, &$data) {
+
 }
+
 
 function _provision_drupal_get_cvs_versions($files) {
   foreach ($files as $modulename => $file) {
@@ -434,7 +400,6 @@ function _provision_drupal_import_site($url) {
   
   include_once("sites/$url/settings.php");
   
-  
   if ($parts = @parse_url($db_url)) {
     $data['site_db_type'] = $parts['scheme'];
     $data['site_db_user'] = $parts['user'];
@@ -447,3 +412,4 @@ function _provision_drupal_import_site($url) {
   } 
   return $data;
 }
+
