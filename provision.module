@@ -6,7 +6,7 @@
 * This module provides a framework for a Drupal site to manage and install new Drupal sites, using the command line
 * Drush utility. 
 *
-* It allows for pluggable 'provisioning modules' that can extend and modify the actions that are taken during installation.
+* It allows for pluggable 'provisioning modules' that can extend and modify the tasks that are taken during installation.
 *
 * Each site has the following commands that can be run on it.
 *
@@ -329,7 +329,7 @@ function provision_install_cmd($url) {
 }
 
 /**
- * Drush action. 
+ * Drush task. 
  *
  * Calls hook_provision_pre_install().
  * Also responsible for calling creating site directory layout, and the drupal settings file.

@@ -28,7 +28,7 @@
  *   A reference to the associated array containing the data for the site. This needs to be a reference, 
  *   because the modules might provide additional information about the site.
  * @param rollback
- *   A boolean specifying whether or not the entire action needs to be rolled back. 
+ *   A boolean specifying whether or not the entire task needs to be rolled back. 
  *   This is used specifically in commands which implement multiple hooks, such as 'install',
  *   which implements 'pre_install', 'install' and 'post_install' hooks.
  * @return
@@ -97,7 +97,7 @@ function provision_output($url = null, $data = array(), $extra = null) {
   }
   else {
     if ($return) {
-      if ($output = theme("provision_" . $data['action_type'] . "_output", $url, $return)) {
+      if ($output = theme("provision_" . $data['task_type'] . "_output", $url, $return)) {
         return $output;
       } else {
         /** TODO : return a cleanly formatted display of all the necessary information */ 
@@ -173,7 +173,7 @@ function provision_cmp_error($error) {
  * @{
  * Functions that allow the provisioning framework to log messages to be provided to the front end.
  *
- * These functions are primarily for diagnostic purposes, but also provide an overview of actions that were taken
+ * These functions are primarily for diagnostic purposes, but also provide an overview of tasks that were taken
  * by the framework during creation of a site.
  */
 
@@ -257,8 +257,8 @@ function provision_get_site_data($url) {
     }
   }
   $site_data['site_url'] = $url;
-  $site_data['action_type'] = $args['commands'][1];
-  $site_data['action_id'] = drush_get_option('action_id', null);
+  $site_data['task_type'] = $args['commands'][1];
+  $site_data['task_id'] = drush_get_option('task_id', null);
   $site_data['publish_path'] = PROVISION_DOCROOT_PATH;
   $site_data['site_profile'] = ($site_data['site_profile']) ? $site_data['site_profile'] : variable_get('provision_default_profile', 'default');
   $site_data['site_ip'] =  variable_get('provision_apache_server_ip', '127.0.0.1');
@@ -317,11 +317,11 @@ function provision_save_site_data($url, $data) {
   }
   else {
     $timestamp = mktime();
-    $aid = $data['action_id'];
+    $aid = $data['task_id'];
     fwrite($fp, "\n\n#" . format_date($timestamp, "large"));
     if ($aid) {
-      $action = array('action' => $data['site_action_type'], 'status' => provision_get_error());
-      $line = "\n\$actions[$aid][$timestamp] = " . str_replace(array("  ", "\n"), "", var_export($action, TRUE)) . ";";
+      $task = array('task' => $data['site_task_type'], 'status' => provision_get_error());
+      $line = "\n\$tasks[$aid][$timestamp] = " . str_replace(array("  ", "\n"), "", var_export($task, TRUE)) . ";";
       fwrite($fp, $line);
     }
     foreach ($data as $key => $value) {
@@ -363,7 +363,7 @@ function provision_value_list() {
   $values['site_db_password'] = t("Password to access database for site");
   $values['site_db_name'] = t("Database name for the site");
   $values['site_profile'] = t("Install profile of site");
-  $values['site_action_type'] = t("What type of action has been used. Only used in conjuction with hosting front end");
+  $values['site_task_type'] = t("What type of task has been used. Only used in conjuction with hosting front end");
 
   return $values;
 }

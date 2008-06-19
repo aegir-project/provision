@@ -9,9 +9,9 @@
  */
 
 /**
- * Perform actions on a path.
+ * Perform tasks on a path.
  *
- * Perform actions on a path, and logs error messages / codes on success or failure.
+ * Perform tasks on a path, and logs error messages / codes on success or failure.
  * This function will call another function which defines the functionality,
  * and exists to provide a consistent interface for file operations with error logging
  * integration.
@@ -43,7 +43,7 @@
  *    Confirm that the final value of the file operation matches this value.
  *    This value defaults to true, which is sufficient for most file operations.
  *
- *    Certain actions such as chmod, chown and chgp will attempt to change the
+ *    Certain tasks such as chmod, chown and chgp will attempt to change the
  *    properties of $path to match the value in $confirm, and then test that
  *    the change was completed succesfully afterwards.
  *    
