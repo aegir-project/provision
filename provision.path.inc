@@ -213,6 +213,27 @@ function provision_path_switch_paths($path1, &$path2, &$reason) {
   return $path1;
 }
 
+
+function provision_path_extract($path, &$target, &$reason) {
+  if (file_exists($path) && is_readable($path)) {
+    if (is_writeable(dirname($target)) && !file_exists($target) && !is_dir($target)) {
+      mkdir($target);
+      provision_shell_exec("tar -zxf %s -C %s", $path, $target);
+      $target = TRUE;
+      return TRUE;
+    }
+    else {
+      $reason = t("The target directory could not be written to");
+      return false;
+    }
+  }
+  else {
+    $reason = t("Backup file could not be opened");
+    return false;
+  }
+
+}
+
 /**
 *@} end filegroup
  */

@@ -343,7 +343,8 @@ function provision_drupal_provision_verify($url, &$data) {
 }
 
 /**
- * Remove any directories for the site in sites/
+ * Remove any directories for the site in sites
+ * This can't be rolled back. so won't even try.
  */
 function provision_drupal_provision_delete($url, $data) {
   return _provision_recursive_delete("sites/$url");
@@ -358,11 +359,6 @@ function provision_drupal_find_sites() {
   }
   return $sites;
 }
-
-function provision_drupal_provision_pre_restore($url, $backup_file, &$data) {
-
-}
-
 
 function _provision_drupal_get_cvs_versions($files) {
   foreach ($files as $modulename => $file) {

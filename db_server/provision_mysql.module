@@ -8,7 +8,7 @@
  */
 
 
-include_once('provision_mysql.inc');
+include_once('provision.mysql.inc');
 
 /**
  * @ingroup provisionui
@@ -106,10 +106,18 @@ function provision_mysql_provision_pre_install($url, &$data) {
   $data['site_db_user'] = $data['site_db_name']; 
 
   return _provision_mysql_new_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
-
 }
 
-function provision_mysql_provision_pre_restore($url, $backup_file, &$data) {
+function provision_mysql_provision_pre_install_rollback($url, &$data) {
+  _provision_mysql_destroy_site_db($data['site_db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
+  unset($data['site_db_host']);
+  unset($data['site_db_type']);
+  unset($data['site_db_passwd']);
+  unset($data['site_db_user']);
+  unset($data['site_db_name']);
+}
+
+function provision_mysql_provision_pre_restore($url, &$data) {
   // store a backup of the credentials of the site.
   $keys = array('site_db_name', 'site_db_passwd', 'site_db_user', 'site_db_host');
   foreach ($keys as $key) {
@@ -122,15 +130,18 @@ function provision_mysql_provision_pre_restore($url, $backup_file, &$data) {
   $data['site_db_user'] = $data['site_db_name']; 
 
   $success = _provision_mysql_new_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
-  if (!$success) {
-    // store a backup of the credentials of the site.
-    foreach ($keys as $key) {
-      $data[$key] = $data['old_' . $key];
-    }
-    return false; # i really really need to dust up on my rollback code.
+  if ($success) {
+    _provision_mysql_import_dump($data['restore_file'], $data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
   }
-  _provision_mysql_import_dump($url, $data);
+}
 
+function provision_mysql_provision_pre_restore_rollback($url, &$data) {
+  _provision_mysql_destroy_site_db($data['site_db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
+
+  //Restore the original database credentials of the site.
+  foreach ($keys as $key) {
+    $data[$key] = $data['old_' . $key];
+  }
 }
 
 /**
@@ -142,8 +153,10 @@ function provision_mysql_provision_delete($url, &$data) {
   return _provision_mysql_destroy_site_db($data['site_db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
 }
 
+// Rollback doesn't apply here yet. Unless we trigger a restore of the first dump
+// made. Which could go on infinitely if something is really long.
 function provision_mysql_provision_post_restore($url, &$data) {
-  return _provision_mysql_destroy_site_db($data['old_site_db_name'], $data['old_db_user'], $data['old_db_passwd'], $data['old_db_host']);
+  return _provision_mysql_destroy_site_db($data['old_site_db_name'], $data['old_site_db_user'], $data['old_site_db_passwd'], $data['old_site_db_host']);
 }
 
 
@@ -155,6 +168,8 @@ function provision_mysql_provision_backup($url, &$data) {
 
 /**
  * Implementation of hook_provision_verify
+ *
+ * Can't be rolled back.
  */
 function provision_mysql_provision_verify() {
   provision_set_active_db(_provision_master_db_url());

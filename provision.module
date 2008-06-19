@@ -23,13 +23,13 @@
 *   disable - Disable an installed Drupal site. Changes the virtual host config file so that it redirects to provision_disabled_site_redirect_url
 *   enable  - Re-enable a site that has already been disabled. Recreates the virtual host file.
 *   delete -  Generates a back up of the site, and then removes all references to it.
+*   restore - Revert to a previous backup of the site.
 *
 * Not implemented yet :
 *   upgrade - Accepts a site package (backup) as argument, and redeploys it, running the upgrade processes on it.
 *             Uses hook_provision_pre_upgrade(), hook_provision_upgrade() and hook_provision_post_upgrade() hooks,
 *             and allows clean roll back if any errors occur. Will include stringent checking of module versions,
 *             and allow unit tests to be run.
-*   restore - Revert to a previous backup of the site.
 *   rename  - Change the url of a site. This requires moving of files, and numerous other issues.
 */
 
@@ -47,6 +47,7 @@
  * program, but are configurable.
  */
 function provision_init() {
+
   // Set up defines for platform
   if (function_exists('drush_get_option')) {
     $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
@@ -54,17 +55,19 @@ function provision_init() {
   else {
     $docroot = $_SERVER['pwd'];
   }
-
+  
   $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
   define('PROVISION_DOCROOT_PATH', rtrim($path, '/'));
-  define('PROVISION_SITES_PATH', rtrim($path, '/'));
+  define('PROVISION_SITES_PATH', rtrim($path, '/') . '/sites');
   
   $parts = explode("/", rtrim($path, '/'));
   array_pop($parts);
   define('PROVISION_PARENT_PATH', rtrim(implode("/" , $parts), '/'));
 
-  define('PROVISION_BACKUP_PATH', variable_get('provision_backup_path', PROVISION_PARENT_PATH . '/backups'));
-  define('PROVISION_CONFIG_PATH', variable_get('provision_config_path', PROVISION_PARENT_PATH . '/config')) ;
+  define('PROVISION_BACKUP_PATH', 
+    variable_get('provision_backup_path', PROVISION_PARENT_PATH . '/backups'));
+  define('PROVISION_CONFIG_PATH', 
+    variable_get('provision_config_path', PROVISION_PARENT_PATH . '/config')) ;
   define('PROVISION_VHOST_PATH', PROVISION_CONFIG_PATH . '/vhost.d');
   define('PROVISION_DRUSHRC_PATH', PROVISION_CONFIG_PATH . '/drushrc.d');
 
@@ -78,6 +81,13 @@ function provision_init() {
   define('PROVISION_DB_PASSWD', variable_get('provision_db_passwd', 'root'));
   define('PROVISION_DB_HOST', variable_get('provision_db_host', 'localhost'));
 
+  
+  global $base_url;
+  define('PROVISION_WEB_DISABLE_URL', 
+    variable_get('provision_web_disable_url', $base_url . '/provision/disable'));
+
+  define('PROVISION_WEB_MAINTENENCE_URL', 
+    variable_get('provision_web_maintenance_url', $base_url . '/provision/maintenance'));
 }
 
 
@@ -587,35 +597,68 @@ function _provision_verify($url = '') {
  * and leave the current site directory and database in the right place, and remove all cruft that
  * was created by this process.
  */
-function _provision_restore($site, $backup_file) {
-  if (!_provision_drupal_site_installed($url)) {
+function _provision_restore($url, $restore_file) {
+  if (!($exists = _provision_drupal_site_installed($url))) {
+    // this can probably be done more consistently with another
+    // provision_path like function.
     provision_log("Error", "Site has not been installed yet.");
     provision_set_error(PROVISION_SITE_NOT_FOUND);
-    provision_output($url, $data);
   }
 
-  $exists = !provision_path("exists", $backup_file, true,
+  $exists &= provision_path("exists", $restore_file, true,
       t("Restoring site from @path"),
       t("Could not find backup file @path"),
       PROVISION_FRAMEWORK_ERROR);
 
-  if (!$exists) {
-    provision_output($url, $data);
-  }
+  if ($exists) {
+    $data = provision_get_site_data($url);
+    $data['restore_file'] = $restore_file;
 
-  $data = provision_get_site_data($url);
+    $phases = array("pre_restore", "restore", "post_restore");
+
+    $completed = array();
+    $rolled_back = false; // initializes to false.
+    foreach ($phases as $phase) {
+      $rolled_back = provision_invoke($phase, $url, $data, $rolled_back);
+
+      if (!$rolled_back) {
+        $completed[] = $phase;
+      }
+      else {
+        break; // exit out of the loop, to allow any changes to be reversed next.
+      }
+    }
+
+    if ($rolled_back) {
+      // An error has occurred, and we must undo all the changes we made, in reverse
+      // This works by triggering the _rollback functions for each of the hooks.
+      foreach (array_reverse($completed) as $phase) {
+        provision_invoke($phase, $url, $data, $rolled_back);
+      }
+
+    }
+    else {
+      provision_save_site_data($url, $data);
+    }
+  }
+  provision_output($url, $data);
+}
+
+function provision_provision_pre_restore($url, &$data) {
   _provision_backup_site($url, $data); # Backup site for posterity, before rolling back.
 
-  $rolled_back = provision_invoke("pre_restore", $url, $data); // if we need to make the site unavailable etc.
-  
-  provision_shell_exec("tar -zxf %s -C %s/%s.restore", $backup_file, PROVISION_SITES_PATH, $url); # check out old directory.
-  $rolled_back = provision_invoke("restore", $url, $data); // do the actual database/file manipulation
-  _provision_recursive_delete(PROVISION_BACKUP_PATH . '/' . $url . '.tmp');
+  provision_path("extract", $data['restore_file'], PROVISION_SITES_PATH . "/$url.restore", 
+    t('Successfully extracted the contents of @path to @confirm'),
+    t('Failed to extract the contents of @path to @confirm'),
+    PROVISION_PERM_ERROR, PROVISION_FRAMEWORK_ERROR);
+}
 
-  $rolled_back = provision_invoke("post_restore", $url, $data); // do the actual database/file manipulation
+function provision_provision_pre_restore_rollback($url, $data) {
+  _provision_recursive_delete(PROVISION_SITES_PATH . "/$url.restore");
+}
 
-  $data['site_installed'] = TRUE;
-  provision_save_site_data($url, $data);  
+function provision_provision_post_restore($url, $data) {
+  _provision_recursive_delete(PROVISION_SITES_PATH . "/$url.restore");
 }
 
 function _provision_disable($url) {
@@ -633,7 +676,6 @@ function _provision_disable($url) {
   provision_save_site_data($url, $data);
   provision_output($url, $data);
 }
-
 
 function _provision_enable($url) {
   if (!_provision_drupal_site_installed($url)) {
