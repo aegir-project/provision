@@ -59,15 +59,39 @@ function provision_help($section) {
     [$username@hm2 ~]$ chown $username:$username $backup_path
     [$username@hm2 ~]$ chmod 0700 $backup_path
 EOF;
+    $vigr_cmd = <<<EOF
+    [$username@hm2 ~]$ sudo /usr/sbin/vigr
+EOF;
+    $vigr1 = <<<EOF
+    $group::99:
+EOF;
+    $vigr2 = <<<EOF
+    $group::99:$username
+EOF;
+    $vigr3 = <<<EOF
+    $group::99:anotheruser,$username
+EOF;
+
     $output .= "<ol>";
     $output .= '<li>' . t('<p><strong>The user account running the script, and the group of the httpd daemon.</strong> 
                           The provision framework takes special care to make sure that the file permissions of the 
                           hosted sites are always as safe as can be, especially to make sure that the web server does 
                           not have the ability to modify the code of the site, therefor this information is required 
-                          to assure that safety while keeping the sites accessible.</p>
+                          to assure that safety while keeping the sites accessible. This username needs to be a member
+                          of the web server group, in order to be able to correctly set the file permissions.</p>
                           <p>Based on your server configuration we have determined that you should set the 
                           username to "<code>@username</code>" and the group to "<code>@group</code>", 
-                          but you can change these in the <a href="@provision_link">provisioning section</a>.</p>', array("@username" => $username, "@group" => $group, "@provision_link" => url('admin/settings/provision'))) . '</li>';
+                          but you can change these in the <a href="@provision_link">provisioning section</a>.</p>
+                          <p> 
+                          <strong>To configure: </strong> If your user is not a member of the web group, you can add them by using the
+                          <code>vigr</code> command: <pre>@vigr_cmd</pre>
+                          Once you have run the vigr command, find the line that says : <pre>@vigr1</pre>
+                          Then add the username to the end of the line, so that it looks like : <pre>@vigr2</pre>
+                          If there were already users in the group, you add your user to the group using a comma as separator :
+                          <pre>@vigr3</pre>.</p>', 
+                          array("@username" => $username, "@group" => $group, "@provision_link" => url('admin/settings/provision'),
+                            '@vigr_cmd' => $vigr_cmd, '@vigr1' => $vigr1, '@vigr2' => $vigr2, '@vigr3' => $vigr3)) . '</li>';
+
     
     $output .= '<li>' . t('<p><strong>Write access to a directory to store backups.</strong> 
                           The drush user needs to be able to maintain the backups repository to ensure that your site is backed up successfully. 
@@ -76,7 +100,7 @@ EOF;
 
                           <p>Based on your server configuration we have determined that your path should be <code>@backup_path</code>, 
                           but you can change this in the <a href="@provision_link">provisioning section</a>.</p>
-                          <strong>To configure: </strong> Please enter the following commands :
+                         Please enter the following commands :
                           <pre>@mkdir_cmd</pre>',$mkdir_cmd) . '</li>';
     $output .= "</ol>";
     return $output;

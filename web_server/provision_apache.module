@@ -139,6 +139,16 @@ function provision_apache_provision_configure($node = null) {
   return $form;
 }
 
+function provision_apache_validate_web_group($element) {
+  $user = $element['#post']['web_server']['script_user'];
+  $group = $element['#post']['web_server']['web_group'];
+  if ($user && $group) {
+    if (!provision_user_in_group($user, $group)) {
+       form_set_error('web_server][web_group', t("The %user user is not in the %group group. For information on how to fix this, please check the !link.", 
+         array('%user' => $user, '%group' =>  $group, '!link' => l(t("provisioning requirements"), "admin/help/provision/requirements") )));
+    }
+  }
+}
 
 /**
  * Implementation of hook_provision_templates
