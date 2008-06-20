@@ -84,7 +84,7 @@ function provision_init() {
   
   global $base_url;
   define('PROVISION_WEB_DISABLE_URL', 
-    variable_get('provision_web_disable_url', $base_url . '/provision/disable'));
+    variable_get('provision_web_disable_url', $base_url . '/provision/disabled'));
 
   define('PROVISION_WEB_MAINTENENCE_URL', 
     variable_get('provision_web_maintenance_url', $base_url . '/provision/maintenance'));
