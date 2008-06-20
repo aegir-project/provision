@@ -87,12 +87,12 @@ function _provision_mysql_can_create_database() {
 
 function _provision_mysql_grant($name, $username, $password, $host = '') {
   $host = ($host) ? $host : '%';
-  db_query("GRANT ALL PRIVILEGES ON %s.* TO %s@`%s` IDENTIFIED BY '%s'", $name, $username, $host, $password);
+  db_query("GRANT ALL PRIVILEGES ON `%s`.* TO `%s`@`%s` IDENTIFIED BY '%s'", $name, $username, $host, $password);
 }
 
 function _provision_mysql_revoke($name, $username, $host = '') {
   $host = ($host) ? $host : '%';
-  db_query("REVOKE ALL PRIVILEGES ON %s.* FROM %s@`%s`", $name, $username, $host);
+  db_query("REVOKE ALL PRIVILEGES ON `%s`.* FROM `%s`@`%s`", $name, $username, $host);
 }
 
 function _provision_mysql_old_password($username, $password, $host = '') {
