@@ -109,7 +109,7 @@ function provision_mysql_provision_pre_install($url, &$data) {
 }
 
 function provision_mysql_provision_pre_install_rollback($url, &$data) {
-  _provision_mysql_destroy_site_db($data['site_db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
+  _provision_mysql_destroy_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
   unset($data['site_db_host']);
   unset($data['site_db_type']);
   unset($data['site_db_passwd']);
@@ -119,24 +119,28 @@ function provision_mysql_provision_pre_install_rollback($url, &$data) {
 
 function provision_mysql_provision_pre_restore($url, &$data) {
   // store a backup of the credentials of the site.
-  $keys = array('site_db_name', 'site_db_passwd', 'site_db_user', 'site_db_host');
-  foreach ($keys as $key) {
-    $data['old_' . $key] = $data[$key];
-  }
+  $data['old_site_db_name'] = $data['site_db_name'];
+  $data['old_site_db_passwd'] = $data['site_db_passwd'];
+  $data['old_site_db_user'] = $data['site_db_user'];
+  $data['old_site_db_host'] = $data['site_db_host'];
 
   # generate a random password for use
   $data['site_db_passwd'] = user_password(); 
   $data['site_db_name'] = _provision_mysql_suggest_db_name($url, $data);
-  $data['site_db_user'] = $data['site_db_name']; 
+  $data['site_db_user'] = $data['site_db_name'];
 
   $success = _provision_mysql_new_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
   if ($success) {
-    _provision_mysql_import_dump($data['restore_file'], $data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
+    _provision_mysql_import_dump(PROVISION_SITES_PATH . '/' . $url . '.restore/database.sql', $data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
+  }
+  else {
+    provision_set_error(PROVISION_DB_ERROR);
+    provision_log("error", "could not create new database to be imported into");
   }
 }
 
 function provision_mysql_provision_pre_restore_rollback($url, &$data) {
-  _provision_mysql_destroy_site_db($data['site_db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
+  _provision_mysql_destroy_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
 
   //Restore the original database credentials of the site.
   foreach ($keys as $key) {
@@ -150,7 +154,7 @@ function provision_mysql_provision_pre_restore_rollback($url, &$data) {
  * This will drop the database, revoke the privileges and flush the privileges.
  */
 function provision_mysql_provision_delete($url, &$data) {
-  return _provision_mysql_destroy_site_db($data['site_db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
+  return _provision_mysql_destroy_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
 }
 
 // Rollback doesn't apply here yet. Unless we trigger a restore of the first dump

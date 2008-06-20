@@ -320,7 +320,7 @@ function provision_save_site_data($url, $data) {
     $aid = $data['task_id'];
     fwrite($fp, "\n\n#" . format_date($timestamp, "large"));
     if ($aid) {
-      $task = array('task' => $data['site_task_type'], 'status' => provision_get_error());
+      $task = array('task' => $data['task_type'], 'status' => provision_get_error());
       $line = "\n\$tasks[$aid][$timestamp] = " . str_replace(array("  ", "\n"), "", var_export($task, TRUE)) . ";";
       fwrite($fp, $line);
     }

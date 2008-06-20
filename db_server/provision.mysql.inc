@@ -29,7 +29,10 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
     _provision_mysql_old_password($db_user, $db_passwd, $db_host);
   }
   _provision_mysql_flush();
+  $status = _provision_mysql_database_exists($db_name);
   provision_set_active_db();
+  
+  return $status; 
    #TODO : Test to confirm that the database is actually writeable. Taking this on faith for now.
 }
 
@@ -116,6 +119,8 @@ function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd
       t('The database dump at @path could not be read.'), 
       PROVISION_PERM_ERROR);
     if ($readable) {
+      provision_log("notice", sprintf("Importing database using command: mysql -u%s -p%s -h%s %s < %s", 
+        $db_user, $db_passwd, $db_host, $db_name, $dump_file));
       provision_shell_exec("mysql -u%s -p%s -h%s %s < %s", 
         $db_user, $db_passwd, $db_host, $db_name, $dump_file );
      }

@@ -307,20 +307,6 @@ function provision_apache_provision_pre_restore_rollback($url, $data) {
   _provision_recursive_delete(PROVISION_SITES_PATH . "/$url.restore");
 }
 
-function provision_apache_provision_restore($url, $data) {
-  $old = PROVISION_SITES_PATH . "/$url.restore";
-  $new = PROVISION_SITES_PATH . "/$url";
-  provision_path("switch_paths", $old, $new ,
-    t('Swapping out the @path and @confirm directories was successful.'),
-    t('Swapping the @path and @confirm directories has failed.'),
-    PROVISION_PERM_ERROR);
-}
-
-// Luckily this is reversable =)
-function provision_apache_provision_restore_rollback($url, $data) {
-  provision_apache_provision_restore($url, $data);
-}
-
 function provision_apache_provision_post_restore($url, &$data) {
   _provision_apache_create_vhost_config($url, $data);
   _provision_apache_restart_apache();

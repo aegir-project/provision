@@ -239,6 +239,27 @@ function _provision_drupal_switch_active_site($url = null) {
   }
 }
 
+function provision_drupal_provision_post_restore($url, $data) {
+  _provision_drupal_create_settings_file($url, $data);
+}
+
+function provision_drupal_provision_restore($url, $data) {
+  $old = PROVISION_SITES_PATH . "/$url.restore";
+  $new = PROVISION_SITES_PATH . "/$url";
+  provision_path("switch_paths", $old, $new ,
+    t('Swapping out the @path and @confirm directories was successful.'),
+    t('Swapping the @path and @confirm directories has failed.'),
+    PROVISION_PERM_ERROR);
+  // make sure it has the latest site data available
+  provision_save_site_data($url, $data);
+}
+
+// Luckily this is reversable =)
+function provision_drupal_provision_restore_rollback($url, $data) {
+  provision_drupal_provision_restore($url, $data);
+}
+
+
 /**
  * Force drupal to load the modules it expects to find on an uninstalled site
  */
