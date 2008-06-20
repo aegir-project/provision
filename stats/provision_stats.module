@@ -9,14 +9,14 @@ function provision_stats_drush_command() {
 }
 
 function _provision_stats($url) {
-  #safety mechanism to ensure back end calls are not made via the front end.
-  if (!provision_confirm_drush()) return null;
-  
-  $data = provision_get_site_data($url);
-  if (!$data['site-installed']) {
-    print t('The site %site has not been installed yet.',  array('%site' => $url));
-    exit(PROVISION_FRAMEWORK_ERROR); #exit with error, so front end can catch it
+  if (!_provision_drupal_site_installed($url)) {
+    provision_log("error", "Site has not been installed yet.");
+    provision_set_error(PROVISION_SITE_NOT_FOUND);
+    provision_output($url, $data);
   }
+  $data = provision_get_site_data($url);
+  $rolled_back = provision_invoke("stats", $url, $data);
+
   #needs to be done on active database
   $modules = module_implements('provision_stats');
   drupal_get_messages(); # clear the messages being saved so far.
@@ -36,7 +36,7 @@ function _provision_stats($url) {
     $stats = array_merge($stats, $func($url, $data));
   }
   
-  _provision_switch_active_site();
+  _provision_drupal_switch_active_site();
   module_list(TRUE);
   
   return provision_output($url, $data, array('stats' => $stats));
