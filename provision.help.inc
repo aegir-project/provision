@@ -48,17 +48,84 @@ function provision_help($section) {
       
       return $output;
     case 'admin/help/provision#requirements' :
-      $username = PROVISION_SCRIPT_USER;
-      $group = PROVISION_WEB_GROUP;
+      $output .= "<ol>";
+      $output .= '<li>' . _provision_requirements('group') . '</li>';
+
       
-      $backup_path = PROVISION_BACKUP_PATH;
-      $mkdir_cmd['@backup_path'] = $backup_path;      
-      $mkdir_cmd['@provision_link'] = url('admin/settings/provision');
-      $mkdir_cmd['@mkdir_cmd'] = <<<EOF
+      $output .= '<li>' . _provision_requirements('backup_dir') . '</li>';
+      $output .= "</ol>";
+      return $output;
+  }
+}
+
+/**
+ * Page callback with in depth requirement documentation
+ */
+function provision_help_requirements() {
+  $output .= _provision_requirements("basic");  
+  $modules = module_implements('provision_service');
+  foreach ($modules as $module) {
+    $service = module_invoke($module, 'provision_service');
+    $name = current($service);
+    $help = module_invoke($module, 'help', 'admin/help/provision#requirements');
+    if ($name && $help) {
+      $output .= '<a href="requirements-$module"></a><h3>' . t($name) . '</h3>';
+      $output .=  $help;
+    }
+  }
+
+  return $output;
+}
+
+function _provision_requirements($req, $section = 'all') {
+  $func = '_provision_' . $req . '_requirements';
+  if (function_exists($func)) {
+    $help = $func();
+  }
+  if ($section != 'all') {
+    return $help[$section];
+  }
+  return implode("", $help);
+}
+
+function _provision_basic_requirements() {
+  $help['summary'] = 
+    t('<p><strong>A system capable of running Drupal: </strong>If you are reading this via the inline help, this would be kind of obvious. This system is entirely Drupal based, and has the same base requirements that Drupal does.</p>
+    <p><strong>Your own server: </strong>The level of access required to be able to configure this system is very far beyond what is commonly available to users with shared hosting.</p>
+    <p><strong>A unix based operating system: </strong>The majority of functionality in this system occurs in the back-end, through system level programming. There are several features (such as symlinks), that are not available to users on Windows. There are no plans currently to add windows support.</p>');
+
+  return $help;
+}
+
+function _provision_backup_dir_requirements() {
+    $username = PROVISION_SCRIPT_USER;
+    $group = PROVISION_WEB_GROUP;
+    $backup_path = PROVISION_BACKUP_PATH;
+    $mkdir_cmd['@backup_path'] = $backup_path;      
+    $mkdir_cmd['@provision_link'] = url('admin/settings/provision');
+    $mkdir_cmd['@mkdir_cmd'] = <<<EOF
     [$username@hm2 ~]$ mkdir $backup_path
     [$username@hm2 ~]$ chown $username:$username $backup_path
     [$username@hm2 ~]$ chmod 0700 $backup_path
 EOF;
+  $help['summary'] = t('<p><strong>Write access to a directory to store backups.</strong> 
+                          The drush user needs to be able to maintain the backups repository to ensure that your site is backed up successfully. 
+                          It is incredibly important that this path is not accessible via the web server, so that no undesirables can get their
+                          hands on your database. The recommended path is directly above your platform path, but it can be anywhere.</p>');
+  $help['configuration'] = t('<p>Based on your server configuration we have determined that your path should be <code>@backup_path</code>, 
+                          but you can change this in the <a href="@provision_link">provisioning section</a>.</p>
+                         Please enter the following commands :
+                         <pre>@mkdir_cmd</pre>', $mkdir_cmd);
+  return $help;
+
+}
+
+function _provision_group_requirements() {
+
+    $username = PROVISION_SCRIPT_USER;
+    $group = PROVISION_WEB_GROUP;
+      
+
     $vigr_cmd = <<<EOF
     [$username@hm2 ~]$ sudo /usr/sbin/vigr
 EOF;
@@ -72,8 +139,7 @@ EOF;
     $group::99:anotheruser,$username
 EOF;
 
-    $output .= "<ol>";
-    $output .= '<li>' . t('<p><strong>The user account running the script, and the group of the httpd daemon.</strong> 
+  $help['summary'] = t('<p><strong>The user account running the script, and the group of the httpd daemon.</strong> 
                           The provision framework takes special care to make sure that the file permissions of the 
                           hosted sites are always as safe as can be, especially to make sure that the web server does 
                           not have the ability to modify the code of the site, therefor this information is required 
@@ -81,49 +147,16 @@ EOF;
                           of the web server group, in order to be able to correctly set the file permissions.</p>
                           <p>Based on your server configuration we have determined that you should set the 
                           username to "<code>@username</code>" and the group to "<code>@group</code>", 
-                          but you can change these in the <a href="@provision_link">provisioning section</a>.</p>
-                          <p> 
-                          <strong>To configure: </strong> If your user is not a member of the web group, you can add them by using the
+                          but you can change these in the <a href="@provision_link">provisioning section</a>.</p>', 
+                          array("@username" => $username, "@group" => $group, "@provision_link" => url('admin/settings/provision')));
+
+  $help['configuration'] =t('<p><strong>To configure: </strong> If your user is not a member of the web group, you can add them by using the
                           <code>vigr</code> command: <pre>@vigr_cmd</pre>
                           Once you have run the vigr command, find the line that says : <pre>@vigr1</pre>
                           Then add the username to the end of the line, so that it looks like : <pre>@vigr2</pre>
-                          If there were already users in the group, you add your user to the group using a comma as separator :
-                          <pre>@vigr3</pre>.</p>', 
-                          array("@username" => $username, "@group" => $group, "@provision_link" => url('admin/settings/provision'),
-                            '@vigr_cmd' => $vigr_cmd, '@vigr1' => $vigr1, '@vigr2' => $vigr2, '@vigr3' => $vigr3)) . '</li>';
+                          If there were already users in the group, add your user to the group using a comma as separator :
+                          <pre>@vigr3</pre></p>', 
+                          array('@vigr_cmd' => $vigr_cmd, '@vigr1' => $vigr1, '@vigr2' => $vigr2, '@vigr3' => $vigr3));
+  return $help;
 
-    
-    $output .= '<li>' . t('<p><strong>Write access to a directory to store backups.</strong> 
-                          The drush user needs to be able to maintain the backups repository to ensure that your site is backed up successfully. 
-                          It is incredibly important that this path is not accessible via the web server, so that no undesirables can get their
-                          hands on your database. The recommended path is directly above your platform path, but it can be anywhere.</p>
-
-                          <p>Based on your server configuration we have determined that your path should be <code>@backup_path</code>, 
-                          but you can change this in the <a href="@provision_link">provisioning section</a>.</p>
-                         Please enter the following commands :
-                          <pre>@mkdir_cmd</pre>',$mkdir_cmd) . '</li>';
-    $output .= "</ol>";
-    return $output;
-  }
-}
-
-/**
- * Page callback with in depth requirement documentation
- */
-function provision_help_requirements() {
-  $output .= t('<p>Unfortunately, due to the requirements of some of the functionality, significantly more access than is usually allowed on a shared hosting solution is required,
-                and as such, a virtual server or dedicated hosting system will be required to run this system.</p>');
-  $output .= t('<p>Some of the features of the system also require the ability to create symlinks, which means that it needs to run on a unix-like operating system. There are no plans currently to add windows support.</p>');  
-  $modules = module_implements('provision_service');
-  foreach ($modules as $module) {
-    $service = module_invoke($module, 'provision_service');
-    $name = current($service);
-    $help = module_invoke($module, 'help', 'admin/help/provision#requirements');
-    if ($name && $help) {
-      $output .= '<a href="requirements-$module"></a><h3>' . t($name) . '</h3>';
-      $output .=  $help;
-    }
-  }
-
-  return $output;
 }

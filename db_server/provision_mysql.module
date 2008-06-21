@@ -21,9 +21,18 @@ include_once('provision.mysql.inc');
  function provision_mysql_help($section) {
    switch ($section) {
      case 'admin/help/provision#requirements':
-       $username = PROVISION_SCRIPT_USER;
-       $output .= "<ol>";
-       $command = <<<EOF
+
+       $output .= '<li>' . _provision_requirements('mysql_user') . '</li>';
+       $output .= "</ol>";
+       return $output;
+       break;
+   }
+ }
+
+function _provision_mysql_user_requirements() {
+   $username = PROVISION_SCRIPT_USER;
+   $output .= "<ol>";
+   $command = <<<EOF
      [$username@hm2 ~]$ mysql -uroot -pXXXXXXXXX mysql
 
      mysql> grant create, drop, grant option  on *.* to 'username_here'@'localhost'
@@ -33,15 +42,15 @@ include_once('provision.mysql.inc');
      mysql> flush privileges;
      Query OK, 0 rows affected (0.00 sec)
 EOF;
-       $output .= '<li>' . t('<p><strong>Mysql user account capable of creating new databases.</strong>
-                To be able to create new sites, the provisioning framework will need to be able to create new databases and users. 
-                It is not recommended using the mysql root password for this, but any account with the correct permissions will do.</p>
-                <p><strong>To configure:</strong> Log in to your mysql server as root, and type in the following command:
-                <pre>@command_text</pre></p>', array('@command_text' => $command)) . '</li>';            
-       $output .= "</ol>";
-       return $output;
-       break;
-   }
+ $help['summary'] = t('<p><strong>Mysql user account capable of creating new databases.</strong>
+   To be able to create new sites, the provisioning framework will need to be able 
+   to create new databases and users. It is not recommended using the mysql root password for this, 
+   but any account with the correct permissions will do.</p>');
+
+ $help['configuration'] = t('<p><strong>To configure:</strong> 
+   Log in to your mysql server as root, and type in the following command:
+   <pre>@command_text</pre></p>', array('@command_text' => $command));     
+  return $help;
 }
 
 /**
@@ -62,21 +71,23 @@ function provision_mysql_provision_configure($node = null) {
   
   $form['db_host'] = array(
     '#type' => 'textfield',
-    '#title' => t('Mysql server hostname'),
-    '#description' => t('The mysql server to connect to.'),
+    '#title' => t('Database server hostname'),
+    '#description' => t('The address of the database server to connect to.'),
     '#size' => 30,
     '#default_value' => ($node->db_host) ? $node->db_host : PROVISION_DB_HOST,
     '#maxlength' => 64,
+    '#weight' => 0,
   );
   
   $form['db_user'] = array(
     '#type' => 'textfield',
     '#required' => TRUE,
-    '#title' => t('Mysql user account'),
+    '#title' => t('Username'),
     '#description' => t('The user that will be used to create users and databases for new sites.'),
     '#size' => 40,
     '#default_value' => ($node->db_user) ? $node->db_user : PROVISION_DB_USER,
     '#maxlength' => 255,
+    '#weight' => 5,
   );
   if ($node->db_passwd) {
     $passwd_description = t('<strong>You have already set a password for this database server.</strong><br />');
@@ -84,9 +95,9 @@ function provision_mysql_provision_configure($node = null) {
   $form['db_passwd'] = array(
     '#type' => 'password_confirm',
     '#required' => (PROVISION_DB_PASSWD) ? FALSE : TRUE,
-    '#title' => t('Mysql user password'),
     '#description' => $passwd_description . t('The user account that will be used to create new mysql users and databases for new sites'),
     '#size' => 30,
+    '#weight' => 10
   );
   
   return $form;
