@@ -52,7 +52,7 @@ function provision_help($section) {
       $output .= '<li>' . _provision_requirements('group') . '</li>';
 
       
-      $output .= '<li>' . _provision_requirements('backup_dir') . '</li>';
+      $output .= '<li>' . _provision_requirements('backup_path') . '</li>';
       $output .= "</ol>";
       return $output;
   }
@@ -97,7 +97,7 @@ function _provision_basic_requirements() {
   return $help;
 }
 
-function _provision_backup_dir_requirements() {
+function _provision_backup_path_requirements() {
     $username = PROVISION_SCRIPT_USER;
     $group = PROVISION_WEB_GROUP;
     $backup_path = PROVISION_BACKUP_PATH;
@@ -145,7 +145,9 @@ EOF;
                           not have the ability to modify the code of the site, therefor this information is required 
                           to assure that safety while keeping the sites accessible. This username needs to be a member
                           of the web server group, in order to be able to correctly set the file permissions.</p>
-                          <p>Based on your server configuration we have determined that you should set the 
+                          ');
+
+    $help['suggest'] = t('<p>Based on your server configuration we have determined that you should set the 
                           username to "<code>@username</code>" and the group to "<code>@group</code>", 
                           but you can change these in the <a href="@provision_link">provisioning section</a>.</p>', 
                           array("@username" => $username, "@group" => $group, "@provision_link" => url('admin/settings/provision')));

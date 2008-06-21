@@ -20,14 +20,9 @@ function provision_apache_provision_service() {
 function provision_apache_help($section) {
   switch ($section) {
     case 'admin/help/provision#requirements':
-
-      
       $output .= "<ol>";
-
-      $output .= '<li>' . _provision_requirements('vhost_path') . '</li>';
-
+      $output .= '<li>' . _provision_requirements('config_path') . '</li>';
       $output .= '<li>' . _provision_requirements('httpd_conf')  . '</li>';
-
       $output .= '<li>' . _provision_requirements('visudo') . '</li>';
       $output .= "</ol>";
       return $output;
@@ -35,7 +30,7 @@ function provision_apache_help($section) {
   }
 }
 
-function _provision_vhost_path_requirements() {
+function _provision_config_path_requirements() {
   $username = PROVISION_SCRIPT_USER;
   $group = PROVISION_WEB_GROUP;
   $vhost_path = PROVISION_VHOST_PATH;
@@ -107,6 +102,7 @@ EOF;
   return $help;
 
 }
+
 /**
  * Hook into central configuration form for provisioning framework.
  */
@@ -114,9 +110,9 @@ function provision_apache_provision_configure($node = null) {
   // We need to define form elements for the node's title and body.
   $form['restart_cmd'] = array(
       '#type' => 'textfield',
-      '#title' => t('Apache restart command'),
+      '#title' => t('Restart command'),
       '#required' => TRUE,
-      '#description' => t('The command to run to restart apache for new changes to take effect. This is required for the new site to become live'),
+      '#description' => t('The command to run to restart the for new changes to take effect. This is required for the new site to become live'),
       '#default_value' => ($node->restart_cmd) ? $node->restart_cmd : variable_get('provision_restart_cmd', 'sudo apachectl graceful'),
       '#size' => 40,
       '#maxlength' => 255,
@@ -133,7 +129,7 @@ function provision_apache_provision_configure($node = null) {
     '#maxlength' => 255,
     '#weight' => -15,
   );
-  
+   
   $form['web_group'] = array(
     '#type' => 'textfield',
     '#title' => t('Web server group'),
@@ -174,11 +170,11 @@ function provision_apache_provision_configure($node = null) {
 }
 
 function provision_apache_validate_web_group($element) {
-  $user = $element['#post']['web_server']['script_user'];
-  $group = $element['#post']['web_server']['web_group'];
+  $user = $element['#post']['script_user'];
+  $group = $element['#post']['web_group'];
   if ($user && $group) {
     if (!provision_user_in_group($user, $group)) {
-       form_set_error('web_server][web_group', t("The %user user is not in the %group group. For information on how to fix this, please check the !link.", 
+       form_set_error('web_group', t("The %user user is not in the %group group. For information on how to fix this, please check the !link.", 
          array('%user' => $user, '%group' =>  $group, '!link' => l(t("provisioning requirements"), "admin/help/provision/requirements") )));
     }
   }
