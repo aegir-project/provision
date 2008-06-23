@@ -51,6 +51,7 @@ function provision_init() {
   // Set up defines for platform
   if (function_exists('drush_get_option')) {
     $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
+    define('PROVISION_DOMAIN', drush_get_option(array('l', 'uri'), $_SERVER['HTTP_HOST']));
   }
   else {
     $docroot = $_SERVER['pwd'];
@@ -83,6 +84,7 @@ function provision_init() {
 
   
   global $base_url;
+  define('PROVISION_BASE_URL', $base_url);
   define('PROVISION_WEB_DISABLE_URL', 
     variable_get('provision_web_disable_url', $base_url . '/provision/disabled'));
 
