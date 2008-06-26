@@ -22,8 +22,7 @@ include_once('provision.mysql.inc');
    switch ($section) {
      case 'admin/help/provision#requirements':
 
-       $output .= '<li>' . _provision_requirements('mysql_user') . '</li>';
-       $output .= "</ol>";
+       $output .= _provision_requirements('mysql_user');
        return $output;
        break;
    }
@@ -31,7 +30,6 @@ include_once('provision.mysql.inc');
 
 function _provision_mysql_user_requirements() {
    $username = PROVISION_SCRIPT_USER;
-   $output .= "<ol>";
    $command = <<<EOF
      [$username@hm2 ~]$ mysql -uroot -pXXXXXXXXX mysql
 

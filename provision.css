@@ -1,0 +1,32 @@
+.provision-help-hidden { display: none }
+
+div.provision-requirement-help .message {
+  background-repeat: no-repeat;
+  background-position: 5px 50%;
+  padding-left: 27px;
+  padding-right: 1em;
+  font-weight: bold;
+}
+
+.provision-status-warning .message {
+  border: 1px solid #ccb;
+  background: #ffd;
+  background-image: url(/misc/watchdog-warning.png);
+}
+
+.provision-status-error .message {
+  border: 1px solid #d77;
+  background: #fcc;
+  color: #200;
+  background-image: url(/misc/watchdog-error.png);
+}
+
+.provision-status-success .message {
+  border: 1px solid #bdb;
+  background: #dfd;
+  background-image: url(/misc/watchdog-ok.png);
+}
+
+.provision-help-collapsed .provision-help {
+  display: none;
+}

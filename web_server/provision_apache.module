@@ -47,10 +47,9 @@ EOF;
                        to assure that safety while keeping the sites accessible. 
                        The recommended path is directly above your platform path, but it can be anywhere.');
 
-  $help['configuration'] = t('Based on your server configuration we have determined that your path should be <code>@vhost_path</code>, 
-                            but you can change it change them in the <a href="@provision_link">provisioning section</a></p>
-                            <p><strong>To configure:</strong> this directory correctly, please enter the following commands :
-                            <pre>@mkdir_cmd</pre>',$mkdir_cmd);
+  $help['configuration'][] = t('Based on your server configuration we have determined that your path should be <code>@vhost_path</code>, 
+    but you can change it change them in the <a href="@provision_link">provisioning section</a>.', $mkdir_cmd);
+  $help['configuration'][] = t(' please enter the following commands : <pre>@mkdir_cmd</pre>',$mkdir_cmd);
 
   return $help;
 
@@ -65,7 +64,7 @@ EOF;
   $help['summary'] = t('You are required to add a single line to the httpd.conf file, which allows 
                         the system to load the additional virtual hosts that are generated.</p>
                         The location of this file differs between distributions, 
-                        but is most commonly found in <code>/etc/httpd</code> or <code>/etc/apache</a>.');
+                        but is most commonly found in <code>/etc/httpd</code> or <code>/etc/apache</code>.');
 
   $help['configuration'] = t('Once you have determined the location of your httpd.conf file, add the following line to it :
                             <pre>@vhost_line</pre>', array('@vhost_line' => $vhost_line));

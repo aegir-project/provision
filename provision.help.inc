@@ -41,19 +41,25 @@ function _provision_status_class($status)  {
 define('PROVISION_HELP_ENABLED', 1);
 /** Don't show help component **/
 define('PROVISION_HELP_DISABLED', ~PROVISION_HELP_ENABLED);
+
+/** These are internally used to test against. Use the COLLAPSIBLE AND COLLAPSED instead **/
+define('_PROVISION_HELP_CAN_COLLAPSE', 2);
+define('_PROVISION_HELP_HAS_COLLAPSED', 4);
+
 /**
  * Show help with the ability to collapse to save space. 
  * This automatically enables the help component
  **/
-define('PROVISION_HELP_COLLAPSIBLE', PROVISION_HELP_ENABLED & 2);
+define('PROVISION_HELP_COLLAPSIBLE', PROVISION_HELP_ENABLED | _PROVISION_HELP_CAN_COLLAPSE);
 /** 
  * Display help component with an initial collapsed state.
  * This automatically enables and sets the help component to be collapsible
  */
-define('PROVISION_HELP_COLLAPSED', PROVISION_HELP_COLLAPSIBLE & 4);
+define('PROVISION_HELP_COLLAPSED', PROVISION_HELP_COLLAPSIBLE | _PROVISION_HELP_HAS_COLLAPSED);
+
 
 /**
- * Returns a class name for the output of the form element
+ * Returns a class name for the output of the form elementG
  */
 function _provision_help_class($state) {
   static $map;
@@ -113,12 +119,8 @@ function provision_help($section) {
       
       return $output;
     case 'admin/help/provision#requirements' :
-      $output .= "<ol>";
-      $output .= '<li>' . _provision_requirements('group') . '</li>';
-
-      
-      $output .= '<li>' . _provision_requirements('backup_path') . '</li>';
-      $output .= "</ol>";
+      $output .= _provision_requirements('group');
+      $output .=  _provision_requirements('backup_path');
       return $output;
   }
 }
@@ -136,27 +138,30 @@ function provision_help_requirements() {
     $name = current($service);
     $help = module_invoke($module, 'help', 'admin/help/provision#requirements');
     if ($name && $help) {
-      $output .= '<a href="requirements-$module"></a><h3>' . t($name) . '</h3>';
+      $output .= "<a href='requirements-$module'></a><h3>" . t($name) . '</h3>';
       $output .=  $help;
     }
   }
   return $output;
 }
 
+/**
+ * Helper function for displaying contextual help when not used in a form.
+ */
 function _provision_requirements($req, $section = 'all') {
-  $item = array();
+  $item = _element_info('requirement_help');
   $item['#requirement'] = $req;
   $item['#type'] = 'requirement_help';
-
+/*
   foreach (array('#heading', '#summary', '#suggestion', '#configuration') as $key) {
     if (in_array($section, array('all', $key))) {
-      $item[$key] = PROVISION_HELP_ENABLED;
+      $item['#' . $key] = PROVISION_HELP_ENABLED;
     }
-    else {
-      $item[$key] = PROVISION_HELP_DISABLED;
+    elseif ($section != 'all') {
+      $item['#' . $key] = ($section == $key) ? PROVISION_HELP_ENABLED : PROVISION_HELP_DISABLED;
     }
   }
-
+ */
   $item = provision_requirement_process($item);
   return theme("requirement_help", $item);
 }
@@ -185,9 +190,9 @@ EOF;
                         It is incredibly important that this path is not accessible via the web server, so that no undesirables can get their
                         hands on your database. The recommended path is directly above your platform path, but it can be anywhere.');
 
-  $help['configuration'][] = t('Based on your server configuration we have determined that your path should be <code>@backup_path</code>, 
+  $help['suggestion'] = t('Based on your server configuration we have determined that your path should be <code>@backup_path</code>, 
     but you can change this in the <a href="@provision_link">provisioning section</a>.', $mkdir_cmd);
-  $help['configuration'][] = t('Please enter the following commands : <pre>@mkdir_cmd</pre>', $mkdir_cmd);
+  $help['configuration'] = t('Please enter the following commands : <pre>@mkdir_cmd</pre>', $mkdir_cmd);
   return $help;
 }
 
@@ -241,19 +246,18 @@ EOF;
 function provision_elements() {
   $type['requirement_help'] = array(
     '#requirement' => null,
-    '#status' => PROVISION_HELP_WARNING,
+    '#status' => PROVISION_STATUS_NONE,
     '#heading' => PROVISION_HELP_ENABLED,
     '#summary' => PROVISION_HELP_ENABLED,
-    '#configuration' => PROVISION_HELP_ENABLED,
-    '#summary_show' => t("More information"),
-    '#configuration_show' => t("To configure"),
+    '#summary_prefix' => t("What is this?"),
+    '#configuration' => PROVISION_HELP_COLLAPSED,
+    '#configuration_prefix' => t("How do I configure this?"),
+    '#default_messages' => array(
+      PROVISION_STATUS_SUCCESS => t("You have met this requirement."),
+      PROVISION_STATUS_WARNING => t("This requirement has a non critical error."),
+      PROVISION_STATUS_ERROR => t("This requirement has a critical error. This system will not operate until it has been fixed")),
     '#process' => array('provision_requirement_process' => array()),
   );
-
-  $type['requirement_description'] = $type['requirement_help'];
-  $type['requirement_description']['#summary'] = PROVISION_HELP_COLLAPSED;
-  $type['requirement_description']['#configuration'] = PROVISION_HELP_DISABLED;
-
   return $type;
 }
 
@@ -276,13 +280,19 @@ function provision_requirement_process(&$element) {
  */
 function theme_requirement_help(&$element) {
   drupal_add_js(drupal_get_path('module', 'provision') . '/provision.js');
-
+  drupal_add_css(drupal_get_path('module', 'provision') . '/provision.css');
+  $req = $element['#requirement'];
   $help = $element['#help']; // this is just to make it easier to work with.
 
   //place anchor so user can be directed to right page.
   $output .= "<a name='provision-help-$req'></a>";
 
-  $output .= '<div class="provision-' . form_clean_id($element["#type"]) . '">';
+  $output .= '<div class="provision-' . form_clean_id($element["#type"]) . 
+    ' ' . _provision_status_class($element['#status']) . '">';
+
+  if ($element['#status'] != PROVISION_STATUS_NONE) {
+    $output .= "<div class='message'>" . (($element['#message']) ? $element['#message'] : $element['#default_messages'][$element['#status']]) . "</div>";
+  }
 
   $components = array('summary', 'suggestion', 'configuration');
   foreach ($components as $key) {
@@ -293,7 +303,11 @@ function theme_requirement_help(&$element) {
         // it is simpler if there's only one way to print the component
         $help[$key] = array($help[$key]);  
       }
-      $output .= "<p>" . implode("</p><p>", $help[$key]) . "</p>"; 
+      if ($element["#$key" . '_prefix'] && ($element["#$key"] & _PROVISION_HELP_CAN_COLLAPSE)) {
+        $output .= '<a href="javascript:void(0)" class="provision-help-toggle">' . $element["#$key" . '_prefix'] . '</a>';
+      }
+
+      $output .= "<div class='provision-help'><p>" . implode("</p><p>", $help[$key]) . "</p></div>"; 
       $output .= '</div>';
     } 
   }
