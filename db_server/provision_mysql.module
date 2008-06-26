@@ -42,14 +42,13 @@ function _provision_mysql_user_requirements() {
      mysql> flush privileges;
      Query OK, 0 rows affected (0.00 sec)
 EOF;
- $help['summary'] = t('<p><strong>Mysql user account capable of creating new databases.</strong>
-   To be able to create new sites, the provisioning framework will need to be able 
-   to create new databases and users. It is not recommended using the mysql root password for this, 
-   but any account with the correct permissions will do.</p>');
+   $help['title'] = t('Mysql user account capable of creating new databases.');
+   $help['summary'] = t('To be able to create new sites, the provisioning framework will need to be able
+     to create new databases and users. It is not recommended using the mysql root password for this, 
+     but any account with the correct permissions will do.');
+   $help['configuration'] = t('Log in to your mysql server as root, and type in the following command:
+     <pre>@command_text</pre>', array('@command_text' => $command));     
 
- $help['configuration'] = t('<p><strong>To configure:</strong> 
-   Log in to your mysql server as root, and type in the following command:
-   <pre>@command_text</pre></p>', array('@command_text' => $command));     
   return $help;
 }
 

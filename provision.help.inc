@@ -3,6 +3,71 @@
  * @file ProvisionHelp contains the bulk of the provision help system
  */
 
+
+/**
+ * Constants used to generate the requirement help documentation.
+ */
+/** Status is irrelevant. Can't be checked **/
+define('PROVISION_STATUS_NONE', 0);
+/** Requirement is met. **/
+define('PROVISION_STATUS_SUCCESS', 1);
+/** Requirement not met. Less severe than an error. */
+define('PROVISION_STATUS_WARNING', 2);
+/** Requirement failed. Fix before site will function. */
+define('PROVISION_STATUS_ERROR', 4);
+
+/**
+ * Returns a class name for the output of the form element.
+ */
+function _provision_status_class($status)  {
+  static $map;
+ 
+  if (!sizeof($map)) {
+   $map = array(
+      PROVISION_STATUS_NONE => 'provision-status-none',
+      PROVISION_STATUS_SUCCESS => 'provision-status-success',
+      PROVISION_STATUS_WARNING => 'provision-status-warning',
+      PROVISION_STATUS_ERROR => 'provision-status-error',
+    );
+  }
+
+  return $map[$status];
+}
+
+/**
+ * Constants used to configure contextual hosting help
+ */
+/** Display component of help **/
+define('PROVISION_HELP_ENABLED', 1);
+/** Don't show help component **/
+define('PROVISION_HELP_DISABLED', ~PROVISION_HELP_ENABLED);
+/**
+ * Show help with the ability to collapse to save space. 
+ * This automatically enables the help component
+ **/
+define('PROVISION_HELP_COLLAPSIBLE', PROVISION_HELP_ENABLED & 2);
+/** 
+ * Display help component with an initial collapsed state.
+ * This automatically enables and sets the help component to be collapsible
+ */
+define('PROVISION_HELP_COLLAPSED', PROVISION_HELP_COLLAPSIBLE & 4);
+
+/**
+ * Returns a class name for the output of the form element
+ */
+function _provision_help_class($state) {
+  static $map;
+ 
+  if (!sizeof($map)) {
+    $map = array(
+      PROVISION_HELP_ENABLED => 'provision-help',
+      PROVISION_HELP_COLLAPSIBLE => 'provision-help-collapsible',
+      PROVISION_HELP_COLLAPSED => 'provision-help-collapsed'
+    );
+  }
+  return $map[$state];
+}
+
 /**
  * Implementation of hook_help()
  */
@@ -62,7 +127,9 @@ function provision_help($section) {
  * Page callback with in depth requirement documentation
  */
 function provision_help_requirements() {
-  $output .= _provision_requirements("basic");  
+  $output .= _provision_requirements("basic_drupal");  
+  $output .= _provision_requirements("basic_unix");  
+  $output .= _provision_requirements("basic_server");  
   $modules = module_implements('provision_service');
   foreach ($modules as $module) {
     $service = module_invoke($module, 'provision_service');
@@ -73,27 +140,32 @@ function provision_help_requirements() {
       $output .=  $help;
     }
   }
-
   return $output;
 }
 
 function _provision_requirements($req, $section = 'all') {
+  $item = array();
+  $item['#requirement'] = $req;
+  $item['#type'] = 'requirement_help';
+
+  foreach (array('#heading', '#summary', '#suggestion', '#configuration') as $key) {
+    if (in_array($section, array('all', $key))) {
+      $item[$key] = PROVISION_HELP_ENABLED;
+    }
+    else {
+      $item[$key] = PROVISION_HELP_DISABLED;
+    }
+  }
+
+  $item = provision_requirement_process($item);
+  return theme("requirement_help", $item);
+}
+
+function provision_get_requirement($req) {
   $func = '_provision_' . $req . '_requirements';
   if (function_exists($func)) {
     $help = $func();
   }
-  if ($section != 'all') {
-    return $help[$section];
-  }
-  return implode("", $help);
-}
-
-function _provision_basic_requirements() {
-  $help['summary'] = 
-    t('<p><strong>A system capable of running Drupal: </strong>If you are reading this via the inline help, this would be kind of obvious. This system is entirely Drupal based, and has the same base requirements that Drupal does.</p>
-    <p><strong>Your own server: </strong>The level of access required to be able to configure this system is very far beyond what is commonly available to users with shared hosting.</p>
-    <p><strong>A unix based operating system: </strong>The majority of functionality in this system occurs in the back-end, through system level programming. There are several features (such as symlinks), that are not available to users on Windows. There are no plans currently to add windows support.</p>');
-
   return $help;
 }
 
@@ -108,16 +180,15 @@ function _provision_backup_path_requirements() {
     [$username@hm2 ~]$ chown $username:$username $backup_path
     [$username@hm2 ~]$ chmod 0700 $backup_path
 EOF;
-  $help['summary'] = t('<p><strong>Write access to a directory to store backups.</strong> 
-                          The drush user needs to be able to maintain the backups repository to ensure that your site is backed up successfully. 
-                          It is incredibly important that this path is not accessible via the web server, so that no undesirables can get their
-                          hands on your database. The recommended path is directly above your platform path, but it can be anywhere.</p>');
-  $help['configuration'] = t('<p>Based on your server configuration we have determined that your path should be <code>@backup_path</code>, 
-                          but you can change this in the <a href="@provision_link">provisioning section</a>.</p>
-                         Please enter the following commands :
-                         <pre>@mkdir_cmd</pre>', $mkdir_cmd);
-  return $help;
+  $help['title'] = t('Write access to a directory to store backups.');
+  $help['summary'] = t('The drush user needs to be able to maintain the backups repository to ensure that your site is backed up successfully. 
+                        It is incredibly important that this path is not accessible via the web server, so that no undesirables can get their
+                        hands on your database. The recommended path is directly above your platform path, but it can be anywhere.');
 
+  $help['configuration'][] = t('Based on your server configuration we have determined that your path should be <code>@backup_path</code>, 
+    but you can change this in the <a href="@provision_link">provisioning section</a>.', $mkdir_cmd);
+  $help['configuration'][] = t('Please enter the following commands : <pre>@mkdir_cmd</pre>', $mkdir_cmd);
+  return $help;
 }
 
 function _provision_group_requirements() {
@@ -138,27 +209,128 @@ EOF;
     $vigr3 = <<<EOF
     $group::99:anotheruser,$username
 EOF;
-
-  $help['summary'] = t('<p><strong>The user account running the script, and the group of the httpd daemon.</strong> 
-                          The provision framework takes special care to make sure that the file permissions of the 
+  
+  $help['title'] = t('The user account running the script, and the group of the httpd daemon.');
+  $help['summary'] = t('The provision framework takes special care to make sure that the file permissions of the 
                           hosted sites are always as safe as can be, especially to make sure that the web server does 
                           not have the ability to modify the code of the site, therefor this information is required 
                           to assure that safety while keeping the sites accessible. This username needs to be a member
-                          of the web server group, in order to be able to correctly set the file permissions.</p>
-                          ');
+                          of the web server group, in order to be able to correctly set the file permissions.');
 
-    $help['suggest'] = t('<p>Based on your server configuration we have determined that you should set the 
-                          username to "<code>@username</code>" and the group to "<code>@group</code>", 
-                          but you can change these in the <a href="@provision_link">provisioning section</a>.</p>', 
-                          array("@username" => $username, "@group" => $group, "@provision_link" => url('admin/settings/provision')));
+  $help['suggestion'] = t('Based on your server configuration we have determined that you should set the 
+                        username to "<code>@username</code>" and the group to "<code>@group</code>", 
+                        but you can change these in the <a href="@provision_link">provisioning section</a>.', 
+                        array("@username" => $username, "@group" => $group, "@provision_link" => url('admin/settings/provision')));
 
-  $help['configuration'] =t('<p><strong>To configure: </strong> If your user is not a member of the web group, you can add them by using the
+  $help['configuration'] =t('If your user is not a member of the web group, you can add them by using the
                           <code>vigr</code> command: <pre>@vigr_cmd</pre>
                           Once you have run the vigr command, find the line that says : <pre>@vigr1</pre>
                           Then add the username to the end of the line, so that it looks like : <pre>@vigr2</pre>
                           If there were already users in the group, add your user to the group using a comma as separator :
-                          <pre>@vigr3</pre></p>', 
-                          array('@vigr_cmd' => $vigr_cmd, '@vigr1' => $vigr1, '@vigr2' => $vigr2, '@vigr3' => $vigr3));
+                          <pre>@vigr3</pre>', array('@vigr_cmd' => $vigr_cmd, '@vigr1' => $vigr1, '@vigr2' => $vigr2, '@vigr3' => $vigr3));
   return $help;
 
 }
+
+/**
+ * Implementation of hook_elements.
+ *
+ * Defines a number of form elements that are used for formatting the contextual help
+ * in forms.
+ */
+function provision_elements() {
+  $type['requirement_help'] = array(
+    '#requirement' => null,
+    '#status' => PROVISION_HELP_WARNING,
+    '#heading' => PROVISION_HELP_ENABLED,
+    '#summary' => PROVISION_HELP_ENABLED,
+    '#configuration' => PROVISION_HELP_ENABLED,
+    '#summary_show' => t("More information"),
+    '#configuration_show' => t("To configure"),
+    '#process' => array('provision_requirement_process' => array()),
+  );
+
+  $type['requirement_description'] = $type['requirement_help'];
+  $type['requirement_description']['#summary'] = PROVISION_HELP_COLLAPSED;
+  $type['requirement_description']['#configuration'] = PROVISION_HELP_DISABLED;
+
+  return $type;
+}
+
+/**
+ * Places the various help components info the $element array
+ */
+function provision_requirement_process(&$element) {
+  if (!$element['#requirement']) {
+    return element;
+  }
+
+  $element['#help'] = provision_get_requirement($element['#requirement']);
+  return $element;
+}
+
+/**
+ * Theme function for displaying contextual help.
+ *
+ * Can control individual components of the help, for display in various places.
+ */
+function theme_requirement_help(&$element) {
+  drupal_add_js(drupal_get_path('module', 'provision') . '/provision.js');
+
+  $help = $element['#help']; // this is just to make it easier to work with.
+
+  //place anchor so user can be directed to right page.
+  $output .= "<a name='provision-help-$req'></a>";
+
+  $output .= '<div class="provision-' . form_clean_id($element["#type"]) . '">';
+
+  $components = array('summary', 'suggestion', 'configuration');
+  foreach ($components as $key) {
+    if (($element["#$key"] & PROVISION_HELP_ENABLED) && !is_null($help[$key])) {
+      $display_type = _provision_help_class($element["#$key"]);
+      $output .= "<div class='provision-help-$key $display_type'>";
+      if (!is_array($help[$key])) {
+        // it is simpler if there's only one way to print the component
+        $help[$key] = array($help[$key]);  
+      }
+      $output .= "<p>" . implode("</p><p>", $help[$key]) . "</p>"; 
+      $output .= '</div>';
+    } 
+  }
+  $output .= '</div>';
+  if (($element['#heading'] & PROVISION_HELP_ENABLED) && $help['title'] && !$element['#title']) {
+    $element['#title'] = $help['title'];
+  }
+  $element['#value'] = $output;
+  return theme('item', $element);
+}
+
+/**
+ * @TODO: handle element children for requirement help
+function _provision_basic_requirements() {
+  $help['drupal'] = _provision_basic_drupal_requirements();
+  $help['unix'] = _provision_basic_unix_requirements();
+  $help['server'] = _provision_basic_server_requirements();
+
+  return $help;
+}
+ */
+
+function _provision_basic_drupal_requirements() {
+  $help['title'] = t('A system capable of running Drupal');
+  $help['summary'] = t('If you are reading this via the inline help, this would be kind of obvious. This system is entirely Drupal based, and has the same base requirements that Drupal does.');
+  return $help;
+}
+
+function _provision_basic_server_requirements() {
+  $help['title'] = t('Your own server');
+  $help['summary'] = t('The level of access required to be able to configure this system is very far beyond what is commonly available to users with shared hosting.');
+  return $help;
+}
+
+function _provision_basic_unix_requirements() {
+  $help['title'] = t('A unix based operating system');
+  $help['summary'] = t('The majority of functionality in this system occurs in the back-end, through system level programming. There are several features (such as symlinks), that are not available to users on Windows. There are no plans currently to add windows support.</p>');
+  return $help;
+}
+

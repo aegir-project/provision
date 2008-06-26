@@ -54,6 +54,7 @@ function provision_init() {
     define('PROVISION_DOMAIN', drush_get_option(array('l', 'uri'), $_SERVER['HTTP_HOST']));
   }
   else {
+    define('PROVISION_DOMAIN', $_SERVER['HTTP_HOST']);
     $docroot = $_SERVER['pwd'];
   }
   
@@ -61,6 +62,7 @@ function provision_init() {
   define('PROVISION_DOCROOT_PATH', rtrim($path, '/'));
   define('PROVISION_SITES_PATH', rtrim($path, '/') . '/sites');
   
+  define('PROVISION_DRUSH_PATH', drupal_get_path('module', 'drush') . '/drush.php');
   $parts = explode("/", rtrim($path, '/'));
   array_pop($parts);
   define('PROVISION_PARENT_PATH', rtrim(implode("/" , $parts), '/'));

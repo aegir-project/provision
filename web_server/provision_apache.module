@@ -20,11 +20,9 @@ function provision_apache_provision_service() {
 function provision_apache_help($section) {
   switch ($section) {
     case 'admin/help/provision#requirements':
-      $output .= "<ol>";
-      $output .= '<li>' . _provision_requirements('config_path') . '</li>';
-      $output .= '<li>' . _provision_requirements('httpd_conf')  . '</li>';
-      $output .= '<li>' . _provision_requirements('visudo') . '</li>';
-      $output .= "</ol>";
+      $output .= _provision_requirements('config_path');
+      $output .= _provision_requirements('httpd_conf');
+      $output .= _provision_requirements('visudo');
       return $output;
       break;
   }
@@ -42,19 +40,17 @@ function _provision_config_path_requirements() {
     [$username@hm2 ~]$ chmod 0700 $vhost_path
 EOF;
 
+  $help['title'] = t('Web server inaccessible directory to store Virtual Host information.');
+  $help['summary'] = t('The provision framework takes special care to make sure that the file permissions of the 
+                       hosted sites are always as safe as can be, especially to make sure that the web server does 
+                       not have the ability to modify the code of the site, therefor this information is required 
+                       to assure that safety while keeping the sites accessible. 
+                       The recommended path is directly above your platform path, but it can be anywhere.');
 
-  $help['summary'] = t('<p><strong>Web server inaccessible directory to store Virtual Host information.</strong> 
-                            The provision framework takes special care to make sure that the file permissions of the 
-                            hosted sites are always as safe as can be, especially to make sure that the web server does 
-                            not have the ability to modify the code of the site, therefor this information is required 
-                            to assure that safety while keeping the sites accessible. 
-                            The recommended path is directly above your platform path, but it can be anywhere.</p>');
-
-  $help['configuration'] = t('<p>Based on your server configuration we have determined that your path should be <code>@vhost_path</code>, 
+  $help['configuration'] = t('Based on your server configuration we have determined that your path should be <code>@vhost_path</code>, 
                             but you can change it change them in the <a href="@provision_link">provisioning section</a></p>
                             <p><strong>To configure:</strong> this directory correctly, please enter the following commands :
-                            <pre>@mkdir_cmd</pre></p>',$mkdir_cmd);
-
+                            <pre>@mkdir_cmd</pre>',$mkdir_cmd);
 
   return $help;
 
@@ -65,16 +61,14 @@ function _provision_httpd_conf_requirements() {
   $vhost_line = <<<EOF
     Include $vhost_path
 EOF;
+  $help['title'] = t('Access to the server\'s httpd.conf file.');
+  $help['summary'] = t('You are required to add a single line to the httpd.conf file, which allows 
+                        the system to load the additional virtual hosts that are generated.</p>
+                        The location of this file differs between distributions, 
+                        but is most commonly found in <code>/etc/httpd</code> or <code>/etc/apache</a>.');
 
-  $help['summary'] = t('<p><strong>Access to the server\'s <code>httpd.conf</code> file.</strong> 
-                            You are required to add a single line to the httpd.conf file, which allows 
-                            the system to load the additional virtual hosts that are generated.</p>
-                            The location of this file differs between distributions, 
-                            but is most commonly found in <code>/etc/httpd</code> or <code>/etc/apache</a>.</p>');
-
-  $help['configuration'] = t('<p><strong>To configure:</strong> 
-                            Once you have determined the location of your httpd.conf file, add the following line to it :
-                            <pre>@vhost_line</pre></p>', array('@vhost_line' => $vhost_line));
+  $help['configuration'] = t('Once you have determined the location of your httpd.conf file, add the following line to it :
+                            <pre>@vhost_line</pre>', array('@vhost_line' => $vhost_line));
 
   return $help;
 }
@@ -90,14 +84,14 @@ EOF;
     $username ALL=NOPASSWD: /usr/sbin/apachectl
 EOF;
 
-  $help['summary'] = t('<p><strong>Ability to reload the httpd daemon.</strong> 
-                             As the provisioning framework should not be run as root,
-                             and the web server group should not be allowed access to the 
-                             functionality to stop/start the web server, it is required that you provide access
-                             to the Apache restart command for the user account the script will be running as. 
-                             If this is not configured, every command will ask for a sudo password when restarting the server.</p>');
-  $help['configuration'] = t('<p><strong>To configure:</strong> Run the visudo command: <pre>@visudo_cmd</pre>
-                             Then add the following line to the file: <pre>@visudo_line</pre></p>', 
+  $help['title'] = t('Permission to restart the httpd daemon as the user the script is running as');
+  $help['summary'] = t('As the provisioning framework should not be run as root,
+                         and the web server group should not be allowed access to the 
+                         functionality to stop/start the web server, it is required that you provide access
+                         to the Apache restart command for the user account the script will be running as. 
+                         If this is not configured, every command will ask for a sudo password when restarting the server.');
+  $help['configuration'] = t('Run the visudo command: <pre>@visudo_cmd</pre>
+                             Then add the following line to the file: <pre>@visudo_line</pre>', 
                              $visudo_cmd);
   return $help;
 
