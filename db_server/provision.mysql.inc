@@ -113,7 +113,7 @@ function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd
   $exists = provision_path("exists", $dump_file, true,
     t('Found database dump at @path.'),
     t('No database dump was found at @path.'),
-    FILE_FRAMEWORK_ERROR);
+    PROVISION_FRAMEWORK_ERROR);
   if ($exists) {
     $readable = provision_path("readable", $dump_file, true, '', 
       t('The database dump at @path could not be read.'), 
