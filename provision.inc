@@ -36,12 +36,15 @@
  * 
  */
 function provision_invoke($hook, $url, &$data, $rollback = false) {
-  
+   
   if (!$rollback) {
     foreach (module_implements("provision_$hook") as $name) {
+      _provision_log_messages();
       $completed[] = $name;
       $func = $name . "_provision_" . $hook;
       $func($url, $data);
+      # this is run before and after so that messages appear in the correct order.
+      _provision_log_messages();
       if (provision_get_error()) {
         # As soon as an error occurs, roll back
         $rollback = TRUE;
@@ -67,6 +70,30 @@ function provision_invoke($hook, $url, &$data, $rollback = false) {
     return FALSE;
   }
 }
+
+
+/**
+ * Turn drupal_set_message errors into provision_log errors
+ */
+function _provision_log_messages() {
+  $messages = drupal_get_messages();
+
+  # Drupal message errors.
+  foreach ((array) $messages['error'] as $error) {
+    if (preg_match("/^warning:/", $error)) {
+      provision_log("warning", ereg_replace("/^warning: /", '', $error));  
+    }
+    elseif (preg_match("/^user warning:/", $error)) {
+      provision_log("error", ereg_replace("/^user warning: /", '', $error));  
+    }
+    else {
+      provision_log("error", $error);
+    }
+  }
+
+}
+
+
 
 /**
  * Return output to the command line.
