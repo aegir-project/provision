@@ -67,7 +67,7 @@
  * @return
  *    Returns TRUE if the test against $confirm passed, otherwise returns FALSE.
  */
-function provision_path($op, $path, $confirm = true, $succeed_message = '', $fail_message = '', $error_codes = null) {
+function provision_path($op, $path, $confirm = true, $succeed_message = null, $fail_message = null, $error_codes = null) {
   # The code style is a bit weird here, but it's a bit easier to read this way.
   $func = "provision_path_" . $op;
   if (function_exists($func)) {
@@ -84,19 +84,23 @@ function provision_path($op, $path, $confirm = true, $succeed_message = '', $fai
     }
     $status = ($value == $confirm);
     if ($status) {
-      if ($succeed_message) {
+      if (!is_null($succeed_message)) {
         provision_log("message", t($succeed_message, $tokens));      
       }
     }
     else {
       if ($error_codes) {
         // Trigger a sysem halting error
-        provision_log("error", t($fail_message, $tokens));
+        if (!is_null($fail_message)) {
+          provision_log("error", t($fail_message, $tokens));
+        }
         provision_set_error($error_codes);
       }
       else {
         // Trigger a warning
-        provision_log("warning", t($fail_message, $tokens));
+        if (!is_null($fail_message)) {
+          provision_log("warning", t($fail_message, $tokens));
+        }
       }
     }
     return $status;
@@ -174,8 +178,11 @@ function provision_path_chown($path, &$owner, &$reason) {
 function provision_path_chgrp($path, &$group, &$reason) {
   if ($group = provision_posix_groupname($group)) {
     if (provision_user_in_group(PROVISION_SCRIPT_USER, $group)) {
-      if (!chgrp($path, $group)) {
-        $reason = t("chgrp failed"); 
+      if (chgrp($path, $group)) {
+        return $group;
+      }
+      else {
+        $reason = t("chgrp failed");
       }
     }
     else {
