@@ -51,13 +51,12 @@ function provision_init() {
   // Set up defines for platform
   if (function_exists('drush_get_option')) {
     $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
-    define('PROVISION_DOMAIN', drush_get_option(array('l', 'uri'), $_SERVER['HTTP_HOST']));
   }
   else {
-    define('PROVISION_DOMAIN', $_SERVER['HTTP_HOST']);
     $docroot = $_SERVER['pwd'];
   }
   
+  define('PROVISION_DOMAIN', $_SERVER['HTTP_HOST']);
   $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
   define('PROVISION_DOCROOT_PATH', rtrim($path, '/'));
   define('PROVISION_SITES_PATH', rtrim($path, '/') . '/sites');
