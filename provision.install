@@ -1,0 +1,17 @@
+<?php
+/**
+ * Configure the module weights for the core modules, to ensure that the
+ * hooks always fire in a predictable pattern.
+ *
+ * Provision module - does necessary setup for an task to occur.
+ * Mysql module - creates the necessary database settings
+ * Drupal module - manages installations and the like.
+ * Apache module - ensures that web server can see the site
+ */
+function provision_install() {
+  db_query("UPDATE {system} SET weight = 0 WHERE type='module' AND name='provision'");
+  db_query("UPDATE {system} SET weight = 1 WHERE type='module' AND name='provision_mysql'");
+  db_query("UPDATE {system} SET weight = 2 WHERE type='module' AND name='provision_drupal'");
+  db_query("UPDATE {system} SET weight = 3 WHERE type='module' AND name='provision_apache'");
+
+}

@@ -168,6 +168,9 @@ function provision_mysql_provision_delete($url, &$data) {
 // Rollback doesn't apply here yet. Unless we trigger a restore of the first dump
 // made. Which could go on infinitely if something is really long.
 function provision_mysql_provision_post_restore($url, &$data) {
+  provision_path('unlink', 'sites/' . $url . '/database.sql', true,
+    t("Removed dump file @path after restoring from it"),
+    t("Could not remove dump file @path"), PROVISION_PERM_ERROR);
   return _provision_mysql_destroy_site_db($data['old_site_db_name'], $data['old_site_db_user'], $data['old_site_db_passwd'], $data['old_site_db_host']);
 }
 

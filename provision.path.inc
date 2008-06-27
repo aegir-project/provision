@@ -174,7 +174,7 @@ function provision_path_chown($path, &$owner, &$reason) {
 function provision_path_chgrp($path, &$group, &$reason) {
   if ($group = provision_posix_groupname($group)) {
     if (provision_user_in_group(PROVISION_SCRIPT_USER, $group)) {
-      if (chgrp($path, $group)) {
+      if (!chgrp($path, $group)) {
         $reason = t("chgrp failed"); 
       }
     }
@@ -212,7 +212,6 @@ function provision_path_switch_paths($path1, &$path2, &$reason) {
   }
   return $path1;
 }
-
 
 function provision_path_extract($path, &$target, &$reason) {
   if (file_exists($path) && is_readable($path)) {

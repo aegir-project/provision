@@ -117,18 +117,25 @@ function _provision_drupal_default_template() {
  *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file($url, &$data) {
+  provision_log('notice', t("Generate settings.php file"));
   if (provision_path("exists", "sites/$url/settings.php")) {
-    provision_path("chmod", "sites/$url/settings.php", 0750);
+    provision_path("chmod", "sites/$url/settings.php", 0750,
+      t('Changed permissions of settings.php to @confirm'),
+      t('Could not change permissions of settings.php to @confirm'));
   }
 
   $fp = fopen("sites/$url/settings.php", "w");
   $text = variable_get('provision_drupal_settings_template', _provision_drupal_default_template());
   fwrite($fp, "<?php\n" . provision_render_config($text, $data));
   fclose($fp);
-  
+
   # Change the permissions of the file
-  provision_path("chmod", "sites/$url/settings.php", 0550);
-  provision_path("chgrp", "sites/$url/settings.php", PROVISION_WEB_GROUP);
+  provision_path("chmod", "sites/$url/settings.php", 0550,
+    t('Changed permissions of settings.php to @confirm'),
+    t('Could not change permissions of settings.php to @confirm'));
+  provision_path("chgrp", "sites/$url/settings.php", PROVISION_WEB_GROUP,
+    t('Change group ownership of settings.php to @confirm'),
+    t('Could not change group ownership of settings.php to @confirm'));
 }
 
 /**
