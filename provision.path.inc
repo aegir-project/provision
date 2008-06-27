@@ -219,6 +219,7 @@ function provision_path_extract($path, &$target, &$reason) {
     if (is_writeable(dirname($target)) && !file_exists($target) && !is_dir($target)) {
       mkdir($target);
       provision_shell_exec("tar -zxf %s -C %s", $path, $target);
+      provision_log("notice", sprintf("Running: tar -zxf %s -C %s", $path, $target));
       if (is_writeable(dirname($target)) && is_readable(dirname($target)) && is_dir($target)) {
         $target = TRUE;
         return TRUE;
