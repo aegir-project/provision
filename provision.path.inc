@@ -219,8 +219,13 @@ function provision_path_extract($path, &$target, &$reason) {
     if (is_writeable(dirname($target)) && !file_exists($target) && !is_dir($target)) {
       mkdir($target);
       provision_shell_exec("tar -zxf %s -C %s", $path, $target);
-      $target = TRUE;
-      return TRUE;
+      if (is_writeable(dirname($target)) && is_readable(dirname($target)) && is_dir($target)) {
+        $target = TRUE;
+        return TRUE;
+      }
+      else {
+        $reason = t("The file could not be extracted");
+      }
     }
     else {
       $reason = t("The target directory could not be written to");

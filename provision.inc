@@ -422,6 +422,9 @@ function _provision_recursive_delete($path) {
 
 /**
  * Wrapper around drush_shell_exec to provide sprintf functionality with some more safety.
+ *
+ * @TODO: fix this so we can get error codes and the return values. drush_shell_exec is too
+ *        limited
  */
 function provision_shell_exec() {
   $args = func_get_args();

@@ -120,7 +120,7 @@ function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd
       PROVISION_PERM_ERROR);
     if ($readable) {
       provision_log("notice", sprintf("Importing database using command: mysql -u%s -p%s -h%s %s < %s", 
-        $db_user, $db_passwd, $db_host, $db_name, $dump_file));
+        $db_user, 'XXXXXXXXXX', $db_host, $db_name, $dump_file));
       provision_shell_exec("mysql -u%s -p%s -h%s %s < %s", 
         $db_user, $db_passwd, $db_host, $db_name, $dump_file );
      }
