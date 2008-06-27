@@ -522,57 +522,8 @@ function _provision_import($url = null) {
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
 function _provision_verify($url = '') {
-  $exists = provision_path("exists",PROVISION_CONFIG_PATH, true ,
-    t("Provision configuration path exists."),
-    t("Provision configuration path does not exist."));
-
-  if (!$exists) {
-    $made = provision_path("mkdir", PROVISION_CONFIG_PATH, true,
-        t("Provision configuration path has been created."),
-        t("Provision configuration could not be created."),
-        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-  }
-
-  provision_path("writable", PROVISION_CONFIG_PATH, true ,
-      t("Provision configuration path is writable."),
-      t("Provision configuration path is not writable."), 
-      PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-
-  provision_path("chown", PROVISION_CONFIG_PATH, PROVISION_SCRIPT_USER, 
-    t("Changed ownership of <code>@path</code>"),
-    t("Could not change ownership <code>@path</code>"),
-    PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
-
-  provision_path("chmod", PROVISION_CONFIG_PATH, 0700, 
-    t("Changed permissions of <code>@path</code> to @confirm"),
-    t("Could not change ownership <code>@path</code> to @confirm"),
-    PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
-
-  $exists = provision_path("exists", PROVISION_BACKUP_PATH, true ,
-    t("Provision backup path exists."),
-    t("Provision backup path does not exist."));
-
-  if (!$exists) {
-    $made = provision_path("mkdir", PROVISION_BACKUP_PATH, true,
-        t("Provision backup path has been created."),
-        t("Provision backup could not be created."),
-        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-  }
-
-  provision_path("writable", PROVISION_BACKUP_PATH, true ,
-      t("Provision backup path is writable."),
-      t("Provision backup path is not writable."), 
-      PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-
-  provision_path("chown", PROVISION_BACKUP_PATH, PROVISION_SCRIPT_USER, 
-    t("Changed ownership of <code>@path</code>"),
-    t("Could not change ownership <code>@path</code>"),
-    PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
-
-  provision_path("chmod", PROVISION_BACKUP_PATH, 0700, 
-    t("Changed permissions of <code>@path</code> to @confirm"),
-    t("Could not change ownership <code>@path</code> to @confirm"),
-    PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );        
+  _provision_create_dir(PROVISION_CONFIG_PATH, t('Provision configuration'), 0700);
+  _provision_create_dir(PROVISION_BACKUP_PATH, t('Web server configuration'), 0700);
   
   $data = array();
   $rolled_back = provision_invoke("verify", $url, $data);

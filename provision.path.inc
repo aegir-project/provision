@@ -237,3 +237,42 @@ function provision_path_extract($path, &$target, &$reason) {
 /**
 *@} end filegroup
  */
+
+
+/**
+ * Small helper function for creation of configuration directories.
+ */
+function _provision_create_dir($path, $name, $perms) {
+  $exists = provision_path("exists",$path, true ,
+    $name . ' ' . t("path exists."),
+    $name . ' ' . t("path does not exist.")
+  );
+
+  if (!$exists) {
+    $exists = provision_path("mkdir", $path, true,
+      $name . ' ' . t("path has been created."),
+      $name . ' ' . t("path could not be created."),
+      PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+  }
+
+  if ($exists) {
+    provision_path("chown", $path, PROVISION_SCRIPT_USER, 
+      $name . ' ' . t("ownership of path has been changed to @confirm."),
+      $name . ' ' . t("ownership of path could not be changed to @confirm."),
+      PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+
+    provision_path("chmod", $path, $perms, 
+      $name . ' ' . t("permissions of path have been changed to @confirm."),
+      $name . ' ' . t("permissions of path could not be changed to @confirm."),
+      PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
+
+    $writable = provision_path("writable", $path, true,
+        $name . ' ' . t("path is writeable."),
+        $name . ' ' . t("path is not writeable."),
+        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+
+  }
+
+  return ($exists && $writable);
+}
+

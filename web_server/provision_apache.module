@@ -286,33 +286,7 @@ function _provision_apache_restart_apache() {
 }
 
 function provision_apache_provision_verify() {
-  $exists = provision_path("exists", PROVISION_VHOST_PATH, true ,
-    t("Virtual Host configuration path exists."),
-    t("Virtual Host configuration path does not exist."));
-  if (!$exists) {
-    $made = provision_path("mkdir", PROVISION_VHOST_PATH, true, 
-        t("Virtual host configuration path has been created."),
-        t("Virtual host configuration path could not be created."), 
-        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-  }
-  else {
-    $writable = provision_path("writable", PROVISION_VHOST_PATH, true ,
-        t("Virtual host configuration path is writable."),
-        t("Virtual host configuration path is not writable."), 
-        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-
-    if (!$writable) {
-      provision_path("chown", PROVISION_VHOST_PATH, PROVISION_SCRIPT_USER, 
-        t("Changed ownership of <code>@path</code>"),
-        t("Could not change ownership <code>@path</code>"),
-        PROVISION_PERM_ERROR);
-
-      provision_path("chmod", PROVISION_VHOST_PATH, 0700, 
-        t("Changed permissions of <code>@path</code> to @confirm"),
-        t("Could not change ownership <code>@path</code> to @confirm"),
-        PROVISION_PERM_ERROR );
-    }
-  }
+  $exists = _provision_create_dir(PROVISION_VHOST_PATH, t("Virtual host configuration"), 0700);
 }
 
 /**

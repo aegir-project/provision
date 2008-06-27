@@ -330,25 +330,8 @@ function _provision_drupal_install_schema($profile) {
 function provision_drupal_provision_verify($url, &$data) {
   provision_path("writable", "sites", true, t("Drupal sites directory is writable by the provisioning script"),
     t("Drupal sites directory is not writable by the provisioning script"), PROVISION_PERM_ERROR);
+  $exists = _provision_create_dir(PROVISION_DRUSHRC_PATH, t('Drush configuration path'), 0700);
 
-  $exists = provision_path("exists", PROVISION_DRUSHRC_PATH, true ,
-    t("Virtual Host configuration path exists."),
-    t("Virtual Host configuration path does not exist."));
-  if (!$exists) {
-    $made = provision_path("mkdir", PROVISION_DRUSHRC_PATH, true, 
-        t("Virtual host configuration path has been created."),
-        t("Virtual host configuration path could not be created."), 
-        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-  }
-  else {
-    $writable = provision_path("writable", PROVISION_DRUSHRC_PATH, true ,
-        t("Virtual host configuration path is writable."),
-        t("Virtual host configuration path is not writable."), 
-        PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-    if (!$writable) {
-      chmod($path, 0770);
-    }
-  }
   $profiles = file_scan_directory('./profiles', '\.profile$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name', 0);
   $data['profiles'] = $profiles;
  
