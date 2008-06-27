@@ -74,13 +74,15 @@ EOF;
 
 function _provision_visudo_requirements() {
   $username = PROVISION_SCRIPT_USER;
+  $cmd = trim(str_replace("sudo", '', PROVISION_RESTART_CMD));
+  $cmd = substr($cmd, 0, strpos($cmd, " "));
   $visudo_cmd['@visudo_cmd'] = <<<EOF
     [$username@hm2 ~]$ sudo su -
     password:
     [root@hm2 ~]$ visudo
 EOF;
   $visudo_cmd['@visudo_line'] = <<<EOF
-    $username ALL=NOPASSWD: /usr/sbin/apachectl
+    $username ALL=NOPASSWD: $cmd
 EOF;
 
   $help['title'] = t('Permission to restart the httpd daemon as the user the script is running as');
@@ -106,7 +108,7 @@ function provision_apache_provision_configure($node = null) {
       '#title' => t('Restart command'),
       '#required' => TRUE,
       '#description' => t('The command to run to restart the for new changes to take effect. This is required for the new site to become live'),
-      '#default_value' => ($node->restart_cmd) ? $node->restart_cmd : variable_get('provision_restart_cmd', 'sudo /usr/sbin/apachectl graceful'),
+      '#default_value' => ($node->restart_cmd) ? $node->restart_cmd : PROVISION_RESTART_CMD,
       '#size' => 40,
       '#maxlength' => 255,
       '#weight' => -20,
@@ -277,8 +279,7 @@ function _provision_apache_create_vhost_config($url, $data, $template = null) {
 function _provision_apache_restart_apache() {
   # This is required to be configurable, due to the fact that different hosts might need to do this differently.
   # TODO : test for this instead of relying on a configuration setting?
-  $apache_restart_cmd = escapeshellcmd(variable_get('provision_restart_cmd', 'sudo apachectl graceful'));
-  $return = drush_shell_exec(escapeshellcmd($apache_restart_cmd));
+  $return = drush_shell_exec(escapeshellcmd(PROVISION_RESTART_CMD));
   if (!$return) {
     provision_set_error(PROVISION_WEB_ERROR);
     provision_log("error", "Web server could not be restarted. Changes might not be available until this has been done.");
