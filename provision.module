@@ -82,7 +82,18 @@ function provision_init() {
   define('PROVISION_DB_USER', variable_get('provision_db_user', 'root'));
   define('PROVISION_DB_PASSWD', variable_get('provision_db_passwd', 'root'));
   define('PROVISION_DB_HOST', variable_get('provision_db_host', 'localhost'));
-  define('PROVISION_RESTART_CMD', variable_get('provision_restart_cmd', 'sudo /usr/sbin/apachectl graceful'));
+
+  # try to detect the apache restart command
+  $command = '/usr/sbin/apachectl'; # a proper default for most of the world
+  foreach (array('/usr/local/sbin/apachectl', # freebsd
+                 '/usr/sbin/apache2ctl', # debian + apache2
+		 $command) as $test) {
+    if (is_executable($test)) {
+      $command = $test;
+    }
+  }
+
+  define('PROVISION_RESTART_CMD', variable_get('provision_restart_cmd', "sudo $command graceful"));
   
   global $base_url;
   define('PROVISION_BASE_URL', $base_url);
