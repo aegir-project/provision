@@ -33,12 +33,9 @@ function _provision_mysql_user_requirements() {
    $command = <<<EOF
      [$username@hm2 ~]$ mysql -uroot -pXXXXXXXXX mysql
 
-     mysql> grant create, drop, grant option  on *.* to 'username_here'@'localhost'
-         -> identified by 'mypassword';
+     mysql> GRANT ALL PRIVILEGES ON *.* TO 'username_here'@'localhost' IDENTIFIED BY 'mypassword' WITH GRANT OPTION;
      Query OK, 0 rows affected (0.00 sec)
 
-     mysql> flush privileges;
-     Query OK, 0 rows affected (0.00 sec)
 EOF;
    $help['title'] = t('Mysql user account capable of creating new databases.');
    $help['summary'] = t('To be able to create new sites, the provisioning framework will need to be able
