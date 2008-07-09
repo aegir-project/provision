@@ -203,7 +203,7 @@ function _provision_group_requirements() {
       
 
     $vigr_cmd = <<<EOF
-    [$username@hm2 ~]$ sudo /usr/sbin/vigr
+    [$username@hm2 ~]$ sudo adduser $username $group
 EOF;
     $vigr1 = <<<EOF
     $group::99:
@@ -228,8 +228,11 @@ EOF;
                         array("@username" => $username, "@group" => $group, "@provision_link" => url('admin/settings/provision')));
 
   $help['configuration'] =t('If your user is not a member of the web group, you can add them by using the
-                          <code>vigr</code> command: <pre>@vigr_cmd</pre>
-                          Once you have run the vigr command, find the line that says : <pre>@vigr1</pre>
+                          <code>adduser</code> command:
+                          <pre>@vigr_cmd</pre>
+                          If that command is not available, you will need to edit the /etc/group file directly with
+                          your vigr or your favorite editor.
+                          Find the line that says : <pre>@vigr1</pre>
                           Then add the username to the end of the line, so that it looks like : <pre>@vigr2</pre>
                           If there were already users in the group, add your user to the group using a comma as separator :
                           <pre>@vigr3</pre>', array('@vigr_cmd' => $vigr_cmd, '@vigr1' => $vigr1, '@vigr2' => $vigr2, '@vigr3' => $vigr3));
