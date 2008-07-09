@@ -40,8 +40,8 @@ function _provision_config_path_requirements() {
     [$username@hm2 ~]$ chmod 0700 $vhost_path
 EOF;
 
-  $help['title'] = t('Web server inaccessible directory to store Virtual Host information.');
-  $help['summary'] = t('The provision framework takes special care to make sure that the file permissions of the 
+  $help['title'] = t('Write access to a directory to store configuration information');
+  $help['summary'] = t('The Provision framework takes special care to make sure that the file permissions of the 
                        hosted sites are always as safe as can be, especially to make sure that the web server does 
                        not have the ability to modify the code of the site, therefor this information is required 
                        to assure that safety while keeping the sites accessible. 
@@ -60,7 +60,7 @@ function _provision_httpd_conf_requirements() {
   $vhost_line = <<<EOF
     Include $vhost_path
 EOF;
-  $help['title'] = t('Access to the server\'s httpd.conf file.');
+  $help['title'] = t('Modify the server\'s httpd.conf file');
   $help['summary'] = t('You are required to add a single line to the httpd.conf file, which allows 
                         the system to load the additional virtual hosts that are generated.</p>
                         The location of this file differs between distributions, 

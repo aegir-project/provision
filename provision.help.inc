@@ -185,7 +185,7 @@ function _provision_backup_path_requirements() {
     [$username@hm2 ~]$ chown $username:$username $backup_path
     [$username@hm2 ~]$ chmod 0700 $backup_path
 EOF;
-  $help['title'] = t('Write access to a directory to store backups.');
+  $help['title'] = t('Write access to a directory to store backups');
   $help['summary'] = t('The drush user needs to be able to maintain the backups repository to ensure that your site is backed up successfully. 
                         It is incredibly important that this path is not accessible via the web server, so that no undesirables can get their
                         hands on your database. The recommended path is directly above your platform path, but it can be anywhere.');
