@@ -416,7 +416,10 @@ function _provision_drupal_import_site($url) {
     $data['site_profile'] = $installed_profile;
     $data['site_installed'] = TRUE;
     provision_save_site_data($url, $data);
-  } 
+  }
+
+  //Just make sure our ini settings and the like aren't wiped out.
+  include("sites/" . conf_path() . "/settings.php");
   return $data;
 }
 

@@ -92,9 +92,8 @@ function provision_init() {
       $command = $test;
     }
   }
-
   define('PROVISION_RESTART_CMD', variable_get('provision_restart_cmd', "sudo $command graceful"));
-  
+
   global $base_url;
   define('PROVISION_BASE_URL', $base_url);
   define('PROVISION_WEB_DISABLE_URL', 
