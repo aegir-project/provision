@@ -398,6 +398,9 @@ function provision_drupal_provision_import($url, &$data) {
       }
     }
   }
+  //Just make sure our ini settings and the like aren't wiped out.
+  include(conf_path() . "/settings.php");
+
 }
 
 function _provision_drupal_import_site($url) {
@@ -405,8 +408,7 @@ function _provision_drupal_import_site($url) {
     $data = array(); // initialize site data to empty array
   }
   
-  include_once("sites/$url/settings.php");
-  
+  include("sites/$url/settings.php");
   if ($parts = @parse_url($db_url)) {
     $data['site_db_type'] = $parts['scheme'];
     $data['site_db_user'] = $parts['user'];
@@ -418,8 +420,6 @@ function _provision_drupal_import_site($url) {
     provision_save_site_data($url, $data);
   }
 
-  //Just make sure our ini settings and the like aren't wiped out.
-  include("sites/" . conf_path() . "/settings.php");
   return $data;
 }
 
