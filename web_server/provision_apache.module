@@ -43,7 +43,7 @@ EOF;
   $help['title'] = t('Write access to a directory to store configuration information');
   $help['summary'] = t('The Provision framework takes special care to make sure that the file permissions of the 
                        hosted sites are always as safe as can be, especially to make sure that the web server does 
-                       not have the ability to modify the code of the site, therefor this information is required 
+                       not have the ability to modify the code of the site, therefore this information is required 
                        to assure that safety while keeping the sites accessible. 
                        The recommended path is directly above your platform path, but it can be anywhere.');
 
@@ -61,12 +61,12 @@ function _provision_httpd_conf_requirements() {
     Include $vhost_path
 EOF;
   $help['title'] = t('Modify the server\'s httpd.conf file');
-  $help['summary'] = t('You are required to add a single line to the httpd.conf file, which allows 
-                        the system to load the additional virtual hosts that are generated.</p>
+  $help['summary'] = t('To allow the system to load additional virtual hosts that are generated,
+                        you are required to add a line to your httpd.conf file.</p>
                         The location of this file differs between distributions, 
                         but is most commonly found in <code>/etc/httpd</code> or <code>/etc/apache</code>.');
 
-  $help['configuration'] = t('Once you have determined the location of your httpd.conf file, add the following line to it :
+  $help['configuration'] = t('Once you have determined the location of your httpd.conf file, add the following line to it:
                             <pre>@vhost_line</pre>', array('@vhost_line' => $vhost_line));
 
   return $help;

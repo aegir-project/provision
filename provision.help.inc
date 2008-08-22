@@ -186,7 +186,7 @@ function _provision_backup_path_requirements() {
     [$username@hm2 ~]$ chmod 0700 $backup_path
 EOF;
   $help['title'] = t('Write access to a directory to store backups');
-  $help['summary'] = t('The drush user needs to be able to maintain the backups repository to ensure that your site is backed up successfully. 
+  $help['summary'] = t('The drush user (<a href="http://drupal.org/project/drush">http://drupal.org/project/drush</a>) needs to be able to maintain the backups repository to ensure that your site is backed up successfully. 
                         It is incredibly important that this path is not accessible via the web server, so that no undesirables can get their
                         hands on your database. The recommended path is directly above your platform path, but it can be anywhere.');
 
@@ -218,7 +218,7 @@ EOF;
   $help['title'] = t('The user account running the script, and the group of the httpd daemon.');
   $help['summary'] = t('The provision framework takes special care to make sure that the file permissions of the 
                           hosted sites are always as safe as can be, especially to make sure that the web server does 
-                          not have the ability to modify the code of the site, therefor this information is required 
+                          not have the ability to modify the code of the site, therefore this information is required 
                           to assure that safety while keeping the sites accessible. This username needs to be a member
                           of the web server group, in order to be able to correctly set the file permissions.');
 

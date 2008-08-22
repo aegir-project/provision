@@ -279,8 +279,8 @@ function _provision_create_dir($path, $name, $perms) {
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
 
     $writable = provision_path("writable", $path, true,
-        $name . ' ' . t("path is writeable."),
-        $name . ' ' . t("path is not writeable."),
+        $name . ' ' . t("path is writable."),
+        $name . ' ' . t("path is not writable."),
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
 
   }
