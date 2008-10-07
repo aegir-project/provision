@@ -203,12 +203,11 @@ function _provision_drupal_switch_active_site($url = null) {
 
     // Export the following settings.php variables to the global namespace
     global $base_url, $base_path, $base_root;
-    global  $cookie_domain, $conf, $installed_profile, $profile, $db_prefix;
+    global  $cookie_domain, $conf, $profile, $profile, $db_prefix;
  
     # This is just for backup, to be able to restore to the old DRUSH system.
-    $backups = compact("active_db", "base_url", "base_path", "db_prefix", "cookie_domain", "conf", "installed_profile", "profile");
+    $backups = compact("active_db", "base_url", "base_path", "db_prefix", "cookie_domain", "conf", "profile");
     
-    $conf = array();
     include_once $_SERVER['DOCUMENT_ROOT'] .'sites/' . $url . '/settings.php';
 
     // Create base URL
@@ -223,6 +222,12 @@ function _provision_drupal_switch_active_site($url = null) {
        $base_path = '/';
      }
      provision_set_active_db($db_url);
+
+     // Reload all variables, so variable_get works for the individual site.
+     $conf = array();
+     cache_clear_all('variables', 'cache');
+     $conf = variable_init(isset($conf) ? $conf : array());
+
    }
   else {
     /**
@@ -238,7 +243,7 @@ function _provision_drupal_switch_active_site($url = null) {
     
     global $base_url, $base_path, $base_root;
      // Export the following settings.php variables to the global namespace
-    global $db_prefix, $cookie_domain, $conf, $installed_profile, $profile;
+    global $db_prefix, $cookie_domain, $conf, $profile;
 
     # This is just for backup, to be able to restore to the old DRUSH system.
     extract($backups, EXTR_OVERWRITE);
@@ -423,7 +428,7 @@ function _provision_drupal_import_site($url) {
   if (!($data = provision_get_site_data($url))) {
     $data = array(); // initialize site data to empty array
   }
-  
+
   include("sites/$url/settings.php");
   if ($parts = @parse_url($db_url)) {
     $data['site_db_type'] = $parts['scheme'];
@@ -431,10 +436,18 @@ function _provision_drupal_import_site($url) {
     $data['site_db_host'] = $parts['host'];
     $data['site_db_passwd'] = $parts['pass'];
     $data['site_db_name'] = substr($parts['path'], 1);
-    $data['site_profile'] = $installed_profile;
+
+    /**
+     * We need to be running AS the site to be able to see what profile it is installed with.
+     *
+     * This information is no longer stored in settings.php
+     */
+    _provision_drupal_switch_active_site($url);
+    $data['site_profile'] = variable_get('install_profile', 'default');
+    _provision_drupal_switch_active_site();
     $data['site_installed'] = TRUE;
-    provision_save_site_data($url, $data);
   }
+  provision_save_site_data($url, $data);
 
   return $data;
 }
