@@ -338,19 +338,35 @@ function provision_drupal_provision_verify($url, &$data) {
   provision_path("writable", "sites", true, t("Drupal sites directory is writable by the provisioning script"),
     t("Drupal sites directory is not writable by the provisioning script"), PROVISION_PERM_ERROR);
   $exists = _provision_create_dir(PROVISION_DRUSHRC_PATH, t('Drush configuration path'), 0700);
-
-  $profiles = file_scan_directory('./profiles', '\.profile$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name', 0);
-  $data['profiles'] = $profiles;
- 
   $data['modules'] = _provision_drupal_get_cvs_versions(module_rebuild_cache());
   // Find theme engines
   $data['engines'] = drupal_system_listing('\.engine$', 'themes/engines');
-
+  $data['profiles'] = _provision_find_profiles();
   $data['themes'] = system_theme_data();
   
   $sites = provision_drupal_find_sites(); 
 
   $data['sites'] = array_keys($sites); // return list of hosted sites. used to determine whether or not to import. 
+}
+
+/**
+ * Find available profiles on this platform.
+ */
+function _provision_find_profiles() {
+  include_once('includes/install.inc');
+
+  $profiles = file_scan_directory('./profiles', '\.profile$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name', 0);
+  
+  foreach ($profiles as $key => $profile) {
+    require_once($profile->filename);
+    $func = $profile->name . "_profile_details";
+    if (function_exists($func)) {
+      $profile->info =  $func();
+    }
+    $return[$key] = $profile;
+  }
+  return $return;
+
 }
 
 /**

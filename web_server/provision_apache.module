@@ -31,7 +31,7 @@ function provision_apache_help($section) {
 function _provision_config_path_requirements() {
   $username = PROVISION_SCRIPT_USER;
   $group = PROVISION_WEB_GROUP;
-  $vhost_path = PROVISION_VHOST_PATH;
+  $vhost_path = PROVISION_CONFIG_PATH;
   $mkdir_cmd['@vhost_path'] = $vhost_path;
   $mkdir_cmd['@provision_link'] = url('admin/settings/provision');
   $mkdir_cmd['@mkdir_cmd'] = <<<EOF
