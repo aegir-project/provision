@@ -295,6 +295,7 @@ function _provision_drupal_force_load_modules($url = null) {
  * Install the drupal schema and install profile
  */
 function _provision_drupal_install_schema($profile) {
+  $GLOBALS['profile'] = $profile;
   provision_log("install", t("Installing Drupal schema"));
   // Load the profile.
   require_once "./profiles/$profile/$profile.profile";
