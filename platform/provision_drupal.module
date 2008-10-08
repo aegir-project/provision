@@ -223,12 +223,7 @@ function _provision_drupal_switch_active_site($url = null) {
      }
      provision_set_active_db($db_url);
 
-     // Reload all variables, so variable_get works for the individual site.
-     $conf = array();
-     cache_clear_all('variables', 'cache');
-     $conf = variable_init(isset($conf) ? $conf : array());
-
-   }
+  }
   else {
     /**
     * Restore everything to the way it was before we switched sites.
@@ -322,8 +317,10 @@ function _provision_drupal_install_schema($profile) {
   $modules = drupal_verify_profile($profile, null);
 
   if (!$modules) {
+    provision_set_error(PROVISION_FRAMEWORK_ERROR);
     return false;
   }
+
   
   // Perform actual installation defined in the profile.
   drupal_install_profile($profile, $modules);
