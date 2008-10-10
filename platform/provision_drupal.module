@@ -454,9 +454,9 @@ function _provision_drupal_import_site($url) {
     provision_set_active_db($db_url);
     $install_profile =  db_result(db_query("SELECT value FROM {variable} WHERE name='install_profile'"));
     $data['site_profile'] = ($install_profile) ? unserialize($install_profile) : 'default';
-    $has_locale = db_result(db_query("SELECT status FROM system WHERE type='module' AND name='locale'"));
+    $has_locale = db_result(db_query("SELECT status FROM {system} WHERE type='module' AND name='locale'"));
     if ($has_locale) {
-      $locale = db_result(db_query("SELECT locale FROM locales_meta WHERE isdefault=1 AND enabled=1"));
+      $locale = db_result(db_query("SELECT locale FROM {locales_meta} WHERE isdefault=1 AND enabled=1"));
     }
     $data['site_language'] = ($locale) ? ($locale) : 'en';
     provision_close_active_db();

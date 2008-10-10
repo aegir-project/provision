@@ -219,7 +219,8 @@ function provision_apache_provision_post_install($url, &$data) {
 }
 
 function provision_apache_provision_delete($url, &$data) {
-  return _provision_apache_delete_vhost_config($url, $data);
+  _provision_apache_delete_vhost_config($url, $data);
+  return _provision_apache_restart_apache();  
 }
 
 /**
