@@ -389,7 +389,7 @@ function _provision_install($url, &$data) {
   if (!$rolled_back) {
     _provision_drupal_switch_active_site($url); # Change headers and db info, also backs up
     _provision_drupal_force_load_modules($url);
-    _provision_drupal_install_schema($data['site_profile']);
+    _provision_drupal_install_schema($data['site_profile'], $data['site_language']);
     _provision_drupal_force_load_modules();
     _provision_drupal_switch_active_site(); # This *should* bring the site back to where we were before installing
     

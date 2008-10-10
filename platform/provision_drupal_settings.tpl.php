@@ -1,7 +1,9 @@
 
   $db_url = '<?php print "$site_db_type://$site_db_user:$site_db_passwd@$site_db_host/$site_db_name"; ?>';
   $profile = "<?php print $site_profile ?>";
-
+  <?php if ($site_locale != 'en') : ?>
+    $locale = '<?php print $site_locale; ?>';
+  <?php endif; ?>
   /**
   * PHP settings:
   *

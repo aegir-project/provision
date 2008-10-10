@@ -294,8 +294,11 @@ function _provision_drupal_force_load_modules($url = null) {
 /**
  * Install the drupal schema and install profile
  */
-function _provision_drupal_install_schema($profile) {
+function _provision_drupal_install_schema($profile, $language = 'en') {
+  include_once('includes/locale.inc');
+
   $GLOBALS['profile'] = $profile;
+  $GLOBALS['install_locale'] = $language;
   provision_log("install", t("Installing Drupal schema"));
   // Load the profile.
   require_once "./profiles/$profile/$profile.profile";
@@ -315,14 +318,13 @@ function _provision_drupal_install_schema($profile) {
   }
 
   // Verify existence of all required modules.
-  $modules = drupal_verify_profile($profile, null);
+  $modules = drupal_verify_profile($profile, $language);
 
   if (!$modules) {
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
     return false;
   }
 
-  
   // Perform actual installation defined in the profile.
   drupal_install_profile($profile, $modules);
 
@@ -366,6 +368,13 @@ function _provision_find_profiles() {
     if (function_exists($func)) {
       $profile->info =  $func();
     }
+
+    // Find languages available
+    $languages = array_keys(file_scan_directory('./profiles/' . $key, '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'name'));
+
+    array_unshift($languages, 'en');
+    $profile->info['languages'] = $languages;
+
     $return[$key] = $profile;
   }
   return $return;

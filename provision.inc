@@ -290,6 +290,10 @@ function provision_get_site_data($url) {
   $site_data['site_profile'] = ($site_data['site_profile']) ? $site_data['site_profile'] : variable_get('provision_default_profile', 'default');
   $site_data['site_ip'] =  variable_get('provision_apache_server_ip', '127.0.0.1');
   $site_data['site_port'] =  variable_get('provision_apache_server_ip', 80);
+    
+  //Default to english language
+  $site_data['site_language'] = $site_data['site_language'] ? $site_data['site_language'] : 'en';
+
   if ($old_data = provision_load_site_data($url)) {
     # Merge previously saved data with the new data. This way, old parameters overwrite new ones.
     $site_data = array_merge($old_data, $site_data);    
