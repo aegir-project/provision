@@ -333,7 +333,9 @@ function _provision_drupal_install_schema($profile, $language = 'en') {
   if (function_exists($function)) {
     // More steps required
     $profile_message = $function();
-  } 
+  }
+
+  variable_set('install_profile', $profile);
 }
 
 /**
@@ -449,9 +451,15 @@ function _provision_drupal_import_site($url) {
      *
      * This information is no longer stored in settings.php
      */
-    _provision_drupal_switch_active_site($url);
-    $data['site_profile'] = variable_get('install_profile', 'default');
-    _provision_drupal_switch_active_site();
+    provision_set_active_db($db_url);
+    $install_profile =  db_result(db_query("SELECT value FROM {variable} WHERE name='install_profile'"));
+    $data['site_profile'] = ($install_profile) ? unserialize($install_profile) : 'default';
+    $has_locale = db_result(db_query("SELECT status FROM system WHERE type='module' AND name='locale'"));
+    if ($has_locale) {
+      $locale = db_result(db_query("SELECT locale FROM locales_meta WHERE isdefault=1 AND enabled=1"));
+    }
+    $data['site_language'] = ($locale) ? ($locale) : 'en';
+    provision_close_active_db();
     $data['site_installed'] = TRUE;
   }
   provision_save_site_data($url, $data);

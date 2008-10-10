@@ -495,6 +495,24 @@ function provision_set_active_db($new_db_url = null) {
     db_set_active('default');
   }
 }
+
+/**
+ * Close an active connection
+ *
+ * This is an INCREDIBLY dangerous function, that is only used during import of sites
+ * to avoid creating connections for every site being imported
+ */
+function provision_close_active_db() {
+  global $active_db;
+  $close_db = $active_db;
+  db_set_active('default');
+  if ($close_db !== $active_db) {
+    db_close($close_db);
+  }
+}
+
+
+
 /**
  * Check whether a user is a member of a group.
  *

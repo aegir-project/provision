@@ -75,6 +75,14 @@ function _provision_mysql_create_database($name) {
   db_query("CREATE DATABASE %s", $name);  
 }
 
+/**
+ * Close an active connection. There's no clean way to close a connection
+ * in the Drupal db api. Sadly.
+ */
+function db_close($connection) {
+  return mysql_close($connection);
+}
+
 function _provision_mysql_can_create_database() {
   $test = 'provision_test';
   _provision_mysql_create_database($test);
