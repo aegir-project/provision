@@ -146,7 +146,7 @@ function _provision_drupal_create_settings_file($url, &$data) {
 function _provision_drupal_create_directories($url, $profile = null) {  
   $paths = array(
     "sites/$url"                 => 0750,
-    "sites/$url/files"           => 02750,
+    "sites/$url/files"           => 02770,
     "sites/$url/files/tmp"       => 02770,
     "sites/$url/files/images"    => 02770,
     "sites/$url/files/pictures"  => 02770,
