@@ -15,3 +15,21 @@ function provision_install() {
   db_query("UPDATE {system} SET weight = 3 WHERE type='module' AND name='provision_apache'");
 
 }
+
+/**
+ * Make sure that the POSIX library is available, and that we are not running on a windows based host.
+ */
+function provision_requirements($phase) {
+  $t = get_t();
+  $has_posix = function_exists('posix_uname');
+
+  $requirements['posix']['title'] = $t('POSIX library');
+  $requirements['posix']['value'] = ($has_posix) ? $t('Enabled') : $t('Not found');
+
+  if (!$has_posix) {
+    $requirements['posix']['description'] = $t('<p>The <a href="@helpurl">POSIX library</a> has not been compiled into PHP.</p>', array("@helpurl" => 'http://www.php.net/manual/en/book.posix.php')) .
+      $t("<p><strong>This library is not available on Windows based hosts</strong>, and you will not be able to install this system.</p>");
+    $requirements['posix']['severity'] = REQUIREMENT_ERROR;
+  }
+  return $requirements;
+}
