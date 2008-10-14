@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
 * @file
 *   Provisioning Framework
@@ -59,19 +60,19 @@ function provision_init() {
   define('PROVISION_DOMAIN', $_SERVER['HTTP_HOST']);
   $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
   define('PROVISION_DOCROOT_PATH', rtrim($path, '/'));
-  define('PROVISION_SITES_PATH', rtrim($path, '/') . '/sites');
+  define('PROVISION_SITES_PATH', rtrim($path, '/') .'/sites');
   
-  define('PROVISION_DRUSH_PATH', drupal_get_path('module', 'drush') . '/drush.php');
+  define('PROVISION_DRUSH_PATH', drupal_get_path('module', 'drush') .'/drush.php');
   $parts = explode("/", rtrim($path, '/'));
   array_pop($parts);
   define('PROVISION_PARENT_PATH', rtrim(implode("/" , $parts), '/'));
 
   define('PROVISION_BACKUP_PATH', 
-    variable_get('provision_backup_path', PROVISION_PARENT_PATH . '/backups'));
+    variable_get('provision_backup_path', PROVISION_PARENT_PATH .'/backups'));
   define('PROVISION_CONFIG_PATH', 
-    variable_get('provision_config_path', PROVISION_PARENT_PATH . '/config')) ;
-  define('PROVISION_VHOST_PATH', PROVISION_CONFIG_PATH . '/vhost.d');
-  define('PROVISION_DRUSHRC_PATH', PROVISION_CONFIG_PATH . '/drushrc.d');
+    variable_get('provision_config_path', PROVISION_PARENT_PATH .'/config')) ;
+  define('PROVISION_VHOST_PATH', PROVISION_CONFIG_PATH .'/vhost.d');
+  define('PROVISION_DRUSHRC_PATH', PROVISION_CONFIG_PATH .'/drushrc.d');
 
   define('PROVISION_SCRIPT_USER', variable_get('provision_script_user', get_current_user()));   
   
@@ -87,7 +88,7 @@ function provision_init() {
   $command = '/usr/sbin/apachectl'; # a proper default for most of the world
   foreach (array('/usr/local/sbin/apachectl', # freebsd
                  '/usr/sbin/apache2ctl', # debian + apache2
-		 $command) as $test) {
+      $command) as $test) {
     if (is_executable($test)) {
       $command = $test;
     }
@@ -97,10 +98,10 @@ function provision_init() {
   global $base_url;
   define('PROVISION_BASE_URL', $base_url);
   define('PROVISION_WEB_DISABLE_URL', 
-    variable_get('provision_web_disable_url', $base_url . '/provision/disabled'));
+    variable_get('provision_web_disable_url', $base_url .'/provision/disabled'));
 
   define('PROVISION_WEB_MAINTENENCE_URL', 
-    variable_get('provision_web_maintenance_url', $base_url . '/provision/maintenance'));
+    variable_get('provision_web_maintenance_url', $base_url .'/provision/maintenance'));
 }
 
 
@@ -127,7 +128,7 @@ function provision_perm() {
 /**
  * Implementation of hook_menu().
  */
-function provision_menu($may_cache = true) {
+function provision_menu($may_cache = TRUE) {
   if ($may_cache) {
     $items[] = array(
       'path' => 'admin/settings/provision',
@@ -144,7 +145,8 @@ function provision_menu($may_cache = true) {
       'callback' => 'provision_help_requirements',
       'type' => MENU_CALLBACK
     );
-  } else {
+  }
+  else {
     $items[] = array(
       'path' => 'provision/disabled',
       'title' => t('Site disabled'),
@@ -196,7 +198,7 @@ function provision_configure() {
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
       '#access' => user_access("administer $service provisioning"),
-      '#tree' => true
+      '#tree' => TRUE
     );
     $form[$service] = array_merge($form[$service], module_invoke($module, "provision_configure"));
   }
@@ -211,7 +213,7 @@ function provision_configure() {
 function provision_configure_submit($form_id, $values) {
   foreach ($values['services'] as $service) {
     foreach ($values[$service] as $key => $value) {
-      variable_set('provision_' . $key, $value);
+      variable_set('provision_'. $key, $value);
     }
   }
 }
@@ -324,7 +326,7 @@ function provision_install_cmd($url) {
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
     provision_output($url, $data);
   }
-  $ops = array('pre_install', 'install', 'post_install'); # these are the provision hooks that will get triggered.
+  $ops = array('pre_install', 'install', 'post_install'); //these are the provision hooks that will get triggered.
 
   if (_provision_drupal_site_installed($url)) {
     provision_set_error(PROVISION_SITE_INSTALLED);
@@ -414,7 +416,7 @@ function _provision_install($url, &$data) {
 function _provision_post_install($url, &$data) {
   $rolled_back = provision_invoke("post_install", $url, $data);
   if (!$rolled_back) {
-    $data['site_installed'] = true;  
+    $data['site_installed'] = TRUE;  
   }
   return $rolled_back;
 }
@@ -475,7 +477,7 @@ function _provision_backup($url) {
 /**
  * Generate a backup tarbal for a site.
  */
-function _provision_backup_site($url, &$data, $file = null) {
+function _provision_backup_site($url, &$data, $file = NULL) {
   // This is the actual drupal provisioning requirements. 
   if (!is_dir(PROVISION_BACKUP_PATH)) {
     provision_log("Backup directory does not exist.");
@@ -488,18 +490,18 @@ function _provision_backup_site($url, &$data, $file = null) {
     provision_set_error(PROVISION_PERM_ERROR);
     provision_output($url, $data);
   }
-  $suggested = PROVISION_BACKUP_PATH . "/$url-" . date("Y-m-d",mktime()) . ".tar";
+  $suggested = PROVISION_BACKUP_PATH ."/$url-". date("Y-m-d", mktime()) .".tar";
 
   // Use format of mysite.com-2008-01-02, if already existing, add number.
-  while (is_file($suggested . '.gz')) {
+  while (is_file($suggested .'.gz')) {
     $count++;
-    $suggested = PROVISION_BACKUP_PATH . "/$url-" . date("Y-m-d", mktime()) . "_$count.tar";
+    $suggested = PROVISION_BACKUP_PATH ."/$url-". date("Y-m-d", mktime()) ."_$count.tar";
   }
 
   $data['backup_file'] = (!empty($file)) ? ereg_replace('.gz$', '', $file) : $suggested;
   $rolled_back = provision_invoke("backup", $url, $data);
   provision_shell_exec("gzip %s", $data['backup_file']);
-  $data['backup_file'] = $data['backup_file'] . '.gz';
+  $data['backup_file'] = $data['backup_file'] .'.gz';
 }
 
 /**
@@ -513,7 +515,7 @@ function _provision_backup_site($url, &$data, $file = null) {
  *   Output of provision_output() function.
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
-function _provision_import($url = null) {
+function _provision_import($url = NULL) {
   $rolled_back = provision_invoke("import", $url, $data);
   provision_output($url, $data);
 }
@@ -569,7 +571,7 @@ function _provision_restore($url, $restore_file) {
     provision_set_error(PROVISION_SITE_NOT_FOUND);
   }
 
-  $exists &= provision_path("exists", $restore_file, true,
+  $exists &= provision_path("exists", $restore_file, TRUE,
       t("Restoring site from @path"),
       t("Could not find backup file @path"),
       PROVISION_FRAMEWORK_ERROR);
@@ -581,7 +583,7 @@ function _provision_restore($url, $restore_file) {
     $phases = array("pre_restore", "restore", "post_restore");
 
     $completed = array();
-    $rolled_back = false; // initializes to false.
+    $rolled_back = FALSE; // initializes to FALSE.
     foreach ($phases as $phase) {
       $rolled_back = provision_invoke($phase, $url, $data, $rolled_back);
 
@@ -609,20 +611,20 @@ function _provision_restore($url, $restore_file) {
 }
 
 function provision_provision_pre_restore($url, &$data) {
-  _provision_backup_site($url, $data); # Backup site for posterity, before rolling back.
+  _provision_backup_site($url, $data); // Backup site for posterity, before rolling back.
 
-  provision_path("extract", $data['restore_file'], PROVISION_SITES_PATH . "/$url.restore", 
+  provision_path("extract", $data['restore_file'], PROVISION_SITES_PATH ."/$url.restore", 
     t('Successfully extracted the contents of @path to @confirm'),
     t('Failed to extract the contents of @path to @confirm'),
     PROVISION_PERM_ERROR, PROVISION_FRAMEWORK_ERROR);
 }
 
 function provision_provision_pre_restore_rollback($url, $data) {
-  _provision_recursive_delete(PROVISION_SITES_PATH . "/$url.restore");
+  _provision_recursive_delete(PROVISION_SITES_PATH ."/$url.restore");
 }
 
 function provision_provision_post_restore($url, $data) {
-  _provision_recursive_delete(PROVISION_SITES_PATH . "/$url.restore");
+  _provision_recursive_delete(PROVISION_SITES_PATH ."/$url.restore");
 }
 
 function _provision_disable($url) {

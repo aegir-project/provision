@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file
  * Drupal specific functions for the provisioning framework.
@@ -80,7 +81,7 @@ function _provision_drupal_site_installed($url) {
       return isset($data['site_installed']) ? $data['site_installed'] : FALSE;
     }
   }
-  return false;
+  return FALSE;
 }
 
 /**
@@ -104,7 +105,7 @@ function provision_drupal_provision_backup($url, $data) {
  *   The default template for the config file
  */
 function _provision_drupal_default_template() {
-  return file_get_contents(drupal_get_path('module', 'provision_drupal') . '/provision_drupal_settings.tpl.php');
+  return file_get_contents(drupal_get_path('module', 'provision_drupal') .'/provision_drupal_settings.tpl.php');
 }
 
 /**
@@ -126,7 +127,7 @@ function _provision_drupal_create_settings_file($url, &$data) {
 
   $fp = fopen("sites/$url/settings.php", "w");
   $text = variable_get('provision_drupal_settings_template', _provision_drupal_default_template());
-  fwrite($fp, "<?php\n" . provision_render_config($text, $data));
+  fwrite($fp, "<?php\n". provision_render_config($text, $data));
   fclose($fp);
 
   # Change the permissions of the file
@@ -143,7 +144,7 @@ function _provision_drupal_create_settings_file($url, &$data) {
  * 
  * Also maintains permissions on existing directories.
  */
-function _provision_drupal_create_directories($url, $profile = null) {  
+function _provision_drupal_create_directories($url, $profile = NULL) {  
   $paths = array(
     "sites/$url"                 => 0750,
     "sites/$url/files"           => 02770,
@@ -156,7 +157,7 @@ function _provision_drupal_create_directories($url, $profile = null) {
 
   foreach ($paths as $path => $perm) {
     if (!is_dir($path)) {
-      provision_path("mkdir", $path, true, 
+      provision_path("mkdir", $path, TRUE, 
         t("Created <code>@path</code>"),
         t("Could not create <code>@path</code>"),
         PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
@@ -183,7 +184,7 @@ function _provision_drupal_create_directories($url, $profile = null) {
  * so that it can cleanly install the database schema. It also handles switching back to the 
  * main provisioning site.
  */
-function _provision_drupal_switch_active_site($url = null) {
+function _provision_drupal_switch_active_site($url = NULL) {
   static $backups;
   if ($url) {
     /* Pretend to be the site being installed */
@@ -191,8 +192,9 @@ function _provision_drupal_switch_active_site($url = null) {
     // Fake the necessary HTTP headers that Drupal needs:
     $drupal_base_url = parse_url($url);
     $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
-    $_SERVER['PHP_SELF'] = $drupal_base_url['path'].'/index.php';
-    $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF'];
+    $_SERVER['PHP_SELF'] = $drupal_base_url['path'] .'/index.php';
+
+    $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF']; // Coder generates a warning. But this is correct.
     $_SERVER['REMOTE_ADDR'] = NULL;
     $_SERVER['REQUEST_METHOD'] = NULL;
 
@@ -205,10 +207,10 @@ function _provision_drupal_switch_active_site($url = null) {
     global $base_url, $base_path, $base_root;
     global  $cookie_domain, $conf, $profile, $profile, $db_prefix;
  
-    # This is just for backup, to be able to restore to the old DRUSH system.
+    // This is just for backup, to be able to restore to the old DRUSH system.
     $backups = compact("active_db", "base_url", "base_path", "db_prefix", "cookie_domain", "conf", "profile");
     
-    include_once $_SERVER['DOCUMENT_ROOT'] .'sites/' . $url . '/settings.php';
+    include_once $_SERVER['DOCUMENT_ROOT'] .'sites/'. $url .'/settings.php';
 
     // Create base URL
      $base_root = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
@@ -231,16 +233,17 @@ function _provision_drupal_switch_active_site($url = null) {
     // Fake the necessary HTTP headers that Drupal needs:
     $drupal_base_url = parse_url(DRUSH_URI);
     $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
-    $_SERVER['PHP_SELF'] = $drupal_base_url['path'].'/index.php';
-    $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF'];
+    $_SERVER['PHP_SELF'] = $drupal_base_url['path'] .'/index.php';
+    
+    $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF']; // Coder generates a warning, but this is correct.
     $_SERVER['REMOTE_ADDR'] = NULL;
     $_SERVER['REQUEST_METHOD'] = NULL;
     
     global $base_url, $base_path, $base_root;
-     // Export the following settings.php variables to the global namespace
+    // Export the following settings.php variables to the global namespace
     global $db_prefix, $cookie_domain, $conf, $profile;
 
-    # This is just for backup, to be able to restore to the old DRUSH system.
+    // This is just for backup, to be able to restore to the old DRUSH system.
     extract($backups, EXTR_OVERWRITE);
     provision_set_active_db();
   }
@@ -251,8 +254,8 @@ function provision_drupal_provision_post_restore($url, $data) {
 }
 
 function provision_drupal_provision_restore($url, $data) {
-  $old = PROVISION_SITES_PATH . "/$url.restore";
-  $new = PROVISION_SITES_PATH . "/$url";
+  $old = PROVISION_SITES_PATH ."/$url.restore";
+  $new = PROVISION_SITES_PATH ."/$url";
   provision_path("switch_paths", $old, $new ,
     t('Swapping out the @path and @confirm directories was successful.'),
     t('Swapping the @path and @confirm directories has failed.'),
@@ -270,7 +273,7 @@ function provision_drupal_provision_restore_rollback($url, $data) {
 /**
  * Force drupal to load the modules it expects to find on an uninstalled site
  */
-function _provision_drupal_force_load_modules($url = null) {
+function _provision_drupal_force_load_modules($url = NULL) {
   static $backup_list;
   if ($url) {
     $backup_list = module_list();
@@ -314,7 +317,7 @@ function _provision_drupal_install_schema($profile, $language = 'en') {
       }
     }
 
-    return false;
+    return FALSE;
   }
 
   // Verify existence of all required modules.
@@ -322,7 +325,7 @@ function _provision_drupal_install_schema($profile, $language = 'en') {
 
   if (!$modules) {
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    return false;
+    return FALSE;
   }
 
   // Perform actual installation defined in the profile.
@@ -342,7 +345,7 @@ function _provision_drupal_install_schema($profile, $language = 'en') {
  * implementation of provision_verify
  */
 function provision_drupal_provision_verify($url, &$data) {
-  provision_path("writable", "sites", true, t("Drupal sites directory is writable by the provisioning script"),
+  provision_path("writable", "sites", TRUE, t("Drupal sites directory is writable by the provisioning script"),
     t("Drupal sites directory is not writable by the provisioning script"), PROVISION_PERM_ERROR);
   $exists = _provision_create_dir(PROVISION_DRUSHRC_PATH, t('Drush configuration path'), 0700);
   $data['modules'] = _provision_drupal_get_cvs_versions(module_rebuild_cache());
@@ -429,7 +432,7 @@ function provision_drupal_provision_import($url, &$data) {
     }
   }
   //Just make sure our ini settings and the like aren't wiped out.
-  include(conf_path() . "/settings.php");
+  include(conf_path() ."/settings.php");
 
 }
 

@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file ProvisionHelp contains the bulk of the provision help system
  */
@@ -85,35 +86,35 @@ function provision_help($section) {
                     The Hostmaster profile is capable of driving several provision backends, in a distributed manner, and provides an interface for the functionality of provision.</p>');
       $output .= t('<p>It is not required to run the hosting front end to use the Provision framework, but the system does not provide much in the way of a web accessible front end, by design.</p>');
 
-      $output .= '<a name=\'requirements\'><h3>' . t('Requirements') . '</h3></a>';
+      $output .= '<a name=\'requirements\'><h3>'. t('Requirements') .'</h3></a>';
       $output .= t('<p>For a more detailed breakdown of steps that need to be taken to configure Provisioning to run with your system, please read the <a href="@url">in depth requirement documentation</a></p>',
                   array('@url' => url('admin/help/provision/requirements')));
-      $output .= '<a name=\'commands\'><h3>' . t('Commands') . '</h3></a>';
+      $output .= '<a name=\'commands\'><h3>'. t('Commands') .'</h3></a>';
       $commands = module_invoke_all('drush_command');
       $output .= "<dl>";
       foreach ($commands as $command => $info) {
         if (preg_match('/^provision/', $command)) {
           if (sizeof($info['arguments'])) {
-            $command .= ' ' . implode(' ', (array) key($info['arguments']));            
+            $command .= ' '. implode(' ', (array) key($info['arguments']));            
           }
           if (sizeof($info['optional arguments'])) {
-            $command .= ' [' . implode('] [', (array) key($info['optional arguments'])) . ']';  
+            $command .= ' ['. implode('] [', (array) key($info['optional arguments'])) .']';  
           }
-          $output .= '<dt>' . "<code>drush.php $command</code>" . '</dt>';
-          $output .= '<dd>' .  $info["description"] . '</dd>';
+          $output .= '<dt>'."<code>drush.php $command</code>".'</dt>';
+          $output .= '<dd>'.  $info["description"] .'</dd>';
         }
       }
       $output .= "</dl>";
 
-      $output .= '<a name=\'options\'><h3>' . t('Options') . '</h3></a>';
+      $output .= '<a name=\'options\'><h3>'. t('Options') .'</h3></a>';
 
       
       $options = module_invoke_all('value_list');
 
       $output .= "<dl>";
       foreach ($options as $option => $description) {
-        $output .= '<dt>' . "<code>--$option</code>" . '</dt>';
-        $output .= '<dd>' .  $description . '</dd>';
+        $output .= '<dt>'."<code>--$option</code>".'</dt>';
+        $output .= '<dd>'.  $description .'</dd>';
       }
       $output .= "</dl>";
       
@@ -138,7 +139,7 @@ function provision_help_requirements() {
     $name = current($service);
     $help = module_invoke($module, 'help', 'admin/help/provision#requirements');
     if ($name && $help) {
-      $output .= "<a href='requirements-$module'></a><h3>" . t($name) . '</h3>';
+      $output .= "<a href='requirements-$module'></a><h3>". t($name) .'</h3>';
       $output .=  $help;
     }
   }
@@ -155,10 +156,10 @@ function _provision_requirements($req, $section = 'all') {
 /*
   foreach (array('#heading', '#summary', '#suggestion', '#configuration') as $key) {
     if (in_array($section, array('all', $key))) {
-      $item['#' . $key] = PROVISION_HELP_ENABLED;
+      $item['#'. $key] = PROVISION_HELP_ENABLED;
     }
     elseif ($section != 'all') {
-      $item['#' . $key] = ($section == $key) ? PROVISION_HELP_ENABLED : PROVISION_HELP_DISABLED;
+      $item['#'. $key] = ($section == $key) ? PROVISION_HELP_ENABLED : PROVISION_HELP_DISABLED;
     }
   }
  */
@@ -167,7 +168,7 @@ function _provision_requirements($req, $section = 'all') {
 }
 
 function provision_get_requirement($req) {
-  $func = '_provision_' . $req . '_requirements';
+  $func = '_provision_'. $req .'_requirements';
   if (function_exists($func)) {
     $help = $func();
   }
@@ -248,7 +249,7 @@ EOF;
  */
 function provision_elements() {
   $type['requirement_help'] = array(
-    '#requirement' => null,
+    '#requirement' => NULL,
     '#status' => PROVISION_STATUS_NONE,
     '#heading' => PROVISION_HELP_ENABLED,
     '#summary' => PROVISION_HELP_ENABLED,
@@ -282,19 +283,19 @@ function provision_requirement_process(&$element) {
  * Can control individual components of the help, for display in various places.
  */
 function theme_requirement_help(&$element) {
-  drupal_add_js(drupal_get_path('module', 'provision') . '/provision.js');
-  drupal_add_css(drupal_get_path('module', 'provision') . '/provision.css');
+  drupal_add_js(drupal_get_path('module', 'provision') .'/provision.js');
+  drupal_add_css(drupal_get_path('module', 'provision') .'/provision.css');
   $req = $element['#requirement'];
   $help = $element['#help']; // this is just to make it easier to work with.
 
   //place anchor so user can be directed to right page.
   $output .= "<a name='provision-help-$req'></a>";
 
-  $output .= '<div class="provision-' . form_clean_id($element["#type"]) . 
-    ' ' . _provision_status_class($element['#status']) . '">';
+  $output .= '<div class="provision-'. form_clean_id($element["#type"]) . 
+    ' '. _provision_status_class($element['#status']) .'">';
 
   if ($element['#status'] != PROVISION_STATUS_NONE) {
-    $output .= "<div class='message'>" . (($element['#message']) ? $element['#message'] : $element['#default_messages'][$element['#status']]) . "</div>";
+    $output .= "<div class='message'>". (($element['#message']) ? $element['#message'] : $element['#default_messages'][$element['#status']]) ."</div>";
   }
 
   $components = array('summary', 'suggestion', 'configuration');
@@ -306,11 +307,11 @@ function theme_requirement_help(&$element) {
         // it is simpler if there's only one way to print the component
         $help[$key] = array($help[$key]);  
       }
-      if ($element["#$key" . '_prefix'] && ($element["#$key"] & _PROVISION_HELP_CAN_COLLAPSE)) {
-        $output .= '<a href="javascript:void(0)" class="provision-help-toggle">' . $element["#$key" . '_prefix'] . '</a>';
+      if ($element["#$key".'_prefix'] && ($element["#$key"] & _PROVISION_HELP_CAN_COLLAPSE)) {
+        $output .= '<a href="javascript:void(0)" class="provision-help-toggle">'. $element["#$key".'_prefix'] .'</a>';
       }
 
-      $output .= "<div class='provision-help'><p>" . implode("</p><p>", $help[$key]) . "</p></div>"; 
+      $output .= "<div class='provision-help'><p>". implode("</p><p>", $help[$key]) ."</p></div>"; 
       $output .= '</div>';
     } 
   }

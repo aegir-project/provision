@@ -1,4 +1,9 @@
 <?php
+// $Id$
+/**
+ * @file Install file for provision module
+ */
+
 /**
  * Configure the module weights for the core modules, to ensure that the
  * hooks always fire in a predictable pattern.
@@ -41,7 +46,7 @@ function provision_requirements($phase) {
   $docroot = $_SERVER['DOCUMENT_ROOT']; 
   $requirements['docroot']['title'] = $t("Document root");
   $requirements['docroot']['value'] = ($is_in_docroot) ? $t('Correct') : 
-    $t("Installed in the @subdir sub directory of @root", array('@root' => rtrim($docroot,'/'), '@subdir' => trim($base_path, '/')));
+    $t("Installed in the @subdir sub directory of @root", array('@root' => rtrim($docroot, '/'), '@subdir' => trim($base_path, '/')));
   if (!$is_in_docroot) {
     $requirements['docroot']['value'] = $t("Drupal has been installed in a subdirectory. 
       You will need to modify your virtual host configuration to point a ServerName directly at the installation path.");

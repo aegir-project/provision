@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file
  * The provisioning framework error code definitions.
@@ -31,7 +32,7 @@ define('PROVISION_SITE_INSTALLED', 64);
 /** Database could not be accessed, or configured */
 define('PROVISION_DB_ERROR', 128);
 
-#  List of provisioning errors. This is a global so that other modules can reference it.
+//List of provisioning errors. This is a global so that other modules can reference it.
 global $provision_errors;
 $provision_errors = array(
   PROVISION_SUCCESS => t("Successful"),

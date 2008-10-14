@@ -1,5 +1,5 @@
 <?php
-
+// $Id$
 /**
  * @defgroup pathhandling Managing paths, permissions and file ownership
  *
@@ -41,7 +41,7 @@
  *
  * @param confirm
  *    Confirm that the final value of the file operation matches this value.
- *    This value defaults to true, which is sufficient for most file operations.
+ *    This value defaults to TRUE, which is sufficient for most file operations.
  *
  *    Certain tasks such as chmod, chown and chgp will attempt to change the
  *    properties of $path to match the value in $confirm, and then test that
@@ -67,7 +67,7 @@
  * @return
  *    Returns TRUE if the test against $confirm passed, otherwise returns FALSE.
  */
-function provision_path($op, $path, $confirm = true, $succeed_message = null, $fail_message = null, $error_codes = null) {
+function provision_path($op, $path, $confirm = TRUE, $succeed_message = NULL, $fail_message = NULL, $error_codes = NULL) {
   # The code style is a bit weird here, but it's a bit easier to read this way.
   $func = "provision_path_" . $op;
   if (function_exists($func)) {
@@ -134,7 +134,7 @@ function provision_path_group($path) {
 }
 
 function provision_path_mkdir($path) {
-  return mkdir($path, 0770, true);
+  return mkdir($path, 0770, TRUE);
 }
 
 function provision_path_rmdir($path) {
@@ -199,7 +199,7 @@ function provision_path_chgrp($path, &$group, &$reason) {
 
 function provision_path_switch_paths($path1, &$path2, &$reason) {
   //TODO : Add error reasons.
-  $temp = $path1 . '.tmp';
+  $temp = $path1 .'.tmp';
   if (rename($path1, $temp)) { 
     if (rename($path2, $path1)) {
       if (rename($temp, $path2)) {
@@ -255,13 +255,13 @@ function provision_path_extract($path, &$target, &$reason) {
  * Small helper function for creation of configuration directories.
  */
 function _provision_create_dir($path, $name, $perms) {
-  $exists = provision_path("exists",$path, true ,
+  $exists = provision_path("exists",$path, TRUE ,
     $name . ' ' . t("path exists."),
     $name . ' ' . t("path does not exist.")
   );
 
   if (!$exists) {
-    $exists = provision_path("mkdir", $path, true,
+    $exists = provision_path("mkdir", $path, TRUE,
       $name . ' ' . t("path has been created."),
       $name . ' ' . t("path could not be created."),
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
@@ -278,7 +278,7 @@ function _provision_create_dir($path, $name, $perms) {
       $name . ' ' . t("permissions of path could not be changed to @confirm."),
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
 
-    $writable = provision_path("writable", $path, true,
+    $writable = provision_path("writable", $path, TRUE,
         $name . ' ' . t("path is writable."),
         $name . ' ' . t("path is not writable."),
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);

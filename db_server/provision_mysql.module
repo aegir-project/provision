@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file
  *    Mysql provisioning module.
@@ -57,7 +58,7 @@ function provision_mysql_provision_service() {
 /**
  * Implementation of provision_configure
  */
-function provision_mysql_provision_configure($node = null) {
+function provision_mysql_provision_configure($node = NULL) {
   if (!is_object($node) && ($nid = variable_get('hosting_own_db_server', 0))) {
     $node = node_load($nid);
   }
@@ -136,7 +137,7 @@ function provision_mysql_provision_pre_restore($url, &$data) {
 
   $success = _provision_mysql_new_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
   if ($success) {
-    _provision_mysql_import_dump(PROVISION_SITES_PATH . '/' . $url . '.restore/database.sql', $data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
+    _provision_mysql_import_dump(PROVISION_SITES_PATH .'/'. $url .'.restore/database.sql', $data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
   }
   else {
     provision_set_error(PROVISION_DB_ERROR);
@@ -149,7 +150,7 @@ function provision_mysql_provision_pre_restore_rollback($url, &$data) {
 
   //Restore the original database credentials of the site.
   foreach ($keys as $key) {
-    $data[$key] = $data['old_' . $key];
+    $data[$key] = $data['old_'. $key];
   }
 }
 
@@ -165,7 +166,7 @@ function provision_mysql_provision_delete($url, &$data) {
 // Rollback doesn't apply here yet. Unless we trigger a restore of the first dump
 // made. Which could go on infinitely if something is really long.
 function provision_mysql_provision_post_restore($url, &$data) {
-  provision_path('unlink', 'sites/' . $url . '/database.sql', true,
+  provision_path('unlink', 'sites/'. $url .'/database.sql', TRUE,
     t("Removed dump file @path after restoring from it"),
     t("Could not remove dump file @path"), PROVISION_PERM_ERROR);
   return _provision_mysql_destroy_site_db($data['old_site_db_name'], $data['old_site_db_user'], $data['old_site_db_passwd'], $data['old_site_db_host']);
@@ -194,8 +195,3 @@ function provision_mysql_provision_verify() {
   }
   provision_set_active_db();
 }
-
-
-
-
-

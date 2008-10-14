@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file
  * The provisioning framework API.
@@ -35,15 +36,15 @@
  *   A boolean specifying whether or not any rollback has been performed. 
  * 
  */
-function provision_invoke($hook, $url, &$data, $rollback = false) {
+function provision_invoke($hook, $url, &$data, $rollback = FALSE) {
    
   if (!$rollback) {
     foreach (module_implements("provision_$hook") as $name) {
       _provision_log_messages();
       $completed[] = $name;
-      $func = $name . "_provision_" . $hook;
+      $func = $name .'_provision_'. $hook;
       $func($url, $data);
-      # this is run before and after so that messages appear in the correct order.
+      //this is run before and after so that messages appear in the correct order.
       _provision_log_messages();
       if (provision_get_error()) {
         # As soon as an error occurs, roll back
@@ -58,10 +59,10 @@ function provision_invoke($hook, $url, &$data, $rollback = false) {
   
   if ($rollback) {
     foreach (array_reverse($completed) as $name) {
-      $func = $name . "_" . $hook . '_rollback';
+      $func = $name .'_'. $hook .'_rollback';
       if (function_exists($func)) {
         $func($url, $data);
-        provision_set_log("Rollback", "Changes for $name module have been rolled back.");
+        provision_set_log('Rollback', "Changes for $name module have been rolled back.");
       }
     }
     return TRUE;
@@ -78,16 +79,16 @@ function provision_invoke($hook, $url, &$data, $rollback = false) {
 function _provision_log_messages() {
   $messages = drupal_get_messages();
 
-  # Drupal message errors.
+  //Drupal message errors.
   foreach ((array) $messages['error'] as $error) {
-    if (preg_match("/^warning:/", $error)) {
-      provision_log("warning", ereg_replace("/^warning: /", '', $error));  
+    if (preg_match('/^warning:/', $error)) {
+      provision_log('warning', ereg_replace('/^warning: /', '', $error));  
     }
-    elseif (preg_match("/^user warning:/", $error)) {
-      provision_log("error", ereg_replace("/^user warning: /", '', $error));  
+    elseif (preg_match('/^user warning:/', $error)) {
+      provision_log("error", ereg_replace('/^user warning: /', '', $error));  
     }
     else {
-      provision_log("error", $error);
+      provision_log('error', $error);
     }
   }
 
@@ -108,7 +109,7 @@ function _provision_log_messages() {
  * @param extra
  *   An associative array containing additional data to be returned from the command. @see provision_stats_stats()
  */
-function provision_output($url = null, $data = array(), $extra = null) {
+function provision_output($url = NULL, $data = array(), $extra = NULL) {
   $return = $extra;
 
   $return['site'] = $data;
@@ -124,9 +125,10 @@ function provision_output($url = null, $data = array(), $extra = null) {
   }
   else {
     if ($return) {
-      if ($output = theme("provision_" . $data['task_type'] . "_output", $url, $return)) {
+      if ($output = theme('provision_'. $data['task_type'] .'_output', $url, $return)) {
         return $output;
-      } else {
+      } 
+      else {
         /** TODO : return a cleanly formatted display of all the necessary information */ 
         print_r($return);
       }
@@ -210,11 +212,11 @@ function provision_cmp_error($error) {
  * @param entry
  *   Associative array containing the log message.
  * @return
- *   Entire log history, only if $entry is null
+ *   Entire log history, only if $entry is NULL
  */
-function _provision_set_log($entry = null) {
+function _provision_set_log($entry = NULL) {
   static $log = array();
-  if ($entry == null) {
+  if ($entry == NULL) {
     return $log;
   }
   else {
@@ -277,7 +279,7 @@ function provision_get_log() {
  */
 function provision_get_site_data($url) {
   global $args;
-  #TODO: Accept serialized string via unix pipe.
+  //TODO: Accept serialized string via unix pipe.
   foreach ($args['options'] as $key => $value) {
     if (preg_match("/^site_/", $key)) {
       $site_data[$key] = $value;
@@ -285,7 +287,7 @@ function provision_get_site_data($url) {
   }
   $site_data['site_url'] = $url;
   $site_data['task_type'] = $args['commands'][1];
-  $site_data['task_id'] = drush_get_option('task_id', null);
+  $site_data['task_id'] = drush_get_option('task_id', NULL);
   $site_data['publish_path'] = PROVISION_DOCROOT_PATH;
   $site_data['site_profile'] = ($site_data['site_profile']) ? $site_data['site_profile'] : variable_get('provision_default_profile', 'default');
   $site_data['site_ip'] =  variable_get('provision_apache_server_ip', '127.0.0.1');
@@ -295,7 +297,7 @@ function provision_get_site_data($url) {
   $site_data['site_language'] = $site_data['site_language'] ? $site_data['site_language'] : 'en';
 
   if ($old_data = provision_load_site_data($url)) {
-    # Merge previously saved data with the new data. This way, old parameters overwrite new ones.
+    //Merge previously saved data with the new data. This way, old parameters overwrite new ones.
     $site_data = array_merge($old_data, $site_data);    
   }
 
@@ -311,13 +313,13 @@ function provision_get_site_data($url) {
  *   If the file was found, an associative array of the data that was loaded. Otherwise returns FALSE.
  */
 function provision_load_site_data($url) {
-  # Load the configuration data.
+  //Load the configuration data.
   $conf_file = "sites/$url/site.php";
   if (file_exists($conf_file) && is_readable($conf_file)) {
     require($conf_file);
     return (array) $data;
   }
-  return false;
+  return FALSE;
 }
 
 /**
@@ -336,30 +338,30 @@ function provision_save_site_data($url, $data) {
 
   //initialize the file. this is lame, i know. but it will work.
   if (!file_exists($conf_file)) {
-    $fp = fopen($conf_file, "a+"); # Append to the end of the config file.
+    $fp = fopen($conf_file, 'a+'); //Append to the end of the config file.
     fwrite($fp, "<?php\n");
     fclose($fp);
   } 
 
   $fp = fopen($conf_file, "a+");
   if (!$fp) {
-    provision_log("error", "Site config file could not be written");
+    provision_log('error', 'Site config file could not be written');
     provision_set_error(PROVISION_PERM_ERROR);
   }
   else {
     $timestamp = mktime();
     $aid = $data['task_id'];
-    fwrite($fp, "\n\n#" . format_date($timestamp, "large"));
+    fwrite($fp, "\n\n#". format_date($timestamp, 'large'));
     if ($aid) {
       $task = array('task' => $data['task_type'], 'status' => provision_get_error());
-      $line = "\n\$tasks[$aid][$timestamp] = " . str_replace(array("  ", "\n"), "", var_export($task, TRUE)) . ";";
+      $line = "\n\$tasks[$aid][$timestamp] = ". str_replace(array('  ', "\n"), '', var_export($task, TRUE)) .';';
       fwrite($fp, $line);
     }
     foreach ($data as $key => $value) {
 
-      if (preg_match("/^site_/", $key)) {
+      if (preg_match('/^site_/', $key)) {
         if ($data[$key] != $old_data[$key]) {
-          $line = "\n\$data['$key'] = " . var_export($value, true) . ';';
+          $line = "\n\$data['$key'] = ". var_export($value, TRUE) .';';
           fwrite($fp, $line);  
         }
       }
@@ -388,13 +390,13 @@ function provision_save_site_data($url, $data) {
  */
 function provision_value_list() {
     /** TODO: Complete the value list to allow the front end to more easily edit the settings. */
-  $values['site_url'] = t("The domain name used to access the site. This is defaulted to the value used on the command line.");
-  $values['site_db_type'] = t("The type of database server used");
-  $values['site_db_username'] = t("Username to access database for site");
-  $values['site_db_password'] = t("Password to access database for site");
-  $values['site_db_name'] = t("Database name for the site");
-  $values['site_profile'] = t("Install profile of site");
-  $values['site_task_type'] = t("What type of task has been used. Only used in conjuction with hosting front end");
+  $values['site_url'] = t('The domain name used to access the site. This is defaulted to the value used on the command line.');
+  $values['site_db_type'] = t('The type of database server used');
+  $values['site_db_username'] = t('Username to access database for site');
+  $values['site_db_password'] = t('Password to access database for site');
+  $values['site_db_name'] = t('Database name for the site');
+  $values['site_profile'] = t('Install profile of site');
+  $values['site_task_type'] = t('What type of task has been used. Only used in conjuction with hosting front end');
 
   return $values;
 }
@@ -405,7 +407,7 @@ function provision_value_list() {
 function provision_render_config($template, $variables) {
   extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
   ob_start();                      // Start output buffering
-  eval("?>" . $template);                 // Generate content
+  eval('?>'. $template);                 // Generate content
   $contents = ob_get_contents();   // Get the contents of the buffer
   ob_end_clean();                  // End buffering and discard
   return $contents;                // Return the contents
@@ -420,32 +422,33 @@ function provision_render_config($template, $variables) {
  * Remove files or directories, recursively
  *
  * This was taken from imagecache.module, with slight modifications:
- * - carry error codes along the way (returns true only if all operations return true)
+ * - carry error codes along the way (returns TRUE only if all operations return TRUE)
  * - remove any type of files encountered (not just links, files and dirs)
  * - safety checking since we don't necessarly trust the removed files
  */
 function _provision_recursive_delete($path) {
   if (is_dir($path)) {
     $d = dir($path);
-    while (($entry = $d->read()) !== false) {
+    while (($entry = $d->read()) !== FALSE) {
       if ($entry == '.' || $entry == '..') continue;
       $entry_path = $path .'/'. $entry;
       if (file_check_location($entry_path, $path)) {
         $ret = _provision_recursive_delete($entry_path);
-      } else {
+      } 
+      else {
         $ret = 0;
       }
     }
 
-    $rm = provision_path("rmdir", $path, true,
-      t("Deleting @path directory sucessful.", array('@path' => $path)),
-      t("Deleting @path directory failed.", array('@path' => $path)));
+    $rm = provision_path('rmdir', $path, TRUE,
+      t('Deleting @path directory sucessful.', array('@path' => $path)),
+      t('Deleting @path directory failed.', array('@path' => $path)));
 
     $ret = $ret && $rm;
   }
   else {
-    $rm = provision_path("unlink", $path, true, null, 
-      t("Deleting @path file failed.", array('@path' => $path)));
+    $rm = provision_path('unlink', $path, TRUE, NULL, 
+      t('Deleting @path file failed.', array('@path' => $path)));
     $ret = $ret && $rm;
   }
   return $ret;
@@ -460,11 +463,11 @@ function _provision_recursive_delete($path) {
 function provision_shell_exec() {
   $args = func_get_args();
   
-  #do not change the command itself, just the parameters.
+  //do not change the command itself, just the parameters.
   for ($x = 1; $x < sizeof($args); $x++) {
     $args[$x] = escapeshellcmd($args[$x]);
   }
-  $command = call_user_func_array("sprintf", $args);
+  $command = call_user_func_array('sprintf', $args);
  
   return drush_shell_exec($command);
 }
@@ -476,8 +479,8 @@ function provision_shell_exec() {
  * @param new_db_url
  *    The database url to set the connection to. If not provided, will switch back to Drupal default.
  */
-function provision_set_active_db($new_db_url = null) {
-  static $old_db_url = null;
+function provision_set_active_db($new_db_url = NULL) {
+  static $old_db_url = NULL;
   global $db_url;
   
   #initialize static
@@ -523,7 +526,7 @@ function provision_close_active_db() {
  *
  * @return
  *   Boolean. True if user does belong to group, 
- *   and false if the user does not belong to the group, or either the user or group do not exist.
+ *   and FALSE if the user does not belong to the group, or either the user or group do not exist.
  */
 function provision_user_in_group($user, $group) {
   // TODO: make these singletons with static variables for caching.
@@ -535,18 +538,18 @@ function provision_user_in_group($user, $group) {
       return TRUE;
     }
   }
-  return false;
+  return FALSE;
 }
 
 /**
  * Return the valid system username for $user.
  *
  * @return
- *   Returns the username if found, otherwise returns false
+ *   Returns the username if found, otherwise returns FALSE
  */
 function provision_posix_username($user) {
   // TODO: make these singletons with static variables for caching.
-  // we do this both ways, so that the function returns null if no such user was found.
+  // we do this both ways, so that the function returns NULL if no such user was found.
   if (is_numeric($user)) {
     $info = posix_getpwuid($user);
     $user = $info['name'];
@@ -562,11 +565,11 @@ function provision_posix_username($user) {
  * Return the valid system groupname for $group.
  *
  * @return
- *   Returns the groupname if found, otherwise returns false
+ *   Returns the groupname if found, otherwise returns FALSE
  */
 function provision_posix_groupname($group) {
   // TODO: make these singletons with static variables for caching.
-  // we do this both ways, so that the function returns null if no such user was found.
+  // we do this both ways, so that the function returns NULL if no such user was found.
   if (is_numeric($user)) {
     $info = posix_getgrgid($group);
     $group = $info['name'];

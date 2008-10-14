@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file mysql db api extension
  *
@@ -33,7 +34,7 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
   provision_set_active_db();
   
   return $status; 
-   #TODO : Test to confirm that the database is actually writeable. Taking this on faith for now.
+   //TODO : Test to confirm that the database is actually writeable. Taking this on faith for now.
 }
 
 /**
@@ -88,9 +89,9 @@ function _provision_mysql_can_create_database() {
   _provision_mysql_create_database($test);
   if (_provision_mysql_database_exists($test)) {
     _provision_mysql_drop_database($test);
-    return true;
+    return TRUE;
   }
-  return false;
+  return FALSE;
 }
 
 function _provision_mysql_grant($name, $username, $password, $host = '') {
@@ -118,12 +119,12 @@ function _provision_master_db_url($data = array()) {
 
 
 function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd, $db_host) {
-  $exists = provision_path("exists", $dump_file, true,
+  $exists = provision_path("exists", $dump_file, TRUE,
     t('Found database dump at @path.'),
     t('No database dump was found at @path.'),
     PROVISION_FRAMEWORK_ERROR);
   if ($exists) {
-    $readable = provision_path("readable", $dump_file, true, '', 
+    $readable = provision_path("readable", $dump_file, TRUE, '', 
       t('The database dump at @path could not be read.'), 
       PROVISION_PERM_ERROR);
     if ($readable) {
@@ -146,10 +147,10 @@ function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd
 function _provision_mysql_suggest_db_name($url, $data) {
   provision_set_active_db(_provision_master_db_url());
   if ($data['site_id']) {
-    $id_suggest = 'site_' . $data['site_id'];
+    $id_suggest = 'site_'. $data['site_id'];
     $suggest[] = $id_suggest;
     for ($i = 0; $i < 100; $i++) {
-      $suggest[] = $id_suggest . '_' . $i;
+      $suggest[] = $id_suggest .'_'. $i;
     }
   }
   else {
@@ -158,7 +159,7 @@ function _provision_mysql_suggest_db_name($url, $data) {
     $url_suggest = substr(0, 14, str_replace(array(".", "-"), '' , ereg_replace("^www\.", "", $url)));
     $suggest[] = $url_suggest;
     for ($i = 0; $i < 100; $i++) {
-      $suggest[] = $url_suggest . '_' . $i;
+      $suggest[] = $url_suggest .'_'. $i;
     }
   }
 

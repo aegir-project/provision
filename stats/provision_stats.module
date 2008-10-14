@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 function provision_stats_drush_command() {
   $items['provision stats'] = array(
@@ -17,22 +18,22 @@ function _provision_stats($url) {
   $data = provision_get_site_data($url);
   $rolled_back = provision_invoke("stats", $url, $data);
 
-  #needs to be done on active database
+  //needs to be done on active database
   $modules = module_implements('provision_stats');
-  drupal_get_messages(); # clear the messages being saved so far.
+  drupal_get_messages(); //clear the messages being saved so far.
   
-  # Change headers and db info, also backs up to restore later
+  // Change headers and db info, also backs up to restore later
   _provision_drupal_switch_active_site($url);
 
-  #TODO: add some required modules here, possibly update_status if not enabled.
-  #Load the modules from the hosted site
+  //TODO: add some required modules here, possibly update_status if not enabled.
+  //Load the modules from the hosted site
   module_list(TRUE);
   
   $stats['node_count'] = db_result(db_query("select max(nid) from {node}"));
   $stats['user_count'] = db_result(db_query("select max(uid) from {users}"));
 
   foreach ($modules as $name) {
-    $func = $name . "_provision_stats";
+    $func = $name .'_provision_stats';
     $stats = array_merge($stats, $func($url, $data));
   }
   
