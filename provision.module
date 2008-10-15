@@ -128,43 +128,38 @@ function provision_perm() {
 /**
  * Implementation of hook_menu().
  */
-function provision_menu($may_cache = TRUE) {
-  if ($may_cache) {
-    $items[] = array(
-      'path' => 'admin/settings/provision',
-      'title' => t('Provisioning'),
-      'description' => t("Configure how new Drupal sites will be provisioned."),
-      'callback' => 'drupal_get_form',
-      'callback arguments' => array('provision_configure'),
-      'access' => user_access('administer provisioning'),
-    );
-    $items[] = array(
-      'path' => 'admin/help/provision/requirements',
-      'title' => t('Provisioning requirements'),
-      'description' => t("Information of how to configure the provisioning system."),
-      'callback' => 'provision_help_requirements',
-      'type' => MENU_CALLBACK
-    );
-  }
-  else {
-    $items[] = array(
-      'path' => 'provision/disabled',
-      'title' => t('Site disabled'),
-      'description' => t('Page showed when a site is disabled.'),
-      'callback' => 'provision_disabled_site',
-      'type' => MENU_CALLBACK,
-      'access' => user_access('access content'),
-    );
-    $items[] = array(
-      'path' => 'provision/maintenance',
-      'title' => t('Site is undergoing maintenance.'),
-      'description' => t('Page shown when a site is being restored or moved etc.'),
-      'callback' => 'provision_site_maintenance',
-      'type' => MENU_CALLBACK,
-      'access' => user_access('access content'),
-    );
-
-  }
+function provision_menu($may_cache) {
+  $items[] = array(
+    'path' => 'admin/settings/provision',
+    'title' => t('Provisioning'),
+    'description' => t("Configure how new Drupal sites will be provisioned."),
+    'callback' => 'drupal_get_form',
+    'callback arguments' => array('provision_configure'),
+    'access' => user_access('administer provisioning'),
+  );
+  $items[] = array(
+    'path' => 'admin/help/provision/requirements',
+    'title' => t('Provisioning requirements'),
+    'description' => t("Information of how to configure the provisioning system."),
+    'callback' => 'provision_help_requirements',
+    'type' => MENU_CALLBACK
+  );
+  $items[] = array(
+    'path' => 'provision/disabled',
+    'title' => t('Site disabled'),
+    'description' => t('Page showed when a site is disabled.'),
+    'callback' => 'provision_disabled_site',
+    'type' => MENU_CALLBACK,
+    'access' => user_access('access content'),
+  );
+  $items[] = array(
+    'path' => 'provision/maintenance',
+    'title' => t('Site is undergoing maintenance.'),
+    'description' => t('Page shown when a site is being restored or moved etc.'),
+    'callback' => 'provision_site_maintenance',
+    'type' => MENU_CALLBACK,
+    'access' => user_access('access content'),
+  );
   return $items;
 }
 
