@@ -257,12 +257,10 @@ function provision_path_symlink($path, &$target, &$reason) {
     $reason = t("A symlink already exists at target, but it is pointing to @link", array("@link" => readlink($target)));
     return FALSE;
   }
-  if (is_link($target) && (readlink($target) != $path)) {
-    $reason = t("The symlink has already been created. Doing nothing.");
+  if (is_link($target) && (readlink($target) == $path)) {
     $target = TRUE;
     return TRUE;
   }
-
   if (symlink($path, $target)) {
     $target = TRUE;
     return TRUE;
