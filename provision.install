@@ -55,11 +55,11 @@ function provision_requirements($phase) {
   }
 
   $url = parse_url($GLOBALS['base_url']);
-  $conf_path = (conf_path() != 'sites/default');
+  $conf_path = (conf_path() == 'sites/default');
   $requirements['confpath']['title'] = $t('Configuration path');
   $requirements['confpath']['value'] = conf_path();
   if (!$conf_path) {
-    $requirements['confpath']['description'] = $t('Provision can not import or maintain sites installed in the "sites/default" directory of a Drupal installation. <br />Please move the "sites/default" directory to "sites/@url"', array('@url' => $url['host']));
+    $requirements['confpath']['description'] = $t('Provision may only be installed as the default site in a Drupal installation. It is currently installed in the "sites/@url" directory. Please move this directory to "sites/default".', array('@url' => $url['host']));
     $requirements['confpath']['severity'] = REQUIREMENT_ERROR;
   }
 
