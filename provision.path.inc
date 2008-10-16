@@ -30,6 +30,7 @@
  *      group - The $path belongs to the group in $confirm.
  *      mkdir - Create the $path directory.
  *      unlink - Delete the file $path.
+ *      symlink - Create a symlink from $path to $confirm.
  *      rmdir - Delete the directory $path.
  *      chmod - Change the file permissions of $path to the octal value in $confirm.
  *      chown - Change the owner of $path to the user in $confirm.
@@ -48,6 +49,7 @@
  *    the change was completed succesfully afterwards.
  *    
  *    These exceptions are :
+ *      symlink - $confirm is the path to the symlink being created
  *      chmod - $confirm is an octal value denoting the desired file permissions.
  *      chown - $confirm is the name or user id you wish to change the file ownership to.
  *      chgrp - $confirm is the name of group id you wish to change the file group ownership to.
@@ -246,10 +248,36 @@ function provision_path_extract($path, &$target, &$reason) {
 
 }
 
+function provision_path_symlink($path, &$target, &$reason) {
+  if (file_exists($target) && !is_link($target)) {
+    $reason = t("A file already exists at @path");
+    return FALSE;
+  }
+  if (is_link($target) && (readlink($target) != $path)) {
+    $reason = t("A symlink already exists at target, but it is pointing to @link", array("@link" => readlink($target)));
+    return FALSE;
+  }
+  if (is_link($target) && (readlink($target) != $path)) {
+    $reason = t("The symlink has already been created. Doing nothing.");
+    $target = TRUE;
+    return TRUE;
+  }
+
+  if (symlink($path, $target)) {
+    $target = TRUE;
+    return TRUE;
+  }
+  else {
+    $reason = t('The symlink could not be created, an error has occured');
+    return FALSE;
+  }
+
+
+}
+
 /**
 *@} end filegroup
  */
-
 
 /**
  * Small helper function for creation of configuration directories.
