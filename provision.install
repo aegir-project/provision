@@ -25,8 +25,9 @@ function provision_install() {
  * Implementation of hook_requirements
  *
  * Make sure that the POSIX library is available, and that we are not running on a windows based host.
- * Make sure that site is not installed in a subdirectory, but that the DocumentRoot directive points at
- * the installation.
+ * Make sure that site is not installed in a subdirectory, but that the DocumentRoot directive points at the installation.
+ * Make sure the site is not being installed in sites/default
+ * @TODO: make sure the required modules are installed in the right places
  */
 function provision_requirements($phase) {
   global $base_path;
@@ -52,5 +53,15 @@ function provision_requirements($phase) {
       You will need to modify your virtual host configuration to point a ServerName directly at the installation path.");
     $requirements['docroot']['severity'] = REQUIREMENT_ERROR;
   }
+
+  $url = parse_url($GLOBALS['base_url']);
+  $conf_path = (conf_path() != 'sites/default');
+  $requirements['confpath']['title'] = $t('Configuration path');
+  $requirements['confpath']['value'] = conf_path();
+  if (!$conf_path) {
+    $requirements['confpath']['description'] = $t('Provision can not import or maintain sites installed in the "sites/default" directory of a Drupal installation. <br />Please move the "sites/default" directory to "sites/@url"', array('@url' => $url['host']));
+    $requirements['confpath']['severity'] = REQUIREMENT_ERROR;
+  }
+
   return $requirements;
 }
