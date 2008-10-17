@@ -423,12 +423,10 @@ function _provision_drupal_get_cvs_versions($files) {
 function provision_drupal_provision_import($url, &$data) {
   $sites = provision_drupal_find_sites();
   foreach ($sites as $site => $file) {
-    if ($site != 'default') {
-      $info = _provision_drupal_import_site($site);
-      if ($info['site_installed']) {
-        provision_log("notice", "Returning information for $site");
-        $data['sites'][$site] = $info;
-      }
+    $info = _provision_drupal_import_site($site);
+    if ($info['site_installed']) {
+      provision_log("notice", "Returning information for $site");
+      $data['sites'][$site] = $info;
     }
   }
   //Just make sure our ini settings and the like aren't wiped out.
