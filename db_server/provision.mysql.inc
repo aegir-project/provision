@@ -43,7 +43,7 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
 function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_host) {
   provision_set_active_db(_provision_master_db_url());
     
-  if ( _provision_mysql_database_exists($data['site_db_name']) ) {
+  if ( _provision_mysql_database_exists($data['db_name']) ) {
     provision_log("notice", t("Dropping database @dbname", array('@dbname' => $db_name)));
     _provision_mysql_drop_database($db_name);
   }

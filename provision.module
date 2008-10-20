@@ -48,7 +48,6 @@
  * program, but are configurable.
  */
 function provision_init() {
-
   // Set up defines for platform
   if (function_exists('drush_get_option')) {
     $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
@@ -59,31 +58,47 @@ function provision_init() {
   
   define('PROVISION_DOMAIN', $_SERVER['HTTP_HOST']);
   $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
+
   define('PROVISION_DOCROOT_PATH', rtrim($path, '/'));
   define('PROVISION_SITES_PATH', rtrim($path, '/') .'/sites');
   
-  define('PROVISION_DRUSH_PATH', drupal_get_path('module', 'drush') .'/drush.php');
+  define('PROVISION_DRUSH_PATH', './drush.php');
+
   $parts = explode("/", rtrim($path, '/'));
   array_pop($parts);
   define('PROVISION_PARENT_PATH', rtrim(implode("/" , $parts), '/'));
 
-  define('PROVISION_BACKUP_PATH', 
-    variable_get('provision_backup_path', PROVISION_PARENT_PATH .'/backups'));
-  define('PROVISION_CONFIG_PATH', 
-    variable_get('provision_config_path', PROVISION_PARENT_PATH .'/config')) ;
+  if (file_exists('sites/default/provision.settings.php')) {
+    include_once('sites/default/provision.settings.php');
+  }
+  else {
+    $defaults = _provision_config_defaults();
+    define('PROVISION_BACKUP_PATH', $defaults['backup_path']);
+    define('PROVISION_CONFIG_PATH', $defaults['config_path']);
+    define('PROVISION_WEB_GROUP', $defaults['web_group']);
+    define('PROVISION_MASTER_DB', $defaults['master_db']);
+    define('PROVISION_SCRIPT_USER', $defaults['script_user']);
+    define('PROVISION_RESTART_CMD', $defaults['restart_cmd']);
+    define('PROVISION_MASTER_URL', $defaults['master_url']);
+    define('PROVISION_MASTER_DB', $defaults['master_db']);
+  }
+  # These settings are based on settings in the provision.settings.php file
   define('PROVISION_VHOST_PATH', PROVISION_CONFIG_PATH .'/vhost.d');
   define('PROVISION_DRUSHRC_PATH', PROVISION_CONFIG_PATH .'/drushrc.d');
+  define('PROVISION_WEB_DISABLE_URL', PROVISION_MASTER_URL .'/provision/disabled');
 
-  define('PROVISION_SCRIPT_USER', variable_get('provision_script_user', get_current_user()));   
-  
-  $info = posix_getgrgid(posix_getgid());
-  define('PROVISION_WEB_GROUP', variable_get('provision_web_group', $info['name']));
+  define('PROVISION_WEB_MAINTENENCE_URL', PROVISION_MASTER_URL .'/provision/maintenance');
 
-  define('PROVISION_DB_TYPE', variable_get('provision_db_type', 'mysqli'));
-  define('PROVISION_DB_USER', variable_get('provision_db_user', 'root'));
-  define('PROVISION_DB_PASSWD', variable_get('provision_db_passwd', 'root'));
-  define('PROVISION_DB_HOST', variable_get('provision_db_host', 'localhost'));
+  $db = parse_url(PROVISION_MASTER_DB);
+  define('PROVISION_DB_TYPE', $db['scheme']);
+  define('PROVISION_DB_USER', $db['user']);
+  define('PROVISION_DB_PASSWD', $db['pass']);
+  define('PROVISION_DB_HOST', $db['host']);
 
+
+}
+
+function _provision_default_restart_cmd() {
   # try to detect the apache restart command
   $command = '/usr/sbin/apachectl'; # a proper default for most of the world
   foreach (array('/usr/local/sbin/apachectl', # freebsd
@@ -93,31 +108,56 @@ function provision_init() {
       $command = $test;
     }
   }
-  define('PROVISION_RESTART_CMD', variable_get('provision_restart_cmd', "sudo $command graceful"));
 
-  global $base_url;
-  define('PROVISION_BASE_URL', $base_url);
-  define('PROVISION_WEB_DISABLE_URL', 
-    variable_get('provision_web_disable_url', $base_url .'/provision/disabled'));
-
-  define('PROVISION_WEB_MAINTENENCE_URL', 
-    variable_get('provision_web_maintenance_url', $base_url .'/provision/maintenance'));
+  return "sudo $command graceful";
 }
 
-
 /**
- * Implementation of hook_provision_service
+ * Provides a set of best guess values for the provision.settings.php file
  */
-function provision_provision_service() {
-  return array('provision' => t("Basic configuration"));
+function _provision_config_defaults() {
+  $default = array();
+  $defaults['backup_path'] = defined('PROVISION_BACKUP_PATH') ? PROVISION_BACKUP_PATH : PROVISION_PARENT_PATH .'/backups';
+  $defaults['config_path'] = defined('PROVISION_CONFIG_PATH') ? PROVISION_CONFIG_PATH : PROVISION_PARENT_PATH .'/config';
+
+  $defaults['script_user'] = defined('PROVISION_SCRIPT_USER') ? PROVISION_SCRIPT_USER : get_current_user();
+  
+  $info = posix_getgrgid(posix_getgid());
+  $defaults['web_group'] = defined('PROVISION_WEB_GROUP') ? PROVISION_WEB_GROUP : $info['name'];
+
+  $defaults['master_db'] = defined('PROVISION_MASTER_DB') ? PROVISION_MASTER_DB : $GLOBALS['db_url'];
+
+  $defaults['restart_cmd'] = defined('PROVISION_RESTART_CMD') ? PROVISION_RESTART_CMD : _provision_default_restart_cmd();
+
+
+  $master_url = variable_get('provision_install_url', $GLOBALS['base_url']);
+  $defaults['master_url'] = defined('PROVISION_MASTER_URL') ? PROVISION_MASTER_URL : $master_url;
+
+  return $defaults;
 }
 
-
 /**
- * Implementation of hook_perm().
+ * Generate a provision.settings.php file to configure provision
  */
-function provision_perm() {
-  return array("administer provisioning");
+function _provision_generate_config($data = array()) {
+  provision_log('notice', t("Generating provision.settings.php file"));
+  if (provision_path("exists", "sites/default/provision.settings.php")) {
+    provision_path("chmod", "sites/default/provision.settings.php", 0600,
+      t('Changed permissions of provision.settings.php to @confirm'),
+      t('Could not change permissions of provision.settings.php to @confirm'));
+  }
+
+  $data = array_merge(_provision_config_defaults(), $data);
+  $fp = fopen("sites/default/provision.settings.php", "w");
+  $text = file_get_contents(drupal_get_path('module', 'provision') .'/provision_settings.tpl.php');
+  fwrite($fp, "<?php\n". provision_render_config($text, $data));
+  fclose($fp);
+
+  # Change the permissions of the file
+  provision_path("chmod", "sites/default/provision.settings.php", 0400,
+    t('Changed permissions of provision.settings.php to @confirm'),
+    t('Could not change permissions of provision.settings.php to @confirm'));
+  return TRUE;
 }
 
 /**
@@ -129,14 +169,6 @@ function provision_perm() {
  * Implementation of hook_menu().
  */
 function provision_menu($may_cache) {
-  $items[] = array(
-    'path' => 'admin/settings/provision',
-    'title' => t('Provisioning'),
-    'description' => t("Configure how new Drupal sites will be provisioned."),
-    'callback' => 'drupal_get_form',
-    'callback arguments' => array('provision_configure'),
-    'access' => user_access('administer provisioning'),
-  );
   $items[] = array(
     'path' => 'admin/help/provision/requirements',
     'title' => t('Provisioning requirements'),
@@ -174,46 +206,6 @@ function provision_site_maintenance() {
 }
 
 /**
- * Menu callback.
- * 
- * Configuration screen for the provisioning framework.
- */
- 
-function provision_configure() {
-  $form['services'] = array('#type' => 'value');
-  
-  foreach (module_implements('provision_configure') as $module) {
-    $data = module_invoke($module, 'provision_service');
-    $service = key($data);
-    $title = current($data);
-    $form['services']['#value'][] = $service;
-    $form[$service] = array(
-      '#type' => 'fieldset',
-      '#title' => $title,
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
-      '#access' => user_access("administer $service provisioning"),
-      '#tree' => TRUE
-    );
-    $form[$service] = array_merge($form[$service], module_invoke($module, "provision_configure"));
-  }
-  $form['submit'] = array(
-    '#type' => 'submit', 
-    '#value' => t('Save settings'),
-  );
-  
-  return $form;
-}
-
-function provision_configure_submit($form_id, $values) {
-  foreach ($values['services'] as $service) {
-    foreach ($values[$service] as $key => $value) {
-      variable_set('provision_'. $key, $value);
-    }
-  }
-}
-
-/**
  * @} End of "defgroup provisionui"
  */
 
@@ -235,8 +227,8 @@ function provision_drush_command() {
 
   $items['provision synch'] = array(
     'callback' => '_provision_synch',
-    'arguments' => array('domain.com' => t('The domain of the site to synch.')),
-    'description' => t('Regenerate all the config files for a site.')
+    'optional arguments' => array('domain.com' => t('The domain of the site to synch.')),
+    'description' => t('Regenerate the configuration files for a site or platform.')
   );
   
   $items['provision import'] = array(
@@ -393,7 +385,7 @@ function _provision_install($url, &$data) {
   if (!$rolled_back) {
     _provision_drupal_switch_active_site($url); # Change headers and db info, also backs up
     _provision_drupal_force_load_modules($url);
-    _provision_drupal_install_schema($data['site_profile'], $data['site_language']);
+    _provision_drupal_install_schema($data['profile'], $data['language']);
     _provision_drupal_force_load_modules();
     _provision_drupal_switch_active_site(); # This *should* bring the site back to where we were before installing
     
@@ -418,7 +410,7 @@ function _provision_install($url, &$data) {
 function _provision_post_install($url, &$data) {
   $rolled_back = provision_invoke("post_install", $url, $data);
   if (!$rolled_back) {
-    $data['site_installed'] = TRUE;  
+    $data['installed'] = TRUE;  
   }
   return $rolled_back;
 }
@@ -432,21 +424,28 @@ function _provision_post_install($url, &$data) {
  *   Output of provision_output() function.
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
-function _provision_synch($url) {
-  if (!_provision_drupal_site_installed($url)) {
-    provision_log("error", "Site has not been installed yet.");
-    provision_set_error(PROVISION_SITE_NOT_FOUND);
+function _provision_synch($url = NULL) {
+  if (!$url) {
+    global $args;
+    _provision_generate_config($args['options']);
+    provision_output(NULL, $args['options']);
+  }
+  else {
+    if (!_provision_drupal_site_installed($url)) {
+      provision_log("error", "Site has not been installed yet.");
+      provision_set_error(PROVISION_SITE_NOT_FOUND);
+      provision_output();
+    }
+    $data = provision_get_site_data($url);
+    // This is the actual drupal provisioning requirements. 
+    _provision_drupal_create_directories($url, $data['profile']);
+    $rolled_back = provision_invoke("synch", $url, $data);
+    // Requires at least the database settings to complete.
+    _provision_drupal_create_settings_file($url, $data);
+    $data['installed'] = TRUE;
+    provision_save_site_data($url, $data);
     provision_output($url, $data);
   }
-  $data = provision_get_site_data($url);
-  // This is the actual drupal provisioning requirements. 
-  _provision_drupal_create_directories($url, $data['profile']);
-  $rolled_back = provision_invoke("synch", $url, $data);
-  // Requires at least the database settings to complete.
-  _provision_drupal_create_settings_file($url, $data);
-  $data['site_installed'] = TRUE;
-  provision_save_site_data($url, $data);
-  provision_output($url, $data);
 }
 
 /**
@@ -470,7 +469,7 @@ function _provision_backup($url) {
   $file = array_shift($args);
   _provision_backup_site($url, $data, $file);
 
-  $data['site_installed'] = TRUE;
+  $data['installed'] = TRUE;
   provision_save_site_data($url, $data);
    
   provision_output($url, $data);
@@ -640,7 +639,7 @@ function _provision_disable($url) {
 
   $rolled_back = provision_invoke("disable", $url, $data);
 
-  $data['site_enabled'] = FALSE;
+  $data['enabled'] = FALSE;
   provision_save_site_data($url, $data);
   provision_output($url, $data);
 }
@@ -655,7 +654,7 @@ function _provision_enable($url) {
 
   $rolled_back = provision_invoke("enable", $url, $data);
 
-  $data['site_enabled'] = TRUE;
+  $data['enabled'] = TRUE;
   provision_save_site_data($url, $data);  
   provision_output($url, $data);
 }
@@ -689,9 +688,8 @@ function _provision_setup() {
     t('Created symlink for drush.php file'), 
     t('Could not create symlink for drush.php'), 
     PROVISION_FRAMEWORK_ERROR);
-  $success &= _provision_create_dir(PROVISION_CONFIG_PATH, t('Config path'), 0700);
-  $success &= _provision_create_dir(PROVISION_DRUSHRC_PATH, t('Drush config path'), 0700);
 
+  $success &= _provision_generate_config();
   return $success; 
 }
 

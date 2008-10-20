@@ -11,10 +11,6 @@
  * to ensure that the sites are getting loaded up correctly.
  */
 
-function provision_apache_provision_service() {
-  return array( "web_server" => t("Web Server"));
-}
-
 /**
  * Implementation of hook_help().
  */
@@ -99,82 +95,7 @@ EOF;
 
 }
 
-/**
- * Hook into central configuration form for provisioning framework.
- */
-function provision_apache_provision_configure($node = NULL) {
-  // We need to define form elements for the node's title and body.
-  $form['restart_cmd'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Restart command'),
-      '#required' => TRUE,
-      '#description' => t('The command to run to restart the for new changes to take effect. This is required for the new site to become live'),
-      '#default_value' => ($node->restart_cmd) ? $node->restart_cmd : PROVISION_RESTART_CMD,
-      '#size' => 40,
-      '#maxlength' => 255,
-      '#weight' => -20,
-  );
 
-  $form['script_user'] = array(
-    '#type' => 'textfield',
-    '#title' => t('System account'),
-    '#required' => TRUE,
-    '#description' => t('The system account that the hosted files will belong to, for security reasons.<br />This should be a different to the account the web server is running as.'),
-    '#default_value' => ($node->script_user) ? $node->script_user : PROVISION_SCRIPT_USER,
-    '#size' => 20,
-    '#maxlength' => 255,
-    '#weight' => -15,
-  );
-   
-  $form['web_group'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Web server group'),
-    '#required' => TRUE,
-    '#description' => t('The group that the hosted files will belong to.<br />This should be the group the web server is running as.'),
-    '#default_value' => ($node->web_group) ? $node->web_group : PROVISION_WEB_GROUP,
-    '#size' => 20,
-    '#maxlength' => 75,
-    '#validate' => array('provision_apache_validate_web_group' => array()),
-    '#weight' => -10,
-  );
-  
-  $form['config_path'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Configuration path'),
-    '#required' => TRUE,
-    '#size' => 40,
-    '#default_value' => ($node->config_path) ? $node->config_path : PROVISION_CONFIG_PATH,
-    '#description' => t("The path on the server where configuration files will be stored.<br />
-        It is essential that this directory should not be accessible via a web browser."),
-    '#maxlength' => 255,
-    '#weight' => -10,
-  );
-  
-  $form['backup_path'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Backup path'),
-    '#required' => TRUE,
-    '#size' => 40,
-    '#default_value' => ($node->backup_path) ? $node->backup_path : PROVISION_BACKUP_PATH,
-    '#description' => t("The path on the server where backups will be stored.<br />
-        It is essential that this directory should not be accessible via a web browser."),
-    '#maxlength' => 255,
-    '#weight' => -10,
-  );
-  
-  return $form;
-}
-
-function provision_apache_validate_web_group($element) {
-  $user = $element['#post']['script_user'];
-  $group = $element['#post']['web_group'];
-  if ($user && $group) {
-    if (!provision_user_in_group($user, $group)) {
-       form_set_error('web_group', t("The %user user is not in the %group group. For information on how to fix this, please check the !link.", 
-         array('%user' => $user, '%group' =>  $group, '!link' => l(t("provisioning requirements"), "admin/help/provision/requirements") )));
-    }
-  }
-}
 
 /**
  * Implementation of hook_provision_templates

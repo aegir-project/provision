@@ -280,21 +280,17 @@ function provision_get_log() {
 function provision_get_site_data($url) {
   global $args;
   //TODO: Accept serialized string via unix pipe.
-  foreach ($args['options'] as $key => $value) {
-    if (preg_match("/^site_/", $key)) {
-      $site_data[$key] = $value;
-    }
-  }
+  $site_data = $args['options'];
   $site_data['site_url'] = $url;
   $site_data['task_type'] = $args['commands'][1];
   $site_data['task_id'] = drush_get_option('task_id', NULL);
   $site_data['publish_path'] = PROVISION_DOCROOT_PATH;
-  $site_data['site_profile'] = ($site_data['site_profile']) ? $site_data['site_profile'] : variable_get('provision_default_profile', 'default');
+  $site_data['profile'] = ($site_data['profile']) ? $site_data['profile'] : variable_get('provision_default_profile', 'default');
   $site_data['site_ip'] =  variable_get('provision_apache_server_ip', '127.0.0.1');
   $site_data['site_port'] =  variable_get('provision_apache_server_ip', 80);
     
   //Default to english language
-  $site_data['site_language'] = $site_data['site_language'] ? $site_data['site_language'] : 'en';
+  $site_data['language'] = $site_data['language'] ? $site_data['language'] : 'en';
 
   if ($old_data = provision_load_site_data($url)) {
     //Merge previously saved data with the new data. This way, old parameters overwrite new ones.
@@ -358,12 +354,9 @@ function provision_save_site_data($url, $data) {
       fwrite($fp, $line);
     }
     foreach ($data as $key => $value) {
-
-      if (preg_match('/^site_/', $key)) {
-        if ($data[$key] != $old_data[$key]) {
-          $line = "\n\$data['$key'] = ". var_export($value, TRUE) .';';
-          fwrite($fp, $line);  
-        }
+      if ($data[$key] != $old_data[$key]) {
+        $line = "\n\$data['$key'] = ". var_export($value, TRUE) .';';
+        fwrite($fp, $line);  
       }
     }
     fclose($fp);
@@ -391,12 +384,12 @@ function provision_save_site_data($url, $data) {
 function provision_value_list() {
     /** TODO: Complete the value list to allow the front end to more easily edit the settings. */
   $values['site_url'] = t('The domain name used to access the site. This is defaulted to the value used on the command line.');
-  $values['site_db_type'] = t('The type of database server used');
-  $values['site_db_username'] = t('Username to access database for site');
-  $values['site_db_password'] = t('Password to access database for site');
-  $values['site_db_name'] = t('Database name for the site');
-  $values['site_profile'] = t('Install profile of site');
-  $values['site_task_type'] = t('What type of task has been used. Only used in conjuction with hosting front end');
+  $values['db_type'] = t('The type of database server used');
+  $values['db_username'] = t('Username to access database for site');
+  $values['db_password'] = t('Password to access database for site');
+  $values['db_name'] = t('Database name for the site');
+  $values['profile'] = t('Install profile of site');
+  $values['task_type'] = t('What type of task has been used. Only used in conjuction with hosting front end');
 
   return $values;
 }

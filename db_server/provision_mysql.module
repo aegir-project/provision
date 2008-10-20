@@ -49,95 +49,46 @@ EOF;
 }
 
 /**
- * Implementation of provision_service()
- */
-function provision_mysql_provision_service() {
-  return array("db_server" => t("Mysql database server"));
-}
-
-/**
- * Implementation of provision_configure
- */
-function provision_mysql_provision_configure($node = NULL) {
-  if (!is_object($node) && ($nid = variable_get('hosting_own_db_server', 0))) {
-    $node = node_load($nid);
-  }
-  $form['db_type'] = array('#type' => 'hidden', '#value' => ($node->db_type) ? $node->db_type : PROVISION_DB_TYPE);
-  
-  $form['db_host'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Database server hostname'),
-    '#description' => t('The address of the database server to connect to.'),
-    '#size' => 30,
-    '#default_value' => ($node->db_host) ? $node->db_host : PROVISION_DB_HOST,
-    '#maxlength' => 64,
-    '#weight' => 0,
-  );
-  
-  $form['db_user'] = array(
-    '#type' => 'textfield',
-    '#required' => TRUE,
-    '#title' => t('Username'),
-    '#description' => t('The user that will be used to create users and databases for new sites.'),
-    '#size' => 40,
-    '#default_value' => ($node->db_user) ? $node->db_user : PROVISION_DB_USER,
-    '#maxlength' => 255,
-    '#weight' => 5,
-  );
-  if ($node->db_passwd) {
-    $passwd_description = t('<strong>You have already set a password for this database server.</strong><br />');
-  }
-  $form['db_passwd'] = array(
-    '#type' => 'password_confirm',
-    '#required' => (PROVISION_DB_PASSWD) ? FALSE : TRUE,
-    '#description' => $passwd_description . t('The user account that will be used to create new mysql users and databases for new sites'),
-    '#size' => 30,
-    '#weight' => 10
-  );
-  
-  return $form;
-}
-/**
  * @} end "ingroup provisionui"
  */
 
 
 function provision_mysql_provision_pre_install($url, &$data) {
-  $data['site_db_type'] = ($data['site_db_type']) ? $data['site_db_type'] : PROVISION_DB_TYPE;
-  $data['site_db_host'] = ($data['site_db_host']) ? $data['site_db_host'] : PROVISION_DB_HOST;
+  $data['db_type'] = ($data['db_type']) ? $data['db_type'] : PROVISION_DB_TYPE;
+  $data['db_host'] = ($data['db_host']) ? $data['db_host'] : PROVISION_DB_HOST;
 
   # generate a random password for use
-  $data['site_db_passwd'] = user_password(); 
-  $data['site_db_name'] = _provision_mysql_suggest_db_name($url, $data);
-  $data['site_db_user'] = $data['site_db_name']; 
+  $data['db_passwd'] = user_password(); 
+  $data['db_name'] = _provision_mysql_suggest_db_name($url, $data);
+  $data['db_user'] = $data['db_name']; 
 
-  return _provision_mysql_new_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
+  return _provision_mysql_new_site_db($data['db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
 }
 
 function provision_mysql_provision_pre_install_rollback($url, &$data) {
-  _provision_mysql_destroy_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
-  unset($data['site_db_host']);
-  unset($data['site_db_type']);
-  unset($data['site_db_passwd']);
-  unset($data['site_db_user']);
-  unset($data['site_db_name']);
+  _provision_mysql_destroy_site_db($data['db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
+  unset($data['db_host']);
+  unset($data['db_type']);
+  unset($data['db_passwd']);
+  unset($data['db_user']);
+  unset($data['db_name']);
 }
 
 function provision_mysql_provision_pre_restore($url, &$data) {
   // store a backup of the credentials of the site.
-  $data['old_site_db_name'] = $data['site_db_name'];
-  $data['old_site_db_passwd'] = $data['site_db_passwd'];
-  $data['old_site_db_user'] = $data['site_db_user'];
-  $data['old_site_db_host'] = $data['site_db_host'];
+  $data['old_db_name'] = $data['db_name'];
+  $data['old_db_passwd'] = $data['db_passwd'];
+  $data['old_db_user'] = $data['db_user'];
+  $data['old_db_host'] = $data['db_host'];
 
   # generate a random password for use
-  $data['site_db_passwd'] = user_password(); 
-  $data['site_db_name'] = _provision_mysql_suggest_db_name($url, $data);
-  $data['site_db_user'] = $data['site_db_name'];
+  $data['db_passwd'] = user_password(); 
+  $data['db_name'] = _provision_mysql_suggest_db_name($url, $data);
+  $data['db_user'] = $data['db_name'];
 
-  $success = _provision_mysql_new_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
+  $success = _provision_mysql_new_site_db($data['db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
   if ($success) {
-    _provision_mysql_import_dump(PROVISION_SITES_PATH .'/'. $url .'.restore/database.sql', $data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
+    _provision_mysql_import_dump(PROVISION_SITES_PATH .'/'. $url .'.restore/database.sql', $data['db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
   }
   else {
     provision_set_error(PROVISION_DB_ERROR);
@@ -146,7 +97,7 @@ function provision_mysql_provision_pre_restore($url, &$data) {
 }
 
 function provision_mysql_provision_pre_restore_rollback($url, &$data) {
-  _provision_mysql_destroy_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
+  _provision_mysql_destroy_site_db($data['db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
 
   //Restore the original database credentials of the site.
   foreach ($keys as $key) {
@@ -160,7 +111,7 @@ function provision_mysql_provision_pre_restore_rollback($url, &$data) {
  * This will drop the database, revoke the privileges and flush the privileges.
  */
 function provision_mysql_provision_delete($url, &$data) {
-  return _provision_mysql_destroy_site_db($data['site_db_name'], $data['site_db_user'], $data['site_db_passwd'], $data['site_db_host']);
+  return _provision_mysql_destroy_site_db($data['db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
 }
 
 // Rollback doesn't apply here yet. Unless we trigger a restore of the first dump
@@ -169,13 +120,13 @@ function provision_mysql_provision_post_restore($url, &$data) {
   provision_path('unlink', 'sites/'. $url .'/database.sql', TRUE,
     t("Removed dump file @path after restoring from it"),
     t("Could not remove dump file @path"), PROVISION_PERM_ERROR);
-  return _provision_mysql_destroy_site_db($data['old_site_db_name'], $data['old_site_db_user'], $data['old_site_db_passwd'], $data['old_site_db_host']);
+  return _provision_mysql_destroy_site_db($data['old_db_name'], $data['old_db_user'], $data['old_db_passwd'], $data['old_db_host']);
 }
 
 
 function provision_mysql_provision_backup($url, &$data) {
   provision_log("backup", "Generating mysql dump for $url.");
-  provision_shell_exec("mysqldump -u%s -p%s %s > sites/%s/database.sql", $data['site_db_user'], $data['site_db_passwd'], $data['site_db_name'], $url); 
+  provision_shell_exec("mysqldump -u%s -p%s %s > sites/%s/database.sql", $data['db_user'], $data['db_passwd'], $data['db_name'], $url); 
   provision_shell_exec("cd sites/%; tar -rf %s database.sql; rm database.sql", $url, $data['backup_file']);
 }
 

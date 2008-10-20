@@ -423,8 +423,11 @@ function _provision_drupal_get_cvs_versions($files) {
 function provision_drupal_provision_import($url, &$data) {
   $sites = provision_drupal_find_sites();
   foreach ($sites as $site => $file) {
+    if ($site == 'default') {
+      continue;
+    }
     $info = _provision_drupal_import_site($site);
-    if ($info['site_installed']) {
+    if ($info['installed']) {
       provision_log("notice", "Returning information for $site");
       $data['sites'][$site] = $info;
     }
@@ -441,11 +444,11 @@ function _provision_drupal_import_site($url) {
 
   include("sites/$url/settings.php");
   if ($parts = @parse_url($db_url)) {
-    $data['site_db_type'] = $parts['scheme'];
-    $data['site_db_user'] = $parts['user'];
-    $data['site_db_host'] = $parts['host'];
-    $data['site_db_passwd'] = $parts['pass'];
-    $data['site_db_name'] = substr($parts['path'], 1);
+    $data['db_type'] = $parts['scheme'];
+    $data['db_user'] = $parts['user'];
+    $data['db_host'] = $parts['host'];
+    $data['db_passwd'] = $parts['pass'];
+    $data['db_name'] = substr($parts['path'], 1);
 
     /**
      * We need to be running AS the site to be able to see what profile it is installed with.
@@ -454,14 +457,14 @@ function _provision_drupal_import_site($url) {
      */
     provision_set_active_db($db_url);
     $install_profile =  db_result(db_query("SELECT value FROM {variable} WHERE name='install_profile'"));
-    $data['site_profile'] = ($install_profile) ? unserialize($install_profile) : 'default';
+    $data['profile'] = ($install_profile) ? unserialize($install_profile) : 'default';
     $has_locale = db_result(db_query("SELECT status FROM {system} WHERE type='module' AND name='locale'"));
     if ($has_locale) {
       $locale = db_result(db_query("SELECT locale FROM {locales_meta} WHERE isdefault=1 AND enabled=1"));
     }
-    $data['site_language'] = ($locale) ? ($locale) : 'en';
+    $data['language'] = ($locale) ? ($locale) : 'en';
     provision_close_active_db();
-    $data['site_installed'] = TRUE;
+    $data['installed'] = TRUE;
   }
   provision_save_site_data($url, $data);
 
