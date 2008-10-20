@@ -190,9 +190,8 @@ function _provision_drupal_switch_active_site($url = NULL) {
     /* Pretend to be the site being installed */
     
     // Fake the necessary HTTP headers that Drupal needs:
-    $drupal_base_url = parse_url($url);
-    $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
-    $_SERVER['PHP_SELF'] = $drupal_base_url['path'] .'/index.php';
+    $_SERVER['HTTP_HOST'] = $url;
+    $_SERVER['PHP_SELF'] = '/index.php';
 
     $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF']; // Coder generates a warning. But this is correct.
     $_SERVER['REMOTE_ADDR'] = NULL;
@@ -297,7 +296,7 @@ function _provision_drupal_force_load_modules($url = NULL) {
 /**
  * Install the drupal schema and install profile
  */
-function _provision_drupal_install_schema($profile, $language = 'en') {
+function _provision_drupal_install_schema($profile, $language = 'en', $client_email = NULL) {
   include_once('includes/locale.inc');
 
   $GLOBALS['profile'] = $profile;
@@ -336,6 +335,36 @@ function _provision_drupal_install_schema($profile, $language = 'en') {
   if (function_exists($function)) {
     // More steps required
     $profile_message = $function();
+  }
+
+  if ($client_email) {
+    $account = new stdClass();
+    $edit['name'] = 'admin';
+    $edit['pass'] = user_password();
+    $edit['mail'] = $client_email;
+    $edit['status'] = 1;
+    $account = user_save($account,  $edit);
+
+    $from = variable_get('site_mail', ini_get('sendmail_from'));
+
+    $onetime = user_pass_reset_url($account);
+    // Mail one time login URL and instructions.
+    $variables = array(
+      '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
+      '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail, 
+      '!date' => format_date(time()), '!login_uri' => url('user', NULL, NULL, TRUE), 
+      '!edit_uri' => url('user/'. $account->uid .'/edit', NULL, NULL, TRUE));
+    $subject = _user_mail_text('pass_subject', $variables);
+    $body = _user_mail_text('pass_body', $variables);
+    $mail_success = drupal_mail('user-pass', $account->mail, $subject, $body, $from);
+
+    if ($mail_success) {
+      provision_log('message', t('Sent welcome mail to @client', array('@client' => $client_email)));
+      provision_log('message', t('Login url: !onetime', array('!onetime' => $onetime)));
+    }
+    else {
+      provision_log('notice', t('Could not send welcome mail to @client', array('@client' => $client_email)));
+    }
   }
 
   variable_set('install_profile', $profile);
