@@ -68,7 +68,7 @@ function provision_init() {
   array_pop($parts);
   define('PROVISION_PARENT_PATH', rtrim(implode("/" , $parts), '/'));
 
-  if (file_exists('sites/default/provision.settings.php')) {
+  if (file_exists('sites/default/provision.settings.php') && is_readable('sites/default/provision.settings.php')) {
     include_once('sites/default/provision.settings.php');
   }
   else {
