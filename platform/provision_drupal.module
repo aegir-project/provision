@@ -372,6 +372,7 @@ function provision_drupal_provision_verify($url, &$data) {
   $data['engines'] = drupal_system_listing('\.engine$', 'themes/engines');
   $data['profiles'] = _provision_find_profiles();
   $data['themes'] = system_theme_data();
+  $data['platform'] = array('short_name' => 'drupal', 'version' => VERSION);  
   
   $sites = provision_drupal_find_sites(); 
 
