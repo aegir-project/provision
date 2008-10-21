@@ -11,6 +11,10 @@
  * to ensure that the sites are getting loaded up correctly.
  */
 
+function provision_apache_provision_service() {
+  return array( "web_server" => t("Web Server"));
+}
+
 /**
  * Implementation of hook_help().
  */

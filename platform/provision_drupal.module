@@ -8,6 +8,10 @@
  * and all the install api code. 
  */
 
+function provision_drupal_provision_service() {
+  return array('drupal' => t("Drupal sites"));
+}
+
 /**
  * Test to see if the site settings.php exists
  *
