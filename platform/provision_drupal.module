@@ -78,7 +78,7 @@ function _provision_drupal_site_exists($url) {
 function _provision_drupal_site_installed($url) {
   if (_provision_drupal_site_exists($url)) {
     if ($data = provision_load_site_data($url)) {
-      return isset($data['site_installed']) ? $data['site_installed'] : FALSE;
+      return isset($data['installed']) ? $data['installed'] : FALSE;
     }
   }
   return FALSE;
