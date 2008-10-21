@@ -9,61 +9,6 @@
  */
 
 /**
- * @ingroup provisionui
- * @{
- */
- 
-/**
- * Implementation of hook_provision_service()
- */
-function provision_drupal_provision_service() {
-  return array('drupal' => t("Drupal sites"));
-}
-
-/**
- * Implentation of hook_provision_configure()
- * @TODO: PROPER profile support
-function provision_drupal_provision_configure() {
-
-  $profiles = file_scan_directory('./profiles', '\.profile$', array('.', '..', 'CVS'), 0, TRUE, 'name', 0);
-  // Don't need to choose profile if only one available.
-  if (sizeof($profiles) == 1) {
-    $profile = array_pop($profiles);
-    $form['default_profile'] = array('#type' => 'value', '#value' => $profile->name);
-  }
-  elseif (sizeof($profiles) > 1) {
-    foreach ($profiles as $profile) {
-      if ($_POST['profile'] == $profile->name) {
-        $options[$profile->name] = $profile->name;
-      }
-    }
-    $form['provision_default_profile'] = array(
-      '#type' => 'radios',
-      '#title' => t('Default install profile'),
-      '#description' => t('New sites will be created with the following install profile'),
-      '#options' => $options,
-      '#default_value' => variable_get('provision_default_profile', 'default'),
-    );
-    
-  }
-
-
-  
-  return $form;
-}
-//*/
-/**
- * Implementation of hook_provision_templates
- */
-function provision_drupal_provision_templates() {
-  // settings template
-}
-
-/**
- * @} End "ingroup provisionui"
-*/
-
-/**
  * Test to see if the site settings.php exists
  *
  * @param url
@@ -408,7 +353,7 @@ function provision_drupal_provision_verify($url, &$data) {
   $data['engines'] = drupal_system_listing('\.engine$', 'themes/engines');
   $data['profiles'] = _provision_find_profiles();
   $data['themes'] = system_theme_data();
-  
+  $data['platform'] = array('short_name' => 'drupal', 'version' => VERSION);  
   $sites = provision_drupal_find_sites(); 
 
   $data['sites'] = array_keys($sites); // return list of hosted sites. used to determine whether or not to import. 
