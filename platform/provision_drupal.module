@@ -338,6 +338,7 @@ function _provision_drupal_install_schema($profile, $language = 'en', $client_em
   }
 
   if ($client_email) {
+    // create the admin account
     $account = new stdClass();
     $edit['name'] = 'admin';
     $edit['pass'] = user_password();
@@ -345,26 +346,51 @@ function _provision_drupal_install_schema($profile, $language = 'en', $client_em
     $edit['status'] = 1;
     $account = user_save($account,  $edit);
 
-    $from = variable_get('site_mail', ini_get('sendmail_from'));
-
-    $onetime = user_pass_reset_url($account);
     // Mail one time login URL and instructions.
+    $from = variable_get('site_mail', ini_get('sendmail_from'));
+    $onetime = user_pass_reset_url($account);
     $variables = array(
       '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
       '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail, 
       '!date' => format_date(time()), '!login_uri' => url('user', NULL, NULL, TRUE), 
       '!edit_uri' => url('user/'. $account->uid .'/edit', NULL, NULL, TRUE));
-    $subject = _user_mail_text('pass_subject', $variables);
-    $body = _user_mail_text('pass_body', $variables);
-    $mail_success = drupal_mail('user-pass', $account->mail, $subject, $body, $from);
+
+    // allow the profile to override welcome email text
+    if (file_exists("./profiles/$profile/provision_welcome_mail.inc")) {
+      require_once "./profiles/$profile/provision_welcome_mail.inc";
+      $mailkey = 'welcome-mail-admin';
+    }
+    elseif (file_exists(dirname(__FILE__) . '/provision_welcome_mail.inc')) { 
+      /** use the module provided welcome email
+       * We can not use drupal_get_path here,
+       * as we are connected to the provisioned site's database
+       */
+      require_once dirname(__FILE__) . '/provision_welcome_mail.inc';
+      $mailkey = 'welcome-mail-admin';
+    }
+    else {
+      // last resort use the user-pass mail text
+      $mailkey = 'user-pass';
+    }
+
+    if ($mailkey == 'welcome-mail-admin') {
+      $subject = st($mail['subject'], $variables);
+      $body = st($mail['body'], $variables);
+    }
+    else {
+      $subject = _user_mail_text('pass_subject', $variables);
+      $body = _user_mail_text('pass_body', $variables);
+    }
+
+    $mail_success = drupal_mail($mailkey, $account->mail, $subject, $body, $from);
 
     if ($mail_success) {
       provision_log('message', t('Sent welcome mail to @client', array('@client' => $client_email)));
-      provision_log('message', t('Login url: !onetime', array('!onetime' => $onetime)));
     }
     else {
       provision_log('notice', t('Could not send welcome mail to @client', array('@client' => $client_email)));
     }
+    provision_log('message', t('Login url: !onetime', array('!onetime' => $onetime)));
   }
 
   variable_set('install_profile', $profile);
