@@ -15,8 +15,11 @@ include_once('provision.mysql.inc');
  * @ingroup provisionui
  * @{
  */
+function provision_mysql_provision_service() {
+  return array("db_server" => t("Mysql database server"));
+}
 
- /**
+/**
   * Implementation of hook_help().
   */
  function provision_mysql_help($section) {

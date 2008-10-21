@@ -165,6 +165,10 @@ function _provision_generate_config($data = array()) {
  * @{
  */
 
+function provision_provision_service() {
+  return array('provision' => t("Basic configuration"));
+}
+
 /**
  * Implementation of hook_menu().
  */

@@ -137,7 +137,7 @@ function provision_help_requirements() {
   foreach ($modules as $module) {
     $service = module_invoke($module, 'provision_service');
     $name = current($service);
-    $help = module_invoke($module, 'help', 'admin/help/provision#requirements');
+    $help = module_invoke($module, 'help', 'admin/help/provision#requirements', null);
     if ($name && $help) {
       $output .= "<a href='requirements-$module'></a><h3>". t($name) .'</h3>';
       $output .=  $help;
