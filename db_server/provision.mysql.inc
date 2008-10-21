@@ -81,7 +81,8 @@ function _provision_mysql_create_database($name) {
  * in the Drupal db api. Sadly.
  */
 function db_close($connection) {
-  return mysql_close($connection);
+  $func = PROVISION_DB_TYPE . '_close';
+  return $func($connection);
 }
 
 function _provision_mysql_can_create_database() {

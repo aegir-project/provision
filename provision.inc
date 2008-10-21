@@ -485,6 +485,11 @@ function provision_set_active_db($new_db_url = NULL) {
   }
 
   if ($new_db_url) {
+    preg_match("$^([a-z]*)://$", $new_db_url, $matches);
+
+    if ($matches[1] != PROVISION_DB_TYPE) {
+      $new_db_url = preg_replace("/^" .$matches[1]. "/", PROVISION_DB_TYPE, $new_db_url);
+    }
     $db_url[md5($new_db_url)] = $new_db_url;
     db_set_active(md5($new_db_url));
   }
