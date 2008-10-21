@@ -167,6 +167,15 @@ function _provision_requirements($req, $section = 'all') {
   return theme("requirement_help", $item);
 }
 
+function provision_theme() {
+  return array(
+    'requirement_help' => array(
+       'arguments' => array('element' => NULL)
+     ),
+  );
+
+}
+
 function provision_get_requirement($req) {
   $func = '_provision_'. $req .'_requirements';
   if (function_exists($func)) {

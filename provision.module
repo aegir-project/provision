@@ -173,6 +173,8 @@ function provision_menu() {
     'title' => 'Provisioning requirements',
     'description' => "Information of how to configure the provisioning system.",
     'page callback' => 'provision_help_requirements',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
     'type' => MENU_CALLBACK
   );
 
@@ -181,13 +183,15 @@ function provision_menu() {
     'description' => 'Configure your platform.',
     'page callback' => 'provision_front',
     'type' => MENU_CALLBACK,
-    'access arguments' => TRUE,
+    'access callback' => TRUE,
   );
+
   $items['provision/disabled'] = array(
     'title' => 'Site disabled',
     'description' => 'Page showed when a site is disabled.',
     'page callback' => 'provision_disabled_site',
     'type' => MENU_CALLBACK,
+    'access callback' => 'user_access',
     'access arguments' => array('access content'),
   );
   $items['provision/maintenance'] = array(
