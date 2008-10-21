@@ -1,4 +1,6 @@
 name = Provision: Statistics
 description = Generate statistics from a running Drupal site.
 package = Provision
-dependencies = provision
+dependencies[] = provision
+
+core = 6.x

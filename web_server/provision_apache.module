@@ -14,8 +14,8 @@
 /**
  * Implementation of hook_help().
  */
-function provision_apache_help($section) {
-  switch ($section) {
+function provision_apache_help($path, $arg) {
+  switch ($path) {
     case 'admin/help/provision#requirements':
       $output .= _provision_requirements('config_path');
       $output .= _provision_requirements('httpd_conf');

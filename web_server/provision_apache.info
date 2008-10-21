@@ -1,4 +1,6 @@
 name = Provision: Apache
 description = Provides provisioning requirements for the Apache Webserver
 package = Provision
-dependencies = provision
+dependencies[] = provision
+
+core = 6.x

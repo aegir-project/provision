@@ -78,8 +78,8 @@ function _provision_help_class($state) {
 /**
  * Implementation of hook_help()
  */
-function provision_help($section) {
-  switch ($section) {
+function provision_help($path, $arg) {
+  switch ($path) {
     case 'admin/help#provision':
       $output .= t('<p>The Provision framework is a powerful set of modules that lets you to accomplish a lot of maintenance tasks through the unix command line such as installing new sites, backing them up, rolling back to previous backups and facilitating upgrades.</p>');
       $output .= t('<p>Additionally, the Provision framework is one component of the distributed hosting infrastructure provided by the <code>hostmaster</code> install profile. 
@@ -260,7 +260,7 @@ function provision_elements() {
       PROVISION_STATUS_SUCCESS => t("You have met this requirement."),
       PROVISION_STATUS_WARNING => t("This requirement has a non critical error."),
       PROVISION_STATUS_ERROR => t("This requirement has a critical error. This system will not operate until it has been fixed")),
-    '#process' => array('provision_requirement_process' => array()),
+    '#process' => array('provision_requirement_process'),
   );
   return $type;
 }
