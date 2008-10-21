@@ -176,6 +176,15 @@ function provision_menu($may_cache) {
     'callback' => 'provision_help_requirements',
     'type' => MENU_CALLBACK
   );
+
+  $items[] = array(
+    'path' => 'provision',
+    'title' => t('Configure your platform'),
+    'description' => t('Configure your platform.'),
+    'callback' => 'provision_front',
+    'type' => MENU_CALLBACK,
+    'access' => TRUE,
+  );
   $items[] = array(
     'path' => 'provision/disabled',
     'title' => t('Site disabled'),
@@ -192,17 +201,37 @@ function provision_menu($may_cache) {
     'type' => MENU_CALLBACK,
     'access' => user_access('access content'),
   );
+  $items[] = array(
+    'path' => 'provision/notfound',
+    'title' => t('Site not found.'),
+    'description' => t('The site you have requested is not available.'),
+    'callback' => 'provision_site_notfound',
+    'type' => MENU_CALLBACK,
+    'access' => user_access('access content'),
+  );
   return $items;
 }
 
-
+function provision_front() {
+  if (variable_get('provision_setup', FALSE)) {
+    drupal_goto('provision/notfound');
+  }
+  return _provision_requirements("provision_setup");
+}
 
 function provision_disabled_site() {
+  drupal_set_breadcrumb(array());
   return "<p>This site was disabled by the site administrators.</p>";
 }
 
 function provision_site_maintenance() {
+  drupal_set_breadcrumb(array());
   return "<p>This site is being worked on presently. Check back later.</p>";
+}
+
+function provision_site_notfound() {
+  drupal_set_breadcrumb(array());
+  return "<p>The site you have requested does not exist.</p>";
 }
 
 /**
@@ -697,7 +726,9 @@ function _provision_setup() {
  * Drush command wrapper for the setup of the platform
  */
 function _provision_setup_cmd() {
-  _provision_setup();
+  if (_provision_setup()) {
+    variable_set('provision_setup', TRUE); 
+  }
  
   // @TODO use provision_output for this, but we need pretty print first.
   $logs = provision_get_log();
