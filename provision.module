@@ -145,7 +145,7 @@ function _provision_config_defaults() {
  */
 function _provision_generate_config($data = array()) {
   provision_log('notice', t("Generating provision.settings.php file"));
-  provision_path("chmod", "sites/default", 0700);
+  provision_path("chmod", "sites/default", 0750);
   if (provision_path("exists", "sites/default/provision.settings.php")) {
     provision_path("chmod", "sites/default/provision.settings.php", 0600,
       t('Changed permissions of provision.settings.php to @confirm'),
