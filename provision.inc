@@ -475,11 +475,14 @@ function provision_shell_exec() {
  */
 function provision_set_active_db($new_db_url = NULL) {
   static $old_db_url = NULL;
+  static $old_db_type = NULL;
   global $db_url;
   
   #initialize static
   if (!$old_db_url) {
     $old_db_url = $db_url;
+    preg_match("$^([a-z]*)://$", $old_db_url, $matches);
+    $old_db_type = $matches[1]; 
     $db_url = array();
     $db_url['default'] = $old_db_url;
   }
@@ -487,8 +490,8 @@ function provision_set_active_db($new_db_url = NULL) {
   if ($new_db_url) {
     preg_match("$^([a-z]*)://$", $new_db_url, $matches);
 
-    if ($matches[1] != PROVISION_DB_TYPE) {
-      $new_db_url = preg_replace("/^" .$matches[1]. "/", PROVISION_DB_TYPE, $new_db_url);
+    if ($matches[1] != $old_db_type) {
+      $new_db_url = preg_replace("/^" .$matches[1]. "/", $old_db_type, $new_db_url);
     }
     $db_url[md5($new_db_url)] = $new_db_url;
     db_set_active(md5($new_db_url));
