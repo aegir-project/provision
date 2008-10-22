@@ -164,7 +164,7 @@ function _provision_requirements($req, $section = 'all') {
   }
  */
   $item = provision_requirement_process($item);
-  return theme("requirement_help", $item);
+  return theme_requirement_help($item);
 }
 
 function provision_theme() {
