@@ -90,10 +90,13 @@ function provision_init() {
   define('PROVISION_WEB_MAINTENENCE_URL', PROVISION_MASTER_URL .'/provision/maintenance');
 
   $db = parse_url(PROVISION_MASTER_DB);
-  define('PROVISION_DB_TYPE', $db['scheme']);
   define('PROVISION_DB_USER', $db['user']);
   define('PROVISION_DB_PASSWD', $db['pass']);
   define('PROVISION_DB_HOST', $db['host']);
+
+  // Drupal does not support multiple types of connections in the same session
+  preg_match("$^([a-z]*)://$", $GLOBALS['db_url'], $matches);
+  define('PROVISION_DB_TYPE', $matches[1]);
 
 
 }
@@ -141,6 +144,7 @@ function _provision_config_defaults() {
  */
 function _provision_generate_config($data = array()) {
   provision_log('notice', t("Generating provision.settings.php file"));
+  provision_path("chmod", "sites/default", 0750);
   if (provision_path("exists", "sites/default/provision.settings.php")) {
     provision_path("chmod", "sites/default/provision.settings.php", 0600,
       t('Changed permissions of provision.settings.php to @confirm'),
@@ -157,6 +161,7 @@ function _provision_generate_config($data = array()) {
   provision_path("chmod", "sites/default/provision.settings.php", 0400,
     t('Changed permissions of provision.settings.php to @confirm'),
     t('Could not change permissions of provision.settings.php to @confirm'));
+  provision_path("chmod", "sites/default", 0550);
   return TRUE;
 }
 
