@@ -338,6 +338,8 @@ function _provision_drupal_install_schema($url, $install_profile, $language = 'e
     if (!empty($batch)) {
       $install_locale_batch_components = $batch['#components'];
       batch_set($batch);
+      $batch =& batch_get();
+      $batch['progressive'] = FALSE;
       batch_process();
     }
   }
@@ -369,6 +371,8 @@ function _provision_drupal_install_schema($url, $install_profile, $language = 'e
       // Start a batch, switch to 'locale-remaining-batch' task. We need to
       // set the variable here, because batch_process() redirects.
       batch_set($batch);
+      $batch =& batch_get();
+      $batch['progressive'] = FALSE;
       batch_process();
     }
   }
@@ -486,13 +490,14 @@ function _provision_find_profiles() {
     }
 
     // Find languages available
-    $languages = array_keys(file_scan_directory('./profiles/' . $key, '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'name'));
+    $languages = array_keys(file_scan_directory('./profiles/' . $key . '/translations', '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'name'));
 
     array_unshift($languages, 'en');
     $profile->info['languages'] = $languages;
 
     $return[$key] = $profile;
   }
+
   return $return;
 
 }
