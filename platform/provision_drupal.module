@@ -220,6 +220,10 @@ function provision_drupal_provision_restore_rollback($url, $data) {
 
 /**
  * Force drupal to load the modules it expects to find on an uninstalled site
+ *
+ * This code is based on the first part of install_main in install.php, with
+ * the added ability to restore the loaded modules to normal when the url
+ * parameter is not passed.
  */
 function _provision_drupal_force_load_modules($url = NULL) {
   static $backup_list;
@@ -245,18 +249,34 @@ function _provision_drupal_force_load_modules($url = NULL) {
 /**
  * Install the drupal schema and install profile
  */
-function _provision_drupal_install_schema($profile, $language = 'en', $client_email = NULL) {
-  include_once('includes/locale.inc');
+function _provision_drupal_install_schema($url, $install_profile, $language = 'en', $client_email = NULL) {
+  global $profile, $install_locale, $conf;
 
-  $GLOBALS['profile'] = $profile;
-  $GLOBALS['install_locale'] = $language;
+  include_once('includes/locale.inc');
+  include_once('includes/install.inc');
+  include_once('includes/batch.inc');
+  require_once './modules/system/system.install';
+  require_once './includes/file.inc'; 
+
   provision_log("install", t("Installing Drupal schema"));
+
+  $profile = $install_profile;
+  provision_log("install", t("Installing profile : @profile", array("@profile" => $profile)));
   // Load the profile.
   require_once "./profiles/$profile/$profile.profile";
 
+  $install_locale = $language;
+  provision_log("install", t("Installing translation : @locale", array("@locale" => $install_locale)));
+
+  /**
+   * Handles requirement checking
+   *
+   * This code is based on install_check_requirements in install.php
+   * We separate this out because we want to avoid all the user interface
+   * code in this function, so we only use the relevant part of it.
+   */
   $requirements = drupal_check_profile($profile);
   $severity = drupal_requirements_severity($requirements);
-
   // If there are issues, report them.
   if ($severity == REQUIREMENT_ERROR) {
     foreach ($requirements as $requirement) {
@@ -264,29 +284,96 @@ function _provision_drupal_install_schema($profile, $language = 'en', $client_em
         drupal_set_message($requirement['description'] .' ('. st('Currently using !item !version', array('!item' => $requirement['title'], '!version' => $requirement['value'])) .')', 'error');
       }
     }
+    $missing_requirement = TRUE;
+  }
+  if ($severity == REQUIREMENT_WARNING) {
+    foreach ($requirements as $requirement) {
+      if (isset($requirement['severity']) && $requirement['severity'] == REQUIREMENT_WARNING) {
+        $message = $requirement['description'];
+        if (isset($requirement['value']) && $requirement['value']) {
+          $message .= ' ('. st('Currently using !item !version', array('!item' => $requirement['title'], '!version' => $requirement['value'])) .')';
+        }
+        drupal_set_message($message, 'warning');
+      }
+    }
+  }
 
+  if ($missing_requirement) {
+    provision_set_error(PROVISION_INSTALL_ERROR);
+    provision_log('error', t("Could not meet the requirements for installing the drupal profile"));
     return FALSE;
   }
 
   // Verify existence of all required modules.
   $modules = drupal_verify_profile($profile, $language);
 
-  if (!$modules) {
-    provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    return FALSE;
-  }
- // install system.module
+
   drupal_install_system();
   $modules = array_diff($modules, array('system'));
 
-  // install other modules
+  /**
+   * Further installation tasks
+   *
+   * This code is based on install_tasks() in install.php
+   * It has been modified to remove any calls to the user interface,
+   * and run all batches in the same process, instead of in a single page
+   * load.
+   */
+
+  // profile-install and profile-install-batch tasks
   $files = module_rebuild_cache();
-  $operations = array();
   foreach ($modules as $module) {
     _drupal_install_module($module);
     module_enable(array($module));
+    provision_log("notice", t("Installed @module module.", 
+      array("@module" => $files[$module]->info['name'])));
   }
 
+  // locale-initial-import and locale-inintial-batch tasks
+  if (!empty($install_locale) && ($install_locale != 'en')) {
+    // Enable installation language as default site language.
+    locale_add_language($install_locale, NULL, NULL, NULL, NULL, NULL, 1, TRUE);
+    // Collect files to import for this language.
+    $batch = locale_batch_by_language($install_locale);
+    if (!empty($batch)) {
+      $install_locale_batch_components = $batch['#components'];
+      batch_set($batch);
+      batch_process();
+    }
+  }
+
+  // configure-task
+  variable_set('site_name', $url);
+  variable_set('site_mail', 'webmaster@' . $url);
+  variable_set('clean_url', TRUE);
+  provision_path("chmod", "./sites/$url/settings.php", 0660, t("Secured settings.php with safe permissions"));
+  menu_rebuild();
+
+  // profile task
+  // @TODO support install profiles with multiple additional tasks
+  $task = 'profile';
+  $function = $profile .'_profile_tasks';
+  if (function_exists($function)) {
+    // The profile needs to run more code, maybe even more tasks.
+    // $task is sent through as a reference and may be changed!
+    $output = $function($task, $url);
+  }
+
+  // profile-finished task
+  // Secondary locale import 
+  if (!empty($install_locale) && ($install_locale != 'en')) {
+    // Collect files to import for this language. Skip components
+    // already covered in the initial batch set.
+    $batch = locale_batch_by_language($install_locale, NULL, $install_locale_batch_components);
+    if (!empty($batch)) {
+      // Start a batch, switch to 'locale-remaining-batch' task. We need to
+      // set the variable here, because batch_process() redirects.
+      batch_set($batch);
+      batch_process();
+    }
+  }
+
+  // done task
   // Rebuild menu to get content type links registered by the profile,
   // and possibly any other menu items created through the tasks.
   menu_rebuild();
@@ -298,13 +385,14 @@ function _provision_drupal_install_schema($profile, $language = 'en', $client_em
   // this is a new install, not upgraded yet.
   _drupal_flush_css_js();
 
-  // Show profile finalization info.
-  $function = $profile .'_profile_final';
-  if (function_exists($function)) {
-    // More steps required
-    $profile_message = $function();
-  }
+  cache_clear_all();
+  variable_set('install_profile', $profile);
 
+  // Send initial welcome email
+  provision_drupal_send_welcome_mail($url, $profile, $language, $client_email);
+}
+
+function provision_drupal_send_welcome_mail($url, $profile, $language, $client_email) {
   if ($client_email) {
     // create the admin account
     $account = user_load(1);
@@ -360,8 +448,6 @@ function _provision_drupal_install_schema($profile, $language = 'en', $client_em
     }
     provision_log('message', t('Login url: !onetime', array('!onetime' => $onetime)));
   }
-
-  variable_set('install_profile', $profile);
 }
 
 /**
