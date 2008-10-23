@@ -470,7 +470,6 @@ function provision_drupal_provision_verify($url, &$data) {
   provision_log('notice', t("This platform is running @short_name @version", 
     array('@short_name' => 'drupal', '@version' => VERSION)));  
   $sites = provision_drupal_find_sites(); 
-
   $data['sites'] = array_keys($sites); // return list of hosted sites. used to determine whether or not to import. 
 }
 
@@ -489,12 +488,15 @@ function _provision_find_profiles() {
       $profile->info =  $func();
     }
 
+    $languages['en'] = 1;
     // Find languages available
-    $languages = array_keys(file_scan_directory('./profiles/' . $key . '/translations', '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'name'));
-
-    array_unshift($languages, 'en');
-    $profile->info['languages'] = $languages;
-
+    $files = array_keys(file_scan_directory('./profiles/' . $key . '/translations', '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
+    foreach ($files as $file) {
+      if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
+        $languages[$langcode[2]] = 1; // use the language name as an index to weed out duplicates
+      }
+    }
+    $profile->info['languages'] = array_flip($languages);
     $return[$key] = $profile;
   }
 
@@ -551,7 +553,6 @@ function provision_drupal_provision_import($url, &$data) {
   }
   //Just make sure our ini settings and the like aren't wiped out.
   include(conf_path() ."/settings.php");
-
 }
 
 function _provision_drupal_import_site($url) {
@@ -573,18 +574,28 @@ function _provision_drupal_import_site($url) {
      * This information is no longer stored in settings.php
      */
     provision_set_active_db($db_url);
-    $install_profile =  db_result(db_query("SELECT value FROM {variable} WHERE name='install_profile'"));
-    $data['profile'] = ($install_profile) ? unserialize($install_profile) : 'default';
-    $has_locale = db_result(db_query("SELECT status FROM {system} WHERE type='module' AND name='locale'"));
-    if ($has_locale) {
-      $locale = db_result(db_query("SELECT locale FROM {locales_meta} WHERE isdefault=1 AND enabled=1"));
-    }
-    $data['language'] = ($locale) ? ($locale) : 'en';
+    $data['profile'] =_provision_drupal_variable_get('install_profile', 'default');
+    $language = _provision_drupal_variable_get('language_default',
+      (object) array('language' => 'en', 'name' => 'English', 'native' => 'English', 
+                     'direction' => 0, 'enabled' => 1, 'plurals' => 0, 'formula' => '',
+                     'domain' => '', 'prefix' => '', 'weight' => 0, 'javascript' => ''));
+    $data['language'] = $language->language;
     provision_close_active_db();
     $data['installed'] = TRUE;
   }
   provision_save_site_data($url, $data);
 
   return $data;
+}
+
+/**
+ * Retrieve drupal variable from database
+ *
+ * This is different to the normal variable_get in that it doesn't
+ * do any caching whatsoever.
+ */
+function _provision_drupal_variable_get($name, $default) {
+ $value =  db_result(db_query("SELECT value FROM {variable} WHERE name='%s'", $name));
+ return ($value) ? unserialize($value) : $default;
 }
 
