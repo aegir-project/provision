@@ -496,7 +496,7 @@ function _provision_find_profiles() {
         $languages[$langcode[2]] = 1; // use the language name as an index to weed out duplicates
       }
     }
-    $profile->info['languages'] = array_flip($languages);
+    $profile->info['languages'] = array_keys($languages);
     $return[$key] = $profile;
   }
 
