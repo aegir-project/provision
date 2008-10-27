@@ -245,7 +245,7 @@ function _provision_drupal_force_load_modules($url = NULL) {
 /**
  * Install the drupal schema and install profile
  */
-function _provision_drupal_install_schema($profile, $language = 'en', $client_email = NULL) {
+function _provision_drupal_install_schema($url, $profile, $language = 'en', $client_email = NULL) {
   include_once('includes/locale.inc');
 
   $GLOBALS['profile'] = $profile;
@@ -286,63 +286,66 @@ function _provision_drupal_install_schema($profile, $language = 'en', $client_em
     $profile_message = $function();
   }
 
-  if ($client_email) {
-    // create the admin account
-    $account = new stdClass();
-    $edit['name'] = 'admin';
-    $edit['pass'] = user_password();
-    $edit['mail'] = $client_email;
-    $edit['status'] = 1;
-    $account = user_save($account,  $edit);
+  variable_set('install_profile', $profile);
+  // Send initial welcome email
+  provision_drupal_send_welcome_mail($url, $profile, $language, $client_email);
+}
 
-    // Mail one time login URL and instructions.
-    $from = variable_get('site_mail', ini_get('sendmail_from'));
-    $onetime = user_pass_reset_url($account);
-    $variables = array(
-      '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
-      '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail, 
-      '!date' => format_date(time()), '!login_uri' => url('user', NULL, NULL, TRUE), 
-      '!edit_uri' => url('user/'. $account->uid .'/edit', NULL, NULL, TRUE));
+function provision_drupal_send_welcome_mail($url, $profile, $language, $client_email) {
+  // create the admin account
+  $account = new stdClass();
+  $edit['name'] = 'admin';
+  $edit['pass'] = user_password();
+  $edit['mail'] = $client_email;
+  $edit['status'] = 1;
+  $account = user_save($account,  $edit);
 
-    // allow the profile to override welcome email text
-    if (file_exists("./profiles/$profile/provision_welcome_mail.inc")) {
-      require_once "./profiles/$profile/provision_welcome_mail.inc";
-      $mailkey = 'welcome-mail-admin';
-    }
-    elseif (file_exists(dirname(__FILE__) . '/provision_welcome_mail.inc')) { 
-      /** use the module provided welcome email
-       * We can not use drupal_get_path here,
-       * as we are connected to the provisioned site's database
-       */
-      require_once dirname(__FILE__) . '/provision_welcome_mail.inc';
-      $mailkey = 'welcome-mail-admin';
-    }
-    else {
-      // last resort use the user-pass mail text
-      $mailkey = 'user-pass';
-    }
+  // Mail one time login URL and instructions.
+  $from = variable_get('site_mail', ini_get('sendmail_from'));
+  $onetime = user_pass_reset_url($account);
+  $variables = array(
+    '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
+    '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail, 
+    '!date' => format_date(time()), '!login_uri' => url('user', NULL, NULL, TRUE), 
+    '!edit_uri' => url('user/'. $account->uid .'/edit', NULL, NULL, TRUE));
 
-    if ($mailkey == 'welcome-mail-admin') {
-      $subject = st($mail['subject'], $variables);
-      $body = st($mail['body'], $variables);
-    }
-    else {
-      $subject = _user_mail_text('pass_subject', $variables);
-      $body = _user_mail_text('pass_body', $variables);
-    }
-
-    $mail_success = drupal_mail($mailkey, $account->mail, $subject, $body, $from);
-
-    if ($mail_success) {
-      provision_log('message', t('Sent welcome mail to @client', array('@client' => $client_email)));
-    }
-    else {
-      provision_log('notice', t('Could not send welcome mail to @client', array('@client' => $client_email)));
-    }
-    provision_log('message', t('Login url: !onetime', array('!onetime' => $onetime)));
+  // allow the profile to override welcome email text
+  if (file_exists("./profiles/$profile/provision_welcome_mail.inc")) {
+    require_once "./profiles/$profile/provision_welcome_mail.inc";
+    $mailkey = 'welcome-mail-admin';
+  }
+  elseif (file_exists(dirname(__FILE__) . '/provision_welcome_mail.inc')) { 
+    /** use the module provided welcome email
+     * We can not use drupal_get_path here,
+     * as we are connected to the provisioned site's database
+     */
+    require_once dirname(__FILE__) . '/provision_welcome_mail.inc';
+    $mailkey = 'welcome-mail-admin';
+  }
+  else {
+    // last resort use the user-pass mail text
+    $mailkey = 'user-pass';
   }
 
-  variable_set('install_profile', $profile);
+  if ($mailkey == 'welcome-mail-admin') {
+    $subject = st($mail['subject'], $variables);
+    $body = st($mail['body'], $variables);
+  }
+  else {
+    $subject = _user_mail_text('pass_subject', $variables);
+    $body = _user_mail_text('pass_body', $variables);
+  }
+
+  $mail_success = drupal_mail($mailkey, $account->mail, $subject, $body, $from);
+
+  if ($mail_success) {
+    provision_log('message', t('Sent welcome mail to @client', array('@client' => $client_email)));
+  }
+  else {
+    provision_log('notice', t('Could not send welcome mail to @client', array('@client' => $client_email)));
+  }
+  provision_log('message', t('Login url: !onetime', array('!onetime' => $onetime)));
+
 }
 
 /**
@@ -378,12 +381,16 @@ function _provision_find_profiles() {
       $profile->info =  $func();
     }
 
+    $languages['en'] = 1;
     // Find languages available
-    $languages = array_keys(file_scan_directory('./profiles/' . $key, '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'name'));
+    $files = array_keys(file_scan_directory('./profiles/' . $key, '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
+    foreach ($files as $file) {
+      if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
+        $languages[$langcode[2]] = 1; // use the language name as an index to weed out duplicates
+      }
+    }
 
-    array_unshift($languages, 'en');
-    $profile->info['languages'] = $languages;
-
+    $profile->info['languages'] = array_keys($languages);
     $return[$key] = $profile;
   }
   return $return;
@@ -460,8 +467,7 @@ function _provision_drupal_import_site($url) {
      * This information is no longer stored in settings.php
      */
     provision_set_active_db($db_url);
-    $install_profile =  db_result(db_query("SELECT value FROM {variable} WHERE name='install_profile'"));
-    $data['profile'] = ($install_profile) ? unserialize($install_profile) : 'default';
+    $data['profile'] =_provision_drupal_variable_get('install_profile', 'default');
     $has_locale = db_result(db_query("SELECT status FROM {system} WHERE type='module' AND name='locale'"));
     if ($has_locale) {
       $locale = db_result(db_query("SELECT locale FROM {locales_meta} WHERE isdefault=1 AND enabled=1"));
@@ -473,5 +479,17 @@ function _provision_drupal_import_site($url) {
   provision_save_site_data($url, $data);
 
   return $data;
+}
+
+
+/**
+ * Retrieve drupal variable from database
+ *
+ * This is different to the normal variable_get in that it doesn't
+ * do any caching whatsoever.
+ */
+function _provision_drupal_variable_get($name, $default) {
+ $value =  db_result(db_query("SELECT value FROM {variable} WHERE name='%s'", $name));
+ return ($value) ? unserialize($value) : $default;
 }
 
