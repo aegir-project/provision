@@ -361,8 +361,9 @@ function provision_drupal_provision_verify($url, &$data) {
   $data['profiles'] = _provision_find_profiles();
   $data['themes'] = system_theme_data();
   $data['platform'] = array('short_name' => 'drupal', 'version' => VERSION);  
+  provision_log('notice', t("This platform is running @short_name @version", 
+    array('@short_name' => 'drupal', '@version' => VERSION)));  
   $sites = provision_drupal_find_sites(); 
-
   $data['sites'] = array_keys($sites); // return list of hosted sites. used to determine whether or not to import. 
 }
 
