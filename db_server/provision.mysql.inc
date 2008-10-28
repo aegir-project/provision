@@ -136,6 +136,7 @@ function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd
         $db_user, $db_passwd, $db_host, $db_name, $dump_file));
       if (!provision_shell_exec("mysql -u%s -p%s -h%s %s < %s", $db_user, $db_passwd, $db_host, $db_name, $dump_file )) {
         provision_log("error", t("Database import failed"));
+      }
      }
    }
 }
