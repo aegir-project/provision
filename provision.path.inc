@@ -154,7 +154,7 @@ function provision_path_unlink($path) {
 
 function provision_path_chmod($path, &$perms, &$reason) {
   if (!chmod($path, $perms)) {
-    $reason = t('chmod failed');
+    $reason = t('chmod to @perm failed on @path', array('@perm' => $perms, '@path' => $path));
     return false;
   }
   clearstatcache(); // this needs to be called, otherwise we get the old info 
@@ -166,7 +166,7 @@ function provision_path_chmod($path, &$perms, &$reason) {
 function provision_path_chown($path, &$owner, &$reason) {
   if ($owner = provision_posix_username($owner)) {
     if (!chown($path, $owner)) {
-      $reason = t("chmod failed"); 
+      $reason = t("chown to @owner failed on @path", array('@owner' => $owner, '@path' => $path)) ; 
     }
   }
   else {
@@ -184,7 +184,7 @@ function provision_path_chgrp($path, &$group, &$reason) {
         return $group;
       }
       else {
-        $reason = t("chgrp failed");
+        $reason = t("chgrp to @group failed on @path", array('@group' => $group, '@path' => $path));
       }
     }
     else {

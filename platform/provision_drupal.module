@@ -479,9 +479,19 @@ function provision_drupal_provision_verify($url, &$data) {
 function _provision_find_profiles() {
   include_once('includes/install.inc');
 
-  $profiles = file_scan_directory('./profiles', '\.profile$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name', 0);
-  
-  foreach ($profiles as $key => $profile) {
+  if (!$dir = opendir("./profiles")) {
+    provision_log('error', t("Cannot find profiles directory"));
+    return FALSE;
+  }
+  while (FALSE !== ($name = readdir($dir))) {
+    $file = "./profiles/$name/$name.profile";
+    if ($name == '..' || $name == '.' || !file_exists($file)) {
+      continue;
+    }
+    $profile = new stdClass();
+    $profile->name = $name;
+    $profile->filename = $file;
+
     require_once($profile->filename);
     $func = $profile->name . "_profile_details";
     if (function_exists($func)) {
@@ -498,6 +508,7 @@ function _provision_find_profiles() {
     }
     $profile->info['languages'] = array_keys($languages);
     $return[$key] = $profile;
+    provision_log('notice', t('found install profile %name', array('%name' => $name)));
   }
 
   return $return;
@@ -513,11 +524,16 @@ function provision_drupal_provision_delete($url, $data) {
 }
 
 function provision_drupal_find_sites() {
-  $sitephp = file_scan_directory('./sites', 'settings\.php$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'filename', 0);
-  foreach ($sitephp as $file => $info) {
-    $path = explode("/", $file);
-    array_pop($path);
-    $sites[array_pop($path)] = $file;
+  if ($dir = opendir("./sites")) {
+    while (FALSE !== ($subdir = readdir($dir))) {
+      $file = "./sites/$subdir/settings.php";
+      if (file_exists("$file")) {
+        $sites[$subdir] = $file;
+      }
+    }
+  } else {
+    provision_log("error", t("Cannot find sites directory"));
+    $sites = FALSE;
   }
   return $sites;
 }
