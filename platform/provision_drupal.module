@@ -394,7 +394,7 @@ function _provision_find_profiles() {
 
     $languages['en'] = 1;
     // Find languages available
-    $files = array_keys(file_scan_directory('./profiles/' . $key, '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
+    $files = array_keys(file_scan_directory('./profiles/' . $name, '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
     foreach ($files as $file) {
       if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
         $languages[$langcode[2]] = 1; // use the language name as an index to weed out duplicates
@@ -402,7 +402,7 @@ function _provision_find_profiles() {
     }
 
     $profile->info['languages'] = array_keys($languages);
-    $return[$key] = $profile;
+    $return[$name] = $profile;
     provision_log('notice', t('found install profile %name', array('%name' => $name)));
   }
   return $return;
