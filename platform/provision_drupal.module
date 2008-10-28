@@ -372,9 +372,19 @@ function provision_drupal_provision_verify($url, &$data) {
 function _provision_find_profiles() {
   include_once('includes/install.inc');
 
-  $profiles = file_scan_directory('./profiles', '\.profile$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name', 0);
-  
-  foreach ($profiles as $key => $profile) {
+  if (!$dir = opendir("./profiles")) {
+    provision_log('error', t("Cannot find profiles directory"));
+    return FALSE;
+  }
+  while (FALSE !== ($name = readdir($dir))) {
+    $file = "./profiles/$name/$name.profile";
+    if ($name == '..' || $name == '.' || !file_exists($file)) {
+      continue;
+    }
+    $profile = new stdClass();
+    $profile->name = $name;
+    $profile->filename = $file;
+
     require_once($profile->filename);
     $func = $profile->name . "_profile_details";
     if (function_exists($func)) {
@@ -392,6 +402,7 @@ function _provision_find_profiles() {
 
     $profile->info['languages'] = array_keys($languages);
     $return[$key] = $profile;
+    provision_log('notice', t('found install profile %name', array('%name' => $name)));
   }
   return $return;
 
