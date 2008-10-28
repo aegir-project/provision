@@ -13,23 +13,25 @@
 function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) {
   provision_set_active_db(_provision_master_db_url());
  
-  _provision_mysql_create_database($db_name);
-  
-  if ( !_provision_mysql_database_exists($db_name) ) {
+  if (!_provision_mysql_create_database($db_name) ||
+      !_provision_mysql_database_exists($db_name) ) {
    provision_set_error(PROVISION_DB_ERROR);
    provision_log("error", "Database could not be created.");
    provision_set_active_db();
    return FALSE;
   }
   
-  _provision_mysql_grant($db_name, $db_user, $db_passwd);
-  _provision_mysql_grant($db_name, $db_user, $db_passwd, $db_host);
+  if (!_provision_mysql_grant($db_name, $db_user, $db_passwd) ||
+      !_provision_mysql_grant($db_name, $db_user, $db_passwd, $db_host)) {
+    provision_log("warning", "Could not GRANT user access.");
+  }
 
   if ($data['site_mysql_old_passwords']) {
-    _provision_mysql_old_password($db_user, $db_passwd);
-    _provision_mysql_old_password($db_user, $db_passwd, $db_host);
+    if (!_provision_mysql_old_password($db_user, $db_passwd) ||
+        !_provision_mysql_old_password($db_user, $db_passwd, $db_host)) {
+      provision_log("warning", "Could not set old passwords for user");
+    }
   }
-  _provision_mysql_flush();
   $status = _provision_mysql_database_exists($db_name);
   provision_set_active_db();
   
@@ -45,7 +47,9 @@ function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_ho
     
   if ( _provision_mysql_database_exists($data['db_name']) ) {
     provision_log("notice", t("Dropping database @dbname", array('@dbname' => $db_name)));
-    _provision_mysql_drop_database($db_name);
+    if (!_provision_mysql_drop_database($db_name)) {
+      provision_log("warning", t("Failed to drop database @dbname", array('@dbname' => $db_name)));
+    }
   }
   
   if ( _provision_mysql_database_exists($db_name) ) {
@@ -56,10 +60,11 @@ function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_ho
   }
   
   provision_log("notice", "Revoking privileges");
-  _provision_mysql_revoke($db_name, $db_user);
-  _provision_mysql_revoke($db_name, $db_user, $db_host);
+  if (!_provision_mysql_revoke($db_name, $db_user) ||
+      !_provision_mysql_revoke($db_name, $db_user, $db_host)) {
+      provision_log("warning", t("Failed to revoke user privileges"));
+  }
 
-  _provision_mysql_flush();
   provision_set_active_db();
 }
 
@@ -69,11 +74,11 @@ function _provision_mysql_database_exists($name) {
 }
 
 function _provision_mysql_drop_database($name) {
-  db_query("DROP DATABASE `%s`", $name);
+  return db_query("DROP DATABASE `%s`", $name);
 }
 
 function _provision_mysql_create_database($name) {
-  db_query("CREATE DATABASE %s", $name);  
+  return db_query("CREATE DATABASE %s", $name);  
 }
 
 /**
@@ -89,7 +94,9 @@ function _provision_mysql_can_create_database() {
   $test = 'provision_test';
   _provision_mysql_create_database($test);
   if (_provision_mysql_database_exists($test)) {
-    _provision_mysql_drop_database($test);
+    if (!_provision_mysql_drop_database($test)) {
+      provision_log("warning", t("Failed to drop database @dbname", array('@dbname' => $test)));
+    }
     return TRUE;
   }
   return FALSE;
@@ -97,21 +104,17 @@ function _provision_mysql_can_create_database() {
 
 function _provision_mysql_grant($name, $username, $password, $host = '') {
   $host = ($host) ? $host : '%';
-  db_query("GRANT ALL PRIVILEGES ON `%s`.* TO `%s`@`%s` IDENTIFIED BY '%s'", $name, $username, $host, $password);
+  return db_query("GRANT ALL PRIVILEGES ON `%s`.* TO `%s`@`%s` IDENTIFIED BY '%s'", $name, $username, $host, $password);
 }
 
 function _provision_mysql_revoke($name, $username, $host = '') {
   $host = ($host) ? $host : '%';
-  db_query("REVOKE ALL PRIVILEGES ON `%s`.* FROM `%s`@`%s`", $name, $username, $host);
+  return db_query("REVOKE ALL PRIVILEGES ON `%s`.* FROM `%s`@`%s`", $name, $username, $host);
 }
 
 function _provision_mysql_old_password($username, $password, $host = '') {
   $host = ($host) ? $host : '%';  
-  db_query("SET PASSWORD FOR '%s'@'%s' = OLD_PASSWORD('%s')", $username, $host, $password);
-}
-
-function _provision_mysql_flush() {
-  db_query("FLUSH PRIVILEGES");
+  return db_query("SET PASSWORD FOR '%s'@'%s' = OLD_PASSWORD('%s')", $username, $host, $password);
 }
 
 function _provision_master_db_url($data = array()) {
@@ -131,8 +134,8 @@ function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd
     if ($readable) {
       provision_log("notice", sprintf("Importing database using command: mysql -u%s -p%s -h%s %s < %s", 
         $db_user, $db_passwd, $db_host, $db_name, $dump_file));
-      provision_shell_exec("mysql -u%s -p%s -h%s %s < %s", 
-        $db_user, $db_passwd, $db_host, $db_name, $dump_file );
+      if (!provision_shell_exec("mysql -u%s -p%s -h%s %s < %s", $db_user, $db_passwd, $db_host, $db_name, $dump_file )) {
+        provision_log("error", t("Database import failed"));
      }
    }
 }
