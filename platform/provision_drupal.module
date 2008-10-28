@@ -406,11 +406,16 @@ function provision_drupal_provision_delete($url, $data) {
 }
 
 function provision_drupal_find_sites() {
-  $sitephp = file_scan_directory('./sites', 'settings\.php$', array('.', '..', 'CVS', '.svn'), 0, TRUE, 'filename', 0);
-  foreach ($sitephp as $file => $info) {
-    $path = explode("/", $file);
-    array_pop($path);
-    $sites[array_pop($path)] = $file;
+  if ($dir = opendir("./sites")) {
+    while (FALSE !== ($subdir = readdir($dir))) {
+      $file = "./sites/$subdir/settings.php";
+      if (file_exists("$file")) {
+        $sites[$subdir] = $file;
+      }
+    }
+  } else {
+    provision_log("error", t("Cannot find sites directory"));
+    $sites = FALSE;
   }
   return $sites;
 }
