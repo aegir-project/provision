@@ -421,10 +421,11 @@ function provision_drupal_find_sites() {
   if ($dir = opendir("./sites")) {
     while (FALSE !== ($subdir = readdir($dir))) {
       $file = "./sites/$subdir/settings.php";
-      if (file_exists("$file")) {
+      if (file_exists("$file") && ($subdir != 'default')) {
         $sites[$subdir] = $file;
       }
     }
+    closedir($dir);
   } else {
     provision_log("error", t("Cannot find sites directory"));
     $sites = FALSE;
@@ -460,8 +461,6 @@ function provision_drupal_provision_import($url, &$data) {
       $data['sites'][$site] = $info;
     }
   }
-  //Just make sure our ini settings and the like aren't wiped out.
-  include(conf_path() ."/settings.php");
 
 }
 
