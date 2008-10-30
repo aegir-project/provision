@@ -10,9 +10,9 @@
     # the ? at the end is to remove any query string in the original url
     RewriteRule ^(.*)$ <?php print $redirect_url ?>?
 
-    <?php if (is_array($site_aliases)) :
-     foreach ($site_aliases as $alias_url) : ?>
-       ServerAlias <?php print $alias_url; ?>
+    <?php if (is_array($aliases)) :
+     foreach ($aliases as $alias) : ?>
+       ServerAlias <?php print $alias; ?>
      <?php
        endforeach;
      endif; ?>

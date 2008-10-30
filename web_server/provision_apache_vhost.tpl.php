@@ -1,17 +1,17 @@
 <VirtualHost *:80>
-    <?php if ($site_mail) : ?>
-      ServerAdmin <?php  print $site_mail; ?> 
-    <?php endif;?>
-    DocumentRoot <?php print $publish_path; ?> 
+<?php if ($site_mail) : ?>
+  ServerAdmin <?php  print $site_mail; ?> 
+<?php endif;?>
+  DocumentRoot <?php print $publish_path; ?> 
     
-    ServerName <?php print $site_url; ?>
+  ServerName <?php print $site_url; ?>
 
-    <?php if (is_array($site_aliases)) :
-     foreach ($site_aliases as $alias_url) : ?>
-       ServerAlias <?php print $alias_url; ?>
-     <?php
-       endforeach;
-     endif; ?>
+<?php if (is_array($aliases)) :
+  foreach ($aliases as $alias_url) : ?>
+  ServerAlias <?php print $alias_url; ?>
+<?php
+ endforeach;
+ endif; ?>
 
     # Error handler for Drupal > 4.6.7
     <Directory "<?php print $publish_path; ?>/sites/<?php print trim($site_url, '/'); ?>/files">

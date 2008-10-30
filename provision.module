@@ -423,6 +423,7 @@ function _provision_install($url, &$data) {
     _provision_drupal_switch_active_site($url); # Change headers and db info, also backs up
     _provision_drupal_force_load_modules($url);
     _provision_drupal_install_schema($url, $data['profile'], $data['language'], $data['client_email']);
+    _provision_drupal_maintain_aliases($url, $data); # Create symlinks for site aliases (if any)
     _provision_drupal_force_load_modules();
     _provision_drupal_switch_active_site(); # This *should* bring the site back to where we were before installing
     
@@ -476,6 +477,7 @@ function _provision_synch($url = NULL) {
     $data = provision_get_site_data($url);
     // This is the actual drupal provisioning requirements. 
     _provision_drupal_create_directories($url, $data['profile']);
+    _provision_drupal_maintain_aliases($url, $data);
     $rolled_back = provision_invoke("synch", $url, $data);
     // Requires at least the database settings to complete.
     _provision_drupal_create_settings_file($url, $data);
