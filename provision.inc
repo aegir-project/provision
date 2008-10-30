@@ -293,10 +293,13 @@ function provision_get_site_data($url) {
   $site_data['language'] = $site_data['language'] ? $site_data['language'] : 'en';
 
   if ($old_data = provision_load_site_data($url)) {
-    //Merge previously saved data with the new data. This way, old parameters overwrite new ones.
+    //Merge previously saved data with the new data. This way, new parameters overwrite old ones.
     $site_data = array_merge($old_data, $site_data);    
   }
-
+  
+  if ($site_data['aliases']) {
+    $site_data['aliases'] = explode(",", $site_data['aliases']);
+  }  
   return $site_data;
 }
 
