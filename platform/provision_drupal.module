@@ -510,7 +510,7 @@ function _provision_drupal_import_site($url) {
  * do any caching whatsoever.
  */
 function _provision_drupal_variable_get($name, $default) {
- $value =  db_result(db_query("SELECT value FROM {variable} WHERE name='%s'", $name));
+ $value =  db_result(@db_query("SELECT value FROM {variable} WHERE name='%s'", $name));
  return ($value) ? unserialize($value) : $default;
 }
 
