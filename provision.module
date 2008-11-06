@@ -25,6 +25,7 @@
 *   enable  - Re-enable a site that has already been disabled. Recreates the virtual host file.
 *   delete -  Generates a back up of the site, and then removes all references to it.
 *   restore - Revert to a previous backup of the site.
+*   cron - Run cron process for a site
 *
 * Not implemented yet :
 *   upgrade - Accepts a site package (backup) as argument, and redeploys it, running the upgrade processes on it.
@@ -349,6 +350,12 @@ function provision_drush_command() {
     'description' => 'Delete a site.'
   );
 
+  $items['provision cron'] = array(
+    'callback' => '_provision_cron',
+    'description' => 'Run cron process for site.',
+    'arguments' => array('domain.com' => t('The domain of the site to be processed'))
+  );
+ 
   if (!function_exists('hosting_setup')) {
     $items['provision setup'] = array(
       'callback' => '_provision_setup_cmd',
@@ -788,4 +795,20 @@ function _provision_setup_cmd() {
   if (provision_get_error()) {
     print "\nThe command did not complete successfully, please fix the issues and re-run this script.";
   }
+}
+
+/**
+ * Drush command to run cron
+ */
+function _provision_cron($url) {
+  if (!_provision_drupal_site_installed($url)) {
+    provision_log("Error", "Site has not been installed yet.");
+    provision_set_error(PROVISION_SITE_NOT_FOUND);
+    provision_output($url, $data);
+  }
+  $data = provision_get_site_data($url);
+  _provision_drupal_switch_active_site($url);
+  drupal_cron_run();
+  _provision_drupal_switch_active_site();
+   
 }
