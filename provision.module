@@ -40,6 +40,40 @@
   include_once('provision.help.inc');
 
 
+/**
+ * Load additional modules just for this process
+ *
+ * Load additional modules specified by --load_module_name
+ */
+function provision_load_from_args() {
+  if (!function_exists('drush_verify_cli')) {
+    return null;
+  }
+  global $args;
+  $reset = FALSE;
+  foreach ($args['options'] as $arg => $value) {
+    if (preg_match("/^load-([a-z\-]*)$/", $arg, $matches)) {
+      $module = str_replace("-", "_", $matches[1]);
+      provision_log("notice", t("Loaded @module on request", array("@module" => $module)));
+      drupal_load('module', $module);
+      $loaded[$module]['name'] = $module;
+      $loaded[$module]['filename']  = drupal_get_filename('module', $module);
+      $reset = TRUE;
+    }
+  }
+  if ($reset) {
+    $list = module_list(TRUE, FALSE);
+    foreach ($list as $module) {
+      $loaded[$module]['name'] = $module;
+      $loaded[$module]['filename'] = drupal_get_filename('module', $module);
+    }
+    module_list(TRUE, FALSE, FALSE, $loaded);
+    // Force to regenerate the stored list of hook implementations.
+    module_implements('', FALSE, TRUE);
+  }
+}
+
+
 /** 
  * Implementation of hook_init
  *
@@ -48,6 +82,9 @@
  * program, but are configurable.
  */
 function provision_init() {
+  // Load requested additional modules
+  provision_load_from_args();
+
   // Set up defines for platform
   if (function_exists('drush_get_option')) {
     $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
@@ -55,7 +92,7 @@ function provision_init() {
   else {
     $docroot = $_SERVER['pwd'];
   }
-  
+   
   define('PROVISION_DOMAIN', $_SERVER['HTTP_HOST']);
   $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
 

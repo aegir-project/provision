@@ -8,7 +8,7 @@ function provision_stats_drush_command() {
   return $items;
 }
 
-function _provision_stats(&$form_state, $url) {
+function _provision_stats($url) {
   if (!_provision_drupal_site_installed($url)) {
     provision_log("error", "Site has not been installed yet.");
     provision_set_error(PROVISION_SITE_NOT_FOUND);
@@ -26,7 +26,7 @@ function _provision_stats(&$form_state, $url) {
 
   //TODO: add some required modules here, possibly update_status if not enabled.
   //Load the modules from the hosted site
-  module_list(TRUE);
+  #module_list(TRUE);
   
   $stats['node_count'] = db_result(db_query("select max(nid) from {node}"));
   $stats['user_count'] = db_result(db_query("select max(uid) from {users}"));
