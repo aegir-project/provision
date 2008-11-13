@@ -79,6 +79,9 @@ function provision_path($op, $path, $confirm = TRUE, $succeed_message = NULL, $f
 
     $value = $func($path, $confirm, $reason);
 
+    if ($op == 'chmod') {
+      $confirm = sprintf('%o', $confirm); # convert octal to string representation
+    }
     clearstatcache(); // this needs to be called, otherwise we get the old info 
     $tokens = array("@path" => $path, "@op" => $op, "@confirm" => $confirm);
     if ($reason) {
@@ -158,11 +161,10 @@ function provision_path_unlink($path) {
 
 function provision_path_chmod($path, &$perms, &$reason) {
   if (!chmod($path, $perms)) {
-    $reason = t('chmod to @perm failed on @path', array('@perm' => $perms, '@path' => $path));
+    $reason = t('chmod to @perm failed on @path', array('@perm' => sprintf('%o', $perms), '@path' => $path));
     return false;
   }
   clearstatcache(); // this needs to be called, otherwise we get the old info 
-  $perms = sprintf('%o', $perms); # needs to be reset to oct
   $value = substr(sprintf('%o', fileperms($path)), -4);
   return $value;
 }
