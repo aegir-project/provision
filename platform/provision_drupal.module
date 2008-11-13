@@ -456,17 +456,15 @@ function _provision_drupal_get_cvs_versions($files) {
 
 function provision_drupal_provision_import($url, &$data) {
   $sites = provision_drupal_find_sites();
-  foreach ($sites as $site => $file) {
-    if ($site == 'default') {
-      continue;
-    }
-    $info = _provision_drupal_import_site($site);
-    if ($info['installed']) {
-      provision_log("notice", "Returning information for $site");
-      $data['sites'][$site] = $info;
+  if (is_array($sites)) {
+    foreach ($sites as $site => $file) {
+      $info = _provision_drupal_import_site($site);
+      if ($info['installed']) {
+        provision_log("notice", "Returning information for $site");
+        $data['sites'][$site] = $info;
+      }
     }
   }
-
 }
 
 function _provision_drupal_import_site($url) {
