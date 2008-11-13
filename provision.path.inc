@@ -136,7 +136,11 @@ function provision_path_group($path) {
 }
 
 function provision_path_mkdir($path) {
-  return mkdir($path, 0770, TRUE);
+  if (version_compare(PHP_VERSION, '5.0.0', '<')) {
+    return _provision_mkdir_recursive($path, 0770);
+  } else {
+    return mkdir($path, 0770, TRUE);
+  }
 }
 
 function provision_path_rmdir($path) {
@@ -314,3 +318,14 @@ function _provision_create_dir($path, $name, $perms) {
   return ($exists && $writable);
 }
 
+/**
+ * Makes directory recursively, returns TRUE if exists or made (for PHP4 compatibility)
+ * Code courtesy of: http://ca3.php.net/manual/en/function.mkdir.php#81656
+ *
+ * @param string $pathname The directory path.
+ * @return boolean returns TRUE if exists or made or FALSE on failure.
+ */
+function _provision_mkdir_recursive($path, $mode) {
+  is_dir(dirname($path)) || _provision_mkdir_recursive(dirname($path), $mode);
+  return is_dir($path) || mkdir($path, $mode);
+}
