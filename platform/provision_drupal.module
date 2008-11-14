@@ -592,28 +592,16 @@ function _provision_drupal_import_site($url) {
     $data = array(); // initialize site data to empty array
   }
 
-  include("sites/$url/settings.php");
-  if ($parts = @parse_url($db_url)) {
-    $data['db_type'] = $parts['scheme'];
-    $data['db_user'] = $parts['user'];
-    $data['db_host'] = $parts['host'];
-    $data['db_passwd'] = $parts['pass'];
-    $data['db_name'] = substr($parts['path'], 1);
-
-    /**
-     * We need to be running AS the site to be able to see what profile it is installed with.
-     *
-     * This information is no longer stored in settings.php
-     */
-    provision_set_active_db($db_url);
-    $data['profile'] =_provision_drupal_variable_get('install_profile', 'default');
-    $language = _provision_drupal_variable_get('language_default',
-      (object) array('language' => 'en', 'name' => 'English', 'native' => 'English', 
-                     'direction' => 0, 'enabled' => 1, 'plurals' => 0, 'formula' => '',
-                     'domain' => '', 'prefix' => '', 'weight' => 0, 'javascript' => ''));
-    $data['language'] = $language->language;
-    provision_close_active_db();
+  $cmd = sprintf("php %s/provision_drupal_import.php %s", drupal_get_path('module', 'provision_drupal'), escapeshellarg($url));
+  exec($cmd, $return, $code);
+  $return = join("", $return);
+  $values = unserialize($return);
+  if (is_array($values)) {
+    $data = array_merge($data, $values);
     $data['installed'] = TRUE;
+  }
+  else {
+    $data['installed'] = FALSE;
   }
   provision_save_site_data($url, $data);
 
