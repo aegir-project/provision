@@ -469,6 +469,7 @@ function provision_drupal_send_welcome_mail($url, $profile, $language, $client_e
  * implementation of provision_verify
  */
 function provision_drupal_provision_verify($url, &$data) {
+  _provision_drupal_create_directories('default');
   provision_path("writable", "sites", TRUE, t("Drupal sites directory is writable by the provisioning script"),
     t("Drupal sites directory is not writable by the provisioning script"), PROVISION_PERM_ERROR);
   $exists = _provision_create_dir(PROVISION_DRUSHRC_PATH, t('Drush configuration path'), 0700);
