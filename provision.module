@@ -171,7 +171,7 @@ function _provision_config_defaults() {
   $defaults['restart_cmd'] = defined('PROVISION_RESTART_CMD') ? PROVISION_RESTART_CMD : _provision_default_restart_cmd();
 
 
-  $master_url = variable_get('provision_install_url', $GLOBALS['base_url']);
+  $master_url = variable_get('install_url', $GLOBALS['base_url']);
   $defaults['master_url'] = defined('PROVISION_MASTER_URL') ? PROVISION_MASTER_URL : $master_url;
 
   return $defaults;
