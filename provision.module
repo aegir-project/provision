@@ -183,7 +183,9 @@ function _provision_config_defaults() {
  */
 function _provision_generate_config($data = array()) {
   provision_log('notice', t("Generating provision.settings.php file"));
-  provision_path("chmod", "sites/default", 0750);
+  // We are doing a system call here to ensure we can write to the file
+  // and we don't need logging or the overhead of provision_path on this
+  system('chmod u+wx sites/default');
   if (provision_path("exists", "sites/default/provision.settings.php")) {
     provision_path("chmod", "sites/default/provision.settings.php", 0600,
       t('Changed permissions of provision.settings.php to @confirm'),
@@ -200,7 +202,6 @@ function _provision_generate_config($data = array()) {
   provision_path("chmod", "sites/default/provision.settings.php", 0400,
     t('Changed permissions of provision.settings.php to @confirm'),
     t('Could not change permissions of provision.settings.php to @confirm'));
-  provision_path("chmod", "sites/default", 0550);
   return TRUE;
 }
 
