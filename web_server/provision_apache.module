@@ -36,9 +36,9 @@ function _provision_config_path_requirements() {
   $mkdir_cmd['@vhost_path'] = $vhost_path;
   $mkdir_cmd['@provision_link'] = url('admin/settings/provision');
   $mkdir_cmd['@mkdir_cmd'] = <<<EOF
-    [$username@hm2 ~]$ mkdir -p $vhost_path
-    [$username@hm2 ~]$ chown $username:$username $vhost_path
-    [$username@hm2 ~]$ chmod 0700 $vhost_path
+    mkdir -p $vhost_path
+    chown $username:$username $vhost_path
+    chmod 0700 $vhost_path
 EOF;
 
   $help['title'] = t('Write access to a directory to store configuration information');
@@ -78,15 +78,13 @@ function _provision_visudo_requirements() {
   $cmd = trim(str_replace("sudo", '', PROVISION_RESTART_CMD));
   $cmd = substr($cmd, 0, strpos($cmd, " "));
   $visudo_cmd['@visudo_cmd'] = <<<EOF
-    [$username@hm2 ~]$ sudo su -
-    password:
-    [root@hm2 ~]$ visudo
+    sudo visudo
 EOF;
   $visudo_cmd['@visudo_line'] = <<<EOF
     $username ALL=NOPASSWD: $cmd
 EOF;
 
-  $help['title'] = t('Permission to restart the httpd daemon as the user the script is running as');
+  $help['title'] = t('Permission to restart the web server');
   $help['summary'] = t('As the provisioning framework should not be run as root,
                          and the web server group should not be allowed access to the 
                          functionality to stop/start the web server, it is required that you provide access

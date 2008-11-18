@@ -120,6 +120,7 @@ function provision_help($path, $arg) {
       
       return $output;
     case 'admin/help/provision#requirements' :
+      $output .= _provision_requirements('user');
       $output .= _provision_requirements('group');
       $output .=  _provision_requirements('backup_path');
       return $output;
@@ -191,18 +192,37 @@ function _provision_backup_path_requirements() {
     $mkdir_cmd['@backup_path'] = $backup_path;      
     $mkdir_cmd['@provision_link'] = url('admin/settings/provision');
     $mkdir_cmd['@mkdir_cmd'] = <<<EOF
-    [$username@hm2 ~]$ mkdir $backup_path
-    [$username@hm2 ~]$ chown $username:$username $backup_path
-    [$username@hm2 ~]$ chmod 0700 $backup_path
+    mkdir $backup_path
+    chown $username:$username $backup_path
+    chmod 0700 $backup_path
 EOF;
   $help['title'] = t('Write access to a directory to store backups');
   $help['summary'] = t('The drush user (<a href="http://drupal.org/project/drush">http://drupal.org/project/drush</a>) needs to be able to maintain the backups repository to ensure that your site is backed up successfully. 
                         It is incredibly important that this path is not accessible via the web server, so that no undesirables can get their
                         hands on your database. The recommended path is directly above your platform path, but it can be anywhere.');
 
-  $help['suggestion'] = t('Based on your server configuration we have determined that your path should be <code>@backup_path</code>, 
-    but you can change this in the <a href="@provision_link">provisioning section</a>.', $mkdir_cmd);
+  $help['suggestion'] = t('Based on your server configuration we have determined that your path should be <code>@backup_path</code>', $mkdir_cmd);
   $help['configuration'] = t('Please enter the following commands : <pre>@mkdir_cmd</pre>', $mkdir_cmd);
+  return $help;
+}
+
+
+function _provision_user_requirements() {
+  $username = PROVISION_SCRIPT_USER;
+  $path = PROVISION_DOCROOT_PATH;
+  $add_cmd = <<<EOF
+    sudo adduser $username
+EOF;
+  $chmod_cmd = <<<EOF
+    sudo chown $username $path
+EOF;
+  $help['title'] = t('A separate system account for the scripts');
+  $help['summary'] = t('The provision framework requires that the scripts run as a non-root system account, to ensure that
+    it can correctly set the file permissions on the hosted files. All existing files need to be changed to belong to this
+    new system account.');
+  $help['suggestion'] = t('Based on your server configuration, we have determined that your user account should be <code>@script_user</code>', array('@script_user' => PROVISION_SCRIPT_USER));
+  $help['configuration'][] = t('If your system supports it, run the adduser command (if this command is unavailable, please consult your operating system documentation on how to add new system accounts) : <pre>@cmd</pre>', array('@cmd' => $add_cmd));
+  $help['configuration'][] = t('Once you have created the user account, you need to modify the ownership of the files. Use the following command : <pre>@cmd</pre>', array('@cmd' => $chmod_cmd));
   return $help;
 }
 
@@ -213,7 +233,7 @@ function _provision_group_requirements() {
       
 
     $vigr_cmd = <<<EOF
-    [$username@hm2 ~]$ sudo adduser $username $group
+    sudo adduser $username $group
 EOF;
     $vigr1 = <<<EOF
     $group::99:
@@ -224,20 +244,21 @@ EOF;
     $vigr3 = <<<EOF
     $group::99:anotheruser,$username
 EOF;
-  
-  $help['title'] = t('The user account running the script, and the group of the httpd daemon.');
-  $help['summary'] = t('The provision framework takes special care to make sure that the file permissions of the 
-                          hosted sites are always as safe as can be, especially to make sure that the web server does 
-                          not have the ability to modify the code of the site, therefore this information is required 
-                          to assure that safety while keeping the sites accessible. This username needs to be a member
+
+    $su = <<<EOF
+    su -
+EOF;
+
+  $help['title'] = t('The system group of the web server');
+  $help['summary'] = t('For the provision framework to be able to ensure that the file permissions of the 
+                          hosted sites are always as safe as can be, and especially to make sure that the web server does 
+                          not have the ability to modify the code of the site, the configured system account needs to be a member
                           of the web server group, in order to be able to correctly set the file permissions.');
 
-  $help['suggestion'] = t('Based on your server configuration we have determined that you should set the 
-                        username to "<code>@username</code>" and the group to "<code>@group</code>", 
-                        but you can change these in the <a href="@provision_link">provisioning section</a>.', 
-                        array("@username" => $username, "@group" => $group, "@provision_link" => url('admin/settings/provision')));
+  $help['suggestion'] = t('Based on your server configuration we have determined that you should add the 
+                        system account "<code>@username</code>" to the "<code>@group</code>" system group.', array("@username" => $username, "@group" => $group));
 
-  $help['configuration'] =t('If your user is not a member of the web group, you can add them by using the
+  $help['configuration'] =t('If your system account is not a member of the web group, you can add them by using the
                           <code>adduser</code> command:
                           <pre>@vigr_cmd</pre>
                           If that command is not available, you will need to edit the /etc/group file directly with
@@ -245,7 +266,11 @@ EOF;
                           Find the line that says : <pre>@vigr1</pre>
                           Then add the username to the end of the line, so that it looks like : <pre>@vigr2</pre>
                           If there were already users in the group, add your user to the group using a comma as separator :
-                          <pre>@vigr3</pre>', array('@vigr_cmd' => $vigr_cmd, '@vigr1' => $vigr1, '@vigr2' => $vigr2, '@vigr3' => $vigr3));
+                          <pre>@vigr3</pre>
+                          Once you have changed this, you will need to log out and log bag into your terminal session for this
+                          setting to take effect. Alternatively you
+                          can get a new login shell by typing :<pre>@su</pre>', 
+                          array('@vigr_cmd' => $vigr_cmd, '@vigr1' => $vigr1, '@vigr2' => $vigr2, '@vigr3' => $vigr3, '@su' => $su));
   return $help;
 
 }
@@ -357,9 +382,10 @@ function _provision_basic_server_requirements() {
 
 function _provision_basic_unix_requirements() {
   $help['title'] = t('A unix based operating system');
-  $help['summary'] = t('The majority of functionality in this system occurs in the back-end, through system level programming. There are several features (such as symlinks), that are not available to users on Windows. There are no plans currently to add windows support.</p>');
+  $help['summary'] = t('The majority of functionality in this system occurs in the back-end, through command line scripting. There are several features (such as symlinks), that are not available to users on Windows. There are no plans currently to add windows support.</p>');
   return $help;
 }
+
 
 function _provision_provision_setup_requirements() {
   $docroot = PROVISION_DOCROOT_PATH;
@@ -367,8 +393,8 @@ function _provision_provision_setup_requirements() {
   $drush_path = rtrim(drupal_get_path('module', 'drush'), '/') . '/drush.php';
   $username = PROVISION_SCRIPT_USER;
   $setup_cmd = <<<EOF
-    [$username@hm2 ~]$ cd $docroot
-    [$username@hm2 ~]$ $drush_path provision setup
+    cd $docroot
+    $drush_path provision setup
 EOF;
   $help['title'] = t('Generate your configuration file using the <code>Provision Setup</code> command');
 
