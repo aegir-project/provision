@@ -35,7 +35,7 @@ function provision_mysql_provision_service() {
 function _provision_mysql_user_requirements() {
    $username = PROVISION_SCRIPT_USER;
    $command = <<<EOF
-     [$username@hm2 ~]$ mysql -uroot -pXXXXXXXXX mysql
+     mysql -uroot -pXXXXXXXXX mysql
 
      mysql> GRANT ALL PRIVILEGES ON *.* TO 'username_here'@'localhost' IDENTIFIED BY 'mypassword' WITH GRANT OPTION;
      Query OK, 0 rows affected (0.00 sec)
