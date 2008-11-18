@@ -83,6 +83,14 @@ function provision_load_from_args() {
  * program, but are configurable.
  */
 function provision_init() {
+  // Do not allow the program to be run as the root user. ever
+  $name = posix_getpwuid(posix_geteuid());
+  if ($name['name'] == 'root') {
+    provision_log('error', 'You are running the provision script as the root user. Exiting');
+    provision_set_error(PROVISION_FRAMEWORK_ERROR);
+    provision_output($url);
+  }
+
   // Load requested additional modules
   provision_load_from_args();
 
