@@ -97,6 +97,8 @@ function provision_init() {
   // Set up defines for platform
   if (function_exists('drush_get_option')) {
     $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
+    $backend = drush_get_option(array('b', 'backend'), 0);
+    define("PROVISION_DRUSH_BACKEND", $backend);
   }
   else {
     $docroot = $_SERVER['pwd'];

@@ -54,7 +54,7 @@ function provision_drupal_provision_backup($url, $data) {
  *   The default template for the config file
  */
 function _provision_drupal_default_template() {
-  return file_get_contents(drupal_get_path('module', 'provision_drupal') .'/provision_drupal_settings.tpl.php');
+  return file_get_contents(dirname(__FILE__) .'/provision_drupal_settings.tpl.php');
 }
 
 /**
@@ -592,12 +592,8 @@ function _provision_drupal_import_site($url) {
     $data = array(); // initialize site data to empty array
   }
 
-  $cmd = sprintf("php %s/provision_drupal_import.php %s", drupal_get_path('module', 'provision_drupal'), escapeshellarg($url));
-  exec($cmd, $return, $code);
-  $return = join("", $return);
-  $values = unserialize($return);
-  if (is_array($values)) {
-    $data = array_merge($data, $values);
+  $cmd = sprintf("php %s/provision_drupal_import.php %s", dirname(__FILE__), escapeshellarg($url));
+  if (provision_exec($cmd, $data)) {
     $data['installed'] = TRUE;
   }
   else {
