@@ -21,14 +21,12 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
    return FALSE;
   }
   
-  if (!_provision_mysql_grant($db_name, $db_user, $db_passwd) ||
-      !_provision_mysql_grant($db_name, $db_user, $db_passwd, $db_host)) {
+  if (!_provision_mysql_grant($db_name, $db_user, $db_passwd)) {
     provision_log("warning", "Could not GRANT user access.");
   }
 
   if ($data['site_mysql_old_passwords']) {
-    if (!_provision_mysql_old_password($db_user, $db_passwd) ||
-        !_provision_mysql_old_password($db_user, $db_passwd, $db_host)) {
+    if (!_provision_mysql_old_password($db_user, $db_passwd)) {
       provision_log("warning", "Could not set old passwords for user");
     }
   }

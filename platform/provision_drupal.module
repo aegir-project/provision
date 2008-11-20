@@ -378,6 +378,7 @@ function _provision_find_profiles() {
     return FALSE;
   }
   while (FALSE !== ($name = readdir($dir))) {
+    $languages = array();
     $file = "./profiles/$name/$name.profile";
     if ($name == '..' || $name == '.' || !file_exists($file)) {
       continue;
@@ -395,9 +396,11 @@ function _provision_find_profiles() {
     $languages['en'] = 1;
     // Find languages available
     $files = array_keys(file_scan_directory('./profiles/' . $name, '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
-    foreach ($files as $file) {
-      if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
-        $languages[$langcode[2]] = 1; // use the language name as an index to weed out duplicates
+    if (is_array($files)) {
+      foreach ($files as $file) {
+        if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
+          $languages[$langcode[2]] = 1; // use the language name as an index to weed out duplicates
+        }
       }
     }
 
