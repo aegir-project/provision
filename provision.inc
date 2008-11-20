@@ -120,7 +120,7 @@ function provision_output($url = NULL, $data = array(), $extra = NULL) {
   $return['error_status'] = $error; // error code being returned
   $return['log'] = provision_get_log(); // Append logging information
   $return['messages'] = drupal_get_messages();
-  if (drush_get_option(array('b', 'backend'), FALSE)) {
+  if (PROVISION_DRUSH_BACKEND) {
     print serialize($return);
   }
   else {
@@ -233,7 +233,6 @@ function _provision_set_log($entry = NULL) {
  *   String containing the message to be logged.
  */
 function provision_log($type, $message) {
-  if (DRUSH_VERBOSE) print $message . "\n";
   _provision_set_log(array(
      'type' => $type, 
      'message' => $message, 
@@ -583,4 +582,26 @@ function provision_posix_groupname($group) {
   return $group;
 }
 
+/**
+ * Run an external provision script and integrate it's output
+ */
+function provision_exec($cmd, &$data) {
+  exec($cmd, $return, $code);
+  $return = join("", $return);
+  provision_log('command', t('Running: @cmd', array('@cmd' => $cmd)));
+  $values = unserialize($return);
+  if (is_array($values)) {
+    $data = array_merge($data, $values['site']);
+    foreach ($values['log'] as $log) {
+      provision_log($log['type'], $log['message']);
+    }
+    provision_set_error($code);
+    return TRUE; 
+  }
+  else {
+    provision_set_error(PROVISION_FRAMEWORK_ERROR);
+    provision_log('error', t('External script failed'));
+    return FALSE;
+  }
+};
 

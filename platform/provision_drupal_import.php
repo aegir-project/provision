@@ -1,5 +1,16 @@
 <?php
-include_once('provision_drupal_bootstrap.inc');
+if ($argv[1]) {
+  $_SERVER['HTTP_HOST'] = $argv[1];
+  $_SERVER['SCRIPT_NAME'] = '/index.php';
+  $command_line = true;
+  require_once('includes/bootstrap.inc');
+  drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+  require_once(dirname(__FILE__) . '/../provision.inc');
+}
+else {
+  print "USAGE: provision_drupal_import.php url\n";
+  exit(PROVISION_FRAMEWORK_ERROR);
+}
 
 if ($parts = @parse_url($GLOBALS['db_url'])) {
   $data['db_type'] = $parts['scheme'];
@@ -16,5 +27,7 @@ if ($parts = @parse_url($GLOBALS['db_url'])) {
   }
   $data['language'] = ($locale) ? ($locale) : 'en';
 }
+provision_output($argv[1], $data);
+
 print(serialize($data));
-exit(1);
+exit(PROVISION_SUCCESS);
