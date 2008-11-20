@@ -595,12 +595,14 @@ function provision_exec($cmd, &$data) {
     foreach ($values['log'] as $log) {
       provision_log($log['type'], $log['message']);
     }
-    provision_set_error($code);
+    if (!($code & PROVISION_SUCCESS)) {
+      provision_set_error($code);
+    }
     return TRUE; 
   }
   else {
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    provision_log('error', t('External script failed'));
+    provision_log('error',t("The command could not be executed succesfully (returned: !return, code: %code)", array("!return" => $return, "%code" =>  $code)));
     return FALSE;
   }
 };
