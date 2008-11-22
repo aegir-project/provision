@@ -25,12 +25,6 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
     provision_log("warning", "Could not GRANT user access.");
   }
 
-  if ($data['site_mysql_old_passwords']) {
-    if (!_provision_mysql_old_password($db_user, $db_passwd) ||
-        !_provision_mysql_old_password($db_user, $db_passwd, $db_host)) {
-      provision_log("warning", "Could not set old passwords for user");
-    }
-  }
   $status = _provision_mysql_database_exists($db_name);
   provision_set_active_db();
   
@@ -111,15 +105,9 @@ function _provision_mysql_revoke($name, $username, $host = '') {
   return db_query("REVOKE ALL PRIVILEGES ON `%s`.* FROM `%s`@`%s`", $name, $username, $host);
 }
 
-function _provision_mysql_old_password($username, $password, $host = '') {
-  $host = ($host) ? $host : '%';  
-  return db_query("SET PASSWORD FOR '%s'@'%s' = OLD_PASSWORD('%s')", $username, $host, $password);
-}
-
 function _provision_master_db_url($data = array()) {
   return sprintf("%s://%s:%s@%s/mysql", PROVISION_DB_TYPE, PROVISION_DB_USER, PROVISION_DB_PASSWD, PROVISION_DB_HOST);
 }
-
 
 function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd, $db_host) {
   $exists = provision_path("exists", $dump_file, TRUE,
