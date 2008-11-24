@@ -211,6 +211,9 @@ function _provision_apache_restart_apache($cause_error = FALSE) {
     }
     provision_log(($cause_error) ? "error" : "warning", "Web server could not be restarted. Changes might not be available until this has been done.");
   }
+  else {
+    provision_log('notice', t('Apache has been restarted'));
+  }
 }
 
 function provision_apache_provision_verify() {
