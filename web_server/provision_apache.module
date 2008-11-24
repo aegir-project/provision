@@ -201,18 +201,21 @@ function _provision_apache_create_vhost_config($url, $data, $template = NULL) {
 /**
  * Restart Apache
  */
-function _provision_apache_restart_apache() {
+function _provision_apache_restart_apache($cause_error = FALSE) {
   //This is required to be configurable, due to the fact that different hosts might need to do this differently.
   //TODO : test for this instead of relying on a configuration setting?
   $return = drush_shell_exec(escapeshellcmd(PROVISION_RESTART_CMD));
   if (!$return) {
-    provision_set_error(PROVISION_WEB_ERROR);
-    provision_log("error", "Web server could not be restarted. Changes might not be available until this has been done.");
+    if ($cause_error) {
+      provision_set_error(PROVISION_WEB_ERROR);
+    }
+    provision_log(($cause_error) ? "error" : "warning", "Web server could not be restarted. Changes might not be available until this has been done.");
   }
 }
 
 function provision_apache_provision_verify() {
   $exists = _provision_create_dir(PROVISION_VHOST_PATH, t("Virtual host configuration"), 0700);
+  _provision_apache_restart_apache(TRUE);
 }
 
 /**
