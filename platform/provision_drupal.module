@@ -390,7 +390,6 @@ function _provision_drupal_install_schema($url, $install_profile, $language = 'e
 
   cache_clear_all();
   variable_set('install_profile', $profile);
-
   // Send initial welcome email
   provision_drupal_send_welcome_mail($url, $profile, $language, $client_email);
 }

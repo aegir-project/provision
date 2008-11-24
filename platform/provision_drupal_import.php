@@ -1,8 +1,14 @@
 <?php
 if ($argv[1]) {
-  $_SERVER['HTTP_HOST'] = $argv[1];
-  $_SERVER['SCRIPT_NAME'] = '/index.php';
-  $command_line = true;
+  // Fake the necessary HTTP headers that Drupal needs:
+  $drupal_base_url = parse_url(sprintf("http://" . $argv[1]));
+  $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
+  $_SERVER['PHP_SELF'] = $drupal_base_url['path'].'/index.php';
+  $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF'];
+  $_SERVER['REMOTE_ADDR'] = '';
+  $_SERVER['REQUEST_METHOD'] = NULL;
+  $_SERVER['SERVER_SOFTWARE'] = NULL;
+
   require_once('includes/bootstrap.inc');
   drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
   require_once(dirname(__FILE__) . '/../provision.inc');
@@ -20,10 +26,7 @@ if ($parts = @parse_url($GLOBALS['db_url'])) {
   $data['db_name'] = substr($parts['path'], 1);
 
   $data['profile'] = variable_get('install_profile', 'default');
-  $language = variable_get('language_default',
-    (object) array('language' => 'en', 'name' => 'English', 'native' => 'English', 
-                   'direction' => 0, 'enabled' => 1, 'plurals' => 0, 'formula' => '',
-                   'domain' => '', 'prefix' => '', 'weight' => 0, 'javascript' => ''));
+  $language = language_default();
   $data['language'] = $language->language;
 }
 provision_output($argv[1], $data);
