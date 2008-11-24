@@ -611,7 +611,12 @@ function _provision_backup_site($url, &$data, $file = NULL) {
  *   Output of provision_output() function.
  *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
  */
-function _provision_import($url = NULL) {
+function _provision_import($url) {
+  if (!$url) {
+    print "Usage: drush.php provision import DOMAIN\n";
+    provision_set_error(PROVISION_FRAMEWORK_ERROR);
+    provision_output($url, $data);
+  }
   $rolled_back = provision_invoke("import", $url, $data);
   provision_output($url, $data);
 }

@@ -577,19 +577,14 @@ function _provision_drupal_get_cvs_versions($files) {
 }
 
 function provision_drupal_provision_import($url, &$data) {
-  $sites = provision_drupal_find_sites();
-  if (is_array($sites)) {
-    foreach ($sites as $site => $file) {
-      $info = _provision_drupal_import_site($site);
-      if ($info['installed']) {
-        provision_log("notice", "Returning information for $site");
-        $data['sites'][$site] = $info;
-      }
-    }
+  $info = _provision_drupal_import_site($url, $data);
+  if ($info['installed']) {
+    provision_log("notice", "Returning information for $url");
   }
+  return TRUE;
 }
 
-function _provision_drupal_import_site($url) {
+function _provision_drupal_import_site($url, &$data) {
   if (!($data = provision_get_site_data($url))) {
     $data = array(); // initialize site data to empty array
   }
@@ -621,27 +616,28 @@ function _provision_drupal_variable_get($name, $default) {
  * Create and remove symlinks for each of the possible domain aliases of an existing site
  */
 function _provision_drupal_maintain_aliases($url, $data) {
-  if ($old_data = provision_load_site_data($url)) {
-    $old_aliases = $old_data['aliases'];
-  }
-  else {
+  if ($url) {
     $old_aliases = array();
-  }
-
-  // Flip the array to make it easier to remove duplicates
-  $old_aliases = array_flip($old_aliases);
-  if (is_array($data['aliases'])) {
-    foreach($data['aliases'] as $alias) {
-      if (isset($old_aliases[$alias])) {
-        // We have already created an alias for this site.
-        unset($old_aliases[$alias]);
+    if ($old_data = provision_load_site_data($url)) {
+      if (is_array($old_data['aliases'])) {
+         // Flip the array to make it easier to remove duplicates
+        $old_aliases = array_flip($old_data['aliases']);
       }
-      provision_path("symlink", $url, PROVISION_DOCROOT_PATH . "/sites/" . $alias, 
-        t("Created symlink for alias @alias", array("@alias" => $alias)), 
-        t("Could not create symlink for alias @alias", array("@alias" => $alias)));
     }
-    // Delete existing aliases that are no longer present
-    _provision_drupal_delete_aliases(array_keys($old_aliases));
+   
+    if (is_array($data['aliases'])) {
+      foreach($data['aliases'] as $alias) {
+        if (isset($old_aliases[$alias])) {
+          // We have already created an alias for this site.
+          unset($old_aliases[$alias]);
+        }
+        provision_path("symlink", $url, PROVISION_DOCROOT_PATH . "/sites/" . $alias, 
+          t("Created symlink for alias @alias", array("@alias" => $alias)), 
+          t("Could not create symlink for alias @alias", array("@alias" => $alias)));
+      }
+      // Delete existing aliases that are no longer present
+      _provision_drupal_delete_aliases(array_keys($old_aliases));
+    }
   }
 }
 
