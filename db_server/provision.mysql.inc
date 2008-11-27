@@ -53,8 +53,7 @@ function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_ho
   }
   
   provision_log("notice", "Revoking privileges");
-  if (!_provision_mysql_revoke($db_name, $db_user) ||
-      !_provision_mysql_revoke($db_name, $db_user, $db_host)) {
+  if (!_provision_mysql_revoke($db_name, $db_user)) {
       provision_log("warning", t("Failed to revoke user privileges"));
   }
 
