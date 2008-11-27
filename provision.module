@@ -71,6 +71,10 @@ function provision_load_from_args() {
     module_list(TRUE, FALSE, FALSE, $loaded);
     // Force to regenerate the stored list of hook implementations.
     module_implements('', FALSE, TRUE);
+
+    // As we have missed the bootstrap phase, we need to run
+    // our own provision_init hook to initialize modules.
+    module_invoke_all('provision_init');
   }
 }
 
@@ -99,54 +103,51 @@ function provision_init() {
     $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
     $backend = drush_get_option(array('b', 'backend'), 0);
     define("PROVISION_DRUSH_BACKEND", $backend);
-  }
-  else {
-    $docroot = $_SERVER['pwd'];
-  }
+    
+    define('PROVISION_DOMAIN', $_SERVER['HTTP_HOST']);
+    // Paths
+    $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
+    define('PROVISION_DOCROOT_PATH', rtrim($path, '/'));
+    define('PROVISION_SITES_PATH', rtrim($path, '/') .'/sites');
+    define('PROVISION_DRUSH_PATH', './drush.php');
+    $parts = explode("/", rtrim($path, '/'));
+    array_pop($parts);
+    define('PROVISION_PARENT_PATH', rtrim(implode("/" , $parts), '/'));
+    define('PROVISION_BACKUP_PATH', 
+      drush_get_option('backup_path', PROVISION_PARENT_PATH . '/backups'));
+    define('PROVISION_CONFIG_PATH', 
+      drush_get_option('config_path', PROVISION_PARENT_PATH .'/config'));
+    define('PROVISION_VHOST_PATH', PROVISION_CONFIG_PATH .'/vhost.d');
+
+    // Commands
+    define('PROVISION_RESTART_CMD',
+      drush_get_option('restart_cmd', _provision_default_restart_cmd()));
+
+    // System account
+    $info = posix_getgrgid(posix_getgid());
+    define('PROVISION_WEB_GROUP', 
+      drush_get_option('web_group', $info['name'] ));
+    define('PROVISION_SCRIPT_USER', 
+      drush_get_option('script_user', get_current_user() ));
+
+    // Redirection urls
+    define('PROVISION_MASTER_URL', 
+      drush_get_option('master_url', variable_get('install_url', $GLOBALS['base_url'])));
+    define('PROVISION_WEB_DISABLE_URL', PROVISION_MASTER_URL .'/provision/disabled');
+    define('PROVISION_WEB_MAINTENENCE_URL', PROVISION_MASTER_URL .'/provision/maintenance');
+
+    // Database
+    define('PROVISION_MASTER_DB', 
+      drush_get_option('master_db', $GLOBALS['db_url']));
+    $db = parse_url(PROVISION_MASTER_DB);
+    define('PROVISION_DB_USER', $db['user']);
+    define('PROVISION_DB_PASSWD', $db['pass']);
+    define('PROVISION_DB_HOST', $db['host']);
    
-  define('PROVISION_DOMAIN', $_SERVER['HTTP_HOST']);
-  $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
-
-  define('PROVISION_DOCROOT_PATH', rtrim($path, '/'));
-  define('PROVISION_SITES_PATH', rtrim($path, '/') .'/sites');
-  
-  define('PROVISION_DRUSH_PATH', './drush.php');
-
-  $parts = explode("/", rtrim($path, '/'));
-  array_pop($parts);
-  define('PROVISION_PARENT_PATH', rtrim(implode("/" , $parts), '/'));
-
-  if (file_exists('sites/default/provision.settings.php') && is_readable('sites/default/provision.settings.php')) {
-    include_once('sites/default/provision.settings.php');
+    // Drupal does not support multiple types of connections in the same session
+    preg_match("$^([a-z]*)://$", $GLOBALS['db_url'], $matches);
+    define('PROVISION_DB_TYPE', $matches[1]);
   }
-  else {
-    $defaults = _provision_config_defaults();
-    define('PROVISION_BACKUP_PATH', $defaults['backup_path']);
-    define('PROVISION_CONFIG_PATH', $defaults['config_path']);
-    define('PROVISION_WEB_GROUP', $defaults['web_group']);
-    define('PROVISION_MASTER_DB', $defaults['master_db']);
-    define('PROVISION_SCRIPT_USER', $defaults['script_user']);
-    define('PROVISION_RESTART_CMD', $defaults['restart_cmd']);
-    define('PROVISION_MASTER_URL', $defaults['master_url']);
-    define('PROVISION_MASTER_DB', $defaults['master_db']);
-  }
-  # These settings are based on settings in the provision.settings.php file
-  define('PROVISION_VHOST_PATH', PROVISION_CONFIG_PATH .'/vhost.d');
-  define('PROVISION_DRUSHRC_PATH', PROVISION_CONFIG_PATH .'/drushrc.d');
-  define('PROVISION_WEB_DISABLE_URL', PROVISION_MASTER_URL .'/provision/disabled');
-
-  define('PROVISION_WEB_MAINTENENCE_URL', PROVISION_MASTER_URL .'/provision/maintenance');
-
-  $db = parse_url(PROVISION_MASTER_DB);
-  define('PROVISION_DB_USER', $db['user']);
-  define('PROVISION_DB_PASSWD', $db['pass']);
-  define('PROVISION_DB_HOST', $db['host']);
-
-  // Drupal does not support multiple types of connections in the same session
-  preg_match("$^([a-z]*)://$", $GLOBALS['db_url'], $matches);
-  define('PROVISION_DB_TYPE', $matches[1]);
-
-
 }
 
 function _provision_default_restart_cmd() {
@@ -164,54 +165,18 @@ function _provision_default_restart_cmd() {
 }
 
 /**
- * Provides a set of best guess values for the provision.settings.php file
- */
-function _provision_config_defaults() {
-  $default = array();
-  $defaults['backup_path'] = defined('PROVISION_BACKUP_PATH') ? PROVISION_BACKUP_PATH : PROVISION_PARENT_PATH .'/backups';
-  $defaults['config_path'] = defined('PROVISION_CONFIG_PATH') ? PROVISION_CONFIG_PATH : PROVISION_PARENT_PATH .'/config';
-
-  $defaults['script_user'] = defined('PROVISION_SCRIPT_USER') ? PROVISION_SCRIPT_USER : get_current_user();
-  
-  $info = posix_getgrgid(posix_getgid());
-  $defaults['web_group'] = defined('PROVISION_WEB_GROUP') ? PROVISION_WEB_GROUP : $info['name'];
-
-  $defaults['master_db'] = defined('PROVISION_MASTER_DB') ? PROVISION_MASTER_DB : $GLOBALS['db_url'];
-
-  $defaults['restart_cmd'] = defined('PROVISION_RESTART_CMD') ? PROVISION_RESTART_CMD : _provision_default_restart_cmd();
-
-
-  $master_url = variable_get('install_url', $GLOBALS['base_url']);
-  $defaults['master_url'] = defined('PROVISION_MASTER_URL') ? PROVISION_MASTER_URL : $master_url;
-
-  return $defaults;
-}
-
-/**
  * Generate a provision.settings.php file to configure provision
  */
-function _provision_generate_config($data = array()) {
-  provision_log('notice', t("Generating provision.settings.php file"));
-  // We are doing a system call here to ensure we can write to the file
-  // and we don't need logging or the overhead of provision_path on this
-  system('chmod u+wx sites/default');
+function _provision_generate_config() {
+  provision_log('notice', t("Generating drushrc.php file"));
+  provision_path("chmod", PROVISION_DOCROOT_PATH . '/drushrc.php', 0600,
+     t('Changed permissions of drushrc.php to @confirm'),
+      t('Could not change permissions of drushrc.php to @confirm'));
 
-  if (provision_path("exists", "sites/default/provision.settings.php")) {
-    provision_path("chmod", "sites/default/provision.settings.php", 0600,
-      t('Changed permissions of provision.settings.php to @confirm'),
-      t('Could not change permissions of provision.settings.php to @confirm'));
-  }
-
-  $data = array_merge(_provision_config_defaults(), $data);
-  $fp = fopen("sites/default/provision.settings.php", "w");
-  $text = file_get_contents(drupal_get_path('module', 'provision') .'/provision_settings.tpl.php');
-  fwrite($fp, "<?php\n". provision_render_config($text, $data));
-  fclose($fp);
-
-  # Change the permissions of the file
-  provision_path("chmod", "sites/default/provision.settings.php", 0400,
-    t('Changed permissions of provision.settings.php to @confirm'),
-    t('Could not change permissions of provision.settings.php to @confirm'));
+  provision_save_platform_data();
+  provision_path("chmod", PROVISION_DOCROOT_PATH . '/drushrc.php', 0400,
+    t('Changed permissions of drushrc.php to @confirm'),
+    t('Could not change permissions of drushrc.php to @confirm'));
   return TRUE;
 }
 

@@ -36,7 +36,7 @@ define('PROVISION_DB_ERROR', 128);
 global $provision_errors;
 $provision_errors = array(
   PROVISION_SUCCESS => t("Successful"),
-  PROVISION_QUEUED => t("To be processed"),
+  PROVISION_QUEUED => t("Queued"),
   PROVISION_DB_ERROR => t("Database error"),
   PROVISION_INSTALL_ERROR => t("Drupal installation error"),
   PROVISION_PERM_ERROR => t("File permission error"),

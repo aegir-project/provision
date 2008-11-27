@@ -372,6 +372,33 @@ function provision_save_site_data($url, $data) {
 
 
 /**
+ * Save the options for the platform to the drushrc.php in the root of the platform. 
+ */
+function provision_save_platform_data() {
+  global $args;
+  $exclude = array('task_id');
+  $conf_file = PROVISION_DOCROOT_PATH . '/drushrc.php';
+  $fp = fopen($conf_file, "w");
+  if (!$fp) {
+    provision_log('error', 'Platform config file could not be written');
+    provision_set_error(PROVISION_PERM_ERROR);
+  }
+  else {
+    fwrite($fp, "<?php\n");
+    $timestamp = mktime();
+    fwrite($fp, "#". format_date($timestamp, 'large'));
+    foreach ($args['options'] as $key => $value) {
+      if (!in_array($key, $exclude)) {
+        $line = "\n\$options['$key'] = ". var_export($value, TRUE) .';';
+        fwrite($fp, $line);  
+      }
+    }
+    fwrite($fp, "\n");
+    fclose($fp);
+  }
+}
+
+/**
  * @defgroup provisionvalues Value replacement support for the provisioning framework
  * @{
  */
