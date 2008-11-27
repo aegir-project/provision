@@ -291,8 +291,12 @@ function _provision_drupal_install_schema($url, $profile, $language = 'en', $cli
 }
 
 function provision_drupal_send_welcome_mail($url, $profile, $language, $client_email) {
-  // create the admin account
-  $account = new stdClass();
+  // create the admin account or change some parameters if the install profile
+  // already created one
+  $account = user_load(array('uid' => 1));
+  if (!$account) {
+    $account = new stdClass();
+  }
   $edit['name'] = 'admin';
   $edit['pass'] = user_password();
   $edit['mail'] = $client_email;
