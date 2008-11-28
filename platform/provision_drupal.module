@@ -95,13 +95,19 @@ function _provision_drupal_create_settings_file($url, &$data) {
  */
 function _provision_drupal_create_directories($url, $profile = NULL) {  
   $paths = array(
-    "sites/$url"                 => 0750,
+    "sites/$url"                 => 0755,
     "sites/$url/files"           => 02770,
     "sites/$url/files/tmp"       => 02770,
     "sites/$url/files/images"    => 02770,
     "sites/$url/files/pictures"  => 02770,
-    "sites/$url/themes"          => 02750,
-    "sites/$url/modules"         => 02750,  
+    "sites/$url/themes"          => 0755,
+    "sites/$url/modules"         => 0755,  
+  );
+  $grps = array(
+    "sites/$url/files",
+    "sites/$url/files/tmp",
+    "sites/$url/files/images",
+    "sites/$url/files/pictures",
   );
 
   foreach ($paths as $path => $perm) {
@@ -111,18 +117,20 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
         t("Could not create <code>@path</code>"),
         PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
     }
-    provision_path("chown", $path, PROVISION_SCRIPT_USER, 
+
+    provision_path("chmod", $path, $perm, 
+      t("Changed permissions of <code>@path</code> to @confirm"),
+      t("Could not change permissions <code>@path</code> to @confirm"),
+      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
+  }
+  foreach ($grps as $path) {
+      provision_path("chown", $path, PROVISION_SCRIPT_USER, 
       t("Changed ownership of <code>@path</code>"),
       t("Could not change ownership <code>@path</code>"),
       PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
     provision_path("chgrp", $path, PROVISION_WEB_GROUP,
       t("Changed group ownership of <code>@path</code>"),
       t("Could not change group ownership <code>@path</code>"));
-
-    provision_path("chmod", $path, $perm, 
-      t("Changed permissions of <code>@path</code> to @confirm"),
-      t("Could not change permissions <code>@path</code> to @confirm"),
-      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
   }
 }
 

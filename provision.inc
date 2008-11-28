@@ -340,6 +340,10 @@ function provision_save_site_data($url, $data) {
     $fp = fopen($conf_file, 'a+'); //Append to the end of the config file.
     fwrite($fp, "<?php\n");
     fclose($fp);
+    provision_path("chmod", $conf_file, 0600,
+      t("Changed permissions of <code>@path</code> to @confirm"),
+      t("Could not change permissions <code>@path</code> to @confirm"),
+      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
   } 
 
   $fp = fopen($conf_file, "a+");
