@@ -14,7 +14,7 @@
 * Implemented : 
 *   install - Install a new Drupal site. The install command uses 3 separate hooks to do it's job, 
 *              namely hook_provision_pre_install(), hook_provision_install() and hook_provision_post_install()
-*   synch   - Recreate all configuration files, to be in synch with changes in the front end.
+*   verify  - Recreate all configuration files, to be in synch with changes in the front end. And test that they are correct.
 *   stats   - Return an associated array of site statistics. (implemented in provision_stats module, is thus optional)
 *   import  - Import the details of an already existing site into the provisioning framework.
 *             This command inspects the settings.php and generates the site.php file that the framework uses for configuration.
@@ -278,12 +278,6 @@ function provision_drush_command() {
     'description' => t('Provision a new site using the provided data.')
   );
 
-  $items['provision synch'] = array(
-    'callback' => '_provision_synch',
-    'optional arguments' => array('domain.com' => t('The domain of the site to synch.')),
-    'description' => t('Regenerate the configuration files for a site or platform.')
-  );
-  
   $items['provision import'] = array(
     'callback' => '_provision_import',
     'arguments' => array('domain.com' => t('The domain of the site to import.')),
@@ -310,7 +304,7 @@ function provision_drush_command() {
 
   $items['provision verify'] = array(
     'callback' => '_provision_verify',
-#    'arguments' => array('domain.com' => t('The domain of the site to disable (only if disabled).')),    
+    'arguments' => array('domain.com' => t('The domain of the site to verify).')),    
     'description' => 'Verify that the provisioning framework is correctly installed.'
   );
  
@@ -487,25 +481,9 @@ function _provision_post_install($url, &$data) {
 function _provision_synch($url = NULL) {
   if (!$url) {
     global $args;
-    _provision_generate_config($args['options']);
-    provision_output(NULL, $args['options']);
+    provision_output(NULL, $data);
   }
   else {
-    if (!_provision_drupal_site_installed($url)) {
-      provision_log("error", "Site has not been installed yet.");
-      provision_set_error(PROVISION_SITE_NOT_FOUND);
-      provision_output();
-    }
-    $data = provision_get_site_data($url);
-    // This is the actual drupal provisioning requirements. 
-    _provision_drupal_create_directories($url, $data['profile']);
-    _provision_drupal_maintain_aliases($url, $data);
-    $rolled_back = provision_invoke("synch", $url, $data);
-    // Requires at least the database settings to complete.
-    _provision_drupal_create_settings_file($url, $data);
-    $data['installed'] = TRUE;
-    provision_save_site_data($url, $data);
-    provision_output($url, $data);
   }
 }
 
@@ -594,20 +572,41 @@ function _provision_import($url) {
  * This is accomplished by inspecting the settings.php file and generating a site.php file.
  *
  * @param url
- *   The url of the site being synched.
+ *   The url of the site being verified. 
+ *   Optional, if no site is specified the platform will be verified
  * @return
  *   Output of provision_output() function.
- *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
+ *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site specified does not exist.
  */
-function _provision_verify($url = '') {
-  _provision_create_dir(PROVISION_CONFIG_PATH, t('Provision configuration'), 0700);
-  _provision_create_dir(PROVISION_BACKUP_PATH, t('Web server configuration'), 0700);
-  
-  $data = array();
-  $rolled_back = provision_invoke("verify", $url, $data);
-  if ($url) {
-    provision_save_site_data($url, $data);    
+function _provision_verify($url = NULL) {
+  if (!$url) {
+    // we are verifying a platform
+    $data = array();
+    _provision_create_dir(PROVISION_CONFIG_PATH, t('Provision configuration'), 0700);
+    _provision_create_dir(PROVISION_BACKUP_PATH, t('Web server configuration'), 0700);
   }
+  else {
+    // we are verifying a site
+    if (!_provision_drupal_site_installed($url)) {
+      provision_log("error", "Site has not been installed yet.");
+      provision_set_error(PROVISION_SITE_NOT_FOUND);
+      provision_output();
+    }
+    $data = provision_get_site_data($url);
+  }
+
+  $rolled_back = provision_invoke("verify", $url, $data);
+
+  // We only save the settings if they validated correctly, not before.
+  if (!$rolled_back) {
+    if (!$url) {
+      _provision_generate_config();
+    }
+    else {
+      provision_save_site_data($url, $data);
+    }
+  }
+
   provision_output($url, $data);
 }
 

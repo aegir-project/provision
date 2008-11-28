@@ -363,20 +363,30 @@ function provision_drupal_send_welcome_mail($url, $profile, $language, $client_e
  * implementation of provision_verify
  */
 function provision_drupal_provision_verify($url, &$data) {
-  _provision_drupal_create_directories('default');
-  provision_path("writable", "sites", TRUE, t("Drupal sites directory is writable by the provisioning script"),
-    t("Drupal sites directory is not writable by the provisioning script"), PROVISION_PERM_ERROR);
-  $exists = _provision_create_dir(PROVISION_DRUSHRC_PATH, t('Drush configuration path'), 0700);
-  $data['modules'] = _provision_drupal_get_cvs_versions(module_rebuild_cache());
-  // Find theme engines
-  $data['engines'] = drupal_system_listing('\.engine$', 'themes/engines');
-  $data['profiles'] = _provision_find_profiles();
-  $data['themes'] = system_theme_data();
-  $data['platform'] = array('short_name' => 'drupal', 'version' => VERSION);  
-  provision_log('notice', t("This platform is running @short_name @version", 
-    array('@short_name' => 'drupal', '@version' => VERSION)));  
-  $sites = provision_drupal_find_sites(); 
-  $data['sites'] = array_keys($sites); // return list of hosted sites. used to determine whether or not to import. 
+  if (!$url) {
+    provision_path("writable", "sites", TRUE, t("Drupal sites directory is writable by the provisioning script"),
+      t("Drupal sites directory is not writable by the provisioning script"), PROVISION_PERM_ERROR);
+    $exists = _provision_create_dir(PROVISION_DRUSHRC_PATH, t('Drush configuration path'), 0700);
+    $data['modules'] = _provision_drupal_get_cvs_versions(module_rebuild_cache());
+    // Find theme engines
+    $data['engines'] = drupal_system_listing('\.engine$', 'themes/engines');
+    $data['profiles'] = _provision_find_profiles();
+    $data['themes'] = system_theme_data();
+    $data['platform'] = array('short_name' => 'drupal', 'version' => VERSION);  
+    provision_log('notice', t("This platform is running @short_name @version", 
+      array('@short_name' => 'drupal', '@version' => VERSION)));  
+    $sites = provision_drupal_find_sites(); 
+    $data['sites'] = array_keys($sites); // return list of hosted sites. used to determine whether or not to import. 
+  }
+  else {
+      // This is the actual drupal provisioning requirements. 
+    _provision_drupal_create_directories($url, $data['profile']);
+    _provision_drupal_maintain_aliases($url, $data);
+    // Requires at least the database settings to complete.
+    _provision_drupal_create_settings_file($url, $data);
+  }
+
+
 }
 
 /**
