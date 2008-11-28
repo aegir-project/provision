@@ -69,7 +69,7 @@ function _provision_drupal_default_template() {
 function _provision_drupal_create_settings_file($url, &$data) {
   provision_log('notice', t("Generate settings.php file"));
   if (provision_path("exists", "sites/$url/settings.php")) {
-    provision_path("chmod", "sites/$url/settings.php", 0750,
+    provision_path("chmod", "sites/$url/settings.php", 0640,
       t('Changed permissions of settings.php to @confirm'),
       t('Could not change permissions of settings.php to @confirm'));
   }
@@ -80,7 +80,7 @@ function _provision_drupal_create_settings_file($url, &$data) {
   fclose($fp);
 
   # Change the permissions of the file
-  provision_path("chmod", "sites/$url/settings.php", 0550,
+  provision_path("chmod", "sites/$url/settings.php", 0440,
     t('Changed permissions of settings.php to @confirm'),
     t('Could not change permissions of settings.php to @confirm'));
   provision_path("chgrp", "sites/$url/settings.php", PROVISION_WEB_GROUP,
