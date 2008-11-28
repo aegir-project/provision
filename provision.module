@@ -99,55 +99,53 @@ function provision_init() {
   provision_load_from_args();
 
   // Set up defines for platform
-  if (function_exists('drush_get_option')) {
-    $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
-    $backend = drush_get_option(array('b', 'backend'), 0);
-    define("PROVISION_DRUSH_BACKEND", $backend);
-    
-    define('PROVISION_DOMAIN', $_SERVER['HTTP_HOST']);
-    // Paths
-    $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
-    define('PROVISION_DOCROOT_PATH', rtrim($path, '/'));
-    define('PROVISION_SITES_PATH', rtrim($path, '/') .'/sites');
-    define('PROVISION_DRUSH_PATH', './drush.php');
-    $parts = explode("/", rtrim($path, '/'));
-    array_pop($parts);
-    define('PROVISION_PARENT_PATH', rtrim(implode("/" , $parts), '/'));
-    define('PROVISION_BACKUP_PATH', 
-      drush_get_option('backup_path', PROVISION_PARENT_PATH . '/backups'));
-    define('PROVISION_CONFIG_PATH', 
-      drush_get_option('config_path', PROVISION_PARENT_PATH .'/config'));
-    define('PROVISION_VHOST_PATH', PROVISION_CONFIG_PATH .'/vhost.d');
+  $docroot = provision_get_option(array("r", "root"), $_SERVER['PWD']);
+  $backend = provision_get_option(array('b', 'backend'), 0);
+  define("PROVISION_DRUSH_BACKEND", $backend);
+  
+  define('PROVISION_DOMAIN', $_SERVER['HTTP_HOST']);
+  // Paths
+  $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
+  define('PROVISION_DOCROOT_PATH', rtrim($path, '/'));
+  define('PROVISION_SITES_PATH', rtrim($path, '/') .'/sites');
+  define('PROVISION_DRUSH_PATH', './drush.php');
+  $parts = explode("/", rtrim($path, '/'));
+  array_pop($parts);
+  define('PROVISION_PARENT_PATH', rtrim(implode("/" , $parts), '/'));
+  define('PROVISION_BACKUP_PATH', 
+    provision_get_option('backup_path', PROVISION_PARENT_PATH . '/backups'));
+  define('PROVISION_CONFIG_PATH', 
+    provision_get_option('config_path', PROVISION_PARENT_PATH .'/config'));
+  define('PROVISION_VHOST_PATH', PROVISION_CONFIG_PATH .'/vhost.d');
 
-    // Commands
-    define('PROVISION_RESTART_CMD',
-      drush_get_option('restart_cmd', _provision_default_restart_cmd()));
+  // Commands
+  define('PROVISION_RESTART_CMD',
+    provision_get_option('restart_cmd', _provision_default_restart_cmd()));
 
-    // System account
-    $info = posix_getgrgid(posix_getgid());
-    define('PROVISION_WEB_GROUP', 
-      drush_get_option('web_group', $info['name'] ));
-    define('PROVISION_SCRIPT_USER', 
-      drush_get_option('script_user', get_current_user() ));
+  // System account
+  $info = posix_getgrgid(posix_getgid());
+  define('PROVISION_WEB_GROUP', 
+    provision_get_option('web_group', $info['name'] ));
+  define('PROVISION_SCRIPT_USER', 
+    provision_get_option('script_user', get_current_user() ));
 
-    // Redirection urls
-    define('PROVISION_MASTER_URL', 
-      drush_get_option('master_url', variable_get('install_url', $GLOBALS['base_url'])));
-    define('PROVISION_WEB_DISABLE_URL', PROVISION_MASTER_URL .'/provision/disabled');
-    define('PROVISION_WEB_MAINTENENCE_URL', PROVISION_MASTER_URL .'/provision/maintenance');
+  // Redirection urls
+  define('PROVISION_MASTER_URL', 
+    provision_get_option('master_url', variable_get('install_url', $GLOBALS['base_url'])));
+  define('PROVISION_WEB_DISABLE_URL', PROVISION_MASTER_URL .'/provision/disabled');
+  define('PROVISION_WEB_MAINTENENCE_URL', PROVISION_MASTER_URL .'/provision/maintenance');
 
-    // Database
-    define('PROVISION_MASTER_DB', 
-      drush_get_option('master_db', $GLOBALS['db_url']));
-    $db = parse_url(PROVISION_MASTER_DB);
-    define('PROVISION_DB_USER', $db['user']);
-    define('PROVISION_DB_PASSWD', $db['pass']);
-    define('PROVISION_DB_HOST', $db['host']);
-   
-    // Drupal does not support multiple types of connections in the same session
-    preg_match("$^([a-z]*)://$", $GLOBALS['db_url'], $matches);
-    define('PROVISION_DB_TYPE', $matches[1]);
-  }
+  // Database
+  define('PROVISION_MASTER_DB', 
+    provision_get_option('master_db', $GLOBALS['db_url']));
+  $db = parse_url(PROVISION_MASTER_DB);
+  define('PROVISION_DB_USER', $db['user']);
+  define('PROVISION_DB_PASSWD', $db['pass']);
+  define('PROVISION_DB_HOST', $db['host']);
+ 
+  // Drupal does not support multiple types of connections in the same session
+  preg_match("$^([a-z]*)://$", $GLOBALS['db_url'], $matches);
+  define('PROVISION_DB_TYPE', $matches[1]);
 }
 
 function _provision_default_restart_cmd() {
