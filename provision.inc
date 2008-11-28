@@ -638,3 +638,14 @@ function provision_exec($cmd, &$data) {
   }
 };
 
+/**
+ * A wrapper for drush_get_option for when it is not present
+ */
+function provision_get_option($option, $default) {
+  if (function_exists('drush_get_option')) {
+    return call_user_func('drush_get_option', $option, $default);
+  }
+  else {
+    return $default;
+  }
+}
