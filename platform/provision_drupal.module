@@ -355,7 +355,7 @@ function _provision_drupal_install_schema($url, $install_profile, $language = 'e
   variable_set('site_name', $url);
   variable_set('site_mail', 'webmaster@' . $url);
   variable_set('clean_url', TRUE);
-  provision_path("chmod", "./sites/$url/settings.php", 0660, t("Secured settings.php with safe permissions"));
+  provision_path("chmod", "./sites/$url/settings.php", 0660, t("Set settings.php with Drupal-6 permissions"));
   menu_rebuild();
 
   // profile task
@@ -400,6 +400,10 @@ function _provision_drupal_install_schema($url, $install_profile, $language = 'e
   variable_set('install_profile', $profile);
   // Send initial welcome email
   provision_drupal_send_welcome_mail($url, $profile, $language, $client_email);
+}
+
+function provision_drupal_provision_post_install($url, $data) {
+  provision_path("chmod", "./sites/$url/settings.php", 0440, t("Secured settings.php with safe permissions"));
 }
 
 function provision_drupal_mail($key, &$message, $params) {
