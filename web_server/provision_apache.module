@@ -190,6 +190,12 @@ function _provision_apache_create_vhost_config($url, $data, $template = NULL) {
   $writable = provision_path("writable", PROVISION_VHOST_PATH, TRUE , NULL,
       t("Virtual host configuration path @path is not writable."), 
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+  $data['extra_config'] = "# Extra configuration from modules:\n";
+  foreach (module_implements('provision_vhost_config') as $module) {
+    $data['extra_config'] .= "# -- $module settings --\n";
+    $data['extra_config'] .= module_invoke($module, 'provision_vhost_config', $url, $data) . "\n";
+  }
+  
   if ($writable) {
     $file = fopen(PROVISION_VHOST_PATH .'/'. $url, "w");
     $text = provision_render_config($template, $data);
