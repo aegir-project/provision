@@ -55,23 +55,29 @@ function provision_load_from_args() {
   foreach ($args['options'] as $arg => $value) {
     if (preg_match("/^load-([a-z\-]*)$/", $arg, $matches)) {
       $module = str_replace("-", "_", $matches[1]);
-      provision_log("notice", t("Loaded @module on request", array("@module" => $module)));
-      drupal_load('module', $module);
-      $loaded[$module]['name'] = $module;
-      $loaded[$module]['filename']  = drupal_get_filename('module', $module);
+      // find file : can only search under provision path
+      $files = file_scan_directory(dirname(__FILE__), "$module.module", array('.', '..', 'CVS'), 0, TRUE, 'name');
+      if (isset($files[$module])) {
+        provision_log("notice", t("Loading @module on request", array("@module" => $module)));
+        $loaded[$module]['name'] = $module;
+        $loaded[$module]['filename']  = $files[$module]->filename;
+        include_once($loaded[$module]['filename']);
+      }
       $reset = TRUE;
     }
   }
-  if ($reset) {
+  if ($reset && is_array($loaded)) {
+    $existing = array();
     $list = module_list(TRUE, FALSE);
     foreach ($list as $module) {
-      $loaded[$module]['name'] = $module;
-      $loaded[$module]['filename'] = drupal_get_filename('module', $module);
+      $existing[$module]['name'] = $module;
+      $existing[$module]['filename'] = drupal_get_filename('module', $module);
+      drupal_load('module', $module);
     }
-    module_list(TRUE, FALSE, FALSE, $loaded);
+    $loaded = array_merge($existing, $loaded);
+    module_list(TRUE, FALSE, TRUE, $loaded);
     // Force to regenerate the stored list of hook implementations.
-    module_implements('', FALSE, TRUE);
-
+    module_implements('', TRUE, TRUE);
     // As we have missed the bootstrap phase, we need to run
     // our own provision_init hook to initialize modules.
     module_invoke_all('provision_init');
@@ -592,7 +598,12 @@ function _provision_verify($url = NULL) {
     $data = provision_get_site_data($url);
   }
 
-  $rolled_back = provision_invoke("verify", $url, $data);
+  if (!$rolled_back = provision_invoke("pre_verify", $url, $data)) {
+    if (!$rolled_back = provision_invoke("verify", $url, $data)) {
+      $rolled_back = provision_invoke("post_verify", $url, $data);
+    }
+  }
+
 
   // We only save the settings if they validated correctly, not before.
   if (!$rolled_back) {

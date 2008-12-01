@@ -502,9 +502,27 @@ function provision_drupal_provision_verify($url, &$data) {
     // Requires at least the database settings to complete.
     _provision_drupal_create_settings_file($url, $data);
   }
-
-
 }
+
+/**
+ * Implementation of hook_provision_post_verify
+ */
+function provision_drupal_provision_post_verify($url, &$data) {
+  if ($url) {
+    _provision_drupal_rebuild_caches($url, $data);
+  }
+}
+
+/**
+ * Runs an external script to reload all the various drupal caches
+ */
+function _provision_drupal_rebuild_caches($url, &$data) {
+  if ($url) {
+    $cmd = sprintf("php %s/provision_drupal_clear.php %s", dirname(__FILE__), escapeshellarg($url));
+    provision_exec($cmd, $data);
+  }
+}
+
 
 /**
  * Find available profiles on this platform.
