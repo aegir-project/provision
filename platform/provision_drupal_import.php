@@ -25,7 +25,6 @@ if ($parts = @parse_url($GLOBALS['db_url'])) {
   $data['db_passwd'] = $parts['pass'];
   $data['db_name'] = substr($parts['path'], 1);
 
-
   $data['profile'] = variable_get('install_profile', 'default');
   $has_locale = db_result(db_query("SELECT status FROM {system} WHERE type='module' AND name='locale'"));
   if ($has_locale) {
