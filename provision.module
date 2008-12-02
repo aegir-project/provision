@@ -38,7 +38,6 @@
   // Include the provisioning API. 
   include_once('provision.inc');
   include_once('provision.path.inc');
-  include_once('provision.help.inc');
 
 
 /**
@@ -189,23 +188,10 @@ function _provision_generate_config() {
  * @{
  */
 
-function provision_provision_service() {
-  return array('provision' => t("Basic configuration"));
-}
-
 /**
  * Implementation of hook_menu().
  */
 function provision_menu() {
-  $items['admin/help/provision/requirements'] = array(
-    'title' => 'Provisioning requirements',
-    'description' => "Information of how to configure the provisioning system.",
-    'page callback' => 'provision_help_requirements',
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-  );
-
   $items['provision'] = array(
     'title' => 'Configure your platform',
     'description' => 'Configure your platform.',
@@ -243,7 +229,7 @@ function provision_front() {
   if (variable_get('provision_setup', FALSE)) {
     drupal_goto('provision/notfound');
   }
-  return _provision_requirements("provision_setup");
+  #return _provision_requirements("provision_setup");
 }
 
 function provision_disabled_site() {
