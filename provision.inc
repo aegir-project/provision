@@ -110,7 +110,7 @@ function provision_parse_output($lines) {
       $output .= $line;
     }
     else {
-      if (!trim($line)) {
+      if (trim($line)) {
         $messages[] = array('type' => 'warning', 'message' => $line, 'timestamp' => time());
       }
     }
