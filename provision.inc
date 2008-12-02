@@ -363,40 +363,29 @@ function provision_load_site_data($url) {
 function provision_save_site_data($url, $data) {
   global $args;
   $conf_file = "sites/$url/site.php";
-    
-  $old_data = provision_load_site_data($url);
+
+  $exclude = array('task_id', 'url');
+  $options = array();
+  include(PROVISION_DOCROOT_PATH . '/drushrc.php'); // load drush rc
+  $exclude = array_merge($exclude, array_keys($options));
 
   //initialize the file. this is lame, i know. but it will work.
-  if (!file_exists($conf_file)) {
-    $fp = fopen($conf_file, 'a+'); //Append to the end of the config file.
-    fwrite($fp, "<?php\n");
-    fclose($fp);
-    provision_path("chmod", $conf_file, 0600,
-      t("Changed permissions of <code>@path</code> to @confirm"),
-      t("Could not change permissions <code>@path</code> to @confirm"),
-      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
-  } 
-
-  $fp = fopen($conf_file, "a+");
+  $fp = fopen($conf_file, 'w'); //Append to the end of the config file.
   if (!$fp) {
     provision_log('error', 'Site config file could not be written');
     provision_set_error(PROVISION_PERM_ERROR);
   }
   else {
+    fwrite($fp, "<?php\n");
     $timestamp = mktime();
-    $aid = $data['task_id'];
-    fwrite($fp, "\n\n#". format_date($timestamp, 'large'));
-    if ($aid) {
-      $task = array('task' => $data['task_type'], 'status' => provision_get_error());
-      $line = "\n\$tasks[$aid][$timestamp] = ". str_replace(array('  ', "\n"), '', var_export($task, TRUE)) .';';
-      fwrite($fp, $line);
-    }
+    fwrite($fp, "#". format_date($timestamp, 'large'));
     foreach ($data as $key => $value) {
-      if ($data[$key] != $old_data[$key]) {
+      if (!in_array($key, $exclude)) {
         $line = "\n\$data['$key'] = ". var_export($value, TRUE) .';';
         fwrite($fp, $line);  
       }
     }
+    fwrite($fp, "\n");
     fclose($fp);
   }
 }
