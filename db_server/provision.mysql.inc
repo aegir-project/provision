@@ -108,7 +108,6 @@ function _provision_master_db_url($data = array()) {
   return sprintf("%s://%s:%s@%s/mysql", PROVISION_DB_TYPE, PROVISION_DB_USER, PROVISION_DB_PASSWD, PROVISION_DB_HOST);
 }
 
-
 function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd, $db_host) {
   $exists = provision_path("exists", $dump_file, TRUE,
     t('Found database dump at @path.'),

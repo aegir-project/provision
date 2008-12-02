@@ -11,7 +11,6 @@
  * to ensure that the sites are getting loaded up correctly.
  */
 
-
 /**
  * The default template provided for the virtual host configuration
  */
@@ -118,6 +117,7 @@ function _provision_apache_restart_apache($cause_error = FALSE) {
   else {
     provision_log('notice', t('Apache has been restarted'));
   }
+
 }
 
 function provision_apache_provision_verify() {

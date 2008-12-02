@@ -27,7 +27,7 @@ function _provision_stats($url) {
 
   //TODO: add some required modules here, possibly update_status if not enabled.
   //Load the modules from the hosted site
-  module_list(TRUE);
+  #module_list(TRUE);
   
   $stats['node_count'] = db_result(db_query("select max(nid) from {node}"));
   $stats['user_count'] = db_result(db_query("select max(uid) from {users}"));

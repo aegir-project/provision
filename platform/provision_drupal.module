@@ -226,25 +226,26 @@ function provision_drupal_provision_restore_rollback($url, $data) {
 }
 
 function provision_drupal_provision_pre_install($url, &$data) {
-  // This is the actual drupal provisioning requirements. 
-  _provision_drupal_create_directories($url, $data['profile']);
-  // Requires at least the database settings to complete.
-  _provision_drupal_create_settings_file($url, $data);
+ // This is the actual drupal provisioning requirements. 
+ _provision_drupal_create_directories($url, $data['profile']);
+ // Requires at least the database settings to complete.
+ _provision_drupal_create_settings_file($url, $data);
 }
 
 
 function provision_drupal_provision_install($url, &$data) {
-  $cmd = sprintf("php %s/install.php %s %s %s %s", dirname(__FILE__), escapeshellarg($url), escapeshellarg($data['profile']), escapeshellarg($data['language']), escapeshellarg($data['client_email']));
-  if (provision_exec($cmd, $url, $data)) {
-    $data['installed'] = TRUE;
-    _provision_drupal_maintain_aliases($url, $data); # Create symlinks for site aliases (if any)
-  }
+ $cmd = sprintf("php %s/install.php %s %s %s %s", dirname(__FILE__), escapeshellarg($url), escapeshellarg($data['profile']), escapeshellarg($data['language']), escapeshellarg($data['client_email']));
+ if (provision_exec($cmd, $url, $data)) {
+   $data['installed'] = TRUE;
+   _provision_drupal_maintain_aliases($url, $data); # Create symlinks for site aliases (if any)
+ }
 }
 
 function provision_drupal_provision_post_install($url, &$data) {
-  if ($url) {
-    _provision_drupal_rebuild_caches($url, $data);
-  }
+ if ($url) {
+   provision_path("chmod", "./sites/$url/settings.php", 0440, t("Secured settings.php with safe permissions"));
+   _provision_drupal_rebuild_caches($url, $data);
+ }
 }
 
 
@@ -332,11 +333,11 @@ function _provision_find_profiles() {
         }
       }
     }
-
     $profile->info['languages'] = array_keys($languages);
     $return[$name] = $profile;
     provision_log('notice', t('found install profile %name', array('%name' => $name)));
   }
+
   return $return;
 
 }
@@ -376,6 +377,7 @@ function _provision_drupal_get_cvs_versions($files) {
       $project = array();
       $project['filename'] = $file->filename;
       $project['name'] = $file->name;
+      $file->info['description'] = str_replace("\n", "", $file->info['description']);
       if (empty($project['project'])) {
         $project['project'] = cvs_deploy_get_project_name($project);
       }
@@ -411,7 +413,6 @@ function _provision_drupal_import_site($url, &$data) {
 
   return $data;
 }
-
 
 /**
  * Retrieve drupal variable from database
