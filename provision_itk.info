@@ -1,0 +1,5 @@
+; $Id$
+name = Provision Apache-ITK
+description = "Provisions apache virtual hosts with proper access restrictions."
+dependencies = provision
+package = Provision
