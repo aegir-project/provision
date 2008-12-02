@@ -35,15 +35,15 @@ define('PROVISION_DB_ERROR', 128);
 //List of provisioning errors. This is a global so that other modules can reference it.
 global $provision_errors;
 $provision_errors = array(
-  PROVISION_SUCCESS => t("Successful"),
-  PROVISION_QUEUED => t("Queued"),
-  PROVISION_DB_ERROR => t("Database error"),
-  PROVISION_INSTALL_ERROR => t("Drupal installation error"),
-  PROVISION_PERM_ERROR => t("File permission error"),
-  PROVISION_WEB_ERROR => t("Web server error"),
-  PROVISION_FRAMEWORK_ERROR => t("Provision framework error"),
-  PROVISION_SITE_NOT_FOUND => t("Site not found"),
-  PROVISION_SITE_INSTALLED => t("Site has already been installed"),  
+  PROVISION_SUCCESS => pt("Successful"),
+  PROVISION_QUEUED => pt("Queued"),
+  PROVISION_DB_ERROR => pt("Database error"),
+  PROVISION_INSTALL_ERROR => pt("Drupal installation error"),
+  PROVISION_PERM_ERROR => pt("File permission error"),
+  PROVISION_WEB_ERROR => pt("Web server error"),
+  PROVISION_FRAMEWORK_ERROR => pt("Provision framework error"),
+  PROVISION_SITE_NOT_FOUND => pt("Site not found"),
+  PROVISION_SITE_INSTALLED => pt("Site has already been installed"),  
   );
 /**
  * @} End of "name Error status defintions".

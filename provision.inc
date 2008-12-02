@@ -649,3 +649,51 @@ function provision_get_option($option, $default) {
     return $default;
   }
 }
+
+/**
+ * A wrapper for t(). The st() function is too specific for our purposes
+ */
+function pt($string, $args = array()) {
+  if (function_exists('t')) {
+    return call_user_func('t', $string, $args);
+  }
+  else {
+    // Transform arguments before inserting them
+    foreach ($args as $key => $value) {
+      switch ($key[0]) {
+        // Escaped only
+        case '@':
+          $args[$key] = check_plain($value);
+          break;
+        // Escaped and placeholder
+        case '%':
+        default:
+          $args[$key] = '<em>'. check_plain($value) .'</em>';
+          break;
+        // Pass-through
+        case '!':
+      }
+    }
+    return strtr($string, $args);
+  }
+}
+
+/**
+ * This is a script that allows external scripts to initialize themselves to a certain url (usually $argv[1])
+ *
+ * Some scripts need to run with drupal as the only active database, and this allows us to do that.
+ */
+function provision_external_init($url, $bootstrap = TRUE) {
+  $drupal_base_url = parse_url(sprintf("http://" . $url));
+  $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
+  $_SERVER['PHP_SELF'] = $drupal_base_url['path'].'/install.php';
+  $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF'];
+  $_SERVER['REMOTE_ADDR'] = '';
+  $_SERVER['REQUEST_METHOD'] = NULL;
+  $_SERVER['SERVER_SOFTWARE'] = NULL;
+
+  if ($bootstrap) {
+    include_once('includes/bootstrap.inc');
+    drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+  }
+}

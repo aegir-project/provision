@@ -5,23 +5,13 @@
  *    Rebuild all the caches
  */
 
+require_once(dirname(__FILE__) . '/../provision.inc');
 if ($argv[1]) {
-  // Fake the necessary HTTP headers that Drupal needs:
-  $drupal_base_url = parse_url(sprintf("http://" . $argv[1]));
-  $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
-  $_SERVER['PHP_SELF'] = $drupal_base_url['path'].'/index.php';
-  $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF'];
-  $_SERVER['REMOTE_ADDR'] = '';
-  $_SERVER['REQUEST_METHOD'] = NULL;
-  $_SERVER['SERVER_SOFTWARE'] = NULL;
-
-  require_once('includes/bootstrap.inc');
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
-  require_once(dirname(__FILE__) . '/../provision.inc');
+  provision_external_init($argv[1]);
 }
 else {
-  print "USAGE: provision_drupal_clear.php url\n";
-  exit(PROVISION_FRAMEWORK_ERROR);
+  provision_set_error(PROVISION_FRAMEWORK_ERROR);
+  provision_log("error", "USAGE: clear.php url\n");
 }
 
 cache_clear_all();

@@ -409,14 +409,7 @@ function provision_install_cmd($url) {
  *   Boolean denoting whether the provision_invoke rolled back changes made. 
  */
 function _provision_pre_install($url, &$data) {
-  $rolled_back = provision_invoke("pre_install", $url, $data);
-  if (!provision_get_error()) {
-    // This is the actual drupal provisioning requirements. 
-    _provision_drupal_create_directories($url, $data['profile']);
-    // Requires at least the database settings to complete.
-    _provision_drupal_create_settings_file($url, $data);
-  }
-  return $rolled_back;
+  return provision_invoke("pre_install", $url, $data);
 }
 
 /**
@@ -437,19 +430,7 @@ function _provision_pre_install($url, &$data) {
  *   Boolean denoting whether the provision_invoke rolled back changes made. 
  */
 function _provision_install($url, &$data) {
-  $rolled_back = provision_invoke("install", $url, $data);
-
-  if (!$rolled_back) {
-    _provision_drupal_switch_active_site($url); # Change headers and db info, also backs up
-    _provision_drupal_force_load_modules($url);
-    _provision_drupal_install_schema($url, $data['profile'], $data['language'], $data['client_email']);
-    _provision_drupal_maintain_aliases($url, $data); # Create symlinks for site aliases (if any)
-    _provision_drupal_force_load_modules();
-    _provision_drupal_switch_active_site(); # This *should* bring the site back to where we were before installing
-    
-  }
-
-  return $rolled_back;
+  return provision_invoke("install", $url, $data);
 }
 
 /** 
@@ -466,11 +447,7 @@ function _provision_install($url, &$data) {
  *   Boolean denoting whether the provision_invoke rolled back changes made. 
  */
 function _provision_post_install($url, &$data) {
-  $rolled_back = provision_invoke("post_install", $url, $data);
-  if (!$rolled_back) {
-    $data['installed'] = TRUE;  
-  }
-  return $rolled_back;
+  return provision_invoke("post_install", $url, $data);
 }
 
 /**
