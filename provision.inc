@@ -13,6 +13,8 @@
  * @see provisionvalues
  */
 
+define('PROVISION_OUTPUT', 'PROVISION_OUTPUT>>>');
+
 /**
  * Invoke provision api calls. 
  * 
@@ -95,6 +97,35 @@ function _provision_log_messages() {
 
 }
 
+function provision_parse_output($lines) {
+  $start = FALSE;
+  $output = '';
+  foreach ($lines as $line) {
+    if (preg_match('/^' . PROVISION_OUTPUT . '/', $line)) {
+      // found the start out output.
+      $line = str_replace(PROVISION_OUTPUT, '', $line);
+      $start = TRUE;
+    }
+    if ($start) {
+      $output .= $line;
+    }
+    else {
+      if (!trim($line)) {
+        $messages[] = array('type' => 'warning', 'message' => $line, 'timestamp' => time());
+      }
+    }
+  }
+  if ($start) {
+    $data = unserialize($output);
+    if (is_array($data)) {
+      if (is_array($messages)) {
+        $data['log'] = array_merge($data['log'], $messages);
+      }
+      return $data;
+    }
+  }
+  return false;
+}
 
 
 /**
@@ -122,7 +153,7 @@ function provision_output($url = NULL, $data = array(), $extra = NULL) {
   $return['log'] = provision_get_log(); // Append logging information
   $return['messages'] = drupal_get_messages();
   if (PROVISION_DRUSH_BACKEND) {
-    print serialize($return);
+    print PROVISION_OUTPUT . serialize($return);
   }
   else {
     if ($return) {
@@ -618,9 +649,8 @@ function provision_posix_groupname($group) {
  */
 function provision_exec($cmd, &$data) {
   exec($cmd, $return, $code);
-  $return = join("", $return);
   provision_log('command', t('Running: @cmd', array('@cmd' => $cmd)));
-  $values = unserialize($return);
+  $values = provision_parse_output($return);
   if (is_array($values)) {
     $data = array_merge($data, $values['site']);
     foreach ($values['log'] as $log) {
@@ -633,7 +663,7 @@ function provision_exec($cmd, &$data) {
   }
   else {
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    provision_log('error',t("The command could not be executed succesfully (returned: !return, code: %code)", array("!return" => $return, "%code" =>  $code)));
+    provision_log('error',t("The command could not be executed succesfully (returned: !return, code: %code)", array("!return" => implode('', $return), "%code" =>  $code)));
     return FALSE;
   }
 };
