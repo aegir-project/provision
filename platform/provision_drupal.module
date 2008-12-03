@@ -234,11 +234,12 @@ function provision_drupal_provision_pre_install($url, &$data) {
 
 
 function provision_drupal_provision_install($url, &$data) {
- $cmd = sprintf("php %s/install.php %s %s %s %s", dirname(__FILE__), escapeshellarg($url), escapeshellarg($data['profile']), escapeshellarg($data['language']), escapeshellarg($data['client_email']));
- if (provision_exec($cmd, $url, $data)) {
-   $data['installed'] = TRUE;
-   _provision_drupal_maintain_aliases($url, $data); # Create symlinks for site aliases (if any)
- }
+  $cmd = sprintf("php %s/install.php %s %s %s %s", dirname(__FILE__), escapeshellarg($url), escapeshellarg($data['profile']), escapeshellarg($data['language']), escapeshellarg($data['client_email']));
+  if (provision_exec($cmd, $data)) {
+    $data['installed'] = TRUE;
+    // Create symlinks for site aliases (if any)
+    _provision_drupal_maintain_aliases($url, $data);
+  }
 }
 
 function provision_drupal_provision_post_install($url, &$data) {

@@ -23,6 +23,8 @@ define('PROVISION_OUTPUT', 'PROVISION_OUTPUT>>>');
  * If at any point during execution, the provision_get_error() function returns anything but 0, provision_invoke will
  * trigger $hook_rollback for each of the hooks that implement it, in reverse order from how they were executed.
  *
+ * This function will also trigger pre_$hook and post_$hook variants of the hook and it's rollbacks automatically.
+ *
  * @param hook
  *   The hook name to be executed for all the modules.
  * @param url
@@ -30,21 +32,25 @@ define('PROVISION_OUTPUT', 'PROVISION_OUTPUT>>>');
  * @param data
  *   A reference to the associated array containing the data for the site. This needs to be a reference, 
  *   because the modules might provide additional information about the site.
- * @param rollback
- *   A boolean specifying whether or not the entire task needs to be rolled back. 
- *   This is used specifically in commands which implement multiple hooks, such as 'install',
- *   which implements 'pre_install', 'install' and 'post_install' hooks.
  * @return
- *   A boolean specifying whether or not any rollback has been performed. 
+ *   A boolean specifying whether or not the command was successfully completed. 
  * 
  */
-function provision_invoke($hook, $url, &$data, $rollback = FALSE) {
-   
-  if (!$rollback) {
-    foreach (module_implements("provision_$hook") as $name) {
-      _provision_log_messages();
-      $completed[] = $name;
-      $func = $name .'_provision_'. $hook;
+function provision_invoke($hook, $url, &$data) {
+
+  // First we build a list of functions are about to execute
+  $variations = array("pre_$hook", $hook, "post_$hook");
+  foreach ($variations as $var_hook) {
+    foreach (module_implements("provision_$var_hook") as $name) {
+      $functions[] = $name . '_provision_' . $var_hook;
+    }
+  }
+
+  $rollback = FALSE;
+  $completed = array();
+  foreach ($functions as $func) {
+    $completed[] = $func;
+    if (function_exists($func)) {
       $func($url, $data);
       //this is run before and after so that messages appear in the correct order.
       _provision_log_messages();
@@ -55,23 +61,20 @@ function provision_invoke($hook, $url, &$data, $rollback = FALSE) {
       }
     }
   }
-  else {
-    $completed = module_implements("provision_$hook");
-  }
-  
+
+  // something went wrong, we need to undo 
   if ($rollback) {
-    foreach (array_reverse($completed) as $name) {
-      $func = $name .'_'. $hook .'_rollback';
-      if (function_exists($func)) {
-        $func($url, $data);
-        provision_set_log('Rollback', "Changes for $name module have been rolled back.");
+    foreach (array_reverse($completed) as $func) {
+      $rb_func = $func . '_rollback';
+      if (function_exists($rb_func)) {
+        $rb_func($url, $data);
+        _provision_log_messages();
+        provision_log('Rollback', "Changes for $name module have been rolled back.");
       }
     }
-    return TRUE;
   }
-  else {
-    return FALSE;
-  }
+
+  return !$rollback;
 }
 
 
@@ -363,7 +366,7 @@ function provision_save_site_data($url, $data) {
   global $args;
   $conf_file = "sites/$url/site.php";
 
-  $exclude = array('task_id', 'url');
+  $exclude = array('task_id', 'url', 'backend');
   $options = array();
   include(PROVISION_DOCROOT_PATH . '/drushrc.php'); // load drush rc
   $exclude = array_merge($exclude, array_keys($options));
