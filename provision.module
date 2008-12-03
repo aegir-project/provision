@@ -362,95 +362,10 @@ function provision_install_cmd($url) {
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
     provision_output($url, $data);
   }
-  $ops = array('pre_install', 'install', 'post_install'); //these are the provision hooks that will get triggered.
-
-  if (_provision_drupal_site_installed($url)) {
-    provision_set_error(PROVISION_SITE_INSTALLED);
-    provision_log("error", t("Site has already been installed. Exiting."));
-    provision_output($url, $data);
+  if (provision_invoke("install", $url, $data)) {
+    provision_save_site_data($url, $data);
   }
-
-  foreach ($ops as $op ) {
-    $func = "_provision_$op";
-    $func($url, $data);
-  }
-
-  provision_save_site_data($url, $data);
   provision_output($url, $data);
-}
-
-/**
- * Drush task. 
- *
- * Calls hook_provision_pre_install().
- * Also responsible for calling creating site directory layout, and the drupal settings file.
- *
- * @param url
- *   The url of the site being invoked.
- * @param data
- *   A reference to the associated array containing the data for the site. This needs to be a reference, 
- *   because the modules might provide additional information about the site.
- * @return
- *   Boolean denoting whether the provision_invoke rolled back changes made. 
- */
-function _provision_pre_install($url, &$data) {
-  return provision_invoke("pre_install", $url, $data);
-}
-
-/**
- * Install drupal site
- *
- * The magic here is that we need to drive the install api through this code. 
- * At this point, we no longer have access to the central database, and we need to be able
- * to drive this code blind, without causing bad stuff to happen.
- *
- * Install profile gets triggered at the end of this code.
- *
- * @param url
- *   The url of the site being invoked.
- * @param data
- *   A reference to the associated array containing the data for the site. This needs to be a reference, 
- *   because the modules might provide additional information about the site.
- * @return
- *   Boolean denoting whether the provision_invoke rolled back changes made. 
- */
-function _provision_install($url, &$data) {
-  return provision_invoke("install", $url, $data);
-}
-
-/** 
- * Clean up after installation.
- *
- * Most notably give the web server the opportunity to recheck it's configuration files.
- *
- * @param url
- *   The url of the site being installed.
- * @param data
- *   A reference to the associated array containing the data for the site. This needs to be a reference, 
- *   because the modules might provide additional information about the site.
- * @return
- *   Boolean denoting whether the provision_invoke rolled back changes made. 
- */
-function _provision_post_install($url, &$data) {
-  return provision_invoke("post_install", $url, $data);
-}
-
-/**
- * Regenerate the config files of an already running site.
- *
- * @param url
- *   The url of the site being synched.
- * @return
- *   Output of provision_output() function.
- *   Will exit with a PROVISION_SITE_NOT_FOUND error if the site does not exist.
- */
-function _provision_synch($url = NULL) {
-  if (!$url) {
-    global $args;
-    provision_output(NULL, $data);
-  }
-  else {
-  }
 }
 
 /**
@@ -505,7 +420,7 @@ function _provision_backup_site($url, &$data, $file = NULL) {
   }
 
   $data['backup_file'] = (!empty($file)) ? ereg_replace('.gz$', '', $file) : $suggested;
-  $rolled_back = provision_invoke("backup", $url, $data);
+  provision_invoke("backup", $url, $data);
   provision_shell_exec("gzip %s", $data['backup_file']);
   $data['backup_file'] = $data['backup_file'] .'.gz';
 }
@@ -527,7 +442,7 @@ function _provision_import($url) {
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
     provision_output($url, $data);
   }
-  $rolled_back = provision_invoke("import", $url, $data);
+  provision_invoke("import", $url, $data);
   provision_output($url, $data);
 }
 
@@ -561,15 +476,10 @@ function _provision_verify($url = NULL) {
     $data = provision_get_site_data($url);
   }
 
-  if (!$rolled_back = provision_invoke("pre_verify", $url, $data)) {
-    if (!$rolled_back = provision_invoke("verify", $url, $data)) {
-      $rolled_back = provision_invoke("post_verify", $url, $data);
-    }
-  }
-
+  
 
   // We only save the settings if they validated correctly, not before.
-  if (!$rolled_back) {
+  if (provision_invoke("verify", $url, $data)) {
     if (!$url) {
       _provision_generate_config();
     }
@@ -617,30 +527,7 @@ function _provision_restore($url, $restore_file) {
     $data = provision_get_site_data($url);
     $data['restore_file'] = $restore_file;
 
-    $phases = array("pre_restore", "restore", "post_restore");
-
-    $completed = array();
-    $rolled_back = FALSE; // initializes to FALSE.
-    foreach ($phases as $phase) {
-      $rolled_back = provision_invoke($phase, $url, $data, $rolled_back);
-
-      if (!$rolled_back) {
-        $completed[] = $phase;
-      }
-      else {
-        break; // exit out of the loop, to allow any changes to be reversed next.
-      }
-    }
-
-    if ($rolled_back) {
-      // An error has occurred, and we must undo all the changes we made, in reverse
-      // This works by triggering the _rollback functions for each of the hooks.
-      foreach (array_reverse($completed) as $phase) {
-        provision_invoke($phase, $url, $data, $rolled_back);
-      }
-
-    }
-    else {
+    if (provision_invoke("restore", $url, $data)) {
       provision_save_site_data($url, $data);
     }
   }
@@ -673,10 +560,11 @@ function _provision_disable($url) {
   $data = provision_get_site_data($url);
   _provision_backup_site($url, $data); # Backup site for posterity, before disabling 
 
-  $rolled_back = provision_invoke("disable", $url, $data);
+  if (provision_invoke("disable", $url, $data)) {
+    $data['enabled'] = FALSE;
+    provision_save_site_data($url, $data);
+  }
 
-  $data['enabled'] = FALSE;
-  provision_save_site_data($url, $data);
   provision_output($url, $data);
 }
 
@@ -688,10 +576,11 @@ function _provision_enable($url) {
   }
   $data = provision_get_site_data($url);
 
-  $rolled_back = provision_invoke("enable", $url, $data);
+  if (provision_invoke("enable", $url, $data)) {
+    $data['enabled'] = TRUE;
+    provision_save_site_data($url, $data);  
+  } 
 
-  $data['enabled'] = TRUE;
-  provision_save_site_data($url, $data);  
   provision_output($url, $data);
 }
 
@@ -702,7 +591,7 @@ function _provision_delete($url) {
   $file = array_shift($args);
   _provision_backup_site($url, $data, $file);
 
-  $rolled_back = provision_invoke("delete", $url, $data);
+  provision_invoke("delete", $url, $data);
 
   provision_output($url, $data);
 }
