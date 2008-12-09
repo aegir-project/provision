@@ -26,50 +26,6 @@ function _provision_apache_redirect_template() {
 }
 
 /**
- * Implementation of hook_provision_pre_install
- */
-function provision_apache_provision_pre_install($url, &$data) {
-  return _provision_apache_create_vhost_config($url, $data);
-}
-
-/**
- * Implementation of hook_provision_post_install
- */
-function provision_apache_provision_post_install($url, &$data) {
-  return _provision_apache_restart_apache();  
-}
-
-function provision_apache_provision_delete($url, &$data) {
-  _provision_apache_delete_vhost_config($url, $data);
-  return _provision_apache_restart_apache();  
-}
-
-/**
- * Implementation of hook_provision_enable
- */
-function provision_apache_provision_enable($url, &$data) {
-  _provision_apache_create_vhost_config($url, $data);
-  _provision_apache_restart_apache();
-}
-
-/**
- * Implementation of hook_provision_disable
- */
-function provision_apache_provision_disable($url, &$data) {
-  $data['redirect_url'] = PROVISION_WEB_DISABLE_URL;
-  _provision_apache_create_vhost_config($url, $data, _provision_apache_redirect_template());
-  _provision_apache_restart_apache();
-}
-
-/**
- * Implementation of hook_provision_sync
- */
-function provision_apache_provision_synch($url, &$data) {
-  _provision_apache_create_vhost_config($url, $data);
-  _provision_apache_restart_apache();
-}
-
-/**
  * Delete virtual host file
  */
 function _provision_apache_delete_vhost_config($url, $data) {
@@ -79,7 +35,7 @@ function _provision_apache_delete_vhost_config($url, $data) {
 /**
  * Generate virtual host file
  */
-function _provision_apache_create_vhost_config($url, $data, $template = NULL) {
+function _provision_apache_create_vhost_config($data, $url, $template = NULL) {
   if (is_null($template)) {
     $template = variable_get('provision_apache_vhost_template', _provision_apache_default_template());
   }
@@ -120,32 +76,3 @@ function _provision_apache_restart_apache($cause_error = FALSE) {
 
 }
 
-function provision_apache_provision_verify() {
-  $exists = _provision_create_dir(PROVISION_VHOST_PATH, t("Virtual host configuration"), 0700);
-  _provision_apache_restart_apache(TRUE);
-}
-
-/**
- * Implementation of hook_provision_pre_restore
- */
-function provision_apache_provision_pre_restore($url, &$data) {
-  $data['redirect_url'] = PROVISION_WEB_MAINTENANCE_URL;
-  _provision_apache_create_vhost_config($url, $data, _provision_apache_redirect_template());
-  _provision_apache_restart_apache();
-}
-
-function provision_apache_provision_pre_restore_rollback($url, $data) {
-  _provision_apache_create_vhost_config($url, $data);
-  _provision_apache_restart_apache();
-  _provision_recursive_delete(PROVISION_SITES_PATH ."/$url.restore");
-}
-
-function provision_apache_provision_post_restore($url, &$data) {
-  _provision_apache_create_vhost_config($url, $data);
-  _provision_apache_restart_apache();
-}
-
-// The old db details should have been switched back by the mysql rollback at this point.
-function provision_apache_provision_post_restore_rollback($url, &$data) {
-  provision_apache_provision_post_restore($url, $data);
-}

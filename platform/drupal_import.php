@@ -20,7 +20,4 @@ if ($parts = @parse_url($GLOBALS['db_url'])) {
   $language = language_default();
   $data['language'] = $language->language;
 }
-provision_output($argv[1], $data);
-
-print(serialize($data));
-exit(PROVISION_SUCCESS);
+provision_output($data);

@@ -6,159 +6,104 @@
  * A collection of helper functions used by the main provision hooks to accomplish their tasks.
  */
 
-
-/**
- * Generate a new mysql database and user account for the specified credentials
- */
-function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) {
-  provision_set_active_db(_provision_master_db_url());
- 
-  if (!_provision_mysql_create_database($db_name) ||
-      !_provision_mysql_database_exists($db_name) ) {
-   provision_set_error(PROVISION_DB_ERROR);
-   provision_log("error", "Database could not be created.");
-   provision_set_active_db();
-   return FALSE;
+function _provision_db_connection($conn = NULL) {
+  static $connection = NULL;
+  if (!is_null($conn)) {
+    $connection = $conn;
   }
-  
-  if (!_provision_mysql_grant($db_name, $db_user, $db_passwd)) {
-    provision_log("warning", "Could not GRANT user access.");
-  }
-
-  $status = _provision_mysql_database_exists($db_name);
-  provision_set_active_db();
-  
-  return $status; 
-   //TODO : Test to confirm that the database is actually writeable. Taking this on faith for now.
+  return $connection;
 }
 
-/**
- * Remove the database and user account for the supplied credentials
- */
-function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_host) {
-  provision_set_active_db(_provision_master_db_url());
-    
-  if ( _provision_mysql_database_exists($data['db_name']) ) {
-    provision_log("notice", t("Dropping database @dbname", array('@dbname' => $db_name)));
-    if (!_provision_mysql_drop_database($db_name)) {
-      provision_log("warning", t("Failed to drop database @dbname", array('@dbname' => $db_name)));
-    }
-  }
-  
-  if ( _provision_mysql_database_exists($db_name) ) {
-   provision_set_error(PROVISION_DB_ERROR);
-   provision_log("error", "Database could not be destroyed.");
-   provision_set_active_db();
-   return FALSE;
-  }
-  
-  provision_log("notice", "Revoking privileges");
-  if (!_provision_mysql_revoke($db_name, $db_user)) {
-      provision_log("warning", t("Failed to revoke user privileges"));
-  }
-
-  provision_set_active_db();
-}
-
-
-function _provision_mysql_database_exists($name) {
-  return db_result(db_query("SHOW DATABASES LIKE '%s'", $name));
-}
-
-function _provision_mysql_drop_database($name) {
-  return db_query("DROP DATABASE `%s`", $name);
-}
-
-function _provision_mysql_create_database($name) {
-  return db_query("CREATE DATABASE %s", $name);  
-}
-
-/**
- * Close an active connection. There's no clean way to close a connection
- * in the Drupal db api. Sadly.
- */
-function db_close($connection) {
-  $func = PROVISION_DB_TYPE . '_close';
-  return $func($connection);
-}
-
-function _provision_mysql_can_create_database() {
-  $test = 'provision_test';
-  _provision_mysql_create_database($test);
-  if (_provision_mysql_database_exists($test)) {
-    if (!_provision_mysql_drop_database($test)) {
-      provision_log("warning", t("Failed to drop database @dbname", array('@dbname' => $test)));
-    }
+function provision_db_connect() {
+  if (_provision_db_connection()) {
     return TRUE;
+  }
+  $connection = @mysql_connect(PROVISION_DB_HOST, PROVISION_DB_USER, PROVISION_DB_PASSWD);
+
+  if (!$connection) {
+    provision_set_error(PROVISION_DB_ERROR);
+    provision_log('error', pt('Could not connect to the master database.'));
+  }
+  else {
+    $success = @mysql_select_db('mysql', $connection);
+    if ($success) {
+      _provision_db_connection($connection);
+    }
+    else {
+      provision_set_error(PROVISION_DB_ERROR);
+      provision_log('error', pt('Could not select the mysql database.'));
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+
+
+function provision_db_query($query) {
+  $args = func_get_args();
+  array_shift($args);
+  if (isset($args[0]) and is_array($args[0])) { // 'All arguments in one array' syntax
+    $args = $args[0];
+  }
+  _provision_db_query_callback($args, TRUE);
+  $query = preg_replace_callback(PROVISION_QUERY_REGEXP, '_provision_db_query_callback', $query);
+  return _provision_db_query($query);
+}
+
+/**
+ * Helper function for db_query().
+ */
+function _provision_db_query($query, $debug = 0) {
+  $result = mysql_query($query, _provision_db_connection());
+
+  if (!mysql_errno(_provision_db_connection())) {
+    return $result;
+  }
+  else {
+    provision_log("error", 
+      mysql_error(_provision_db_connection()) ."\nquery: ". $query);
+    return FALSE;
+  }
+}
+
+function provision_db_result($result, $row = 0) {
+  if ($result && mysql_num_rows($result) > $row) {
+    return mysql_result($result, $row);
   }
   return FALSE;
 }
 
-function _provision_mysql_grant($name, $username, $password, $host = '') {
-  $host = ($host) ? $host : '%';
-  return db_query("GRANT ALL PRIVILEGES ON `%s`.* TO `%s`@`%s` IDENTIFIED BY '%s'", $name, $username, $host, $password);
-}
-
-function _provision_mysql_revoke($name, $username, $host = '') {
-  $host = ($host) ? $host : '%';
-  return db_query("REVOKE ALL PRIVILEGES ON `%s`.* FROM `%s`@`%s`", $name, $username, $host);
-}
-
-function _provision_master_db_url($data = array()) {
-  return sprintf("%s://%s:%s@%s/mysql", PROVISION_DB_TYPE, PROVISION_DB_USER, PROVISION_DB_PASSWD, PROVISION_DB_HOST);
-}
-
-function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd, $db_host) {
-  $exists = provision_path("exists", $dump_file, TRUE,
-    t('Found database dump at @path.'),
-    t('No database dump was found at @path.'),
-    PROVISION_FRAMEWORK_ERROR);
-  if ($exists) {
-    $readable = provision_path("readable", $dump_file, TRUE, '', 
-      t('The database dump at @path could not be read.'), 
-      PROVISION_PERM_ERROR);
-    if ($readable) {
-      provision_log("notice", sprintf("Importing database using command: mysql -u%s -p%s -h%s %s < %s", 
-        $db_user, $db_passwd, $db_host, $db_name, $dump_file));
-      if (!provision_shell_exec("mysql -u%s -p%s -h%s %s < %s", $db_user, $db_passwd, $db_host, $db_name, $dump_file )) {
-        provision_log("error", t("Database import failed"));
-      }
-     }
-   }
-}
 
 /**
- * Find a viable database name, based on available information.
- *
- * This function exists solely to work past mysql's database name restrictions.
- * As mysql also does not have the ability to rename databases, it is completely
- * possible that sites will be running with derivative names on the same server,
- * until the upgrade / restore process is completed.
- */ 
-function _provision_mysql_suggest_db_name($url, $data) {
-  provision_set_active_db(_provision_master_db_url());
-  if ($data['site_id']) {
-    $id_suggest = 'site_'. $data['site_id'];
-    $suggest[] = $id_suggest;
-    for ($i = 0; $i < 100; $i++) {
-      $suggest[] = $id_suggest .'_'. $i;
-    }
-  }
-  else {
-    // This is a last option, and not ideal
-    // Provision only users will trigger this mostly.
-    $url_suggest = substr(0, 14, str_replace(array(".", "-"), '' , ereg_replace("^www\.", "", $url)));
-    $suggest[] = $url_suggest;
-    for ($i = 0; $i < 100; $i++) {
-      $suggest[] = $url_suggest .'_'. $i;
-    }
+ * Indicates the place holders that should be replaced in _db_query_callback().
+ */
+define('PROVISION_QUERY_REGEXP', '/(%d|%s|%%|%f|%b)/');
+
+
+function _provision_db_query_callback($match, $init = FALSE) {
+  static $args = NULL;
+  if ($init) {
+    $args = $match;
+    return;
   }
 
-  foreach ($suggest as $option) {
-    if (!_provision_mysql_database_exists($option)) {
-      provision_set_active_db();
-      return $option;
-    }
+  switch ($match[1]) {
+    case '%d': // We must use type casting to int to convert FALSE/NULL/(TRUE?)
+      return (int) array_shift($args); // We don't need db_escape_string as numbers are db-safe
+    case '%s':
+      return mysql_real_escape_string(array_shift($args), _provision_db_connection());
+    case '%%':
+      return '%';
+    case '%f':
+      return (float) array_shift($args);
+    case '%b': // binary data
+      return "'" . mysql_real_escape_string(array_shift($args), _provision_db_connection()) . "'";
   }
+}
 
+function provision_db_close() {
+  if (_provision_db_connection()) {
+    $conn = _provision_db_connection();
+    mysql_close($conn);
+  }
 }

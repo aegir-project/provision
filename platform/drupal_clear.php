@@ -31,6 +31,6 @@ provision_log('notice', t('Rebuild node access cache'));
 
 menu_rebuild();
 provision_log('notice', t('Rebuild menu cache'));
-
-provision_output($argv[1], array());
+$data = array();
+provision_output($data);
 

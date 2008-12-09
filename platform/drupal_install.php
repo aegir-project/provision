@@ -318,4 +318,4 @@ function install_main() {
 }
 $data = array();
 install_main($url, $data);
-provision_output($argv[1], $data);
+provision_output($data);

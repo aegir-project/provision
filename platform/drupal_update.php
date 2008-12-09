@@ -132,4 +132,4 @@ function _update_do_one($module, $number, &$context) {
 }
 
 update_main($url, $data);
-provision_output($url, $data);
+provision_output($data);
