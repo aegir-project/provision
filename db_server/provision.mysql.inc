@@ -26,9 +26,8 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
   }
 
   $status = _provision_mysql_database_exists($db_name);
-  _provision_mysql_flush_privileges();
   provision_set_active_db();
-
+  
   return $status; 
    //TODO : Test to confirm that the database is actually writeable. Taking this on faith for now.
 }
@@ -58,7 +57,6 @@ function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_ho
       provision_log("warning", t("Failed to revoke user privileges"));
   }
 
-  _provision_mysql_flush_privileges();
   provision_set_active_db();
 }
 
@@ -73,10 +71,6 @@ function _provision_mysql_drop_database($name) {
 
 function _provision_mysql_create_database($name) {
   return db_query("CREATE DATABASE %s", $name);  
-}
-
-function _provision_mysql_flush_privileges() {
-  return db_query("FLUSH PRIVILEGES");  
 }
 
 /**
