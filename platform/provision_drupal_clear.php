@@ -7,7 +7,7 @@
 
 require_once(dirname(__FILE__) . '/../provision.inc');
 if ($argv[1]) {
-  provision_external_init($argv[1]);
+  $data = provision_external_init($argv[1]);
 }
 else {
   provision_set_error(PROVISION_FRAMEWORK_ERROR);
@@ -32,5 +32,5 @@ provision_log('notice', t('Rebuild node access cache'));
 menu_rebuild();
 provision_log('notice', t('Rebuild menu cache'));
 
-provision_output($argv[1], array());
+provision_output($argv[1], $data);
 
