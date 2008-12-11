@@ -13,7 +13,7 @@
  * @see provisionvalues
  */
 
-define('PROVISION_OUTPUT', 'PROVISION_OUTPUT>>>');
+define('PROVISION_OUTPUT', 'PROVISION_OUTPUT_START>>>%s<<<PROVISION_OUTPUT_END');
 
 /**
  * Invoke provision api calls. 
@@ -37,19 +37,10 @@ define('PROVISION_OUTPUT', 'PROVISION_OUTPUT>>>');
  *   A boolean specifying whether or not the command was successfully completed. 
  * 
  */
-function provision_invoke($hook, &$data, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL, $arg5 = NULL) {
-  $modules = module_list(FALSE, FALSE);
-  foreach ($modules as $module) {
-    $files = file_scan_directory(dirname($module['filename']), $hook . ".provision.inc$");
-    if (is_array($files)) {
-      foreach ($files as $filename => $info) {
-        include_once($filename);
-      }
-    }
-  }
+function provision_invoke($hook, $url, &$data) {
 
   // First we build a list of functions are about to execute
-  $variations = array($hook . "_validate", "pre_$hook", $hook, "post_$hook");
+  $variations = array("pre_$hook", $hook, "post_$hook");
   foreach ($variations as $var_hook) {
     foreach (module_implements("provision_$var_hook") as $name) {
       $functions[] = $name . '_provision_' . $var_hook;
@@ -61,11 +52,10 @@ function provision_invoke($hook, &$data, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
   foreach ($functions as $func) {
     $completed[] = $func;
     if (function_exists($func)) {
-      $func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
+      $func($url, $data);
       //this is run before and after so that messages appear in the correct order.
       _provision_log_messages();
       if (provision_get_error()) {
-        provision_log('error', pt('An error occurred at function : @func', array('@func' => $func)));
         # As soon as an error occurs, roll back
         $rollback = TRUE;
         break;
@@ -78,34 +68,14 @@ function provision_invoke($hook, &$data, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
     foreach (array_reverse($completed) as $func) {
       $rb_func = $func . '_rollback';
       if (function_exists($rb_func)) {
-        $rb_func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
+        $rb_func($url, $data);
         _provision_log_messages();
-        provision_log('Rollback', "Changes for $func module have been rolled back.");
+        provision_log('Rollback', "Changes for $name module have been rolled back.");
       }
     }
   }
 
   return !$rollback;
-}
-
-function provision_command($hook, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL, $arg5 = NULL) {
-  $data = array();
-  foreach (module_implements("provision_init") as $name) {
-    $func = $name . '_provision_init';
-    $func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
-    _provision_log_messages();
-  }
-  if (!provision_get_error()) {
-    $success = provision_invoke($hook, $data, $arg1, $arg2, $arg3, $arg4, $arg5);
-    if ($success) {
-      foreach (module_implements('provision_finalize') as $name) {
-        $func = $name . '_provision_finalize';
-        $func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
-        _provision_log_messages();
-      }
-    }
-  }
-  provision_output($data);
 }
 
 
@@ -131,24 +101,21 @@ function _provision_log_messages() {
 }
 
 function provision_parse_output($lines) {
-  $start = FALSE;
-  $output = '';
-  foreach ($lines as $line) {
-    if (preg_match('/^' . PROVISION_OUTPUT . '/', $line)) {
-      // found the start out output.
-      $line = str_replace(PROVISION_OUTPUT, '', $line);
-      $start = TRUE;
-    }
-    if ($start) {
-      $output .= $line;
-    }
-    else {
-      if (trim($line)) {
-        $messages[] = array('type' => 'warning', 'message' => $line, 'timestamp' => time());
-      }
+  $regex = sprintf(PROVISION_OUTPUT, '(.*)');
+  $string = implode("\n", $lines);
+
+  preg_match("/$regex/s", $string, $match);
+  if ($match[1]) {
+    // we have our serialized string
+    $output = $match[1];
+    // remove the match we just made and any non printing characters
+    $string = trim(str_replace(sprintf(PROVISION_OUTPUT, $match[1]), '', $string));
+    if ($string) {
+      $messages[] = array('type' => 'warning', 'message' => $string, 'timestamp' => time());
     }
   }
-  if ($start) {
+
+  if ($output) {
     $data = unserialize($output);
     if (is_array($data)) {
       if (is_array($messages)) {
@@ -167,12 +134,14 @@ function provision_parse_output($lines) {
  * Provides support for the -b/--backend flag to drush, which returns a serialized data structure.
  * This feature is used for communication with the front end.
  *
+ * @param url
+ *   The url of the site being invoked.
  * @param data
  *    The complete associative array containing all the aggregated site settings.
  * @param extra
  *   An associative array containing additional data to be returned from the command. @see provision_stats_stats()
  */
-function provision_output($data = array()) {
+function provision_output($url = NULL, $data = array(), $extra = NULL) {
   $return = $extra;
 
   $return['site'] = $data;
@@ -184,7 +153,7 @@ function provision_output($data = array()) {
   $return['log'] = provision_get_log(); // Append logging information
   $return['messages'] = drupal_get_messages();
   if (PROVISION_DRUSH_BACKEND) {
-    print PROVISION_OUTPUT . serialize($return);
+    printf(PROVISION_OUTPUT, serialize($return));
   }
   else {
     if ($return) {
@@ -391,7 +360,7 @@ function provision_load_site_data($url) {
  * @param data
  *   The complete data structure that has been created. Only settings that have been changed will be recorded.
  */
-function provision_save_site_data($data, $url) {
+function provision_save_site_data($url, $data) {
   global $args;
   $conf_file = "sites/$url/site.php";
 
@@ -399,14 +368,6 @@ function provision_save_site_data($data, $url) {
   $options = array();
   include(PROVISION_DOCROOT_PATH . '/drushrc.php'); // load drush rc
   $exclude = array_merge($exclude, array_keys($options));
-
-  foreach (array('themes', 'engines', 'profiles', 'modules') as $type) {
-    if (is_array($data[$type])) {
-      foreach ($data[$type] as $name => $info) {
-        $data[$type][$name] = (array) $info;
-      }
-    }
-  }
 
   //initialize the file. this is lame, i know. but it will work.
   $fp = fopen($conf_file, 'w'); //Append to the end of the config file.
@@ -680,9 +641,7 @@ function provision_exec($cmd, &$data) {
   provision_log('command', t('Running: @cmd', array('@cmd' => $cmd)));
   $values = provision_parse_output($return);
   if (is_array($values)) {
-    if (is_array($values['site'])) {
-      $data = array_merge($data, $values['site']);
-    }
+    $data = array_merge($data, $values['site']);
     foreach ($values['log'] as $log) {
       provision_log($log['type'], $log['message']);
     }
@@ -744,7 +703,6 @@ function pt($string, $args = array()) {
  * Some scripts need to run with drupal as the only active database, and this allows us to do that.
  */
 function provision_external_init($url, $bootstrap = TRUE) {
-  $url = ($url) ? $url : 'default';
   $drupal_base_url = parse_url(sprintf("http://" . $url));
   $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
   $_SERVER['PHP_SELF'] = $drupal_base_url['path'].'/install.php';
@@ -752,7 +710,7 @@ function provision_external_init($url, $bootstrap = TRUE) {
   $_SERVER['REMOTE_ADDR'] = '';
   $_SERVER['REQUEST_METHOD'] = NULL;
   $_SERVER['SERVER_SOFTWARE'] = NULL;
-  define('PROVISION_DRUSH_BACKEND', TRUE);
+
   if ($bootstrap) {
     include_once('includes/bootstrap.inc');
     drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
