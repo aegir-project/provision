@@ -12,7 +12,7 @@
  * @see provisionvalues
  */
 
-define('PROVISION_OUTPUT', 'PROVISION_OUTPUT>>>');
+define('PROVISION_OUTPUT', 'PROVISION_OUTPUT_START>>>%s<<<PROVISION_OUTPUT_END');
 
 /**
  * Invoke provision api calls. 
@@ -100,24 +100,21 @@ function _provision_log_messages() {
 }
 
 function provision_parse_output($lines) {
-  $start = FALSE;
-  $output = '';
-  foreach ($lines as $line) {
-    if (preg_match('/^' . PROVISION_OUTPUT . '/', $line)) {
-      // found the start out output.
-      $line = str_replace(PROVISION_OUTPUT, '', $line);
-      $start = TRUE;
-    }
-    if ($start) {
-      $output .= $line;
-    }
-    else {
-      if (trim($line)) {
-        $messages[] = array('type' => 'warning', 'message' => $line, 'timestamp' => time());
-      }
+  $regex = sprintf(PROVISION_OUTPUT, '(.*)');
+  $string = implode("\n", $lines);
+
+  preg_match("/$regex/s", $string, $match);
+  if ($match[1]) {
+    // we have our serialized string
+    $output = $match[1];
+    // remove the match we just made and any non printing characters
+    $string = trim(str_replace(sprintf(PROVISION_OUTPUT, $match[1]), '', $string));
+    if ($string) {
+      $messages[] = array('type' => 'warning', 'message' => $string, 'timestamp' => time());
     }
   }
-  if ($start) {
+
+  if ($output) {
     $data = unserialize($output);
     if (is_array($data)) {
       if (is_array($messages)) {
@@ -155,7 +152,7 @@ function provision_output($url = NULL, $data = array(), $extra = NULL) {
   $return['log'] = provision_get_log(); // Append logging information
   $return['messages'] = drupal_get_messages();
   if (PROVISION_DRUSH_BACKEND) {
-    print PROVISION_OUTPUT . serialize($return);
+    printf(PROVISION_OUTPUT, serialize($return));
   }
   else {
     if ($return) {

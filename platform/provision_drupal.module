@@ -66,7 +66,7 @@ function _provision_drupal_default_template() {
  *   A reference to the associated array containing the data for the site. This needs to be a reference, 
  *   because the modules might provide additional information about the site.
  */
-function _provision_drupal_create_settings_file($url, $data) {
+function _provision_drupal_create_settings_file($url, &$data) {
   provision_log('notice', t("Generate settings.php file"));
   if (provision_path("exists", "sites/$url/settings.php")) {
     provision_path("chmod", "sites/$url/settings.php", 0640,
