@@ -8,61 +8,8 @@
  * and all the install api code. 
  */
 
-
-/**
- * Initialize the platform / site
- *
- * This function is executed by provision_invoke, and is responsible
- * for populating the $data context array
- */
-function provision_drupal_provision_init(&$data, $url = NULL) {
-  if ($url) {
-    define('PROVISION_ACTIVE_URL', $url);
-    $data = provision_get_site_data($url); // load the existing site's context into the system.
-  }
-  define('PROVISION_CONTEXT_SITE', ($url) ? TRUE : FALSE);
-  define('PROVISION_CONTEXT_PLATFORM', !PROVISION_CONTEXT_SITE);
-}
-
-/**
- * Finalize the platform / site
- *
- * This will run only if there were no errors in any of the previous hooks,
- * and will allow us to cache the successful settings to the site.php/ drushrc.php
- * files for future runs.
- */
-function provision_drupal_provision_finalize(&$data, $url = NULL) {
-  if (PROVISION_CONTEXT_SITE) {
-    provision_save_site_data($data, $url);
-  }
-  else {
-    _provision_generate_config();
-  }
-}
-
-/**
- * Some commands need to have a url to operate on.
- *  This prints out a message to that effect.
- */
-function _provision_drupal_url_required() {
-  if (PROVISION_CONTEXT_PLATFORM) {
-    provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    provision_log('error', pt('You need to specify the URL argument for this command'));
-  }
-}
-
-/**
- * Validate a site exists, ie: has a settings.php file
- *
- * This will return an error for sites that haven't been created yet
- */
-function _provision_drupal_valid_site() {
-  if (PROVISION_CONTEXT_SITE) {
-    if (!_provision_drupal_site_exists(PROVISION_ACTIVE_URL)) {
-      provision_set_error(PROVISION_SITE_NOT_FOUND);
-      provision_log("error", "Site could not be found.");
-    }
-  }
+function provision_drupal_provision_service() {
+  return array('drupal' => t("Drupal sites"));
 }
 
 /**
@@ -77,33 +24,6 @@ function _provision_drupal_site_exists($url) {
   return file_exists("sites/$url/settings.php");
 }
 
-
-/**
- * Validate a site has been installed, by checking it's site.php file. 
- *
- * This will return an error for sites that haven't been installed yet
- */
-function _provision_drupal_valid_installed_site() {
-  if (PROVISION_CONTEXT_SITE) {
-    if (!_provision_drupal_site_installed(PROVISION_ACTIVE_URL)) {
-      provision_set_error(PROVISION_SITE_NOT_FOUND);
-      provision_log("error", "Site has not been installed yet.");
-    }
-  }
-}
-
-function _provision_drupal_valid_not_installed_site() {
-  if (PROVISION_CONTEXT_SITE) {
-    if (_provision_drupal_site_installed(PROVISION_ACTIVE_URL)) {
-      provision_set_error(PROVISION_SITE_INSTALLED);
-      provision_log('error', pt('This site has already been installed.'));
-    }
-  }
-}
-
-/**
- * Test to see if the site has a site.php and has it set to 'installed'
- */
 function _provision_drupal_site_installed($url) {
   if (_provision_drupal_site_exists($url)) {
     if ($data = provision_load_site_data($url)) {
@@ -111,6 +31,20 @@ function _provision_drupal_site_installed($url) {
     }
   }
   return FALSE;
+}
+
+/**
+ * Implentation of hook_provision_backup()
+ */
+function provision_drupal_provision_backup($url, $data) {
+  // Adds the site directory into the backup file
+  provision_log("backup", "Adding sites directory to $data[backup_file].gz");
+  $result = provision_shell_exec("cd %s; tar -rf %s * ", "sites/$url",  $data['backup_file']);
+
+  if (!$result) {
+    provision_log("error", "Could not back up sites directory for drupal");
+    provision_set_error(PROVISION_FRAMEWORK_ERROR);
+  }
 }
 
 /**
@@ -132,12 +66,18 @@ function _provision_drupal_default_template() {
  *   A reference to the associated array containing the data for the site. This needs to be a reference, 
  *   because the modules might provide additional information about the site.
  */
-function _provision_drupal_create_settings_file(&$data, $url = NULL) {
+function _provision_drupal_create_settings_file($url, $data) {
   provision_log('notice', t("Generate settings.php file"));
   if (provision_path("exists", "sites/$url/settings.php")) {
     provision_path("chmod", "sites/$url/settings.php", 0640,
       t('Changed permissions of settings.php to @confirm'),
       t('Could not change permissions of settings.php to @confirm'));
+  }
+
+  $data['extra_config'] = "# Extra configuration from modules:\n";
+  foreach (module_implements('provision_drupal_config') as $module) {
+    $data['extra_config'] .= "# -- $module settings --\n";
+    $data['extra_config'] .= module_invoke($module, 'provision_drupal_config', $url, $data) . "\n";
   }
 
   $fp = fopen("sites/$url/settings.php", "w");
@@ -201,11 +141,164 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
 }
 
 /**
+ * Switch the active database to the newly created database
+ *
+ * This function tricks Drupal into thinking that it's running on an uninstalled site,
+ * so that it can cleanly install the database schema. It also handles switching back to the 
+ * main provisioning site.
+ */
+function _provision_drupal_switch_active_site($url = NULL) {
+  static $backups;
+  if ($url) {
+    /* Pretend to be the site being installed */
+    
+    // Fake the necessary HTTP headers that Drupal needs:
+    $_SERVER['HTTP_HOST'] = $url;
+    $_SERVER['PHP_SELF'] = '/index.php';
+
+    $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF']; // Coder generates a warning. But this is correct.
+    $_SERVER['REMOTE_ADDR'] = NULL;
+    $_SERVER['REQUEST_METHOD'] = NULL;
+
+    /**
+     * This code is sourced from bootstrap.inc. I am trying to avoid patching core, but it might
+     * be smarter to make a small patch to allow core to re-initialize itself more easily
+     */
+
+    // Export the following settings.php variables to the global namespace
+    global $base_url, $base_path, $base_root;
+    global  $cookie_domain, $conf, $profile, $profile, $db_prefix;
+ 
+    // This is just for backup, to be able to restore to the old DRUSH system.
+    $backups = compact("active_db", "base_url", "base_path", "db_prefix", "cookie_domain", "conf", "profile");
+    
+    include_once $_SERVER['DOCUMENT_ROOT'] .'sites/'. $url .'/settings.php';
+
+    // Create base URL
+     $base_root = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
+     $base_url = $base_root .= '://'. preg_replace('/[^a-z0-9-:._]/i', '', $_SERVER['HTTP_HOST']);
+     if ($dir = trim(dirname($_SERVER['SCRIPT_NAME']), '\,/')) {
+       $base_path = "/$dir";
+       $base_url .= $base_path;
+       $base_path .= '/';
+     }
+     else {
+       $base_path = '/';
+     }
+     provision_set_active_db($db_url);
+
+  }
+  else {
+    /**
+    * Restore everything to the way it was before we switched sites.
+    */
+    // Fake the necessary HTTP headers that Drupal needs:
+    $drupal_base_url = parse_url(DRUSH_URI);
+    $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
+    $_SERVER['PHP_SELF'] = $drupal_base_url['path'] .'/index.php';
+    
+    $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF']; // Coder generates a warning, but this is correct.
+    $_SERVER['REMOTE_ADDR'] = NULL;
+    $_SERVER['REQUEST_METHOD'] = NULL;
+    
+    global $base_url, $base_path, $base_root;
+    // Export the following settings.php variables to the global namespace
+    global $db_prefix, $cookie_domain, $conf, $profile;
+
+    // This is just for backup, to be able to restore to the old DRUSH system.
+    extract($backups, EXTR_OVERWRITE);
+    provision_set_active_db();
+  }
+}
+
+function provision_drupal_provision_post_restore($url, $data) {
+  _provision_drupal_create_settings_file($url, $data);
+}
+
+function provision_drupal_provision_restore($url, $data) {
+  $old = PROVISION_SITES_PATH ."/$url.restore";
+  $new = PROVISION_SITES_PATH ."/$url";
+  provision_path("switch_paths", $old, $new ,
+    t('Swapping out the @path and @confirm directories was successful.'),
+    t('Swapping the @path and @confirm directories has failed.'),
+    PROVISION_PERM_ERROR);
+  // make sure it has the latest site data available
+  provision_save_site_data($url, $data);
+}
+
+// Luckily this is reversable =)
+function provision_drupal_provision_restore_rollback($url, $data) {
+  provision_drupal_provision_restore($url, $data);
+}
+
+function provision_drupal_provision_pre_install($url, &$data) {
+ // This is the actual drupal provisioning requirements. 
+ _provision_drupal_create_directories($url, $data['profile']);
+ // Requires at least the database settings to complete.
+ _provision_drupal_create_settings_file($url, $data);
+}
+
+
+function provision_drupal_provision_install($url, &$data) {
+  $cmd = sprintf("php %s/install.php %s %s %s %s", dirname(__FILE__), escapeshellarg($url), escapeshellarg($data['profile']), escapeshellarg($data['language']), escapeshellarg($data['client_email']));
+  if (provision_exec($cmd, $data)) {
+    $data['installed'] = TRUE;
+    // Create symlinks for site aliases (if any)
+    _provision_drupal_maintain_aliases($url, $data);
+  }
+}
+
+function provision_drupal_provision_post_install($url, &$data) {
+ if ($url) {
+   provision_path("chmod", "./sites/$url/settings.php", 0440, t("Secured settings.php with safe permissions"));
+   _provision_drupal_rebuild_caches($url, $data);
+ }
+}
+
+
+/**
+ * implementation of provision_verify
+ */
+function provision_drupal_provision_verify($url, &$data) {
+  if (!$url) {
+    provision_path("writable", "sites", TRUE, t("Drupal sites directory is writable by the provisioning script"),
+      t("Drupal sites directory is not writable by the provisioning script"), PROVISION_PERM_ERROR);
+    $exists = _provision_create_dir(PROVISION_DRUSHRC_PATH, t('Drush configuration path'), 0700);
+    $data['modules'] = _provision_drupal_get_cvs_versions(module_rebuild_cache());
+    // Find theme engines
+    $data['engines'] = drupal_system_listing('\.engine$', 'themes/engines');
+    $data['profiles'] = _provision_find_profiles();
+    $data['themes'] = system_theme_data();
+    $data['platform'] = array('short_name' => 'drupal', 'version' => VERSION);  
+    provision_log('notice', t("This platform is running @short_name @version", 
+      array('@short_name' => 'drupal', '@version' => VERSION)));  
+    $sites = provision_drupal_find_sites(); 
+    $data['sites'] = array_keys($sites); // return list of hosted sites. used to determine whether or not to import. 
+  }
+  else {
+      // This is the actual drupal provisioning requirements. 
+    _provision_drupal_create_directories($url, $data['profile']);
+    _provision_drupal_maintain_aliases($url, $data);
+    // Requires at least the database settings to complete.
+    _provision_drupal_create_settings_file($url, $data);
+  }
+}
+
+/**
+ * Implementation of hook_provision_post_verify
+ */
+function provision_drupal_provision_post_verify($url, &$data) {
+  if ($url) {
+    _provision_drupal_rebuild_caches($url, $data);
+  }
+}
+
+/**
  * Runs an external script to reload all the various drupal caches
  */
-function _provision_drupal_rebuild_caches(&$data, $url = NULL) {
+function _provision_drupal_rebuild_caches($url, &$data) {
   if ($url) {
-    $cmd = sprintf("php %s/drupal_clear.php %s", dirname(__FILE__), escapeshellarg($url));
+    $cmd = sprintf("php %s/provision_drupal_clear.php %s", dirname(__FILE__), escapeshellarg($url));
     provision_exec($cmd, $data);
   }
 }
@@ -256,6 +349,20 @@ function _provision_find_profiles() {
 
 }
 
+/**
+ * Remove any directories for the site in sites
+ * This can't be rolled back. so won't even try.
+ */
+function provision_drupal_provision_delete($url, $data) {
+  if ($old_data = provision_load_site_data($url)) {
+    if (sizeof($old_aliases = $old_data['aliases'])) {
+      _provision_drupal_delete_aliases($old_aliases);
+    }
+  }
+
+  return _provision_recursive_delete("sites/$url");
+}
+
 function provision_drupal_find_sites() {
   if ($dir = opendir("./sites")) {
     while (FALSE !== ($subdir = readdir($dir))) {
@@ -289,14 +396,20 @@ function _provision_drupal_get_cvs_versions($files) {
   return $files;
 }
 
+function provision_drupal_provision_import($url, &$data) {
+  $info = _provision_drupal_import_site($url, $data);
+  if ($info['installed']) {
+    provision_log("notice", "Returning information for $url");
+  }
+  return TRUE;
+}
 
-
-function _provision_drupal_import_site(&$data, $url = NULL) {
+function _provision_drupal_import_site($url, &$data) {
   if (!($data = provision_get_site_data($url))) {
     $data = array(); // initialize site data to empty array
   }
 
-  $cmd = sprintf("php %s/drupal_import.php %s", dirname(__FILE__), escapeshellarg($url));
+  $cmd = sprintf("php %s/provision_drupal_import.php %s", dirname(__FILE__), escapeshellarg($url));
   if (provision_exec($cmd, $data)) {
     $data['installed'] = TRUE;
   }
@@ -322,8 +435,8 @@ function _provision_drupal_variable_get($name, $default) {
 /**
  * Create and remove symlinks for each of the possible domain aliases of an existing site
  */
-function _provision_drupal_maintain_aliases($data, $url) {
-  if (PROVISION_PLATFORM_SITE) {
+function _provision_drupal_maintain_aliases($url, $data) {
+  if ($url) {
     $old_aliases = array();
     if ($old_data = provision_load_site_data($url)) {
       if (is_array($old_data['aliases'])) {
