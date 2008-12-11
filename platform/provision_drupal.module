@@ -66,12 +66,18 @@ function _provision_drupal_default_template() {
  *   A reference to the associated array containing the data for the site. This needs to be a reference, 
  *   because the modules might provide additional information about the site.
  */
-function _provision_drupal_create_settings_file($url, &$data) {
+function _provision_drupal_create_settings_file($url, $data) {
   provision_log('notice', t("Generate settings.php file"));
   if (provision_path("exists", "sites/$url/settings.php")) {
     provision_path("chmod", "sites/$url/settings.php", 0640,
       t('Changed permissions of settings.php to @confirm'),
       t('Could not change permissions of settings.php to @confirm'));
+  }
+
+  $data['extra_config'] = "# Extra configuration from modules:\n";
+  foreach (module_implements('provision_drupal_config') as $module) {
+    $data['extra_config'] .= "# -- $module settings --\n";
+    $data['extra_config'] .= module_invoke($module, 'provision_drupal_config', $url, $data) . "\n";
   }
 
   $fp = fopen("sites/$url/settings.php", "w");
