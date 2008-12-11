@@ -100,9 +100,8 @@ function _provision_log_messages() {
 
 }
 
-function provision_parse_output($lines) {
+function provision_parse_output($string) {
   $regex = sprintf(PROVISION_OUTPUT, '(.*)');
-  $string = implode("\n", $lines);
 
   preg_match("/$regex/s", $string, $match);
   if ($match[1]) {
@@ -633,27 +632,55 @@ function provision_posix_groupname($group) {
   return $group;
 }
 
+function provision_proc_open($cmd, &$data = NULL) {
+  $descriptorspec = array(
+     0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
+     1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+     2 => array("file", "/tmp/error-output.txt", "a") // stderr is a file to write to
+  );
+
+  $process = proc_open($cmd, $descriptorspec, $pipes, null, null, array('context' => $context));
+  if (is_resource($process)) {
+    if ($data) {
+      fwrite($pipes[0], serialize($data)); // pass the data array in a serialized string
+    }
+    fclose($pipes[0]);
+    $info = stream_get_meta_data($pipes[1]);
+    stream_set_timeout($pipes[1], 1);
+    while (! ($string = stream_get_contents($pipes[1]))) { 
+      sleep(1); 
+    };
+    fclose($pipes[1]);
+    $code = proc_close($process);
+    return array('cmd' => $cmd, 'output' => $string, 'code' => $code);
+  }
+  return false;
+}
+
+
 /**
  * Run an external provision script and integrate it's output
  */
 function provision_exec($cmd, &$data) {
-  exec($cmd, $return, $code);
   provision_log('command', t('Running: @cmd', array('@cmd' => $cmd)));
-  $values = provision_parse_output($return);
-  if (is_array($values)) {
-    $data = array_merge($data, $values['site']);
-    foreach ($values['log'] as $log) {
-      provision_log($log['type'], $log['message']);
+  $proc = provision_proc_open($cmd, $data);
+  if ($proc['output']) {
+    $values = provision_parse_output($proc['output']);
+    if (is_array($values)) {
+      $data = array_merge($data, $values['site']);
+      foreach ($values['log'] as $log) {
+        provision_log($log['type'], $log['message']);
+      }
+      if (!($proc['code'] & PROVISION_SUCCESS)) {
+        provision_set_error($proc['code']);
+      }
+      return TRUE; 
     }
-    if (!($code & PROVISION_SUCCESS)) {
-      provision_set_error($code);
+    else {
+      provision_set_error(PROVISION_FRAMEWORK_ERROR);
+      provision_log('error',t("The command could not be executed succesfully (returned: !return, code: %code)", array("!return" => $proc['output'], "%code" =>  $proc['code'])));
+      return FALSE;
     }
-    return TRUE; 
-  }
-  else {
-    provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    provision_log('error',t("The command could not be executed succesfully (returned: !return, code: %code)", array("!return" => implode('', $return), "%code" =>  $code)));
-    return FALSE;
   }
 };
 
@@ -715,4 +742,13 @@ function provision_external_init($url, $bootstrap = TRUE) {
     include_once('includes/bootstrap.inc');
     drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
   }
+  ob_start();
+  print stream_get_contents(STDIN);
+  $string = ob_get_contents();
+  ob_end_clean();
+
+  if (trim($string)) {
+    return unserialize($string);
+  }
+  return TRUE;
 }

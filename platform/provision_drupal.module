@@ -85,6 +85,7 @@ function _provision_drupal_create_settings_file($url, &$data) {
   fwrite($fp, "<?php\n". provision_render_config($text, $data));
   fclose($fp);
 
+  unset($data['extra_config']);
   # Change the permissions of the file
   provision_path("chmod", "sites/$url/settings.php", 0440,
     t('Changed permissions of settings.php to @confirm'),
