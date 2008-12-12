@@ -466,7 +466,7 @@ function _provision_verify($url = NULL) {
   if (!$url) {
     // we are verifying a platform
     $data = array();
-    _provision_create_dir(PROVISION_CONFIG_PATH, t('Provision configuration'), 0700);
+    _provision_create_dir(PROVISION_CONFIG_PATH, t('Provision configuration'), 0755);
     _provision_create_dir(PROVISION_BACKUP_PATH, t('Web server configuration'), 0700);
   }
   else {
