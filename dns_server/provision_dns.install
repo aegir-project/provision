@@ -1,0 +1,62 @@
+<?php
+// $Id$
+function provision_dns_install() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql' :
+    case 'mysqli' :
+      // The hosting_dns_server_zone table maps DNS server nodes onto zone IDs
+      db_query("CREATE TABLE {hosting_dns_server_zone} (
+        vid int NOT NULL DEFAULT '0',
+        nid int(10) unsigned NOT NULL DEFAULT '0',
+        zid int(10) unsigned NOT NULL DEFAULT '0',
+	rid int(10) unsigned NOT NULL DEFAULT '0',
+        KEY (vid, zid)
+      ) /*!40100 DEFAULT CHARACTER SET UTF8 */ ");
+
+      // The provision_dns_soa table defines zones
+      db_query("CREATE TABLE {provision_dns_soa} (
+        zid int(10) NOT NULL auto_increment,
+	origin char(255) NOT NULL,
+	ns1 char(255) NOT NULL,
+	ns2 char(255) NOT NULL,
+	mbox char(255) NOT NULL,
+	serial int(10) unsigned NOT NULL default '1',
+	refresh int(10) unsigned NOT NULL default '28800',
+	retry int(10) unsigned NOT NULL default '7200',
+	expire int(10) unsigned NOT NULL default '604800',
+	minimum int(10) unsigned NOT NULL default '86400',
+	ttl int(10) unsigned NOT NULL default '86400',
+	active ENUM('Y','N') NOT NULL,
+	xfer CHAR(255) NOT NULL,
+	PRIMARY KEY (zid),
+	UNIQUE KEY origin (origin),
+	KEY active (active)
+      ) /*!40100 DEFAULT CHARACTER SET UTF8 */ ");
+
+      // The provision_dns_rr table defines Resource Records
+      db_query("CREATE TABLE {provision_dns_rr} (
+        rid int(10) unsigned NOT NULL auto_increment,
+	zid int(10) unsigned NOT NULL,
+	name char(64) NOT NULL,
+	type char(64) default 'A',
+	data char(128) NOT NULL,
+	aux int(10) unsigned NOT NULL,
+	ttl int(10) unsigned default NULL,
+	PRIMARY KEY (rid),
+	UNIQUE KEY rr (zid,name,type,data)
+      ) /*!40100 DEFAULT CHARACTER SET UTF8 */ ");
+      break;
+  }
+}
+
+function provision_dns_uninstall() {
+  db_query("DROP TABLE {hosting_dns_server_zone}");
+  db_query("DROP TABLE {provision_dns_soa}"); // Should we tell the engine to remove these first?
+  db_query("DROP TABLE {provision_dns_rr}"); 
+}
+
+function provision_dns_update_1() {
+  $ret = array();
+  $ret[] = update_sql("ALTER TABLE hosting_site_zone RENAME TO hosting_dns_server_zone");
+  return $ret;
+}

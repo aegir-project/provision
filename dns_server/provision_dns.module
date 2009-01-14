@@ -1,0 +1,276 @@
+<?php
+// $Id$
+/**
+ * @file
+ *    DNS provisioning module.
+ *
+ * The goal of this module is to manage DNS zonefiles and Resource Records
+ * (RRs), for sites that are about to be created.  It uses the provision API to
+ * tie into the right places in the site creation work flow.
+ */
+
+/**
+ * This include creates an admin interface which was primarily built for
+ * testing, and requires munging of the secure permissions setup on the 
+ * config/named directory so the webserver can manage zones directly. 
+ * Eventually, we may want to incorporate this in a drush-driven way that
+ * maintains security, so I've left it here for future reference.
+ **/
+include_once(drupal_get_path('module', 'provision_dns') . '/provision_dns.admin.inc');
+
+# DNS API split off to a separate file for clarity
+include_once('provision_dns.api.inc');
+
+/**
+ * Implementation of hook_init
+ **/
+function provision_dns_init() {
+  define('PROVISION_NAMED_PATH', PROVISION_CONFIG_PATH .'/named');
+  
+}
+
+/**
+ * @ingroup provisionui
+ * @{
+ */
+function provision_dns_provision_service() {
+  return array("dns_server" => t("DNS server"));
+}
+
+/**
+ * Implementation of hook_help().
+ **/
+function provision_dns_help($section) {
+   switch ($section) {
+     case 'admin/help/provision#requirements':
+
+       $output .= _provision_requirements('named_path');
+       $output .= _provision_requirements('named_conf');
+       # Leaving this out for now, because I think it better fits into the engine module.. but not sure how that works yet
+       #$output .= _provision_requirements('named_visudo'); 
+       return $output;
+       break;
+   }
+ }
+
+/**
+ * Callback for the provision_requirements function called in hook_help.
+ **/
+function _provision_named_path_requirements() {
+   $username = PROVISION_SCRIPT_USER;
+   $named_path = PROVISION_CONFIG_PATH . '/named';
+   $mkdir_cmd['@named_path'] = $named_path;
+   $mkdir_cmd['@provision_dns_link'] = url('admin/settings/provision_dns');
+   $mkdir_cmd['@mkdir_cmd'] = <<<EOF
+     mkdir -p $named_path
+     chown $username:$username $named_path
+     chmod 0700 $named_path
+EOF;
+   
+   $help['title'] = t('DNS Server (BIND9) capable of creating new zonefiles.');
+   $help['summary'] = t('To be able to create new sites, the provisioning framework will need to be able
+     to create new zonefiles and RRs. It is not recommended using the bind user for this, 
+     but any account with the correct permissions will do.');
+   $help['configuration'][] = t('Based on your server configuration we have determined that your path should be <code>@named_path</code>,
+     but you can change this in the <a href="@provision_dns_link">DNS provisioning settings</a>.', $mkdir_cmd);
+   $help['configuration'][] = t(' please enter the following commands: <pre>@mkdir_cmd</pre>', $mkdir_cmd);
+
+  return $help;
+}
+
+/**
+ * Callback for the provision_requirements function called in hook_help.
+ **/
+function _provision_named_conf_requirements() {
+  $named_conf = PROVISION_NAMED_PATH . '/named.conf.drupal';
+  $named_line = <<<EOF
+   include "$named_conf"; 
+EOF;
+  $help['title'] = t('Modify the server\'s named.conf file');
+  $help['summary'] = t('To allow the system to create new zones (domains) that are generated,
+                        you are required to add a line to your named.conf file.</p>
+                        The location of this file differs between distributions,
+                        but is most commonly found in <code>/etc/bind</code> or <code>/etc/named</code>.');
+  $help['configuration'] = t('Once you have determined the location of your named.conf file, add the following line to it:
+                              <pre>@named_line</pre>', array('@named_line' => $named_line));
+
+  return $help;
+}
+
+/**
+ * Implementation of hook_provision_templates
+ * Defines a template of a stock zonefile, to be used when creating a new zone
+ * This stuff should also be in the bind engine, i think.. (and actually used!)
+ **/
+function provision_dns_provision_templates() {
+  $form['zonefile_template'] = array(
+    '#type' => 'textarea',
+    '#title' => t('BIND Zone file configuration template'),
+    '#description' => t('The text to use when generating a new zone file for BIND'),
+    '#default_value' => variable_get('provision_dns_zonefile_template', _provision_dns_default_template()),
+    '#cols' => 60,
+    '#rows' => 5,
+  );
+  return $form;
+}
+
+/**
+ * The default template provided for the zonefile configuration
+ **/
+function _provision_dns_default_template() {
+  return file_get_contents(drupal_get_path('module', 'provision_dns') ."/provision_dns_zonefile.tpl.php");
+}
+
+/**
+ * @} end "ingroup provisionui"
+ */
+
+/**
+ * Implementation of hook_provision_pre_install
+ **/
+function provision_dns_provision_pre_install($url, &$data) {
+#  if ($url) {
+#    $url_parts = _provision_dns_split_url($url);
+#    if (!isset($url_parts['zone'])) { 
+#      provision_set_error(PROVISION_FRAMEWORK_ERROR);
+#      return;
+#    }
+#
+#    $zone = provision_dns_create_zone($url_parts['zone'], $data);   # initialize zone for this domain (if it doesn't exist)
+#    provision_dns_create_record($url_parts['host'], $zone, $data);    # creates the RR for the (sub)domain
+#    provision_dns_commit($data['dns_id']);                            # makes the changes live (ie: restart bind)
+#  }
+}
+
+/**
+ * Implementation of hook_provision_pre_install_rollback
+ **/
+function provision_dns_provision_pre_install_rollback($url, &$data) {
+#  if ($url) {
+#    provision_dns_delete($url);
+#  }
+}
+
+/**
+ * Implementation of hook_provision_pre_restore
+ * This is a duplicate of the _pre_install hook
+ **/
+function provision_dns_provision_pre_restore($url, &$data) {
+  # re-install the zonefiles and/or resource records for the site?
+  provision_dns_provision_pre_restore($url, $data);
+}
+
+/**
+ * Implementation of hook_provision_pre_restore_rollback
+ * This duplicates the _pre_install_rollback hook
+ **/
+function provision_dns_provision_pre_restore_rollback($url, &$data) {
+  # remove them again?
+  if ($url) {
+    provision_dns_delete($url);
+  }
+}
+
+/**
+ * Implementation of hook_provision_delete()
+ *
+ * delete the RR for this site at least, but possibly also the zone itself?
+ * need to lookup the zid for the base zone of this site, and then call provision_dns_rr with the zid and site 'name'
+ * (ie: pull off the tld and second-level domain for the 'base' zone, and treat the rest as the 'name')
+ */
+function provision_dns_provision_delete($url, &$data) {
+  if ($url) {
+    provision_dns_delete($url);
+  }
+}
+
+/**
+ * Implementation of hook_provision_verify
+ *
+ * Can't be rolled back.
+ */
+function provision_dns_provision_verify($url, &$data) {
+  if (!$url) {
+    // we are verifying a platform
+    $data = array();
+    _provision_create_dir(PROVISION_NAMED_PATH, t('Provision DNS configuration'), 0755);
+# The above perms should really be 750, but that means the aegir user must be in the 'bind' group, so this will work:
+#    provision_path("chgrp", PROVISION_NAMED_PATH, 'bind', 
+#		   t('Changed group ownership of '.PROVISION_NAMED_PATH.' to @confirm'),
+#                   t('Could not change group ownership of '.PROVISION_NAMED_PATH.' to @confirm'));
+#  } else {
+#    provision_log("notice", "Hit provision_dns_provision_verify hook: $url");
+#    $url_parts = _provision_dns_split_url($url);
+#    if (!isset($url_parts['zone'])) { 
+#      provision_set_error(PROVISION_FRAMEWORK_ERROR);
+#      return;
+#    }
+#
+#    $zone = provision_dns_create_zone($url_parts['zone'], $data);   # initializes the zone for the domain (if it doesn't exist)
+#    provision_dns_create_record($url_parts['host'], $zone, $data);    # creates the RR for the (sub)domain
+#    provision_dns_commit($data['dns_id']);                            # makes the changes live (ie: restart bind)
+  }
+}
+
+// Utility functions
+
+/**
+ * Helper function to get the zid for a given zone
+ *
+ * @param $origin
+ *   The name (or origin) of the zone/domain
+ **/
+function _provision_dns_get_zid($origin) {
+  return db_result(db_query("SELECT zid FROM {provision_dns_soa} WHERE origin LIKE '%%%s%%'", $origin));
+}
+
+/**
+ * Need to modify this to use an admin-generated list of TLDs, and return the
+ * domain as the TLD plus one other component
+ * Examples:
+ *  domain.tld
+ *  www.domain.tld
+ *  sub.domain.tld
+ *  www.sub.domain.tld
+ *  sub.multi.domain.tld (domain has multiple parts before TLD, but after host?)
+ **/
+function _provision_dns_split_url($url) {
+  $tlds = split("\n", variable_get('provision_dns_tlds', ''));
+  $first_dot = strpos($url, '.');
+
+  # Strip off the first part
+  $host = substr($url, 0, $first_dot);
+  $zone = substr($url, $first_dot);
+
+  # If the remaining hostname is a TLD
+  if (in_array($zone, $tlds)) {
+    # Add the first part back, and that's the zone (the host is @)
+    $zone = $host . $zone;
+    $host = '@';
+  } else {
+    # that's the zone (and the host is the first part)
+    $zone = substr($zone, 1); # strip the leading .
+  }
+
+  return array('host' => $host, 'zone' => $zone);
+}
+
+/**
+ * Helper function to increment a zone's serial number.
+ * 
+ * @param $serial
+ *    A serial in YYYYMMDDnn format
+ * 
+ * @return
+ *    The serial, incremented based on current date and index
+ **/
+function _provision_dns_increment_serial($serial) {
+  $date = substr($serial, 0, 8); # Get the YYYYMMDD part
+  $index = substr($serial, 8, 2); # Get the index part
+  $today = date('Ymd');
+  if ($date == $today) {
+    return $date . sprintf('%02d', $index+1);
+  } else {
+    return $today . '01';
+  }
+}

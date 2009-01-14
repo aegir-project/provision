@@ -1,0 +1,4 @@
+name = Provision: DNS BIND
+description = Provides BIND engine for DNS provisioning 
+package = Provision
+dependencies = provision provision_dns
