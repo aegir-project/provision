@@ -40,9 +40,10 @@ function provision_drupal_provision_backup($url, $data) {
   // Adds the site directory into the backup file
   provision_log("backup", "Adding sites directory to $data[backup_file].gz");
   $result = provision_shell_exec("cd %s; tar -rf %s * ", "sites/$url",  $data['backup_file']);
+  $log = join('\n', _drush_shell_exec_output_set());
 
   if (!$result) {
-    provision_log("error", "Could not back up sites directory for drupal");
+    provision_log("error", t("Could not back up sites directory for drupal, error: @log", array('@log' => $log)));
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
   }
 }
