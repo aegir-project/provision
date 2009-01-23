@@ -42,7 +42,8 @@ function provision_drupal_provision_backup($url, $data) {
   $result = provision_shell_exec("cd %s; tar -rf %s * ", "sites/$url",  $data['backup_file']);
 
   if (!$result) {
-    provision_log("error", "Could not back up sites directory for drupal");
+    $log = join('\n', _drush_shell_exec_output_set());
+    provision_log("error", t("Could not back up sites directory for drupal, error: @log", array('@log' => $log)));
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
   }
 }
