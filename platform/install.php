@@ -166,7 +166,7 @@ function install_main() {
   }
 
   // Verify existence of all required modules.
-  $modules = drupal_verify_profile($profile, $language);
+  $modules = drupal_verify_profile($profile, $install_locale);
 
   if (!$modules) {
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
