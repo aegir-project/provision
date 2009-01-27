@@ -192,7 +192,6 @@ function provision_dns_provision_delete($url, &$data) {
 function provision_dns_provision_verify($url, &$data) {
   if (!$url) {
     // we are verifying a platform
-    $data = array();
     _provision_create_dir(PROVISION_NAMED_PATH, t('Provision DNS configuration'), 0755);
 # The above perms should really be 750, but that means the aegir user must be in the 'bind' group, so this will work:
 #    provision_path("chgrp", PROVISION_NAMED_PATH, 'bind', 
