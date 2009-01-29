@@ -277,7 +277,8 @@ function provision_dns_rr($op, $zone, $args) {
   $fields = array('name', 'type', 'data', 'aux', 'ttl');
   if (is_numeric($zone)) {
     $zone = provision_dns_status('zone', array('zid' => $zone));
-  } elseif (!is_object($zone)) {
+  }
+  if (!is_object($zone)) {
     return FALSE;  # Error, the zone doesn't seem to exist!
   }
 
