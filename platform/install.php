@@ -5,7 +5,7 @@
  */
 
 require_once(dirname(__FILE__) . '/../provision.inc');
-if (sizeof($argv) == 4) {
+if (sizeof($argv) >= 4) {
   // Fake the necessary HTTP headers that Drupal needs:
   provision_external_init($argv[1], FALSE);
   $GLOBALS['profile'] = $argv[2];
