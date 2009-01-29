@@ -100,14 +100,11 @@ function provision_init() {
     provision_output($url);
   }
 
-  // Load requested additional modules
-  provision_load_from_args();
-
   // Set up defines for platform
   $docroot = provision_get_option(array("r", "root"), $_SERVER['PWD']);
   $backend = provision_get_option(array('b', 'backend'), 0);
   define("PROVISION_DRUSH_BACKEND", $backend);
-  
+   
   define('PROVISION_DOMAIN', $_SERVER['HTTP_HOST']);
   // Paths
   $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
@@ -151,6 +148,9 @@ function provision_init() {
   // Drupal does not support multiple types of connections in the same session
   preg_match("$^([a-z]*)://$", $GLOBALS['db_url'], $matches);
   define('PROVISION_DB_TYPE', $matches[1]);
+
+  // Load requested additional modules
+  provision_load_from_args();
 }
 
 function _provision_default_restart_cmd() {

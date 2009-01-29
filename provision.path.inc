@@ -288,31 +288,31 @@ function provision_path_symlink($path, &$target, &$reason) {
  */
 function _provision_create_dir($path, $name, $perms) {
   $exists = provision_path("exists",$path, TRUE ,
-    $name . ' ' . t("path exists."),
-    $name . ' ' . t("path does not exist.")
+    $name . ' ' . t("path @path exists."),
+    $name . ' ' . t("path @path does not exist.")
   );
 
   if (!$exists) {
     $exists = provision_path("mkdir", $path, TRUE,
-      $name . ' ' . t("path has been created."),
-      $name . ' ' . t("path could not be created."),
+      $name . ' ' . t("path @path has been created."),
+      $name . ' ' . t("path @path could not be created."),
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
   }
 
   if ($exists) {
     provision_path("chown", $path, PROVISION_SCRIPT_USER, 
-      $name . ' ' . t("ownership of path has been changed to @confirm."),
-      $name . ' ' . t("ownership of path could not be changed to @confirm."),
+      $name . ' ' . t("ownership of path @path has been changed to @confirm."),
+      $name . ' ' . t("ownership of path @path could not be changed to @confirm."),
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
 
     provision_path("chmod", $path, $perms, 
-      $name . ' ' . t("permissions of path have been changed to @confirm."),
-      $name . ' ' . t("permissions of path could not be changed to @confirm."),
+      $name . ' ' . t("permissions of path @path have been changed to @confirm."),
+      $name . ' ' . t("permissions of path @path could not be changed to @confirm."),
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
 
     $writable = provision_path("writable", $path, TRUE,
-        $name . ' ' . t("path is writable."),
-        $name . ' ' . t("path is not writable."),
+        $name . ' ' . t("path @path is writable."),
+        $name . ' ' . t("path @path is not writable."),
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
 
   }
