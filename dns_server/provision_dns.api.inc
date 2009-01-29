@@ -15,16 +15,16 @@
  *   The zone object, whether newly created, or already existing.
  **/
 function provision_dns_create_zone($domain, $data) {
-  provision_log("Notice", t("Generate zone file for url: ") . $domain);
   $writable = provision_path("writable", PROVISION_NAMED_PATH, TRUE, NULL, 
                              t("DNS configuration path @path is not writable"), 
                              PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
 
   if ($zone = provision_dns_status('zone', array('domain' => $domain))) {
+    provision_log("Notice", t("Loading zone file for url @url", array('@url' => $domain)));
     return $zone;
   } else {
+    provision_log("Notice", t("Generating zone file for url @url on dns server @id", array('@url' => $domain, '@id' => $data['dns_id'])));
     # Setup args array from defaults
-    provision_log("notice", t("Loading DNS server with ID: ").$data['dns_id']);
     $dns = node_load($data['dns_id']);
     $zone_fields['dns_id'] = $data['dns_id'];
     $zone_fields['origin'] = $domain;
@@ -59,7 +59,7 @@ provision_log("notice", "provision_dns_create_zone ns_recs: ".$ns_recs[0].", ".$
  *   The record object, or FALSE if the record could not be created.
  **/
 function provision_dns_create_record($host, $zone, $data) {
-  provision_log("notice", t("Generate A record for url: ") . $host);
+  provision_log("notice", t("Creating %type record for url @url", array('%type' => $data['type'], '@url' => $host)));
   $rec['name'] = $host;
   $rec['type'] = $data['type']?$data['type']:'A';
   $rec['data'] = $data['dns_ip'];
