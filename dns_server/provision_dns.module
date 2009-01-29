@@ -24,9 +24,8 @@ include_once('provision_dns.api.inc');
 /**
  * Implementation of hook_init
  **/
-function provision_dns_init() {
+function provision_dns_provision_init() {
   define('PROVISION_NAMED_PATH', PROVISION_CONFIG_PATH .'/named');
-  
 }
 
 /**
