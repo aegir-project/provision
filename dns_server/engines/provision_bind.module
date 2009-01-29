@@ -158,7 +158,7 @@ function provision_bind_create_zone_config($zone) {
   $path = variable_get('provision_bind_zonedata', PROVISION_CONFIG_PATH .'/named');
   $conf = PROVISION_CONFIG_PATH . '/' . variable_get('provision_bind_conf', 'named.conf.drupal');
   
-  $zone_str = sprintf('zone "%s" { type master; file "%s/%s"; };%s', $zone->origin, $path, $zone->origin, "\n");
+  $zone_str = sprintf('zone "%s" { type master; file "%s/%s"; allow-query { any; }; };%s', $zone->origin, $path, $zone->origin, "\n");
 
   if ($fd = fopen($conf, "a")) {
     $fd = fwrite($fd, $zone_str);
