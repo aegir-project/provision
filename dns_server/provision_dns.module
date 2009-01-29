@@ -81,7 +81,7 @@ EOF;
  * Callback for the provision_requirements function called in hook_help.
  **/
 function _provision_named_conf_requirements() {
-  $named_conf = PROVISION_NAMED_PATH . '/named.conf.drupal';
+  $named_conf = PROVISION_CONFIG_PATH . '/named.conf';
   $named_line = <<<EOF
    include "$named_conf"; 
 EOF;

@@ -156,16 +156,18 @@ function provision_bind_provision_dns_rr($op, $zone, $record) {
 function provision_bind_create_zone_config($zone) {
   // add the zone to our local named.conf file
   $path = variable_get('provision_bind_zonedata', PROVISION_CONFIG_PATH .'/named');
-  $conf = $path . '/' . variable_get('provision_bind_conf', 'named.conf.drupal');
+  $conf = PROVISION_CONFIG_PATH . '/' . variable_get('provision_bind_conf', 'named.conf.drupal');
   
   $zone_str = sprintf('zone "%s" { type master; file "%s/%s"; };%s', $zone->origin, $path, $zone->origin, "\n");
 
   if ($fd = fopen($conf, "a")) {
-    fwrite($fd, $zone_str);
-    fclose($fd);
-  } else {
+    $fd = fwrite($fd, $zone_str);
+  }
+  if (!$fd) {
+    provision_log("Error", t("error adding the zone to the bind configuration in @path", array("@path" => $conf)));
     provision_set_error(PROVISION_PERM_ERROR);
   }
+  @fclose($fd);
 }
 
 /**
@@ -207,7 +209,7 @@ function provision_bind_update_zone($zone, $exists = FALSE) {
   }
 
   $path = variable_get('provision_bind_zonedata', PROVISION_CONFIG_PATH .'/named');
-  $conf = $path . '/' . variable_get('provision_bind_conf', 'named.conf.drupal');
+  $conf = PROVISION_CONFIG_PATH . '/' . variable_get('provision_bind_conf', 'named.conf.drupal');
 
   if ($exists && isset($zone->old_origin)) { 				  # The name of the zone has changed
 #provision_log("notice", "Updating zone ".$zone->old_origin." to ".$zone->origin);
@@ -234,7 +236,7 @@ function provision_bind_update_zone($zone, $exists = FALSE) {
 function provision_bind_delete_zone($zone) {
   # Remove the zone from the named.conf file..
   $path = variable_get('provision_bind_zonedata', PROVISION_CONFIG_PATH .'/named');
-  $conf = $path . '/' . variable_get('provision_bind_conf', 'named.conf.drupal');
+  $conf = PROVISION_CONFIG_PATH . '/' . variable_get('provision_bind_conf', 'named.conf.drupal');
   $zone_re = sprintf('^zone..%s.*$', $zone->origin);
   _provision_bind_editfile($conf, $zone_re);
 
