@@ -549,7 +549,6 @@ function provision_set_active_db($new_db_url = NULL) {
   }
 }
 
-
 /**
  * Close an active connection
  *
