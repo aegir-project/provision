@@ -147,7 +147,7 @@ function _provision_mysql_suggest_db_name($url, $data) {
   else {
     // This is a last option, and not ideal
     // Provision only users will trigger this mostly.
-    $url_suggest = substr(0, 14, str_replace(array(".", "-"), '' , ereg_replace("^www\.", "", $url)));
+    $url_suggest = substr(str_replace(array(".", "-"), '' , ereg_replace("^www\.", "", $url)), 0, 14);
     $suggest[] = $url_suggest;
     for ($i = 0; $i < 100; $i++) {
       $suggest[] = $url_suggest .'_'. $i;
