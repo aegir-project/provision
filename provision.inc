@@ -326,7 +326,7 @@ function provision_get_site_data($url) {
     $site_data = array_merge($old_data, $site_data);    
   }
   
-  if ($site_data['aliases']) {
+  if ($site_data['aliases'] && !is_array($site_data['aliases'])) {
     $site_data['aliases'] = explode(",", $site_data['aliases']);
   }  
   return $site_data;
