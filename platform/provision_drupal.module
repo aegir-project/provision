@@ -401,28 +401,16 @@ function _provision_drupal_get_cvs_versions($files) {
 }
 
 function provision_drupal_provision_import($url, &$data) {
-  $info = _provision_drupal_import_site($url, $data);
-  if ($info['installed']) {
-    provision_log("notice", "Returning information for $url");
-  }
-  return TRUE;
-}
-
-function _provision_drupal_import_site($url, &$data) {
-  if (!($data = provision_get_site_data($url))) {
-    $data = array(); // initialize site data to empty array
-  }
-
   $cmd = sprintf("php %s/provision_drupal_import.php %s", dirname(__FILE__), escapeshellarg($url));
   if (provision_exec($cmd, $data)) {
     $data['installed'] = TRUE;
+    provision_log("notice", "Returning information for $url");
   }
   else {
     $data['installed'] = FALSE;
   }
-  provision_save_site_data($url, $data);
 
-  return $data;
+  return TRUE;
 }
 
 /**
