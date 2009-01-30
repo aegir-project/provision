@@ -459,6 +459,7 @@ function _provision_import($url) {
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
     provision_output($url, $data);
   }
+  $data = provision_get_site_data($url);
   provision_invoke("import", $url, $data);
   provision_output($url, $data);
 }
