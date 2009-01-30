@@ -343,8 +343,8 @@ function provision_get_site_data($url) {
 function provision_load_site_data($url) {
   //Load the configuration data.
   $conf_file = "sites/$url/site.php";
-  provision_path('chmod', $conf_file, 0400);
-  if (file_exists($conf_file) && is_readable($conf_file)) {
+  if (file_exists($conf_file)) {
+    provision_path('chmod', $conf_file, 0400);
     require($conf_file);
     return (array) $data;
   }
@@ -367,7 +367,9 @@ function provision_save_site_data($url, $data) {
   $options = array();
   include(PROVISION_DOCROOT_PATH . '/drushrc.php'); // load drush rc
   $exclude = array_merge($exclude, array_keys($options));
-  provision_path("chmod", $conf_file, 0600, t("Made site.php file writable"));
+  if (file_exists($conf_file) && !is_readable($conf_file)) {
+    provision_path("chmod", $conf_file, 0600, t("Made site.php file writable"));
+  }
   //initialize the file. this is lame, i know. but it will work.
   $fp = fopen($conf_file, 'w'); //Append to the end of the config file.
   if (!$fp) {
