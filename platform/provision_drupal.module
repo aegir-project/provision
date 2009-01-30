@@ -267,7 +267,6 @@ function provision_drupal_provision_verify($url, &$data) {
   if (!$url) {
     provision_path("writable", "sites", TRUE, t("Drupal sites directory is writable by the provisioning script"),
       t("Drupal sites directory is not writable by the provisioning script"), PROVISION_PERM_ERROR);
-    $exists = _provision_create_dir(PROVISION_DRUSHRC_PATH, t('Drush configuration path'), 0700);
     $data['modules'] = _provision_drupal_get_cvs_versions(module_rebuild_cache());
     // Find theme engines
     $data['engines'] = drupal_system_listing('\.engine$', 'themes/engines');
