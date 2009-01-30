@@ -367,7 +367,7 @@ function provision_save_site_data($url, $data) {
   $options = array();
   include(PROVISION_DOCROOT_PATH . '/drushrc.php'); // load drush rc
   $exclude = array_merge($exclude, array_keys($options));
-  if (file_exists($conf_file) && !is_readable($conf_file)) {
+  if (file_exists($conf_file) && !is_writable($conf_file)) {
     provision_path("chmod", $conf_file, 0600, t("Made site.php file writable"));
   }
   //initialize the file. this is lame, i know. but it will work.

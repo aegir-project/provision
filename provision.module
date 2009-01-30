@@ -335,8 +335,7 @@ function provision_drush_command() {
   if (!function_exists('hosting_setup')) {
     $items['provision setup'] = array(
       'callback' => '_provision_setup_cmd',
-      'description' => 'Initialize this platform to be able to create hosted sites.',
-    );
+      'description' => 'Initialize this platform to be able to create hosted sites.',);
   }
 
   /*
@@ -461,6 +460,8 @@ function _provision_import($url) {
   }
   $data = provision_get_site_data($url);
   provision_invoke("import", $url, $data);
+
+  provision_save_site_data($url, $data);
   provision_output($url, $data);
 }
 
