@@ -2,14 +2,18 @@
 
 require_once(dirname(__FILE__) . '/../provision.inc');
 if ($argv[1]) {
-  provision_external_init($argv[1]);
+  $data = provision_external_init($argv[1]);
 }
 else {
   provision_set_error(PROVISION_FRAMEWORK_ERROR);
   provision_log("error", "USAGE: import.php url\n");
 }
 
-if ($parts = @parse_url($GLOBALS['db_url'])) {
+if (is_array($GLOBALS['db_url'])) {
+  $db_url = $GLOBALS['db_url']['default'];
+}
+
+if ($parts = @parse_url($db_url)) {
   $data['db_type'] = $parts['scheme'];
   $data['db_user'] = $parts['user'];
   $data['db_host'] = $parts['host'];
