@@ -3,6 +3,10 @@
 
 // Admin configuration hooks
 
+function provision_dns_perm() {
+  return array('administer DNS provisioning');
+}
+
 /**
  * Implementation of hook_menu().
  **/
@@ -14,7 +18,7 @@ function provision_dns_menu($may_cache) {
       'description' => t('Configure DNS Provisioning'),
       'callback' => 'drupal_get_form',
       'callback arguments' => 'provision_dns_settings',
-      'access' => TRUE,
+      'access' => user_access('administer DNS provisioning'),
     );
     $items[] = array(
       'path' => 'admin/settings/provision_dns/general',
@@ -28,8 +32,7 @@ function provision_dns_menu($may_cache) {
       'title' => t('DNS Provisioning Admin'),
       'description' => t('Manually administer DNS zones and records'),
       'callback' => 'provision_dns_admin',
-      #'callback arguments' => 'provision_dns_admin',
-      'access' => TRUE,
+      'access' => user_access('administer DNS provisioning'),
     );
     $items[] = array(
       'path' => 'admin/build/provision_dns/list',
