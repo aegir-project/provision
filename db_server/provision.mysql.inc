@@ -21,7 +21,7 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
    return FALSE;
   }
   
-  if (!_provision_mysql_grant($db_name, $db_user, $db_passwd)) {
+  if (!_provision_mysql_grant($db_name, $db_user, $db_passwd) || !_provision_mysql_grant($db_name, $db_user, $db_passwd, 'localhost') ) {
     provision_log("warning", "Could not GRANT user access.");
   }
 
@@ -53,7 +53,7 @@ function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_ho
   }
   
   provision_log("notice", "Revoking privileges");
-  if (!_provision_mysql_revoke($db_name, $db_user)) {
+  if (!_provision_mysql_revoke($db_name, $db_user) || !_provision_mysql_revoke($db_name, $db_user, 'localhost')) {
       provision_log("warning", t("Failed to revoke user privileges"));
   }
 
