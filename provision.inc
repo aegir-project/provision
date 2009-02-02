@@ -13,7 +13,7 @@
  * @see provisionvalues
  */
 
-define('PROVISION_OUTPUT', 'PROVISION_OUTPUT>>>');
+define('PROVISION_OUTPUT', 'PROVISION_OUTPUT_START>>>%s<<<PROVISION_OUTPUT_END');
 
 /**
  * Invoke provision api calls. 
@@ -130,25 +130,21 @@ function _provision_log_messages() {
 
 }
 
-function provision_parse_output($lines) {
-  $start = FALSE;
-  $output = '';
-  foreach ($lines as $line) {
-    if (preg_match('/^' . PROVISION_OUTPUT . '/', $line)) {
-      // found the start out output.
-      $line = str_replace(PROVISION_OUTPUT, '', $line);
-      $start = TRUE;
-    }
-    if ($start) {
-      $output .= $line;
-    }
-    else {
-      if (trim($line)) {
-        $messages[] = array('type' => 'warning', 'message' => $line, 'timestamp' => time());
-      }
+function provision_parse_output($string) {
+  $regex = sprintf(PROVISION_OUTPUT, '(.*)');
+
+  preg_match("/$regex/s", $string, $match);
+  if ($match[1]) {
+    // we have our serialized string
+    $output = $match[1];
+    // remove the match we just made and any non printing characters
+    $string = trim(str_replace(sprintf(PROVISION_OUTPUT, $match[1]), '', $string));
+    if ($string) {
+      $messages[] = array('type' => 'warning', 'message' => $string, 'timestamp' => time());
     }
   }
-  if ($start) {
+
+  if ($output) {
     $data = unserialize($output);
     if (is_array($data)) {
       if (is_array($messages)) {
@@ -159,6 +155,7 @@ function provision_parse_output($lines) {
   }
   return false;
 }
+
 
 
 /**
@@ -184,7 +181,7 @@ function provision_output($data = array()) {
   $return['log'] = provision_get_log(); // Append logging information
   $return['messages'] = drupal_get_messages();
   if (PROVISION_DRUSH_BACKEND) {
-    print PROVISION_OUTPUT . serialize($return);
+    printf(PROVISION_OUTPUT, serialize($return));
   }
   else {
     if ($return) {
@@ -359,7 +356,7 @@ function provision_get_site_data($url) {
     $site_data = array_merge($old_data, $site_data);    
   }
   
-  if ($site_data['aliases']) {
+  if ($site_data['aliases'] && !is_array($site_data['aliases'])) {
     $site_data['aliases'] = explode(",", $site_data['aliases']);
   }  
   return $site_data;
@@ -376,7 +373,8 @@ function provision_get_site_data($url) {
 function provision_load_site_data($url) {
   //Load the configuration data.
   $conf_file = "sites/$url/site.php";
-  if (file_exists($conf_file) && is_readable($conf_file)) {
+  if (file_exists($conf_file)) {
+    provision_path('chmod', $conf_file, 0400);
     require($conf_file);
     return (array) $data;
   }
@@ -391,7 +389,7 @@ function provision_load_site_data($url) {
  * @param data
  *   The complete data structure that has been created. Only settings that have been changed will be recorded.
  */
-function provision_save_site_data($data, $url) {
+function provision_save_site_data($url, $data) {
   global $args;
   $conf_file = "sites/$url/site.php";
 
@@ -399,15 +397,9 @@ function provision_save_site_data($data, $url) {
   $options = array();
   include(PROVISION_DOCROOT_PATH . '/drushrc.php'); // load drush rc
   $exclude = array_merge($exclude, array_keys($options));
-
-  foreach (array('themes', 'engines', 'profiles', 'modules') as $type) {
-    if (is_array($data[$type])) {
-      foreach ($data[$type] as $name => $info) {
-        $data[$type][$name] = (array) $info;
-      }
-    }
+  if (file_exists($conf_file) && !is_writable($conf_file)) {
+    provision_path("chmod", $conf_file, 0600, t("Made site.php file writable"));
   }
-
   //initialize the file. this is lame, i know. but it will work.
   $fp = fopen($conf_file, 'w'); //Append to the end of the config file.
   if (!$fp) {
@@ -426,6 +418,7 @@ function provision_save_site_data($data, $url) {
     }
     fwrite($fp, "\n");
     fclose($fp);
+    provision_path('chmod', $conf_file, 0400, t('Protected site.php file'));
   }
 }
 
@@ -672,29 +665,55 @@ function provision_posix_groupname($group) {
   return $group;
 }
 
+function provision_proc_open($cmd, &$data = NULL) {
+  $descriptorspec = array(
+     0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
+     1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+     2 => array("file", "/tmp/error-output.txt", "a") // stderr is a file to write to
+  );
+
+  $process = proc_open($cmd, $descriptorspec, $pipes, null, null, array('context' => $context));
+  if (is_resource($process)) {
+    if ($data) {
+      fwrite($pipes[0], serialize($data)); // pass the data array in a serialized string
+    }
+    fclose($pipes[0]);
+    $info = stream_get_meta_data($pipes[1]);
+    stream_set_timeout($pipes[1], 1);
+    while (! ($string = stream_get_contents($pipes[1]))) { 
+      sleep(1); 
+    };
+    fclose($pipes[1]);
+    $code = proc_close($process);
+    return array('cmd' => $cmd, 'output' => $string, 'code' => $code);
+  }
+  return false;
+}
+
+
 /**
  * Run an external provision script and integrate it's output
  */
 function provision_exec($cmd, &$data) {
-  exec($cmd, $return, $code);
   provision_log('command', t('Running: @cmd', array('@cmd' => $cmd)));
-  $values = provision_parse_output($return);
-  if (is_array($values)) {
-    if (is_array($values['site'])) {
+  $proc = provision_proc_open($cmd, $data);
+  if ($proc['output']) {
+    $values = provision_parse_output($proc['output']);
+    if (is_array($values)) {
       $data = array_merge($data, $values['site']);
+      foreach ($values['log'] as $log) {
+        provision_log($log['type'], $log['message']);
+      }
+      if (!($proc['code'] & PROVISION_SUCCESS)) {
+        provision_set_error($proc['code']);
+      }
+      return TRUE; 
     }
-    foreach ($values['log'] as $log) {
-      provision_log($log['type'], $log['message']);
+    else {
+      provision_set_error(PROVISION_FRAMEWORK_ERROR);
+      provision_log('error',t("The command could not be executed succesfully (returned: !return, code: %code)", array("!return" => $proc['output'], "%code" =>  $proc['code'])));
+      return FALSE;
     }
-    if (!($code & PROVISION_SUCCESS)) {
-      provision_set_error($code);
-    }
-    return TRUE; 
-  }
-  else {
-    provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    provision_log('error',t("The command could not be executed succesfully (returned: !return, code: %code)", array("!return" => implode('', $return), "%code" =>  $code)));
-    return FALSE;
   }
 };
 
@@ -744,7 +763,6 @@ function pt($string, $args = array()) {
  * Some scripts need to run with drupal as the only active database, and this allows us to do that.
  */
 function provision_external_init($url, $bootstrap = TRUE) {
-  $url = ($url) ? $url : 'default';
   $drupal_base_url = parse_url(sprintf("http://" . $url));
   $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
   $_SERVER['PHP_SELF'] = $drupal_base_url['path'].'/install.php';
@@ -752,9 +770,18 @@ function provision_external_init($url, $bootstrap = TRUE) {
   $_SERVER['REMOTE_ADDR'] = '';
   $_SERVER['REQUEST_METHOD'] = NULL;
   $_SERVER['SERVER_SOFTWARE'] = NULL;
-  define('PROVISION_DRUSH_BACKEND', TRUE);
+
   if ($bootstrap) {
     include_once('includes/bootstrap.inc');
     drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
   }
+  ob_start();
+  print stream_get_contents(STDIN);
+  $string = ob_get_contents();
+  ob_end_clean();
+
+  if (trim($string)) {
+    return unserialize($string);
+  }
+  return TRUE;
 }
