@@ -28,7 +28,7 @@ function provision_drupal_provision_deploy_validate(&$data, $url = null, $backup
   _provision_drupal_valid_not_installed_site();
 
   $exists = provision_path("exists", $backup_file, TRUE,
-      dt("Restoring site from @path"),
+      dt("Deploying site from @path"),
       dt("Could not find backup file @path"),
       PROVISION_FRAMEWORK_ERROR);
   if ($exists) {

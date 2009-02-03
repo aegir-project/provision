@@ -188,6 +188,15 @@ function provision_drush_command() {
       'site_backup.tar.gz' => dt('The backup to deploy.')),
     'bootstrap' => -1
   );
+
+  $items['provision migrate'] = array(
+    'callback' => 'provision_command',
+    'callback arguments' => array('migrate'),
+    'description' => 'Migrate a site between platforms.',
+    'arguments' => array('domain.com' => dt('The domain to migrate. Any outstanding updates will be run.'),
+      '/path/to/platform' => dt('The platform to migrate the site to.')),
+    'bootstrap' => -1
+  );
  
   $items['provision delete'] = array(
     'callback' => 'provision_command',
