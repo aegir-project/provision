@@ -160,7 +160,7 @@ function provision_path_unlink($path) {
  */
 
 function provision_path_chmod($path, &$perms, &$reason) {
-  if (!chmod($path, $perms)) {
+  if (!@chmod($path, $perms)) {
     $reason = dt('chmod to @perm failed on @path', array('@perm' => sprintf('%o', $perms), '@path' => $path));
     return false;
   }
