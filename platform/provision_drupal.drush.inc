@@ -32,7 +32,9 @@ function provision_drupal_provision_init(&$data, $url = NULL) {
  */
 function provision_drupal_provision_finalize(&$data, $url = NULL) {
   if (PROVISION_CONTEXT_SITE) {
-    provision_save_site_data($data, $url);
+    if ($data['installed']) {
+      provision_save_site_data($data, $url);
+    }
   }
   else {
     _provision_generate_config();

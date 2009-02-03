@@ -26,6 +26,7 @@ function provision_drupal_provision_delete(&$data, $url) {
   }
 
   _provision_recursive_delete("sites/$url");
+  $data['installed'] = FALSE;
 }
 
 
