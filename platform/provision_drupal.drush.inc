@@ -8,8 +8,6 @@
  * and all the install api code. 
  */
 
-include_once('cvs_deploy.inc');
-
 /**
  * Initialize the platform / site
  *
