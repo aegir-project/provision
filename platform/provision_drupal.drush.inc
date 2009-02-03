@@ -147,7 +147,7 @@ function _provision_drupal_create_settings_file(&$data, $url = NULL) {
 
 
   $fp = fopen("sites/$url/settings.php", "w");
-  $text = variable_get('provision_drupal_settings_template', _provision_drupal_default_template());
+  $text =  _provision_drupal_default_template();
   fwrite($fp, "<?php\n". provision_render_config($text, $data));
   fclose($fp);
 

@@ -120,7 +120,7 @@ function provision_drush_command() {
     'callback arguments' => array('install'),
     'arguments' => array('domain.com' => dt('The domain of the site to install.')),
     'description' => dt('Provision a new site using the provided data.'),
-    'bootstrap' => DRUPAL_BOOTSTRAP_CONFIGURATION
+    'bootstrap' => -1
   );
 
   $items['provision import'] = array(
@@ -128,14 +128,15 @@ function provision_drush_command() {
     'callback arguments' => array('import'),
     'arguments' => array('domain.com' => dt('The domain of the site to import.')),
     'description' => dt('Turn an already running site into a provisioned site.'),
-    'bootstrap' => DRUPAL_BOOTSTRAP_CONFIGURATION
+    'bootstrap' => -1
   );
 
   $items['provision update'] = array(
     'callback' => 'provision_command',
     'callback arguments' => array('update'),
     'arguments' => array('domain.com' => dt('The domain of the site to update.')),
-    'description' => dt('Run any outstanding updates on the site.')
+    'description' => dt('Run any outstanding updates on the site.'),
+    'bootstrap' => -1
   );
   
   $items['provision backup'] = array(
@@ -143,20 +144,23 @@ function provision_drush_command() {
     'callback arguments' => array('backup'),
     'arguments' => array('domain.com' => dt('The domain of the site to back up.')),
     'optional arguments' => array('backup-file' => dt('The file to save the backup to. This will be a gzipped tarball.')),
-    'description' => dt('Generate a back up for the site.')
+    'description' => dt('Generate a back up for the site.'),
+    'bootstrap' => -1
   );
   
   $items['provision enable'] = array(
     'callback' => 'provision_command',
     'callback arguments' => array('enable'), 
     'arguments' => array('domain.com' => dt('The domain of the site to enable (only if enabled).')),
-    'description' => 'Enable a disabled site.'
+    'description' => 'Enable a disabled site.',
+    'bootstrap' => -1
   );
   $items['provision disable'] = array(
     'callback' => 'provision_command',
     'callback arguments' => array('disable'), 
     'arguments' => array('domain.com' => dt('The domain of the site to disable (only if disabled).')),    
-    'description' => 'Disable a site.'
+    'description' => 'Disable a site.',
+    'bootstrap' => -1
   );
 
   $items['provision verify'] = array(
@@ -164,7 +168,7 @@ function provision_drush_command() {
     'callback arguments' => array('verify'),
     'arguments' => array('domain.com' => dt('The domain of the site to verify).')),    
     'description' => 'Verify that the provisioning framework is correctly installed.',
-    'bootstrap' => DRUPAL_BOOTSTRAP_CONFIGURATION,
+    'bootstrap' => -1
   );
  
   $items['provision restore'] = array(
@@ -172,26 +176,30 @@ function provision_drush_command() {
     'callback arguments' => array('restore'),
     'description' => 'Restore the site to a previous backup. This will also generate a backup of the site as it was.',
     'arguments' => array('domain.com' => dt('The domain of the site to be restored'),
-                    'site_backup.tar.gz' => dt('The backup to restore the site to.'))
+    'site_backup.tar.gz' => dt('The backup to restore the site to.')),
+    'bootstrap' => -1
   );
  
   $items['provision delete'] = array(
     'callback' => 'provision_command',
     'callback arguments' => array('delete'),
-    'description' => 'Delete a site.'
+    'description' => 'Delete a site.',
+    'bootstrap' => -1
   );
 
   $items['provision cron'] = array(
     'callback' => 'provision_command',
     'callback arguments' => array('cron'),
     'description' => 'Run cron process for site.',
-    'arguments' => array('domain.com' => dt('The domain of the site to be processed'))
+    'arguments' => array('domain.com' => dt('The domain of the site to be processed')),
+    'bootstrap' => -1
   );
  
   if (!function_exists('hosting_setup')) {
     $items['provision setup'] = array(
       'callback' => '_provision_setup_cmd',
       'description' => 'Initialize this platform to be able to create hosted sites.',
+      'bootstrap' => -1
     );
   }
 
@@ -210,7 +218,8 @@ function provision_drush_command() {
  */
 function _provision_setup() {
   $success = TRUE;
-  $drush_path = sprintf("%s/%s/drush.php", PROVISION_DOCROOT_PATH, drupal_get_path('module', 'drush'));
+  
+  $drush_path = realpath($_SERVER['argv'][0]);
 
   $success &= provision_path('symlink', $drush_path, PROVISION_DOCROOT_PATH . '/drush.php', 
     dt('Created symlink for drush.php file'), 
@@ -225,9 +234,7 @@ function _provision_setup() {
  * Drush command wrapper for the setup of the platform
  */
 function _provision_setup_cmd() {
-  if (_provision_setup()) {
-    variable_set('provision_setup', TRUE); 
-  }
+  _provision_setup();
  
   // @TODO use provision_output for this, but we need pretty print first.
   $logs = provision_get_log();

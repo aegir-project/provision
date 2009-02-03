@@ -111,21 +111,23 @@ function provision_command($hook, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg
  * Turn drupal_set_message errors into provision_log errors
  */
 function _provision_log_messages() {
-  $messages = drupal_get_messages();
+  if (function_exists('drupal_get_messages')) {
 
-  //Drupal message errors.
-  foreach ((array) $messages['error'] as $error) {
-    if (preg_match('/^warning:/', $error)) {
-      provision_log('warning', ereg_replace('/^warning: /', '', $error));  
-    }
-    elseif (preg_match('/^user warning:/', $error)) {
-      provision_log("error", ereg_replace('/^user warning: /', '', $error));  
-    }
-    else {
-      provision_log('error', $error);
+    $messages = drupal_get_messages();
+
+    //Drupal message errors.
+    foreach ((array) $messages['error'] as $error) {
+      if (preg_match('/^warning:/', $error)) {
+        provision_log('warning', ereg_replace('/^warning: /', '', $error));  
+      }
+      elseif (preg_match('/^user warning:/', $error)) {
+        provision_log("error", ereg_replace('/^user warning: /', '', $error));  
+      }
+      else {
+        provision_log('error', $error);
+      }
     }
   }
-
 }
 
 function provision_parse_output($string) {
@@ -177,7 +179,6 @@ function provision_output($data = array()) {
   }
   $return['error_status'] = $error; // error code being returned
   $return['log'] = provision_get_log(); // Append logging information
-  $return['messages'] = drupal_get_messages();
   if (PROVISION_DRUSH_BACKEND) {
     printf(PROVISION_OUTPUT, serialize($return));
   }
@@ -337,9 +338,9 @@ function provision_get_site_data($url) {
   $site_data['task_type'] = $args['commands'][1];
   $site_data['task_id'] = drush_get_option('task_id', NULL);
   $site_data['publish_path'] = PROVISION_DOCROOT_PATH;
-  $site_data['profile'] = ($site_data['profile']) ? $site_data['profile'] : variable_get('provision_default_profile', 'default');
-  $site_data['site_ip'] =  variable_get('provision_apache_server_ip', '127.0.0.1');
-  $site_data['site_port'] =  variable_get('provision_apache_server_ip', 80);
+  $site_data['profile'] = ($site_data['profile']) ? $site_data['profile'] : 'default';
+  $site_data['site_ip'] =  ($site_data['site_ip']) ? $site_data['site_ip'] : '127.0.0.1';
+  $site_data['site_port'] =  ($site_data['site_port']) ? $site_data['site_port'] : '80';
     
   //Default to english language
   $site_data['language'] = $site_data['language'] ? $site_data['language'] : 'en';
@@ -504,7 +505,7 @@ function _provision_recursive_delete($path) {
     while (($entry = $d->read()) !== FALSE) {
       if ($entry == '.' || $entry == '..') continue;
       $entry_path = $path .'/'. $entry;
-      if (file_check_location($entry_path, $path)) {
+      if (_provision_file_check_location($entry_path, $path)) {
         $ret = _provision_recursive_delete($entry_path);
       } 
       else {
@@ -524,6 +525,22 @@ function _provision_recursive_delete($path) {
     $ret = $ret && $rm;
   }
   return $ret;
+}
+
+function _provision_file_check_location($source, $directory = '') {
+  $check = realpath($source);
+  if ($check) {
+    $source = $check;
+  }
+  else {
+    // This file does not yet exist
+    $source = realpath(dirname($source)) .'/'. basename($source);
+  }
+  $directory = realpath($directory);
+  if ($directory && strpos($source, $directory) !== 0) {
+    return 0;
+  }
+  return $source;
 }
 
 /**
@@ -735,12 +752,12 @@ function pt($string, $args = array()) {
       switch ($key[0]) {
         // Escaped only
         case '@':
-          $args[$key] = check_plain($value);
+          $args[$key] = htmlspecialchars($value, ENT_QUOTES);
           break;
         // Escaped and placeholder
         case '%':
         default:
-          $args[$key] = '<em>'. check_plain($value) .'</em>';
+          $args[$key] = '<em>'. htmlspecialchars($value, ENT_QUOTES) .'</em>';
           break;
         // Pass-through
         case '!':

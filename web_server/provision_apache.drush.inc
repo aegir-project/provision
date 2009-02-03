@@ -37,7 +37,7 @@ function _provision_apache_delete_vhost_config($url, $data) {
  */
 function _provision_apache_create_vhost_config($data, $url, $template = NULL) {
   if (is_null($template)) {
-    $template = variable_get('provision_apache_vhost_template', _provision_apache_default_template());
+    $template = _provision_apache_default_template();
   }
   provision_log("Notice", dt("Generate virtual host configuration file."));
   $writable = provision_path("writable", PROVISION_VHOST_PATH, TRUE , NULL,
