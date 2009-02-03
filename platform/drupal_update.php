@@ -4,8 +4,7 @@
 require_once(dirname(__FILE__) . '/../provision.inc');
 if ($argv[1]) {
   // Fake the necessary HTTP headers that Drupal needs:
-  provision_external_init($argv[1], FALSE);
-
+  $data = provision_external_init($argv[1], FALSE);
 }
 else {
   provision_set_error(PROVISION_FRAMEWORK_ERROR);
@@ -131,5 +130,5 @@ function _update_do_one($module, $number, &$context) {
 
 }
 
-update_main($url, $data);
+update_main();
 provision_output($data);

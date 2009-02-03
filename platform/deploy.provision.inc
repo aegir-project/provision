@@ -69,3 +69,6 @@ function provision_drupal_provision_deploy_rollback(&$data, $url) {
   provision_drupal_provision_deploy(&$data, $url);
 }
 
+function provision_drupal_provision_post_deploy(&$data, $url) {
+  provision_invoke('update', $data, $url);
+}

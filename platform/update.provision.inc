@@ -8,7 +8,6 @@ function provision_drupal_provision_update_validate() {
 function provision_drupal_provision_update(&$data, $url) {
   $cmd = sprintf("php %s/drupal_update.php %s", dirname(__FILE__), $url);
   provision_exec($cmd, $data);
-  provision_invoke('verify', $data, $url);
 }
 
 
