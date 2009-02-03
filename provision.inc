@@ -38,20 +38,17 @@ define('PROVISION_OUTPUT', 'PROVISION_OUTPUT_START>>>%s<<<PROVISION_OUTPUT_END')
  * 
  */
 function provision_invoke($hook, &$data, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL, $arg5 = NULL) {
-  $modules = module_list(FALSE, FALSE);
-  foreach ($modules as $module) {
-    $files = file_scan_directory(dirname($module['filename']), $hook . ".provision.inc$");
-    if (is_array($files)) {
-      foreach ($files as $filename => $info) {
-        include_once($filename);
-      }
+  $files = drush_scan_directory(dirname(__FILE__), $hook . ".provision.inc$");
+  if (is_array($files)) {
+    foreach ($files as $filename => $info) {
+      include_once($filename);
     }
   }
 
   // First we build a list of functions are about to execute
   $variations = array($hook . "_validate", "pre_$hook", $hook, "post_$hook");
   foreach ($variations as $var_hook) {
-    foreach (module_implements("provision_$var_hook") as $name) {
+    foreach (drush_command_implements("provision_$var_hook") as $name) {
       $functions[] = $name . '_provision_' . $var_hook;
     }
   }
@@ -90,15 +87,16 @@ function provision_invoke($hook, &$data, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
 
 function provision_command($hook, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL, $arg5 = NULL) {
   $data = array();
-  foreach (module_implements("provision_init") as $name) {
+  foreach (drush_command_implements("provision_init") as $name) {
     $func = $name . '_provision_init';
     $func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
+    provision_log('notice', "Initializing $name");
     _provision_log_messages();
   }
   if (!provision_get_error()) {
     $success = provision_invoke($hook, $data, $arg1, $arg2, $arg3, $arg4, $arg5);
     if ($success) {
-      foreach (module_implements('provision_finalize') as $name) {
+      foreach (drush_command_implements('provision_finalize') as $name) {
         $func = $name . '_provision_finalize';
         $func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
         _provision_log_messages();
@@ -185,13 +183,8 @@ function provision_output($data = array()) {
   }
   else {
     if ($return) {
-      if ($output = theme('provision_'. $data['task_type'] .'_output', $url, $return)) {
-        return $output;
-      } 
-      else {
-        /** TODO : return a cleanly formatted display of all the necessary information */ 
-        print_r($return);
-      }
+      /** TODO : return a cleanly formatted display of all the necessary information */ 
+      print_r($return);
     }
   }
   exit($error);
@@ -389,7 +382,7 @@ function provision_load_site_data($url) {
  * @param data
  *   The complete data structure that has been created. Only settings that have been changed will be recorded.
  */
-function provision_save_site_data($url, $data) {
+function provision_save_site_data($data, $url) {
   global $args;
   $conf_file = "sites/$url/site.php";
 
@@ -398,7 +391,7 @@ function provision_save_site_data($url, $data) {
   include(PROVISION_DOCROOT_PATH . '/drushrc.php'); // load drush rc
   $exclude = array_merge($exclude, array_keys($options));
   if (file_exists($conf_file) && !is_writable($conf_file)) {
-    provision_path("chmod", $conf_file, 0600, t("Made site.php file writable"));
+    provision_path("chmod", $conf_file, 0600, dt("Made site.php file writable"));
   }
   //initialize the file. this is lame, i know. but it will work.
   $fp = fopen($conf_file, 'w'); //Append to the end of the config file.
@@ -409,7 +402,7 @@ function provision_save_site_data($url, $data) {
   else {
     fwrite($fp, "<?php\n");
     $timestamp = mktime();
-    fwrite($fp, "#". format_date($timestamp, 'large'));
+#    fwrite($fp, "#". format_date($timestamp, 'large'));
     foreach ($data as $key => $value) {
       if (!in_array($key, $exclude)) {
         $line = "\n\$data['$key'] = ". var_export($value, TRUE) .';';
@@ -418,7 +411,7 @@ function provision_save_site_data($url, $data) {
     }
     fwrite($fp, "\n");
     fclose($fp);
-    provision_path('chmod', $conf_file, 0400, t('Protected site.php file'));
+    provision_path('chmod', $conf_file, 0400, dt('Protected site.php file'));
   }
 }
 
@@ -442,7 +435,7 @@ function provision_save_platform_data() {
   else {
     fwrite($fp, "<?php\n");
     $timestamp = mktime();
-    fwrite($fp, "#". format_date($timestamp, 'large'));
+#    fwrite($fp, "#". format_date($timestamp, 'large'));
     foreach ($args['options'] as $key => $value) {
       if (!in_array($key, $exclude)) {
         $line = "\n\$options['$key'] = ". var_export($value, TRUE) .';';
@@ -469,13 +462,13 @@ function provision_save_platform_data() {
  */
 function provision_value_list() {
     /** TODO: Complete the value list to allow the front end to more easily edit the settings. */
-  $values['site_url'] = t('The domain name used to access the site. This is defaulted to the value used on the command line.');
-  $values['db_type'] = t('The type of database server used');
-  $values['db_username'] = t('Username to access database for site');
-  $values['db_password'] = t('Password to access database for site');
-  $values['db_name'] = t('Database name for the site');
-  $values['profile'] = t('Install profile of site');
-  $values['task_type'] = t('What type of task has been used. Only used in conjuction with hosting front end');
+  $values['site_url'] = dt('The domain name used to access the site. This is defaulted to the value used on the command line.');
+  $values['db_type'] = dt('The type of database server used');
+  $values['db_username'] = dt('Username to access database for site');
+  $values['db_password'] = dt('Password to access database for site');
+  $values['db_name'] = dt('Database name for the site');
+  $values['profile'] = dt('Install profile of site');
+  $values['task_type'] = dt('What type of task has been used. Only used in conjuction with hosting front end');
 
   return $values;
 }
@@ -520,14 +513,14 @@ function _provision_recursive_delete($path) {
     }
 
     $rm = provision_path('rmdir', $path, TRUE,
-      t('Deleting @path directory sucessful.', array('@path' => $path)),
-      t('Deleting @path directory failed.', array('@path' => $path)));
+      dt('Deleting @path directory sucessful.', array('@path' => $path)),
+      dt('Deleting @path directory failed.', array('@path' => $path)));
 
     $ret = $ret && $rm;
   }
   else {
     $rm = provision_path('unlink', $path, TRUE, NULL, 
-      t('Deleting @path file failed.', array('@path' => $path)));
+      dt('Deleting @path file failed.', array('@path' => $path)));
     $ret = $ret && $rm;
   }
   return $ret;
@@ -695,7 +688,7 @@ function provision_proc_open($cmd, &$data = NULL) {
  * Run an external provision script and integrate it's output
  */
 function provision_exec($cmd, &$data) {
-  provision_log('command', t('Running: @cmd', array('@cmd' => $cmd)));
+  provision_log('command', dt('Running: @cmd', array('@cmd' => $cmd)));
   $proc = provision_proc_open($cmd, $data);
   if ($proc['output']) {
     $values = provision_parse_output($proc['output']);
@@ -711,7 +704,7 @@ function provision_exec($cmd, &$data) {
     }
     else {
       provision_set_error(PROVISION_FRAMEWORK_ERROR);
-      provision_log('error',t("The command could not be executed succesfully (returned: !return, code: %code)", array("!return" => $proc['output'], "%code" =>  $proc['code'])));
+      provision_log('error', dt("The command could not be executed succesfully (returned: !return, code: %code)", array("!return" => $proc['output'], "%code" =>  $proc['code'])));
       return FALSE;
     }
   }
@@ -730,7 +723,7 @@ function provision_get_option($option, $default) {
 }
 
 /**
- * A wrapper for t(). The st() function is too specific for our purposes
+ * A wrapper for dt(). The st() function is too specific for our purposes
  */
 function pt($string, $args = array()) {
   if (function_exists('t')) {
@@ -763,6 +756,7 @@ function pt($string, $args = array()) {
  * Some scripts need to run with drupal as the only active database, and this allows us to do that.
  */
 function provision_external_init($url, $bootstrap = TRUE) {
+  $url = ($url) ? $url : 'default';
   $drupal_base_url = parse_url(sprintf("http://" . $url));
   $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
   $_SERVER['PHP_SELF'] = $drupal_base_url['path'].'/install.php';
@@ -771,6 +765,7 @@ function provision_external_init($url, $bootstrap = TRUE) {
   $_SERVER['REQUEST_METHOD'] = NULL;
   $_SERVER['SERVER_SOFTWARE'] = NULL;
 
+  define('PROVISION_DRUSH_BACKEND', true);
   if ($bootstrap) {
     include_once('includes/bootstrap.inc');
     drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
@@ -779,9 +774,32 @@ function provision_external_init($url, $bootstrap = TRUE) {
   print stream_get_contents(STDIN);
   $string = ob_get_contents();
   ob_end_clean();
-
   if (trim($string)) {
     return unserialize($string);
   }
   return TRUE;
+}
+
+function provision_password($length = 10) {
+  // This variable contains the list of allowable characters for the
+  // password. Note that the number 0 and the letter 'O' have been
+  // removed to avoid confusion between the two. The same is true
+  // of 'I', 1, and 'l'.
+  $allowable_characters = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+  // Zero-based count of characters in the allowable list:
+  $len = strlen($allowable_characters) - 1;
+
+  // Declare the password as a blank string.
+  $pass = '';
+
+  // Loop the number of times specified by $length.
+  for ($i = 0; $i < $length; $i++) {
+
+    // Each iteration, pick a random character from the
+    // allowable string and append it to the password:
+    $pass .= $allowable_characters[mt_rand(0, $len)];
+  }
+
+  return $pass;
 }

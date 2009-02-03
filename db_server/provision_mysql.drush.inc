@@ -32,11 +32,11 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
   $status = _provision_mysql_database_exists($db_name);
 
   if ($status) {
-    provision_log('success', pt('Created @name database', array("@name" => $db_name)));
+    provision_log('success', dt('Created @name database', array("@name" => $db_name)));
   }
   else {
     provision_set_error(PROVISION_DB_ERROR);
-    provision_log("error", pt("Could not create @name database", array("@name" => $db_name)));
+    provision_log("error", dt("Could not create @name database", array("@name" => $db_name)));
   }
   return $status; 
    //TODO : Test to confirm that the database is actually writeable. Taking this on faith for now.
@@ -48,9 +48,9 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
 function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_host) {
     
   if ( _provision_mysql_database_exists($data['db_name']) ) {
-    provision_log("notice", t("Dropping database @dbname", array('@dbname' => $db_name)));
+    provision_log("notice", dt("Dropping database @dbname", array('@dbname' => $db_name)));
     if (!_provision_mysql_drop_database($db_name)) {
-      provision_log("warning", t("Failed to drop database @dbname", array('@dbname' => $db_name)));
+      provision_log("warning", dt("Failed to drop database @dbname", array('@dbname' => $db_name)));
     }
   }
   
@@ -63,7 +63,7 @@ function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_ho
   provision_log("notice", "Revoking privileges");
   _provision_mysql_flush_privileges();
   if (!_provision_mysql_revoke($db_name, $db_user)) {
-      provision_log("warning", t("Failed to revoke user privileges"));
+      provision_log("warning", dt("Failed to revoke user privileges"));
   }
 }
 
@@ -89,7 +89,7 @@ function _provision_mysql_can_create_database() {
   _provision_mysql_create_database($test);
   if (_provision_mysql_database_exists($test)) {
     if (!_provision_mysql_drop_database($test)) {
-      provision_log("warning", t("Failed to drop database @dbname", array('@dbname' => $test)));
+      provision_log("warning", dt("Failed to drop database @dbname", array('@dbname' => $test)));
     }
     return TRUE;
   }
@@ -108,18 +108,18 @@ function _provision_mysql_revoke($name, $username, $host = '') {
 
 function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd, $db_host) {
   $exists = provision_path("exists", $dump_file, TRUE,
-    t('Found database dump at @path.'),
-    t('No database dump was found at @path.'),
+    dt('Found database dump at @path.'),
+    dt('No database dump was found at @path.'),
     PROVISION_FRAMEWORK_ERROR);
   if ($exists) {
-    $readable = provision_path("readable", $dump_file, TRUE, t('Database dump at @path is readable'), 
-      t('The database dump at @path could not be read.'), 
+    $readable = provision_path("readable", $dump_file, TRUE, dt('Database dump at @path is readable'), 
+      dt('The database dump at @path could not be read.'), 
       PROVISION_PERM_ERROR);
     if ($readable) {
       provision_log("notice", sprintf("Importing database using command: mysql -u%s -p%s -h%s %s < %s", 
         $db_user, $db_passwd, $db_host, $db_name, $dump_file));
       if (!provision_shell_exec("mysql -u%s -p%s -h%s %s < %s", $db_user, $db_passwd, $db_host, $db_name, $dump_file )) {
-        provision_log("error", t("Database import failed"));
+        provision_log("error", dt("Database import failed"));
       }
      }
    }

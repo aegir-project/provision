@@ -90,21 +90,21 @@ function provision_path($op, $path, $confirm = TRUE, $succeed_message = NULL, $f
     $status = ($value == $confirm);
     if ($status) {
       if (!is_null($succeed_message)) {
-        provision_log("message", t($succeed_message, $tokens));      
+        provision_log("message", dt($succeed_message, $tokens));      
       }
     }
     else {
       if ($error_codes) {
         // Trigger a sysem halting error
         if (!is_null($fail_message)) {
-          provision_log("error", t($fail_message, $tokens));
+          provision_log("error", dt($fail_message, $tokens));
         }
         provision_set_error($error_codes);
       }
       else {
         // Trigger a warning
         if (!is_null($fail_message)) {
-          provision_log("warning", t($fail_message, $tokens));
+          provision_log("warning", dt($fail_message, $tokens));
         }
       }
     }
@@ -161,7 +161,7 @@ function provision_path_unlink($path) {
 
 function provision_path_chmod($path, &$perms, &$reason) {
   if (!chmod($path, $perms)) {
-    $reason = t('chmod to @perm failed on @path', array('@perm' => sprintf('%o', $perms), '@path' => $path));
+    $reason = dt('chmod to @perm failed on @path', array('@perm' => sprintf('%o', $perms), '@path' => $path));
     return false;
   }
   clearstatcache(); // this needs to be called, otherwise we get the old info 
@@ -172,11 +172,11 @@ function provision_path_chmod($path, &$perms, &$reason) {
 function provision_path_chown($path, &$owner, &$reason) {
   if ($owner = provision_posix_username($owner)) {
     if (!chown($path, $owner)) {
-      $reason = t("chown to @owner failed on @path", array('@owner' => $owner, '@path' => $path)) ; 
+      $reason = dt("chown to @owner failed on @path", array('@owner' => $owner, '@path' => $path)) ; 
     }
   }
   else {
-    $reason = t("the user does not exist");
+    $reason = dt("the user does not exist");
   }
 
   clearstatcache(); // this needs to be called, otherwise we get the old info 
@@ -190,15 +190,15 @@ function provision_path_chgrp($path, &$group, &$reason) {
         return $group;
       }
       else {
-        $reason = t("chgrp to @group failed on @path", array('@group' => $group, '@path' => $path));
+        $reason = dt("chgrp to @group failed on @path", array('@group' => $group, '@path' => $path));
       }
     }
     else {
-      $reason = t("@user is not in @group group", array("@user" => PROVISION_SCRIPT_USER, "@group" => $group));
+      $reason = dt("@user is not in @group group", array("@user" => PROVISION_SCRIPT_USER, "@group" => $group));
     }
   }
   else {
-    $reason = t("the group does not exist");
+    $reason = dt("the group does not exist");
   }
 
   clearstatcache(); // this needs to be called, otherwise we get the old info 
@@ -239,16 +239,16 @@ function provision_path_extract($path, &$target, &$reason) {
         return TRUE;
       }
       else {
-        $reason = t("The file could not be extracted");
+        $reason = dt("The file could not be extracted");
       }
     }
     else {
-      $reason = t("The target directory could not be written to");
+      $reason = dt("The target directory could not be written to");
       return false;
     }
   }
   else {
-    $reason = t("Backup file could not be opened");
+    $reason = dt("Backup file could not be opened");
     return false;
   }
 
@@ -256,11 +256,11 @@ function provision_path_extract($path, &$target, &$reason) {
 
 function provision_path_symlink($path, &$target, &$reason) {
   if (file_exists($target) && !is_link($target)) {
-    $reason = t("A file already exists at @path");
+    $reason = dt("A file already exists at @path");
     return FALSE;
   }
   if (is_link($target) && (readlink($target) != $path)) {
-    $reason = t("A symlink already exists at target, but it is pointing to @link", array("@link" => readlink($target)));
+    $reason = dt("A symlink already exists at target, but it is pointing to @link", array("@link" => readlink($target)));
     return FALSE;
   }
   if (is_link($target) && (readlink($target) == $path)) {
@@ -272,7 +272,7 @@ function provision_path_symlink($path, &$target, &$reason) {
     return TRUE;
   }
   else {
-    $reason = t('The symlink could not be created, an error has occured');
+    $reason = dt('The symlink could not be created, an error has occured');
     return FALSE;
   }
 
@@ -288,31 +288,31 @@ function provision_path_symlink($path, &$target, &$reason) {
  */
 function _provision_create_dir($path, $name, $perms) {
   $exists = provision_path("exists",$path, TRUE ,
-    $name . ' ' . t("path exists."),
-    $name . ' ' . t("path does not exist.")
+    $name . ' ' . dt("path exists."),
+    $name . ' ' . dt("path does not exist.")
   );
 
   if (!$exists) {
     $exists = provision_path("mkdir", $path, TRUE,
-      $name . ' ' . t("path has been created."),
-      $name . ' ' . t("path could not be created."),
+      $name . ' ' . dt("path has been created."),
+      $name . ' ' . dt("path could not be created."),
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
   }
 
   if ($exists) {
     provision_path("chown", $path, PROVISION_SCRIPT_USER, 
-      $name . ' ' . t("ownership of path has been changed to @confirm."),
-      $name . ' ' . t("ownership of path could not be changed to @confirm."),
+      $name . ' ' . dt("ownership of path has been changed to @confirm."),
+      $name . ' ' . dt("ownership of path could not be changed to @confirm."),
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
 
     provision_path("chmod", $path, $perms, 
-      $name . ' ' . t("permissions of path have been changed to @confirm."),
-      $name . ' ' . t("permissions of path could not be changed to @confirm."),
+      $name . ' ' . dt("permissions of path have been changed to @confirm."),
+      $name . ' ' . dt("permissions of path could not be changed to @confirm."),
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR );
 
     $writable = provision_path("writable", $path, TRUE,
-        $name . ' ' . t("path is writable."),
-        $name . ' ' . t("path is not writable."),
+        $name . ' ' . dt("path is writable."),
+        $name . ' ' . dt("path is not writable."),
         PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
 
   }

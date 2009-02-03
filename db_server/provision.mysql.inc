@@ -22,7 +22,7 @@ function provision_db_connect() {
 
   if (!$connection) {
     provision_set_error(PROVISION_DB_ERROR);
-    provision_log('error', pt('Could not connect to the master database.'));
+    provision_log('error', dt('Could not connect to the master database.'));
   }
   else {
     $success = @mysql_select_db('mysql', $connection);
@@ -31,7 +31,7 @@ function provision_db_connect() {
     }
     else {
       provision_set_error(PROVISION_DB_ERROR);
-      provision_log('error', pt('Could not select the mysql database.'));
+      provision_log('error', dt('Could not select the mysql database.'));
       return FALSE;
     }
   }

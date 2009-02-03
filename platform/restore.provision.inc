@@ -28,8 +28,8 @@ function provision_drupal_provision_restore_validate(&$data, $url = null, $resto
   _provision_drupal_valid_installed_site();
 
   $exists = provision_path("exists", $restore_file, TRUE,
-      pt("Restoring site from @path"),
-      pt("Could not find backup file @path"),
+      dt("Restoring site from @path"),
+      dt("Could not find backup file @path"),
       PROVISION_FRAMEWORK_ERROR);
   if ($exists) {
     $data['restore_file'] = $restore_file;
@@ -43,8 +43,8 @@ function provision_drupal_provision_pre_restore(&$data, $url, $restore_file) {
   provision_invoke('backup', &$data, $url);
 
   provision_path("extract", $data['restore_file'], PROVISION_SITES_PATH ."/$url.restore", 
-    pt('Successfully extracted the contents of @path'),
-    pt('Failed to extract the contents of @path'),
+    dt('Successfully extracted the contents of @path'),
+    dt('Failed to extract the contents of @path'),
     PROVISION_PERM_ERROR, PROVISION_FRAMEWORK_ERROR);
 }
 
@@ -62,8 +62,8 @@ function provision_drupal_provision_restore(&$data, $url) {
   $old = PROVISION_SITES_PATH ."/$url.restore";
   $new = PROVISION_SITES_PATH ."/$url";
   provision_path("switch_paths", $old, $new ,
-    pt('Swapping out the @path and @confirm directories was successful.'),
-    pt('Swapping the @path and @confirm directories has failed.'),
+    dt('Swapping out the @path and @confirm directories was successful.'),
+    dt('Swapping the @path and @confirm directories has failed.'),
     PROVISION_PERM_ERROR);
   // make sure it has the latest site data available
   _provision_drupal_create_settings_file($data, $url);

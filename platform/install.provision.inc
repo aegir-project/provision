@@ -25,8 +25,6 @@ function provision_drupal_provision_install_validate() {
 function provision_drupal_provision_pre_install(&$data, $url = NULL) {
  // This is the actual drupal provisioning requirements. 
  _provision_drupal_create_directories($url, $data['profile']);
- // Requires at least the database settings to complete.
- _provision_drupal_create_settings_file($data, $url);
 }
 
 /**
@@ -36,6 +34,9 @@ function provision_drupal_provision_pre_install(&$data, $url = NULL) {
  * weird problems such as the multiple database connections don't confuse drupal.
  */
 function provision_drupal_provision_install(&$data, $url = NULL) {
+ // Requires at least the database settings to complete.
+  _provision_drupal_create_settings_file($data, $url);
+
   $cmd = sprintf("php %s/drupal_install.php %s %s %s %s", dirname(__FILE__), escapeshellarg($url), escapeshellarg($data['profile']), escapeshellarg($data['language']), escapeshellarg($data['client_email']));
   provision_exec($cmd, $data);
 }
@@ -57,7 +58,7 @@ function provision_drupal_provision_install_rollback(&$data, $url = NULL) {
 function provision_drupal_provision_post_install(&$data, $url = NULL) {
   $data['installed'] = TRUE;
   _provision_drupal_maintain_aliases($url, $data);
-  provision_path("chmod", "./sites/$url/settings.php", 0440, t("Secured settings.php with safe permissions"));
+  provision_path("chmod", "./sites/$url/settings.php", 0440, dt("Secured settings.php with safe permissions"));
   _provision_drupal_rebuild_caches($data, $url);
 }
 

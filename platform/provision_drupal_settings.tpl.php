@@ -30,6 +30,8 @@
   $conf['cache'] = 1;
   $conf['clean_url'] = 1;
 
+<?php print $extra_config; ?>
+
   /**
   * This was added from Drupal 5.2 onwards.
   */
@@ -45,7 +47,6 @@
       @ini_set('session.cookie_domain', $domain);
     }
   }
-
 
   # Additional host wide configuration settings. Useful for safely specifying configuration settings.
   if (file_exists('<?php print PROVISION_CONFIG_PATH . '/' ?>includes/global.inc')) {

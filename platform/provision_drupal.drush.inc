@@ -8,6 +8,7 @@
  * and all the install api code. 
  */
 
+include_once('cvs_deploy.inc');
 
 /**
  * Initialize the platform / site
@@ -47,7 +48,7 @@ function provision_drupal_provision_finalize(&$data, $url = NULL) {
 function _provision_drupal_url_required() {
   if (PROVISION_CONTEXT_PLATFORM) {
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    provision_log('error', pt('You need to specify the URL argument for this command'));
+    provision_log('error', dt('You need to specify the URL argument for this command'));
   }
 }
 
@@ -96,7 +97,7 @@ function _provision_drupal_valid_not_installed_site() {
   if (PROVISION_CONTEXT_SITE) {
     if (_provision_drupal_site_installed(PROVISION_ACTIVE_URL)) {
       provision_set_error(PROVISION_SITE_INSTALLED);
-      provision_log('error', pt('This site has already been installed.'));
+      provision_log('error', dt('This site has already been installed.'));
     }
   }
 }
@@ -133,12 +134,19 @@ function _provision_drupal_default_template() {
  *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file(&$data, $url = NULL) {
-  provision_log('notice', t("Generate settings.php file"));
+  provision_log('notice', dt("Generate settings.php file"));
   if (provision_path("exists", "sites/$url/settings.php")) {
     provision_path("chmod", "sites/$url/settings.php", 0640,
-      t('Changed permissions of settings.php to @confirm'),
-      t('Could not change permissions of settings.php to @confirm'));
+      dt('Changed permissions of settings.php to @confirm'),
+      dt('Could not change permissions of settings.php to @confirm'));
   }
+
+  $data['extra_config'] = "# Extra configuration from modules:\n";
+  foreach (drush_command_implements('provision_drupal_config') as $module) {
+    $data['extra_config'] .= "# -- $module settings --\n";
+    $data['extra_config'] .= module_invoke($module, 'provision_drupal_config', $url, $data) . "\n";
+  }
+
 
   $fp = fopen("sites/$url/settings.php", "w");
   $text = variable_get('provision_drupal_settings_template', _provision_drupal_default_template());
@@ -147,11 +155,11 @@ function _provision_drupal_create_settings_file(&$data, $url = NULL) {
 
   # Change the permissions of the file
   provision_path("chmod", "sites/$url/settings.php", 0440,
-    t('Changed permissions of settings.php to @confirm'),
-    t('Could not change permissions of settings.php to @confirm'));
+    dt('Changed permissions of settings.php to @confirm'),
+    dt('Could not change permissions of settings.php to @confirm'));
   provision_path("chgrp", "sites/$url/settings.php", PROVISION_WEB_GROUP,
-    t('Change group ownership of settings.php to @confirm'),
-    t('Could not change group ownership of settings.php to @confirm'));
+    dt('Change group ownership of settings.php to @confirm'),
+    dt('Could not change group ownership of settings.php to @confirm'));
 }
 
 /**
@@ -179,24 +187,24 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
   foreach ($paths as $path => $perm) {
     if (!is_dir($path)) {
       provision_path("mkdir", $path, TRUE, 
-        t("Created <code>@path</code>"),
-        t("Could not create <code>@path</code>"),
+        dt("Created <code>@path</code>"),
+        dt("Could not create <code>@path</code>"),
         PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
     }
 
     provision_path("chmod", $path, $perm, 
-      t("Changed permissions of <code>@path</code> to @confirm"),
-      t("Could not change permissions <code>@path</code> to @confirm"),
+      dt("Changed permissions of <code>@path</code> to @confirm"),
+      dt("Could not change permissions <code>@path</code> to @confirm"),
       PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
   }
   foreach ($grps as $path) {
       provision_path("chown", $path, PROVISION_SCRIPT_USER, 
-      t("Changed ownership of <code>@path</code>"),
-      t("Could not change ownership <code>@path</code>"),
+      dt("Changed ownership of <code>@path</code>"),
+      dt("Could not change ownership <code>@path</code>"),
       PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
     provision_path("chgrp", $path, PROVISION_WEB_GROUP,
-      t("Changed group ownership of <code>@path</code>"),
-      t("Could not change group ownership <code>@path</code>"));
+      dt("Changed group ownership of <code>@path</code>"),
+      dt("Could not change group ownership <code>@path</code>"));
   }
 }
 
@@ -218,7 +226,7 @@ function _provision_find_profiles() {
   include_once('includes/install.inc');
 
   if (!$dir = opendir("./profiles")) {
-    provision_log('error', t("Cannot find profiles directory"));
+    provision_log('error', dt("Cannot find profiles directory"));
     return FALSE;
   }
   while (FALSE !== ($name = readdir($dir))) {
@@ -239,7 +247,7 @@ function _provision_find_profiles() {
 
     $languages['en'] = 1;
     // Find languages available
-    $files = array_keys(file_scan_directory('./profiles/' . $name . '/translations', '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
+    $files = array_keys(drush_scan_directory('./profiles/' . $name . '/translations', '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
     if (is_array($files)) {
       foreach ($files as $file) {
         if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
@@ -249,7 +257,7 @@ function _provision_find_profiles() {
     }
     $profile->info['languages'] = array_keys($languages);
     $return[$name] = $profile;
-    provision_log('notice', t('found install profile %name', array('%name' => $name)));
+    provision_log('notice', dt('found install profile %name', array('%name' => $name)));
   }
 
   return $return;
@@ -266,7 +274,7 @@ function provision_drupal_find_sites() {
     }
     closedir($dir);
   } else {
-    provision_log("error", t("Cannot find sites directory"));
+    provision_log("error", dt("Cannot find sites directory"));
     $sites = FALSE;
   }
   return $sites;
@@ -292,10 +300,6 @@ function _provision_drupal_get_cvs_versions($files) {
 
 
 function _provision_drupal_import_site(&$data, $url = NULL) {
-  if (!($data = provision_get_site_data($url))) {
-    $data = array(); // initialize site data to empty array
-  }
-
   $cmd = sprintf("php %s/drupal_import.php %s", dirname(__FILE__), escapeshellarg($url));
   if (provision_exec($cmd, $data)) {
     $data['installed'] = TRUE;
@@ -303,9 +307,6 @@ function _provision_drupal_import_site(&$data, $url = NULL) {
   else {
     $data['installed'] = FALSE;
   }
-  provision_save_site_data($url, $data);
-
-  return $data;
 }
 
 /**
@@ -339,8 +340,8 @@ function _provision_drupal_maintain_aliases($data, $url) {
           unset($old_aliases[$alias]);
         }
         provision_path("symlink", $url, PROVISION_DOCROOT_PATH . "/sites/" . $alias, 
-          t("Created symlink for alias @alias", array("@alias" => $alias)), 
-          t("Could not create symlink for alias @alias", array("@alias" => $alias)));
+          dt("Created symlink for alias @alias", array("@alias" => $alias)), 
+          dt("Could not create symlink for alias @alias", array("@alias" => $alias)));
       }
       // Delete existing aliases that are no longer present
       _provision_drupal_delete_aliases(array_keys($old_aliases));
@@ -354,7 +355,9 @@ function _provision_drupal_maintain_aliases($data, $url) {
 function _provision_drupal_delete_aliases($aliases) {
   foreach ($aliases as $alias) {
     provision_path("unlink", PROVISION_DOCROOT_PATH . "/sites/" . $alias, TRUE,
-          t("Removed symlink for alias @alias", array("@alias" => $alias)), 
-          t("Could not remove symlink for alias @alias", array("@alias" => $alias)));
+          dt("Removed symlink for alias @alias", array("@alias" => $alias)), 
+          dt("Could not remove symlink for alias @alias", array("@alias" => $alias)));
   }
 }
+
+

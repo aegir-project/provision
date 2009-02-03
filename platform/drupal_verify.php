@@ -2,7 +2,7 @@
 // $Id$
 
 require_once(dirname(__FILE__) . '/../provision.inc');
-require_once('provision_drupal.module');
+require_once('provision_drupal.drush.inc');
 
 $url = ($argv[1]) ? $argv[1] : null;
 provision_external_init($url);
