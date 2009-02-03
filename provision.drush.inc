@@ -176,7 +176,16 @@ function provision_drush_command() {
     'callback arguments' => array('restore'),
     'description' => 'Restore the site to a previous backup. This will also generate a backup of the site as it was.',
     'arguments' => array('domain.com' => dt('The domain of the site to be restored'),
-    'site_backup.tar.gz' => dt('The backup to restore the site to.')),
+      'site_backup.tar.gz' => dt('The backup to restore the site to.')),
+    'bootstrap' => -1
+  );
+
+  $items['provision deploy'] = array(
+    'callback' => 'provision_command',
+    'callback arguments' => array('deploy'),
+    'description' => 'Deploy an existing backup to a new url.',
+    'arguments' => array('domain.com' => dt('The domain to deploy the site package to.'),
+      'site_backup.tar.gz' => dt('The backup to deploy.')),
     'bootstrap' => -1
   );
  
