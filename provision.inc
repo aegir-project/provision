@@ -649,9 +649,14 @@ function provision_proc_open($cmd, &$data = NULL) {
     }
     fclose($pipes[0]);
     $info = stream_get_meta_data($pipes[1]);
+    stream_set_blocking($pipes[0], TRUE);
     stream_set_timeout($pipes[1], 1);
-    while (! ($string = stream_get_contents($pipes[1]))) { 
-      sleep(1); 
+    $stream = '';
+    while (!feof($pipes[1]) && !$info['timed_out']) { 
+      $string .= fgets($pipes[1], 4096);
+      $info = stream_get_meta_data($pipes[1]);
+      ob_flush();
+      flush();
     };
     fclose($pipes[1]);
     $code = proc_close($process);
@@ -659,6 +664,7 @@ function provision_proc_open($cmd, &$data = NULL) {
   }
   return false;
 }
+
 
 
 /**
