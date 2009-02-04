@@ -797,6 +797,23 @@ function provision_external_init($url, $bootstrap = TRUE) {
   return TRUE;
 }
 
+function provision_internal_init($url, $bootstrap = TRUE) {
+  $url = ($url) ? $url : 'default';
+  $drupal_base_url = parse_url(sprintf("http://" . $url));
+  $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
+  $_SERVER['PHP_SELF'] = $drupal_base_url['path'].'/install.php';
+  $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF'];
+  $_SERVER['REMOTE_ADDR'] = '';
+  $_SERVER['REQUEST_METHOD'] = NULL;
+  $_SERVER['SERVER_SOFTWARE'] = NULL;
+
+  if ($bootstrap) {
+    include_once('includes/bootstrap.inc');
+    drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+  }
+
+}
+
 function provision_password($length = 10) {
   // This variable contains the list of allowable characters for the
   // password. Note that the number 0 and the letter 'O' have been

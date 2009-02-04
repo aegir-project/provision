@@ -1,17 +1,5 @@
 <?php
 // $Id$
-
-require_once(dirname(__FILE__) . '/../provision.inc');
-if ($argv[1]) {
-  // Fake the necessary HTTP headers that Drupal needs:
-  $data = provision_external_init($argv[1], FALSE);
-}
-else {
-  provision_set_error(PROVISION_FRAMEWORK_ERROR);
-  provision_log("error", "USAGE: drupal_update.php url\n");
-  provision_output($url, $data);
-}
-
 /**
  * @file
  *   Update.php for provisioned sites.
@@ -131,4 +119,3 @@ function _update_do_one($module, $number, &$context) {
 }
 
 update_main();
-provision_output($data);
