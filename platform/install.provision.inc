@@ -37,7 +37,7 @@ function provision_drupal_provision_install(&$data, $url = NULL) {
  // Requires at least the database settings to complete.
   _provision_drupal_create_settings_file($data, $url);
   provision_internal_init($url, FALSE);
-  provision_platform_include(dirname(__FILE__), 'install');
+  provision_platform_include($data, dirname(__FILE__), 'install');
 }
 
 /**

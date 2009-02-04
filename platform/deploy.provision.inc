@@ -73,5 +73,5 @@ function provision_drupal_provision_deploy_rollback(&$data, $url) {
 
 function provision_drupal_provision_post_deploy(&$data, $url) {
   provision_invoke('update', $data, $url);
-  provision_platform_include(dirname(__FILE__), 'deploy');
+  provision_platform_include($data, dirname(__FILE__), 'deploy');
 }

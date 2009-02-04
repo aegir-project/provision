@@ -213,10 +213,8 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
  */
 function _provision_drupal_rebuild_caches(&$data, $url = NULL) {
   if (PLATFORM_CONTEXT_SITE) {
-    ini_set('error_reporting', E_ALL);
-    ini_set('display_errors', TRUE);
     provision_internal_init($url);
-    provision_platform_include(dirname(__FILE__), 'clear');
+    provision_platform_include($data, dirname(__FILE__), 'clear');
   }
 }
 
@@ -362,4 +360,12 @@ function _provision_drupal_delete_aliases($aliases) {
   }
 }
 
+function provision_drupal_install_log($ret) {
+  foreach ($ret as $info) {
+    if (!$info['success']) {
+      provision_set_error('PROVISION_DB_ERROR');
+    }
+    provision_log( ($info['success']) ? 'success' : 'error', $info['query']);
+  }
+}
 

@@ -18,8 +18,8 @@ function update_main() {
   include_once './includes/batch.inc';
   drupal_load_updates();
 
-  update_fix_d6_requirements();
-  update_fix_compatibility();
+  provision_drupal_install_log(update_fix_d6_requirements());
+  provision_drupal_install_log(update_fix_compatibility());
 
   $start = array();
   $modules = drupal_get_installed_schema_version(NULL, FALSE, TRUE);

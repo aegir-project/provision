@@ -476,11 +476,13 @@ function provision_value_list() {
  * Generate the text for a config file using php
  */
 function provision_render_config($template, $variables) {
+  _provision_errors_off();
   extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
   ob_start();                      // Start output buffering
   eval('?>'. $template);                 // Generate content
   $contents = ob_get_contents();   // Get the contents of the buffer
   ob_end_clean();                  // End buffering and discard
+  _provision_errors_on();
   return $contents;                // Return the contents
 }
 
@@ -557,53 +559,6 @@ function provision_shell_exec() {
   $command = call_user_func_array('sprintf', $args);
  
   return drush_shell_exec($command);
-}
-
-/**
- * Set the active database.
- *
- * Wrapper around db_set_active, which provides switching out of db_url.
- * @param new_db_url
- *    The database url to set the connection to. If not provided, will switch back to Drupal default.
- */
-function provision_set_active_db($new_db_url = NULL) {
-  static $old_db_url = NULL;
-  global $db_url;
-  
-  #initialize static
-  if (!$old_db_url) {
-    $old_db_url = $db_url;
-    $db_url = array();
-    $db_url['default'] = $old_db_url;
-  }
-
-  if ($new_db_url) {
-    preg_match("$^([a-z]*)://$", $new_db_url, $matches);
-
-    if ($matches[1] != PROVISION_DB_TYPE) {
-      $new_db_url = preg_replace("/^" .$matches[1]. "/", PROVISION_DB_TYPE, $new_db_url);
-    }
-    $db_url[md5($new_db_url)] = $new_db_url;
-    db_set_active(md5($new_db_url));
-  }
-  else {
-    db_set_active('default');
-  }
-}
-
-/**
- * Close an active connection
- *
- * This is an INCREDIBLY dangerous function, that is only used during import of sites
- * to avoid creating connections for every site being imported
- */
-function provision_close_active_db() {
-  global $active_db;
-  $close_db = $active_db;
-  db_set_active('default');
-  if ($close_db !== $active_db) {
-    db_close($close_db);
-  }
 }
 
 
@@ -841,7 +796,7 @@ function provision_password($length = 10) {
   return $pass;
 }
 
-function provision_platform_include($path, $command, $version = null, $platform = 'drupal') {
+function provision_platform_include(&$data, $path, $command, $version = null, $platform = 'drupal') {
   $version = ($version) ? $version : drush_drupal_major_version();
   $options[] = sprintf("%s_%s_%s", $platform, $version, $command);
   $options[] = sprintf("%s_%s", $platform, $command);
@@ -860,4 +815,16 @@ function provision_platform_include($path, $command, $version = null, $platform 
     provision_log('notice', dt('Including platform specific file : @file', array('@file' => $match)));
     include_once($file);
   }
+}
+
+function _provision_errors_on() {
+  ini_set('error_reporting', E_ALL);
+  ini_set('display_errors', TRUE);
+}
+_provision_errors_on();
+
+
+function _provision_errors_off() {
+  ini_set('error_reporting', ~E_ALL);
+  ini_set('display_errors', FALSE);
 }

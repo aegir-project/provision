@@ -18,8 +18,8 @@ function update_main() {
   include_once './includes/batch.inc';
   drupal_load_updates();
 
-  update_fix_d6_requirements();
-  update_fix_compatibility();
+  provision_drupal_install_log(update_fix_d6_requirements());
+  provision_drupal_install_log(update_fix_compatibility());
 
   $start = array();
   $modules = drupal_get_installed_schema_version(NULL, FALSE, TRUE);
@@ -99,12 +99,7 @@ function _update_do_one($module, $number, &$context) {
   $function = $module .'_update_'. $number;
   if (function_exists($function)) {
     $ret = $function($context['sandbox']);
-  }
-  foreach ($ret as $info) {
-    if (!$info['success']) {
-      provision_set_error('PROVISION_DB_ERROR');
-    }
-    provision_log( ($info['success']) ? 'success' : 'error', $info['query']);
+    provision_drupal_install_log($ret);
   }
 
   if (isset($ret['#finished'])) {

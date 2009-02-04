@@ -53,14 +53,7 @@ function update_main() {
           while (!$finished) {
             // do update
             $ret = module_invoke($module, 'update_' . $update);
-            // Assume the update finished unless the update results indicate otherwise.
-            foreach ($ret as $info) {
-              if (!$info['success']) {
-                provision_set_error('PROVISION_DB_ERROR');
-              }
-              provision_log( ($info['success']) ? 'success' : 'error', $info['query']);
-
-            }
+            provision_drupal_install_log($ret);
             $finished = 1;
             if (isset($ret['#finished'])) {
               $finished = $ret['#finished'];

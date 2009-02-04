@@ -56,8 +56,6 @@ function provision_init() {
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
     provision_output($url);
   }
-  // Load requested additional modules
-  #provision_load_from_args();
 
   // Set up defines for platform
   $docroot = provision_get_option(array("r", "root"), $_SERVER['PWD']);
@@ -104,9 +102,7 @@ function provision_init() {
   define('PROVISION_DB_PASSWD', $db['pass']);
   define('PROVISION_DB_HOST', $db['host']);
  
-  // Drupal does not support multiple types of connections in the same session
-  preg_match("$^([a-z]*)://$", $GLOBALS['db_url'], $matches);
-  define('PROVISION_DB_TYPE', $matches[1]);
+  define('PROVISION_DB_TYPE', $db['scheme']);
 }
 
 
@@ -283,50 +279,6 @@ function _provision_generate_config() {
 }
 
 
-/**
- * Load additional modules just for this process
- *
- * Load additional modules specified by --load_module_name
- */
-function provision_load_from_args() {
-  if (!function_exists('drush_verify_cli')) {
-    return null;
-  }
-  global $args;
-  $reset = FALSE;
-  foreach ($args['options'] as $arg => $value) {
-    if (preg_match("/^load-([a-z\-]*)$/", $arg, $matches)) {
-      $module = str_replace("-", "_", $matches[1]);
-      // find file : can only search under provision path
-      $files = file_scan_directory(dirname(__FILE__), "$module.module", array('.', '..', 'CVS'), 0, TRUE, 'name');
-      if (isset($files[$module])) {
-        provision_log("notice", dt("Loading @module on request", array("@module" => $module)));
-        $loaded[$module]['name'] = $module;
-        $loaded[$module]['filename']  = $files[$module]->filename;
-        include_once($loaded[$module]['filename']);
-      }
-      $reset = TRUE;
-    }
-  }
-  $existing = array();
-  $list = module_list(TRUE, FALSE);
-  foreach ($list as $module) {
-    $existing[$module]['name'] = $module;
-    $existing[$module]['filename'] = drupal_get_filename('module', $module);
-    drupal_load('module', $module);
-  }
-  $loaded = array_merge($existing, (array) $loaded);
-  foreach ($loaded as $name => $info) {
-    $files = file_scan_directory(dirname($info['filename']), ".drush.inc$");
-    foreach ($files as $filename => $info2) {
-      include_once($filename);
-    }
-
-  }
-  module_list(TRUE, FALSE, TRUE, $loaded);
-  // Force to regenerate the stored list of hook implementations.
-  module_implements('', TRUE, TRUE);
-}
 
 function _provision_default_restart_cmd() {
   # try to detect the apache restart command

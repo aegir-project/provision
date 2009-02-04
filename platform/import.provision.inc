@@ -19,6 +19,6 @@ function provision_drupal_provision_import_validate() {
  */
 function provision_drupal_provision_import(&$data, $url = NULL) {
   provision_internal_init($url);
-  provision_platform_include(dirname(__FILE__), 'import');
+  provision_platform_include($data, dirname(__FILE__), 'import');
 }
 

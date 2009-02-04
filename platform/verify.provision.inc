@@ -34,7 +34,7 @@ function provision_drupal_provision_verify(&$data, $url = null) {
     // Requires at least the database settings to complete.
     _provision_drupal_create_settings_file($data, $url);
 //    provision_internal_init($url);
-//    provision_platform_include(dirname(__FILE__), 'verify');
+//    provision_platform_include($data, dirname(__FILE__), 'verify');
   }
   if (is_array($data['modules'])) {
     // get the correct version names for everything.
