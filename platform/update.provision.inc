@@ -7,5 +7,5 @@ function provision_drupal_provision_update_validate() {
 
 function provision_drupal_provision_update(&$data, $url) {
   provision_internal_init($data['site_url'], false);
-  include_once(sprintf('%s/drupal_update.inc', dirname(__FILE__)));
+  provision_platform_include(dirname(__FILE__), 'update');
 }

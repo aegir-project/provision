@@ -26,7 +26,6 @@ function provision_drupal_provision_verify(&$data, $url = null) {
     provision_log('notice', dt("This platform is running @short_name @version", 
       array('@short_name' => 'drupal', '@version' => VERSION)));
     $data['profiles'] = _provision_find_profiles();
-    $cmd = sprintf("php %s/drupal_verify.php", dirname(__FILE__)); 
   }
   else {
       // This is the actual drupal provisioning requirements. 
@@ -34,8 +33,8 @@ function provision_drupal_provision_verify(&$data, $url = null) {
     _provision_drupal_maintain_aliases($data, $url);
     // Requires at least the database settings to complete.
     _provision_drupal_create_settings_file($data, $url);
-    #$cmd = sprintf("php %s/drupal_verify.php %s", dirname(__FILE__), $url); 
-    #provision_exec($cmd, $data);
+//    provision_internal_init($url);
+//    provision_platform_include(dirname(__FILE__), 'verify');
   }
   if (is_array($data['modules'])) {
     // get the correct version names for everything.

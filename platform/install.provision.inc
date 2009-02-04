@@ -36,9 +36,8 @@ function provision_drupal_provision_pre_install(&$data, $url = NULL) {
 function provision_drupal_provision_install(&$data, $url = NULL) {
  // Requires at least the database settings to complete.
   _provision_drupal_create_settings_file($data, $url);
-
-  $cmd = sprintf("php %s/drupal_install.php %s %s %s %s", dirname(__FILE__), escapeshellarg($url), escapeshellarg($data['profile']), escapeshellarg($data['language']), escapeshellarg($data['client_email']));
-  provision_exec($cmd, $data);
+  provision_internal_init($url, FALSE);
+  provision_platform_include(dirname(__FILE__), 'install');
 }
 
 /**

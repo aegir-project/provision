@@ -1,5 +1,13 @@
 
+  $databases['default']['default'] = array(
+    'driver' => '<?php print $db_type; ?>',
+    'database' => '<?php print $db_name; ?>',
+    'username' => '<?php print $db_user; ?>',
+    'password' => '<?php print $db_passwd; ?>',
+    'host' => '<?php print $db_host ?>',
+  );
   $db_url = '<?php print "$db_type://$db_user:$db_passwd@$db_host/$db_name"; ?>';
+
   $profile = "<?php print $profile ?>";
   /**
   * PHP settings:

@@ -1,14 +1,5 @@
 <?php
 
-require_once(dirname(__FILE__) . '/../provision.inc');
-if ($argv[1]) {
-  provision_external_init($argv[1]);
-}
-else {
-  provision_set_error(PROVISION_FRAMEWORK_ERROR);
-  provision_log("error", "USAGE: import.php url\n");
-}
-
 if ($parts = @parse_url($GLOBALS['db_url'])) {
   $data['db_type'] = $parts['scheme'];
   $data['db_user'] = $parts['user'];
@@ -20,4 +11,3 @@ if ($parts = @parse_url($GLOBALS['db_url'])) {
   $language = language_default();
   $data['language'] = $language->language;
 }
-provision_output($data);

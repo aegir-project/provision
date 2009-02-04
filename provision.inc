@@ -170,8 +170,6 @@ function provision_parse_output($string) {
  *   An associative array containing additional data to be returned from the command. @see provision_stats_stats()
  */
 function provision_output($data = array()) {
-  $return = $extra;
-
   $return['site'] = $data;
   $error = provision_get_error();
   if (!$error) {
@@ -689,9 +687,14 @@ function provision_proc_open($cmd, &$data = NULL) {
     }
     fclose($pipes[0]);
     $info = stream_get_meta_data($pipes[1]);
+    stream_set_blocking($pipes[0], TRUE);
     stream_set_timeout($pipes[1], 1);
-    while (! ($string = stream_get_contents($pipes[1]))) { 
-      sleep(1); 
+    $stream = '';
+    while (!feof($pipes[1]) && !$info['timed_out']) { 
+      $string .= fgets($pipes[1], 4096);
+      $info = stream_get_meta_data($pipes[1]);
+      ob_flush();
+      flush();
     };
     fclose($pipes[1]);
     $code = proc_close($process);
@@ -782,6 +785,7 @@ function provision_external_init($url, $bootstrap = TRUE) {
   $_SERVER['REQUEST_METHOD'] = NULL;
   $_SERVER['SERVER_SOFTWARE'] = NULL;
 
+  define('DRUPAL_ROOT', realpath('.'));
   define('PROVISION_DRUSH_BACKEND', true);
   if ($bootstrap) {
     include_once('includes/bootstrap.inc');
@@ -801,14 +805,13 @@ function provision_internal_init($url, $bootstrap = TRUE) {
   $url = ($url) ? $url : 'default';
   $drupal_base_url = parse_url(sprintf("http://" . $url));
   $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
-  $_SERVER['PHP_SELF'] = $drupal_base_url['path'].'/install.php';
+  $_SERVER['PHP_SELF'] = '/index.php';
   $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF'];
-  $_SERVER['REMOTE_ADDR'] = '';
+  $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
   $_SERVER['REQUEST_METHOD'] = NULL;
   $_SERVER['SERVER_SOFTWARE'] = NULL;
-
   if ($bootstrap) {
-    include_once('includes/bootstrap.inc');
+    include_once('./includes/bootstrap.inc');
     drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
   }
 
@@ -836,4 +839,25 @@ function provision_password($length = 10) {
   }
 
   return $pass;
+}
+
+function provision_platform_include($path, $command, $version = null, $platform = 'drupal') {
+  $version = ($version) ? $version : drush_drupal_major_version();
+  $options[] = sprintf("%s_%s_%s", $platform, $version, $command);
+  $options[] = sprintf("%s_%s", $platform, $command);
+  $options[] = sprintf("%s", $command);
+
+  $match = false;
+  foreach ($options as $option) {
+    $file = sprintf("%s/%s.inc", $path, $option);
+    if (file_exists($file)) {
+      $match = $file;
+      break;
+    }
+  }
+
+  if ($match) {
+    provision_log('notice', dt('Including platform specific file : @file', array('@file' => $match)));
+    include_once($file);
+  }
 }

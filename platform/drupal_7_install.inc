@@ -4,36 +4,33 @@
  *    Rebuild all the caches
  */
 
-require_once(dirname(__FILE__) . '/../provision.inc');
-if (sizeof($argv) == 5) {
-  // Fake the necessary HTTP headers that Drupal needs:
-  provision_external_init($argv[1], FALSE);
-  $GLOBALS['url'] = $argv[1];
-  $GLOBALS['profile'] = $argv[2];
-  $GLOBALS['install_locale'] = $argv[3];
-  $GLOBALS['client_email'] = $argv[4];
+$GLOBALS['url'] = $data['site_url'];
+$GLOBALS['profile'] = $data['profile'];
+$GLOBALS['install_locale'] = $data['language'];
+$GLOBALS['client_email'] = $data['client_email'];
 
-  require_once 'includes/install.inc';
-  define('MAINTENANCE_MODE', 'install');
-}
-else {
-  provision_set_error(PROVISION_FRAMEWORK_ERROR);
-  provision_log("error", "USAGE: install.php url profile locale email\n");
-}
+require_once 'includes/install.inc';
+define('MAINTENANCE_MODE', 'install');
 
 /**
  * Verify if Drupal is installed.
  */
 function install_verify_drupal() {
-  $result = @db_query("SELECT name FROM {system} WHERE name = 'system'");
-  return $result && db_result($result) == 'system';
+  try { 
+    $result = @db_query("SELECT name FROM {system} WHERE name = 'system'");
+    return $result && db_result($result) == 'system';
+  }
+  catch (Exception $e) {
+  }
+
 }
 
 /**
  * Verify existing settings.php
  */
 function install_verify_settings() {
-  global $db_prefix, $db_type, $db_url;
+  global $db_prefix, $db_type, $db_url, $databases;
+  return TRUE;
   // Verify existing settings (if any).
   if (!empty($db_url)) {
     // We need this because we want to run form_get_errors.
@@ -141,7 +138,7 @@ function install_main() {
   include_once './includes/module.inc';
   $module_list['system']['filename'] = 'modules/system/system.module';
   $module_list['filter']['filename'] = 'modules/filter/filter.module';
-  module_list(TRUE, FALSE, FALSE, $module_list);
+  module_list(TRUE, FALSE,  $module_list);
   drupal_load('module', 'system');
   drupal_load('module', 'filter');
 
@@ -154,13 +151,14 @@ function install_main() {
     // Since we have a database connection, we use the normal cache system.
     // This is important, as the installer calls into the Drupal system for
     // the clean URL checks, so we should maintain the cache properly.
-    require_once './includes/cache.inc';
-    $conf['cache_inc'] = './includes/cache.inc';
+    require_once DRUPAL_ROOT . '/includes/cache.inc';
+    $conf['cache_inc'] = 'includes/cache.inc';
 
-    // Establish a connection to the database.
-    require_once './includes/database.inc';
-    db_set_active();
+    // Initialize the database system. Note that the connection
+    // won't be initialized until it is actually requested.
+    require_once DRUPAL_ROOT . '/includes/database/database.inc';
 
+    // Check if Drupal is installed.
     if (install_verify_drupal()) {
       provision_set_error(PROVISION_SITE_INSTALLED);
       provision_log('error', st('Site is already installed'));
@@ -168,9 +166,13 @@ function install_main() {
     }
   }
   else {
-    provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    provision_log('error', st('Config file could not be loaded'));
-    return FALSE;
+    // Since no persistent storage is available yet, and functions that check
+    // for cached data will fail, we temporarily replace the normal cache
+    // system with a stubbed-out version that short-circuits the actual
+    // caching process and avoids any errors.
+    require_once DRUPAL_ROOT . '/includes/cache-install.inc';
+    $conf['cache_inc'] = 'includes/cache-install.inc';
+
   }
 
 
@@ -188,6 +190,7 @@ function install_main() {
    * We separate this out because we want to avoid all the user interface
    * code in this function, so we only use the relevant part of it.
    */
+  $missing_requirement = FALSE;
   $requirements = drupal_check_profile($profile);
   $severity = drupal_requirements_severity($requirements);
   // If there are issues, report them.
@@ -218,15 +221,18 @@ function install_main() {
   }
 
   // Verify existence of all required modules.
-  $modules = drupal_verify_profile($profile, $language);
+  $requirements = drupal_verify_profile($profile, $install_locale);
+  // Check the severity of the requirements reported.
+  $severity = drupal_requirements_severity($requirements);
 
-  if (!$modules) {
+  if ($severity == REQUIREMENT_ERROR) {
+    provision_log('error', t('Missing requirements'));
     provision_set_error(PROVISION_FRAMEWORK_ERROR);
     return FALSE;
   }
 
   drupal_install_system();
-  $modules = array_diff($modules, array('system'));
+  $modules = array_diff(drupal_get_profile_modules($profile, $install_locale), array('system'));
 
   drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
@@ -316,6 +322,4 @@ function install_main() {
     install_send_welcome_mail($url, $profile, $instal_locale, $client_email);
   }
 }
-$data = array();
-install_main($url, $data);
-provision_output($data);
+install_main();

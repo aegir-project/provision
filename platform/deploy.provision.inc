@@ -73,6 +73,5 @@ function provision_drupal_provision_deploy_rollback(&$data, $url) {
 
 function provision_drupal_provision_post_deploy(&$data, $url) {
   provision_invoke('update', $data, $url);
-  $cmd = sprintf("php %s/drupal_deploy.php %s %s", dirname(__FILE__), $url, $data['old_site_url']);
-  provision_exec($cmd, $data);
+  provision_platform_include(dirname(__FILE__), 'deploy');
 }

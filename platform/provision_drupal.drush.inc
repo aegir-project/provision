@@ -212,9 +212,11 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
  * Runs an external script to reload all the various drupal caches
  */
 function _provision_drupal_rebuild_caches(&$data, $url = NULL) {
-  if ($url) {
-    $cmd = sprintf("php %s/drupal_clear.php %s", dirname(__FILE__), escapeshellarg($url));
-    provision_exec($cmd, $data);
+  if (PLATFORM_CONTEXT_SITE) {
+    ini_set('error_reporting', E_ALL);
+    ini_set('display_errors', TRUE);
+    provision_internal_init($url);
+    provision_platform_include(dirname(__FILE__), 'clear');
   }
 }
 
@@ -324,7 +326,7 @@ function _provision_drupal_variable_get($name, $default) {
  * Create and remove symlinks for each of the possible domain aliases of an existing site
  */
 function _provision_drupal_maintain_aliases($data, $url) {
-  if (PROVISION_PLATFORM_SITE) {
+  if (PROVISION_CONTEXT_SITE) {
     $old_aliases = array();
     if ($old_data = provision_load_site_data($url)) {
       if (is_array($old_data['aliases'])) {
