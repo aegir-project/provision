@@ -45,7 +45,9 @@ function provision_drupal_provision_pre_deploy(&$data, $url, $backup_file) {
     dt('Failed to extract the contents of @path'),
     PROVISION_PERM_ERROR, PROVISION_FRAMEWORK_ERROR);
   if ($extracted) {
-    $data = array_merge(provision_get_site_data($url), $data); 
+    $old_data = provision_get_site_data($url);
+    $data['old_site_url'] = $old_data['site_url'];
+    $data = array_merge($old_data, $data); 
   }
 }
 
@@ -71,4 +73,6 @@ function provision_drupal_provision_deploy_rollback(&$data, $url) {
 
 function provision_drupal_provision_post_deploy(&$data, $url) {
   provision_invoke('update', $data, $url);
+  $cmd = sprintf("php %s/drupal_deploy.php %s %s", dirname(__FILE__), $url, $data['old_site_url']);
+  provision_exec($cmd, $data);
 }

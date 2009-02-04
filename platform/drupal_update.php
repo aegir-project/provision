@@ -8,7 +8,7 @@ if ($argv[1]) {
 }
 else {
   provision_set_error(PROVISION_FRAMEWORK_ERROR);
-  provision_log("error", "USAGE: update.php url\n");
+  provision_log("error", "USAGE: drupal_update.php url\n");
   provision_output($url, $data);
 }
 
