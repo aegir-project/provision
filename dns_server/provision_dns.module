@@ -16,7 +16,6 @@
  * Eventually, we may want to incorporate this in a drush-driven way that
  * maintains security, so I've left it here for future reference.
  **/
-include_once(drupal_get_path('module', 'provision_dns') . '/provision_dns.admin.inc');
 
 # DNS API split off to a separate file for clarity
 include_once('provision_dns.api.inc');

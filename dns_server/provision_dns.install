@@ -5,13 +5,6 @@ function provision_dns_install() {
     case 'mysql' :
     case 'mysqli' :
       // The hosting_dns_server_zone table maps DNS server nodes onto zone IDs
-      db_query("CREATE TABLE {hosting_dns_server_zone} (
-        vid int NOT NULL DEFAULT '0',
-        nid int(10) unsigned NOT NULL DEFAULT '0',
-        zid int(10) unsigned NOT NULL DEFAULT '0',
-	rid int(10) unsigned NOT NULL DEFAULT '0',
-        KEY (vid, zid)
-      ) /*!40100 DEFAULT CHARACTER SET UTF8 */ ");
 
       // The provision_dns_soa table defines zones
       db_query("CREATE TABLE {provision_dns_soa} (
@@ -50,7 +43,6 @@ function provision_dns_install() {
 }
 
 function provision_dns_uninstall() {
-  db_query("DROP TABLE {hosting_dns_server_zone}");
   db_query("DROP TABLE {provision_dns_soa}"); // Should we tell the engine to remove these first?
   db_query("DROP TABLE {provision_dns_rr}"); 
 }
@@ -58,5 +50,13 @@ function provision_dns_uninstall() {
 function provision_dns_update_1() {
   $ret = array();
   $ret[] = update_sql("ALTER TABLE hosting_site_zone RENAME TO hosting_dns_server_zone");
+  return $ret;
+}
+
+function provision_dns_update_2() {
+  $ret = array();
+  $ret[] = update_sql("DROP TABLE {hosting_dns_server_zone}");
+  $ret[] = update_sql("DROP TABLE {provision_dns_soa}");
+  $ret[] = update_sql("DROP TABLE {provision_dns_rr}");
   return $ret;
 }
