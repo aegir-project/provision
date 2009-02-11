@@ -183,9 +183,9 @@ function provision_path_chown($path, &$owner, &$reason) {
   return provision_posix_username(fileowner($path));
 }
 
-function provision_path_chgrp($path, &$group, &$reason) {
-  if ($group = provision_posix_groupname($group)) {
-    if (provision_user_in_group(PROVISION_SCRIPT_USER, $group)) {
+function provision_path_chgrp($path, &$gid, &$reason) {
+  if ($group = provision_posix_groupname($gid)) {
+    if (provision_user_in_group(PROVISION_SCRIPT_USER, $gid)) {
       if (chgrp($path, $group)) {
         return $group;
       }
@@ -197,7 +197,7 @@ function provision_path_chgrp($path, &$group, &$reason) {
       $reason = dt("@user is not in @group group", array("@user" => PROVISION_SCRIPT_USER, "@group" => $group));
     }
   }
-  else {
+  elseif (!@chgrp($path, $gid)) { # try to change the group anyways
     $reason = dt("the group does not exist");
   }
 
