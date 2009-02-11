@@ -157,7 +157,8 @@ function _provision_drupal_create_settings_file(&$data, $url = NULL) {
   provision_path("chmod", "sites/$url/settings.php", 0440,
     dt('Changed permissions of settings.php to @confirm'),
     dt('Could not change permissions of settings.php to @confirm'));
-  provision_path("chgrp", "sites/$url/settings.php", PROVISION_WEB_GROUP,
+  $group = $data['web_group'] ? $data['web_group'] : PROVISION_WEB_GROUP;
+  provision_path("chgrp", "sites/$url/settings.php", $group,
     dt('Change group ownership of settings.php to @confirm'),
     dt('Could not change group ownership of settings.php to @confirm'));
 }
