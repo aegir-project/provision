@@ -136,6 +136,7 @@ function install_main() {
 
   // Load module basics (needed for hook invokes).
   include_once './includes/module.inc';
+  include_once './includes/session.inc';
   $module_list['system']['filename'] = 'modules/system/system.module';
   $module_list['filter']['filename'] = 'modules/filter/filter.module';
   module_list(TRUE, FALSE,  $module_list);

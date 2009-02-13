@@ -289,7 +289,7 @@ function provision_log($type, $message) {
      'type' => $type, 
      'message' => $message, 
      'timestamp' => time()
-    ));
+   ));
 }
 
 /**
@@ -825,6 +825,6 @@ _provision_errors_on();
 
 
 function _provision_errors_off() {
-  ini_set('error_reporting', ~E_ALL);
-  ini_set('display_errors', FALSE);
+#  ini_set('error_reporting', ~E_ALL);
+#  ini_set('display_errors', FALSE);
 }
