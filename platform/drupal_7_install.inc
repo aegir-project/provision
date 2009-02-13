@@ -85,6 +85,7 @@ function install_send_welcome_mail($url, $profile, $language, $client_email) {
 }
 
 function install_mail($key, &$message, $params) {
+  global $profile, $install_locale, $client_email, $conf, $url, $base_url;
   switch ($key) {
     case 'welcome-admin':
       // allow the profile to override welcome email text
@@ -235,6 +236,7 @@ function install_main() {
   drupal_install_system();
   $modules = array_diff(drupal_get_profile_modules($profile, $install_locale), array('system'));
 
+  drupal_install_init_database(); 
   drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
   /**
@@ -254,6 +256,8 @@ function install_main() {
     provision_log("notice", t("Installed @module module.", 
       array("@module" => $files[$module]->info['name'])));
   }
+  module_load_all();
+  module_invoke_all('init');
 
   // locale-initial-import and locale-inintial-batch tasks
   if (!empty($install_locale) && ($install_locale != 'en')) {
@@ -291,6 +295,7 @@ function install_main() {
   // profile-finished task
   // Secondary locale import 
   if (!empty($install_locale) && ($install_locale != 'en')) {
+    include_once DRUPAL_ROOT . '/includes/locale.inc';
     // Collect files to import for this language. Skip components
     // already covered in the initial batch set.
     $batch = locale_batch_by_language($install_locale, NULL, $install_locale_batch_components);
@@ -320,7 +325,7 @@ function install_main() {
   variable_set('install_profile', $profile);
 
   if ($client_email) {
-    install_send_welcome_mail($url, $profile, $instal_locale, $client_email);
+    install_send_welcome_mail($url, $profile, $install_locale, $client_email);
   }
 }
 install_main();

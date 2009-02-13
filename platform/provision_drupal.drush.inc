@@ -213,7 +213,7 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
  * Runs an external script to reload all the various drupal caches
  */
 function _provision_drupal_rebuild_caches(&$data, $url = NULL) {
-  if (PLATFORM_CONTEXT_SITE) {
+  if (PROVISION_CONTEXT_SITE) {
     provision_internal_init($url);
     provision_platform_include($data, dirname(__FILE__), 'clear');
   }
