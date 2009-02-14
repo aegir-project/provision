@@ -818,13 +818,13 @@ function provision_platform_include(&$data, $path, $command, $version = null, $p
 }
 
 function _provision_errors_on() {
-#  ini_set('error_reporting', E_ALL);
-#  ini_set('display_errors', TRUE);
+  ini_set('error_reporting', E_ALL ^ E_NOTICE);
+  ini_set('display_errors', TRUE);
 }
 _provision_errors_on();
 
 
 function _provision_errors_off() {
-#  ini_set('error_reporting', ~E_ALL);
-#  ini_set('display_errors', FALSE);
+  ini_set('error_reporting', ~E_ALL);
+  ini_set('display_errors', FALSE);
 }
