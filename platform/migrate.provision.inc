@@ -26,11 +26,6 @@
 function provision_drupal_provision_migrate_validate(&$data, $url = null, $platform = null) {
   _provision_drupal_url_required();
   _provision_drupal_valid_installed_site();
-
-  $exists = provision_path("exists", $platform . '/drush.php', TRUE,
-      dt("Found platform at @path"),
-      dt("Could not find platform at @path"),
-      PROVISION_FRAMEWORK_ERROR);
 }
 
 /**
