@@ -24,7 +24,8 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
    return FALSE;
   }
   
-  if (!_provision_mysql_grant($db_name, $db_user, $db_passwd)) {
+  if (!_provision_mysql_grant($db_name, $db_user, $db_passwd)
+      || !_provision_mysql_grant($db_name, $db_user, $db_passwd, 'localhost')) {
     provision_log("warning", "Could not GRANT user access.");
   }
   _provision_mysql_flush_privileges();
