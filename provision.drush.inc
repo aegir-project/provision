@@ -26,11 +26,11 @@
  *   restore - Revert to a previous backup of the site.
  *   cron - Run cron process for a site
  *
- * Not implemented yet :
  *   upgrade - Accepts a site package (backup) as argument, and redeploys it, running the upgrade processes on it.
  *             Uses hook_provision_pre_upgrade(), hook_provision_upgrade() and hook_provision_post_upgrade() hooks,
  *             and allows clean roll back if any errors occur. Will include stringent checking of module versions,
  *             and allow unit tests to be run.
+ * Not implemented yet :
  *   rename  - Change the url of a site. This requires moving of files, and numerous other issues.
  */
 
@@ -110,7 +110,7 @@ function provision_init() {
  * Implementation of hook_drush_command().
  */
 function provision_drush_command() {
-  
+
   $items['provision install'] = array(
     'callback' => 'provision_command',
     'callback arguments' => array('install'),
@@ -209,56 +209,7 @@ function provision_drush_command() {
     'bootstrap' => -1
   );
  
-  if (!function_exists('hosting_setup')) {
-    $items['provision setup'] = array(
-      'callback' => '_provision_setup_cmd',
-      'description' => 'Initialize this platform to be able to create hosted sites.',
-      'bootstrap' => -1
-    );
-  }
-
   return $items;
-}
-
-
-/**
- * Initial setup of platform
- * 
- * Creates symlink to drush.php
- * Creates config path
- * Creates drushrc path
- *
- * This function is re-used by the hosting_setup command, as it is a superset of this functionality.
- */
-function _provision_setup() {
-  $success = TRUE;
-  
-  $drush_path = realpath($_SERVER['argv'][0]);
-
-  $success &= provision_path('symlink', $drush_path, PROVISION_DOCROOT_PATH . '/drush.php', 
-    dt('Created symlink for drush.php file'), 
-    dt('Could not create symlink for drush.php'), 
-    PROVISION_FRAMEWORK_ERROR);
-
-  $success &= _provision_generate_config();
-  return $success; 
-}
-
-/**
- * Drush command wrapper for the setup of the platform
- */
-function _provision_setup_cmd() {
-  _provision_setup();
- 
-  // @TODO use provision_output for this, but we need pretty print first.
-  $logs = provision_get_log();
-  foreach ($logs as $log) {
-    print "$log[message]\n";
-  }
-
-  if (provision_get_error()) {
-    print "\nThe command did not complete successfully, please fix the issues and re-run this script.";
-  }
 }
 
 
@@ -281,16 +232,41 @@ function _provision_generate_config() {
 
 
 function _provision_default_restart_cmd() {
-  # try to detect the apache restart command
   $command = '/usr/sbin/apachectl'; # a proper default for most of the world
-  foreach (array('/usr/local/sbin/apachectl', # freebsd
-                 '/usr/sbin/apache2ctl', # debian + apache2
-      $command) as $test) {
+  foreach (explode(':', $_SERVER['PATH']) as $path) {
+    $options[] = "$path/apache2ctl";
+    $options[] = "$path/apachectl";
+  }
+  # try to detect the apache restart command
+  $options[] = '/usr/local/sbin/apachectl'; # freebsd
+  $options[] = '/usr/sbin/apache2ctl'; # debian + apache2
+  $options[] = $command;
+
+  foreach ($options as $test) {
     if (is_executable($test)) {
       $command = $test;
+      break;
     }
   }
 
   return "sudo $command graceful";
+}
+
+function _provision_default_web_group() {
+  $common_groups = array(
+    'httpd',
+    'www-data', 
+    'apache',
+    'nogroup',
+    'nobody',
+    PROVISION_WEB_GROUP);
+
+  foreach ($common_groups as $group) {
+    if (provision_posix_groupname($group)) {
+      return $group;
+      break;
+    }
+  }
+  return null;
 }
 

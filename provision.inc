@@ -201,7 +201,7 @@ function provision_output($data = array()) {
  */
 
 
-if (PROVISION_SUCCESS != -1) {
+if (!defined(PROVISION_SUCCESS)) {
   include_once('provision_errors.inc');
 }
 
@@ -642,7 +642,7 @@ function provision_proc_open($cmd, &$data = NULL) {
     }
     fclose($pipes[0]);
     $info = stream_get_meta_data($pipes[1]);
-    stream_set_blocking($pipes[0], TRUE);
+    stream_set_blocking($pipes[1], TRUE);
     stream_set_timeout($pipes[1], 1);
     $stream = '';
     while (!feof($pipes[1]) && !$info['timed_out']) { 
@@ -769,7 +769,6 @@ function provision_internal_init($url, $bootstrap = TRUE) {
     include_once('./includes/bootstrap.inc');
     drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
   }
-
 }
 
 function provision_password($length = 10) {

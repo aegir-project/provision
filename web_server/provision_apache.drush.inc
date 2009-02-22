@@ -74,5 +74,6 @@ function _provision_apache_restart_apache($cause_error = FALSE) {
     provision_log('notice', dt('Apache has been restarted'));
   }
 
+  return $return;
 }
 

@@ -237,7 +237,7 @@ function install_main() {
   $modules = array_diff(drupal_get_profile_modules($profile, $install_locale), array('system'));
 
   drupal_install_init_database(); 
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+  drush_drupal_bootstrap_full();
 
   /**
    * Further installation tasks
