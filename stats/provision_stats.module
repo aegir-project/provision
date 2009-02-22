@@ -10,7 +10,7 @@ function provision_stats_drush_command() {
 
 function _provision_stats($url) {
   if (!_provision_drupal_site_installed($url)) {
-    provision_log("error", "Site has not been installed yet.");
+    drush_log("Site has not been installed yet.", 'error');
     provision_set_error(PROVISION_SITE_NOT_FOUND);
     provision_output($url, $data);
   }

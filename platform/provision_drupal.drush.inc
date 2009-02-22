@@ -8,6 +8,38 @@
  * and all the install api code. 
  */
 
+define('PROVISION_BACKUP_PATH_NOT_FOUND', 'PROVISION_BACKUP_PATH_NOT_FOUND');
+define('PROVISION_BACKUP_FAILED', 'PROVISION_BACKUP_FAILED');
+define('PROVISION_DRUPAL_INSTALL_FAILED', 'PROVISION_DRUPAL_INSTALL_FAILED');
+define('PROVISION_DRUPAL_UPDATE_FAILED', 'PROVISION_DRUPAL_UPDATE_FAILED');
+define('PROVISION_DRUPAL_INSTALL_MISSING_REQUIREMENTS', 'PROVISION_DRUPAL_INSTALL_MISSING_REQUIREMENTS');
+define('PROVISION_DRUPAL_SITE_INSTALLED', 'PROVISION_DRUPAL_SITE_INSTALLED');
+define('PROVISION_DRUPAL_SITE_NOT_FOUND', 'PROVISION_DRUPAL_SITE_NOT_FOUND');
+define('PROVISION_CONFIG_NOT_VALID', 'PROVISION_CONFIG_NOT_VALID');
+define('PROVISION_REQUIRES_URL', 'PROVISION_REQUIRES_URL');
+
+function provision_drupal_drush_help($section) {
+  switch ($section) {
+    case 'error:PROVISION_CONFIG_NOT_VALID' : 
+      return dt('Config file could not be loaded.');
+    case 'error:PROVISION_DRUPAL_SITE_INSTALLED' : 
+      return dt('Site has already been installed.');
+    case 'error:PROVISION_DRUPAL_SITE_NOT_FOUND' : 
+      return dt('Site was not found.');
+    case 'error:PROVISION_DRUPAL_INSTALL_FAILED' : 
+      return dt('Could not complete Drupal installation.');
+    case 'error:PROVISION_DRUPAL_UPDATE_FAILED' : 
+      return dt('Could not complete Drupal update.');
+    case 'error:PROVISION_BACKUP_PATH_NOT_FOUND' :
+      return dt("Backup directory does not exist.");
+    case 'error:PROVISION_DRUPAL_INSTALL_MISSING_REQUIREMENTS' :
+      return dt("Could not meet the requirements for installing the drupal profile");
+    case 'error:PROVISION_REQUIRES_URL' : 
+      return dt('You need to specify the URL argument for this command');
+  }
+
+}
+
 /**
  * Initialize the platform / site
  *
@@ -47,8 +79,7 @@ function provision_drupal_provision_finalize(&$data, $url = NULL) {
  */
 function _provision_drupal_url_required() {
   if (PROVISION_CONTEXT_PLATFORM) {
-    provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    provision_log('error', dt('You need to specify the URL argument for this command'));
+    drush_set_error(PROVISION_REQUIRES_URL);
   }
 }
 
@@ -60,8 +91,7 @@ function _provision_drupal_url_required() {
 function _provision_drupal_valid_site() {
   if (PROVISION_CONTEXT_SITE) {
     if (!_provision_drupal_site_exists(PROVISION_ACTIVE_URL)) {
-      provision_set_error(PROVISION_SITE_NOT_FOUND);
-      provision_log("error", "Site could not be found.");
+      drush_set_error(PROVISION_DRUPAL_SITE_NOT_FOUND);
     }
   }
 }
@@ -87,8 +117,7 @@ function _provision_drupal_site_exists($url) {
 function _provision_drupal_valid_installed_site() {
   if (PROVISION_CONTEXT_SITE) {
     if (!_provision_drupal_site_installed(PROVISION_ACTIVE_URL)) {
-      provision_set_error(PROVISION_SITE_NOT_FOUND);
-      provision_log("error", "Site has not been installed yet.");
+      drush_set_error(PROVISION_DRUPAL_SITE_NOT_FOUND);
     }
   }
 }
@@ -96,8 +125,7 @@ function _provision_drupal_valid_installed_site() {
 function _provision_drupal_valid_not_installed_site() {
   if (PROVISION_CONTEXT_SITE) {
     if (_provision_drupal_site_installed(PROVISION_ACTIVE_URL)) {
-      provision_set_error(PROVISION_SITE_INSTALLED);
-      provision_log('error', dt('This site has already been installed.'));
+      drush_set_error(PROVISION_DRUPAL_SITE_INSTALLED);
     }
   }
 }
@@ -134,7 +162,7 @@ function _provision_drupal_default_template() {
  *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file(&$data, $url = NULL) {
-  provision_log('notice', dt("Generate settings.php file"));
+  drush_log(dt("Generate settings.php file"));
   if (provision_path("exists", "sites/$url/settings.php")) {
     provision_path("chmod", "sites/$url/settings.php", 0640,
       dt('Changed permissions of settings.php to @confirm'),
@@ -227,7 +255,7 @@ function _provision_find_profiles() {
   include_once('includes/install.inc');
 
   if (!$dir = opendir("./profiles")) {
-    provision_log('error', dt("Cannot find profiles directory"));
+    drush_log(dt("Cannot find profiles directory"), 'error');
     return FALSE;
   }
   while (FALSE !== ($name = readdir($dir))) {
@@ -258,7 +286,7 @@ function _provision_find_profiles() {
     }
     $profile->info['languages'] = array_keys($languages);
     $return[$name] = $profile;
-    provision_log('notice', dt('found install profile %name', array('%name' => $name)));
+    drush_log(dt('found install profile %name', array('%name' => $name)));
   }
 
   return $return;
@@ -275,7 +303,7 @@ function provision_drupal_find_sites() {
     }
     closedir($dir);
   } else {
-    provision_log("error", dt("Cannot find sites directory"));
+    drush_log(dt("Cannot find sites directory"), 'error');
     $sites = FALSE;
   }
   return $sites;
@@ -364,9 +392,9 @@ function _provision_drupal_delete_aliases($aliases) {
 function provision_drupal_install_log($ret) {
   foreach ($ret as $info) {
     if (!$info['success']) {
-      provision_set_error('PROVISION_DB_ERROR');
+      drush_set_error(PROVISION_DRUPAL_INSTALL_FAILED);
     }
-    provision_log( ($info['success']) ? 'success' : 'error', $info['query']);
+    drush_log($info['query'], ($info['success']) ? 'success' : 'error');
   }
 }
 

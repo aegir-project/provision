@@ -52,9 +52,7 @@ function provision_init() {
   // Do not allow the program to be run as the root user. ever
   $name = posix_getpwuid(posix_geteuid());
   if ($name['name'] == 'root') {
-    provision_log('error', 'You are running the provision script as the root user. Exiting');
-    provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    provision_output($url);
+    return drush_set_error(PROVISION_ROOT_USER_ERROR, dt('You are running the provision script as the root user. Exiting'));
   }
 
   // Set up defines for platform
@@ -217,7 +215,7 @@ function provision_drush_command() {
  * Generate a provision.settings.php file to configure provision
  */
 function _provision_generate_config() {
-  provision_log('notice', dt("Generating drushrc.php file"));
+  drush_log(dt("Generating drushrc.php file"));
   provision_path("chmod", PROVISION_DOCROOT_PATH . '/drushrc.php', 0600,
      dt('Changed permissions of drushrc.php to @confirm'),
       dt('Could not change permissions of drushrc.php to @confirm'));

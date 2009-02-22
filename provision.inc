@@ -21,7 +21,7 @@ define('PROVISION_OUTPUT', 'PROVISION_OUTPUT_START>>>%s<<<PROVISION_OUTPUT_END')
  * Call the correct hook for all the modules that implement it. We can not use Drupal's default module_invoke, because we
  * can not pass references through it.
  * Additionally, the ability to rollback when an error has been encountered is also provided.
- * If at any point during execution, the provision_get_error() function returns anything but 0, provision_invoke will
+ * If at any point during execution, the drush_get_error() function returns anything but 0, provision_invoke will
  * trigger $hook_rollback for each of the hooks that implement it, in reverse order from how they were executed.
  *
  * This function will also trigger pre_$hook and post_$hook variants of the hook and it's rollbacks automatically.
@@ -60,9 +60,9 @@ function provision_invoke($hook, &$data, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
     if (function_exists($func)) {
       $func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
       //this is run before and after so that messages appear in the correct order.
-      _provision_log_messages();
-      if (provision_get_error()) {
-        provision_log('error', pt('An error occurred at function : @func', array('@func' => $func)));
+      _drush_log_drupal_messages();
+      if (drush_get_error()) {
+        drush_log(pt('An error occurred at function : @func', array('@func' => $func)), 'error');
         # As soon as an error occurs, roll back
         $rollback = TRUE;
         break;
@@ -76,8 +76,8 @@ function provision_invoke($hook, &$data, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
       $rb_func = $func . '_rollback';
       if (function_exists($rb_func)) {
         $rb_func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
-        _provision_log_messages();
-        provision_log('Rollback', "Changes for $func module have been rolled back.");
+        _drush_log_drupal_messages();
+        drush_log("Changes for $func module have been rolled back.", 'Rollback');
       }
     }
   }
@@ -90,45 +90,22 @@ function provision_command($hook, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg
   foreach (drush_command_implements("provision_init") as $name) {
     $func = $name . '_provision_init';
     $func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
-    provision_log('notice', "Initializing $name");
-    _provision_log_messages();
+    drush_log("Initializing $name");
+    _drush_log_drupal_messages();
   }
-  if (!provision_get_error()) {
+  if (!drush_get_error()) {
     $success = provision_invoke($hook, $data, $arg1, $arg2, $arg3, $arg4, $arg5);
     if ($success) {
       foreach (drush_command_implements('provision_finalize') as $name) {
         $func = $name . '_provision_finalize';
         $func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
-        _provision_log_messages();
+        _drush_log_drupal_messages();
       }
     }
   }
   provision_output($data);
 }
 
-
-/**
- * Turn drupal_set_message errors into provision_log errors
- */
-function _provision_log_messages() {
-  if (function_exists('drupal_get_messages')) {
-
-    $messages = drupal_get_messages();
-
-    //Drupal message errors.
-    foreach ((array) $messages['error'] as $error) {
-      if (preg_match('/^warning:/', $error)) {
-        provision_log('warning', ereg_replace('/^warning: /', '', $error));  
-      }
-      elseif (preg_match('/^user warning:/', $error)) {
-        provision_log("error", ereg_replace('/^user warning: /', '', $error));  
-      }
-      else {
-        provision_log('error', $error);
-      }
-    }
-  }
-}
 
 function provision_parse_output($string) {
   $regex = sprintf(PROVISION_OUTPUT, '(.*)');
@@ -171,12 +148,13 @@ function provision_parse_output($string) {
  */
 function provision_output($data = array()) {
   $return['site'] = $data;
-  $error = provision_get_error();
+  $error = drush_get_error();
   if (!$error) {
-    $error = PROVISION_SUCCESS; // return 1 on success.
+    $error = DRUSH_SUCCESS; // return 1 on success.
   }
   $return['error_status'] = $error; // error code being returned
-  $return['log'] = provision_get_log(); // Append logging information
+  $return['error_log'] = drush_get_error_log();
+  $return['log'] = drush_get_log(); // Append logging information
   if (PROVISION_DRUSH_BACKEND) {
     printf(PROVISION_OUTPUT, serialize($return));
   }
@@ -188,123 +166,6 @@ function provision_output($data = array()) {
   }
   exit($error);
 }
-
-
-/**
- * @defgroup errorhandling Managing errors that occur in the provisioning framework.
- * @{
- * Functions that manage the current error status of the provisioning framework.
- *
- * These functions operate by maintaining a static variable that is a bitmask of all the errors that have occurred.
- * This bitmask value is returned at the end of program execution, and provide the hosting front end more information
- * on how to diagnose any problems that may have occurred.
- */
-
-
-if (!defined(PROVISION_SUCCESS)) {
-  include_once('provision_errors.inc');
-}
-
-/**
- * Set an error code for the error handling system.
- *
- * @param error_code
- *   Any of the defined error status definitions. A numerical bitmask value.
- * @return
- *   The current aggregate error status
- */
-function provision_set_error($error_code = 0) {
-  static $error = 0;
-
-  if ($error_code) {
-    $error = $error | (int) $error_code;    
-  }
-
-  return $error;
-}
-
-/**
- * Return the current error handling status
- *
- * @return
- *   The current aggregate error status
- */
-function provision_get_error() {
-  return provision_set_error();
-}
-
-/**
- * Check if a specific error status has been set.
- *
- * @param error
- *   Any of the defined error status definitions. A numerical bitmask value. 
- * @return
- *   TRUE if the specified error has been set, FALSE if not 
- */
-function provision_cmp_error($error) {
-  return provision_get_error() ^ $error;
-}
-
-/**
- * @} End of "defgroup errorhandling".
- */
-
-/**
- * @defgroup logging Logging information to be provided as output.
- * @{
- * Functions that allow the provisioning framework to log messages to be provided to the front end.
- *
- * These functions are primarily for diagnostic purposes, but also provide an overview of tasks that were taken
- * by the framework during creation of a site.
- */
-
-/**
- * Maintain a static array containing all the log messages
- *
- * @param entry
- *   Associative array containing the log message.
- * @return
- *   Entire log history, only if $entry is NULL
- */
-function _provision_set_log($entry = NULL) {
-  static $log = array();
-  if ($entry == NULL) {
-    return $log;
-  }
-  else {
-    $log[] = $entry;
-  }
-}
-
-/**
- * Add a log message to the log history.
- *
- * @param type
- *   The type of message to be logged. Common types are 'warning', 'error' and 'notice'.
- * @param message
- *   String containing the message to be logged.
- */
-function provision_log($type, $message) {
-  _provision_set_log(array(
-     'type' => $type, 
-     'message' => $message, 
-     'timestamp' => time()
-   ));
-}
-
-/**
- * Retrieve the log messages from the log history
- *
- * @return
- *   Entire log history
- */
-function provision_get_log() {
-  return _provision_set_log();
-}
-
-/**
- * @} End of "defgroup errorhandling".
- */
 
 /**
  * @defgroup sitedata Site data management utility functions.
@@ -395,8 +256,7 @@ function provision_save_site_data($data, $url) {
   //initialize the file. this is lame, i know. but it will work.
   $fp = fopen($conf_file, 'w'); //Append to the end of the config file.
   if (!$fp) {
-    provision_log('error', 'Site config file could not be written');
-    provision_set_error(PROVISION_PERM_ERROR);
+    drush_set_error(DRUSH_PERM_ERROR, dt('Site config file could not be written'));
   }
   else {
     fwrite($fp, "<?php\n");
@@ -428,8 +288,7 @@ function provision_save_platform_data() {
   $conf_file = PROVISION_DOCROOT_PATH . '/drushrc.php';
   $fp = fopen($conf_file, "w");
   if (!$fp) {
-    provision_log('error', 'Platform config file could not be written');
-    provision_set_error(PROVISION_PERM_ERROR);
+    drush_set_error(DRUSH_PERM_ERROR, dt('Platform config file could not be written'));
   }
   else {
     fwrite($fp, "<?php\n");
@@ -452,25 +311,6 @@ function provision_save_platform_data() {
  */
 
 
-
-/**
- * List of values available for the config files
- *
- * @return
- *   A keyed array listing the substitution values.
- */
-function provision_value_list() {
-    /** TODO: Complete the value list to allow the front end to more easily edit the settings. */
-  $values['site_url'] = dt('The domain name used to access the site. This is defaulted to the value used on the command line.');
-  $values['db_type'] = dt('The type of database server used');
-  $values['db_username'] = dt('Username to access database for site');
-  $values['db_password'] = dt('Password to access database for site');
-  $values['db_name'] = dt('Database name for the site');
-  $values['profile'] = dt('Install profile of site');
-  $values['task_type'] = dt('What type of task has been used. Only used in conjuction with hosting front end');
-
-  return $values;
-}
 
 /**
  * Generate the text for a config file using php
@@ -663,24 +503,22 @@ function provision_proc_open($cmd, &$data = NULL) {
  * Run an external provision script and integrate it's output
  */
 function provision_exec($cmd, &$data) {
-  provision_log('command', dt('Running: @cmd', array('@cmd' => $cmd)));
+  drush_log(dt('Running: @cmd', array('@cmd' => $cmd)), 'command');
   $proc = provision_proc_open($cmd, $data);
   if ($proc['output']) {
     $values = provision_parse_output($proc['output']);
     if (is_array($values)) {
       $data = array_merge($data, $values['site']);
       foreach ($values['log'] as $log) {
-        provision_log($log['type'], $log['message']);
+        drush_log($log['message'], $log['type']);
       }
-      if (!($proc['code'] & PROVISION_SUCCESS)) {
-        provision_set_error($proc['code']);
+      if (!($proc['code'] & DRUSH_SUCCESS)) {
+        drush_set_error($proc['code']);
       }
       return TRUE; 
     }
     else {
-      provision_set_error(PROVISION_FRAMEWORK_ERROR);
-      provision_log('error', dt("The command could not be executed succesfully (returned: !return, code: %code)", array("!return" => $proc['output'], "%code" =>  $proc['code'])));
-      return FALSE;
+      return drush_set_error(DRUSH_FRAMEWORK_ERROR, dt("The command could not be executed succesfully (returned: !return, code: %code)", array("!return" => $proc['output'], "%code" =>  $proc['code'])));
     }
   }
 };
@@ -811,7 +649,7 @@ function provision_platform_include(&$data, $path, $command, $version = null, $p
   }
 
   if ($match) {
-    provision_log('notice', dt('Including platform specific file : @file', array('@file' => $match)));
+    drush_log(dt('Including platform specific file : @file', array('@file' => $match)));
     include_once($file);
   }
 }

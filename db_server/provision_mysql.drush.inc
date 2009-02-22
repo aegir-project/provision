@@ -9,35 +9,49 @@
  */
 include_once('provision.mysql.inc');
 
+define('PROVISION_CREATE_DB_FAILED', 'PROVISION_CREATE_DB_FAILED');
+define('PROVISION_DROP_DB_FAILED', 'PROVISION_DROP_DB_FAILED');
+define('PROVISION_DB_DUMP_NOT_FOUND', 'PROVISION_DB_DUMP_NOT_FOUND');
+define('PROVISION_DB_DUMP_NOT_READABLE', 'PROVISION_DB_DUMP_NOT_READABLE');
+define('PROVISION_DB_IMPORT_FAILED', 'PROVISION_DB_IMPORT_FAILED');
+
+
 function provision_mysql_provision_finalize() {
   provision_db_close();
 }
+function provision_mysql_drush_help($section) {
+  switch ($section) {
+    case 'error:PROVISION_CREATE_DB_FAILED' :
+      return dt('Unable to create new databases.');
+    case 'error:PROVISION_DROP_DB_FAILED' :
+      return dt('Unable to drop database.');
+  }
 
+}
 /**
  * Generate a new mysql database and user account for the specified credentials
  */
 function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) {
   if (!_provision_mysql_create_database($db_name) ||
       !_provision_mysql_database_exists($db_name) ) {
-   provision_set_error(PROVISION_DB_ERROR);
-   provision_log("error", "Database could not be created.");
+   drush_set_error(PROVISION_CREATE_DB_FAILED);
+   drush_log("Database could not be created.", 'error');
    return FALSE;
   }
   
   if (!_provision_mysql_grant($db_name, $db_user, $db_passwd)
       || !_provision_mysql_grant($db_name, $db_user, $db_passwd, 'localhost')) {
-    provision_log("warning", "Could not GRANT user access.");
+    drush_log("Could not GRANT user access.", 'warning');
   }
   _provision_mysql_flush_privileges();
 
   $status = _provision_mysql_database_exists($db_name);
 
   if ($status) {
-    provision_log('success', dt('Created @name database', array("@name" => $db_name)));
+    drush_log(dt('Created @name database', array("@name" => $db_name)), 'success');
   }
   else {
-    provision_set_error(PROVISION_DB_ERROR);
-    provision_log("error", dt("Could not create @name database", array("@name" => $db_name)));
+    drush_set_error(PROVISION_CREATE_DB_FAILED, dt("Could not create @name database", array("@name" => $db_name)));
   }
   return $status; 
    //TODO : Test to confirm that the database is actually writeable. Taking this on faith for now.
@@ -49,22 +63,21 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
 function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_host) {
     
   if ( _provision_mysql_database_exists($data['db_name']) ) {
-    provision_log("notice", dt("Dropping database @dbname", array('@dbname' => $db_name)));
+    drush_log(dt("Dropping database @dbname", array('@dbname' => $db_name)));
     if (!_provision_mysql_drop_database($db_name)) {
-      provision_log("warning", dt("Failed to drop database @dbname", array('@dbname' => $db_name)));
+      drush_log(dt("Failed to drop database @dbname", array('@dbname' => $db_name)), 'warning');
     }
   }
   
   if ( _provision_mysql_database_exists($db_name) ) {
-   provision_set_error(PROVISION_DB_ERROR);
-   provision_log("error", "Database could not be destroyed.");
+   drush_set_error(PROVISION_DROP_DB_FAILED);
    return FALSE;
   }
   
-  provision_log("notice", "Revoking privileges");
+  drush_log("Revoking privileges");
   _provision_mysql_flush_privileges();
   if (!_provision_mysql_revoke($db_name, $db_user)) {
-      provision_log("warning", dt("Failed to revoke user privileges"));
+      drush_log(dt("Failed to revoke user privileges"), 'warning');
   }
 }
 
@@ -90,7 +103,7 @@ function _provision_mysql_can_create_database() {
   _provision_mysql_create_database($test);
   if (_provision_mysql_database_exists($test)) {
     if (!_provision_mysql_drop_database($test)) {
-      provision_log("warning", dt("Failed to drop database @dbname", array('@dbname' => $test)));
+      drush_log(dt("Failed to drop database @dbname", array('@dbname' => $test)), 'warning');
     }
     return TRUE;
   }
@@ -111,16 +124,16 @@ function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd
   $exists = provision_path("exists", $dump_file, TRUE,
     dt('Found database dump at @path.'),
     dt('No database dump was found at @path.'),
-    PROVISION_FRAMEWORK_ERROR);
+    PROVISION_DB_DUMP_NOT_FOUND);
   if ($exists) {
     $readable = provision_path("readable", $dump_file, TRUE, dt('Database dump at @path is readable'), 
       dt('The database dump at @path could not be read.'), 
-      PROVISION_PERM_ERROR);
+      PROVISION_DB_DUMP_NOT_READABLE);
     if ($readable) {
-      provision_log("notice", sprintf("Importing database using command: mysql -u%s -p%s -h%s %s < %s", 
+      drush_log(sprintf("Importing database using command: mysql -u%s -p%s -h%s %s < %s", 
         $db_user, $db_passwd, $db_host, $db_name, $dump_file));
       if (!provision_shell_exec("mysql -u%s -p%s -h%s %s < %s", $db_user, $db_passwd, $db_host, $db_name, $dump_file )) {
-        provision_log("error", dt("Database import failed"));
+        drush_set_error(PROVISION_DB_IMPORT_FAILED, dt("Database import failed"));
       }
      }
    }

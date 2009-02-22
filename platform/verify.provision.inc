@@ -23,7 +23,7 @@ function provision_drupal_provision_verify(&$data, $url = null) {
     $data['sites'] = array_keys((array) provision_drupal_find_sites()); // return list of hosted sites. used to determine whether or not to import. 
 
     $data['platform'] = array('short_name' => 'drupal', 'version' => drush_drupal_version());  
-    provision_log('notice', dt("This platform is running @short_name @version", 
+    drush_log(dt("This platform is running @short_name @version", 
       array('@short_name' => 'drupal', '@version' => VERSION)));
     $data['profiles'] = _provision_find_profiles();
   }

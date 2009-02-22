@@ -90,21 +90,23 @@ function provision_path($op, $path, $confirm = TRUE, $succeed_message = NULL, $f
     $status = ($value == $confirm);
     if ($status) {
       if (!is_null($succeed_message)) {
-        provision_log("message", dt($succeed_message, $tokens));      
+        drush_log(dt($succeed_message, $tokens), 'message');      
       }
     }
     else {
       if ($error_codes) {
         // Trigger a sysem halting error
         if (!is_null($fail_message)) {
-          provision_log("error", dt($fail_message, $tokens));
+          drush_set_error($error_codes, dt($fail_message, $tokens));
         }
-        provision_set_error($error_codes);
+        else {
+          drush_set_error($error_codes);
+        }
       }
       else {
         // Trigger a warning
         if (!is_null($fail_message)) {
-          provision_log("warning", dt($fail_message, $tokens));
+          drush_log(dt($fail_message, $tokens), 'warning');
         }
       }
     }
@@ -233,7 +235,7 @@ function provision_path_extract($path, &$target, &$reason) {
     if (is_writeable(dirname($target)) && !file_exists($target) && !is_dir($target)) {
       mkdir($target);
       provision_shell_exec("tar -zxf %s -C %s", $path, $target);
-      provision_log("notice", sprintf("Running: tar -zxf %s -C %s", $path, $target));
+      drush_log(sprintf("Running: tar -zxf %s -C %s", $path, $target));
       if (is_writeable(dirname($target)) && is_readable(dirname($target)) && is_dir($target)) {
         $target = TRUE;
         return TRUE;

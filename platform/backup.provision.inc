@@ -15,8 +15,7 @@ function provision_drupal_provision_backup_validate(&$data, $url = NULL, $backup
 
   // This is the actual drupal provisioning requirements. 
   if (!is_dir(PROVISION_BACKUP_PATH)) {
-    provision_log("Backup directory does not exist.");
-    provision_set_error(PROVISION_PERM_ERROR);
+    drush_set_error(PROVISION_BACKUP_PATH_NOT_FOUND);
   }
   
   if ($backup_file) {
@@ -45,12 +44,11 @@ function provision_drupal_provision_backup_validate(&$data, $url = NULL, $backup
  */
 function provision_drupal_provision_backup(&$data, $url, $backup_file) {
   // Adds the site directory into the backup file
-  provision_log("backup", "Adding sites directory to $data[backup_file].gz");
+  drush_log("Adding sites directory to $data[backup_file].gz", 'backup');
   $result = provision_shell_exec("cd %s; tar -rf %s * ", "sites/$url",  $data['backup_file']);
 
   if (!$result) {
-    provision_log("error", "Could not back up sites directory for drupal");
-    provision_set_error(PROVISION_FRAMEWORK_ERROR);
+    drush_set_error(PROVISION_BACKUP_FAILED, dt("Could not back up sites directory for drupal"));
   }
 }
 

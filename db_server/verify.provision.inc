@@ -12,11 +12,10 @@ function provision_mysql_provision_verify_validate() {
 function provision_mysql_provision_verify() {
   if (PROVISION_CONTEXT_PLATFORM) {
     if (!_provision_mysql_can_create_database()) {
-      provision_set_error(PROVISION_DB_ERROR | PROVISION_FRAMEWORK_ERROR);
-      provision_log('error', dt('Unable to create new databases.'));
+      drush_set_error('PROVISION_CREATE_DB_FAILED', dt('Unable to create new databases.'));
     }
     else {
-      provision_log("message", dt('Mysql can create new databases.'));
+      drush_log(dt('Mysql can create new databases.'), 'message');
     }
   }
 }

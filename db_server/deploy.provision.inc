@@ -25,5 +25,5 @@ function provision_mysql_provision_deploy_rollback(&$data, $url = NULL) {
 function provision_mysql_provision_post_deploy(&$data, $url = NULL) {
   provision_path('unlink', 'sites/'. $url .'/database.sql', TRUE,
     dt("Removed dump file @path after restoring from it"),
-    dt("Could not remove dump file @path"), PROVISION_PERM_ERROR);
+    dt("Could not remove dump file @path"), DRUSH_PERM_ERROR);
 }

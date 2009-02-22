@@ -69,12 +69,12 @@ function install_send_welcome_mail($url, $profile, $language, $client_email) {
     $mail_success = drupal_mail('install', 'welcome-admin', $account->mail, user_preferred_language($account), $mail_params, $from, TRUE);
 
     if ($mail_success) {
-      provision_log('message', t('Sent welcome mail to @client', array('@client' => $client_email)));
+      drush_log(t('Sent welcome mail to @client', array('@client' => $client_email)), 'message');
     }
     else {
-      provision_log('notice', t('Could not send welcome mail to @client', array('@client' => $client_email)));
+      drush_log(t('Could not send welcome mail to @client', array('@client' => $client_email)));
     }
-    provision_log('message', t('Login url: !onetime', array('!onetime' => $onetime)));
+    drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
   }
 }
 
@@ -153,24 +153,20 @@ function install_main() {
     db_set_active();
 
     if (install_verify_drupal()) {
-      provision_set_error(PROVISION_SITE_INSTALLED);
-      provision_log('error', st('Site is already installed'));
-      return FALSE;
+      return drush_set_error(PROVISION_DRUPAL_SITE_INSTALLED);
     }
   }
   else {
-    provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    provision_log('error', st('Config file could not be loaded'));
-    return FALSE;
+    return drush_set_error(PROVISION_CONFIG_NOT_VALID);
   }
 
 
-  provision_log("install", st("Installing Drupal schema"));
+  drush_log(st("Installing Drupal schema"), 'install');
   // Load the profile.
   require_once "./profiles/$profile/$profile.profile";
-  provision_log("install", st("Loading @profile install profile", array("@profile" => $profile)));
+  drush_log(st("Loading @profile install profile", array("@profile" => $profile)), 'install');
 
-  provision_log("install", st("Installing translation : @locale", array("@locale" => $install_locale)));
+  drush_log(st("Installing translation : @locale", array("@locale" => $install_locale)), 'install');
 
   /**
    * Handles requirement checking
@@ -203,17 +199,14 @@ function install_main() {
   }
 
   if ($missing_requirement) {
-    provision_set_error(PROVISION_INSTALL_ERROR);
-    provision_log('error', t("Could not meet the requirements for installing the drupal profile"));
-    return FALSE;
+    return drush_set_error(PROVISION_INSTALL_MISSING_REQUIREMENTS);
   }
 
   // Verify existence of all required modules.
   $modules = drupal_verify_profile($profile, $language);
 
   if (!$modules) {
-    provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    return FALSE;
+    return drush_set_error(PROVISION_DRUPAL_INSTALL_FAILED);
   }
 
   drupal_install_system();
@@ -235,7 +228,7 @@ function install_main() {
   foreach ($modules as $module) {
     _drupal_install_module($module);
     module_enable(array($module));
-    provision_log("notice", t("Installed @module module.", 
+    drush_log(t("Installed @module module.", 
       array("@module" => $files[$module]->info['name'])));
   }
 

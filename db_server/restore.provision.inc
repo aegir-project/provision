@@ -39,7 +39,7 @@ function provision_mysql_provision_pre_restore_rollback(&$data, $url = NULL) {
 function provision_mysql_provision_post_restore(&$data, $url = NULL) {
   provision_path('unlink', 'sites/'. $url .'/database.sql', TRUE,
     dt("Removed dump file @path after restoring from it"),
-    dt("Could not remove dump file @path"), PROVISION_PERM_ERROR);
+    dt("Could not remove dump file @path"), DRUSH_PERM_ERROR);
   _provision_mysql_destroy_site_db($data['old_db_name'], $data['old_db_user'], $data['old_db_passwd'], $data['old_db_host']);
 }
 

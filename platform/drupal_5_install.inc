@@ -94,12 +94,12 @@ function install_send_welcome_mail($url, $profile, $language, $client_email) {
   $mail_success = drupal_mail($mailkey, $account->mail, $subject, $body, $from);
 
   if ($mail_success) {
-    provision_log('message', t('Sent welcome mail to @client', array('@client' => $client_email)));
+    drush_log(t('Sent welcome mail to @client', array('@client' => $client_email)), 'message');
   }
   else {
-    provision_log('notice', t('Could not send welcome mail to @client', array('@client' => $client_email)));
+    drush_log(t('Could not send welcome mail to @client', array('@client' => $client_email)));
   }
-  provision_log('message', t('Login url: !onetime', array('!onetime' => $onetime)));
+  drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
 
 }
 
@@ -120,14 +120,12 @@ function install_main() {
     db_set_active();
     // Check if Drupal is installed.
     if (install_verify_drupal()) {
-      provision_set_error(PROVISION_SITE_INSTALLED);
-      provision_log('error', st('Site is already installed'));
+      drush_set_error(PROVISION_DRUPAL_SITE_INSTALLED, st('Site is already installed'));
       return FALSE;
     }
   }
   else {
-    provision_set_error(PROVISION_FRAMEWORK_ERROR);
-    provision_log('error', st('Config file could not be loaded'));
+    drush_set_error(PROVISION_CONFIG_NOT_VALID, st('Config file could not be loaded'));
     return FALSE;
   }
   // Load module basics (needed for hook invokes).
@@ -139,10 +137,10 @@ function install_main() {
   drupal_load('module', 'filter');
 
 
-  provision_log("install", st("Installing Drupal schema"));
+  drush_log(st("Installing Drupal schema"), 'install');
   // Load the profile.
   require_once "./profiles/$profile/$profile.profile";
-  provision_log("install", st("Loading @profile install profile", array("@profile" => $profile)));
+  drush_log(st("Loading @profile install profile", array("@profile" => $profile)), 'install');
   $requirements = drupal_check_profile($profile);
   $severity = drupal_requirements_severity($requirements);
 
@@ -161,11 +159,11 @@ function install_main() {
   $modules = drupal_verify_profile($profile, $install_locale);
 
   if (!$modules) {
-    provision_set_error(PROVISION_FRAMEWORK_ERROR);
+    drush_set_error(PROVISION_DRUPAL_INSTALL_FAILED);
     return FALSE;
   }
   foreach ($modules as $module) {
-    provision_log("success", st("Installing module : @module", array("@module" => $module)));
+    drush_log(st("Installing module : @module", array("@module" => $module)), 'success');
   }
   // Perform actual installation defined in the profile.
   drupal_install_profile($profile, $modules);

@@ -21,8 +21,7 @@ function provision_db_connect() {
   $connection = @mysql_connect(PROVISION_DB_HOST, PROVISION_DB_USER, PROVISION_DB_PASSWD);
 
   if (!$connection) {
-    provision_set_error(PROVISION_DB_ERROR);
-    provision_log('error', dt('Could not connect to the master database.'));
+    drush_set_error('PROVISION_MASTER_DB_FAILED', dt('Could not connect to the master database.'), 'error');
   }
   else {
     $success = @mysql_select_db('mysql', $connection);
@@ -30,8 +29,7 @@ function provision_db_connect() {
       _provision_db_connection($connection);
     }
     else {
-      provision_set_error(PROVISION_DB_ERROR);
-      provision_log('error', dt('Could not select the mysql database.'));
+      drush_set_error('PROVISION_MASTER_DB_FAILED', dt('Could not select the mysql database.'), 'error');
       return FALSE;
     }
   }
@@ -60,8 +58,7 @@ function _provision_db_query($query, $debug = 0) {
     return $result;
   }
   else {
-    provision_log("error", 
-      mysql_error(_provision_db_connection()) ."\nquery: ". $query);
+    drush_log( mysql_error(_provision_db_connection()) ."\nquery: ". $query, 'error');
     return FALSE;
   }
 }

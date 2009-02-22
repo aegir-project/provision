@@ -31,8 +31,7 @@ function update_main() {
       // are removed, it will == 0.
       $last_removed = module_invoke($module, 'update_last_removed');
       if ($schema_version < $last_removed) {
-        provision_set_error(PROVISION_INSTALL_ERROR);
-        provision_log('error', pt( $module .' module can not be updated. Its schema version is '. $schema_version .'. Updates up to and including '. $last_removed .' have been removed in this release. In order to update '. $module .' module, you will first <a href="http://drupal.org/upgrade">need to upgrade</a> to the last version in which these updates were available.'));
+        drush_set_error(PROVISION_DRUPAL_UPDATE_FAILED, dt( $module .' module can not be updated. Its schema version is '. $schema_version .'. Updates up to and including '. $last_removed .' have been removed in this release. In order to update '. $module .' module, you will first <a href="http://drupal.org/upgrade">need to upgrade</a> to the last version in which these updates were available.'));
         continue;
       }
 
@@ -55,7 +54,7 @@ function update_main() {
       $updates = drupal_get_schema_versions($module);
       $max_version = max($updates);
       if ($version <= $max_version) {
-        provision_log('notice', pt('Updating module @module from schema version @start to schema version @max', array('@module' => $module, '@start' => $version - 1, '@max' => $max_version)));
+        drush_log(pt('Updating module @module from schema version @start to schema version @max', array('@module' => $module, '@start' => $version - 1, '@max' => $max_version)));
         foreach ($updates as $update) {
           if ($update >= $version) {
             $operations[] = array('_update_do_one', array($module, $update));
@@ -63,7 +62,7 @@ function update_main() {
         }
       }
       else {
-        provision_log('notice', pt('No updates for module @module', array('@module' => $module)));
+        drush_log(pt('No updates for module @module', array('@module' => $module)));
       }
     }
     $batch = array(
@@ -79,7 +78,7 @@ function update_main() {
     batch_process();
   }
   else {
-    provision_log('notice', pt('No outstanding updates'));
+    drush_log(pt('No outstanding updates'));
   }
 }
 

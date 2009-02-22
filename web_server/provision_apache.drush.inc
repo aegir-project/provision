@@ -39,7 +39,7 @@ function _provision_apache_create_vhost_config($data, $url, $template = NULL) {
   if (is_null($template)) {
     $template = _provision_apache_default_template();
   }
-  provision_log("Notice", dt("Generate virtual host configuration file."));
+  drush_log(dt("Generate virtual host configuration file."));
   $writable = provision_path("writable", PROVISION_VHOST_PATH, TRUE , NULL,
       dt("Virtual host configuration path @path is not writable."), 
       PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
@@ -66,12 +66,14 @@ function _provision_apache_restart_apache($cause_error = FALSE) {
   $return = drush_shell_exec(escapeshellcmd(PROVISION_RESTART_CMD));
   if (!$return) {
     if ($cause_error) {
-      provision_set_error(PROVISION_WEB_ERROR);
+      return drush_set_error(PROVISION_WEB_RESTART_ERROR, dt("Web server could not be restarted. Changes might not be available until this has been done."));
     }
-    provision_log(($cause_error) ? "error" : "warning", "Web server could not be restarted. Changes might not be available until this has been done.");
+    else {
+      drush_log(dt("Web server could not be restarted. Changes might not be available until this has been done."), "warning");
+    }
   }
   else {
-    provision_log('notice', dt('Apache has been restarted'));
+    drush_log(dt('Apache has been restarted'));
   }
 
   return $return;

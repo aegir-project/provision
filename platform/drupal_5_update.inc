@@ -46,7 +46,7 @@ function update_main() {
     $updates = drupal_get_schema_versions($module);
     $max_version = max($updates);
     if ($version <= $max_version) {
-      provision_log('notice', pt('Updating module @module from schema version @start to schema version @max', array('@module' => $module, '@start' => $version - 1, '@max' => $max_version)));
+      drush_log(pt('Updating module @module from schema version @start to schema version @max', array('@module' => $module, '@start' => $version - 1, '@max' => $max_version)));
       foreach ($updates as $update) {
         $finished = FALSE;
         if ($update >= $version) {
@@ -65,7 +65,7 @@ function update_main() {
       }
     }
     else {
-      provision_log("notice", pt('No updates for @module module', array('@module' => $module)));
+      drush_log(pt('No updates for @module module', array('@module' => $module)));
     }
   }
 }

@@ -12,7 +12,7 @@ $old_url = $data['old_site_url'];
  *   directories.
  */
 
-provision_log('notice', 
+drush_log(
   pt('Changed paths from sites/@old_url to sites/@new_url',
   array('@old_url' => $old_url, '@new_url' => $new_url)));
 
