@@ -42,7 +42,7 @@ function _provision_apache_create_vhost_config($data, $url, $template = NULL) {
   drush_log(dt("Generate virtual host configuration file."));
   $writable = provision_path("writable", PROVISION_VHOST_PATH, TRUE , NULL,
       dt("Virtual host configuration path @path is not writable."), 
-      PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
+      PROVISION_VHOST_PATH_NOT_WRITABLE);
   $data['extra_config'] = "# Extra configuration from modules:\n";
   foreach (drush_command_implements('provision_vhost_config') as $module) {
     $data['extra_config'] .= "# -- $module settings --\n";
@@ -66,7 +66,7 @@ function _provision_apache_restart_apache($cause_error = FALSE) {
   $return = drush_shell_exec(escapeshellcmd(PROVISION_RESTART_CMD));
   if (!$return) {
     if ($cause_error) {
-      return drush_set_error(PROVISION_WEB_RESTART_ERROR, dt("Web server could not be restarted. Changes might not be available until this has been done."));
+      return drush_set_error(PROVISION_WEB_RESTART_FAILED, dt("Web server could not be restarted. Changes might not be available until this has been done."));
     }
     else {
       drush_log(dt("Web server could not be restarted. Changes might not be available until this has been done."), "warning");

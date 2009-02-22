@@ -22,7 +22,7 @@ function provision_drupal_provision_backup_validate(&$data, $url = NULL, $backup
     if ( provision_path("exists", $backup_file, FALSE,
             dt("Backing site up to @path."),
             dt("Back up file @path already exists."),
-        PROVISION_FRAMEWORK_ERROR)) {
+        PROVISION_BACKUP_ALREADY_EXISTS)) {
       $data['backup_file'] = $backup_file;
     }
   }

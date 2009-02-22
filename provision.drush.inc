@@ -52,7 +52,7 @@ function provision_init() {
   // Do not allow the program to be run as the root user. ever
   $name = posix_getpwuid(posix_geteuid());
   if ($name['name'] == 'root') {
-    return drush_set_error(PROVISION_ROOT_USER_ERROR, dt('You are running the provision script as the root user. Exiting'));
+    return drush_set_error(PROVISION_IS_ROOT, dt('You are running the provision script as the root user. Exiting'));
   }
 
   // Set up defines for platform

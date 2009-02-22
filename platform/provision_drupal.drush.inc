@@ -218,19 +218,19 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
       provision_path("mkdir", $path, TRUE, 
         dt("Created <code>@path</code>"),
         dt("Could not create <code>@path</code>"),
-        PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
+        DRUSH_PERM_ERROR);
     }
 
     provision_path("chmod", $path, $perm, 
       dt("Changed permissions of <code>@path</code> to @confirm"),
       dt("Could not change permissions <code>@path</code> to @confirm"),
-      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
+      DRUSH_PERM_ERROR);
   }
   foreach ($grps as $path) {
       provision_path("chown", $path, PROVISION_SCRIPT_USER, 
       dt("Changed ownership of <code>@path</code>"),
       dt("Could not change ownership <code>@path</code>"),
-      PROVISION_PERM_ERROR | PROVISION_INSTALL_ERROR );
+      DRUSH_PERM_ERROR );
     provision_path("chgrp", $path, PROVISION_WEB_GROUP,
       dt("Changed group ownership of <code>@path</code>"),
       dt("Could not change group ownership <code>@path</code>"));

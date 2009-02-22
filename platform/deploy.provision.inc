@@ -30,7 +30,7 @@ function provision_drupal_provision_deploy_validate(&$data, $url = null, $backup
   $exists = provision_path("exists", $backup_file, TRUE,
       dt("Deploying site from @path"),
       dt("Could not find backup file @path"),
-      PROVISION_FRAMEWORK_ERROR);
+      PROVISION_BACKUP_NOT_FOUND);
   if ($exists) {
     $data['backup_file'] = $backup_file;
   }
@@ -43,7 +43,7 @@ function provision_drupal_provision_pre_deploy(&$data, $url, $backup_file) {
   $extracted = provision_path("extract", $data['backup_file'], PROVISION_SITES_PATH ."/$url", 
     dt('Successfully extracted the contents of @path'),
     dt('Failed to extract the contents of @path'),
-    PROVISION_PERM_ERROR, PROVISION_FRAMEWORK_ERROR);
+    PROVISION_BACKUP_EXTRACTION_FAILED);
   if ($extracted) {
     $old_data = provision_get_site_data($url);
     $data['old_site_url'] = $old_data['site_url'];

@@ -19,7 +19,7 @@ function provision_drupal_provision_verify(&$data, $url = null) {
     _provision_create_dir(PROVISION_CONFIG_PATH, dt('Provision configuration'), 0700);
     _provision_create_dir(PROVISION_BACKUP_PATH, dt('Web server configuration'), 0700);
     provision_path("writable", "sites", TRUE, dt("Drupal sites directory is writable by the provisioning script"),
-      dt("Drupal sites directory is not writable by the provisioning script"), PROVISION_PERM_ERROR);
+      dt("Drupal sites directory is not writable by the provisioning script"), PROVISION_SITES_DIR_NOT_WRITABLE);
     $data['sites'] = array_keys((array) provision_drupal_find_sites()); // return list of hosted sites. used to determine whether or not to import. 
 
     $data['platform'] = array('short_name' => 'drupal', 'version' => drush_drupal_version());  
