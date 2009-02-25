@@ -56,9 +56,7 @@ function provision_init() {
   }
 
   // Set up defines for platform
-  $docroot = provision_get_option(array("r", "root"), $_SERVER['PWD']);
-  $backend = provision_get_option(array('b', 'backend'), 0);
-  define("PROVISION_DRUSH_BACKEND", $backend);
+  $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
   
   define('PROVISION_DOMAIN', $_SERVER['HTTP_HOST']);
   // Paths
@@ -70,31 +68,31 @@ function provision_init() {
   array_pop($parts);
   define('PROVISION_PARENT_PATH', rtrim(implode("/" , $parts), '/'));
   define('PROVISION_BACKUP_PATH', 
-    provision_get_option('backup_path', PROVISION_PARENT_PATH . '/backups'));
+    drush_get_option('backup_path', PROVISION_PARENT_PATH . '/backups'));
   define('PROVISION_CONFIG_PATH', 
-    provision_get_option('config_path', PROVISION_PARENT_PATH .'/config'));
+    drush_get_option('config_path', PROVISION_PARENT_PATH .'/config'));
   define('PROVISION_VHOST_PATH', PROVISION_CONFIG_PATH .'/vhost.d');
 
   // Commands
   define('PROVISION_RESTART_CMD',
-    provision_get_option('restart_cmd', _provision_default_restart_cmd()));
+    drush_get_option('restart_cmd', _provision_default_restart_cmd()));
 
   // System account
   $info = posix_getgrgid(posix_getgid());
   define('PROVISION_WEB_GROUP', 
-    provision_get_option('web_group', $info['name'] ));
+    drush_get_option('web_group', $info['name'] ));
   define('PROVISION_SCRIPT_USER', 
-    provision_get_option('script_user', get_current_user() ));
+    drush_get_option('script_user', get_current_user() ));
 
   // Redirection urls
   define('PROVISION_MASTER_URL', 
-    provision_get_option('master_url',  $GLOBALS['base_url']));
+    drush_get_option('master_url',  $GLOBALS['base_url']));
   define('PROVISION_WEB_DISABLE_URL', PROVISION_MASTER_URL .'/provision/disabled');
   define('PROVISION_WEB_MAINTENENCE_URL', PROVISION_MASTER_URL .'/provision/maintenance');
 
   // Database
   define('PROVISION_MASTER_DB', 
-    provision_get_option('master_db', $GLOBALS['db_url']));
+    drush_get_option('master_db', $GLOBALS['db_url']));
   $db = parse_url(PROVISION_MASTER_DB);
   define('PROVISION_DB_USER', $db['user']);
   define('PROVISION_DB_PASSWD', $db['pass']);

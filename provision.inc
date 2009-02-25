@@ -101,71 +101,11 @@ function provision_command($hook, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg
         $func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
         _drush_log_drupal_messages();
       }
+      $GLOBALS['args']['options'] = array_merge($GLOBALS['args']['options'], $data);
     }
   }
-  provision_output($data);
 }
 
-
-function provision_parse_output($string) {
-  $regex = sprintf(PROVISION_OUTPUT, '(.*)');
-
-  preg_match("/$regex/s", $string, $match);
-  if ($match[1]) {
-    // we have our serialized string
-    $output = $match[1];
-    // remove the match we just made and any non printing characters
-    $string = trim(str_replace(sprintf(PROVISION_OUTPUT, $match[1]), '', $string));
-    if ($string) {
-      $messages[] = array('type' => 'warning', 'message' => $string, 'timestamp' => time());
-    }
-  }
-
-  if ($output) {
-    $data = unserialize($output);
-    if (is_array($data)) {
-      if (is_array($messages)) {
-        $data['log'] = array_merge($data['log'], $messages);
-      }
-      return $data;
-    }
-  }
-  return false;
-}
-
-
-
-/**
- * Return output to the command line.
- *
- * Provides support for the -b/--backend flag to drush, which returns a serialized data structure.
- * This feature is used for communication with the front end.
- *
- * @param data
- *    The complete associative array containing all the aggregated site settings.
- * @param extra
- *   An associative array containing additional data to be returned from the command. @see provision_stats_stats()
- */
-function provision_output($data = array()) {
-  $return['site'] = $data;
-  $error = drush_get_error();
-  if (!$error) {
-    $error = DRUSH_SUCCESS; // return 1 on success.
-  }
-  $return['error_status'] = $error; // error code being returned
-  $return['error_log'] = drush_get_error_log();
-  $return['log'] = drush_get_log(); // Append logging information
-  if (PROVISION_DRUSH_BACKEND) {
-    printf(PROVISION_OUTPUT, serialize($return));
-  }
-  else {
-    if ($return) {
-      /** TODO : return a cleanly formatted display of all the necessary information */ 
-      print_r($return);
-    }
-  }
-  exit($error);
-}
 
 /**
  * @defgroup sitedata Site data management utility functions.
@@ -309,8 +249,6 @@ function provision_save_platform_data() {
  * @defgroup provisionvalues Value replacement support for the provisioning framework
  * @{
  */
-
-
 
 /**
  * Generate the text for a config file using php
@@ -496,102 +434,6 @@ function provision_proc_open($cmd, &$data = NULL) {
     return array('cmd' => $cmd, 'output' => $string, 'code' => $code);
   }
   return false;
-}
-
-
-/**
- * Run an external provision script and integrate it's output
- */
-function provision_exec($cmd, &$data) {
-  drush_log(dt('Running: @cmd', array('@cmd' => $cmd)), 'command');
-  $proc = provision_proc_open($cmd, $data);
-  if ($proc['output']) {
-    $values = provision_parse_output($proc['output']);
-    if (is_array($values)) {
-      $data = array_merge($data, $values['site']);
-      foreach ($values['log'] as $log) {
-        drush_log($log['message'], $log['type']);
-      }
-      if (!($proc['code'] & DRUSH_SUCCESS)) {
-        drush_set_error($proc['code']);
-      }
-      return TRUE; 
-    }
-    else {
-      return drush_set_error(DRUSH_FRAMEWORK_ERROR, dt("The command could not be executed succesfully (returned: !return, code: %code)", array("!return" => $proc['output'], "%code" =>  $proc['code'])));
-    }
-  }
-};
-
-/**
- * A wrapper for drush_get_option for when it is not present
- */
-function provision_get_option($option, $default) {
-  if (function_exists('drush_get_option')) {
-    return call_user_func('drush_get_option', $option, $default);
-  }
-  else {
-    return $default;
-  }
-}
-
-/**
- * A wrapper for dt(). The st() function is too specific for our purposes
- */
-function pt($string, $args = array()) {
-  if (function_exists('t')) {
-    return call_user_func('t', $string, $args);
-  }
-  else {
-    // Transform arguments before inserting them
-    foreach ($args as $key => $value) {
-      switch ($key[0]) {
-        // Escaped only
-        case '@':
-          $args[$key] = htmlspecialchars($value, ENT_QUOTES);
-          break;
-        // Escaped and placeholder
-        case '%':
-        default:
-          $args[$key] = '<em>'. htmlspecialchars($value, ENT_QUOTES) .'</em>';
-          break;
-        // Pass-through
-        case '!':
-      }
-    }
-    return strtr($string, $args);
-  }
-}
-
-/**
- * This is a script that allows external scripts to initialize themselves to a certain url (usually $argv[1])
- *
- * Some scripts need to run with drupal as the only active database, and this allows us to do that.
- */
-function provision_external_init($url, $bootstrap = TRUE) {
-  $url = ($url) ? $url : 'default';
-  $drupal_base_url = parse_url(sprintf("http://" . $url));
-  $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
-  $_SERVER['PHP_SELF'] = $drupal_base_url['path'].'/install.php';
-  $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF'];
-  $_SERVER['REMOTE_ADDR'] = '';
-  $_SERVER['REQUEST_METHOD'] = NULL;
-  $_SERVER['SERVER_SOFTWARE'] = NULL;
-
-  define('DRUPAL_ROOT', realpath('.'));
-  define('PROVISION_DRUSH_BACKEND', true);
-  if ($bootstrap) {
-    include_once('includes/bootstrap.inc');
-    drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
-  }
-  ob_start();
-  print stream_get_contents(STDIN);
-  $string = ob_get_contents();
-  ob_end_clean();
-  if (trim($string)) {
-    return unserialize($string);
-  }
-  return TRUE;
 }
 
 function provision_internal_init($url, $bootstrap = TRUE) {

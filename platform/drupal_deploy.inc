@@ -13,7 +13,7 @@ $old_url = $data['old_site_url'];
  */
 
 drush_log(
-  pt('Changed paths from sites/@old_url to sites/@new_url',
+  dt('Changed paths from sites/@old_url to sites/@new_url',
   array('@old_url' => $old_url, '@new_url' => $new_url)));
 
 db_query("UPDATE {files} SET filepath=replace(filepath, 'sites/%', 'sites/%')", $old_url, $new_url);

@@ -326,29 +326,6 @@ function _provision_drupal_get_cvs_versions($files) {
   return $files;
 }
 
-
-
-function _provision_drupal_import_site(&$data, $url = NULL) {
-  $cmd = sprintf("php %s/drupal_import.php %s", dirname(__FILE__), escapeshellarg($url));
-  if (provision_exec($cmd, $data)) {
-    $data['installed'] = TRUE;
-  }
-  else {
-    $data['installed'] = FALSE;
-  }
-}
-
-/**
- * Retrieve drupal variable from database
- *
- * This is different to the normal variable_get in that it doesn't
- * do any caching whatsoever.
- */
-function _provision_drupal_variable_get($name, $default) {
- $value =  db_result(db_query("SELECT value FROM {variable} WHERE name='%s'", $name));
- return ($value) ? unserialize($value) : $default;
-}
-
 /**
  * Create and remove symlinks for each of the possible domain aliases of an existing site
  */
