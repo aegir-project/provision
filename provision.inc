@@ -62,7 +62,7 @@ function provision_invoke($hook, &$data, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
       //this is run before and after so that messages appear in the correct order.
       _drush_log_drupal_messages();
       if (drush_get_error()) {
-        drush_log(pt('An error occurred at function : @func', array('@func' => $func)), 'error');
+        drush_log(dt('An error occurred at function : @func', array('@func' => $func)), 'error');
         # As soon as an error occurs, roll back
         $rollback = TRUE;
         break;
