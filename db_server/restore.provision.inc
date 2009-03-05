@@ -20,7 +20,7 @@ function provision_mysql_provision_pre_restore(&$data, $url = NULL) {
 }
 
 function provision_mysql_provision_restore(&$data, $url) {
-  _provision_mysql_import_dump(PROVISION_SITES_PATH .'/'. $url .'.restore/database.sql', $data['db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
+  _provision_mysql_import_dump(PROVISION_SITES_PATH .'/'. $url .'/database.sql', $data['db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
 }
 
 
@@ -37,9 +37,10 @@ function provision_mysql_provision_pre_restore_rollback(&$data, $url = NULL) {
 // Rollback doesn't apply here yet. Unless we trigger a restore of the first dump
 // made. Which could go on infinitely if something is really long.
 function provision_mysql_provision_post_restore(&$data, $url = NULL) {
+  print_r($data);
   provision_path('unlink', 'sites/'. $url .'/database.sql', TRUE,
     dt("Removed dump file @path after restoring from it"),
     dt("Could not remove dump file @path"), DRUSH_PERM_ERROR);
-  _provision_mysql_destroy_site_db($data['old_db_name'], $data['old_db_user'], $data['old_db_passwd'], $data['old_db_host']);
+  #_provision_mysql_destroy_site_db($data['old_db_name'], $data['old_db_user'], $data['old_db_passwd'], $data['old_db_host']);
 }
 

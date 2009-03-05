@@ -51,7 +51,7 @@ function provision_drupal_provision_pre_restore(&$data, $url, $restore_file) {
 /**
  * Remove the extracted site directory
  */
-function provision_provision_pre_restore_rollback(&$data, $url) {
+function provision_drupal_provision_pre_restore_rollback(&$data, $url) {
   _provision_recursive_delete(PROVISION_SITES_PATH ."/$url.restore");
 }
 
