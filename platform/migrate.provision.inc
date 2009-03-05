@@ -49,7 +49,7 @@ function provision_provision_pre_migrate_rollback(&$data, $url, $platform) {
  * Switch the migrate directories around now that we have the new db installed
  */
 function provision_drupal_provision_migrate(&$data, $url, $platform) {
-  drush_backend_invoke('provision deploy', array($url, $data['backup_file'], 'root' => $platform);
+  drush_backend_invoke('provision deploy', array($url, $data['backup_file'], 'root' => $platform));
 }
 
 

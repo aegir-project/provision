@@ -277,6 +277,7 @@ function _provision_find_profiles() {
     $languages['en'] = 1;
     // Find languages available
     $files = array_keys(drush_scan_directory('./profiles/' . $name . '/translations', '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
+    $files = array_merge($files, array_keys(drush_scan_directory('./profiles/' . $name , '\.po$', array('.', '..', 'CVS'), 0, FALSE, 'filepath')));
     if (is_array($files)) {
       foreach ($files as $file) {
         if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
