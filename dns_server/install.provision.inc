@@ -15,8 +15,8 @@ function provision_dns_provision_pre_install(&$data, $url = NULL) {
   if ($url) {
 #    $url_parts = _provision_dns_split_url($url);
 #    if (!isset($url_parts['zone'])) { 
-      drush_set_error(PROVISION_FRAMEWORK_ERROR);
-      return;
+#      drush_set_error(PROVISION_FRAMEWORK_ERROR);
+#      return;
 #    }
 
     # the zone object should be passed in..
