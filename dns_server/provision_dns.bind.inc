@@ -75,8 +75,8 @@ function provision_bind_create_zone_config($zone) {
     $fd = fwrite($fd, $zone_str);
   }
   if (!$fd) {
-    provision_log("Error", t("error adding the zone to the bind configuration in @path", array("@path" => $conf)));
-    provision_set_error(PROVISION_PERM_ERROR);
+    drush_log("Error", dt("error adding the zone to the bind configuration in @path", array("@path" => $conf)));
+    drush_set_error(PROVISION_PERM_ERROR);
   }
   @fclose($fd);
 }
@@ -123,18 +123,18 @@ function provision_bind_update_zone($zone, $exists = FALSE) {
   $conf = PROVISION_CONFIG_PATH . '/' . variable_get('provision_bind_conf', 'named.conf.drupal');
 
   if ($exists && isset($zone->old_origin)) { 				  # The name of the zone has changed
-#provision_log("notice", "Updating zone ".$zone->old_origin." to ".$zone->origin);
+#drush_log("notice", "Updating zone ".$zone->old_origin." to ".$zone->origin);
     provision_path("unlink", $path . '/' . $zone->old_origin);            # Remove the old zonefile
     _provision_bind_editfile($conf, '^zone..'.$zone->old_origin.'.*$');   # Remove the old zone from named.conf
     provision_bind_create_zone_config($zone);                             # And re-create the zone in named.conf
   }
 
-#provision_log("notice", "Writing zonefile: ".$zone_str);
+#drush_log("notice", "Writing zonefile: ".$zone_str);
   if ($fd = fopen($path . '/'. $zone->origin, "w")) {
     fwrite($fd, $zone_str);  # Write the zonefile
     fclose($fd); 
   } else {
-    provision_set_error(PROVISION_PERM_ERROR);
+    drush_set_error(PROVISION_PERM_ERROR);
   }
 }
 
@@ -179,7 +179,7 @@ function _provision_bind_add_record($zone, $record) {
     fwrite($fh, $line);
     fclose($fh);
   } else {
-    provision_set_error(PROVISION_PERM_ERROR);
+    drush_set_error(PROVISION_PERM_ERROR);
   }
 }
 
@@ -279,12 +279,12 @@ function _provision_bind_editfile($file, $old, $new = '') {
     }
     fclose($fd);
   } else {
-    provision_set_error(PROVISION_PERM_ERROR);
+    drush_set_error(PROVISION_PERM_ERROR);
   }
 
   # Write out the changed lines to the original file again.
   if (!file_put_contents($file, $lines)) {
-    provision_set_error(PROVISION_PERM_ERROR);
+    drush_set_error(PROVISION_PERM_ERROR);
   }
 }
 

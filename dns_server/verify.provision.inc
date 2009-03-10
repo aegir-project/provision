@@ -22,10 +22,10 @@ function provision_dns_provision_verify(&$data, $url = NULL) {
 #		   t('Changed group ownership of '.PROVISION_NAMED_PATH.' to @confirm'),
 #                   t('Could not change group ownership of '.PROVISION_NAMED_PATH.' to @confirm'));
   } else {
-    provision_log("notice", "Hit provision_dns_provision_verify hook: $url");
+    drush_log("notice", "Hit provision_dns_provision_verify hook: $url");
 #    $url_parts = _provision_dns_split_url($url);
     if (!isset($url_parts['zone'])) { 
-      provision_set_error(PROVISION_FRAMEWORK_ERROR);
+      drush_set_error(PROVISION_FRAMEWORK_ERROR);
       return;
     }
 

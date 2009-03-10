@@ -30,10 +30,10 @@ function provision_dns_create_zone($domain, $data) {
                              PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
 
 #  if ($zone = provision_dns_status('zone', array('domain' => $domain))) {
-#    provision_log("Notice", t("Loading zone file for url @url", array('@url' => $domain)));
+#    drush_log("Notice", t("Loading zone file for url @url", array('@url' => $domain)));
 #    return $zone;
 #  } else {
-    provision_log("Notice", t("Generating zone file for url @url on dns server @id", array('@url' => $domain, '@id' => $data['dns_id'])));
+    drush_log("Notice", dt("Generating zone file for url @url on dns server @id", array('@url' => $domain, '@id' => $data['dns_id'])));
     # Setup args array from defaults
     $dns = node_load($data['dns_id']);
     $zone_fields['dns_id'] = $data['dns_id'];
@@ -41,7 +41,7 @@ function provision_dns_create_zone($domain, $data) {
     $zone_fields['serial'] = date('Ymd') . '01';
     $ns_recs = explode("\n", $dns->ns);
 #ob_start(); print_r($ns_recs); $out = ob_get_contents(); ob_end_clean();
-provision_log("notice", "provision_dns_create_zone ns_recs: ".$ns_recs[0].", ".$ns_recs[1]);
+drush_log("notice", "provision_dns_create_zone ns_recs: ".$ns_recs[0].", ".$ns_recs[1]);
     $zone_fields['ns1'] = $ns_recs[0];
     $zone_fields['ns2'] = $ns_recs[1];
     $zone_fields['mbox'] = $dns->mbox;
