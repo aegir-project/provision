@@ -44,7 +44,7 @@ function provision_drupal_provision_install(&$data, $url = NULL) {
  * If the install went south, and the site is not PROVISION_SITE_INSTALLED, clean up behind ourselves
  */
 function provision_drupal_provision_install_rollback(&$data, $url = NULL) {
-  if (!(provision_get_error() & PROVISION_SITE_INSTALLED)) {
+  if (!(drush_get_error() & PROVISION_SITE_INSTALLED)) {
     _provision_recursive_delete("sites/$url");
   }
 }
