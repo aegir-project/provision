@@ -25,7 +25,7 @@ function provision_dns_provision_verify(&$data, $url = NULL) {
     drush_log("notice", "Hit provision_dns_provision_verify hook: $url");
 #    $url_parts = _provision_dns_split_url($url);
     if (!isset($url_parts['zone'])) { 
-      drush_set_error(PROVISION_FRAMEWORK_ERROR);
+      //drush_set_error(PROVISION_FRAMEWORK_ERROR);
       return;
     }
 
