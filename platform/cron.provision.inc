@@ -12,7 +12,7 @@ function provision_drupal_provision_cron_verify() {
 /**
  * Drush command to run cron
  */
-function _provision_cron(&$data, $url) {
+function _provision_cron($url) {
   _provision_drupal_rebuild_caches($url);
 }
 

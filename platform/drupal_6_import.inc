@@ -1,13 +1,13 @@
 <?php
 
 if ($parts = @parse_url($GLOBALS['db_url'])) {
-  $data['db_type'] = $parts['scheme'];
-  $data['db_user'] = $parts['user'];
-  $data['db_host'] = $parts['host'];
-  $data['db_passwd'] = $parts['pass'];
-  $data['db_name'] = substr($parts['path'], 1);
+  drush_set_option('db_type', $parts['scheme'], 'site');
+  drush_set_option('db_user', $parts['user'], 'site');
+  drush_set_option('db_host', $parts['host'], 'site');
+  drush_set_option('db_passwd', $parts['pass'], 'site');
+  drush_set_option('db_name', substr($parts['path'], 1), 'site');
 
-  $data['profile'] = variable_get('install_profile', 'default');
+  drush_set_option('profile', variable_get('install_profile', 'default'), 'site');
   $language = language_default();
-  $data['language'] = $language->language;
+  drush_set_option('language', $language->language, 'site');
 }

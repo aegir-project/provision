@@ -28,30 +28,31 @@ function _provision_apache_redirect_template() {
 /**
  * Delete virtual host file
  */
-function _provision_apache_delete_vhost_config($url, $data) {
-  provision_path("unlink", PROVISION_VHOST_PATH ."/$url", TRUE, dt("Removed apache virtual host configuration"));
+function _provision_apache_delete_vhost_config($url) {
+  provision_path("unlink", drush_get_option('vhost_path') ."/$url", TRUE, dt("Removed apache virtual host configuration"));
 }
 
 /**
  * Generate virtual host file
  */
-function _provision_apache_create_vhost_config($data, $url, $template = NULL) {
+function _provision_apache_create_vhost_config($url, $template = NULL) {
+  $options = drush_get_merged_options();
   if (is_null($template)) {
     $template = _provision_apache_default_template();
   }
   drush_log(dt("Generate virtual host configuration file."));
-  $writable = provision_path("writable", PROVISION_VHOST_PATH, TRUE , NULL,
+  $writable = provision_path("writable", drush_get_option('vhost_path'), TRUE , NULL,
       dt("Virtual host configuration path @path is not writable."), 
       PROVISION_VHOST_PATH_NOT_WRITABLE);
-  $data['extra_config'] = "# Extra configuration from modules:\n";
+  $options['extra_config'] = "# Extra configuration from modules:\n";
   foreach (drush_command_implements('provision_vhost_config') as $module) {
-    $data['extra_config'] .= "# -- $module settings --\n";
-    $data['extra_config'] .= module_invoke($module, 'provision_vhost_config', $url, $data) . "\n";
+    $options['extra_config'] .= "# -- $module settings --\n";
+    $options['extra_config'] .= module_invoke($module, 'provision_vhost_config', $url, $options) . "\n";
   }
   
   if ($writable) {
-    $file = fopen(PROVISION_VHOST_PATH .'/'. $url, "w");
-    $text = provision_render_config($template, $data);
+    $file = fopen(drush_get_option('vhost_path') .'/'. $url, "w");
+    $text = provision_render_config($template, $options);
     fwrite($file, $text);
     fclose($file);
   }
@@ -63,7 +64,7 @@ function _provision_apache_create_vhost_config($data, $url, $template = NULL) {
 function _provision_apache_restart_apache($cause_error = FALSE) {
   //This is required to be configurable, due to the fact that different hosts might need to do this differently.
   //TODO : test for this instead of relying on a configuration setting?
-  $return = drush_shell_exec(escapeshellcmd(PROVISION_RESTART_CMD));
+  $return = drush_shell_exec(escapeshellcmd(drush_get_option('restart_cmd')));
   if (!$return) {
     if ($cause_error) {
       return drush_set_error(PROVISION_WEB_RESTART_FAILED, dt("Web server could not be restarted. Changes might not be available until this has been done."));

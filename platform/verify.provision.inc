@@ -14,42 +14,44 @@ function provision_drupal_provision_verify_validate() {
 /**
  * implementation of provision_verify
  */
-function provision_drupal_provision_verify(&$data, $url = null) {
+function provision_drupal_provision_verify($url = null) {
   if (PROVISION_CONTEXT_PLATFORM) {
-    _provision_create_dir(PROVISION_CONFIG_PATH, dt('Provision configuration'), 0700);
-    _provision_create_dir(PROVISION_BACKUP_PATH, dt('Web server configuration'), 0700);
-    provision_path("writable", "sites", TRUE, dt("Drupal sites directory is writable by the provisioning script"),
+    _provision_create_dir(drush_get_option('config_path'), dt('Provision configuration'), 0700);
+    _provision_create_dir(drush_get_option('backup_path'), dt('Web server configuration'), 0700);
+    provision_path("writable", drush_get_option('sites_path'), TRUE, dt("Drupal sites directory is writable by the provisioning script"),
       dt("Drupal sites directory is not writable by the provisioning script"), PROVISION_SITES_DIR_NOT_WRITABLE);
-    $data['sites'] = array_keys((array) provision_drupal_find_sites()); // return list of hosted sites. used to determine whether or not to import. 
 
-    $data['platform'] = array('short_name' => 'drupal', 'version' => drush_drupal_version());  
+    drush_set_option('sites', array_keys((array) provision_drupal_find_sites()), 'platform'); 
+    drush_set_option('platform', array('short_name' => 'drupal', 'version' => drush_drupal_version()), 'platform'); 
+    print_r(_drush_get_context());
     drush_log(dt("This platform is running @short_name @version", 
       array('@short_name' => 'drupal', '@version' => VERSION)));
-    $data['profiles'] = _provision_find_profiles();
+    drush_set_option('profiles', _scrub_object(_provision_find_profiles()), 'platform');
+
   }
   else {
       // This is the actual drupal provisioning requirements. 
-    _provision_drupal_create_directories($url, $data['profile']);
-    _provision_drupal_maintain_aliases($data, $url);
+    _provision_drupal_create_directories($url);
+    _provision_drupal_maintain_aliases($url);
     // Requires at least the database settings to complete.
-    _provision_drupal_create_settings_file($data, $url);
-//    provision_internal_init($url);
-//    provision_platform_include($data, dirname(__FILE__), 'verify');
+   _provision_drupal_create_settings_file($url);
+    provision_internal_init($url);
+    provision_platform_include(dirname(__FILE__), 'verify');
   }
-  if (is_array($data['modules'])) {
+  #if (is_array($data['modules'])) {
     // get the correct version names for everything.
     #$data['modules'] = _provision_drupal_get_cvs_versions($data['modules']);
-  }
+  #}
 }
 
 
 /**
  * Implementation of hook_provision_post_verify
  */
-function provision_drupal_provision_post_verify(&$data, $url = NULL) {
+function provision_drupal_provision_post_verify($url = NULL) {
   if (PROVISION_CONTEXT_SITE) {
-    _provision_drupal_rebuild_caches($data, $url);
-    $data['installed'] = TRUE;
+    _provision_drupal_rebuild_caches($url);
+    drush_set_option('installed', TRUE, 'site');
   }
 }
 

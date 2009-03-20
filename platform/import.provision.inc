@@ -17,8 +17,8 @@ function provision_drupal_provision_import_validate() {
 /**
  * Import the information about the existing site, and return it in the $data context array
  */
-function provision_drupal_provision_import(&$data, $url = NULL) {
+function provision_drupal_provision_import($url = NULL) {
   provision_internal_init($url);
-  provision_platform_include($data, dirname(__FILE__), 'import');
+  provision_platform_include(dirname(__FILE__), 'import');
 }
 

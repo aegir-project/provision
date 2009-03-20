@@ -17,26 +17,25 @@ include_once('provision_dns.bind.inc');
  *
  * @param $domain
  *   The domain name/origin for the zone to be created.
- * @param $data
- *   An array of data to populate the new zone. Most importantly, the 'dns_id' 
- *   field must contain the nid of the DNS server which on which to privision this zone.
  *
  * @return
  *   The zone object, whether newly created, or already existing.
  **/
-function provision_dns_create_zone($domain, $data) {
-  $writable = provision_path("writable", PROVISION_NAMED_PATH, TRUE, NULL, 
+function provision_dns_create_zone($domain) {
+  /*
+    $writable = provision_path("writable", PROVISION_NAMED_PATH, TRUE, NULL, 
                              t("DNS configuration path @path is not writable"), 
                              PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-
+  */
 #  if ($zone = provision_dns_status('zone', array('domain' => $domain))) {
 #    drush_log("Notice", t("Loading zone file for url @url", array('@url' => $domain)));
 #    return $zone;
 #  } else {
-    drush_log("Notice", dt("Generating zone file for url @url on dns server @id", array('@url' => $domain, '@id' => $data['dns_id'])));
+/**
+  drush_log("Notice", dt("Generating zone file for url @url on dns server @id", array('@url' => $domain, '@id' => drush_get_option('dns_id'))));
     # Setup args array from defaults
-    $dns = node_load($data['dns_id']);
-    $zone_fields['dns_id'] = $data['dns_id'];
+    $dns = node_load(drush_get_option('dns_id'));
+    $zone_fields['dns_id'] = drush_get_option('dns_id');
     $zone_fields['origin'] = $domain;
     $zone_fields['serial'] = date('Ymd') . '01';
     $ns_recs = explode("\n", $dns->ns);
@@ -46,6 +45,7 @@ drush_log("notice", "provision_dns_create_zone ns_recs: ".$ns_recs[0].", ".$ns_r
     $zone_fields['ns2'] = $ns_recs[1];
     $zone_fields['mbox'] = $dns->mbox;
     provision_dns_zone('add', $zone_fields);
+ */
 #    $zone = provision_dns_status('zone', array('domain' => $domain));
 #    foreach ($ns_recs as $ns) {
 #      provision_dns_create_record('@', $zone, array('type' => 'NS', 'dns_ip' => trim($ns))); 
@@ -61,18 +61,15 @@ drush_log("notice", "provision_dns_create_zone ns_recs: ".$ns_recs[0].", ".$ns_r
  *   The name part of the record to be created.
  * @param $zone
  *   The zone object in which to create the record.
- * @param $data
- *   An array of data used to populate the record. Most importantly, the 'dns_ip' field should
- *   contain the IP address which the host record should point to.
  *
  * @return
  *   The record object, or FALSE if the record could not be created.
  **/
-function provision_dns_create_record($host, $zone, $data) {
-  drush_log(dt("Creating %type record for url @url", array('%type' => $data['type'], '@url' => $host)));
+function provision_dns_create_record($host, $zone) {
+  drush_log(dt("Creating %type record for url @url", array('%type' => drush_get_option('type'), '@url' => $host)));
   $rec['name'] = $host;
-  $rec['type'] = $data['type']?$data['type']:'A';
-  $rec['data'] = $data['dns_ip'];
+  $rec['type'] = drush_get_option('type');
+  $rec['data'] = drush_get_option('dns_ip');
   return provision_dns_rr('add', $zone->zid, $rec);
 }
 

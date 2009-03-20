@@ -18,7 +18,7 @@ function provision_db_connect() {
   if (_provision_db_connection()) {
     return TRUE;
   }
-  $connection = @mysql_connect(PROVISION_DB_HOST, PROVISION_DB_USER, PROVISION_DB_PASSWD);
+  $connection = @mysql_connect(drush_get_option('master_db_host'), drush_get_option('master_db_user'), drush_get_option('master_db_passwd'));
 
   if (!$connection) {
     drush_set_error('PROVISION_MASTER_DB_FAILED', dt('Could not connect to the master database.'), 'error');

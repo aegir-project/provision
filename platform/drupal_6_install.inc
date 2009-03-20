@@ -4,10 +4,10 @@
  *    Rebuild all the caches
  */
 
-$GLOBALS['url'] = $data['site_url'];
-$GLOBALS['profile'] = $data['profile'];
-$GLOBALS['install_locale'] = $data['language'];
-$GLOBALS['client_email'] = $data['client_email'];
+$GLOBALS['url'] = drush_get_option('site_url');
+$GLOBALS['profile'] = drush_get_option('profile');
+$GLOBALS['install_locale'] = drush_get_option('language');
+$GLOBALS['client_email'] = drush_get_option('client_email');
 
 require_once 'includes/install.inc';
 define('MAINTENANCE_MODE', 'install');

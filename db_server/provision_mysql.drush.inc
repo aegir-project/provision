@@ -62,7 +62,7 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
  */
 function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_host) {
     
-  if ( _provision_mysql_database_exists($data['db_name']) ) {
+  if ( _provision_mysql_database_exists($db_name) ) {
     drush_log(dt("Dropping database @dbname", array('@dbname' => $db_name)));
     if (!_provision_mysql_drop_database($db_name)) {
       drush_log(dt("Failed to drop database @dbname", array('@dbname' => $db_name)), 'warning');
@@ -147,9 +147,9 @@ function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd
  * possible that sites will be running with derivative names on the same server,
  * until the upgrade / restore process is completed.
  */ 
-function _provision_mysql_suggest_db_name($data, $url) {
-  if ($data['site_id']) {
-    $id_suggest = 'site_'. $data['site_id'];
+function _provision_mysql_suggest_db_name($url) {
+  if ($sid = drush_get_option('site_id')) {
+    $id_suggest = 'site_'. $sid;
     $suggest[] = $id_suggest;
     for ($i = 0; $i < 100; $i++) {
       $suggest[] = $id_suggest .'_'. $i;

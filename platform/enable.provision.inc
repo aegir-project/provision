@@ -10,8 +10,8 @@ function provision_drupal_provision_enable_validate() {
   _provision_drupal_valid_installed_site();
 }
 
-function provision_drupal_post_enable(&$data) {
-  $data['enabled'] = TRUE;
+function provision_drupal_post_enable() {
+  drush_set_option('enabled', TRUE, 'site');
 }
 
 

@@ -37,7 +37,7 @@ define('PROVISION_OUTPUT', 'PROVISION_OUTPUT_START>>>%s<<<PROVISION_OUTPUT_END')
  *   A boolean specifying whether or not the command was successfully completed. 
  * 
  */
-function provision_invoke($hook, &$data, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL, $arg5 = NULL) {
+function provision_invoke($hook, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL, $arg5 = NULL) {
   $files = drush_scan_directory(dirname(__FILE__), $hook . ".provision.inc$");
   if (is_array($files)) {
     foreach ($files as $filename => $info) {
@@ -58,7 +58,7 @@ function provision_invoke($hook, &$data, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
   foreach ($functions as $func) {
     $completed[] = $func;
     if (function_exists($func)) {
-      $func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
+      $func($arg1, $arg2, $arg3, $arg4, $arg5);
       //this is run before and after so that messages appear in the correct order.
       _drush_log_drupal_messages();
       if (drush_get_error()) {
@@ -75,7 +75,7 @@ function provision_invoke($hook, &$data, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
     foreach (array_reverse($completed) as $func) {
       $rb_func = $func . '_rollback';
       if (function_exists($rb_func)) {
-        $rb_func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
+        $rb_func($arg1, $arg2, $arg3, $arg4, $arg5);
         _drush_log_drupal_messages();
         drush_log("Changes for $func module have been rolled back.", 'Rollback');
       }
@@ -86,22 +86,20 @@ function provision_invoke($hook, &$data, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
 }
 
 function provision_command($hook, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL, $arg5 = NULL) {
-  $data = array();
   foreach (drush_command_implements("provision_init") as $name) {
     $func = $name . '_provision_init';
-    $func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
+    $func($arg1, $arg2, $arg3, $arg4, $arg5);
     drush_log("Initializing $name");
     _drush_log_drupal_messages();
   }
   if (!drush_get_error()) {
-    $success = provision_invoke($hook, $data, $arg1, $arg2, $arg3, $arg4, $arg5);
+    $success = provision_invoke($hook, $arg1, $arg2, $arg3, $arg4, $arg5);
     if ($success) {
       foreach (drush_command_implements('provision_finalize') as $name) {
         $func = $name . '_provision_finalize';
-        $func($data, $arg1, $arg2, $arg3, $arg4, $arg5);
+        $func($arg1, $arg2, $arg3, $arg4, $arg5);
         _drush_log_drupal_messages();
       }
-      $GLOBALS['args']['options'] = array_merge($GLOBALS['args']['options'], $data);
     }
   }
 }
@@ -130,20 +128,6 @@ function provision_command($hook, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg
  *   An associated array containing the relevant settings for the site.
  */
 function provision_get_site_data($url) {
-  global $args;
-  //TODO: Accept serialized string via unix pipe.
-  $site_data = $args['options'];
-  $site_data['site_url'] = $url;
-  $site_data['task_type'] = $args['commands'][1];
-  $site_data['task_id'] = drush_get_option('task_id', NULL);
-  $site_data['publish_path'] = PROVISION_DOCROOT_PATH;
-  $site_data['profile'] = ($site_data['profile']) ? $site_data['profile'] : 'default';
-  $site_data['site_ip'] =  ($site_data['site_ip']) ? $site_data['site_ip'] : '127.0.0.1';
-  $site_data['site_port'] =  ($site_data['site_port']) ? $site_data['site_port'] : '80';
-    
-  //Default to english language
-  $site_data['language'] = $site_data['language'] ? $site_data['language'] : 'en';
-
   if ($old_data = provision_load_site_data($url)) {
     //Merge previously saved data with the new data. This way, new parameters overwrite old ones.
     $site_data = array_merge($old_data, $site_data);    
@@ -165,11 +149,19 @@ function provision_get_site_data($url) {
  */
 function provision_load_site_data($url) {
   //Load the configuration data.
+
+  //@TODO remove this, it is a temporary measure until all site.php files are placed by drushrc.php files
+
   $conf_file = "sites/$url/site.php";
   if (file_exists($conf_file)) {
     provision_path('chmod', $conf_file, 0400);
     require($conf_file);
-    return (array) $data;
+
+    // The provision 0.1 config data might contain older data,
+    // so any data in the new drushrc.php file would be newer.
+    $site_context = _drush_get_context('site');
+    $site_context = array_merge($data, $site_context);
+    drush_set_context('site', $site_context);
   }
   return FALSE;
 }
@@ -182,36 +174,8 @@ function provision_load_site_data($url) {
  * @param data
  *   The complete data structure that has been created. Only settings that have been changed will be recorded.
  */
-function provision_save_site_data($data, $url) {
-  global $args;
-  $conf_file = "sites/$url/site.php";
-
-  $exclude = array('task_id', 'url', 'backend');
-  $options = array();
-  include(PROVISION_DOCROOT_PATH . '/drushrc.php'); // load drush rc
-  $exclude = array_merge($exclude, array_keys($options));
-  if (file_exists($conf_file) && !is_writable($conf_file)) {
-    provision_path("chmod", $conf_file, 0600, dt("Made site.php file writable"));
-  }
-  //initialize the file. this is lame, i know. but it will work.
-  $fp = fopen($conf_file, 'w'); //Append to the end of the config file.
-  if (!$fp) {
-    drush_set_error(DRUSH_PERM_ERROR, dt('Site config file could not be written'));
-  }
-  else {
-    fwrite($fp, "<?php\n");
-    $timestamp = mktime();
-#    fwrite($fp, "#". format_date($timestamp, 'large'));
-    foreach ($data as $key => $value) {
-      if (!in_array($key, $exclude)) {
-        $line = "\n\$data['$key'] = ". var_export($value, TRUE) .';';
-        fwrite($fp, $line);  
-      }
-    }
-    fwrite($fp, "\n");
-    fclose($fp);
-    provision_path('chmod', $conf_file, 0400, dt('Protected site.php file'));
-  }
+function provision_save_site_data() {
+  drush_save_config('site');
 }
 
 /**
@@ -223,26 +187,7 @@ function provision_save_site_data($data, $url) {
  * Save the options for the platform to the drushrc.php in the root of the platform. 
  */
 function provision_save_platform_data() {
-  global $args;
-  $exclude = array('task_id');
-  $conf_file = PROVISION_DOCROOT_PATH . '/drushrc.php';
-  $fp = fopen($conf_file, "w");
-  if (!$fp) {
-    drush_set_error(DRUSH_PERM_ERROR, dt('Platform config file could not be written'));
-  }
-  else {
-    fwrite($fp, "<?php\n");
-    $timestamp = mktime();
-#    fwrite($fp, "#". format_date($timestamp, 'large'));
-    foreach ($args['options'] as $key => $value) {
-      if (!in_array($key, $exclude)) {
-        $line = "\n\$options['$key'] = ". var_export($value, TRUE) .';';
-        fwrite($fp, $line);  
-      }
-    }
-    fwrite($fp, "\n");
-    fclose($fp);
-  }
+  drush_save_config('platform');
 }
 
 /**
@@ -335,7 +280,7 @@ function provision_shell_exec() {
     $args[$x] = escapeshellcmd($args[$x]);
   }
   $command = call_user_func_array('sprintf', $args);
- 
+  drush_log($command); 
   return drush_shell_exec($command);
 }
 
@@ -406,36 +351,6 @@ function provision_posix_groupname($group) {
   return $group;
 }
 
-function provision_proc_open($cmd, &$data = NULL) {
-  $descriptorspec = array(
-     0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
-     1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
-     2 => array("file", "/tmp/error-output.txt", "a") // stderr is a file to write to
-  );
-
-  $process = proc_open($cmd, $descriptorspec, $pipes, null, null, array('context' => $context));
-  if (is_resource($process)) {
-    if ($data) {
-      fwrite($pipes[0], serialize($data)); // pass the data array in a serialized string
-    }
-    fclose($pipes[0]);
-    $info = stream_get_meta_data($pipes[1]);
-    stream_set_blocking($pipes[1], TRUE);
-    stream_set_timeout($pipes[1], 1);
-    $stream = '';
-    while (!feof($pipes[1]) && !$info['timed_out']) { 
-      $string .= fgets($pipes[1], 4096);
-      $info = stream_get_meta_data($pipes[1]);
-      ob_flush();
-      flush();
-    };
-    fclose($pipes[1]);
-    $code = proc_close($process);
-    return array('cmd' => $cmd, 'output' => $string, 'code' => $code);
-  }
-  return false;
-}
-
 function provision_internal_init($url, $bootstrap = TRUE) {
   $url = ($url) ? $url : 'default';
   $drupal_base_url = parse_url(sprintf("http://" . $url));
@@ -475,7 +390,7 @@ function provision_password($length = 10) {
   return $pass;
 }
 
-function provision_platform_include(&$data, $path, $command, $version = null, $platform = 'drupal') {
+function provision_platform_include($path, $command, $version = null, $platform = 'drupal') {
   $version = ($version) ? $version : drush_drupal_major_version();
   $options[] = sprintf("%s_%s_%s", $platform, $version, $command);
   $options[] = sprintf("%s_%s", $platform, $command);
@@ -506,4 +421,18 @@ _provision_errors_on();
 function _provision_errors_off() {
   ini_set('error_reporting', ~E_ALL);
   ini_set('display_errors', FALSE);
+}
+
+/**
+ * This is a helper function which changes deeply nested objects into arrays
+ *
+ * This helps get past the face that objects are not simple to work with, or
+ * save in context files.
+ *
+ * This function 'misuses' a side effect of the json_decode function's second
+ * parameter. As this is done in C, and the structures we are manipulating
+ * aren't that large, it should be performant enough.
+ */
+function _scrub_object($input) {
+  return json_decode(json_encode($input), TRUE);
 }

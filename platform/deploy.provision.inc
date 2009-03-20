@@ -23,7 +23,7 @@
 /**
  * Make sure we have a valid site being deployd, and that the file being deployd from exists
  */
-function provision_drupal_provision_deploy_validate(&$data, $url = null, $backup_file = null) {
+function provision_drupal_provision_deploy_validate($url = null, $backup_file = null) {
   _provision_drupal_url_required();
   _provision_drupal_valid_not_installed_site();
 
@@ -32,46 +32,46 @@ function provision_drupal_provision_deploy_validate(&$data, $url = null, $backup
       dt("Could not find backup file @path"),
       PROVISION_BACKUP_NOT_FOUND);
   if ($exists) {
-    $data['backup_file'] = $backup_file;
+    drush_set_option('backup_file', $backup_file);
   }
 }
 
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
-function provision_drupal_provision_pre_deploy(&$data, $url, $backup_file) {
-  $extracted = provision_path("extract", $data['backup_file'], PROVISION_SITES_PATH ."/$url", 
+function provision_drupal_provision_pre_deploy($url, $backup_file) {
+  $extracted = provision_path("extract", drush_get_option('backup_file'), drush_get_option('sites_path') ."/$url", 
     dt('Successfully extracted the contents of @path'),
     dt('Failed to extract the contents of @path'),
     PROVISION_BACKUP_EXTRACTION_FAILED);
   if ($extracted) {
-    $old_data = provision_get_site_data($url);
-    $data['old_site_url'] = $old_data['site_url'];
-    $data = array_merge($old_data, $data); 
+    // @TODO Clear up this properly.
+//    $old_data = provision_get_site_data($url);
+//    $data = array_merge($old_data, $data); 
   }
 }
 
 /**
  * Remove the extracted site directory
  */
-function provision_provision_pre_deploy_rollback(&$data, $url) {
-  _provision_recursive_delete(PROVISION_SITES_PATH ."/$url");
+function provision_provision_pre_deploy_rollback($url) {
+  _provision_recursive_delete(drush_get_option('sites_path') ."/$url");
 }
 
 /**
  * Switch the deploy directories around now that we have the new db installed
  */
-function provision_drupal_provision_deploy(&$data, $url) {
+function provision_drupal_provision_deploy($url) {
   // make sure it has the latest site data available
-  _provision_drupal_create_settings_file($data, $url);
+  _provision_drupal_create_settings_file($url);
 }
 
 // Luckily this is reversable =)
-function provision_drupal_provision_deploy_rollback(&$data, $url) {
-  provision_drupal_provision_deploy(&$data, $url);
+function provision_drupal_provision_deploy_rollback($url) {
+  provision_drupal_provision_deploy($url);
 }
 
-function provision_drupal_provision_post_deploy(&$data, $url) {
-  provision_invoke('update', $data, $url);
-  provision_platform_include($data, dirname(__FILE__), 'deploy');
+function provision_drupal_provision_post_deploy($url) {
+  provision_invoke('update', $url);
+  provision_platform_include(dirname(__FILE__), 'deploy');
 }

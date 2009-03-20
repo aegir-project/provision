@@ -58,47 +58,57 @@ function provision_init() {
   // Set up defines for platform
   $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
   
-  define('PROVISION_DOMAIN', $_SERVER['HTTP_HOST']);
+  drush_set_default('provision_domain', $_SERVER['HTTP_HOST']);
+
   // Paths
-  $path =  ($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'];
-  define('PROVISION_DOCROOT_PATH', rtrim($path, '/'));
-  define('PROVISION_SITES_PATH', rtrim($path, '/') .'/sites');
-  define('PROVISION_DRUSH_PATH', './drush.php');
-  $parts = explode("/", rtrim($path, '/'));
+  $path = drush_set_default('docroot_path', rtrim(($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'], '/'));
+  drush_set_default('sites_path', $path . '/sites');
+
+  $parts = explode("/", $path);
   array_pop($parts);
-  define('PROVISION_PARENT_PATH', rtrim(implode("/" , $parts), '/'));
-  define('PROVISION_BACKUP_PATH', 
-    drush_get_option('backup_path', PROVISION_PARENT_PATH . '/backups'));
-  define('PROVISION_CONFIG_PATH', 
-    drush_get_option('config_path', PROVISION_PARENT_PATH .'/config'));
-  define('PROVISION_VHOST_PATH', PROVISION_CONFIG_PATH .'/vhost.d');
+  $parent_path = drush_set_default('parent_path', implode("/" , $parts));
+
+
+  drush_set_default('backup_path', $parent_path . '/backups');
+  drush_set_default('config_path', $parent_path . '/config');
+
+  $config_path = drush_get_option('config_path');
+  drush_set_default('vhost_path', $config_path . '/vhost.d');
 
   // Commands
-  define('PROVISION_RESTART_CMD',
-    drush_get_option('restart_cmd', _provision_default_restart_cmd()));
+  drush_set_default('restart_cmd', _provision_default_restart_cmd());
 
   // System account
-  $info = posix_getgrgid(posix_getgid());
-  define('PROVISION_WEB_GROUP', 
-    drush_get_option('web_group', $info['name'] ));
-  define('PROVISION_SCRIPT_USER', 
-    drush_get_option('script_user', get_current_user() ));
+  drush_set_default('web_group', _provision_default_web_group());
+  drush_set_default('script_user', get_current_user());
 
   // Redirection urls
-  define('PROVISION_MASTER_URL', 
-    drush_get_option('master_url',  $GLOBALS['base_url']));
-  define('PROVISION_WEB_DISABLE_URL', PROVISION_MASTER_URL .'/provision/disabled');
-  define('PROVISION_WEB_MAINTENENCE_URL', PROVISION_MASTER_URL .'/provision/maintenance');
+  drush_set_default('master_url', $GLOBALS['base_url']);
+  $master_url = drush_get_option('master_url');
+  drush_set_default('web_disable_url', $master_url .'/provision/disabled');
+  drush_set_default('web_maintenence_url', $master_url .'/provision/maintenance');
 
   // Database
-  define('PROVISION_MASTER_DB', 
-    drush_get_option('master_db', $GLOBALS['db_url']));
-  $db = parse_url(PROVISION_MASTER_DB);
-  define('PROVISION_DB_USER', $db['user']);
-  define('PROVISION_DB_PASSWD', $db['pass']);
-  define('PROVISION_DB_HOST', $db['host']);
+  drush_set_default('master_db', $GLOBALS['db_url']);
+
+  $master_db = drush_get_option('master_db');
+  $db = parse_url($master_db);
+  drush_set_default('master_db_user', $db['user']);
+  drush_set_default('master_db_passwd', $db['pass']);
+
+  drush_set_default('master_db_host', $db['host']);
+  drush_set_default('db_host', $db['host']);
  
-  define('PROVISION_DB_TYPE', $db['scheme']);
+  drush_set_default('master_db_type', $db['scheme']);
+  drush_set_default('db_type', $db['scheme']);
+
+  drush_set_default('publish_path', drush_get_option('docroot_path'));
+  drush_set_default('site_url', $url); 
+  drush_set_default('profile', 'default');
+  drush_set_default('web_ip', '127.0.0.1');
+  drush_set_default('web_port', 80); 
+  drush_set_default('language', 'en');
+  drush_set_default('aliases', array());
 }
 
 
@@ -214,12 +224,12 @@ function provision_drush_command() {
  */
 function _provision_generate_config() {
   drush_log(dt("Generating drushrc.php file"));
-  provision_path("chmod", PROVISION_DOCROOT_PATH . '/drushrc.php', 0600,
+  provision_path("chmod", drush_get_option('docroot_path') . '/drushrc.php', 0600,
      dt('Changed permissions of drushrc.php to @confirm'),
       dt('Could not change permissions of drushrc.php to @confirm'));
 
   provision_save_platform_data();
-  provision_path("chmod", PROVISION_DOCROOT_PATH . '/drushrc.php', 0400,
+  provision_path("chmod", drush_get_option('docroot_path') . '/drushrc.php', 0400,
     dt('Changed permissions of drushrc.php to @confirm'),
     dt('Could not change permissions of drushrc.php to @confirm'));
   return TRUE;
@@ -249,13 +259,14 @@ function _provision_default_restart_cmd() {
 }
 
 function _provision_default_web_group() {
+  $info = posix_getgrgid(posix_getgid());
   $common_groups = array(
     'httpd',
     'www-data', 
     'apache',
     'nogroup',
     'nobody',
-    PROVISION_WEB_GROUP);
+    $info['name']);
 
   foreach ($common_groups as $group) {
     if (provision_posix_groupname($group)) {

@@ -12,7 +12,8 @@
  *
  * Can't be rolled back.
  */
-function provision_dns_provision_verify(&$data, $url = NULL) {
+/*
+function provision_dns_provision_verify($url = NULL) {
   if (!$url) {
     // we are verifying a platform
 # Where does this constant come from now?
@@ -29,9 +30,9 @@ function provision_dns_provision_verify(&$data, $url = NULL) {
       return;
     }
 
-#    $zone = provision_dns_create_zone($url_parts['zone'], $data);   # initializes the zone for the domain (if it doesn't exist)
-#    provision_dns_create_record($url_parts['host'], $zone, $data);    # creates the RR for the (sub)domain
-#    provision_dns_commit($data['dns_id']);                            # makes the changes live (ie: restart bind)
+#    $zone = provision_dns_create_zone($url_parts['zone']);   # initializes the zone for the domain (if it doesn't exist)
+#    provision_dns_create_record($url_parts['host'], $zone);    # creates the RR for the (sub)domain
+#    provision_dns_commit(drush_get_option('dns_id'));                            # makes the changes live (ie: restart bind)
   }
 }
-
+ */

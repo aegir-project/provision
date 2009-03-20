@@ -187,7 +187,7 @@ function provision_path_chown($path, &$owner, &$reason) {
 
 function provision_path_chgrp($path, &$gid, &$reason) {
   if ($group = provision_posix_groupname($gid)) {
-    if (provision_user_in_group(PROVISION_SCRIPT_USER, $gid)) {
+    if (provision_user_in_group(drush_get_option('script_user'), $gid)) {
       if (chgrp($path, $group)) {
         return $group;
       }
@@ -196,7 +196,7 @@ function provision_path_chgrp($path, &$gid, &$reason) {
       }
     }
     else {
-      $reason = dt("@user is not in @group group", array("@user" => PROVISION_SCRIPT_USER, "@group" => $group));
+      $reason = dt("@user is not in @group group", array("@user" => drush_get_option('script_user'), "@group" => $group));
     }
   }
   elseif (!@chgrp($path, $gid)) { # try to change the group anyways
@@ -302,7 +302,7 @@ function _provision_create_dir($path, $name, $perms) {
   }
 
   if ($exists) {
-    provision_path("chown", $path, PROVISION_SCRIPT_USER, 
+    provision_path("chown", $path, drush_get_option('script_user'), 
       $name . ' ' . dt("ownership of path has been changed to @confirm."),
       $name . ' ' . dt("ownership of path could not be changed to @confirm."),
       DRUSH_PERM_ERROR);

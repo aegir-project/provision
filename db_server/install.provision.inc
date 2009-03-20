@@ -4,23 +4,19 @@ function provision_mysql_provision_install_validate() {
   provision_db_connect();
 }
 
-function provision_mysql_provision_pre_install(&$data, $url = NULL) {
-  $data['db_type'] = ($data['db_type']) ? $data['db_type'] : PROVISION_DB_TYPE;
-  $data['db_host'] = ($data['db_host']) ? $data['db_host'] : PROVISION_DB_HOST;
+function provision_mysql_provision_pre_install($url = NULL) {
+  $db_type = drush_set_option('db_type', drush_get_option('db_type'), 'site');
+  $db_host = drush_set_option('db_host', drush_get_option('db_host'), 'site');
+  $db_passwd = drush_set_option('db_passwd', provision_password(), 'site');
+  $db_name = drush_set_option('db_name', _provision_mysql_suggest_db_name($url), 'site');
+  $db_user = drush_set_option('db_user', $db_name, 'site');
 
-  # generate a random password for use
-  $data['db_passwd'] = provision_password(); 
-  $data['db_name'] = _provision_mysql_suggest_db_name($data, $url);
-  $data['db_user'] = $data['db_name']; 
-
-  _provision_mysql_new_site_db($data['db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
+  _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host);
 }
 
-function provision_mysql_provision_pre_install_rollback(&$data, $url = NULL) {
-  _provision_mysql_destroy_site_db($data['db_name'], $data['db_user'], $data['db_passwd'], $data['db_host']);
-  unset($data['db_host']);
-  unset($data['db_type']);
-  unset($data['db_passwd']);
-  unset($data['db_user']);
-  unset($data['db_name']);
+function provision_mysql_provision_pre_install_rollback($url = NULL) {
+  _provision_mysql_destroy_site_db(
+    drush_get_option('db_name'), drush_get_option('db_user'),
+    drush_get_option('db_passwd'), drush_get_option('db_host')
+  );
 }
