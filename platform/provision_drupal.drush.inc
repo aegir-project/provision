@@ -47,10 +47,16 @@ function provision_drupal_drush_help($section) {
  * for populating the $data context array
  */
 function provision_drupal_provision_init($url = NULL) {
+
   if ($url) {
-    drush_set_option('site_url', $url);
-    provision_get_site_data($url); // load the existing site's context into the system.
+    drush_set_option('uri' , 'http://' . $url);
+    provision_load_site_data($url);
+    drush_set_default('site_url', $url);
+    drush_set_default('profile', 'default');
+    drush_set_default('language', 'en');
+    drush_set_default('aliases', array());
   }
+
   define('PROVISION_CONTEXT_SITE', ($url) ? TRUE : FALSE);
   define('PROVISION_CONTEXT_PLATFORM', !PROVISION_CONTEXT_SITE);
 }
@@ -63,9 +69,11 @@ function provision_drupal_provision_init($url = NULL) {
  * files for future runs.
  */
 function provision_drupal_provision_finalize($url = NULL) {
+
   if (PROVISION_CONTEXT_SITE) {
     if (drush_get_option('installed')) {
       drush_set_option('site_url', drush_get_option('site_url'), 'site');
+      drush_set_option('site_id', drush_get_option('site_id'), 'site');
       provision_save_site_data($url);
     }
   }
@@ -244,7 +252,8 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
  */
 function _provision_drupal_rebuild_caches($url = NULL) {
   if (PROVISION_CONTEXT_SITE) {
-    provision_internal_init($url);
+    #drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+
     provision_platform_include(dirname(__FILE__), 'clear');
   }
 }
@@ -366,11 +375,15 @@ function _provision_drupal_delete_aliases($aliases) {
 }
 
 function provision_drupal_install_log($ret) {
-  foreach ($ret as $info) {
-    if (!$info['success']) {
-      drush_set_error(PROVISION_DRUPAL_INSTALL_FAILED);
+  if (sizeof($ret)) {
+    foreach ($ret as $info) {
+      if (is_array($info)) {
+        if (!$info['success']) {
+          drush_set_error(PROVISION_DRUPAL_INSTALL_FAILED, $msg);
+        }
+        drush_log($info['query'], ($info['success']) ? 'success' : 'error');
+      }
     }
-    drush_log($info['query'], ($info['success']) ? 'success' : 'error');
   }
 }
 

@@ -114,7 +114,7 @@ function install_mail($key, &$message, $params) {
 
 function install_main() {
   require_once './includes/bootstrap.inc';
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
 
   // This must go after drupal_bootstrap(), which unsets globals!
   global $profile, $install_locale, $client_email, $conf, $url;
@@ -148,9 +148,7 @@ function install_main() {
     require_once './includes/cache.inc';
     $conf['cache_inc'] = './includes/cache.inc';
 
-    // Establish a connection to the database.
-    require_once './includes/database.inc';
-    db_set_active();
+    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_DATABASE);
 
     if (install_verify_drupal()) {
       return drush_set_error(PROVISION_DRUPAL_SITE_INSTALLED);
@@ -209,11 +207,21 @@ function install_main() {
     return drush_set_error(PROVISION_DRUPAL_INSTALL_FAILED);
   }
 
-  drupal_install_system();
+  $system_path = dirname(drupal_get_filename('module', 'system', NULL));
+  require_once './'. $system_path .'/system.install';
+  module_invoke('system', 'install');
+  $system_versions = drupal_get_schema_versions('system');
+  $system_version = $system_versions ? max($system_versions) : SCHEMA_INSTALLED;
+  db_query("INSERT INTO {system} (filename, name, type, owner, status, throttle, bootstrap, schema_version) VALUES('%s', '%s', '%s', '%s', %d, %d, %d, %d)", $system_path .'/system.module', 'system', 'module', '', 1, 0, 0, $system_version);
+  // Now that we've installed things properly, bootstrap the full Drupal environment
+
+  module_rebuild_cache();
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   $modules = array_diff($modules, array('system'));
 
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
-
+  if ($install_locale != 'en') {
+    $modules = array_merge($modules, array('locale'));
+  }
   /**
    * Further installation tasks
    *
@@ -232,8 +240,10 @@ function install_main() {
       array("@module" => $files[$module]->info['name'])));
   }
 
+  drush_log("Initial locale import");
   // locale-initial-import and locale-inintial-batch tasks
   if (!empty($install_locale) && ($install_locale != 'en')) {
+    include_once 'includes/locale.inc';
     // Enable installation language as default site language.
     locale_add_language($install_locale, NULL, NULL, NULL, NULL, NULL, 1, TRUE);
     // Collect files to import for this language.

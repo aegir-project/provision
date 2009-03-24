@@ -24,8 +24,7 @@
  * Make sure we have a valid site being restored, and that the file being restored from exists
  */
 function provision_drupal_provision_restore_validate($url = null, $restore_file = null) {
-  _provision_drupal_url_required();
-  _provision_drupal_valid_installed_site();
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
   $exists = provision_path("exists", $restore_file, TRUE,
       dt("Restoring site from @path"),

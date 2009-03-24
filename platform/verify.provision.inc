@@ -5,7 +5,11 @@
  *
  * Disable an enabled and installed site
  */
-function provision_drupal_provision_verify_validate() {
+function provision_drupal_provision_verify_validate($url = null) {
+  if ($url) {
+    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+  }
+
   // This will not have an effect if you are running it on a platform, just tests that if a site is provided it is an existing one
   _provision_drupal_valid_site();
 }
@@ -21,12 +25,11 @@ function provision_drupal_provision_verify($url = null) {
     provision_path("writable", drush_get_option('sites_path'), TRUE, dt("Drupal sites directory is writable by the provisioning script"),
       dt("Drupal sites directory is not writable by the provisioning script"), PROVISION_SITES_DIR_NOT_WRITABLE);
 
-    drush_set_option('sites', array_keys((array) provision_drupal_find_sites()), 'platform'); 
-    drush_set_option('platform', array('short_name' => 'drupal', 'version' => drush_drupal_version()), 'platform'); 
-    print_r(_drush_get_context());
+    drush_set_option('sites', array_keys((array) provision_drupal_find_sites()), 'drupal'); 
+    drush_set_option('platform', array('short_name' => 'drupal', 'version' => drush_drupal_version())); 
     drush_log(dt("This platform is running @short_name @version", 
       array('@short_name' => 'drupal', '@version' => VERSION)));
-    drush_set_option('profiles', _scrub_object(_provision_find_profiles()), 'platform');
+    drush_set_option('profiles', _scrub_object(_provision_find_profiles()), 'drupal');
 
   }
   else {
@@ -35,7 +38,7 @@ function provision_drupal_provision_verify($url = null) {
     _provision_drupal_maintain_aliases($url);
     // Requires at least the database settings to complete.
    _provision_drupal_create_settings_file($url);
-    provision_internal_init($url);
+
     provision_platform_include(dirname(__FILE__), 'verify');
   }
   #if (is_array($data['modules'])) {

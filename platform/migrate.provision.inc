@@ -24,8 +24,7 @@
  * Make sure we have a valid site being migrated, and that the file being migrated from exists
  */
 function provision_drupal_provision_migrate_validate($url = null, $platform = null) {
-  _provision_drupal_url_required();
-  _provision_drupal_valid_installed_site();
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 }
 
 /**

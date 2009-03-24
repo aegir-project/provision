@@ -121,7 +121,7 @@ function install_mail($key, &$message, $params) {
 
 function install_main() {
   require_once './includes/bootstrap.inc';
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
 
   // This must go after drupal_bootstrap(), which unsets globals!
   global $profile, $install_locale, $client_email, $conf, $url;
@@ -231,7 +231,7 @@ function install_main() {
   $modules = array_diff(drupal_get_profile_modules($profile, $install_locale), array('system'));
 
   drupal_install_init_database(); 
-  drush_drupal_bootstrap_full();
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
 
   /**
    * Further installation tasks

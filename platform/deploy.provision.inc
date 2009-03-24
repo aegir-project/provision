@@ -25,7 +25,6 @@
  */
 function provision_drupal_provision_deploy_validate($url = null, $backup_file = null) {
   _provision_drupal_url_required();
-  _provision_drupal_valid_not_installed_site();
 
   $exists = provision_path("exists", $backup_file, TRUE,
       dt("Deploying site from @path"),
@@ -45,6 +44,7 @@ function provision_drupal_provision_pre_deploy($url, $backup_file) {
     dt('Failed to extract the contents of @path'),
     PROVISION_BACKUP_EXTRACTION_FAILED);
   if ($extracted) {
+    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
     // @TODO Clear up this properly.
 //    $old_data = provision_get_site_data($url);
 //    $data = array_merge($old_data, $data); 
@@ -54,7 +54,7 @@ function provision_drupal_provision_pre_deploy($url, $backup_file) {
 /**
  * Remove the extracted site directory
  */
-function provision_provision_pre_deploy_rollback($url) {
+function provision_drupal_provision_pre_deploy_rollback($url) {
   _provision_recursive_delete(drush_get_option('sites_path') ."/$url");
 }
 

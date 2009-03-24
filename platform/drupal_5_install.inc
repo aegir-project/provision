@@ -105,7 +105,7 @@ function install_send_welcome_mail($url, $profile, $language, $client_email) {
 
 function install_main() {
   require_once './includes/bootstrap.inc';
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_CONFIGURATION);
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
   // This must go after drupal_bootstrap(), which unsets globals!
   global $profile, $install_locale, $client_email;
   require_once './modules/system/system.install';
@@ -116,8 +116,7 @@ function install_main() {
   // Drupal may already be installed.
   if ($verify) {
     // Establish a connection to the database.
-    require_once './includes/database.inc';
-    db_set_active();
+    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_DATABASE);
     // Check if Drupal is installed.
     if (install_verify_drupal()) {
       drush_set_error(PROVISION_DRUPAL_SITE_INSTALLED, st('Site is already installed'));
@@ -168,7 +167,7 @@ function install_main() {
   // Perform actual installation defined in the profile.
   drupal_install_profile($profile, $modules);
 
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
 
   // Show profile finalization info.
   $function = $profile .'_profile_final';

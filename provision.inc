@@ -93,13 +93,13 @@ function provision_command($hook, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg
     _drush_log_drupal_messages();
   }
   if (!drush_get_error()) {
-    $success = provision_invoke($hook, $arg1, $arg2, $arg3, $arg4, $arg5);
-    if ($success) {
-      foreach (drush_command_implements('provision_finalize') as $name) {
-        $func = $name . '_provision_finalize';
-        $func($arg1, $arg2, $arg3, $arg4, $arg5);
-        _drush_log_drupal_messages();
-      }
+    provision_invoke($hook, $arg1, $arg2, $arg3, $arg4, $arg5);
+  }
+  if (!drush_get_error()) {
+    foreach (drush_command_implements('provision_finalize') as $name) {
+      $func = $name . '_provision_finalize';
+      $func($arg1, $arg2, $arg3, $arg4, $arg5);
+      _drush_log_drupal_messages();
     }
   }
 }
@@ -159,7 +159,7 @@ function provision_load_site_data($url) {
 
     // The provision 0.1 config data might contain older data,
     // so any data in the new drushrc.php file would be newer.
-    $site_context = _drush_get_context('site');
+    $site_context = drush_get_context('site');
     $site_context = array_merge($data, $site_context);
     drush_set_context('site', $site_context);
   }
@@ -349,21 +349,6 @@ function provision_posix_groupname($group) {
     $group = $info['name'];
   }
   return $group;
-}
-
-function provision_internal_init($url, $bootstrap = TRUE) {
-  $url = ($url) ? $url : 'default';
-  $drupal_base_url = parse_url(sprintf("http://" . $url));
-  $_SERVER['HTTP_HOST'] = $drupal_base_url['host'];
-  $_SERVER['PHP_SELF'] = '/index.php';
-  $_SERVER['REQUEST_URI'] = $_SERVER['SCRIPT_NAME'] = $_SERVER['PHP_SELF'];
-  $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-  $_SERVER['REQUEST_METHOD'] = NULL;
-  $_SERVER['SERVER_SOFTWARE'] = NULL;
-  if ($bootstrap) {
-    include_once('./includes/bootstrap.inc');
-    drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
-  }
 }
 
 function provision_password($length = 10) {

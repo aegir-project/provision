@@ -16,6 +16,20 @@ define('PROVISION_DB_DUMP_NOT_READABLE', 'PROVISION_DB_DUMP_NOT_READABLE');
 define('PROVISION_DB_IMPORT_FAILED', 'PROVISION_DB_IMPORT_FAILED');
 
 
+function provision_mysql_provision_init() {
+  drush_set_default('master_db', $GLOBALS['db_url']);
+  $master_db = drush_get_option('master_db');
+  $db = parse_url($master_db);
+  drush_set_default('master_db_user', $db['user']);
+  drush_set_default('master_db_passwd', $db['pass']);
+
+  drush_set_default('master_db_host', $db['host']);
+  drush_set_default('db_host', $db['host']);
+ 
+  drush_set_default('master_db_type', $db['scheme']);
+  drush_set_default('db_type', $db['scheme']);
+}
+
 function provision_mysql_provision_finalize() {
   provision_db_close();
 }

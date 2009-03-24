@@ -15,8 +15,9 @@
  * Check that we are trying to install a new site , and a new site only
  */
 function provision_drupal_provision_install_validate() {
-  _provision_drupal_url_required();
-  _provision_drupal_valid_not_installed_site();
+  if (drush_get_option('installed')) {
+    drush_set_error(PROVISION_SITE_INSTALLED);
+  }
 }
 
 /**
@@ -36,8 +37,9 @@ function provision_drupal_provision_pre_install($url) {
 function provision_drupal_provision_install($url) {
  // Requires at least the database settings to complete.
   _provision_drupal_create_settings_file($url);
-  provision_internal_init($url, FALSE);
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
   provision_platform_include(dirname(__FILE__), 'install');
+  drush_set_option('installed', TRUE, 'site');
 }
 
 /**
