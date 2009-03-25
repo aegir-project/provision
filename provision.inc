@@ -344,7 +344,7 @@ function provision_posix_username($user) {
 function provision_posix_groupname($group) {
   // TODO: make these singletons with static variables for caching.
   // we do this both ways, so that the function returns NULL if no such user was found.
-  if (is_numeric($user)) {
+  if (is_numeric($group)) {
     $info = posix_getgrgid($group);
     $group = $info['name'];
   }
