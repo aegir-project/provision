@@ -184,10 +184,14 @@ function provision_save_site_data() {
 
 
 /**
- * Save the options for the platform to the drushrc.php in the root of the platform. 
+ * Save the options for the platform to the drushrc.php in the root of
+ * the platform. 
+ *
+ * @return 
+ *   Boolean. The value returned by drush_save_config().
  */
 function provision_save_platform_data() {
-  drush_save_config('drupal');
+  return drush_save_config('drupal');
 }
 
 /**
