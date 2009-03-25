@@ -187,7 +187,7 @@ function provision_save_site_data() {
  * Save the options for the platform to the drushrc.php in the root of the platform. 
  */
 function provision_save_platform_data() {
-  drush_save_config('platform');
+  drush_save_config('drupal');
 }
 
 /**
