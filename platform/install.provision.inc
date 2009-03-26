@@ -16,7 +16,7 @@
  */
 function provision_drupal_provision_install_validate() {
   if (drush_get_option('installed')) {
-    drush_set_error(PROVISION_SITE_INSTALLED);
+    drush_set_error('PROVISION_SITE_INSTALLED');
   }
 }
 

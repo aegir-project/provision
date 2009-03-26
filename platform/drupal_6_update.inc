@@ -327,7 +327,7 @@ function update_main() {
       // are removed, it will == 0.
       $last_removed = module_invoke($module, 'update_last_removed');
       if ($schema_version < $last_removed) {
-        drush_set_error(PROVISION_DRUPAL_UPDATE_FAILED, dt( $module .' module can not be updated. Its schema version is '. $schema_version .'. Updates up to and including '. $last_removed .' have been removed in this release. In order to update '. $module .' module, you will first <a href="http://drupal.org/upgrade">need to upgrade</a> to the last version in which these updates were available.'));
+        drush_set_error('PROVISION_DRUPAL_UPDATE_FAILED', dt( $module .' module can not be updated. Its schema version is '. $schema_version .'. Updates up to and including '. $last_removed .' have been removed in this release. In order to update '. $module .' module, you will first <a href="http://drupal.org/upgrade">need to upgrade</a> to the last version in which these updates were available.'));
         continue;
       }
 

@@ -8,16 +8,6 @@
  * and all the install api code. 
  */
 
-define('PROVISION_BACKUP_PATH_NOT_FOUND', 'PROVISION_BACKUP_PATH_NOT_FOUND');
-define('PROVISION_BACKUP_FAILED', 'PROVISION_BACKUP_FAILED');
-define('PROVISION_DRUPAL_INSTALL_FAILED', 'PROVISION_DRUPAL_INSTALL_FAILED');
-define('PROVISION_DRUPAL_UPDATE_FAILED', 'PROVISION_DRUPAL_UPDATE_FAILED');
-define('PROVISION_DRUPAL_INSTALL_MISSING_REQUIREMENTS', 'PROVISION_DRUPAL_INSTALL_MISSING_REQUIREMENTS');
-define('PROVISION_DRUPAL_SITE_INSTALLED', 'PROVISION_DRUPAL_SITE_INSTALLED');
-define('PROVISION_DRUPAL_SITE_NOT_FOUND', 'PROVISION_DRUPAL_SITE_NOT_FOUND');
-define('PROVISION_CONFIG_NOT_VALID', 'PROVISION_CONFIG_NOT_VALID');
-define('PROVISION_REQUIRES_URL', 'PROVISION_REQUIRES_URL');
-
 function provision_drupal_drush_help($section) {
   switch ($section) {
     case 'error:PROVISION_CONFIG_NOT_VALID' : 
@@ -88,7 +78,7 @@ function provision_drupal_provision_finalize($url = NULL) {
  */
 function _provision_drupal_url_required() {
   if (PROVISION_CONTEXT_PLATFORM) {
-    drush_set_error(PROVISION_REQUIRES_URL);
+    drush_set_error('PROVISION_REQUIRES_URL');
   }
 }
 
@@ -100,7 +90,7 @@ function _provision_drupal_url_required() {
 function _provision_drupal_valid_site() {
   if (PROVISION_CONTEXT_SITE) {
     if (!_provision_drupal_site_exists(drush_get_option('site_url'))) {
-      drush_set_error(PROVISION_DRUPAL_SITE_NOT_FOUND);
+      drush_set_error('PROVISION_DRUPAL_SITE_NOT_FOUND');
     }
   }
 }
@@ -126,7 +116,7 @@ function _provision_drupal_site_exists($url) {
 function _provision_drupal_valid_installed_site() {
   if (PROVISION_CONTEXT_SITE) {
     if (!_provision_drupal_site_installed(drush_get_option('site_url'))) {
-      drush_set_error(PROVISION_DRUPAL_SITE_NOT_FOUND);
+      drush_set_error('PROVISION_DRUPAL_SITE_NOT_FOUND');
     }
   }
 }
@@ -134,7 +124,7 @@ function _provision_drupal_valid_installed_site() {
 function _provision_drupal_valid_not_installed_site() {
   if (PROVISION_CONTEXT_SITE) {
     if (_provision_drupal_site_installed(drush_get_option('site_url'))) {
-      drush_set_error(PROVISION_DRUPAL_SITE_INSTALLED);
+      drush_set_error('PROVISION_DRUPAL_SITE_INSTALLED');
     }
   }
 }
@@ -379,7 +369,7 @@ function provision_drupal_install_log($ret) {
     foreach ($ret as $info) {
       if (is_array($info)) {
         if (!$info['success']) {
-          drush_set_error(PROVISION_DRUPAL_INSTALL_FAILED, $msg);
+          drush_set_error('PROVISION_DRUPAL_INSTALL_FAILED', $msg);
         }
         drush_log($info['query'], ($info['success']) ? 'success' : 'error');
       }

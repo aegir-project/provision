@@ -134,7 +134,7 @@ function provision_bind_update_zone($zone, $exists = FALSE) {
     fwrite($fd, $zone_str);  # Write the zonefile
     fclose($fd); 
   } else {
-    drush_set_error(PROVISION_PERM_ERROR);
+    drush_set_error('PROVISION_PERM_ERROR');
   }
 }
 
@@ -179,7 +179,7 @@ function _provision_bind_add_record($zone, $record) {
     fwrite($fh, $line);
     fclose($fh);
   } else {
-    drush_set_error(PROVISION_PERM_ERROR);
+    drush_set_error('PROVISION_PERM_ERROR');
   }
 }
 
@@ -279,12 +279,12 @@ function _provision_bind_editfile($file, $old, $new = '') {
     }
     fclose($fd);
   } else {
-    drush_set_error(PROVISION_PERM_ERROR);
+    drush_set_error('PROVISION_PERM_ERROR');
   }
 
   # Write out the changed lines to the original file again.
   if (!file_put_contents($file, $lines)) {
-    drush_set_error(PROVISION_PERM_ERROR);
+    drush_set_error('PROVISION_PERM_ERROR');
   }
 }
 

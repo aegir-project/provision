@@ -12,19 +12,19 @@
 function provision_drupal_provision_backup_validate($url = NULL, $backup_file = NULL) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
   if (!drush_get_option('installed')) {
-     drush_set_error(PROVISION_DRUPAL_SITE_FOUND);
+     drush_set_error('PROVISION_DRUPAL_SITE_FOUND');
    }
 
   // This is the actual drupal provisioning requirements. 
   if (!is_dir(drush_get_option('backup_path'))) {
-    drush_set_error(PROVISION_BACKUP_PATH_NOT_FOUND);
+    drush_set_error('PROVISION_BACKUP_PATH_NOT_FOUND');
   }
 
   if ($backup_file) {
     if ( provision_path("exists", $backup_file, FALSE,
             dt("Backing site up to @path."),
             dt("Back up file @path already exists."),
-        PROVISION_BACKUP_ALREADY_EXISTS)) {
+        'PROVISION_BACKUP_ALREADY_EXISTS')) {
       drush_get_option('backup_file', $backup_file);
     }
   }
@@ -52,7 +52,7 @@ function provision_drupal_provision_backup($url) {
   $result = provision_shell_exec("cd %s; tar -rf %s * ", drush_get_option('sites_path') . "/$url",  $backup_file);
 
   if (!$result) {
-    drush_set_error(PROVISION_BACKUP_FAILED, dt("Could not back up sites directory for drupal"));
+    drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not back up sites directory for drupal"));
   }
 }
 

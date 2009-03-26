@@ -15,7 +15,7 @@ function provision_drupal_provision_disable_validate() {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
   if (!drush_get_option('installed')) {
-     drush_set_error(PROVISION_DRUPAL_SITE_FOUND);
+     drush_set_error('PROVISION_DRUPAL_SITE_FOUND');
    }
 }
 

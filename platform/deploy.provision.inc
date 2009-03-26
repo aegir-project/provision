@@ -29,7 +29,7 @@ function provision_drupal_provision_deploy_validate($url = null, $backup_file = 
   $exists = provision_path("exists", $backup_file, TRUE,
       dt("Deploying site from @path"),
       dt("Could not find backup file @path"),
-      PROVISION_BACKUP_NOT_FOUND);
+      'PROVISION_BACKUP_NOT_FOUND');
   if ($exists) {
     drush_set_option('backup_file', $backup_file);
   }
@@ -42,7 +42,7 @@ function provision_drupal_provision_pre_deploy($url, $backup_file) {
   $extracted = provision_path("extract", drush_get_option('backup_file'), drush_get_option('sites_path') ."/$url", 
     dt('Successfully extracted the contents of @path'),
     dt('Failed to extract the contents of @path'),
-    PROVISION_BACKUP_EXTRACTION_FAILED);
+    'PROVISION_BACKUP_EXTRACTION_FAILED');
   if ($extracted) {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
     // @TODO Clear up this properly.

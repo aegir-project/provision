@@ -162,7 +162,7 @@ function install_main() {
 
     // Check if Drupal is installed.
     if (install_verify_drupal()) {
-      return drush_set_error(PROVISION_DRUPAL_SITE_INSTALLED);
+      return drush_set_error('PROVISION_DRUPAL_SITE_INSTALLED');
     }
   }
   else {
@@ -215,7 +215,7 @@ function install_main() {
   }
 
   if ($missing_requirement) {
-    return drush_set_error(PROVISION_DRUPAL_INSTALL_MISSING_REQUIREMENTS);
+    return drush_set_error('PROVISION_DRUPAL_INSTALL_MISSING_REQUIREMENTS');
   }
 
   // Verify existence of all required modules.
@@ -224,7 +224,7 @@ function install_main() {
   $severity = drupal_requirements_severity($requirements);
 
   if ($severity == REQUIREMENT_ERROR) {
-    return drush_set_error(PROVISION_DRUPAL_INSTALL_MISSING_REQUIREMENTS);
+    return drush_set_error('PROVISION_DRUPAL_INSTALL_MISSING_REQUIREMENTS');
   }
 
   drupal_install_system();

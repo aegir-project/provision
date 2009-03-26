@@ -119,12 +119,12 @@ function install_main() {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_DATABASE);
     // Check if Drupal is installed.
     if (install_verify_drupal()) {
-      drush_set_error(PROVISION_DRUPAL_SITE_INSTALLED, st('Site is already installed'));
+      drush_set_error('PROVISION_DRUPAL_SITE_INSTALLED', st('Site is already installed'));
       return FALSE;
     }
   }
   else {
-    drush_set_error(PROVISION_CONFIG_NOT_VALID, st('Config file could not be loaded'));
+    drush_set_error('PROVISION_CONFIG_NOT_VALID', st('Config file could not be loaded'));
     return FALSE;
   }
   // Load module basics (needed for hook invokes).
@@ -158,7 +158,7 @@ function install_main() {
   $modules = drupal_verify_profile($profile, $install_locale);
 
   if (!$modules) {
-    drush_set_error(PROVISION_DRUPAL_INSTALL_FAILED);
+    drush_set_error('PROVISION_DRUPAL_INSTALL_FAILED');
     return FALSE;
   }
   foreach ($modules as $module) {

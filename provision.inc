@@ -13,8 +13,6 @@
  * @see provisionvalues
  */
 
-define('PROVISION_OUTPUT', 'PROVISION_OUTPUT_START>>>%s<<<PROVISION_OUTPUT_END');
-
 /**
  * Invoke provision api calls. 
  * 

@@ -9,13 +9,6 @@
  */
 include_once('provision.mysql.inc');
 
-define('PROVISION_CREATE_DB_FAILED', 'PROVISION_CREATE_DB_FAILED');
-define('PROVISION_DROP_DB_FAILED', 'PROVISION_DROP_DB_FAILED');
-define('PROVISION_DB_DUMP_NOT_FOUND', 'PROVISION_DB_DUMP_NOT_FOUND');
-define('PROVISION_DB_DUMP_NOT_READABLE', 'PROVISION_DB_DUMP_NOT_READABLE');
-define('PROVISION_DB_IMPORT_FAILED', 'PROVISION_DB_IMPORT_FAILED');
-
-
 function provision_mysql_provision_init() {
   drush_set_default('master_db', $GLOBALS['db_url']);
   $master_db = drush_get_option('master_db');
@@ -48,7 +41,7 @@ function provision_mysql_drush_help($section) {
 function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) {
   if (!_provision_mysql_create_database($db_name) ||
       !_provision_mysql_database_exists($db_name) ) {
-   drush_set_error(PROVISION_CREATE_DB_FAILED);
+   drush_set_error('PROVISION_CREATE_DB_FAILED');
    drush_log("Database could not be created.", 'error');
    return FALSE;
   }
@@ -65,7 +58,7 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
     drush_log(dt('Created @name database', array("@name" => $db_name)), 'success');
   }
   else {
-    drush_set_error(PROVISION_CREATE_DB_FAILED, dt("Could not create @name database", array("@name" => $db_name)));
+    drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not create @name database", array("@name" => $db_name)));
   }
   return $status; 
    //TODO : Test to confirm that the database is actually writeable. Taking this on faith for now.
@@ -84,7 +77,7 @@ function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_ho
   }
   
   if ( _provision_mysql_database_exists($db_name) ) {
-   drush_set_error(PROVISION_DROP_DB_FAILED);
+   drush_set_error('PROVISION_DROP_DB_FAILED');
    return FALSE;
   }
   
@@ -147,7 +140,7 @@ function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd
       drush_log(sprintf("Importing database using command: mysql -u%s -p%s -h%s %s < %s", 
         $db_user, $db_passwd, $db_host, $db_name, $dump_file));
       if (!provision_shell_exec("mysql -u%s -p%s -h%s %s < %s", $db_user, $db_passwd, $db_host, $db_name, $dump_file )) {
-        drush_set_error(PROVISION_DB_IMPORT_FAILED, dt("Database import failed"));
+        drush_set_error('PROVISION_DB_IMPORT_FAILED', dt("Database import failed"));
       }
      }
    }

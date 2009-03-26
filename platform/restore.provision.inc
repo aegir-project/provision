@@ -29,7 +29,7 @@ function provision_drupal_provision_restore_validate($url = null, $restore_file 
   $exists = provision_path("exists", $restore_file, TRUE,
       dt("Restoring site from @path"),
       dt("Could not find backup file @path"),
-      PROVISION_BACKUP_NOT_FOUND);
+      'PROVISION_BACKUP_NOT_FOUND');
   if ($exists) {
     drush_set_option('restore_file', $restore_file);
   }

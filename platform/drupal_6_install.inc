@@ -151,11 +151,11 @@ function install_main() {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_DATABASE);
 
     if (install_verify_drupal()) {
-      return drush_set_error(PROVISION_DRUPAL_SITE_INSTALLED);
+      return drush_set_error('PROVISION_DRUPAL_SITE_INSTALLED');
     }
   }
   else {
-    return drush_set_error(PROVISION_CONFIG_NOT_VALID);
+    return drush_set_error('PROVISION_CONFIG_NOT_VALID');
   }
 
 
@@ -197,14 +197,14 @@ function install_main() {
   }
 
   if ($missing_requirement) {
-    return drush_set_error(PROVISION_INSTALL_MISSING_REQUIREMENTS);
+    return drush_set_error('PROVISION_INSTALL_MISSING_REQUIREMENTS');
   }
 
   // Verify existence of all required modules.
   $modules = drupal_verify_profile($profile, $language);
 
   if (!$modules) {
-    return drush_set_error(PROVISION_DRUPAL_INSTALL_FAILED);
+    return drush_set_error('PROVISION_DRUPAL_INSTALL_FAILED');
   }
 
   $system_path = dirname(drupal_get_filename('module', 'system', NULL));
