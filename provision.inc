@@ -399,14 +399,16 @@ function provision_platform_include($path, $command, $version = null, $platform 
 }
 
 function _provision_errors_on() {
-  ini_set('error_reporting', E_ALL ^ E_NOTICE);
+  $errors =& drush_get_context('DRUPAL_ERROR_REPORTING', E_ALL ^ E_NOTICE);
+  $errors = error_reporting($errors);
   ini_set('display_errors', TRUE);
 }
 _provision_errors_on();
 
 
 function _provision_errors_off() {
-  ini_set('error_reporting', ~E_ALL);
+  $errors =& drush_get_context('DRUPAL_ERROR_REPORTING', 0);
+  $errors = error_reporting(0);
   ini_set('display_errors', FALSE);
 }
 

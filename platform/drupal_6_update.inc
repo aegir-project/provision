@@ -272,9 +272,13 @@ function update_create_batch_table() {
 
 
 function update_main() {
- // Minimum load of components.
-  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
+  // Some unavoidable errors happen because the database is not yet up-to-date.
+  // Our custom error handler is not yet installed, so we just suppress them.
+  _provision_errors_off();
 
+  require_once './includes/bootstrap.inc';
+  // Minimum load of components.
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
   require_once './includes/install.inc';
   require_once './includes/file.inc';
   require_once './modules/system/system.install';
@@ -306,7 +310,7 @@ function update_main() {
 
   // Turn error reporting back on. From now on, only fatal errors (which are
   // not passed through the error handler) will cause a message to be printed.
-  ini_set('display_errors', TRUE);
+  _provision_errors_on();
 
 
 
