@@ -83,24 +83,31 @@ function _provision_apache_create_vhost_config($url, $template = NULL) {
   if (is_null($template)) {
     $template = _provision_apache_default_template();
   }
-  drush_log(dt("Generate virtual host configuration file."));
-  $writable = provision_path("writable", drush_get_option('vhost_path'), TRUE , NULL,
-      dt("Virtual host configuration path @path is not writable."), 
-      'PROVISION_VHOST_PATH_NOT_WRITABLE');
   $options['extra_config'] = "# Extra configuration from modules:\n";
   foreach (drush_command_implements('provision_vhost_config') as $module) {
     $options['extra_config'] .= "# -- $module settings --\n";
     $options['extra_config'] .= module_invoke($module, 'provision_vhost_config', $url, $options) . "\n";
   }
+  return _provision_apache_create_config($url, $options, $template);
+}
+
+/**
+ * Write an apache configuration file
+ */
+function _provision_apache_create_config($file, $data, $template) {
+  drush_log(dt("Generating apache host configuration file %file.", array('%file' => $file)));
+  $writable = provision_path("writable", drush_get_option('vhost_path'), TRUE , NULL,
+      dt("Virtual host configuration path @path is not writable."), 
+      'PROVISION_VHOST_PATH_NOT_WRITABLE');
   
   if ($writable) {
-    $file = fopen(drush_get_option('vhost_path') .'/'. $url, "w");
-    $text = provision_render_config($template, $options);
+    $file = fopen(drush_get_option('vhost_path') .'/'. $file, "w");
+    $text = provision_render_config($template, $data);
     fwrite($file, $text);
     fclose($file);
   }
 }
- 
+
 /**
  * Restart Apache
  */
