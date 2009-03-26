@@ -145,5 +145,9 @@ DirectoryIndex index.php
   RewriteCond %{REQUEST_URI} !=/favicon.ico
   RewriteRule ^(.*)$ index.php?q=$1 [L,QSA]
 </IfModule>
+
+# Do not read the platform's .htaccess
+AllowOverride none
+
 EOF;
 }
