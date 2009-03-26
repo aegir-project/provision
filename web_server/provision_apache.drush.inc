@@ -62,6 +62,13 @@ function _provision_apache_redirect_template() {
 }
 
 /**
+ * The template for platform configuration settings
+ */
+function _provision_apache_platform_template() {
+  return file_get_contents(dirname(__FILE__) ."/provision_apache_platform.tpl.php");
+}
+
+/**
  * Delete virtual host file
  */
 function _provision_apache_delete_vhost_config($url) {

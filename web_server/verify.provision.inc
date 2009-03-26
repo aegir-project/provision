@@ -3,6 +3,18 @@
 function provision_apache_provision_verify($url) {
   if (PROVISION_CONTEXT_PLATFORM) {
     _provision_create_dir(drush_get_option('vhost_path'), dt("Virtual host configuration"), 0700);
+    $data = drush_get_merged_options();
+    drush_log(dt("Generating platform apache configuration file"));
+    $writable = provision_path("writable", drush_get_option('vhost_path'), TRUE , NULL,
+      dt("Virtual host configuration path @path is not writable."), 
+      'PROVISION_VHOST_PATH_NOT_WRITABLE');
+    $options = drush_get_context('options');
+    if ($writable) {
+      $file = fopen(drush_get_option('vhost_path') .'/_platform_' . $options['platform'] . '.conf', "w");
+      $text = provision_render_config(_provision_apache_platform_template(), $data);
+      fwrite($file, $text);
+      fclose($file);
+    }
   }
   else {
     _provision_apache_create_vhost_config($url);
