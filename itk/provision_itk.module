@@ -10,6 +10,6 @@
 /**
  * implementation of hook_provision_vhost_extra
  */
-function provision_itk_provision_vhost_config($url) {
+function provision_itk_provision_apache_vhost_config($url) {
   return "# Configur ITK permissions\nAssignUserID ". drush_get_option('web_user') . ' #' . drush_get_option('web_group') . "\n";
 }

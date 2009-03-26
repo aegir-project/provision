@@ -84,10 +84,7 @@ function _provision_apache_create_vhost_config($url, $template = NULL) {
     $template = _provision_apache_default_template();
   }
   $options['extra_config'] = "# Extra configuration from modules:\n";
-  foreach (drush_command_implements('provision_vhost_config') as $module) {
-    $options['extra_config'] .= "# -- $module settings --\n";
-    $options['extra_config'] .= module_invoke($module, 'provision_vhost_config', $url, $options) . "\n";
-  }
+  $options['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_vhost_config', $url, $options));
   return _provision_apache_create_config($url, $options, $template);
 }
 
