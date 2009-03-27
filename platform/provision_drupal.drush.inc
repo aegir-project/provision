@@ -377,3 +377,143 @@ function provision_drupal_install_log($ret) {
   }
 }
 
+require_once('cvs_deploy.inc');
+
+function provision_find_packages() {
+  $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
+  $searchpaths[] = sprintf("%s/modules", $drupal_root);
+  $searchpaths[] = sprintf("%s/sites/all/modules", $drupal_root);
+  $packages['core']['modules'] = provision_parse_packages($searchpaths);
+  $profiles = drush_get_option('profiles', array());
+  foreach ($profiles as $profile => $info) {
+    $searchpaths = array();
+    $searchpaths[] = sprintf("%s/profiles/%s/modules", $drupal_root, $profile);
+    $packages['profiles'][$profile]['modules'] = provision_parse_packages($searchpaths);
+  }
+  $sites = drush_get_option('sites', array());
+  foreach ($sites as $site) {
+    $searchpaths = array();
+    $searchpaths[] = sprintf("%s/sites/%s/modules", $drupal_root, $site);
+    $packages['sites'][$site]['modules'] = provision_parse_packages($searchpaths);
+  }
+  return $packages;
+}
+
+
+function provision_parse_packages($paths, $type = 'module') {
+  $files = array();
+  foreach ($paths as $path) {
+    $files = array_merge($files, drush_scan_directory($path, ".module$", array('.', '..', 'CVS', '.svn'), 0, true, 'name'));
+  }
+  foreach ($files as $name => $info) {
+    $install_file = sprintf("%s/%s.install", dirname($info->filename), $name);
+    $schema_version = 1;
+    if (file_exists($install_file)) {
+      $source = file_get_contents(trim($install_file));
+      $source = str_replace("\r\n", "\n", $source);
+      $source = str_replace("\r", "\n", $source);
+      $function_matches = array();
+        preg_match_all('!function\s*&?([a-zA-Z0-9_]+)_update_([0-9]+)\(.*?\s*\{!', $source, $function_matches);
+      
+      if (sizeof($function_matches[0])) {
+        $schema_version = max($function_matches[2]) + 1;
+      }
+    }
+    $info_file = sprintf("%s/%s.info", dirname($info->filename), $name);
+    $files[$name]->info = provision_parse_info_file($info_file);
+    $files[$name]->schema_version = $schema_version;
+    _provision_cvs_deploy($files[$name]);
+  }
+  return $files;
+}
+
+
+function provision_parse_info_file($filename) {
+  $info = array();
+
+ $defaults = array(
+    'dependencies' => array(),
+    'description' => '',
+    'version' => NULL,
+    'php' => DRUPAL_MINIMUM_PHP,
+  );
+  
+  if (file_exists($filename)) {
+  
+    switch (drush_drupal_major_version()) {
+      case 5 : 
+        $info = parse_ini_file($filename);
+        break;
+      default :
+        $info = _provision_drupal_parse_info_file($filename);
+        break;
+    }
+  }
+
+  // Merge in defaults and return
+  return $info + $defaults;
+}
+
+/**
+ * This code is based on the Drupal 6 and Drupal 7 drupal_parse_info_file
+ */
+function _provision_drupal_parse_info_file($filename) {
+  $info = array();
+
+  if (!file_exists($filename)) {
+    return $info;
+  }
+
+  $data = file_get_contents($filename);
+  if (preg_match_all('
+    @^\s*                           # Start at the beginning of a line, ignoring leading whitespace
+    ((?:
+      [^=;\[\]]|                    # Key names cannot contain equal signs, semi-colons or square brackets,
+      \[[^\[\]]*\]                  # unless they are balanced and not nested
+    )+?)
+    \s*=\s*                         # Key/value pairs are separated by equal signs (ignoring white-space)
+    (?:
+      ("(?:[^"]|(?<=\\\\)")*")|     # Double-quoted string, which may contain slash-escaped quotes/slashes
+      (\'(?:[^\']|(?<=\\\\)\')*\')| # Single-quoted string, which may contain slash-escaped quotes/slashes
+      ([^\r\n]*?)                   # Non-quoted string
+    )\s*$                           # Stop at the next end of a line, ignoring trailing whitespace
+    @msx', $data, $matches, PREG_SET_ORDER)) {
+    foreach ($matches as $match) {
+      // Fetch the key and value string
+      $i = 0;
+      foreach (array('key', 'value1', 'value2', 'value3') as $var) {
+        $$var = isset($match[++$i]) ? $match[$i] : '';
+      }
+      $value = stripslashes(substr($value1, 1, -1)) . stripslashes(substr($value2, 1, -1)) . $value3;
+
+      // Parse array syntax
+      $keys = preg_split('/\]?\[/', rtrim($key, ']'));
+      $last = array_pop($keys);
+      $parent = &$info;
+
+      // Create nested arrays
+      foreach ($keys as $key) {
+        if ($key == '') {
+          $key = count($parent);
+        }
+        if (!isset($parent[$key]) || !is_array($parent[$key])) {
+          $parent[$key] = array();
+        }
+        $parent = &$parent[$key];
+      }
+
+      // Handle PHP constants
+      if (defined($value)) {
+        $value = constant($value);
+      }
+
+      // Insert actual value
+      if ($last == '') {
+        $last = count($parent);
+      }
+      $parent[$last] = $value;
+    }
+  }
+
+  return $info;
+}

@@ -30,6 +30,8 @@ function provision_drupal_provision_verify($url = null) {
     drush_log(dt("This platform is running @short_name @version", 
       array('@short_name' => 'drupal', '@version' => VERSION)));
     drush_set_option('profiles', _scrub_object(_provision_find_profiles()), 'drupal');
+    drush_set_option('packages', _scrub_object(provision_find_packages()), 'drupal');
+    
 
   }
   else {
