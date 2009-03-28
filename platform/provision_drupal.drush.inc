@@ -269,6 +269,7 @@ function _provision_find_profiles() {
     $profile->name = $name;
     $profile->filename = $file;
 
+    _provision_cvs_deploy($profile);
     require_once($profile->filename);
     $func = $profile->name . "_profile_details";
     if (function_exists($func)) {
@@ -288,7 +289,7 @@ function _provision_find_profiles() {
     }
     $profile->info['languages'] = array_keys($languages);
     $return[$name] = $profile;
-    drush_log(dt('found install profile %name', array('%name' => $name)));
+    drush_log(dt('Found install profile %name', array('%name' => $name)));
   }
 
   return $return;
@@ -380,27 +381,115 @@ function provision_drupal_install_log($ret) {
 require_once('cvs_deploy.inc');
 
 function provision_find_packages() {
-  $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
-  $searchpaths[] = sprintf("%s/modules", $drupal_root);
-  $searchpaths[] = sprintf("%s/sites/all/modules", $drupal_root);
-  $packages['core']['modules'] = provision_parse_packages($searchpaths);
-  $profiles = drush_get_option('profiles', array());
+  // Load the version specific include files.
+  provision_platform_include(dirname(__FILE__), 'packages');
+
+  $packages['base'] = _provision_find_packages('base');
+
+  // Create a package for the Drupal release
+  $packages['base']['platforms'] = _provision_find_platforms();
+
+  // Find install profiles.
+  $profiles = _provision_find_profiles();
+  drush_set_option('profiles', array_keys((array) $profiles), 'drupal'); 
+  $packages['base']['profiles'] = _scrub_object($profiles);
+
+  // Iterate through the install profiles, finding the profile specific packages
   foreach ($profiles as $profile => $info) {
-    $searchpaths = array();
-    $searchpaths[] = sprintf("%s/profiles/%s/modules", $drupal_root, $profile);
-    $packages['profiles'][$profile]['modules'] = provision_parse_packages($searchpaths);
+    $packages['profiles'][$profile] =  _provision_find_packages('profiles', $profile);
   }
-  $sites = drush_get_option('sites', array());
-  foreach ($sites as $site) {
-    $searchpaths = array();
-    $searchpaths[] = sprintf("%s/sites/%s/modules", $drupal_root, $site);
-    $packages['sites'][$site]['modules'] = provision_parse_packages($searchpaths);
+
+  // Iterate through the sites, finding site specific packages
+  foreach (drush_get_option('sites', array()) as $site) {
+    $packages['sites'][$site] = _provision_find_packages('sites', $site);
   }
   return $packages;
 }
 
+function _provision_find_platforms() {
+  return array(
+    'drupal' => array(
+    'short_name' => 'drupal', 'version' => drush_drupal_version(), 
+    'description' => dt("This platform is running @short_name @version", array('@short_name' => 'Drupal', '@version' => VERSION))));
+}
 
-function provision_parse_packages($paths, $type = 'module') {
+/**
+ * A small helper function to reduce code duplication
+ */
+function _provision_find_packages($scope, $key = '') {
+  $scope_text = ($key) ? "$scope/$key" : $scope;
+  foreach (array('modules', 'themes') as $type) {
+    $func = "_provision_drupal_find_$type";
+    $result = $func($scope, $key);
+    if (sizeof($result)) {
+      $packages[$type] = $result;
+      drush_log(dt("Found !count !type in !scope", 
+        array('!count' => sizeof($result), 
+        '!scope' => $scope_text, '!type' => $type)));
+    }
+  }
+  return $packages;
+}
+
+/**
+ * Map the system table to a packages multi-dimensional array component
+ */
+function provision_drupal_system_map() {
+  $profile = drush_get_option('profile');
+  $profiles = _provision_find_profiles();
+
+  $packages['platforms'] = _provision_find_platforms();
+  $packages['profiles'][$profile] = $profiles[$profile];
+  $packages['profiles'][$profile]->status = 1;
+  
+  $result = db_query("SELECT * FROM {system} WHERE type='module'");
+  while ($module = db_fetch_object($result)) {
+    _provision_cvs_deploy($module);
+    $module->filename = realpath($module->filename);
+    $packages['modules'][$module->name] = $module;
+  }
+
+  drush_log(dt("Found !count modules", array('!count' => sizeof($packages['modules']))));
+
+  $result = db_query("SELECT * FROM {system} WHERE type='theme'");
+  while ($theme = db_fetch_object($result)) {
+    _provision_cvs_deploy($theme);
+    $theme->filename = realpath($theme->filename);
+    $packages['themes'][$theme->name] = $theme;
+  }
+  drush_log(dt("Found !count themes", array('!count' => sizeof($packages['themes']))));
+  return $packages;
+}
+
+/**
+ * Retrieve a list of paths to search in a certain scope
+ */
+function _provision_drupal_search_paths($scope, $key = '', $type = 'modules') {
+  $searchpaths = array();
+  $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
+  switch ($scope) {
+    case 'base' : 
+      $searchpaths[] = sprintf("%s/%s", $drupal_root, $type);
+      $searchpaths[] = sprintf("%s/sites/all/%s", $drupal_root, $type);
+      break;
+    default : 
+      if ($key) { 
+        $searchpaths[] = sprintf("%s/%s/%s/%s", $drupal_root, $scope, $key, $type);
+      }
+      break;
+     
+  }
+  return $searchpaths;
+}
+
+/**
+ * Find modules in a certain scope.
+ *
+ * This function is general enough that it works for all supported
+ * versions of Drupal.
+ */
+function _provision_drupal_find_modules($scope, $key = '') {
+  $paths = _provision_drupal_search_paths($scope, $key, 'modules');
   $files = array();
   foreach ($paths as $path) {
     $files = array_merge($files, drush_scan_directory($path, ".module$", array('.', '..', 'CVS', '.svn'), 0, true, 'name'));
@@ -427,11 +516,10 @@ function provision_parse_packages($paths, $type = 'module') {
   return $files;
 }
 
-
 function provision_parse_info_file($filename) {
   $info = array();
 
- $defaults = array(
+  $defaults = array(
     'dependencies' => array(),
     'description' => '',
     'version' => NULL,
@@ -439,81 +527,10 @@ function provision_parse_info_file($filename) {
   );
   
   if (file_exists($filename)) {
-  
-    switch (drush_drupal_major_version()) {
-      case 5 : 
-        $info = parse_ini_file($filename);
-        break;
-      default :
-        $info = _provision_drupal_parse_info_file($filename);
-        break;
-    }
+    $info = _provision_drupal_parse_info_file($filename);
   }
 
   // Merge in defaults and return
   return $info + $defaults;
 }
 
-/**
- * This code is based on the Drupal 6 and Drupal 7 drupal_parse_info_file
- */
-function _provision_drupal_parse_info_file($filename) {
-  $info = array();
-
-  if (!file_exists($filename)) {
-    return $info;
-  }
-
-  $data = file_get_contents($filename);
-  if (preg_match_all('
-    @^\s*                           # Start at the beginning of a line, ignoring leading whitespace
-    ((?:
-      [^=;\[\]]|                    # Key names cannot contain equal signs, semi-colons or square brackets,
-      \[[^\[\]]*\]                  # unless they are balanced and not nested
-    )+?)
-    \s*=\s*                         # Key/value pairs are separated by equal signs (ignoring white-space)
-    (?:
-      ("(?:[^"]|(?<=\\\\)")*")|     # Double-quoted string, which may contain slash-escaped quotes/slashes
-      (\'(?:[^\']|(?<=\\\\)\')*\')| # Single-quoted string, which may contain slash-escaped quotes/slashes
-      ([^\r\n]*?)                   # Non-quoted string
-    )\s*$                           # Stop at the next end of a line, ignoring trailing whitespace
-    @msx', $data, $matches, PREG_SET_ORDER)) {
-    foreach ($matches as $match) {
-      // Fetch the key and value string
-      $i = 0;
-      foreach (array('key', 'value1', 'value2', 'value3') as $var) {
-        $$var = isset($match[++$i]) ? $match[$i] : '';
-      }
-      $value = stripslashes(substr($value1, 1, -1)) . stripslashes(substr($value2, 1, -1)) . $value3;
-
-      // Parse array syntax
-      $keys = preg_split('/\]?\[/', rtrim($key, ']'));
-      $last = array_pop($keys);
-      $parent = &$info;
-
-      // Create nested arrays
-      foreach ($keys as $key) {
-        if ($key == '') {
-          $key = count($parent);
-        }
-        if (!isset($parent[$key]) || !is_array($parent[$key])) {
-          $parent[$key] = array();
-        }
-        $parent = &$parent[$key];
-      }
-
-      // Handle PHP constants
-      if (defined($value)) {
-        $value = constant($value);
-      }
-
-      // Insert actual value
-      if ($last == '') {
-        $last = count($parent);
-      }
-      $parent[$last] = $value;
-    }
-  }
-
-  return $info;
-}

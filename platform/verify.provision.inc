@@ -26,27 +26,19 @@ function provision_drupal_provision_verify($url = null) {
       dt("Drupal sites directory is not writable by the provisioning script"), PROVISION_SITES_DIR_NOT_WRITABLE);
 
     drush_set_option('sites', array_keys((array) provision_drupal_find_sites()), 'drupal'); 
-    drush_set_option('platform', array('short_name' => 'drupal', 'version' => drush_drupal_version())); 
-    drush_log(dt("This platform is running @short_name @version", 
-      array('@short_name' => 'drupal', '@version' => VERSION)));
-    drush_set_option('profiles', _scrub_object(_provision_find_profiles()), 'drupal');
+    drush_log(dt("This platform is running @short_name @version", array('@short_name' => 'drupal', '@version' => VERSION)));
     drush_set_option('packages', _scrub_object(provision_find_packages()), 'drupal');
-    
-
   }
   else {
+    drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
+
       // This is the actual drupal provisioning requirements. 
     _provision_drupal_create_directories($url);
     _provision_drupal_maintain_aliases($url);
     // Requires at least the database settings to complete.
    _provision_drupal_create_settings_file($url);
-
-    provision_platform_include(dirname(__FILE__), 'verify');
   }
-  #if (is_array($data['modules'])) {
-    // get the correct version names for everything.
-    #$data['modules'] = _provision_drupal_get_cvs_versions($data['modules']);
-  #}
+
 }
 
 

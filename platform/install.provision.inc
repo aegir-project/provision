@@ -61,5 +61,6 @@ function provision_drupal_provision_post_install($url) {
   _provision_drupal_maintain_aliases($url);
   provision_path("chmod", "./sites/$url/settings.php", 0440, dt("Secured settings.php with safe permissions"));
   _provision_drupal_rebuild_caches($url);
+  drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
 }
 
