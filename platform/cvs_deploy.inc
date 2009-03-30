@@ -86,6 +86,10 @@ function _provision_cvs_deploy_version_from_tag($tag) {
   if (!$tag || $tag == 'HEAD') {
     $version = 'HEAD';
   }
+  // See if it's a Drupal core release
+  elseif (preg_match('@^DRUPAL-(\d+)-(\d+)$@', $tag, $match)) {
+    $version = $match[1] . '.' . $match[2];
+  }
   // See if it's a full, official release from a tag:
   elseif (preg_match('@^DRUPAL-(\d+)--(\d+)-(\d+)(-.+)?@', $tag, $match)) {
     $version = $match[1] .'.x-'. $match[2] .'.'. $match[3];

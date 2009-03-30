@@ -435,6 +435,9 @@ function _provision_find_packages($scope, $key = '') {
  * Map the system table to a packages multi-dimensional array component
  */
 function provision_drupal_system_map() {
+  // Load the version specific include files.
+  provision_platform_include(dirname(__FILE__), 'packages');
+
   $profile = drush_get_option('profile');
   $profiles = _provision_find_profiles();
 
@@ -444,6 +447,9 @@ function provision_drupal_system_map() {
   
   $result = db_query("SELECT * FROM {system} WHERE type='module'");
   while ($module = db_fetch_object($result)) {
+    $info_file = sprintf("%s/%s.info", dirname($module->filename), $module->name);
+    $module->info = provision_parse_info_file($info_file);
+
     _provision_cvs_deploy($module);
     $module->filename = realpath($module->filename);
     $packages['modules'][$module->name] = $module;
@@ -453,6 +459,8 @@ function provision_drupal_system_map() {
 
   $result = db_query("SELECT * FROM {system} WHERE type='theme'");
   while ($theme = db_fetch_object($result)) {
+    $info_file = sprintf("%s/%s.info", dirname($theme->filename), $theme->name);
+    $theme->info = provision_parse_info_file($info_file);
     _provision_cvs_deploy($theme);
     $theme->filename = realpath($theme->filename);
     $packages['themes'][$theme->name] = $theme;
