@@ -47,7 +47,11 @@ function provision_drupal_provision_install($url) {
  */
 function provision_drupal_provision_install_rollback($url) {
   if (!(drush_get_error() & PROVISION_SITE_INSTALLED)) {
-    _provision_recursive_delete("sites/$url");
+    if ($url) {
+      _provision_recursive_delete("sites/$url");
+    } else {
+      drush_set_error('PROVISION_FRAMEWORK_ERROR', dt('no url defined in %function', array('%function' => __FUNCTION__)));
+    }
   }
 }
 
