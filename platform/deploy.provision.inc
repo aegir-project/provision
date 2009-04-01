@@ -45,9 +45,31 @@ function provision_drupal_provision_pre_deploy($url, $backup_file) {
     'PROVISION_BACKUP_EXTRACTION_FAILED');
   if ($extracted) {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
-    // @TODO Clear up this properly.
-//    $old_data = provision_get_site_data($url);
-//    $data = array_merge($old_data, $data); 
+    $site_packages = drush_get_context('packages', array(), 'site');
+    $profiles = array_keys($site_packages['profiles']);
+    $profile = $profiles[0];
+
+    $drupal_packages = drush_get_context('packages', array(), 'drupal');
+
+    $merged_modules = array_merge($drupal_packages['base']['modules'], $drupal_packages['profiles'][$profile]['modules']);
+    foreach ($site_packages['modules'] as $name => $module) {
+      if ($module['status'] == 1) {
+        if (!array_key_exists($name, $merged_modules)) {
+          drush_log(dt("Could not find a version of the !name module", array('!name' => $name)), 'warning');
+        }
+        else {
+          if ($module['schema_version'] > $merged_modules[$name]['schema_version']) {
+            drush_set_error('PROVISION_SCHEMA_UPGRADE_FAILURE', 
+              dt("The version of the !name module found on this platform has a lower Schema version than the one the site has installed", 
+              array('!name' => $name)));
+          }
+          else {
+            drush_log(dt("Found a valid version of the !name module with schema version !schema_version", 
+              array('!name' => $name, '!schema_version' => $merged_modules[$name]['schema_version'])));
+          }
+        }
+      }
+    }
   }
 }
 
@@ -74,4 +96,5 @@ function provision_drupal_provision_deploy_rollback($url) {
 function provision_drupal_provision_post_deploy($url) {
   provision_invoke('update', $url);
   provision_platform_include(dirname(__FILE__), 'deploy');
+  drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
 }
