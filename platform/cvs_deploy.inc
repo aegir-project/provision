@@ -12,6 +12,7 @@
  * Used by provision to hook into the cvs_deploy system.
  */
 function _provision_cvs_deploy(&$file) {
+  $file->filename = realpath($file->filename);
   $project = $file->info['project'];
   $project = ($project) ? $project : _provision_cvs_deploy_get_project_name($file);
   $file->project = $project;

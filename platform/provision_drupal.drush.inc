@@ -218,19 +218,19 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
       provision_path("mkdir", $path, TRUE, 
         dt("Created <code>@path</code>"),
         dt("Could not create <code>@path</code>"),
-        DRUSH_PERM_ERROR);
+        'DRUSH_PERM_ERROR');
     }
 
     provision_path("chmod", $path, $perm, 
       dt("Changed permissions of <code>@path</code> to @confirm"),
       dt("Could not change permissions <code>@path</code> to @confirm"),
-      DRUSH_PERM_ERROR);
+      'DRUSH_PERM_ERROR');
   }
   foreach ($grps as $path) {
       provision_path("chown", $path, drush_get_option('script_user'), 
       dt("Changed ownership of <code>@path</code>"),
       dt("Could not change ownership <code>@path</code>"),
-      DRUSH_PERM_ERROR );
+     'DRUSH_PERM_ERROR' );
     provision_path("chgrp", $path, drush_get_option('web_group'),
       dt("Changed group ownership of <code>@path</code>"),
       dt("Could not change group ownership <code>@path</code>"));
@@ -392,10 +392,14 @@ function provision_find_packages() {
   // Find install profiles.
   $profiles = _provision_find_profiles();
   drush_set_option('profiles', array_keys((array) $profiles), 'drupal'); 
-  $packages['base']['profiles'] = _scrub_object($profiles);
 
   // Iterate through the install profiles, finding the profile specific packages
   foreach ($profiles as $profile => $info) {
+    _provision_cvs_deploy($info);
+    if (!$info->version) {
+      $info->version = drush_drupal_version();
+    }
+    $packages['base']['profiles'][$profile] = $info;
     $packages['profiles'][$profile] =  _provision_find_packages('profiles', $profile);
   }
 
@@ -438,10 +442,17 @@ function provision_drupal_system_map() {
   // Load the version specific include files.
   provision_platform_include(dirname(__FILE__), 'packages');
 
-  $profile = drush_get_option('profile');
   $profiles = _provision_find_profiles();
-
+  foreach ($profiles as $profile => $info) {
+    _provision_cvs_deploy($info);
+    if (!$info->version) {
+      $info->version = drush_drupal_version();
+    }
+    $profiles[$profile] = $info;
+  }
   $packages['platforms'] = _provision_find_platforms();
+
+  $profile = drush_get_option('profile');
   $packages['profiles'][$profile] = $profiles[$profile];
   $packages['profiles'][$profile]->status = 1;
   
