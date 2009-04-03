@@ -7,6 +7,7 @@
  */
 function provision_drupal_provision_verify_validate($url = null) {
   if ($url) {
+    _provision_errors_on();
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   }
 
@@ -31,7 +32,6 @@ function provision_drupal_provision_verify($url = null) {
   }
   else {
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
-
       // This is the actual drupal provisioning requirements. 
     _provision_drupal_create_directories($url);
     _provision_drupal_maintain_aliases($url);
