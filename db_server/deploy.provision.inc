@@ -28,7 +28,7 @@ function provision_mysql_provision_deploy_rollback($url = NULL) {
 
 // Rollback doesn't apply here yet. Unless we trigger a deploy of the first dump
 // made. Which could go on infinitely if something is really long.
-function provision_mysql_provision_post_deploy($url = NULL) {
+function provision_mysql_post_provision_deploy($url = NULL) {
   provision_path('unlink', drush_get_option('sites_path') .'/'. $url .'/database.sql', TRUE,
     dt("Removed dump file @path after restoring from it"),
     dt("Could not remove dump file @path"), DRUSH_PERM_ERROR);

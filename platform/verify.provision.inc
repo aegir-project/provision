@@ -45,7 +45,7 @@ function provision_drupal_provision_verify($url = null) {
 /**
  * Implementation of hook_provision_post_verify
  */
-function provision_drupal_provision_post_verify($url = NULL) {
+function provision_drupal_post_provision_verify($url = NULL) {
   if (PROVISION_CONTEXT_SITE) {
     _provision_drupal_rebuild_caches($url);
     drush_set_option('installed', TRUE, 'site');

@@ -60,7 +60,7 @@ function provision_drupal_provision_backup($url) {
 /**
  * Generate a backup tarbal for a site.
  */
-function provision_drupal_provision_post_backup($url, $backup_file = NULL) {
+function provision_drupal_post_provision_backup($url, $backup_file = NULL) {
   $backup_file = drush_get_option('backup_file');
 
   provision_shell_exec("gzip %s", $backup_file);

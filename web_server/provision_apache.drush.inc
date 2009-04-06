@@ -11,7 +11,7 @@
  * to ensure that the sites are getting loaded up correctly.
  */
 
-function provision_apache_provision_init() {
+function provision_apache_drush_init() {
   // Set up defines for platform
   $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
 

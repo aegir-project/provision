@@ -14,96 +14,6 @@
  */
 
 /**
- * Invoke provision api calls. 
- * 
- * Call the correct hook for all the modules that implement it. We can not use Drupal's default module_invoke, because we
- * can not pass references through it.
- * Additionally, the ability to rollback when an error has been encountered is also provided.
- * If at any point during execution, the drush_get_error() function returns anything but 0, provision_invoke will
- * trigger $hook_rollback for each of the hooks that implement it, in reverse order from how they were executed.
- *
- * This function will also trigger pre_$hook and post_$hook variants of the hook and it's rollbacks automatically.
- *
- * @param hook
- *   The hook name to be executed for all the modules.
- * @param url
- *   The url of the site being invoked.
- * @param data
- *   A reference to the associated array containing the data for the site. This needs to be a reference, 
- *   because the modules might provide additional information about the site.
- * @return
- *   A boolean specifying whether or not the command was successfully completed. 
- * 
- */
-function provision_invoke($hook, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL, $arg5 = NULL) {
-  $files = drush_scan_directory(dirname(__FILE__), $hook . ".provision.inc$");
-  if (is_array($files)) {
-    foreach ($files as $filename => $info) {
-      include_once($filename);
-    }
-  }
-
-  // First we build a list of functions are about to execute
-  $variations = array($hook . "_validate", "pre_$hook", $hook, "post_$hook");
-  foreach ($variations as $var_hook) {
-    foreach (drush_command_implements("provision_$var_hook") as $name) {
-      $functions[] = $name . '_provision_' . $var_hook;
-    }
-  }
-
-  $rollback = FALSE;
-  $completed = array();
-  foreach ($functions as $func) {
-    $completed[] = $func;
-    if (function_exists($func)) {
-      $func($arg1, $arg2, $arg3, $arg4, $arg5);
-      //this is run before and after so that messages appear in the correct order.
-      _drush_log_drupal_messages();
-      if (drush_get_error()) {
-        drush_log(dt('An error occurred at function : @func', array('@func' => $func)), 'error');
-        # As soon as an error occurs, roll back
-        $rollback = TRUE;
-        break;
-      }
-    }
-  }
-
-  // something went wrong, we need to undo 
-  if ($rollback) {
-    foreach (array_reverse($completed) as $func) {
-      $rb_func = $func . '_rollback';
-      if (function_exists($rb_func)) {
-        $rb_func($arg1, $arg2, $arg3, $arg4, $arg5);
-        _drush_log_drupal_messages();
-        drush_log("Changes for $func module have been rolled back.", 'Rollback');
-      }
-    }
-  }
-
-  return !$rollback;
-}
-
-function provision_command($hook, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL, $arg5 = NULL) {
-  foreach (drush_command_implements("provision_init") as $name) {
-    $func = $name . '_provision_init';
-    $func($arg1, $arg2, $arg3, $arg4, $arg5);
-    drush_log("Initializing $name");
-    _drush_log_drupal_messages();
-  }
-  if (!drush_get_error()) {
-    provision_invoke($hook, $arg1, $arg2, $arg3, $arg4, $arg5);
-  }
-  if (!drush_get_error()) {
-    foreach (drush_command_implements('provision_finalize') as $name) {
-      $func = $name . '_provision_finalize';
-      $func($arg1, $arg2, $arg3, $arg4, $arg5);
-      _drush_log_drupal_messages();
-    }
-  }
-}
-
-
-/**
  * @defgroup sitedata Site data management utility functions.
  * @{
  * The provision framework maintains a site.php file in the sites directory, to maintain additional
@@ -166,14 +76,11 @@ function provision_load_site_data($url) {
 
 /**
  * Save modified options to the site.php file
- *
- * @param url
- *   The url of the site being invoked
- * @param data
- *   The complete data structure that has been created. Only settings that have been changed will be recorded.
  */
 function provision_save_site_data() {
   drush_save_config('site');
+  // @TODO : remove site.php file after successful 
+  // drushrc save.
 }
 
 /**
@@ -285,8 +192,6 @@ function provision_shell_exec() {
   drush_log($command); 
   return drush_shell_exec($command);
 }
-
-
 
 /**
  * Check whether a user is a member of a group.

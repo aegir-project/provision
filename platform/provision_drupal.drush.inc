@@ -36,7 +36,7 @@ function provision_drupal_drush_help($section) {
  * This function is executed by provision_invoke, and is responsible
  * for populating the $data context array
  */
-function provision_drupal_provision_init($url = NULL) {
+function provision_drupal_drush_init($url = NULL) {
 
   if ($url) {
     drush_set_option('uri' , 'http://' . $url);
@@ -58,7 +58,7 @@ function provision_drupal_provision_init($url = NULL) {
  * and will allow us to cache the successful settings to the site.php/ drushrc.php
  * files for future runs.
  */
-function provision_drupal_provision_finalize($url = NULL) {
+function provision_drupal_drush_exit($url = NULL) {
 
   if (PROVISION_CONTEXT_SITE) {
     if (drush_get_option('installed')) {

@@ -20,7 +20,7 @@ function provision_mysql_provision_verify() {
   }
 }
 
-function provision_mysql_provision_post_verify() {
+function provision_mysql_post_provision_verify() {
   if (PROVISION_CONTEXT_PLATFORM) {
     drush_set_option('master_db', drush_get_option('master_db'), 'drupal');
   }

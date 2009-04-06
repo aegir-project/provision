@@ -9,9 +9,8 @@ function provision_drupal_provision_delete_validate($url = NULL, $backup_file = 
 /**
  * Before starting to delete the site, make a backup
  */
-function provision_drupal_provision_pre_delete($url, $backup_file) {
-  // @TODO : fix the inline calling of provision_invoke
-  provision_invoke('backup', $url, $backup_file);
+function provision_drupal_pre_provision_delete($url, $backup_file) {
+  drush_invoke('provision backup', $url, $backup_file);
 }
 
 /**

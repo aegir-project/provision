@@ -38,7 +38,7 @@ function provision_drupal_provision_deploy_validate($url = null, $backup_file = 
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
-function provision_drupal_provision_pre_deploy($url, $backup_file) {
+function provision_drupal_pre_provision_deploy($url, $backup_file) {
   $extracted = provision_path("extract", drush_get_option('backup_file'), drush_get_option('sites_path') ."/$url", 
     dt('Successfully extracted the contents of @path'),
     dt('Failed to extract the contents of @path'),
@@ -76,7 +76,7 @@ function provision_drupal_provision_pre_deploy($url, $backup_file) {
 /**
  * Remove the extracted site directory
  */
-function provision_drupal_provision_pre_deploy_rollback($url) {
+function provision_drupal_pre_provision_deploy_rollback($url) {
   _provision_recursive_delete(drush_get_option('sites_path') ."/$url");
 }
 
@@ -93,8 +93,8 @@ function provision_drupal_provision_deploy_rollback($url) {
   provision_drupal_provision_deploy($url);
 }
 
-function provision_drupal_provision_post_deploy($url) {
-  provision_invoke('update', $url);
+function provision_drupal_post_provision_deploy($url) {
+  drush_invoke('provision update', $url);
   provision_platform_include(dirname(__FILE__), 'deploy');
   drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
 }

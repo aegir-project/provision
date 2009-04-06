@@ -388,7 +388,43 @@ function update_check_d7_settings() {
     file_put_contents($conf_path .'/settings.php', "\n" . '$databases = '. var_export($databases, TRUE) . ';', FILE_APPEND);
   }
 }
+function _drush_error_handler($error_level, $message, $filename, $line, $context) {
+  if ($error_level & error_reporting()) {
+    // All these constants are documented at http://php.net/manual/en/errorfunc.constants.php
+    $types = array(
+      E_ERROR => 'Error',
+      E_WARNING => 'Warning',
+      E_PARSE => 'Parse error',
+      E_NOTICE => 'Notice',
+      E_CORE_ERROR => 'Core error',
+      E_CORE_WARNING => 'Core warning',
+      E_COMPILE_ERROR => 'Compile error',
+      E_COMPILE_WARNING => 'Compile warning',
+      E_USER_ERROR => 'User error',
+      E_USER_WARNING => 'User warning',
+      E_USER_NOTICE => 'User notice',
+      E_STRICT => 'Strict warning',
+      E_RECOVERABLE_ERROR => 'Recoverable fatal error'
+    );
+    $backtrace = debug_backtrace();
 
+    $caller = _drupal_get_last_caller(debug_backtrace());
+
+    // We treat recoverable errors as fatal.
+    print_r(array(
+      '%type' => isset($types[$error_level]) ? $types[$error_level] : 'Unknown error',
+      '%message' => $message,
+      '%function' => $caller['function'],
+      '%file' => $caller['file'],
+      '%line' => $caller['line'],
+    ));
+  }
+}
+  
+function _drush_exception_handler($exception) {
+  // Log the message to the watchdog and return an error page to the user.
+  print_r($exception);
+}
 
 function update_main() {
   // Some unavoidable errors happen because the database is not yet up-to-date.
@@ -447,6 +483,8 @@ function update_main() {
   drupal_maintenance_theme();
   _provision_errors_on();
 
+  set_error_handler('_drush_error_handler');
+  set_exception_handler('_drush_exception_handler');
   drupal_load_updates();
 
   provision_drupal_install_log(update_fix_d6_requirements());
@@ -527,12 +565,17 @@ function _update_do_one($module, $number, &$context) {
     return;
   }
 
-  $function = $module .'_update_'. $number;
-  if (function_exists($function)) {
-    drush_log("Running $function");
-    $ret = $function($context['sandbox']);
+  try {
+    $function = $module .'_update_'. $number;
+    if (function_exists($function)) {
+      drush_log("Running $function");
+      $ret = $function($context['sandbox']);
+    }
+    provision_drupal_install_log($ret);
   }
-  provision_drupal_install_log($ret);
+  catch (Exception $e) {
+    drush_log(var_dump($e, TRUE));
+  }
 
   if (isset($ret['#finished'])) {
     $context['finished'] = $ret['#finished'];

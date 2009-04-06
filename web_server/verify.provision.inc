@@ -15,7 +15,7 @@ function provision_apache_provision_verify($url) {
   _provision_apache_restart_apache(TRUE);
 }
 
-function provision_apache_provision_post_verify($url) {
+function provision_apache_post_provision_verify($url) {
   if (PROVISION_CONTEXT_PLATFORM) {
     drush_set_option('master_url', drush_get_option('master_url'), 'drupal');
     drush_set_option('publish_path', drush_get_option('publish_path'), 'drupal');

@@ -4,7 +4,7 @@ function provision_mysql_provision_restore_validate() {
   provision_db_connect();
 }
 
-function provision_mysql_provision_pre_restore($url = NULL) {
+function provision_mysql_pre_provision_restore($url = NULL) {
   $db_type   = drush_set_option('db_type', drush_get_option('db_type'));
   $db_host   = drush_set_option('db_host', drush_get_option('db_host'));
   $db_passwd = drush_set_option('db_passwd', provision_password());
@@ -23,7 +23,7 @@ function provision_mysql_provision_restore($url) {
 }
 
 
-function provision_mysql_provision_pre_restore_rollback($url = NULL) {
+function provision_mysql_pre_provision_restore_rollback($url = NULL) {
   _provision_mysql_destroy_site_db(
     drush_get_option('db_name'), drush_get_option('db_user'),
     drush_get_option('db_passwd'), drush_get_option('db_host'));
@@ -41,7 +41,7 @@ function provision_mysql_provision_pre_restore_rollback($url = NULL) {
 
 // Rollback doesn't apply here yet. Unless we trigger a restore of the first dump
 // made. Which could go on infinitely if something is really long.
-function provision_mysql_provision_post_restore($url = NULL) {
+function provision_mysql_post_provision_restore($url = NULL) {
   provision_path('unlink', drush_get_option('sites_path') . '/' . $url .'/database.sql', TRUE,
     dt("Removed dump file @path after restoring from it"),
     dt("Could not remove dump file @path"), DRUSH_PERM_ERROR);

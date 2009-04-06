@@ -22,14 +22,14 @@ function provision_drupal_provision_disable_validate() {
 /**
  * Make a backup of the site before we mess with it
  */
-function provision_drupal_provision_pre_disable($url, $backup_file = null) {
-  provision_invoke("backup", $url, $backup_file);
+function provision_drupal_pre_provision_disable($url, $backup_file = null) {
+  drush_invoke("provision backup", $url, $backup_file);
 }
 
 /**
  * Set the enabled property of the site to false
  */
-function provision_drupal_provision_post_disable() {
+function provision_drupal_post_provision_disable() {
   drush_set_option('enabled', FALSE, 'site');
 }
 

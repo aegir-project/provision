@@ -23,7 +23,7 @@ function provision_drupal_provision_install_validate() {
 /**
  * Set up the directories and settings.php file that we need.
  */
-function provision_drupal_provision_pre_install($url) {
+function provision_drupal_pre_provision_install($url) {
  // This is the actual drupal provisioning requirements. 
  _provision_drupal_create_directories($url);
 }
@@ -60,7 +60,7 @@ function provision_drupal_provision_install_rollback($url) {
  * Finish the installation, regenerate the caches on the site so that
  * any changes to things such as available modules/ themes can take affect.
  */
-function provision_drupal_provision_post_install($url) {
+function provision_drupal_post_provision_install($url) {
   drush_set_option('installed', TRUE, 'site');
   _provision_drupal_maintain_aliases($url);
   provision_path("chmod", "./sites/$url/settings.php", 0440, dt("Secured settings.php with safe permissions"));

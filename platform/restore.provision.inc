@@ -38,8 +38,8 @@ function provision_drupal_provision_restore_validate($url = null, $restore_file 
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
-function provision_drupal_provision_pre_restore($url, $restore_file) {
-  provision_invoke('backup', $url);
+function provision_drupal_pre_provision_restore($url, $restore_file) {
+  drush_invoke('provision backup', $url);
 
   provision_path("extract", drush_get_option('restore_file'), drush_get_option('sites_path') ."/$url.restore", 
     dt('Successfully extracted the contents of @path'),
@@ -50,7 +50,7 @@ function provision_drupal_provision_pre_restore($url, $restore_file) {
 /**
  * Remove the extracted site directory
  */
-function provision_drupal_provision_pre_restore_rollback($url) {
+function provision_drupal_pre_provision_restore_rollback($url) {
   _provision_recursive_delete(drush_get_option('sites_path') ."/$url.restore");
 }
 
@@ -77,7 +77,7 @@ function provision_drupal_provision_restore_rollback($url) {
 /**
  * Delete the old site directory and recreate the settings file
  */
-function provision_drupal_provision_post_restore($url) {
+function provision_drupal_post_provision_restore($url) {
   _provision_recursive_delete(drush_get_option('sites_path') ."/$url.restore");
   _provision_drupal_create_settings_file($url);
 }

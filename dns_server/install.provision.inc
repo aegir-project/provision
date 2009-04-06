@@ -7,10 +7,7 @@
  *   Provision hooks for the install command
  **/
 
-/**
- * Implementation of hook_provision_pre_install
- **/
-function provision_dns_provision_pre_install($url = NULL) {
+function provision_dns_pre_provision_install($url = NULL) {
   # data should now contain zone info directly, rather than having to pull them from 
   if ($url) {
 #    $url_parts = _provision_dns_split_url($url);
@@ -26,18 +23,12 @@ function provision_dns_provision_pre_install($url = NULL) {
   }
 }
 
-/**
- * Implementation of hook_provision_pre_install_rollback
- **/
-function provision_dns_provision_pre_install_rollback($url = NULL) {
+function provision_dns_pre_provision_install_rollback($url = NULL) {
   if ($url) {
 #    provision_dns_delete($url);
   }
 }
 
-/**
- * Implementation of hook_provision_post_install
- **/
-function provision_dns_provision_post_install($url = NULL) {
+function provision_dns_post_provision_install($url = NULL) {
   # commit and restart bind
 }

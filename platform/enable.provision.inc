@@ -10,7 +10,7 @@ function provision_drupal_provision_enable_validate() {
 
 }
 
-function provision_drupal_post_enable() {
+function provision_drupal_post_provision_enable() {
   drush_set_option('enabled', TRUE, 'site');
 }
 

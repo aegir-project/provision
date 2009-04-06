@@ -9,7 +9,7 @@
  */
 include_once('provision.mysql.inc');
 
-function provision_mysql_provision_init() {
+function provision_mysql_drush_init() {
   drush_set_default('master_db', $GLOBALS['db_url']);
   $master_db = drush_get_option('master_db');
   $db = parse_url($master_db);
@@ -23,9 +23,10 @@ function provision_mysql_provision_init() {
   drush_set_default('db_type', $db['scheme']);
 }
 
-function provision_mysql_provision_finalize() {
+function provision_mysql_drush_exit() {
   provision_db_close();
 }
+
 function provision_mysql_drush_help($section) {
   switch ($section) {
     case 'error:PROVISION_CREATE_DB_FAILED' :
