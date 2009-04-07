@@ -1,10 +1,10 @@
 <?php
 
-function provision_apache_provision_verify($url) {
+function provision_apache_provision_verify($url = null) {
   if (PROVISION_CONTEXT_PLATFORM) {
     _provision_create_dir(drush_get_option('vhost_path'), dt("Virtual host configuration"), 0700);
     $data = drush_get_merged_options();
-    $options = drush_get_context('options');
+    $options = drush_get_merged_options();
     $data['extra_config'] = "# Extra configuration from modules:\n";
     $data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_dir_config', $data));
     _provision_apache_create_config('platform_' . $options['platform'] . '.conf', $data, _provision_apache_platform_template());
@@ -15,7 +15,7 @@ function provision_apache_provision_verify($url) {
   _provision_apache_restart_apache(TRUE);
 }
 
-function provision_apache_post_provision_verify($url) {
+function provision_apache_post_provision_verify($url = null) {
   if (PROVISION_CONTEXT_PLATFORM) {
     drush_set_option('master_url', drush_get_option('master_url'), 'drupal');
     drush_set_option('publish_path', drush_get_option('publish_path'), 'drupal');

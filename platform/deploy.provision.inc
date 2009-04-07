@@ -95,6 +95,6 @@ function provision_drupal_provision_deploy_rollback($url) {
 
 function provision_drupal_post_provision_deploy($url) {
   drush_invoke('provision update', $url);
-  provision_platform_include(dirname(__FILE__), 'deploy');
+  drush_include_engine('drupal', 'deploy');
   drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
 }

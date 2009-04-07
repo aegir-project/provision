@@ -282,27 +282,6 @@ function provision_password($length = 10) {
   return $pass;
 }
 
-function provision_platform_include($path, $command, $version = null, $platform = 'drupal') {
-  $version = ($version) ? $version : drush_drupal_major_version();
-  $options[] = sprintf("%s_%s_%s", $platform, $version, $command);
-  $options[] = sprintf("%s_%s", $platform, $command);
-  $options[] = sprintf("%s", $command);
-
-  $match = false;
-  foreach ($options as $option) {
-    $file = sprintf("%s/%s.inc", $path, $option);
-    if (file_exists($file)) {
-      $match = $file;
-      break;
-    }
-  }
-
-  if ($match) {
-    drush_log(dt('Including platform specific file : @file', array('@file' => $match)));
-    include_once($file);
-  }
-}
-
 function _provision_errors_on() {
   $errors =& drush_get_context('DRUPAL_ERROR_REPORTING', E_ALL ^ E_NOTICE);
   $errors = error_reporting($errors);

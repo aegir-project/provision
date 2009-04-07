@@ -19,6 +19,6 @@ function provision_drupal_provision_import_validate() {
  */
 function provision_drupal_provision_import($url = NULL) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
-  provision_platform_include(dirname(__FILE__), 'import');
+  drush_include_engine('drupal', 'import');
 }
 

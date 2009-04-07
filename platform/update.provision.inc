@@ -7,6 +7,6 @@ function provision_drupal_provision_update_validate() {
 function provision_drupal_provision_update($url) {
   _provision_drupal_create_settings_file($url);
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
-  provision_platform_include(dirname(__FILE__), 'update');
-  provision_platform_include(dirname(__FILE__), 'clear');
+  drush_include_engine('drupal', 'update');
+  drush_include_engine('drupal', 'clear');
 }

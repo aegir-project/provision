@@ -38,7 +38,7 @@ function provision_drupal_provision_install($url) {
  // Requires at least the database settings to complete.
   _provision_drupal_create_settings_file($url);
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
-  provision_platform_include(dirname(__FILE__), 'install');
+  drush_include_engine('drupal', 'install');
   drush_set_option('installed', TRUE, 'site');
 }
 

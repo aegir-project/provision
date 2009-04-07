@@ -30,6 +30,18 @@ function provision_drupal_drush_help($section) {
 
 }
 
+function provision_drupal_drush_engine_drupal() {
+  $engines = array();
+  $engines['install'] = array();
+  $engines['update'] = array();
+  $engines['import'] = array();
+  $engines['deploy'] = array();
+  $engines['clear'] = array();
+  $engines['packages'] = array();
+  $engines['verify'] = array();
+  return $engines;
+}
+
 /**
  * Initialize the platform / site
  *
@@ -243,8 +255,7 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
 function _provision_drupal_rebuild_caches($url = NULL) {
   if (PROVISION_CONTEXT_SITE) {
     #drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
-
-    provision_platform_include(dirname(__FILE__), 'clear');
+    drush_include_engine('drupal', 'clear');
   }
 }
 
@@ -382,7 +393,7 @@ require_once('cvs_deploy.inc');
 
 function provision_find_packages() {
   // Load the version specific include files.
-  provision_platform_include(dirname(__FILE__), 'packages');
+  drush_include_engine('drupal', 'packages');
 
   $packages['base'] = _provision_find_packages('base');
 
@@ -440,7 +451,7 @@ function _provision_find_packages($scope, $key = '') {
  */
 function provision_drupal_system_map() {
   // Load the version specific include files.
-  provision_platform_include(dirname(__FILE__), 'packages');
+  drush_include_engine('drupal', 'packages');
 
   $profiles = _provision_find_profiles();
   foreach ($profiles as $profile => $info) {
