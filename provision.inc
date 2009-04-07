@@ -13,6 +13,8 @@
  * @see provisionvalues
  */
 
+drush_errors_on();
+
 /**
  * @defgroup sitedata Site data management utility functions.
  * @{
@@ -108,13 +110,13 @@ function provision_save_platform_data() {
  * Generate the text for a config file using php
  */
 function provision_render_config($template, $variables) {
-  _provision_errors_off();
+  drush_errors_off();
   extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
   ob_start();                      // Start output buffering
   eval('?>'. $template);                 // Generate content
   $contents = ob_get_contents();   // Get the contents of the buffer
   ob_end_clean();                  // End buffering and discard
-  _provision_errors_on();
+  drush_errors_on();
   return $contents;                // Return the contents
 }
 
@@ -280,20 +282,6 @@ function provision_password($length = 10) {
   }
 
   return $pass;
-}
-
-function _provision_errors_on() {
-  $errors =& drush_get_context('DRUPAL_ERROR_REPORTING', E_ALL ^ E_NOTICE);
-  $errors = error_reporting($errors);
-  ini_set('display_errors', TRUE);
-}
-_provision_errors_on();
-
-
-function _provision_errors_off() {
-  $errors =& drush_get_context('DRUPAL_ERROR_REPORTING', 0);
-  $errors = error_reporting(0);
-  ini_set('display_errors', FALSE);
 }
 
 /**

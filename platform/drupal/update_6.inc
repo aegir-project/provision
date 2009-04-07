@@ -274,7 +274,7 @@ function update_create_batch_table() {
 function update_main() {
   // Some unavoidable errors happen because the database is not yet up-to-date.
   // Our custom error handler is not yet installed, so we just suppress them.
-  _provision_errors_off();
+  drush_errors_off();
 
   require_once './includes/bootstrap.inc';
   // Minimum load of components.
@@ -306,11 +306,11 @@ function update_main() {
 
   // This must happen *after* drupal_bootstrap(), since it calls
   // variable_(get|set), which only works after a full bootstrap.
-  provision_drupal_install_log(update_create_batch_table());
+  _drush_log_update_sql(update_create_batch_table());
 
   // Turn error reporting back on. From now on, only fatal errors (which are
   // not passed through the error handler) will cause a message to be printed.
-  _provision_errors_on();
+  drush_errors_on();
 
 
 
@@ -318,8 +318,8 @@ function update_main() {
   include_once './includes/batch.inc';
   drupal_load_updates();
 
-  provision_drupal_install_log(update_fix_d6_requirements());
-  provision_drupal_install_log(update_fix_compatibility());
+  _drush_log_update_sql(update_fix_d6_requirements());
+  _drush_log_update_sql(update_fix_compatibility());
 
   $start = array();
   $modules = drupal_get_installed_schema_version(NULL, FALSE, TRUE);
@@ -398,7 +398,7 @@ function _update_do_one($module, $number, &$context) {
   $function = $module .'_update_'. $number;
   if (function_exists($function)) {
     $ret = $function($context['sandbox']);
-    provision_drupal_install_log($ret);
+    _drush_log_update_sql($ret);
   }
 
   if (isset($ret['#finished'])) {

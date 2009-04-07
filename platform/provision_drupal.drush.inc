@@ -376,19 +376,6 @@ function _provision_drupal_delete_aliases($aliases) {
   }
 }
 
-function provision_drupal_install_log($ret) {
-  if (sizeof($ret)) {
-    foreach ($ret as $info) {
-      if (is_array($info)) {
-        if (!$info['success']) {
-          drush_set_error('PROVISION_DRUPAL_INSTALL_FAILED', $msg);
-        }
-        drush_log($info['query'], ($info['success']) ? 'success' : 'error');
-      }
-    }
-  }
-}
-
 require_once('cvs_deploy.inc');
 
 function provision_find_packages() {

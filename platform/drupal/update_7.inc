@@ -429,7 +429,7 @@ function _drush_exception_handler($exception) {
 function update_main() {
   // Some unavoidable errors happen because the database is not yet up-to-date.
   // Our custom error handler is not yet installed, so we just suppress them.
-  _provision_errors_off();
+  drush_errors_off();
 
   require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 
@@ -481,14 +481,14 @@ function update_main() {
   
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   drupal_maintenance_theme();
-  _provision_errors_on();
+  drush_errors_on();
 
   set_error_handler('_drush_error_handler');
   set_exception_handler('_drush_exception_handler');
   drupal_load_updates();
 
-  provision_drupal_install_log(update_fix_d6_requirements());
-  provision_drupal_install_log(update_fix_compatibility());
+  _drush_log_update_sql(update_fix_d6_requirements());
+  _drush_log_update_sql(update_fix_compatibility());
 
   $start = array();
   $start['system'] = array();
@@ -571,7 +571,7 @@ function _update_do_one($module, $number, &$context) {
       drush_log("Running $function");
       $ret = $function($context['sandbox']);
     }
-    provision_drupal_install_log($ret);
+    _drush_log_update_sql($ret);
   }
   catch (Exception $e) {
     drush_log(var_dump($e, TRUE));

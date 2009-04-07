@@ -53,7 +53,7 @@ function update_main() {
           while (!$finished) {
             // do update
             $ret = module_invoke($module, 'update_' . $update);
-            provision_drupal_install_log($ret);
+            _drush_log_update_sql($ret);
             $finished = 1;
             if (isset($ret['#finished'])) {
               $finished = $ret['#finished'];
