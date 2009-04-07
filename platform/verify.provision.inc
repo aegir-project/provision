@@ -7,7 +7,7 @@
  */
 function provision_drupal_provision_verify_validate($url = null) {
   if ($url) {
-    _provision_errors_on();
+    drush_errors_on();
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   }
 
