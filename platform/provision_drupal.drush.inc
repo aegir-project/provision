@@ -33,7 +33,6 @@ function provision_drupal_drush_help($section) {
 function provision_drupal_drush_engine_drupal() {
   $engines = array();
   $engines['install'] = array();
-  $engines['update'] = array();
   $engines['import'] = array();
   $engines['deploy'] = array();
   $engines['clear'] = array();
