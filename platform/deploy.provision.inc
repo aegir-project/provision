@@ -1,23 +1,18 @@
 <?php
 
 /**
- * Restore command implementation
+ * Deploy command implementation
  *
  * This command when called will 
- *   1. Make a backup of the current site, before modifications are made.
- *   2. Temporarily disable the site by causing apache to redirect to a help page. Restarting apache is required.
- *   3. Extract the backup that is being deployd to to a temporary folder in the sites directory.
- *   4. Create a new database, belonging to the site's user, and switch it around with the current site's database.
- *   5. Import the old database and site.php details.
- *   6. Switch around the sites directory of the current site and the backup being deployd.
- *   7. Regenerate configuration files.
- *   8. TODO: diagnostic to test that everything is ok?
- *   9. Remove the temporary redirect and restart apache so the previous site is available again.
- *   10. Remove the extranuous db and duplicate site directory.
- *
- * If at any time an error occurs, before step 9. It should reverse all the changes it has made,
- * and leave the current site directory and database in the right place, and remove all cruft that
- * was created by this process.
+ *   1. Extract the backup that is being deployed to the target folder in the sites directory.
+ *   2. Import the drushrc.php details.
+ *   3. Do some diagnostics to make sure all the needed packages are available.
+ *   4. Create a new database, belonging to the site's user, and import the database dump.
+ *   5. Regenerate configuration files to show new db settings.
+ *   6. Call the drush 'updatedb' command to update the database if neccesary.
+ *   7. Update the file paths to the new sites directory.
+ *   8. Rebuild the site's package manifest.
+ *   9. Save the new drushrc.php with the newly generated settings.
  */
 
 /**
@@ -77,24 +72,19 @@ function provision_drupal_pre_provision_deploy($url, $backup_file) {
  * Remove the extracted site directory
  */
 function provision_drupal_pre_provision_deploy_rollback($url) {
-  _provision_recursive_delete(drush_get_option('sites_path') ."/$url");
+  if ($site_root = drush_get_context('DRUSH_DRUPAL_SITE_ROOT')) {
+    _provision_recursive_delete($site_root);
+  }
 }
 
-/**
- * Switch the deploy directories around now that we have the new db installed
- */
-function provision_drupal_provision_deploy($url) {
-  // make sure it has the latest site data available
-  _provision_drupal_create_settings_file($url);
-}
-
-// Luckily this is reversable =)
-function provision_drupal_provision_deploy_rollback($url) {
-  provision_drupal_provision_deploy($url);
-}
 
 function provision_drupal_post_provision_deploy($url) {
-  drush_invoke('provision update', $url);
-  drush_include_engine('drupal', 'deploy');
-  drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
+  _provision_drupal_create_settings_file($url);
+  // call the drush updatedb command.
+  drush_backend_invoke("updatedb", array('uri' => "http://$url"));
+  // We should be able to fully load Drupal now.
+  if (drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL)) {
+    drush_include_engine('drupal', 'deploy');
+    drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
+  }
 }

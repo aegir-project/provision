@@ -22,11 +22,10 @@
  *             or used for an upgrade.
  *   disable - Disable an installed Drupal site. Changes the virtual host config file so that it redirects to provision_disabled_site_redirect_url
  *   enable  - Re-enable a site that has already been disabled. Recreates the virtual host file.
- *   delete -  Generates a back up of the site, and then removes all references to it.
+ *   delete  - Generates a back up of the site, and then removes all references to it.
  *   restore - Revert to a previous backup of the site.
- *   cron - Run cron process for a site
  *
- *   upgrade - Accepts a site package (backup) as argument, and redeploys it, running the upgrade processes on it.
+ *   deploy  - Accepts a site package (backup) as argument, and redeploys it, running the upgrade processes on it.
  *             Uses hook_provision_pre_upgrade(), hook_provision_upgrade() and hook_provision_post_upgrade() hooks,
  *             and allows clean roll back if any errors occur. Will include stringent checking of module versions,
  *             and allow unit tests to be run.
@@ -64,12 +63,6 @@ function provision_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
-  $items['provision update'] = array(
-    'arguments' => array('domain.com' => dt('The domain of the site to update.')),
-    'description' => dt('Run any outstanding updates on the site.'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
-  );
-  
   $items['provision backup'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to back up.')),
     'optional arguments' => array('backup-file' => dt('The file to save the backup to. This will be a gzipped tarball.')),
@@ -120,11 +113,6 @@ function provision_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
-  $items['provision cron'] = array(
-    'description' => 'Run cron process for site.',
-    'arguments' => array('domain.com' => dt('The domain of the site to be processed')),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
-  );
  
   return $items;
 }
