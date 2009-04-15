@@ -48,18 +48,22 @@ function provision_drupal_drush_engine_drupal() {
  * for populating the $data context array
  */
 function provision_drupal_drush_init($url = NULL) {
+  $command = drush_get_command();
+  $command = explode(" ", $command['command']);
+  if ($command[0] == 'provision') {
 
-  if ($url) {
-    drush_set_option('uri' , 'http://' . $url);
-    provision_load_site_data($url);
-    drush_set_default('site_url', $url);
-    drush_set_default('profile', 'default');
-    drush_set_default('language', 'en');
-    drush_set_default('aliases', array());
+    if ($url) {
+      drush_set_option('uri' , 'http://' . $url);
+      provision_load_site_data($url);
+      drush_set_default('site_url', $url);
+      drush_set_default('profile', 'default');
+      drush_set_default('language', 'en');
+      drush_set_default('aliases', array());
+    }
+
+    define('PROVISION_CONTEXT_SITE', ($url) ? TRUE : FALSE);
+    define('PROVISION_CONTEXT_PLATFORM', !PROVISION_CONTEXT_SITE);
   }
-
-  define('PROVISION_CONTEXT_SITE', ($url) ? TRUE : FALSE);
-  define('PROVISION_CONTEXT_PLATFORM', !PROVISION_CONTEXT_SITE);
 }
 
 /**
@@ -70,16 +74,19 @@ function provision_drupal_drush_init($url = NULL) {
  * files for future runs.
  */
 function provision_drupal_drush_exit($url = NULL) {
-
-  if (PROVISION_CONTEXT_SITE) {
-    if (drush_get_option('installed')) {
-      drush_set_option('site_url', drush_get_option('site_url'), 'site');
-      drush_set_option('site_id', drush_get_option('site_id'), 'site');
-      provision_save_site_data($url);
+  $command = drush_get_command();
+  $command = explode(" ", $command['command']);
+  if ($command[0] == 'provision') {
+    if (PROVISION_CONTEXT_SITE) {
+      if (drush_get_option('installed')) {
+        drush_set_option('site_url', drush_get_option('site_url'), 'site');
+        drush_set_option('site_id', drush_get_option('site_id'), 'site');
+        provision_save_site_data($url);
+      }
     }
-  }
-  else {
-    _provision_generate_config();
+    else {
+      _provision_generate_config();
+    }
   }
 }
 
