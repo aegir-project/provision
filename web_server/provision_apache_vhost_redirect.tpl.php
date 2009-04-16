@@ -8,7 +8,7 @@
 
     RewriteEngine on
     # the ? at the end is to remove any query string in the original url
-    RewriteRule ^(.*)$ <?php print $redirect_url ?>?
+    RewriteRule ^(.*)$ <?php print $redirect_url . '/' . $site_url ?>?
 
     <?php if (is_array($aliases)) :
      foreach ($aliases as $alias) : ?>

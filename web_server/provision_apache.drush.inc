@@ -40,8 +40,8 @@ function provision_apache_drush_init() {
   // Redirection urls
   drush_set_default('master_url', $GLOBALS['base_url']);
   $master_url = drush_get_option('master_url');
-  drush_set_default('web_disable_url', $master_url .'/provision/disabled');
-  drush_set_default('web_maintenence_url', $master_url .'/provision/maintenance');
+  drush_set_default('web_disable_url', $master_url .'/hosting/disabled');
+  drush_set_default('web_maintenence_url', $master_url .'/hosting/maintenance');
 
   drush_set_default('web_ip', '127.0.0.1');
   drush_set_default('web_port', 80); 
