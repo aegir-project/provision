@@ -7,9 +7,12 @@
   ServerName <?php print $site_url; ?>
 
 <?php if (is_array($aliases)) :
-  foreach ($aliases as $alias_url) : ?>
-  ServerAlias <?php print $alias_url; ?>
+  foreach ($aliases as $alias_url) :
+  if (trim($alias_url)) : ?>
+  ServerAlias <?php print $alias_url; ?> 
+
 <?php
+ endif;
  endforeach;
  endif; ?>
 

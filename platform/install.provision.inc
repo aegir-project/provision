@@ -40,6 +40,7 @@ function provision_drupal_provision_install($url) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
   drush_include_engine('drupal', 'install');
   drush_set_option('installed', TRUE, 'site');
+  _provision_drupal_maintain_aliases($url);
 }
 
 /**
@@ -61,8 +62,8 @@ function provision_drupal_provision_install_rollback($url) {
  * any changes to things such as available modules/ themes can take affect.
  */
 function provision_drupal_post_provision_install($url) {
+  drush_set_option('aliases', drush_get_option('aliases'), 'site');
   drush_set_option('installed', TRUE, 'site');
-  _provision_drupal_maintain_aliases($url);
   provision_path("chmod", "./sites/$url/settings.php", 0440, dt("Secured settings.php with safe permissions"));
   _provision_drupal_rebuild_caches($url);
   drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');

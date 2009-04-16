@@ -48,6 +48,7 @@ function provision_drupal_provision_verify($url = null) {
 function provision_drupal_post_provision_verify($url = NULL) {
   if (PROVISION_CONTEXT_SITE) {
     _provision_drupal_rebuild_caches($url);
+    drush_set_option('aliases', drush_get_option('aliases'), 'site');
     drush_set_option('installed', TRUE, 'site');
   }
 }

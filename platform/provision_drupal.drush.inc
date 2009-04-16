@@ -352,17 +352,22 @@ function _provision_drupal_get_cvs_versions($files) {
 function _provision_drupal_maintain_aliases($url) {
   if (PROVISION_CONTEXT_SITE) {
     $old_aliases = drush_get_option('aliases', array(), 'site');
-    /**
-     * First we remove all the old aliases
-     */
-    if (is_array($old_aliases)) {
-      _provision_drupal_delete_aliases($old_aliases);
+
+    if (!is_array($old_aliases)) {
+      $old_aliases = explode(",", $old_aliases);
     }
 
+   /**
+     * First we remove all the old aliases
+     */
+    _provision_drupal_delete_aliases($old_aliases);
 
-    $aliases = drush_get_option('aliases');
-    if (is_array($aliases)) {
-      foreach($aliases as $alias) {
+    $aliases = explode("," , drush_get_option('aliases'));
+    if (!is_array($aliases)) {
+      $aliases = explode(",", $aliases);
+    }
+    foreach($aliases as $alias) {
+      if (trim($alias)) {
         provision_path("symlink", $url, drush_get_option('docroot_path') . "/sites/" . $alias, 
           dt("Created symlink for alias @alias", array("@alias" => $alias)), 
           dt("Could not create symlink for alias @alias", array("@alias" => $alias)));
@@ -376,9 +381,11 @@ function _provision_drupal_maintain_aliases($url) {
  */
 function _provision_drupal_delete_aliases($aliases) {
   foreach ($aliases as $alias) {
-    provision_path("unlink", drush_get_option('docroot_path') . "/sites/" . $alias, TRUE,
-          dt("Removed symlink for alias @alias", array("@alias" => $alias)), 
-          dt("Could not remove symlink for alias @alias", array("@alias" => $alias)));
+    if (trim($alias)) {
+      provision_path("unlink", drush_get_option('docroot_path') . "/sites/" . $alias, TRUE,
+            dt("Removed symlink for alias @alias", array("@alias" => $alias)), 
+            dt("Could not remove symlink for alias @alias", array("@alias" => $alias)));
+    }
   }
 }
 

@@ -83,6 +83,10 @@ function _provision_apache_create_vhost_config($url, $template = NULL) {
   if (is_null($template)) {
     $template = _provision_apache_default_template();
   }
+  if (!is_array($options['aliases'])) {
+    $options['aliases'] = explode(",", $options['aliases']);
+  }
+
   $options['extra_config'] = "# Extra configuration from modules:\n";
   $options['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_vhost_config', $url, $options));
   return _provision_apache_create_config($url, $options, $template);
