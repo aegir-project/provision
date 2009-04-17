@@ -86,12 +86,12 @@ function install_mail($key, &$message, $params) {
         require_once "./profiles/$profile/provision_welcome_mail.inc";
         $custom = TRUE;
       }
-      elseif (file_exists(dirname(__FILE__) . '/provision_welcome_mail.inc')) { 
+      elseif (file_exists(dirname(__FILE__) . '/../provision_welcome_mail.inc')) { 
         /** use the module provided welcome email
          * We can not use drupal_get_path here,
          * as we are connected to the provisioned site's database
          */
-        require_once dirname(__FILE__) . '/provision_welcome_mail.inc';
+        require_once dirname(__FILE__) . '/../provision_welcome_mail.inc';
         $custom = TRUE;
       }
       else {

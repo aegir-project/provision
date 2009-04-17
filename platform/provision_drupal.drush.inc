@@ -351,16 +351,8 @@ function _provision_drupal_get_cvs_versions($files) {
  */
 function _provision_drupal_maintain_aliases($url) {
   if (PROVISION_CONTEXT_SITE) {
-    $old_aliases = drush_get_option('aliases', array(), 'site');
-
-    if (!is_array($old_aliases)) {
-      $old_aliases = explode(",", $old_aliases);
-    }
-
-   /**
-     * First we remove all the old aliases
-     */
-    _provision_drupal_delete_aliases($old_aliases);
+    // First we delete all the old aliases
+    _provision_drupal_delete_aliases(drush_get_option('aliases', array(), 'site'));
 
     $aliases = explode("," , drush_get_option('aliases'));
     if (!is_array($aliases)) {
@@ -380,6 +372,9 @@ function _provision_drupal_maintain_aliases($url) {
  * Delete a list of aliases
  */
 function _provision_drupal_delete_aliases($aliases) {
+  if (!is_array($aliases)) {
+    $aliases = explode(",", $aliases);
+  }
   foreach ($aliases as $alias) {
     if (trim($alias)) {
       provision_path("unlink", drush_get_option('docroot_path') . "/sites/" . $alias, TRUE,

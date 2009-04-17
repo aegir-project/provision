@@ -77,6 +77,10 @@ function provision_drupal_pre_provision_deploy_rollback($url) {
   }
 }
 
+function provision_drupal_provision_deploy($url) {
+  _provision_drupal_maintain_aliases($url);
+}
+
 
 function provision_drupal_post_provision_deploy($url) {
   _provision_drupal_create_settings_file($url);

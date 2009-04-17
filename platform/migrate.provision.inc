@@ -54,6 +54,7 @@ function provision_drupal_provision_migrate($url, $platform) {
  */
 function provision_drupal_post_provision_migrate($url) {
   drush_set_option('installed', FALSE);
+  _provision_drupal_delete_aliases(drush_get_option('aliases', array()));
   _provision_recursive_delete(drush_get_option('sites_path') ."/$url");
 }
 
