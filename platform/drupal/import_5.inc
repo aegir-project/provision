@@ -3,6 +3,9 @@
 if (is_array($GLOBALS['db_url'])) {
   $db_url = $GLOBALS['db_url']['default'];
 }
+else {
+  $db_url = $GLOBALS['db_url'];
+}
 
 if ($parts = @parse_url($db_url)) {
   drush_set_option('db_type', $parts['scheme'], 'site');

@@ -1,6 +1,13 @@
 <?php
 
-if ($parts = @parse_url($GLOBALS['db_url'])) {
+if (is_array($GLOBALS['db_url'])) {
+  $db_url = $GLOBALS['db_url']['default'];
+}
+else {
+  $db_url = $GLOBALS['db_url'];
+}
+
+if ($parts = @parse_url($db_url)) {
   drush_set_option('db_type', $parts['scheme'], 'site');
   drush_set_option('db_user', $parts['user'], 'site');
   drush_set_option('db_host', $parts['host'], 'site');
