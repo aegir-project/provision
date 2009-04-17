@@ -81,6 +81,7 @@ function provision_drupal_drush_exit($url = NULL) {
       if (drush_get_option('installed')) {
         drush_set_option('site_url', drush_get_option('site_url'), 'site');
         drush_set_option('site_id', drush_get_option('site_id'), 'site');
+        drush_set_option('client_email', drush_get_option('client_email'), 'site');
         provision_save_site_data($url);
       }
     }
@@ -388,7 +389,7 @@ require_once('cvs_deploy.inc');
 
 function provision_find_packages() {
   // Load the version specific include files.
-  drush_include_engine('drupal', 'packages');
+  drush_include_engine('drupal', 'packages', drush_drupal_major_version());
 
   $packages['base'] = _provision_find_packages('base');
 
@@ -427,8 +428,10 @@ function _provision_find_platforms() {
  * A small helper function to reduce code duplication
  */
 function _provision_find_packages($scope, $key = '') {
+  $packages = array();
   $scope_text = ($key) ? "$scope/$key" : $scope;
   foreach (array('modules', 'themes') as $type) {
+    $packages[$type] = array();
     $func = "_provision_drupal_find_$type";
     $result = $func($scope, $key);
     if (sizeof($result)) {
