@@ -355,7 +355,7 @@ function _provision_drupal_maintain_aliases($url) {
     // First we delete all the old aliases
     _provision_drupal_delete_aliases(drush_get_option('aliases', array(), 'site'));
 
-    $aliases = explode("," , drush_get_option('aliases'));
+    $aliases = drush_get_option('aliases');
     if (!is_array($aliases)) {
       $aliases = explode(",", $aliases);
     }
