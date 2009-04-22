@@ -317,9 +317,12 @@ function _provision_find_profiles() {
 function provision_drupal_find_sites() {
   if ($dir = opendir("./sites")) {
     while (FALSE !== ($subdir = readdir($dir))) {
-      $file = "./sites/$subdir/settings.php";
-      if (file_exists("$file") && ($subdir != 'default') && !is_link("./sites/$subdir")) {
-        $sites[$subdir] = $file;
+      // skip internal directory pointers
+      if ($subdir == '.' || $subdir == '..') {
+        $file = "./sites/$subdir/settings.php";
+        if (file_exists("$file") && ($subdir != 'default') && !is_link("./sites/$subdir")) {
+          $sites[$subdir] = $file;
+        }
       }
     }
     closedir($dir);
