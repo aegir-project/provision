@@ -2,7 +2,7 @@
 
 function provision_mysql_pre_provision_backup($url = NULL) {
   drush_log("Generating mysql dump for $url.", 'backup');
-  provision_shell_exec("mysqldump -u%s -p%s %s > sites/%s/database.sql", drush_get_option('db_user'), drush_get_option('db_passwd'), drush_get_option('db_name'), $url); 
+  provision_shell_exec("mysqldump -h%s -u%s -p%s %s > sites/%s/database.sql", drush_get_option('db_host'), drush_get_option('db_user'),drush_get_option('db_passwd'), drush_get_option('db_name'), $url); 
 }
 
 function provision_mysql_pre_provision_backup_rollback($url = NULL) {
