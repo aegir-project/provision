@@ -179,4 +179,7 @@ function _provision_mysql_suggest_db_name($url) {
     }
   }
 
+  drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not find a free database names after 100 attempts"));
+  return false;
+
 }
