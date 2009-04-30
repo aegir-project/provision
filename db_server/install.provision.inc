@@ -11,7 +11,12 @@ function provision_mysql_pre_provision_install($url = NULL) {
   $db_name = drush_set_option('db_name', _provision_mysql_suggest_db_name($url), 'site');
   $db_user = drush_set_option('db_user', $db_name, 'site');
 
-  _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host);
+  // fetch the webserver name to create a GRANT specific to this server
+  if ($db_client = drush_get_option('web_ip')) {
+    // the IP isn't available, use the web host for the GRANT
+    $db_client = drush_get_option('web_host');
+  }
+  _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_client);
 }
 
 function provision_mysql_pre_provision_install_rollback($url = NULL) {

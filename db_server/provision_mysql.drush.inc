@@ -39,7 +39,7 @@ function provision_mysql_drush_help($section) {
 /**
  * Generate a new mysql database and user account for the specified credentials
  */
-function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) {
+function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_client) {
   if (!_provision_mysql_create_database($db_name) ||
       !_provision_mysql_database_exists($db_name) ) {
    drush_set_error('PROVISION_CREATE_DB_FAILED');
@@ -47,8 +47,7 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host) 
    return FALSE;
   }
   
-  if (!_provision_mysql_grant($db_name, $db_user, $db_passwd)
-      || !_provision_mysql_grant($db_name, $db_user, $db_passwd, 'localhost')) {
+  if (!_provision_mysql_grant($db_name, $db_user, $db_passwd, $db_client)) {
     drush_log("Could not GRANT user access.", 'warning');
   }
   _provision_mysql_flush_privileges();
