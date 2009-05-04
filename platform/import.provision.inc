@@ -20,5 +20,6 @@ function provision_drupal_provision_import_validate() {
 function provision_drupal_provision_import($url = NULL) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   drush_include_engine('drupal', 'import', drush_drupal_major_version());
+  drush_set_option('installed', TRUE, 'site');
 }
 
