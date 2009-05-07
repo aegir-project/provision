@@ -5,7 +5,7 @@
  *
  * Disable an enabled and installed site
  */
-function provision_drupal_provision_verify_validate($url = null) {
+function drush_provision_drupal_provision_verify_validate($url = null) {
   if ($url) {
     drush_errors_on();
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
@@ -19,7 +19,7 @@ function provision_drupal_provision_verify_validate($url = null) {
 /**
  * implementation of provision_verify
  */
-function provision_drupal_provision_verify($url = null) {
+function drush_provision_drupal_provision_verify($url = null) {
   if (PROVISION_CONTEXT_PLATFORM) {
     _provision_create_dir(drush_get_option('config_path'), dt('Provision configuration'), 0700);
     _provision_create_dir(drush_get_option('backup_path'), dt('Web server configuration'), 0700);
@@ -45,7 +45,7 @@ function provision_drupal_provision_verify($url = null) {
 /**
  * Implementation of hook_provision_post_verify
  */
-function provision_drupal_post_provision_verify($url = NULL) {
+function drush_provision_drupal_post_provision_verify($url = NULL) {
   if (PROVISION_CONTEXT_SITE) {
     _provision_drupal_rebuild_caches($url);
     drush_set_option('aliases', drush_get_option('aliases'), 'site');

@@ -18,7 +18,7 @@
 /**
  * Make sure we have a valid site being deployd, and that the file being deployd from exists
  */
-function provision_drupal_provision_deploy_validate($url = null, $backup_file = null) {
+function drush_provision_drupal_provision_deploy_validate($url = null, $backup_file = null) {
   _provision_drupal_url_required();
 
   $exists = provision_path("exists", $backup_file, TRUE,
@@ -33,7 +33,7 @@ function provision_drupal_provision_deploy_validate($url = null, $backup_file = 
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
-function provision_drupal_pre_provision_deploy($url, $backup_file) {
+function drush_provision_drupal_pre_provision_deploy($url, $backup_file) {
   $extracted = provision_path("extract", drush_get_option('backup_file'), drush_get_option('sites_path') ."/$url", 
     dt('Successfully extracted the contents of @path'),
     dt('Failed to extract the contents of @path'),
@@ -71,18 +71,18 @@ function provision_drupal_pre_provision_deploy($url, $backup_file) {
 /**
  * Remove the extracted site directory
  */
-function provision_drupal_pre_provision_deploy_rollback($url) {
+function drush_provision_drupal_pre_provision_deploy_rollback($url) {
   if ($site_root = drush_get_context('DRUSH_DRUPAL_SITE_ROOT')) {
     _provision_recursive_delete($site_root);
   }
 }
 
-function provision_drupal_provision_deploy($url) {
+function drush_provision_drupal_provision_deploy($url) {
   _provision_drupal_maintain_aliases($url);
 }
 
 
-function provision_drupal_post_provision_deploy($url) {
+function drush_provision_drupal_post_provision_deploy($url) {
   _provision_drupal_create_settings_file($url);
   // call the drush updatedb command.
   drush_backend_invoke("updatedb", array('uri' => "http://$url"));

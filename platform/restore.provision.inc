@@ -23,7 +23,7 @@
 /**
  * Make sure we have a valid site being restored, and that the file being restored from exists
  */
-function provision_drupal_provision_restore_validate($url = null, $restore_file = null) {
+function drush_provision_drupal_provision_restore_validate($url = null, $restore_file = null) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
   $exists = provision_path("exists", $restore_file, TRUE,
@@ -38,7 +38,7 @@ function provision_drupal_provision_restore_validate($url = null, $restore_file 
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
-function provision_drupal_pre_provision_restore($url, $restore_file) {
+function drush_provision_drupal_pre_provision_restore($url, $restore_file) {
   drush_invoke('provision backup', $url);
 
   provision_path("extract", drush_get_option('restore_file'), drush_get_option('sites_path') ."/$url.restore", 
@@ -50,14 +50,14 @@ function provision_drupal_pre_provision_restore($url, $restore_file) {
 /**
  * Remove the extracted site directory
  */
-function provision_drupal_pre_provision_restore_rollback($url) {
+function drush_provision_drupal_pre_provision_restore_rollback($url) {
   _provision_recursive_delete(drush_get_option('sites_path') ."/$url.restore");
 }
 
 /**
  * Switch the restore directories around now that we have the new db installed
  */
-function provision_drupal_provision_restore($url) {
+function drush_provision_drupal_provision_restore($url) {
   $old = drush_get_option('sites_path') ."/$url.restore";
   $new = drush_get_option('sites_path') ."/$url";
   provision_path("switch_paths", $old, $new ,
@@ -70,14 +70,14 @@ function provision_drupal_provision_restore($url) {
 }
 
 // Luckily this is reversable =)
-function provision_drupal_provision_restore_rollback($url) {
+function drush_provision_drupal_provision_restore_rollback($url) {
   provision_drupal_provision_restore($url);
 }
 
 /**
  * Delete the old site directory and recreate the settings file
  */
-function provision_drupal_post_provision_restore($url) {
+function drush_provision_drupal_post_provision_restore($url) {
   _provision_recursive_delete(drush_get_option('sites_path') ."/$url.restore");
   _provision_drupal_create_settings_file($url);
 }

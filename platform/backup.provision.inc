@@ -9,7 +9,7 @@
 /**
  * Make sure the site is installed and enabled, and that we have a valid target to back up to.
  */
-function provision_drupal_provision_backup_validate($url = NULL, $backup_file = NULL) {
+function drush_provision_drupal_provision_backup_validate($url = NULL, $backup_file = NULL) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
   if (!drush_get_option('installed')) {
      drush_set_error('PROVISION_DRUPAL_SITE_NOT_FOUND');
@@ -45,7 +45,7 @@ function provision_drupal_provision_backup_validate($url = NULL, $backup_file = 
 /**
  * Implentation of hook_provision_backup()
  */
-function provision_drupal_provision_backup($url) {
+function drush_provision_drupal_provision_backup($url) {
   $backup_file = drush_get_option('backup_file');
   // Adds the site directory into the backup file
   drush_log(dt("Adding sites directory to !backup_file", array('!backup_file' => $backup_file)), 'backup');
@@ -60,7 +60,7 @@ function provision_drupal_provision_backup($url) {
 /**
  * Generate a backup tarbal for a site.
  */
-function provision_drupal_post_provision_backup($url, $backup_file = NULL) {
+function drush_provision_drupal_post_provision_backup($url, $backup_file = NULL) {
   $backup_file = drush_get_option('backup_file');
 
   provision_shell_exec("gzip %s", $backup_file);

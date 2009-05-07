@@ -1,6 +1,6 @@
 <?php
 
-function provision_mysql_provision_verify_validate() {
+function drush_provision_mysql_provision_verify_validate() {
   provision_db_connect();
 }
 
@@ -9,7 +9,7 @@ function provision_mysql_provision_verify_validate() {
  *
  * Can't be rolled back.
  */
-function provision_mysql_provision_verify() {
+function drush_provision_mysql_provision_verify() {
   if (PROVISION_CONTEXT_PLATFORM) {
     if (!_provision_mysql_can_create_database()) {
       drush_set_error('PROVISION_CREATE_DB_FAILED');
@@ -20,7 +20,7 @@ function provision_mysql_provision_verify() {
   }
 }
 
-function provision_mysql_post_provision_verify() {
+function drush_provision_mysql_post_provision_verify() {
   if (PROVISION_CONTEXT_PLATFORM) {
     drush_set_option('master_db', drush_get_option('master_db'), 'drupal');
   }

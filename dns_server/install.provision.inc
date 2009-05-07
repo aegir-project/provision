@@ -7,7 +7,7 @@
  *   Provision hooks for the install command
  **/
 
-function provision_dns_pre_provision_install($url = NULL) {
+function drush_provision_dns_pre_provision_install($url = NULL) {
   # data should now contain zone info directly, rather than having to pull them from 
   if ($url) {
 #    $url_parts = _provision_dns_split_url($url);
@@ -23,12 +23,12 @@ function provision_dns_pre_provision_install($url = NULL) {
   }
 }
 
-function provision_dns_pre_provision_install_rollback($url = NULL) {
+function drush_provision_dns_pre_provision_install_rollback($url = NULL) {
   if ($url) {
 #    provision_dns_delete($url);
   }
 }
 
-function provision_dns_post_provision_install($url = NULL) {
+function drush_provision_dns_post_provision_install($url = NULL) {
   # commit and restart bind
 }

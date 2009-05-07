@@ -23,28 +23,28 @@
 /**
  * Make sure we have a valid site being migrated, and that the file being migrated from exists
  */
-function provision_drupal_provision_migrate_validate($url = null, $platform = null) {
+function drush_provision_drupal_provision_migrate_validate($url = null, $platform = null) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 }
 
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
-function provision_drupal_pre_provision_migrate($url, $platform) {
+function drush_provision_drupal_pre_provision_migrate($url, $platform) {
   drush_invoke('provision backup', $url);
 }
 
 /**
  * Remove the extracted site directory
  */
-function provision_drupal_pre_provision_migrate_rollback($url, $platform) {
+function drush_provision_drupal_pre_provision_migrate_rollback($url, $platform) {
   $success =  provision_path("unlink", drush_get_option('backup_file'), TRUE, dt('Removed unused migration site package'), dt('Could not remove unused migration site package'));
 }
 
 /**
  * Switch the migrate directories around now that we have the new db installed
  */
-function provision_drupal_provision_migrate($url, $platform) {
+function drush_provision_drupal_provision_migrate($url, $platform) {
   drush_backend_invoke('provision deploy', array($url, drush_get_option('backup_file'), 'root' => $platform));
 }
 
@@ -52,7 +52,7 @@ function provision_drupal_provision_migrate($url, $platform) {
 /**
  * Delete the old site directory and recreate the settings file
  */
-function provision_drupal_post_provision_migrate($url) {
+function drush_provision_drupal_post_provision_migrate($url) {
   drush_set_option('installed', FALSE);
   _provision_drupal_delete_aliases(drush_get_option('aliases', array()));
   _provision_recursive_delete(drush_get_option('sites_path') ."/$url");

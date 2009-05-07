@@ -9,7 +9,7 @@
 /**
  * Check that the site directory at least exists.
  */
-function provision_drupal_provision_import_validate() {
+function drush_provision_drupal_provision_import_validate() {
   _provision_drupal_url_required();
   _provision_drupal_valid_site();
 }
@@ -17,7 +17,7 @@ function provision_drupal_provision_import_validate() {
 /**
  * Import the information about the existing site, and return it in the $data context array
  */
-function provision_drupal_provision_import($url = NULL) {
+function drush_provision_drupal_provision_import($url = NULL) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   drush_include_engine('drupal', 'import', drush_drupal_major_version());
   drush_set_option('installed', TRUE, 'site');

@@ -11,7 +11,7 @@
 /**
  * Make sure the command we are running is on an installed site.
  */
-function provision_drupal_provision_disable_validate() {
+function drush_provision_drupal_provision_disable_validate() {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
   if (!drush_get_option('installed')) {
@@ -22,14 +22,14 @@ function provision_drupal_provision_disable_validate() {
 /**
  * Make a backup of the site before we mess with it
  */
-function provision_drupal_pre_provision_disable($url, $backup_file = null) {
+function drush_provision_drupal_pre_provision_disable($url, $backup_file = null) {
   drush_invoke("provision backup", $url, $backup_file);
 }
 
 /**
  * Set the enabled property of the site to false
  */
-function provision_drupal_post_provision_disable() {
+function drush_provision_drupal_post_provision_disable() {
   drush_set_option('enabled', FALSE, 'site');
 }
 
