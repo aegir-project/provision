@@ -158,6 +158,9 @@ function _provision_mysql_suggest_db_name($url) {
   if ($sid = drush_get_option('site_id')) {
     $suggest_base = 'site_'. $sid;
   }
+  elseif ($name = drush_get_option('db_name')) {
+    $suggest_base = $name;
+  }
   else {
     // This is a last option, and not ideal
     // Provision only users will trigger this mostly.
