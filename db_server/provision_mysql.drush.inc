@@ -159,10 +159,17 @@ function _provision_mysql_suggest_db_name($url) {
     $suggest_base = 'site_'. $sid;
   }
   elseif ($name = drush_get_option('db_name')) {
-    $suggest_base = $name;
+    // consider the verified database name if no site id was provided
+    //
+    // we strip out eventual _N suffixes before finding a new db name
+    // this is necessary because we may already have gone through this
+    // process (in a migration) and had a _N suffix added
+    $suggest_base = preg_replace('/_\d+$/', '', $name);
   }
   else {
-    // This is a last option, and not ideal
+    // This is a last option, and not ideal: base the db name on the
+    // site name
+    //
     // Provision only users will trigger this mostly.
     $suggest_base = substr(str_replace(array(".", "-"), '' , ereg_replace("^www\.", "", $url)), 0, 14);
   }
