@@ -12,7 +12,7 @@ function drush_provision_mysql_pre_provision_install($url = NULL) {
   $db_user = drush_set_option('db_user', $db_name, 'site');
 
   // fetch the webserver name to create a GRANT specific to this server
-  if ($db_client = drush_get_option('web_ip')) {
+  if (!($db_client = drush_get_option('web_ip'))) {
     // the IP isn't available, use the web host for the GRANT
     $db_client = drush_get_option('web_host');
   }
