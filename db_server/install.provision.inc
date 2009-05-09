@@ -12,9 +12,14 @@ function drush_provision_mysql_pre_provision_install($url = NULL) {
   $db_user = drush_set_option('db_user', $db_name, 'site');
 
   // fetch the webserver name to create a GRANT specific to this server
-  if (!($db_client = drush_get_option('web_ip'))) {
+  $db_client = drush_get_option('web_ip');
+  if (!$db_client) {
     // the IP isn't available, use the web host for the GRANT
     $db_client = drush_get_option('web_host');
+  } elseif ($db_client == '127.0.0.1') {
+    // special case: mysql doesn't really like those ip-based lookups
+    // for loopback
+    $db_client = 'localhost';
   }
   _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_client);
 }
