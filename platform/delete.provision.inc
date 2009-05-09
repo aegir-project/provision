@@ -9,7 +9,7 @@ function drush_provision_drupal_provision_delete_validate($url = NULL, $backup_f
 /**
  * Before starting to delete the site, make a backup
  */
-function drush_provision_drupal_pre_provision_delete($url, $backup_file) {
+function drush_provision_drupal_pre_provision_delete($url, $backup_file = NULL) {
   drush_invoke('provision backup', $url, $backup_file);
 }
 

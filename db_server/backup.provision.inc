@@ -11,6 +11,6 @@ function drush_provision_mysql_pre_provision_backup_rollback($url = NULL) {
 }
 
 function drush_provision_mysql_post_provision_backup($url = NULL) {
-  provision_mysql_pre_provision_backup_rollback($url);
+  drush_provision_mysql_pre_provision_backup_rollback($url);
 }
 
