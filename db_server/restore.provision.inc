@@ -11,7 +11,7 @@ function drush_provision_mysql_pre_provision_restore($url = NULL) {
   $db_name   = drush_set_option('db_name', _provision_mysql_suggest_db_name($url));
   $db_user   = drush_set_option('db_user', $db_name);
 
-  _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_host);
+  _provision_mysql_new_site_db($db_name, $db_user, $db_passwd);
 }
 
 function drush_provision_mysql_provision_restore($url) {
@@ -24,9 +24,7 @@ function drush_provision_mysql_provision_restore($url) {
 
 
 function drush_provision_mysql_pre_provision_restore_rollback($url = NULL) {
-  _provision_mysql_destroy_site_db(
-    drush_get_option('db_name'), drush_get_option('db_user'),
-    drush_get_option('db_passwd'), drush_get_option('db_host'));
+  _provision_mysql_destroy_site_db(drush_get_option('db_name'), drush_get_option('db_user'), drush_get_option('db_passwd'));
 
   $keys = array('db_name', 'db_passwd', 'db_user', 'db_host');
 
@@ -46,11 +44,9 @@ function drush_provision_mysql_post_provision_restore($url = NULL) {
     dt("Removed dump file @path after restoring from it"),
     dt("Could not remove dump file @path"), DRUSH_PERM_ERROR);
 
+  $db_client = _provision_mysql_guess_dbclient(drush_get_option('web_ip', null, 'site'), drush_get_option('web_host', null, 'site'));
   // We have now completed successfully, remove the old database.
-  _provision_mysql_destroy_site_db(
-    drush_get_option('db_name', null, 'site'), drush_get_option('db_user', null, 'site'),
-    drush_get_option('db_passwd', null, 'site'), drush_get_option('db_host', null, 'site')
-  );
+  _provision_mysql_destroy_site_db(drush_get_option('db_name', null, 'site'), drush_get_option('db_user', null, 'site'), drush_get_option('db_passwd', null, 'site'), $db_client);
 
   // The new database credentials will be saved against the site now.
   drush_set_option('db_name', drush_get_option('db_name'), 'site');

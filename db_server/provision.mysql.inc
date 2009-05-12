@@ -70,6 +70,17 @@ function provision_db_result($result, $row = 0) {
   return FALSE;
 }
 
+/**
+ * Fetch one row from the result set
+ *
+ * @see db_fetch_array
+ */
+function provision_db_fetch_array($result) {
+  if ($result) {
+    return mysql_fetch_array($result, MYSQL_ASSOC);
+  }
+  return $result;
+}
 
 /**
  * Indicates the place holders that should be replaced in _db_query_callback().
