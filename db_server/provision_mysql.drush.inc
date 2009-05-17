@@ -39,9 +39,12 @@ function provision_mysql_drush_help($section) {
 /**
  * Generate a new mysql database and user account for the specified credentials
  */
-function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_client = NULL) {
-  if (is_null($db_client)) {
-    $db_client = _provision_mysql_guess_dbclient(drush_get_option('web_ip'), drush_get_option('web_host'));
+function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_grant_host = NULL) {
+  if (is_null($db_grant_host)) {
+    $db_grant_host = _provision_mysql_guess_dbclient(
+      drush_get_option('db_host', ''), 
+      drush_get_option('web_ip', null), 
+      drush_get_option('web_host', 'localhost'));
   }
   if (!_provision_mysql_create_database($db_name) ||
       !_provision_mysql_database_exists($db_name) ) {
@@ -50,7 +53,7 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_client
    return FALSE;
   }
   
-  if (!_provision_mysql_grant($db_name, $db_user, $db_passwd, $db_client)) {
+  if (!_provision_mysql_grant($db_name, $db_user, $db_passwd, $db_grant_host)) {
     drush_log("Could not GRANT user access.", 'warning');
   }
   _provision_mysql_flush_privileges();
@@ -70,9 +73,9 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_client
 /**
  * Remove the database and user account for the supplied credentials
  */
-function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_client = NULL) {
-  if (is_null($db_client)) {
-    $db_client = _provision_mysql_guess_dbclient(drush_get_option('web_ip'), drush_get_option('web_host'));
+function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_grant_host = NULL) {
+  if (is_null($db_grant_host)) {
+    $db_grant_host = _provision_mysql_guess_dbclient(drush_get_option('web_ip'), drush_get_option('web_host'));
   }
   if ( _provision_mysql_database_exists($db_name) ) {
     drush_log(dt("Dropping database @dbname", array('@dbname' => $db_name)));
@@ -86,9 +89,9 @@ function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_cl
    return FALSE;
   }
   
-  drush_log(dt("Revoking privileges of %user@%client from %database", array('%user' => $db_user, '%client' => $db_client, '%database' => $db_name)));
+  drush_log(dt("Revoking privileges of %user@%client from %database", array('%user' => $db_user, '%client' => $db_grant_host, '%database' => $db_name)));
   _provision_mysql_flush_privileges();
-  if (!_provision_mysql_revoke($db_name, $db_user, $db_client)) {
+  if (!_provision_mysql_revoke($db_name, $db_user, $db_grant_host)) {
       drush_log(dt("Failed to revoke user privileges"), 'warning');
   }
 }
@@ -212,25 +215,27 @@ function _provision_mysql_suggest_db_name($url) {
 
 /**
  * Properly guess the host part of the MySQL username based on a given
- * IP and web_host
+ * database server host , web server IP and web server host.
  *
- * Basically, we give priority to the IP. If it's not present, we use
- * the hostname directly.
+ * If the database and web server are the same machine, return a localhost
+ * grant, which is a special and very common case which does not involve any
+ * dns lookups and is thus faster and more secure.
  *
- * There is a special case to handle the case where the host is
- * 'localhost' and (therefore) the IP resolved in the frontend is
- * '127.0.0.1': in this case, we want to use the socket, so we revert
- * back to the 'localhost' string.
+ * If the web server and database server are different machines, we prefer to
+ * use the IP address, which is faster and more secure because fewer lookups
+ * are done during connections.
+ *
  */
-function _provision_mysql_guess_dbclient($web_ip, $web_host) {
-  // fetch the webserver name to create a GRANT specific to this server
-  $db_client = $web_ip;
-  if (!$db_client) {
-    // the IP isn't available, use the web host for the GRANT
-    $db_client = $web_host;
-  } elseif ($db_host = 'localhost' && $db_client == '127.0.0.1') {
-    // 'localhost' really means the socket here, so IP-based doesn't work
-    $db_client = 'localhost';
+function _provision_mysql_grant_host($db_host, $web_ip, $web_host) {
+  // The database hostname is localhost, not defined or on the same ip/host as the webserver.
+  if (in_array($db_host, array('127.0.0.1', 'localhost', '', $web_ip, $web_host))) {
+    return 'localhost';
   }
-  return $db_client;
+
+  // if we have the web ip, use that first.
+  if ($web_ip) {
+    return $web_ip;
+  }
+
+  return $web_host;
 }

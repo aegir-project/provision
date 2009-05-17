@@ -44,9 +44,16 @@ function drush_provision_mysql_post_provision_restore($url = NULL) {
     dt("Removed dump file @path after restoring from it"),
     dt("Could not remove dump file @path"), DRUSH_PERM_ERROR);
 
-  $db_client = _provision_mysql_guess_dbclient(drush_get_option('web_ip', null, 'site'), drush_get_option('web_host', null, 'site'));
+  $db_grant_host = _provision_mysql_guess_dbclient(
+      drush_get_option('db_host', '', 'site'), 
+      drush_get_option('web_ip', null, 'site'), 
+      drush_get_option('web_host', null, 'site'));
   // We have now completed successfully, remove the old database.
-  _provision_mysql_destroy_site_db(drush_get_option('db_name', null, 'site'), drush_get_option('db_user', null, 'site'), drush_get_option('db_passwd', null, 'site'), $db_client);
+  _provision_mysql_destroy_site_db(
+    drush_get_option('db_name', null, 'site'), 
+    drush_get_option('db_user', null, 'site'), 
+    drush_get_option('db_passwd', null, 'site'), 
+    $db_grant_host);
 
   // The new database credentials will be saved against the site now.
   drush_set_option('db_name', drush_get_option('db_name'), 'site');
