@@ -41,7 +41,7 @@ function provision_mysql_drush_help($section) {
  */
 function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_grant_host = NULL) {
   if (is_null($db_grant_host)) {
-    $db_grant_host = _provision_mysql_guess_dbclient(
+    $db_grant_host = _provision_mysql_grant_host(
       drush_get_option('db_host', ''), 
       drush_get_option('web_ip', null), 
       drush_get_option('web_host', 'localhost'));
@@ -75,7 +75,7 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_grant_
  */
 function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_grant_host = NULL) {
   if (is_null($db_grant_host)) {
-    $db_grant_host = _provision_mysql_guess_dbclient(drush_get_option('web_ip'), drush_get_option('web_host'));
+    $db_grant_host = _provision_mysql_grant_host(drush_get_option('web_ip'), drush_get_option('web_host'));
   }
   if ( _provision_mysql_database_exists($db_name) ) {
     drush_log(dt("Dropping database @dbname", array('@dbname' => $db_name)));
