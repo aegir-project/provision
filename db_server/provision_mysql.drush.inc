@@ -229,13 +229,13 @@ function _provision_mysql_suggest_db_name($url) {
 function _provision_mysql_grant_host($db_host, $web_ip, $web_host) {
   // The database hostname is localhost, not defined or on the same ip/host as the webserver.
   if (in_array($db_host, array('127.0.0.1', 'localhost', '', $web_ip, $web_host))) {
-    return 'localhost';
+    $grant = 'localhost';
   }
-
   // if we have the web ip, use that first.
-  if ($web_ip) {
-    return $web_ip;
+  elseif ($web_ip) {
+    $grant = $web_ip;
+  } else {
+    $grant = $web_host;
   }
-
-  return $web_host;
+  return $grant;
 }
