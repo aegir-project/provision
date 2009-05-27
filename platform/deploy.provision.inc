@@ -40,11 +40,12 @@ function drush_provision_drupal_pre_provision_deploy($url, $backup_file) {
     'PROVISION_BACKUP_EXTRACTION_FAILED');
   if ($extracted) {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
-    $site_packages = drush_get_context('packages', array(), 'site');
+
+    $site_packages = drush_get_option('packages', array(), 'site');
     $profiles = array_keys($site_packages['profiles']);
     $profile = $profiles[0];
 
-    $drupal_packages = drush_get_context('packages', array(), 'drupal');
+    $drupal_packages = drush_get_option('packages', array(), 'drupal');
 
     $merged_modules = array_merge($drupal_packages['base']['modules'], $drupal_packages['profiles'][$profile]['modules']);
     foreach ($site_packages['modules'] as $name => $module) {
