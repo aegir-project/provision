@@ -25,7 +25,8 @@ function drush_provision_drupal_provision_backup_validate($url = NULL, $backup_f
             dt("Backing site up to @path."),
             dt("Back up file @path already exists."),
         'PROVISION_BACKUP_ALREADY_EXISTS')) {
-      drush_set_option('backup_file', $backup_file);
+
+      drush_set_option('backup_file', str_replace(".gz", '', $backup_file));
     }
   }
 
