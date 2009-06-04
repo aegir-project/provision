@@ -268,11 +268,35 @@ function install_main() {
   // profile task
   // @TODO support install profiles with multiple additional tasks
   $task = 'profile';
+
   $function = $profile .'_profile_tasks';
+
   if (function_exists($function)) {
-    // The profile needs to run more code, maybe even more tasks.
-    // $task is sent through as a reference and may be changed!
-    $output = $function($task, $url);
+    while ($task != 'profile-finished') {
+      drush_log(dt("Running profile specific task : !task", array('!task' => $task)));
+      module_rebuild_cache();
+      module_load_all();
+      // stop batch api from re-directing. ever.
+      $batch =& batch_get();
+      $batch['progressive'] = FALSE;
+      $batch['redirect'] = null;
+      $batch['operations'] = array();
+      $batch['url'] = 'batch';
+      batch_set($batch);
+
+      // The profile needs to run more code, maybe even more tasks.
+      // $task is sent through as a reference and may be changed!
+      $output = $function($task, $url);
+
+      $task = variable_get('install_task', $task);
+      variable_del('install_task');
+
+      // If the profile doesn't move on to a new task we assume
+      // that it is done.
+      if ($task == 'profile') {
+        $task = 'profile-finished';
+      }
+    }
   }
 
   // profile-finished task
@@ -309,5 +333,19 @@ function install_main() {
   if ($client_email) {
     install_send_welcome_mail($url, $profile, $instal_locale, $client_email);
   }
+}
+/**
+ * Batch callback for batch installation of modules.
+ */
+function _install_module_batch($module, $module_name, &$context) {
+  drush_log(dt("Enabling module : !module", array("!module" => $module)), 'success');
+  _drupal_install_module($module);
+  // We enable the installed module right away, so that the module will be
+  // loaded by drupal_bootstrap in subsequent batch requests, and other
+  // modules possibly depending on it can safely perform their installation
+  // steps.
+  module_enable(array($module));
+  $context['results'][] = $module;
+  $context['message'] = st('Installed %module module.', array('%module' => $module_name));
 }
 install_main();
