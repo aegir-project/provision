@@ -22,7 +22,7 @@ function drush_provision_drupal_provision_verify_validate($url = null) {
 function drush_provision_drupal_provision_verify($url = null) {
   if (PROVISION_CONTEXT_PLATFORM) {
     _provision_create_dir(drush_get_option('config_path'), dt('Provision configuration'), 0700);
-    _provision_create_dir(drush_get_option('backup_path'), dt('Web server configuration'), 0700);
+    _provision_create_dir(drush_get_option('backup_path'), dt('Backup'), 0700);
     provision_path("writable", drush_get_option('sites_path'), TRUE, dt("Drupal sites directory is writable by the provisioning script"),
       dt("Drupal sites directory is not writable by the provisioning script"), PROVISION_SITES_DIR_NOT_WRITABLE);
 
