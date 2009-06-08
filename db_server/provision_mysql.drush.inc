@@ -164,7 +164,7 @@ function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd
       drush_log(sprintf("Importing database using command: mysql -u%s -p%s -h%s %s < %s", 
         $db_user, $db_passwd, $db_host, $db_name, $dump_file));
       if (!provision_shell_exec("mysql -u%s -p%s -h%s %s < %s", $db_user, $db_passwd, $db_host, $db_name, $dump_file )) {
-        drush_set_error('PROVISION_DB_IMPORT_FAILED', dt("Database import failed"));
+        drush_set_error('PROVISION_DB_IMPORT_FAILED', dt("Database import failed: %output", array('%output' => join("\n", drush_shell_exec_output()))));
       }
      }
    }
