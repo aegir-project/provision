@@ -24,7 +24,7 @@ function drush_provision_drupal_provision_verify($url = null) {
     _provision_create_dir(drush_get_option('config_path'), dt('Provision configuration'), 0700);
     _provision_create_dir(drush_get_option('backup_path'), dt('Backup'), 0700);
     provision_path("writable", drush_get_option('sites_path'), TRUE, dt("Drupal sites directory is writable by the provisioning script"),
-      dt("Drupal sites directory is not writable by the provisioning script"), PROVISION_SITES_DIR_NOT_WRITABLE);
+      dt("Drupal sites directory is not writable by the provisioning script"), 'PROVISION_SITES_DIR_NOT_WRITABLE');
 
     drush_set_option('sites', array_keys((array) provision_drupal_find_sites()), 'drupal'); 
     drush_log(dt("This platform is running @short_name @version", array('@short_name' => 'drupal', '@version' => VERSION)));

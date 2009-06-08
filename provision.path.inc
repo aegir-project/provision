@@ -298,24 +298,24 @@ function _provision_create_dir($path, $name, $perms) {
     $exists = provision_path("mkdir", $path, TRUE,
       $name . ' ' . dt("path has been created."),
       $name . ' ' . dt("path could not be created."),
-      DRUSH_PERM_ERROR);
+      'DRUSH_PERM_ERROR');
   }
 
   if ($exists) {
     provision_path("chown", $path, drush_get_option('script_user'), 
       $name . ' ' . dt("ownership of path has been changed to @confirm."),
       $name . ' ' . dt("ownership of path could not be changed to @confirm."),
-      DRUSH_PERM_ERROR);
+      'DRUSH_PERM_ERROR');
 
     provision_path("chmod", $path, $perms, 
       $name . ' ' . dt("permissions of path have been changed to @confirm."),
       $name . ' ' . dt("permissions of path could not be changed to @confirm."),
-      DRUSH_PERM_ERROR );
+      'DRUSH_PERM_ERROR' );
 
     $writable = provision_path("writable", $path, TRUE,
         $name . ' ' . dt("path is writable."),
         $name . ' ' . dt("path is not writable."),
-        DRUSH_PERM_ERROR);
+        'DRUSH_PERM_ERROR');
 
   }
 
