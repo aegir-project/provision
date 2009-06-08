@@ -134,6 +134,7 @@ function provision_render_config($template, $variables) {
  * - safety checking since we don't necessarly trust the removed files
  */
 function _provision_recursive_delete($path) {
+  $ret = 1;
   if (is_dir($path)) {
     $d = dir($path);
     while (($entry = $d->read()) !== FALSE) {
@@ -154,8 +155,9 @@ function _provision_recursive_delete($path) {
     $ret = $ret && $rm;
   }
   else {
-    $ret = provision_path('unlink', $path, TRUE, NULL, 
+    $rm = provision_path('unlink', $path, TRUE, NULL, 
       dt('Deleting @path file failed.', array('@path' => $path)));
+    $ret = $ret && $rm;
   }
   return $ret;
 }
