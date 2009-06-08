@@ -240,6 +240,8 @@ function install_main() {
       array("@module" => $files[$module]->info['name'])));
   }
 
+  module_invoke_all('init');
+
   drush_log("Initial locale import");
   // locale-initial-import and locale-inintial-batch tasks
   if (!empty($install_locale) && ($install_locale != 'en')) {
