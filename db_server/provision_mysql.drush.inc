@@ -155,11 +155,11 @@ function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd
   $exists = provision_path("exists", $dump_file, TRUE,
     dt('Found database dump at @path.'),
     dt('No database dump was found at @path.'),
-    PROVISION_DB_DUMP_NOT_FOUND);
+    'PROVISION_DB_DUMP_NOT_FOUND');
   if ($exists) {
     $readable = provision_path("readable", $dump_file, TRUE, dt('Database dump at @path is readable'), 
       dt('The database dump at @path could not be read.'), 
-      PROVISION_DB_DUMP_NOT_READABLE);
+      'PROVISION_DB_DUMP_NOT_READABLE');
     if ($readable) {
       drush_log(sprintf("Importing database using command: mysql -u%s -p%s -h%s %s < %s", 
         $db_user, $db_passwd, $db_host, $db_name, $dump_file));
