@@ -154,9 +154,8 @@ function _provision_recursive_delete($path) {
     $ret = $ret && $rm;
   }
   else {
-    $rm = provision_path('unlink', $path, TRUE, NULL, 
+    $ret = provision_path('unlink', $path, TRUE, NULL, 
       dt('Deleting @path file failed.', array('@path' => $path)));
-    $ret = $ret && $rm;
   }
   return $ret;
 }
