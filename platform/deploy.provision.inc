@@ -93,4 +93,6 @@ function drush_provision_drupal_post_provision_deploy($url) {
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
   }
   _provision_drupal_rebuild_caches();
+  // the url is likely to have changed in the deployment
+  drush_set_option('site_url', $url);
 }
