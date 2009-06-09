@@ -261,7 +261,6 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
  */
 function _provision_drupal_rebuild_caches($url = NULL) {
   if (PROVISION_CONTEXT_SITE) {
-    #drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
     drush_include_engine('drupal', 'clear');
   }
 }

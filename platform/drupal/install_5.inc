@@ -42,7 +42,10 @@ function install_verify_settings() {
   return FALSE;
 }
 
-function install_send_welcome_mail($url, $profile, $language, $client_email) {
+function install_create_admin_user($client_email = NULL) {
+  if (!$client_email) {
+    $client_email = 'webmaster@localhost';
+  }
   // create the admin account or change some parameters if the install profile
   // already created one
   $account = user_load(array('uid' => 1));
@@ -53,8 +56,10 @@ function install_send_welcome_mail($url, $profile, $language, $client_email) {
   $edit['pass'] = user_password();
   $edit['mail'] = $client_email;
   $edit['status'] = 1;
-  $account = user_save($account,  $edit);
+  return user_save($account,  $edit);
+}
 
+function install_send_welcome_mail($url, $account, $profile, $language, $client_email) {
   // Mail one time login URL and instructions.
   $from = variable_get('site_mail', ini_get('sendmail_from'));
   $onetime = user_pass_reset_url($account);
@@ -177,8 +182,9 @@ function install_main() {
   }
 
   variable_set('install_profile', $profile);
+  $account = install_create_admin_user($url, $client_email);
   if ($client_email) {
-    install_send_welcome_mail($url, $profile, $language, $client_email);
+    install_send_welcome_mail($url, $account, $profile, $language, $client_email);
   }
 }
 install_main();
