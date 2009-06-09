@@ -50,7 +50,7 @@ function drush_provision_drupal_provision_backup($url) {
   $backup_file = drush_get_option('backup_file');
   // Adds the site directory into the backup file
   drush_log(dt("Adding sites directory to !backup_file", array('!backup_file' => $backup_file)), 'backup');
-  $result = provision_shell_exec("tar -C %s -r -f %s * ", drush_get_option('sites_path') . "/$url",  $backup_file);
+  $result = provision_shell_exec("tar -C %s -r -f %s .", drush_get_option('sites_path') . "/$url",  $backup_file);
 
   if (!$result && !drush_get_option('force', false)) {
     drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not back up sites directory for drupal"));
