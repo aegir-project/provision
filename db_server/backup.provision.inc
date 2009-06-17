@@ -2,7 +2,10 @@
 
 function drush_provision_mysql_pre_provision_backup($url = NULL) {
   drush_log("Generating mysql dump for $url.", 'backup');
-  provision_shell_exec("mysqldump -h%s -u%s -p%s -rsites/%s/database.sql %s", drush_get_option('db_host'), drush_get_option('db_user'),drush_get_option('db_passwd'), $url, drush_get_option('db_name')); 
+  $result = provision_shell_exec("mysqldump -h%s -u%s -p%s -rsites/%s/database.sql %s", drush_get_option('db_host'), drush_get_option('db_user'),drush_get_option('db_passwd'), $url, drush_get_option('db_name')); 
+  if (!$result && !drush_get_option('force', false)) {
+    drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not back up sites directory for drupal"));
+  }
 }
 
 function drush_provision_mysql_pre_provision_backup_rollback($url = NULL) {
