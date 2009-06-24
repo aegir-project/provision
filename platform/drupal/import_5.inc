@@ -8,11 +8,11 @@ else {
 }
 
 if ($parts = @parse_url($db_url)) {
-  drush_set_option('db_type', $parts['scheme'], 'site');
-  drush_set_option('db_user', $parts['user'], 'site');
-  drush_set_option('db_host', $parts['host'], 'site');
-  drush_set_option('db_passwd', $parts['pass'], 'site');
-  drush_set_option('db_name', substr($parts['path'], 1), 'site');
+  drush_set_option('db_type', urldecode($parts['scheme']), 'site');
+  drush_set_option('db_user', urldecode($parts['user']), 'site');
+  drush_set_option('db_host', urldecode($parts['host']), 'site');
+  drush_set_option('db_passwd', urldecode($parts['pass']), 'site');
+  drush_set_option('db_name', substr(urldecode($parts['path']), 1), 'site');
 
   drush_set_option('profile', variable_get('install_profile', 'default'), 'site');
   $has_locale = db_result(db_query("SELECT status FROM {system} WHERE type='module' AND name='locale'"));

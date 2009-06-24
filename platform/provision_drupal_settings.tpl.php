@@ -6,7 +6,7 @@
     'password' => '<?php print $db_passwd; ?>',
     'host' => '<?php print $db_host ?>',
   );
-  $db_url = '<?php print "$db_type://$db_user:$db_passwd@$db_host/$db_name"; ?>';
+  $db_url = '<?php print strtr("%db_type://%db_user:%db_passwd@%db_host/%db_name", array('%db_type' => urlencode($db_type), '%db_user' => urlencode($db_name), '%db_passwd' => urlencode($db_passwd), '%db_host' => urlencode($db_host), '%db_name' => urlencode($db_name))); ?>';
 
   $profile = "<?php print $profile ?>";
   /**
