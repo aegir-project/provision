@@ -161,19 +161,23 @@ function provision_path_unlink($path) {
  * This is where the more complex file operations start
  */
 
-function provision_path_chmod($path, &$perms, &$reason) {
-  if (!@chmod($path, $perms)) {
+function provision_path_chmod($path, &$perms, &$reason, $recursive = FALSE) {
+  $func = ($recursive) ? '_provision_chmod_recursive' : 'chmod';
+
+  if (!@$func($path, $perms)) {
     $reason = dt('chmod to @perm failed on @path', array('@perm' => sprintf('%o', $perms), '@path' => $path));
     return false;
   }
   clearstatcache(); // this needs to be called, otherwise we get the old info 
   $value = substr(sprintf('%o', fileperms($path)), -4);
+  $perms = sprintf('%o', $perms);
   return $value;
 }
 
-function provision_path_chown($path, &$owner, &$reason) {
+function provision_path_chown($path, &$owner, &$reason, $recursive = FALSE) {
+  $func = ($recursive) ? '_provision_chown_recursive' : 'chown';
   if ($owner = provision_posix_username($owner)) {
-    if (!chown($path, $owner)) {
+    if (!$func($path, $owner)) {
       $reason = dt("chown to @owner failed on @path", array('@owner' => $owner, '@path' => $path)) ; 
     }
   }
@@ -185,10 +189,11 @@ function provision_path_chown($path, &$owner, &$reason) {
   return provision_posix_username(fileowner($path));
 }
 
-function provision_path_chgrp($path, &$gid, &$reason) {
+function provision_path_chgrp($path, &$gid, &$reason, $recursive = FALSE) {
+  $func = ($recursive) ? '_provision_chgrp_recursive' : 'chgrp';
   if ($group = provision_posix_groupname($gid)) {
     if (provision_user_in_group(drush_get_option('script_user'), $gid)) {
-      if (chgrp($path, $group)) {
+      if ($func($path, $group)) {
         return $group;
       }
       else {
@@ -199,13 +204,27 @@ function provision_path_chgrp($path, &$gid, &$reason) {
       $reason = dt("@user is not in @group group", array("@user" => drush_get_option('script_user'), "@group" => $group));
     }
   }
-  elseif (!@chgrp($path, $gid)) { # try to change the group anyways
+  elseif (!@$func($path, $gid)) { # try to change the group anyways
     $reason = dt("the group does not exist");
   }
 
   clearstatcache(); // this needs to be called, otherwise we get the old info 
   return provision_posix_groupname(filegroup($path));
 }
+
+
+function provision_path_chmod_recursive($path, &$perms, &$reason) {
+  return provision_path_chmod($path, $perms, $reason, TRUE);
+}
+
+function provision_path_chown_recursive($path, &$owner, &$reason) {
+  return provision_path_chown($path, $owner, $reason, TRUE);
+}
+
+function provision_path_chgrp_recursive($path, &$gid, &$reason) {
+  return provision_path_chgrp($path, $gid, $reason, TRUE);
+}
+
 
 function provision_path_switch_paths($path1, &$path2, &$reason) {
   //TODO : Add error reasons.
@@ -234,8 +253,8 @@ function provision_path_extract($path, &$target, &$reason) {
   if (file_exists($path) && is_readable($path)) {
     if (is_writeable(dirname($target)) && !file_exists($target) && !is_dir($target)) {
       mkdir($target);
-      provision_shell_exec("tar -zxf %s -C %s", $path, $target);
-      drush_log(sprintf("Running: tar -zxf %s -C %s", $path, $target));
+      provision_shell_exec("tar -zpxf %s -C %s", $path, $target);
+      drush_log(sprintf("Running: tar -zpxf %s -C %s", $path, $target));
       if (is_writeable(dirname($target)) && is_readable(dirname($target)) && is_dir($target)) {
         $target = TRUE;
         return TRUE;
@@ -332,4 +351,50 @@ function _provision_create_dir($path, $name, $perms) {
 function _provision_mkdir_recursive($path, $mode) {
   is_dir(dirname($path)) || _provision_mkdir_recursive(dirname($path), $mode);
   return is_dir($path) || mkdir($path, $mode);
+}
+
+/**
+ * Chmod a directory recursively
+ */
+function _provision_chmod_recursive($path, $filemode) {
+ if ( !is_dir($path) ) {
+  return chmod($path, $filemode);
+ }
+ else {
+   $output = 0;
+   $cmd = sprintf("chmod -R %o %s", $filemode, $path);
+   system($cmd, $output);
+   return !$output; 
+ }
+}
+
+/**
+ * Chown a directory recursively
+ */
+function _provision_chown_recursive($path, $owner) {
+ if ( !is_dir($path) ) {
+  return chown($path, $owner);
+ }
+ else {
+   $output = 0;
+   $cmd = sprintf("chown -R %s %s", $owner, $path);
+   system($cmd, $output);
+   return !$output; 
+ }
+}
+
+
+/**
+ * Chgrp a directory recursively
+ */
+function _provision_chgrp_recursive($path, $owner) {
+ if ( !is_dir($path) ) {
+  return chgrp($path, $owner);
+ }
+ else {
+   $output = 0;
+   $cmd = sprintf("chgrp -R %s %s", $owner, $path);
+   system($cmd, $output);
+   return !$output; 
+ }
 }

@@ -240,17 +240,17 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
         'DRUSH_PERM_ERROR');
     }
 
-    provision_path("chmod", $path, $perm, 
+    provision_path("chmod_recursive", $path, $perm, 
       dt("Changed permissions of <code>@path</code> to @confirm"),
       dt("Could not change permissions <code>@path</code> to @confirm"),
       'DRUSH_PERM_ERROR');
   }
   foreach ($grps as $path) {
-      provision_path("chown", $path, drush_get_option('script_user'), 
+      provision_path("chown_recursive", $path, drush_get_option('script_user'), 
       dt("Changed ownership of <code>@path</code>"),
       dt("Could not change ownership <code>@path</code>"),
      'DRUSH_PERM_ERROR' );
-    provision_path("chgrp", $path, drush_get_option('web_group'),
+    provision_path("chgrp_recursive", $path, drush_get_option('web_group'),
       dt("Changed group ownership of <code>@path</code>"),
       dt("Could not change group ownership <code>@path</code>"));
   }
