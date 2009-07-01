@@ -342,7 +342,7 @@ function _provision_drupal_get_cvs_versions($files) {
         $project['project'] = cvs_deploy_get_project_name($project);
       }
       _cvs_deploy_version_alter($file->info['version'], $project);
-      $name = ($project['project']) ? $project['project'] : $modulename;
+      $name = !empty($project['project']) ? $project['project'] : $modulename;
       $files[$name] = $file; 
   }
 
