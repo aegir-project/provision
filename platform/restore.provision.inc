@@ -79,6 +79,8 @@ function drush_provision_drupal_provision_restore_rollback($url) {
  */
 function drush_provision_drupal_post_provision_restore($url) {
   _provision_recursive_delete(drush_get_option('sites_path') ."/$url.restore");
+  // This is the actual drupal provisioning requirements. 
+  _provision_drupal_create_directories($url);
   _provision_drupal_create_settings_file($url);
 }
 
