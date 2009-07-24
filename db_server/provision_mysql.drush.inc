@@ -53,6 +53,7 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_grant_
    return FALSE;
   }
   
+  drush_log(dt("Granting privileges to %user@%client on %database", array('%user' => $db_user, '%client' => $db_grant_host, '%database' => $db_name)));
   if (!_provision_mysql_grant($db_name, $db_user, $db_passwd, $db_grant_host)) {
     drush_log("Could not GRANT user access.", 'warning');
   }
