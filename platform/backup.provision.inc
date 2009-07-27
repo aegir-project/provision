@@ -11,7 +11,7 @@
  */
 function drush_provision_drupal_provision_backup_validate($url = NULL, $backup_file = NULL) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
-  if (!drush_get_option('installed')) {
+  if (!drush_get_option('installed') && !drush_get_option('force', false)) {
      drush_set_error('PROVISION_DRUPAL_SITE_NOT_FOUND');
    }
 
