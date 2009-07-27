@@ -351,47 +351,48 @@ function _provision_mkdir_recursive($path, $mode) {
 }
 
 /**
+ * Walk the given tree recursively (depth first), calling a function on each file
+ *
+ * $func is not checked for existence and called directly with $path and $arg
+ * for every file encountered.
+ *
+ * @param string $func a valid callback, usually chmod, chown or chgrp
+ * @param string $path a path in the filesystem
+ * @param string $arg the second argument to $func
+ * @return boolean returns TRUE if every $func call returns true
+ */
+function _provision_call_recursive($func, $path, $arg) {
+  $status = 1;
+  if ($dh = @opendir($path)) {
+    while (($file = readdir($dh)) !== false) {
+      if ($file != '.' && $file != '..') {
+        $status = _provision_call_recursive($func, $path . "/" . $file, $arg) && $status;
+      }
+    }
+    closedir($dh);
+  }
+  $status = $func($path, $arg) && $status;
+  return $status;
+}
+
+/**
  * Chmod a directory recursively
+ *
  */
 function _provision_chmod_recursive($path, $filemode) {
- if ( !is_dir($path) ) {
-  return chmod($path, $filemode);
- }
- else {
-   $output = 0;
-   $cmd = sprintf("chmod -R %o %s", $filemode, $path);
-   system($cmd, $output);
-   return !$output; 
- }
+   return _provision_call_recursive("chmod", $path, $filemode);
 }
 
 /**
  * Chown a directory recursively
  */
 function _provision_chown_recursive($path, $owner) {
- if ( !is_dir($path) ) {
-  return chown($path, $owner);
- }
- else {
-   $output = 0;
-   $cmd = sprintf("chown -R %s %s", $owner, $path);
-   system($cmd, $output);
-   return !$output; 
- }
+   return _provision_call_recursive("chown", $path, $owner);
 }
-
 
 /**
  * Chgrp a directory recursively
  */
 function _provision_chgrp_recursive($path, $owner) {
- if ( !is_dir($path) ) {
-  return chgrp($path, $owner);
- }
- else {
-   $output = 0;
-   $cmd = sprintf("chgrp -R %s %s", $owner, $path);
-   system($cmd, $output);
-   return !$output; 
- }
+   return _provision_call_recursive("chgrp", $path, $owner);
 }
