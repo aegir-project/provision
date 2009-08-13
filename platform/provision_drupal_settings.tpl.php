@@ -31,6 +31,12 @@
   @ini_set('session.use_trans_sid',    0);
   @ini_set('url_rewriter.tags',        '');
 
+  /**
+  * Set the umask so that new directories created by Drupal have the correct permissions
+  */
+  umask(0002);
+
+
   global $conf;
   $conf['file_directory_path'] = conf_path() . '/files';
   $conf['file_directory_temp'] = conf_path() . '/files/tmp';

@@ -242,8 +242,8 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
 
     provision_path("chmod_recursive", $path, $perm, 
       dt("Changed permissions of <code>@path</code> to @confirm"),
-      dt("Could not change permissions <code>@path</code> to @confirm"),
-      'DRUSH_PERM_ERROR');
+      dt("Could not change permissions <code>@path</code> to @confirm")
+      );
   }
   foreach ($grps as $path) {
       provision_path("chown_recursive", $path, drush_get_option('script_user'), 
