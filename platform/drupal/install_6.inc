@@ -333,7 +333,7 @@ function install_main() {
   variable_set('install_profile', $profile);
 
   if ($client_email) {
-    install_send_welcome_mail($url, $profile, $instal_locale, $client_email);
+    install_send_welcome_mail($url, $profile, $install_locale, $client_email);
   }
   variable_set('install_task', 'done');
 }
