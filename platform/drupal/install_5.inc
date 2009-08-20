@@ -181,6 +181,10 @@ function install_main() {
     $profile_message = $function();
   }
 
+  // Get the timezone offset from system time
+  $tz_offset = date('Z');
+  variable_set('date_default_timezone', $tz_offset);
+
   variable_set('install_profile', $profile);
   $account = install_create_admin_user($url, $client_email);
   if ($client_email) {

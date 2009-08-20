@@ -265,6 +265,10 @@ function install_main() {
   variable_set('clean_url', TRUE);
   variable_set('install_time', time());
 
+  // Get the timezone offset from system time
+  $tz_offset = date('Z');
+  variable_set('date_default_timezone', $tz_offset);
+
   menu_rebuild();
 
   // profile task
