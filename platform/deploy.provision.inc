@@ -34,6 +34,8 @@ function drush_provision_drupal_provision_deploy_validate($url = null, $backup_f
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
 function drush_provision_drupal_pre_provision_deploy($url, $backup_file) {
+  // the url is likely to have changed in the deployment
+  drush_set_option('site_url', $url);
   $extracted = provision_path("extract", drush_get_option('backup_file'), drush_get_option('sites_path') ."/$url", 
     dt('Successfully extracted the contents of @path'),
     dt('Failed to extract the contents of @path'),
@@ -93,6 +95,4 @@ function drush_provision_drupal_post_provision_deploy($url) {
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
     _provision_drupal_rebuild_caches();
   }
-  // the url is likely to have changed in the deployment
-  drush_set_option('site_url', $url);
 }
