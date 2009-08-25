@@ -38,8 +38,8 @@
 
 
   global $conf;
-  $conf['file_directory_path'] = conf_path() . '/files';
-  $conf['file_directory_temp'] = conf_path() . '/files/tmp';
+  $conf['file_directory_path'] = 'sites/' . <?php print $site_url ?> . '/files';
+  $conf['file_directory_temp'] = 'sites/' . <?php print $site_url ?> . '/files/tmp';
   $conf['file_downloads'] = 1;
   $conf['cache'] = 1;
   $conf['clean_url'] = 1;
