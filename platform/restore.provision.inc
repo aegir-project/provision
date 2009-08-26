@@ -63,7 +63,7 @@ function drush_provision_drupal_provision_restore($url) {
   provision_path("switch_paths", $old, $new ,
     dt('Swapping out the @path and @confirm directories was successful.'),
     dt('Swapping the @path and @confirm directories has failed.'),
-    DRUSH_PERM_ERROR);
+    'DRUSH_PERM_ERROR');
   // make sure it has the latest site data available
   _provision_drupal_create_settings_file($url);
   provision_save_site_data($url);

@@ -42,7 +42,7 @@ function drush_provision_mysql_pre_provision_restore_rollback($url = NULL) {
 function drush_provision_mysql_post_provision_restore($url = NULL) {
   provision_path('unlink', drush_get_option('sites_path') . '/' . $url .'/database.sql', TRUE,
     dt("Removed dump file @path after restoring from it"),
-    dt("Could not remove dump file @path"), DRUSH_PERM_ERROR);
+    dt("Could not remove dump file @path"), 'DRUSH_PERM_ERROR');
 
   $db_grant_host = _provision_mysql_grant_host(
       drush_get_option('db_host', '', 'site'), 

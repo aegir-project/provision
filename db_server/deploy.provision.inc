@@ -28,5 +28,5 @@ function drush_provision_mysql_provision_deploy_rollback($url = NULL) {
 function drush_provision_mysql_post_provision_deploy($url = NULL) {
   provision_path('unlink', drush_get_option('sites_path') .'/'. $url .'/database.sql', TRUE,
     dt("Removed dump file @path after restoring from it"),
-    dt("Could not remove dump file @path"), DRUSH_PERM_ERROR);
+    dt("Could not remove dump file @path"), 'DRUSH_PERM_ERROR');
 }
