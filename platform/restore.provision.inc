@@ -71,7 +71,7 @@ function drush_provision_drupal_provision_restore($url) {
 
 // Luckily this is reversable =)
 function drush_provision_drupal_provision_restore_rollback($url) {
-  provision_drupal_provision_restore($url);
+  drush_provision_drupal_provision_restore($url);
 }
 
 /**
