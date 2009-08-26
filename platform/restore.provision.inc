@@ -44,7 +44,7 @@ function drush_provision_drupal_pre_provision_restore($url, $restore_file) {
   provision_path("extract", drush_get_option('restore_file'), drush_get_option('sites_path') ."/$url.restore", 
     dt('Successfully extracted the contents of @path'),
     dt('Failed to extract the contents of @path'),
-    PROVISION_BACKUP_EXTRACTION_FAILED);
+    'PROVISION_BACKUP_EXTRACTION_FAILED');
 }
 
 /**
