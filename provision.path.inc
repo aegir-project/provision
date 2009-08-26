@@ -250,9 +250,10 @@ function provision_path_extract($path, &$target, &$reason) {
   if (file_exists($path) && is_readable($path)) {
     if (is_writeable(dirname($target)) && !file_exists($target) && !is_dir($target)) {
       mkdir($target);
-      provision_shell_exec("tar -zpxf %s -C %s", $path, $target);
       drush_log(sprintf("Running: tar -zpxf %s -C %s", $path, $target));
-      if (is_writeable(dirname($target)) && is_readable(dirname($target)) && is_dir($target)) {
+      $result = provision_shell_exec("tar -zpxf %s -C %s", $path, $target);
+
+      if ($result && is_writeable(dirname($target)) && is_readable(dirname($target)) && is_dir($target)) {
         $target = TRUE;
         return TRUE;
       }
