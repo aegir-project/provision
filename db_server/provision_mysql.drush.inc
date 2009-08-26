@@ -162,10 +162,41 @@ function _provision_mysql_import_dump($dump_file, $db_name, $db_user, $db_passwd
       dt('The database dump at @path could not be read.'), 
       'PROVISION_DB_DUMP_NOT_READABLE');
     if ($readable) {
-      drush_log(sprintf("Importing database using command: mysql -u%s -p%s -h%s %s < %s", 
-        $db_user, $db_passwd, $db_host, $db_name, $dump_file));
-      if (!provision_shell_exec("mysql -u%s -p%s -h%s %s < %s", $db_user, $db_passwd, $db_host, $db_name, $dump_file )) {
-        drush_set_error('PROVISION_DB_IMPORT_FAILED', dt("Database import failed: %output", array('%output' => join("\n", drush_shell_exec_output()))));
+      $cmd = sprintf("mysql --defaults-file=/dev/fd/3 %s", escapeshellcmd($db_name));
+      drush_log(sprintf("Importing database using command: %s", $cmd));
+      # pipe handling code, this is inspired by drush_provision_mysql_pre_provision_backup()
+      # we go through all this trouble to hide the password from the commandline, it's the most secure way (apart from writing a temporary file, which would create conflicts in parallel runs)
+     $mycnf = sprintf('[client]
+host=%s
+user=%s
+password=%s
+', $db_host, $db_user, $db_passwd);
+
+      $descriptorspec = array(
+        0 => array("file", $dump_file, "r"),
+        1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+        2 => array("pipe", "w"),  // stderr is a file to write to
+        3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials
+      );
+      $process = proc_open($cmd, $descriptorspec, $pipes);
+      $output = "";
+      if (is_resource($process)) {
+        fwrite($pipes[3], $mycnf);
+        fclose($pipes[3]);
+    
+        $output = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
+        // "It is important that you close any pipes before calling
+        // proc_close in order to avoid a deadlock"
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $return_value = proc_close($process);
+      } else {
+        // XXX: failed to execute? unsure when this happens
+        $return_value = -1;
+      }
+
+      if ($return_value != 0) {
+        drush_set_error('PROVISION_DB_IMPORT_FAILED', dt("Database import failed: %output", array('%output' => $output)));
       }
      }
    }
