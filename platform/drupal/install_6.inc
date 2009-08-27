@@ -305,19 +305,21 @@ function install_main() {
     }
   }
 
-  // profile-finished task
-  // Secondary locale import 
-  if (!empty($install_locale) && ($install_locale != 'en')) {
-    // Collect files to import for this language. Skip components
-    // already covered in the initial batch set.
-    $batch = locale_batch_by_language($install_locale, NULL, $install_locale_batch_components);
-    if (!empty($batch)) {
-      // Start a batch, switch to 'locale-remaining-batch' task. We need to
-      // set the variable here, because batch_process() redirects.
-      batch_set($batch);
-      $batch =& batch_get();
-      $batch['progressive'] = FALSE;
-      batch_process();
+  if ($task == 'profile-finished') {
+    // profile-finished task
+    // Secondary locale import 
+    if (!empty($install_locale) && ($install_locale != 'en')) {
+      // Collect files to import for this language. Skip components
+      // already covered in the initial batch set.
+      $batch = locale_batch_by_language($install_locale, NULL, $install_locale_batch_components);
+      if (!empty($batch)) {
+        // Start a batch, switch to 'locale-remaining-batch' task. We need to
+        // set the variable here, because batch_process() redirects.
+        batch_set($batch);
+        $batch =& batch_get();
+        $batch['progressive'] = FALSE;
+        batch_process();
+      }
     }
   }
 
