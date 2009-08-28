@@ -44,7 +44,7 @@ function provision_drupal_drush_engine_drupal() {
 /**
  * Initialize the platform / site
  *
- * This function is executed by provision_invoke, and is responsible
+ * This function is executed by drush_invoke, and is responsible
  * for populating the $data context array
  */
 function provision_drupal_drush_init($url = NULL) {

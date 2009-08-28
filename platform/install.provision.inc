@@ -7,7 +7,7 @@
 /**
  * Provision install command
  *
- * These are the hooks that will be executed by the provision_invoke function
+ * These are the hooks that will be executed by the drush_invoke function
  * when doing a provision_install.
  */
 
