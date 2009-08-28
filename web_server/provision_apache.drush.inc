@@ -15,7 +15,6 @@ function provision_apache_drush_init() {
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
   if ($command[0] == 'provision') {
-
     // Set up defines for platform
     $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
 
@@ -26,7 +25,6 @@ function provision_apache_drush_init() {
     $parts = explode("/", $path);
     array_pop($parts);
     $parent_path = drush_set_default('parent_path', implode("/" , $parts));
-
 
     drush_set_default('backup_path', $parent_path . '/backups');
     drush_set_default('config_path', $parent_path . '/config');
