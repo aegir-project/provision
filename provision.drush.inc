@@ -122,11 +122,16 @@ function provision_drush_command() {
  * Generate a provision.settings.php file to configure provision
  */
 function _provision_generate_config() {
-  drush_log(dt("Generating drushrc.php file"));
-  provision_path("chmod", drush_get_option('docroot_path') . '/drushrc.php', 0600,
-     dt('Changed permissions of drushrc.php to @confirm'),
-      dt('Could not change permissions of drushrc.php to @confirm'));
-
+  $exists = provision_path_exists(drush_get_option('docroot_path') . '/drushrc.php');
+  if ($exists) {
+    drush_log(dt("Found existing drushrc.php file"));
+    provision_path("chmod", drush_get_option('docroot_path') . '/drushrc.php', 0600,
+       dt('Changed permissions of drushrc.php to @confirm'),
+        dt('Could not change permissions of drushrc.php to @confirm'));
+  }
+  else {
+    drush_log(dt("Generating drushrc.php file"));
+  }
   provision_save_platform_data();
   provision_path("chmod", drush_get_option('docroot_path') . '/drushrc.php', 0400,
     dt('Changed permissions of drushrc.php to @confirm'),
