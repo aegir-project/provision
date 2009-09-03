@@ -42,40 +42,45 @@ function install_verify_settings() {
   return FALSE;
 }
 
-function install_send_welcome_mail($url, $profile, $language, $client_email) {
-  if ($client_email) {
-    // create the admin account
-    $account = user_load(1);
-    $edit['name'] = 'admin';
-    $edit['pass'] = user_password();
-    $edit['mail'] = $client_email;
-    $edit['status'] = 1;
+function install_create_admin_user($client_email = NULL) {
+  if (!$client_email) {
+    $client_email = 'webmaster@localhost';
+  }
+  // create the admin account
+  $account = user_load(1);
+  $edit['name'] = 'admin';
+  $edit['pass'] = user_password();
+  $edit['mail'] = $client_email;
+  $edit['status'] = 1;
 
-    // temporarily disable drupal's default mail notification
-    $prev = variable_get('user_mail_status_activated_notify', TRUE);
-    variable_set('user_mail_status_activated_notify', FALSE);
-    $account = user_save($account,  $edit);
-    variable_set('user_mail_status_activated_notify', $prev);
+  // temporarily disable drupal's default mail notification
+  $prev = variable_get('user_mail_status_activated_notify', TRUE);
+  variable_set('user_mail_status_activated_notify', FALSE);
+  $account = user_save($account,  $edit);
+  variable_set('user_mail_status_activated_notify', $prev);
+  return $account;
+}
 
-    // Mail one time login URL and instructions.
-    $from = variable_get('site_mail', ini_get('sendmail_from'));
-    $onetime = user_pass_reset_url($account);
-    $mail_params['variables'] = array(
+function install_send_welcome_mail($url, $account, $profile, $language, $client_email) {
+  // Mail one time login URL and instructions.
+  $from = variable_get('site_mail', ini_get('sendmail_from'));
+  $onetime = user_pass_reset_url($account);
+  $mail_params['variables'] = array(
       '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
       '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail, 
       '!date' => format_date(time()), '!login_uri' => url('user', array('absolute' => TRUE)), 
       '!edit_uri' => url('user/'. $account->uid .'/edit', array('absolute' => TRUE)));
 
-    $mail_success = drupal_mail('install', 'welcome-admin', $account->mail, user_preferred_language($account), $mail_params, $from, TRUE);
+  $mail_success = drupal_mail('install', 'welcome-admin', $account->mail, user_preferred_language($account), $mail_params, $from, TRUE);
 
-    if ($mail_success) {
-      drush_log(t('Sent welcome mail to @client', array('@client' => $client_email)), 'message');
-    }
-    else {
-      drush_log(t('Could not send welcome mail to @client', array('@client' => $client_email)));
-    }
-    drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
+  if ($mail_success) {
+    drush_log(t('Sent welcome mail to @client', array('@client' => $client_email)), 'message');
   }
+  else {
+    drush_log(t('Could not send welcome mail to @client', array('@client' => $client_email)));
+  }
+  drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
+}
 }
 
 function install_mail($key, &$message, $params) {
@@ -338,8 +343,9 @@ function install_main() {
   cache_clear_all();
   variable_set('install_profile', $profile);
 
+  $account = install_create_admin_user($url, $client_email);
   if ($client_email) {
-    install_send_welcome_mail($url, $profile, $install_locale, $client_email);
+    install_send_welcome_mail($url, $account, $profile, $instal_locale, $client_email);
   }
   variable_set('install_task', 'done');
 }
