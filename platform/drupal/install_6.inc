@@ -81,7 +81,6 @@ function install_send_welcome_mail($url, $account, $profile, $language, $client_
   }
   drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
 }
-}
 
 function install_mail($key, &$message, $params) {
   switch ($key) {
