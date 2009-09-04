@@ -344,7 +344,7 @@ function install_main() {
 
   $account = install_create_admin_user($url, $client_email);
   if ($client_email) {
-    install_send_welcome_mail($url, $account, $profile, $instal_locale, $client_email);
+    install_send_welcome_mail($url, $account, $profile, $install_locale, $client_email);
   }
   variable_set('install_task', 'done');
 }
