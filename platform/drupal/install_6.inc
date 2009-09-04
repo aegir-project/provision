@@ -71,7 +71,7 @@ function install_send_welcome_mail($url, $account, $profile, $language, $client_
       '!date' => format_date(time()), '!login_uri' => url('user', array('absolute' => TRUE)), 
       '!edit_uri' => url('user/'. $account->uid .'/edit', array('absolute' => TRUE)));
 
-  $mail_success = drupal_mail('install', 'welcome-admin', $account->mail, user_preferred_language($account), $mail_params, $from, TRUE);
+  $mail_success = drupal_mail('install', 'welcome-admin', $client_email, user_preferred_language($account), $mail_params, $from, TRUE);
 
   if ($mail_success) {
     drush_log(t('Sent welcome mail to @client', array('@client' => $client_email)), 'message');
