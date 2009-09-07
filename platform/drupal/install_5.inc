@@ -36,7 +36,6 @@ function install_verify_drupal() {
  */
 function install_verify_settings() {
   global $db_prefix, $db_type, $db_url;
-
   // Verify existing settings (if any).
   if ($db_url != 'mysql://username:password@localhost/databasename') {
     // We need this because we want to run form_get_errors.
@@ -109,7 +108,7 @@ function install_send_welcome_mail($url, $account, $profile, $language, $client_
     $body = _user_mail_text('pass_body', $variables);
   }
 
-  $mail_success = drupal_mail($mailkey, $account->mail, $subject, $body, $from);
+  $mail_success = drupal_mail($mailkey, $client_email, $subject, $body, $from);
 
   if ($mail_success) {
     drush_log(t('Sent welcome mail to @client', array('@client' => $client_email)), 'message');
@@ -118,12 +117,12 @@ function install_send_welcome_mail($url, $account, $profile, $language, $client_
     drush_log(t('Could not send welcome mail to @client', array('@client' => $client_email)));
   }
   drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
-
 }
 
 function install_main() {
   require_once './includes/bootstrap.inc';
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
+
   // This must go after drupal_bootstrap(), which unsets globals!
   global $profile, $install_locale, $client_email;
   require_once './modules/system/system.install';
@@ -165,7 +164,7 @@ function install_main() {
   if ($severity == REQUIREMENT_ERROR) {
     foreach ($requirements as $requirement) {
       if (isset($requirement['severity']) && $requirement['severity'] == REQUIREMENT_ERROR) {
-        drupal_set_message($requirement['descristion'] .' ('. st('Currently using !item !version', array('!item' => $requirement['title'], '!version' => $requirement['value'])) .')', 'error');
+        drupal_set_message($requirement['description'] .' ('. st('Currently using !item !version', array('!item' => $requirement['title'], '!version' => $requirement['value'])) .')', 'error');
       }
     }
 
@@ -199,9 +198,10 @@ function install_main() {
   variable_set('date_default_timezone', $tz_offset);
 
   variable_set('install_profile', $profile);
+
   $account = install_create_admin_user($url, $client_email);
   if ($client_email) {
-    install_send_welcome_mail($url, $account, $profile, $language, $client_email);
+    install_send_welcome_mail($url, $account, $profile, $install_locale, $client_email);
   }
 }
 install_main();

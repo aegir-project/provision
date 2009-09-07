@@ -16,9 +16,9 @@ case 443:
   $base_url = 'https://' . $GLOBALS['url'];
   break;
 default:
-  $base_url = 'http://' . $GLOBALS['url'] . ':' .  drush_get_option('site_port');
+  $base_url = 'http://' . $GLOBALS['url'] . ':' . drush_get_option('site_port');
   break;
-}   
+}
 $GLOBALS['base_url'] = $base_url;
 
 require_once 'includes/install.inc';
@@ -95,40 +95,6 @@ function install_send_welcome_mail($url, $account, $profile, $language, $client_
   drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
 }
 
-function install_mail($key, &$message, $params) {
-  switch ($key) {
-    case 'welcome-admin':
-      // allow the profile to override welcome email text
-      if (file_exists("./profiles/$profile/provision_welcome_mail.inc")) {
-        require_once "./profiles/$profile/provision_welcome_mail.inc";
-        $custom = TRUE;
-      }
-      elseif (file_exists(dirname(__FILE__) . '/../provision_welcome_mail.inc')) { 
-        /** use the module provided welcome email
-         * We can not use drupal_get_path here,
-         * as we are connected to the provisioned site's database
-         */
-        require_once dirname(__FILE__) . '/../provision_welcome_mail.inc';
-        $custom = TRUE;
-      }
-      else {
-        // last resort use the user-pass mail text
-        $custom = FALSE;
-      }
-
-      if ($custom) {
-        $message['subject'] = st($mail['subject'], $params['variables']);
-        $message['body'] = st($mail['body'], $params['variables']);
-      }
-      else {
-        $message['subject'] = _user_mail_text('pass_subject', $params['variables']);
-        $message['body'] = _user_mail_text('pass_body', $params['variables']);
-      }
-
-      break;
-    }
-}
-
 function install_main() {
   require_once './includes/bootstrap.inc';
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
@@ -166,13 +132,15 @@ function install_main() {
     $conf['cache_inc'] = './includes/cache.inc';
 
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_DATABASE);
-
+    // Check if Drupal is installed.
     if (install_verify_drupal()) {
-      return drush_set_error('PROVISION_DRUPAL_SITE_INSTALLED');
+      drush_set_error('PROVISION_DRUPAL_SITE_INSTALLED', st('Site is already installed'));
+      return FALSE;
     }
   }
   else {
-    return drush_set_error('PROVISION_CONFIG_NOT_VALID');
+    drush_set_error('PROVISION_CONFIG_NOT_VALID', st('Config file could not be loaded'));
+    return FALSE;
   }
 
 
@@ -192,6 +160,7 @@ function install_main() {
    */
   $requirements = drupal_check_profile($profile);
   $severity = drupal_requirements_severity($requirements);
+
   // If there are issues, report them.
   if ($severity == REQUIREMENT_ERROR) {
     foreach ($requirements as $requirement) {
@@ -218,7 +187,7 @@ function install_main() {
   }
 
   // Verify existence of all required modules.
-  $modules = drupal_verify_profile($profile, $language);
+  $modules = drupal_verify_profile($profile, $install_locale);
 
   if (!$modules) {
     return drush_set_error('PROVISION_DRUPAL_INSTALL_FAILED');
