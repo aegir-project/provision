@@ -1,20 +1,12 @@
 <?php
 
 /**
- * Restore command implementation
+ * Clone command implementation
  *
  * This command when called will 
  *   1. Make a backup of the current site, before modifications are made.
- *   2. Extract the backup that is being cloned to to a temporary folder in the sites directory.
- *   3. Create a new database, belonging to the site's user, and switch it around with the current site's database.
- *   4. Import the old database and site.php details.
- *   5. Regenerate configuration files.
- *   6. TODO: diagnostic to test that everything is ok?
- *   7. Restart apache so the previous site is available again.
+ *   2. Execute 'provision deploy' to build the new site using the backup of the old site.
  *
- * If at any time an error occurs, before step 9. It should reverse all the changes it has made,
- * and leave the current site directory and database in the right place, and remove all cruft that
- * was created by this process.
  */
 
 /**
