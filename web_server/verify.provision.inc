@@ -8,6 +8,7 @@ function drush_provision_apache_provision_verify($url = null) {
     $data['extra_config'] = "# Extra configuration from modules:\n";
     $data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_dir_config', $data));
     _provision_apache_create_config('platform_' . $options['platform'] . '.conf', $data, _provision_apache_platform_template());
+    _provision_apache_create_server_config($url);
   }
   else {
     _provision_apache_create_vhost_config($url);

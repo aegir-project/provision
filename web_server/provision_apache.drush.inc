@@ -83,6 +83,10 @@ function _provision_apache_delete_vhost_config($url) {
  */
 function _provision_apache_create_vhost_config($url, $template = NULL) {
   $options = drush_get_merged_options();
+  // backward compatibility with 0.3
+  if (!$options['site_port']) { 
+    $options['site_port'] = 80;
+  }
   if (is_null($template)) {
     $template = _provision_apache_default_template();
   }
@@ -93,6 +97,19 @@ function _provision_apache_create_vhost_config($url, $template = NULL) {
   $options['extra_config'] = "# Extra configuration from modules:\n";
   $options['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_vhost_config', $url, $options));
   return _provision_apache_create_config($url, $options, $template);
+}
+
+function _provision_apache_create_server_config($url) {
+  $options = drush_get_merged_options();
+  $template = _provision_apache_default_server_template();
+  
+  $options['extra_config'] = "# Extra configuration from modules:\n";
+  $options['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_server_config', $url, $options));
+  return _provision_apache_create_config($options['web_host'] .".server", $options, $template);
+}
+
+function _provision_apache_default_server_template() {
+    return file_get_contents(dirname(__FILE__) ."/provision_apache_server.tpl.php");
 }
 
 /**

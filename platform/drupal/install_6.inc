@@ -8,6 +8,18 @@ $GLOBALS['url'] = drush_get_option('site_url');
 $GLOBALS['profile'] = drush_get_option('profile');
 $GLOBALS['install_locale'] = drush_get_option('language');
 $GLOBALS['client_email'] = drush_get_option('client_email');
+switch(drush_get_option('site_port')) {
+case 80:
+  $base_url = 'http://' . $GLOBALS['url'];
+  break;
+case 443:
+  $base_url = 'https://' . $GLOBALS['url'];
+  break;
+default:
+  $base_url = 'http://' . $GLOBALS['url'] . ':' .  drush_get_option('site_port');
+  break;
+}   
+$GLOBALS['base_url'] = $base_url;
 
 require_once 'includes/install.inc';
 define('MAINTENANCE_MODE', 'install');
@@ -62,6 +74,7 @@ function install_create_admin_user($client_email = NULL) {
 }
 
 function install_send_welcome_mail($url, $account, $profile, $language, $client_email) {
+  global $base_url;
   // Mail one time login URL and instructions.
   $from = variable_get('site_mail', ini_get('sendmail_from'));
   $onetime = user_pass_reset_url($account);

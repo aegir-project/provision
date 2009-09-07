@@ -1,4 +1,4 @@
-<VirtualHost *:80>
+<VirtualHost *:<?php print $site_port; ?>>
 <?php if ($site_mail) : ?>
   ServerAdmin <?php  print $site_mail; ?> 
 <?php endif;?>
