@@ -107,6 +107,14 @@ function provision_drush_command() {
       '/path/to/platform' => dt('The platform to migrate the site to.')),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
+
+  $items['provision clone'] = array(
+    'description' => 'Clone a site between platforms.',
+    'arguments' => array('domain.com' => dt('The domain to clone. Any outstanding updates will be run.'),
+      'new.domain.com' => dt('The new domain name to use.'),
+      '/path/to/platform' => dt('The platform to clone the site to.')),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
+  );
  
   $items['provision delete'] = array(
     'description' => 'Delete a site.',
