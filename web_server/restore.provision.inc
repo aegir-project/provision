@@ -5,7 +5,7 @@
  */
 function drush_provision_apache_pre_provision_restore($url) {
   drush_set_option('redirect_url', drush_get_option('web_maintenance_url'));
-  _provision_apache_create_vhost_config($url, _provision_apache_redirect_template());
+  _provision_apache_create_vhost_config($url, _provision_apache_disabled_template());
   _provision_apache_restart_apache();
 }
 

@@ -357,15 +357,17 @@ function _provision_drupal_maintain_aliases($url) {
     // First we delete all the old aliases
     _provision_drupal_delete_aliases(drush_get_option('aliases', array(), 'site'));
 
-    $aliases = drush_get_option('aliases');
-    if (!is_array($aliases)) {
-      $aliases = explode(",", $aliases);
-    }
-    foreach($aliases as $alias) {
-      if (trim($alias)) {
-        provision_path("symlink", $url, drush_get_option('docroot_path') . "/sites/" . $alias, 
-          dt("Created symlink for alias @alias", array("@alias" => $alias)), 
-          dt("Could not create symlink for alias @alias", array("@alias" => $alias)));
+    if (!drush_get_option('redirection')) {
+      $aliases = drush_get_option('aliases');
+      if (!is_array($aliases)) {
+        $aliases = explode(",", $aliases);
+      }
+      foreach($aliases as $alias) {
+        if (trim($alias)) {
+          provision_path("symlink", $url, drush_get_option('docroot_path') . "/sites/" . $alias, 
+            dt("Created symlink for alias @alias", array("@alias" => $alias)), 
+            dt("Could not create symlink for alias @alias", array("@alias" => $alias)));
+        }
       }
     }
   }

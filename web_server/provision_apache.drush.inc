@@ -58,10 +58,17 @@ function _provision_apache_default_template() {
 }
 
 /**
- * The default template for disabled sites
+ * The template for site redirection
  */
 function _provision_apache_redirect_template() {
   return file_get_contents(dirname(__FILE__) ."/provision_apache_vhost_redirect.tpl.php");
+}
+
+/**
+ * The default template for disabled sites
+ */
+function _provision_apache_disabled_template() {
+  return file_get_contents(dirname(__FILE__) ."/provision_apache_vhost_disabled.tpl.php");
 }
 
 /**
@@ -89,6 +96,9 @@ function _provision_apache_create_vhost_config($url, $template = NULL) {
   }
   if (is_null($template)) {
     $template = _provision_apache_default_template();
+  }
+  if ($options['redirection']) {
+    $template .= _provision_apache_redirect_template();
   }
   if (!is_array($options['aliases'])) {
     $options['aliases'] = explode(",", $options['aliases']);
