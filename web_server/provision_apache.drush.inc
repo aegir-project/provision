@@ -11,6 +11,12 @@
  * to ensure that the sites are getting loaded up correctly.
  */
 
+/**
+ * Implementation of hook_drush_init()
+ *
+ * This sets a few default drush options by automatically guessing
+ * proper defaults and settings based on the environment.
+ */
 function provision_apache_drush_init() {
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
@@ -140,6 +146,17 @@ function _provision_apache_create_vhost_config($url, $template = NULL) {
   return _provision_apache_create_config($file, $options, $template);
 }
 
+/**
+ * Create a system-wide Apache configuration file.
+ *
+ * This creates a configuration file without any <VirtualHost> headers
+ * so that the configuration applies to all VirtualHost (in
+ * general). It calls hook_provision_apache_server_config() to allow
+ * third party extensions to add stuff to the configuration file.
+ *
+ * @see _provision_apache_default_server_template()
+ * @see _provision_apache_create_config()
+ */
 function _provision_apache_create_server_config($url) {
   $options = drush_get_merged_options();
   $template = _provision_apache_default_server_template();
@@ -149,12 +166,29 @@ function _provision_apache_create_server_config($url) {
   return _provision_apache_create_config($options['web_host'] .".server", $options, $template);
 }
 
+/**
+ * default template for server-wide configurations
+ * 
+ * @see _provision_apache_create_server_config()
+ */
 function _provision_apache_default_server_template() {
     return file_get_contents(dirname(__FILE__) ."/provision_apache_server.tpl.php");
 }
 
 /**
  * Write an apache configuration file
+ *
+ * Write an apache configuration file to the Aegir configuration
+ * directory `vhost_path` (generally /var/aegir/config/vhost.d).
+ *
+ * @param $file
+ *    the name of the file in the directory
+ * @param $data
+ *    name => value pairs of settings to be passed to the template
+ * @param $template
+ *    the template expanded with provision_render_config()
+ *
+ * @see provision_render_config()
  */
 function _provision_apache_create_config($file, $data, $template) {
   drush_log(dt("Generating apache host configuration file %file.", array('%file' => $file)));
