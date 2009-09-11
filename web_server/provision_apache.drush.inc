@@ -87,6 +87,25 @@ function _provision_apache_delete_vhost_config($url) {
 
 /**
  * Generate virtual host file
+ *
+ * This will create a VirtualHost configuration file for the domain
+ * $url. This is really a stub to _create_config() that sets up the
+ * options properly, guesses the right template and fires a hook to
+ * allow other modules to add lines to the default config, using
+ * hook_provision_apache_vhost_config(). Parameters in the template
+ * are expanded based on the options available through
+ * drush_get_merged_options().
+ *
+ * @param $url
+ *    the domain to generate the configuration file for
+ * @param $template
+ *    the template to use, if NULL, the default will be used
+ *
+ * @see _provision_apache_default_template()
+ * @see _provision_apache_redirect_template()
+ * @see _provision_apache_create_config()
+ * @see hook_provision_apache_vhost_config()
+ * @see drush_get_merged_options()
  */
 function _provision_apache_create_vhost_config($url, $template = NULL) {
   $options = drush_get_merged_options();
