@@ -106,7 +106,19 @@ function _provision_apache_create_vhost_config($url, $template = NULL) {
 
   $options['extra_config'] = "# Extra configuration from modules:\n";
   $options['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_vhost_config', $url, $options));
-  return _provision_apache_create_config($url, $options, $template);
+  /* one file per virtualhost name/port combination
+   *
+   * the rationale here is that we can have different sites on
+   * different ports that will be generated at different times, so we
+   * will not be able to generate a full config file for all ports in
+   * one pass
+   */
+  $file = $url . '_' . $options['site_port'];
+  // backward compatibility with 0.3
+  if (provision_path_exists(drush_get_option('vhost_path') .'/'. $url)) {
+    rename(drush_get_option('vhost_path') .'/'. $url, drush_get_option('vhost_path') .'/'. $file);
+  }
+  return _provision_apache_create_config($file, $options, $template);
 }
 
 function _provision_apache_create_server_config($url) {
