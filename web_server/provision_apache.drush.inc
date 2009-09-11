@@ -91,7 +91,7 @@ function _provision_apache_delete_vhost_config($url) {
 function _provision_apache_create_vhost_config($url, $template = NULL) {
   $options = drush_get_merged_options();
   // backward compatibility with 0.3
-  if (!$options['site_port']) { 
+  if (!$options['site_port'] || $options['site_port'] < 1 || $options['site_port'] > 66535) { 
     $options['site_port'] = 80;
   }
   if (is_null($template)) {
