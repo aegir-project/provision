@@ -88,7 +88,18 @@ function _provision_apache_platform_template() {
  * Delete virtual host file
  */
 function _provision_apache_delete_vhost_config($url) {
-  provision_path("unlink", drush_get_option('vhost_path') ."/$url", TRUE, dt("Removed apache virtual host configuration"));
+  // backward compatibility with 0.3
+  if (provision_path_exists(drush_get_option('vhost_path') .'/'. $url)) {
+    provision_path("unlink", drush_get_option('vhost_path') ."/" . $url, TRUE, dt("Removed apache virtual host configuration"));
+  } else {
+    $options = drush_get_merged_options();
+    // backward compatibility with 0.3
+    if (!$options['site_port'] || $options['site_port'] < 1 || $options['site_port'] > 66535) { 
+      $options['site_port'] = 80;
+    }
+    $file = $url . '_' . $options['site_port'];
+    provision_path("unlink", drush_get_option('vhost_path') ."/" . $file, TRUE, dt("Removed apache virtual host configuration"));
+  }    
 }
 
 /**
