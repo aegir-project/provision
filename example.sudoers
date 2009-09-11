@@ -1,0 +1,7 @@
+# Sample sudoers file for Aegir
+# 
+# this file is designed to be installed in /etc/sudoers.d in sudo
+# 1.7.2p1 or later, which provide a #includedir directive.
+#aegir ALL=NOPASSWD: /usr/sbin/apachectl
+#aegir ALL=NOPASSWD: /usr/sbin/apache2ctl
+
