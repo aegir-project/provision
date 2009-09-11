@@ -94,7 +94,7 @@ function _provision_apache_delete_vhost_config($url) {
   } else {
     $options = drush_get_merged_options();
     // backward compatibility with 0.3
-    if (!$options['site_port'] || $options['site_port'] < 1 || $options['site_port'] > 66535) { 
+    if (!$options['site_port'] || $options['site_port'] < 1 || $options['site_port'] > 65536) { 
       $options['site_port'] = 80;
     }
     $file = $url . '_' . $options['site_port'];
