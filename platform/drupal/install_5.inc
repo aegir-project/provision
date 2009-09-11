@@ -8,18 +8,21 @@ $GLOBALS['url'] = drush_get_option('site_url');
 $GLOBALS['profile'] = drush_get_option('profile');
 $GLOBALS['install_locale'] = drush_get_option('language');
 $GLOBALS['client_email'] = drush_get_option('client_email');
-switch(drush_get_option('site_port')) {
-case 80:
-  $base_url = 'http://' . $GLOBALS['url'];
-  break;
-case 443:
-  $base_url = 'https://' . $GLOBALS['url'];
-  break;
-default:
-  $base_url = 'http://' . $GLOBALS['url'] . ':' . drush_get_option('site_port');
-  break;
+
+// url generation code, should be factored out
+$proto = drush_get_option('ssl') ? 'https' : 'http';
+if (drush_get_option('site_port') == 80) {
+  if (drush_get_option('ssl')) {
+    $GLOBALS['base_url'] = $proto . '://' . $GLOBALS['url'] . ':80';
+  }
 }
-$GLOBALS['base_url'] = $base_url;
+elseif (drush_get_option('site_port') == 443) {
+  if (!drush_get_option('ssl')) {
+    $GLOBALS['base_url'] = $proto . '://' . $GLOBALS['url'] . ':443';
+  }
+} else {
+  $GLOBALS['base_url'] = $proto . '://' . $GLOBALS['url'] . ':' . drush_get_option('site_port');
+}
 
 require_once 'includes/install.inc';
 
