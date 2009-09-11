@@ -21,7 +21,7 @@
  */
 function provision_ssl_provision_apache_vhost_config($url, $options) {
   if ($options['ssl']) {
-    if ($options['ssl_redirect'] && provision_path('exists', drush_get_option('vhost_path') . '/' . $url . '_80', FALSE, NULL, t("The redirection port is not available, no redirction installed"))) {
+    if ($options['ssl_redirect'] && provision_path('exists', drush_get_option('vhost_path') . '/' . $url . '_80', FALSE, NULL, t("The redirection port is not available, no redirection installed"))) {
       $newoptions = $options;
       $newoptions['site_port'] = 80;
       _provision_apache_create_config($url . '_80', $newoptions, _provision_apache_redirect_template());
