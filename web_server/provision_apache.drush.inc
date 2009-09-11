@@ -99,7 +99,8 @@ function _provision_apache_delete_vhost_config($url) {
     }
     $file = $url . '_' . $options['site_port'];
     provision_path("unlink", drush_get_option('vhost_path') ."/" . $file, TRUE, dt("Removed apache virtual host configuration"));
-  }    
+  }
+  drush_command_invoke_all('provision_apache_delete_vhost', $url, $options);
 }
 
 /**

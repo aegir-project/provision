@@ -31,3 +31,14 @@ function provision_ssl_provision_apache_vhost_config($url, $options) {
     return NULL;
   }
 }
+
+/**
+ * Implementation of hook_provision_apache_delete_vhost()
+ *
+ * This will delete the redirection vhost if it was created.
+ */
+function provision_ssl_provision_apache_delete_vhost($url, $options) {
+  if ($options['site_port'] == 443 && $options['ssl_redirect']) {
+    provision_path('unlink', drush_get_option('vhost_path') . '/' . $url . '_80', TRUE, NULL, t("Failed deleting redirection vhost."));
+  }
+}
