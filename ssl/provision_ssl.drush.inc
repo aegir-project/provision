@@ -20,7 +20,7 @@
  * SSLEngine On
  */
 function provision_ssl_provision_apache_vhost_config($url, $options) {
-  if ($options['ssl']) {
+  if (!empty($options['ssl'])) {
     if ($options['ssl_redirect'] && provision_path('exists', drush_get_option('vhost_path') . '/' . $url . '_80', FALSE, NULL, t("The redirection port is not available, no redirection installed"))) {
       $newoptions = $options;
       $newoptions['site_port'] = 80;
