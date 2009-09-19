@@ -2,9 +2,9 @@
     <?php if ($site_mail) : ?>
       ServerAdmin <?php  print $site_mail; ?> 
     <?php endif;?>
-    
-    ServerName <?php print array_pop($aliases); ?>
 
+    ServerName <?php print $site_url; ?>
+    
     <?php if (is_array($aliases)) :
      foreach ($aliases as $alias) : ?>
        ServerAlias <?php print $alias; ?>
