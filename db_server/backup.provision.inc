@@ -59,7 +59,7 @@ password=%s
 
   $result = ($return_value == 0);
   if (!$result && !drush_get_option('force', false)) {
-    drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not back up sites directory for drupal"));
+    drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not generate database backup from mysqldump"));
   }
 }
 
