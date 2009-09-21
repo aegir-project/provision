@@ -149,7 +149,7 @@ function _provision_recursive_delete($path) {
     }
 
     $rm = provision_path('rmdir', $path, TRUE,
-      dt('Deleting @path directory sucessful.', array('@path' => $path)),
+      dt('Deleting @path directory successful.', array('@path' => $path)),
       dt('Deleting @path directory failed.', array('@path' => $path)));
 
     $ret = $ret && $rm;
