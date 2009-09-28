@@ -338,7 +338,7 @@ function _provision_drupal_get_cvs_versions($files) {
       $project['filename'] = $file->filename;
       $project['name'] = $file->name;
       $file->info['description'] = str_replace("\n", "", $file->info['description']);
-      if (empty($project['project'])) {
+      if (!isset($project['project'])) {
         $project['project'] = cvs_deploy_get_project_name($project);
       }
       _cvs_deploy_version_alter($file->info['version'], $project);
@@ -476,6 +476,9 @@ function provision_drupal_system_map() {
 
     _provision_cvs_deploy($module);
     $module->filename = realpath($module->filename);
+    if ($module->schema_version == -1) {
+      $module->schema_version = 0;
+    }
     $packages['modules'][$module->name] = $module;
   }
 
@@ -487,6 +490,11 @@ function provision_drupal_system_map() {
     $theme->info = provision_parse_info_file($info_file);
     _provision_cvs_deploy($theme);
     $theme->filename = realpath($theme->filename);
+
+    if ($theme->schema_version == -1) {
+      $theme->schema_version = 0;
+    }
+
     $packages['themes'][$theme->name] = $theme;
   }
   drush_log(dt("Found !count themes", array('!count' => sizeof($packages['themes']))));
@@ -528,7 +536,7 @@ function _provision_drupal_find_modules($scope, $key = '') {
   }
   foreach ($files as $name => $info) {
     $install_file = sprintf("%s/%s.install", dirname($info->filename), $name);
-    $schema_version = 1;
+    $schema_version = 0;
     if (file_exists($install_file)) {
       $source = file_get_contents(trim($install_file));
       $source = str_replace("\r\n", "\n", $source);
