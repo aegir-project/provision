@@ -545,7 +545,7 @@ function _provision_drupal_find_modules($scope, $key = '') {
         preg_match_all('!function\s*&?([a-zA-Z0-9_]+)_update_([0-9]+)\(.*?\s*\{!', $source, $function_matches);
       
       if (sizeof($function_matches[0])) {
-        $schema_version = max($function_matches[2]) + 1;
+        $schema_version = max($function_matches[2]);
       }
     }
     $info_file = sprintf("%s/%s.info", dirname($info->filename), $name);
