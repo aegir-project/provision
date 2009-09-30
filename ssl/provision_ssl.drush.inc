@@ -39,6 +39,6 @@ function provision_ssl_provision_apache_vhost_config($url, $options) {
  */
 function provision_ssl_provision_apache_delete_vhost($url, $options) {
   if ($options['ssl'] && $options['ssl_redirect']) {
-    provision_path('unlink', drush_get_option('vhost_path') . '/' . $url . '_80', TRUE, NULL, t("Failed deleting redirection vhost."));
+    provision_path('unlink', drush_get_option('vhost_path') . '/' . $url . '_80', TRUE, NULL, dt("Failed deleting redirection vhost."));
   }
 }
