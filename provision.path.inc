@@ -226,24 +226,29 @@ function provision_path_chgrp_recursive($path, &$gid, &$reason) {
 function provision_path_switch_paths($path1, &$path2, &$reason) {
   //TODO : Add error reasons.
   $temp = $path1 .'.tmp';
-  if (rename($path1, $temp)) { 
+  if (!file_exists($path1)) {
+    return rename($path2, $path1);
+  }
+  elseif (!file_exists($path2)) {
+    return rename($path1, $path2);
+  }
+  elseif (rename($path1, $temp)) { 
     if (rename($path2, $path1)) {
       if (rename($temp, $path2)) {
         return $path2; // path1 is now path2
       }
       else {
         // same .. just in reverse
-        rename($path1, $path2);
-        rename($temp, $path1);
+        return rename($path1, $path2) && rename($temp, $path1);
       }
     }
     else {
       // same .. just in reverse
-      rename($temp, $path1);
+      return rename($temp, $path1);
     }   
 
   }
-  return $path1;
+  return FALSE;
 }
 
 function provision_path_extract($path, &$target, &$reason) {
