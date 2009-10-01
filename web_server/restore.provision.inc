@@ -21,5 +21,5 @@ function drush_provision_apache_post_provision_restore($url) {
 
 // The old db details should have been switched back by the mysql rollback at this point.
 function drush_provision_apache_post_provision_restore_rollback($url) {
-  provision_apache_post_provision_restore($url);
+  drush_provision_apache_post_provision_restore($url);
 }
