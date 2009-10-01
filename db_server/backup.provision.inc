@@ -1,6 +1,8 @@
 <?php
 
 function drush_provision_mysql_pre_provision_backup($url = NULL) {
+  # set the umask to 077 so that the dump itself is generated so it's non-readable by the webserver
+  umask(0077);
   drush_log("Generating mysql dump for $url.", 'backup');
   # mixed copy-paste of drush_shell_exec and provision_shell_exec
   $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 -rsites/%s/database.sql %s", escapeshellcmd($url), escapeshellcmd(drush_get_option('db_name'))); 
@@ -61,11 +63,8 @@ password=%s
   if (!$result && !drush_get_option('force', false)) {
     drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not generate database backup from mysqldump"));
   }
-  else {
-    provision_path("chmod", 'sites/' . escapeshellcmd($url) . '/database.sql', 0600,
-      dt('Changed permissions of database dump to be non-readable by webserver'),
-      dt('Could not change permissions of database dump to be non-readable by webserver'));
-  }
+  # reset the umask to normal permissions
+  umask(0022);
 }
 
 function drush_provision_mysql_pre_provision_backup_rollback($url = NULL) {
