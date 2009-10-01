@@ -61,6 +61,11 @@ password=%s
   if (!$result && !drush_get_option('force', false)) {
     drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not generate database backup from mysqldump"));
   }
+  else {
+    provision_path("chmod", 'sites/' . escapeshellcmd($url) . '/database.sql', 0600,
+      dt('Changed permissions of database dump to be non-readable by webserver'),
+      dt('Could not change permissions of database dump to be non-readable by webserver'));
+  }
 }
 
 function drush_provision_mysql_pre_provision_backup_rollback($url = NULL) {
