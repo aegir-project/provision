@@ -57,6 +57,7 @@ function install_verify_settings() {
 }
 
 function install_create_admin_user($client_email = NULL) {
+  global $client_email;
   if (!$client_email) {
     $client_email = 'webmaster@localhost';
   }
