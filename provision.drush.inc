@@ -121,6 +121,15 @@ function provision_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
+  $items['hostmaster migrate'] = array(
+    'description' => dt('Migrate an instance of the Hostmaster front end to a new platform'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
+    'arguments' => array(
+      'example.com' => dt('The name of the site to migrate'),
+      '/path/to/platform' => dt('The platform to migrate the site to.')
+    ),
+  );
+
  
   return $items;
 }
