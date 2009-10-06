@@ -130,10 +130,36 @@ function provision_drush_command() {
     ),
   );
 
- 
+  $items['hostmaster make'] = array(
+    'description' => dt('Build a platform containing the Hostmaster user interface for provision.'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+    'arguments' => array(
+      '/path/to/platform' => dt('The path to create the platform in.')
+    ),
+  );
+
+  
+  $items['hostmaster park'] = array(
+    'description' => dt('Prepare the site to be migrated to a new platform.'),
+    'arguments' => array(
+      'example.com' => dt('The url of the site being migrated.')),
+  );
+
+  $items['hostmaster unpark'] = array(
+    'description' => dt('Complete the migration of the site to a new platform.'),
+    'arguments' => array(
+      'example.com' => dt('The url of the site being migrated.')),
+  );
+
+
   return $items;
 }
 
+
+function drush_provision_hostmaster_make($platform) {
+  drush_backend_invoke('make', array(dirname(__FILE__) . '/aegir.make', $platform));
+
+}
 
 /**
  * Generate a provision.settings.php file to configure provision
