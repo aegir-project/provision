@@ -1,9 +1,10 @@
 <?php
-// $Id$
+ // $Id$
 
 /**
- * @file Package management code for Drupal 6 
+ * @file Package management code for Drupal 7 
  */
+
 
 /**
  * Find themes in a certain scope
@@ -110,8 +111,8 @@ function _provision_drupal_parse_info_file($filename) {
 
 function _provision_system_query($type) {
   $entries = array();
-  $result = db_query("SELECT * FROM {system} WHERE type='%s'", $type);
-  while ($entry = db_fetch_object($result)) {
+  $result = db_query("SELECT * FROM {system} WHERE type=:type", array(':type' => $type));
+  foreach ($result as $entry) { 
     $entries[] = $entry;
   }
   return $entries;

@@ -468,9 +468,8 @@ function provision_drupal_system_map() {
   $profile = drush_get_option('profile');
   $packages['profiles'][$profile] = $profiles[$profile];
   $packages['profiles'][$profile]->status = 1;
-  
-  $result = db_query("SELECT * FROM {system} WHERE type='module'");
-  while ($module = db_fetch_object($result)) {
+
+  foreach (_provision_system_query("module") as $module) { 
     $info_file = sprintf("%s/%s.info", dirname($module->filename), $module->name);
     $module->info = provision_parse_info_file($info_file);
 
@@ -484,8 +483,7 @@ function provision_drupal_system_map() {
 
   drush_log(dt("Found !count modules", array('!count' => sizeof($packages['modules']))));
 
-  $result = db_query("SELECT * FROM {system} WHERE type='theme'");
-  while ($theme = db_fetch_object($result)) {
+  foreach (_provision_system_query("theme") as $theme) { 
     $info_file = sprintf("%s/%s.info", dirname($theme->filename), $theme->name);
     $theme->info = provision_parse_info_file($info_file);
     _provision_cvs_deploy($theme);

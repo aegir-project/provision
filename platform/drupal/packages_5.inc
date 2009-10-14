@@ -57,3 +57,13 @@ function _provision_drupal_find_themes($scope, $key = '') {
 
   return $files;
 }
+
+
+function _provision_system_query($type) {
+  $entries = array();
+  $result = db_query("SELECT * FROM {system} WHERE type='%s'", $type);
+  while ($entry = db_fetch_object($result)) {
+    $entries[] = $entry;
+  }
+  return $entries;
+}

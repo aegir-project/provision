@@ -13,8 +13,7 @@
  */
 function _provision_cvs_deploy(&$file) {
   $file->filename = realpath($file->filename);
-  $project = $file->info['project'];
-  $project = ($project) ? $project : _provision_cvs_deploy_get_project_name($file);
+  $project = (isset($file->info['project'])) ? $file->info['project'] : _provision_cvs_deploy_get_project_name($file);
   $file->project = $project;
   _provision_cvs_deploy_version_alter($file->info['version'], $file);
   $file->version = $file->info['version'];
