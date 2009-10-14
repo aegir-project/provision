@@ -1,5 +1,5 @@
 <?php
-// $Id
+// $Id$
 
 $new_url = drush_get_option('site_url');
 $old_url = drush_get_option('site_url', 'site');
