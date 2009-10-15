@@ -84,7 +84,7 @@ function _provision_cvs_deploy_version_from_tag($tag) {
   // If there's nothing, it must be a HEAD checkout, and therefore,
   // we have no idea what the version is.
   if (!$tag || $tag == 'HEAD') {
-    $version = 'HEAD';
+    $version = drush_drupal_major_version() . '.x-dev';
   }
   // See if it's a Drupal core release
   elseif (preg_match('@^DRUPAL-(\d+)-(\d+)$@', $tag, $match)) {
