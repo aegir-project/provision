@@ -137,7 +137,7 @@ function _provision_apache_create_vhost_config($url, $template = NULL) {
   if (!empty($options['redirection'])) {
     $template .= _provision_apache_redirect_template();
   }
-  if (!is_array($options['aliases'])) {
+  if ($options['aliases'] && !is_array($options['aliases'])) {
     $options['aliases'] = explode(",", $options['aliases']);
   }
 
