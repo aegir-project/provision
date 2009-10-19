@@ -181,6 +181,11 @@ function _provision_drupal_default_template() {
 function _provision_drupal_create_settings_file($url = NULL) {
   $options = drush_get_merged_options();
 
+  // As of Drupal 7 there is no more mysqli type
+  if (drush_drupal_major_version() >= 7) {
+    $options['db_type'] = ($options['db_type'] == 'mysqli') ? 'mysql' : $options['db_type'];
+  }
+
   $options['extra_config'] = "# Extra configuration from modules:\n";
   foreach (drush_command_implements('provision_drupal_config') as $module) {
     $options['extra_config'] .= "# -- $module settings --\n";

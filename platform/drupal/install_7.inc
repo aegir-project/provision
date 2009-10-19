@@ -9,44 +9,7 @@ $GLOBALS['profile'] = drush_get_option('profile');
 $GLOBALS['install_locale'] = drush_get_option('language');
 $GLOBALS['client_email'] = drush_get_option('client_email');
 
-require_once 'includes/install.inc';
 define('MAINTENANCE_MODE', 'install');
-
-/**
- * Verify if Drupal is installed.
- */
-function install_verify_drupal() {
-  try { 
-    $result = @db_query("SELECT name FROM {system} WHERE name = 'system'");
-    return $result && db_result($result) == 'system';
-  }
-  catch (Exception $e) {
-  }
-
-}
-
-/**
- * Verify existing settings.php
- */
-function install_verify_settings() {
-  global $db_prefix, $db_type, $db_url, $databases;
-  return TRUE;
-  // Verify existing settings (if any).
-  if (!empty($db_url)) {
-    // We need this because we want to run form_get_errors.
-
-    $url = parse_url(is_array($db_url) ? $db_url['default'] : $db_url);
-    $db_user = urldecode($url['user']);
-    $db_pass = urldecode($url['pass']);
-    $db_host = urldecode($url['host']);
-    $db_port = isset($url['port']) ? urldecode($url['port']) : '';
-    $db_path = ltrim(urldecode($url['path']), '/');
-    $settings_file = './'. conf_path() .'/settings.php';
-
-    return TRUE;
-  }
-  return FALSE;
-}
 
 function install_send_welcome_mail($url, $profile, $language, $client_email) {
   if ($client_email) {
@@ -84,242 +47,63 @@ function install_send_welcome_mail($url, $profile, $language, $client_email) {
   }
 }
 
-function install_mail($key, &$message, $params) {
-  global $profile, $install_locale, $client_email, $conf, $url, $base_url;
-  switch ($key) {
-    case 'welcome-admin':
-      // allow the profile to override welcome email text
-      if (file_exists("./profiles/$profile/provision_welcome_mail.inc")) {
-        require_once "./profiles/$profile/provision_welcome_mail.inc";
-        $custom = TRUE;
-      }
-      elseif (file_exists(dirname(__FILE__) . '/../provision_welcome_mail.inc')) { 
-        /** use the module provided welcome email
-         * We can not use drupal_get_path here,
-         * as we are connected to the provisioned site's database
-         */
-        require_once dirname(__FILE__) . '/../provision_welcome_mail.inc';
-        $custom = TRUE;
-      }
-      else {
-        // last resort use the user-pass mail text
-        $custom = FALSE;
-      }
-
-      if ($custom) {
-        $message['subject'] = st($mail['subject'], $params['variables']);
-        $message['body'] = st($mail['body'], $params['variables']);
-      }
-      else {
-        $message['subject'] = _user_mail_text('pass_subject', $params['variables']);
-        $message['body'] = _user_mail_text('pass_body', $params['variables']);
-      }
-
-      break;
-    }
-}
-
 function install_main() {
-  require_once './includes/bootstrap.inc';
-  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
+  global $profile, $install_locale, $client_email, $conf, $url, $base_url;
 
-  // This must go after drupal_bootstrap(), which unsets globals!
-  global $profile, $install_locale, $client_email, $conf, $url;
+  require_once('install.php');
 
-  require_once './modules/system/system.install';
-  require_once './includes/file.inc';
-
-  // Ensure correct page headers are sent (e.g. caching)
-  drupal_page_header();
-
-  // Set up $language, so t() caller functions will still work.
-  drupal_init_language();
-
-  // Load module basics (needed for hook invokes).
-  include_once './includes/module.inc';
-  include_once './includes/session.inc';
-  $module_list['system']['filename'] = 'modules/system/system.module';
-  $module_list['filter']['filename'] = 'modules/filter/filter.module';
-  module_list(TRUE, FALSE,  $module_list);
-  drupal_load('module', 'system');
-  drupal_load('module', 'filter');
-
-  // Set up theme system for the maintenance page.
-  drupal_maintenance_theme();  // Check existing settings.php.
-
-  $verify = install_verify_settings();
-  // Drupal may already be installed.
-  if ($verify) {
-    // Since we have a database connection, we use the normal cache system.
-    // This is important, as the installer calls into the Drupal system for
-    // the clean URL checks, so we should maintain the cache properly.
-    require_once DRUPAL_ROOT . '/includes/cache.inc';
-    $conf['cache_inc'] = 'includes/cache.inc';
-
-    // Initialize the database system. Note that the connection
-    // won't be initialized until it is actually requested.
-    require_once DRUPAL_ROOT . '/includes/database/database.inc';
-
-    // Check if Drupal is installed.
-    if (install_verify_drupal()) {
-      return drush_set_error('PROVISION_DRUPAL_SITE_INSTALLED');
-    }
+  $account_pass = provision_password();
+  $settings = array(
+    'parameters' => array(
+      'profile' => $profile,
+      'locale' => $install_locale,
+    ),
+    'forms' => array(
+   /*   'install_settings_form' =>  array(
+          'driver' => drush_get_option('db_type'),
+          'host' => drush_get_option('db_host'),
+          'port' => drush_get_option('db_port'),
+          'database' => drush_get_option('db_name'),
+          'username' => drush_get_option('db_user'),
+          'password' => drush_get_option('db_passwd'),
+        ),*/
+      'install_configure_form' => array(
+        'site_name' => $url,
+        'site_mail' => $client_email ? $client_email : 'admin@example.com',
+        'theme' => 'garland',
+        'account' => array(
+          'name' => 'admin',
+          'mail' => $client_email ? $client_email : 'admin@example.com',
+          'pass' => array(
+            'pass1' => $account_pass,
+            'pass2' => $account_pass,
+          ),
+        ),
+        'update_status_module' => array(
+          1 => TRUE,
+          2 => TRUE,
+        ),
+        'clean_url' => drush_get_option('clean_url', TRUE),
+      ),
+    ),
+  );
+  set_exception_handler('install_exception_handler');
+  set_error_handler('install_exception_handler');
+  try {
+    install_drupal($settings);
   }
-  else {
-    // Since no persistent storage is available yet, and functions that check
-    // for cached data will fail, we temporarily replace the normal cache
-    // system with a stubbed-out version that short-circuits the actual
-    // caching process and avoids any errors.
-    require_once DRUPAL_ROOT . '/includes/cache-install.inc';
-    $conf['cache_inc'] = 'includes/cache-install.inc';
-
+  catch (Exception $e) {
+    drush_log($e->message());
+    dlm($e);
   }
+  _provision_drupal_create_directories($url);
 
-
-  drush_log(st("Installing Drupal schema"), 'install');
-  // Load the profile.
-  require_once "./profiles/$profile/$profile.profile";
-  drush_log(st("Loading @profile install profile", array("@profile" => $profile)), 'install');
-
-  drush_log(st("Installing translation : @locale", array("@locale" => $install_locale)), 'install');
-
-  /**
-   * Handles requirement checking
-   *
-   * This code is based on install_check_requirements in install.php
-   * We separate this out because we want to avoid all the user interface
-   * code in this function, so we only use the relevant part of it.
-   */
-  $missing_requirement = FALSE;
-  $requirements = drupal_check_profile($profile);
-  $severity = drupal_requirements_severity($requirements);
-  // If there are issues, report them.
-  if ($severity == REQUIREMENT_ERROR) {
-    foreach ($requirements as $requirement) {
-      if (isset($requirement['severity']) && $requirement['severity'] == REQUIREMENT_ERROR) {
-        drupal_set_message($requirement['description'] .' ('. st('Currently using !item !version', array('!item' => $requirement['title'], '!version' => $requirement['value'])) .')', 'error');
-      }
-    }
-    $missing_requirement = TRUE;
-  }
-  if ($severity == REQUIREMENT_WARNING) {
-    foreach ($requirements as $requirement) {
-      if (isset($requirement['severity']) && $requirement['severity'] == REQUIREMENT_WARNING) {
-        $message = $requirement['description'];
-        if (isset($requirement['value']) && $requirement['value']) {
-          $message .= ' ('. st('Currently using !item !version', array('!item' => $requirement['title'], '!version' => $requirement['value'])) .')';
-        }
-        drupal_set_message($message, 'warning');
-      }
-    }
-  }
-
-  if ($missing_requirement) {
-    return drush_set_error('PROVISION_DRUPAL_INSTALL_MISSING_REQUIREMENTS');
-  }
-
-  // Verify existence of all required modules.
-  $requirements = drupal_verify_profile($profile, $install_locale);
-  // Check the severity of the requirements reported.
-  $severity = drupal_requirements_severity($requirements);
-
-  if ($severity == REQUIREMENT_ERROR) {
-    return drush_set_error('PROVISION_DRUPAL_INSTALL_MISSING_REQUIREMENTS');
-  }
-
-  drupal_install_system();
-  $modules = array_diff(drupal_get_profile_modules($profile, $install_locale), array('system'));
-
-  drupal_install_init_database(); 
-  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
-
-  /**
-   * Further installation tasks
-   *
-   * This code is based on install_tasks() in install.php
-   * It has been modified to remove any calls to the user interface,
-   * and run all batches in the same process, instead of in a single page
-   * load.
-   */
-
-  // profile-install and profile-install-batch tasks
-  $files = module_rebuild_cache();
-  foreach ($modules as $module) {
-    _drupal_install_module($module);
-    module_enable(array($module));
-    drush_log(t("Installed @module module.", 
-      array("@module" => $files[$module]->info['name'])));
-  }
-  module_load_all();
-  module_invoke_all('init');
-
-  // locale-initial-import and locale-inintial-batch tasks
-  if (!empty($install_locale) && ($install_locale != 'en')) {
-    // Enable installation language as default site language.
-    locale_add_language($install_locale, NULL, NULL, NULL, NULL, NULL, 1, TRUE);
-    // Collect files to import for this language.
-    $batch = locale_batch_by_language($install_locale);
-    if (!empty($batch)) {
-      $install_locale_batch_components = $batch['#components'];
-      batch_set($batch);
-      $batch =& batch_get();
-      $batch['progressive'] = FALSE;
-      batch_process();
-    }
-  }
-
-  // configure-task
-  variable_set('site_name', $url);
-  variable_set('site_mail', 'webmaster@' . $url);
-  variable_set('clean_url', TRUE);
-  variable_set('install_time', time());
-
-  menu_rebuild();
-
-  // profile task
-  // @TODO support install profiles with multiple additional tasks
-  $task = 'profile';
-  $function = $profile .'_profile_tasks';
-  if (function_exists($function)) {
-    // The profile needs to run more code, maybe even more tasks.
-    // $task is sent through as a reference and may be changed!
-    $output = $function($task, $url);
-  }
-
-  // profile-finished task
-  // Secondary locale import 
-  if (!empty($install_locale) && ($install_locale != 'en')) {
-    include_once DRUPAL_ROOT . '/includes/locale.inc';
-    // Collect files to import for this language. Skip components
-    // already covered in the initial batch set.
-    $batch = locale_batch_by_language($install_locale, NULL, $install_locale_batch_components);
-    if (!empty($batch)) {
-      // Start a batch, switch to 'locale-remaining-batch' task. We need to
-      // set the variable here, because batch_process() redirects.
-      batch_set($batch);
-      $batch =& batch_get();
-      $batch['progressive'] = FALSE;
-      batch_process();
-    }
-  }
-
-  // done task
-  // Rebuild menu to get content type links registered by the profile,
-  // and possibly any other menu items created through the tasks.
-  menu_rebuild();
-
-  // Register actions declared by any modules.
-  actions_synchronize();
-
-  // Randomize query-strings on css/js files, to hide the fact that
-  // this is a new install, not upgraded yet.
-  _drupal_flush_css_js();
-
-  cache_clear_all();
-  variable_set('install_profile', $profile);
-
-  if ($client_email) {
-    install_send_welcome_mail($url, $profile, $install_locale, $client_email);
-  }
+#  if ($client_email) {
+#    install_send_welcome_mail($url, $profile, $install_locale, $client_email);
+#  }
 }
 install_main();
+
+function install_exception_handler() {
+  dlm(func_get_args());
+}
