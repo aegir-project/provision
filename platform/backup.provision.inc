@@ -21,26 +21,25 @@ function drush_provision_drupal_provision_backup_validate($url = NULL, $backup_f
   }
 
   if ($backup_file) {
-    if ( provision_path("exists", $backup_file, FALSE,
+    if (provision_path("exists", $backup_file, FALSE,
             dt("Backing site up to @path."),
             dt("Back up file @path already exists."),
         'PROVISION_BACKUP_ALREADY_EXISTS')) {
-
-      drush_set_option('backup_file', str_replace(".gz", '', $backup_file));
+      drush_set_option('backup_file', $backup_file);
     }
   }
 
   if (!$backup_file) {
-    $suggested = drush_get_option('backup_path') ."/$url-". date("Y-m-d", mktime()) .".tar";
+    $suggested = drush_get_option('backup_path') ."/$url-". date("Y-m-d", mktime()) .".tar.gz";
 
     // Use format of mysite.com-2008-01-02, if already existing, add number.
-    while (is_file($suggested .'.gz')) {
+    while (is_file($suggested)) {
       $count++;
-      $suggested = drush_get_option('backup_path') ."/$url-". date("Y-m-d", mktime()) ."_$count.tar";
+      $suggested = drush_get_option('backup_path') ."/$url-". date("Y-m-d", mktime()) ."_$count.tar.gz";
     }
-
-    drush_set_option('backup_file', str_replace(".gz" , '', $suggested));
+    drush_set_option('backup_file', $suggested);
   }
+
 }
 
 /**
@@ -50,20 +49,9 @@ function drush_provision_drupal_provision_backup($url) {
   $backup_file = drush_get_option('backup_file');
   // Adds the site directory into the backup file
   drush_log(dt("Adding sites directory to !backup_file", array('!backup_file' => $backup_file)), 'backup');
-  $result = provision_shell_exec("tar -C %s -p -c -f %s .", drush_get_option('sites_path') . "/$url",  $backup_file);
+  $result = provision_shell_exec("tar -C %s -p -c -z -f %s .", drush_get_option('sites_path') . "/$url",  $backup_file);
 
   if (!$result && !drush_get_option('force', false)) {
     drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not back up sites directory for drupal"));
   }
-}
-
-
-/**
- * Generate a backup tarbal for a site.
- */
-function drush_provision_drupal_post_provision_backup($url, $backup_file = NULL) {
-  $backup_file = drush_get_option('backup_file');
-
-  provision_shell_exec("gzip %s", $backup_file);
-  drush_set_option('backup_file', $backup_file . '.gz');
 }
