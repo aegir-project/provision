@@ -30,12 +30,12 @@ function drush_provision_drupal_provision_backup_validate($url = NULL, $backup_f
   }
 
   if (!$backup_file) {
-    $suggested = drush_get_option('backup_path') ."/$url-". date("Y-m-d", mktime()) .".tar.gz";
+    $suggested = drush_get_option('backup_path') ."/$url-". date("Ymd.His", mktime()) .".tar.gz";
 
     // Use format of mysite.com-2008-01-02, if already existing, add number.
     while (is_file($suggested)) {
       $count++;
-      $suggested = drush_get_option('backup_path') ."/$url-". date("Y-m-d", mktime()) ."_$count.tar.gz";
+      $suggested = drush_get_option('backup_path') ."/$url-". date("Ymd.His", mktime()) ."_$count.tar.gz";
     }
     drush_set_option('backup_file', $suggested);
   }
