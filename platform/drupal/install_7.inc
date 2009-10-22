@@ -37,6 +37,10 @@ function install_send_welcome_mail($url, $profile, $language, $client_email) {
 
     $mail_success = drupal_mail('install', 'welcome-admin', $account->mail, user_preferred_language($account), $mail_params, $from, TRUE);
 
+  // Store the one time login link in an option so the front end can direct the user to their new site.
+  drush_set_option('login_link', $onetime);
+
+
     if ($mail_success) {
       drush_log(t('Sent welcome mail to @client', array('@client' => $client_email)), 'message');
     }

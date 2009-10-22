@@ -78,11 +78,15 @@ function install_send_welcome_mail($url, $account, $profile, $language, $client_
   // Mail one time login URL and instructions.
   $from = variable_get('site_mail', ini_get('sendmail_from'));
   $onetime = user_pass_reset_url($account);
+
   $variables = array(
     '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
     '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail, 
     '!date' => format_date(time()), '!login_uri' => url('user', NULL, NULL, TRUE), 
     '!edit_uri' => url('user/'. $account->uid .'/edit', NULL, NULL, TRUE));
+
+  // Store the one time login link in an option so the front end can direct the user to their new site.
+  drush_set_option('login_link', $onetime);
 
   // allow the profile to override welcome email text
   if (file_exists("./profiles/$profile/provision_welcome_mail.inc")) {
