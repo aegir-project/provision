@@ -49,7 +49,7 @@ function drush_provision_drupal_pre_provision_migrate_rollback($url, $platform) 
 function drush_provision_drupal_provision_migrate($url, $platform) {
   drush_backend_invoke('provision deploy', array($url, drush_get_option('backup_file'), 'root' => $platform, 
     'web_host' => drush_get_option('web_host'), 'web_ip' => drush_get_option('web_ip'), 
-    'db_host' => drush_get_option('db_host')));
+    'db_host' => drush_get_option('db_host'), 'master_db_host' => drush_get_option('master_db_host'), 'master_db_user' => drush_get_option('master_db_user'), 'master_db_passwd' => drush_get_option('master_db_passwd')));
 }
 
 
