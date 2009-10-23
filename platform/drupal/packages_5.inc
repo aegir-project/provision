@@ -22,8 +22,8 @@ function _provision_drupal_find_themes($scope, $key = '') {
   $themes = array();
   $templates = array();
   foreach ($paths as $path) {
-    $themes = array_merge($themes, drush_scan_directory($path, ".theme$", array('.', '..', 'CVS', '.svn'), 0, true, 'name'));
-    $templates = array_merge($templates, drush_scan_directory($path, "page.tpl.php$", array('.', '..', 'CVS', '.svn'), 0, true, 'filename'));
+    $themes = array_merge($themes, drush_scan_directory($path, "/\.theme$/", array('.', '..', 'CVS', '.svn'), 0, true, 'name'));
+    $templates = array_merge($templates, drush_scan_directory($path, "/page.tpl.php$/", array('.', '..', 'CVS', '.svn'), 0, true, 'filename'));
   }
 
   foreach ($themes as $name => $file) {
@@ -38,7 +38,7 @@ function _provision_drupal_find_themes($scope, $key = '') {
   }
   foreach ($files as $name => $theme) {
     // Now that we have the themes, let's get the sub styles.
-    foreach (drush_scan_directory(dirname($theme->filename), 'style.css$') as $style) {
+    foreach (drush_scan_directory(dirname($theme->filename), '/style.css$/') as $style) {
         $style->style = TRUE;
         $style->template = isset($theme->template) ? $theme->template : FALSE;
         $style->name = basename(dirname($style->filename));
