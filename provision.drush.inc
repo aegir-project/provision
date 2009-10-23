@@ -29,6 +29,8 @@
  *             Uses hook_provision_pre_upgrade(), hook_provision_upgrade() and hook_provision_post_upgrade() hooks,
  *             and allows clean roll back if any errors occur. Will include stringent checking of module versions,
  *             and allow unit tests to be run.
+ *   login_reset - Generate a one-time login reset URL.
+ *
  * Not implemented yet :
  *   rename  - Change the url of a site. This requires moving of files, and numerous other issues.
  */
@@ -120,6 +122,12 @@ function provision_drush_command() {
     'description' => 'Delete a site.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
+
+  $items['provision login_reset'] = array(
+    'description' => 'Generate a one-time login reset URL.',
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
+  );
+  
 
   $items['hostmaster migrate'] = array(
     'description' => dt('Migrate an instance of the Hostmaster front end to a new platform'),
