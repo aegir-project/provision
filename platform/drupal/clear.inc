@@ -13,6 +13,7 @@ drush_log(t('Rebuild node type cache'));
 module_rebuild_cache();
 drush_log(t('Rebuild module cache'));
 
+drupal_rebuild_theme_registry();
 system_theme_data();
 drush_log(t('Rebuild theme cache'));
 
