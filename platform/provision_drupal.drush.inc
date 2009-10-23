@@ -535,7 +535,7 @@ function _provision_drupal_find_modules($scope, $key = '') {
   $paths = _provision_drupal_search_paths($scope, $key, 'modules');
   $files = array();
   foreach ($paths as $path) {
-    $files = array_merge($files, drush_scan_directory($path, "/.module$/", array('.', '..', 'CVS', '.svn'), 0, true, 'name'));
+    $files = array_merge($files, drush_scan_directory($path, "/\.module$/", array('.', '..', 'CVS', '.svn'), 0, true, 'name'));
   }
   foreach ($files as $name => $info) {
     $install_file = sprintf("%s/%s.install", dirname($info->filename), $name);
