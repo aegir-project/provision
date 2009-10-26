@@ -10,7 +10,12 @@
  * Make sure the site is installed and enabled, and that we have a valid target to back up to.
  */
 function drush_provision_drupal_provision_backup_validate($url = NULL, $backup_file = NULL) {
-  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
+  if (!@drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE)) {
+    if (drush_get_option('force', false)) {
+      drush_log("clearing error");
+      drush_set_context('DRUSH_ERROR_CODE', DRUSH_SUCCESS);
+    }
+  }
   if (!drush_get_option('installed') && !drush_get_option('force', false)) {
      drush_set_error('PROVISION_DRUPAL_SITE_NOT_FOUND');
    }
