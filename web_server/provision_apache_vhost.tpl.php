@@ -23,4 +23,6 @@
       SetHandler This_is_a_Drupal_security_line_do_not_remove
     </Directory>
 
+    php_admin_value open_basedir /tmp:<?php print $publish_path ?>/:<?php print $config_path ?>/includes/
+
 </VirtualHost>
