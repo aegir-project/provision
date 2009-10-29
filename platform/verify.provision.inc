@@ -7,8 +7,15 @@
  */
 function drush_provision_drupal_provision_verify_validate($url = null) {
   if ($url) {
-    drush_errors_on();
-    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
+     $fields = array('db_type', 'db_host', 'db_user', 'db_passwd', 'db_name');
+     foreach ($fields as $key) {
+       $_SERVER[$key] = drush_get_option($key, null, 'site');
+     }
+
+      _provision_drupal_create_settings_file($url);
+     drush_errors_on();
+     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   }
 
   // This will not have an effect if you are running it on a platform, just tests that if a site is provided it is an existing one

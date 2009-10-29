@@ -6,3 +6,4 @@
     Allow from all
 <?php print $extra_config; ?>
 </Directory>
+

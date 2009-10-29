@@ -80,9 +80,24 @@ function provision_load_site_data($url) {
  * Save modified options to the site.php file
  */
 function provision_save_site_data() {
-  drush_save_config('site');
-  // @TODO : remove site.php file after successful 
-  // drushrc save.
+  $context = 'site';
+  drush_save_config($site);
+
+  if (!drush_get_error()) {
+    // append the db settings in the _SERVER variable so normal drush commands can still read it.
+    $filename = _drush_config_file($context);
+    $cache = drush_get_context($context);
+
+    $fp = fopen($filename, "a+");
+    $fields = array('db_type', 'db_host', 'db_user', 'db_passwd', 'db_name');
+
+    foreach ($fields as $key) {
+      $line = "\n\$_SERVER['$key'] = ". var_export($cache[$key], TRUE) .';';
+      fwrite($fp, $line);  
+     }
+     fwrite($fp, "\n");
+     fclose($fp);
+  }
 }
 
 /**

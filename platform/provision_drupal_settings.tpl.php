@@ -1,12 +1,17 @@
 
   $databases['default']['default'] = array(
-    'driver' => '<?php print $db_type; ?>',
-    'database' => '<?php print $db_name; ?>',
-    'username' => '<?php print $db_user; ?>',
-    'password' => '<?php print $db_passwd; ?>',
-    'host' => '<?php print $db_host ?>',
+    'driver' => urldecode($_SERVER['db_type']),
+    'database' => urldecode($_SERVER['db_name']),
+    'username' => urldecode($_SERVER['db_user']),
+    'password' => urldecode($_SERVER['db_passwd']),
+    'host' => urldecode($_SERVER['db_host']),
   );
-  $db_url = '<?php print strtr("%db_type://%db_user:%db_passwd@%db_host/%db_name", array('%db_type' => urlencode($db_type), '%db_user' => urlencode($db_user), '%db_passwd' => urlencode($db_passwd), '%db_host' => urlencode($db_host), '%db_name' => urlencode($db_name))); ?>';
+  $db_url = "<?php print strtr("%db_type://%db_user:%db_passwd@%db_host/%db_name", array(
+    '%db_type' => '$_SERVER[db_type]',
+    '%db_user' => '$_SERVER[db_user]', 
+    '%db_passwd' => '$_SERVER[db_passwd]',
+    '%db_host' => '$_SERVER[db_host]', 
+    '%db_name' => '$_SERVER[db_name]')); ?>";
 
   $profile = "<?php print $profile ?>";
   /**

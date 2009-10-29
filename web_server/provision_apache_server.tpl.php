@@ -9,4 +9,8 @@ endforeach;
 endif;
 ?>
 
+<IfModule !env_module>
+  LoadModule env_module modules/mod_env.so
+</IfModule>
+
 <?php print $extra_config; ?>
