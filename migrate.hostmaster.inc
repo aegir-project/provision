@@ -20,6 +20,13 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
 }
 
 function drush_provision_pre_hostmaster_migrate($site, $platform) {
+  if (!drush_confirm("This command will replace your crontab entry. continue?")) {
+    drush_set_error('PROVISION_CANCEL_MIGRATE', 'Cancelling');
+  }
+  // wipe out cron entry
+  exec('crontab -r');
+
+  // we can't rely on the park command to exist in pre-0.4 alpha 2 releases
   drush_backend_invoke('hostmaster park', array($site, 'uri' => $site));
 }
 
