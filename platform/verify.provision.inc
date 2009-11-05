@@ -7,11 +7,8 @@
  */
 function drush_provision_drupal_provision_verify_validate($url = null) {
   if ($url) {
-     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
-     $fields = array('db_type', 'db_host', 'db_user', 'db_passwd', 'db_name');
-     foreach ($fields as $key) {
-       $_SERVER[$key] = drush_get_option($key, null, 'site');
-     }
+    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
+    provision_prepare_environment();
 
       _provision_drupal_create_settings_file($url);
      drush_errors_on();

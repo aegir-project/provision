@@ -577,3 +577,12 @@ function provision_parse_info_file($filename) {
   return $info + $defaults;
 }
 
+/**
+ * Set up the $_SERVER environment variable so that drupal can correctly parse the settings.php file
+ */
+function provision_prepare_environment() {
+  $fields = array('db_type', 'db_host', 'db_user', 'db_passwd', 'db_name');
+  foreach ($fields as $key) {
+    $_SERVER[$key] = drush_get_option($key, null, 'site');
+  }
+}
