@@ -81,7 +81,7 @@ function provision_load_site_data($url) {
  */
 function provision_save_site_data() {
   $context = 'site';
-  drush_save_config($site);
+  drush_save_config($context);
 
   if (!drush_get_error()) {
     // append the db settings in the _SERVER variable so normal drush commands can still read it.

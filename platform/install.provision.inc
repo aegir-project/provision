@@ -39,8 +39,14 @@ function drush_provision_drupal_pre_provision_install($url) {
  */
 function drush_provision_drupal_provision_install($url) {
  // Requires at least the database settings to complete.
-  _provision_drupal_create_settings_file($url);
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
+  $fields = array('db_type', 'db_host', 'db_user', 'db_passwd', 'db_name');
+  foreach ($fields as $key) {
+    $_SERVER[$key] = drush_get_option($key, null, 'site');
+  }
+
+  _provision_drupal_create_settings_file($url);
+
   drush_include_engine('drupal', 'install');
   drush_set_option('installed', TRUE, 'site');
   _provision_drupal_maintain_aliases($url);
