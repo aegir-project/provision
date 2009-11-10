@@ -18,8 +18,8 @@ function drush_provision_drupal_provision_install_validate($url) {
   if (!$url) {
     return drush_set_error("PROVISION_URL_REQUIRED", dt("You need to specify a valid url to install a site"));
   }
-  if (drush_get_option('installed')) {
-    drush_set_error('PROVISION_SITE_INSTALLED');
+  if (_provision_drupal_site_installed($url)) {
+    return drush_set_error('PROVISION_SITE_INSTALLED');
   }
 }
 
@@ -52,12 +52,12 @@ function drush_provision_drupal_provision_install($url) {
  * If the install went south, and the site is not PROVISION_SITE_INSTALLED, clean up behind ourselves
  */
 function drush_provision_drupal_provision_install_rollback($url) {
-  if (!drush_cmp_error('PROVISION_SITE_INSTALLED')) {
-    if ($url) {
+  if ($url) {
+    if (!_provision_drupal_site_installed($url)) {
       _provision_recursive_delete("sites/$url");
-    } else {
-      drush_set_error('PROVISION_FRAMEWORK_ERROR', dt('no url defined in %function', array('%function' => __FUNCTION__)));
     }
+  } else {
+    drush_set_error('PROVISION_FRAMEWORK_ERROR', dt('no url defined in %function', array('%function' => __FUNCTION__)));
   }
 }
 

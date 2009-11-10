@@ -15,5 +15,7 @@ function drush_provision_mysql_pre_provision_install($url = NULL) {
 }
 
 function drush_provision_mysql_pre_provision_install_rollback($url = NULL) {
-  _provision_mysql_destroy_site_db(drush_get_option('db_name'), drush_get_option('db_user'), drush_get_option('db_passwd'));
+  if (!_provision_drupal_site_installed($url)) {
+    _provision_mysql_destroy_site_db(drush_get_option('db_name'), drush_get_option('db_user'), drush_get_option('db_passwd'));
+  }
 }
