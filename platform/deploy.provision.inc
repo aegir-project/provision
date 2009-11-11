@@ -88,6 +88,7 @@ function drush_provision_drupal_provision_deploy($url) {
 function drush_provision_drupal_post_provision_deploy($url) {
   provision_prepare_environment();
   _provision_drupal_create_settings_file($url);
+  provision_save_site_data($url);
   // call the drush updatedb command.
   drush_backend_invoke("updatedb", array('uri' => "http://$url"));
   // We should be able to fully load Drupal now.
