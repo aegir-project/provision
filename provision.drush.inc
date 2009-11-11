@@ -166,7 +166,6 @@ function provision_drush_command() {
 
 function drush_provision_hostmaster_make($platform) {
   drush_backend_invoke('make', array(dirname(__FILE__) . '/aegir.make', $platform));
-
 }
 
 /**
