@@ -28,7 +28,7 @@ function drush_provision_pre_hostmaster_migrate($site, $platform) {
   exec('crontab -r');
 
   // we can't rely on the park command to exist in pre-0.4 alpha 2 releases
-  drush_backend_invoke('hostmaster park', array($site, 'uri' => $site));
+  drush_backend_invoke('hostmaster pause', array($site, 'uri' => $site));
 }
 
 function drush_provision_hostmaster_migrate($site, $platform) { 
@@ -36,6 +36,6 @@ function drush_provision_hostmaster_migrate($site, $platform) {
 }
 
 function drush_provision_post_hostmaster_migrate($site, $platform) {
-  drush_backend_invoke('hostmaster unpark', array($site, 'uri' => $site, 'root' => $platform));
+  drush_backend_invoke('hostmaster resume', array($site, 'uri' => $site, 'root' => $platform));
 }
 

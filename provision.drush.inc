@@ -147,13 +147,13 @@ function provision_drush_command() {
   );
 
   
-  $items['hostmaster park'] = array(
+  $items['hostmaster pause'] = array(
     'description' => dt('Prepare the site to be migrated to a new platform.'),
     'arguments' => array(
       'example.com' => dt('The url of the site being migrated.')),
   );
 
-  $items['hostmaster unpark'] = array(
+  $items['hostmaster resume'] = array(
     'description' => dt('Complete the migration of the site to a new platform.'),
     'arguments' => array(
       'example.com' => dt('The url of the site being migrated.')),
