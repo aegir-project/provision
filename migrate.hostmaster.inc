@@ -6,10 +6,16 @@
 
 function drush_provision_hostmaster_migrate_validate($site, $platform) {
   // verify the target platform:
-  $data = drush_get_merged_options(); // XXX: necessary because the remote
-                                      // platform may not have been
-                                      // initialised by the frontend (this
-                                      // should be checked instead)
+  if (!is_dir($platform)) {
+    drush_print("The platform path you specified does not exist yet.");
+    drush_print("Downloading the hostmaster front end. (this might take a few minutes)");
+    drush_backend_invoke('make', array(dirname(__FILE__) . '/aegir.make', $platform));
+    if (drush_get_error()) {
+      drush_log("The hostmaster front end could not be downloaded, exiting.", "error");
+    }
+  }
+
+  $data = drush_get_merged_options(); 
   $data['root'] = $platform;
   $data['r'] = $platform;
   $data['publish_path'] = $platform;
