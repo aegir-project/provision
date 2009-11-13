@@ -150,6 +150,9 @@ DirectoryIndex index.php
 <IfModule mod_rewrite.c>
   RewriteEngine on
 
+  # allow files to be accessed without /sites/fqdn/
+  RewriteRule ^files/(.*)$ /sites/%{HTTP_HOST}/files/$1 [L]
+
   # Rewrite URLs of the form 'x' to the form 'index.php?q=x'.
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
