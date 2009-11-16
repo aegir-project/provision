@@ -187,11 +187,7 @@ function _provision_drupal_create_settings_file($url = NULL) {
   }
 
   $options['extra_config'] = "# Extra configuration from modules:\n";
-  foreach (drush_command_implements('provision_drupal_config') as $module) {
-    $options['extra_config'] .= "# -- $module settings --\n";
-    $options['extra_config'] .= module_invoke($module, 'provision_drupal_config', $url) . "\n";
-  }
-
+  $options['extra_config'] .= join("\n", drush_command_invoke_all('provision_drupal_config', $url, $options));
 
   drush_log(dt("Generate settings.php file"));
   if (provision_path("exists", "sites/$url/settings.php")) {
