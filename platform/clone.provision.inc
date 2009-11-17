@@ -35,7 +35,14 @@ function drush_provision_drupal_pre_provision_clone_rollback($url, $new_url, $pl
  */
 function drush_provision_drupal_provision_clone($url, $new_url, $platform = null) {
   # note that we reset the aliases so they don't conflict with the original site
-  drush_backend_invoke('provision deploy', array($new_url, drush_get_option('backup_file'), 'root' => $platform, 'aliases' => array(),
-    'web_host' => drush_get_option('web_host'), 'web_ip' => drush_get_option('web_ip'), 
-    'db_host' => drush_get_option('db_host')));
+  drush_backend_invoke('provision deploy', array(
+    $new_url, 
+    drush_get_option('backup_file'), 
+    'root' => $platform, 
+    'aliases' => drush_get_option('aliases'),
+    'redirection' => drush_get_option('redirection'),
+    'web_host' => drush_get_option('web_host'), 
+    'web_ip' => drush_get_option('web_ip'), 
+    'db_host' => drush_get_option('db_host')
+  ));
 }

@@ -48,7 +48,6 @@ function drush_provision_drupal_pre_provision_deploy($url, $backup_file) {
     $profile = $profiles[0];
 
     $drupal_packages = drush_get_option('packages', array(), 'drupal');
-
     $merged_modules = array_merge($drupal_packages['base']['modules'], $drupal_packages['profiles'][$profile]['modules']);
     foreach ($site_packages['modules'] as $name => $module) {
       if ($module['status'] == 1) {
@@ -81,6 +80,7 @@ function drush_provision_drupal_pre_provision_deploy_rollback($url) {
 }
 
 function drush_provision_drupal_provision_deploy($url) {
+  $url = drush_get_option('site_url');
   _provision_drupal_maintain_aliases($url);
 }
 
@@ -96,5 +96,7 @@ function drush_provision_drupal_post_provision_deploy($url) {
     drush_include_engine('drupal', 'deploy');
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
     _provision_drupal_rebuild_caches();
+    drush_set_option('aliases', drush_get_option('aliases'), 'site'); 
+    drush_set_option('redirection', drush_get_option('redirection'), 'site');
   }
 }

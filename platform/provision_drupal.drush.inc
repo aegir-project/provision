@@ -356,6 +356,7 @@ function _provision_drupal_get_cvs_versions($files) {
 function _provision_drupal_maintain_aliases($url) {
   if (PROVISION_CONTEXT_SITE) {
     // First we delete all the old aliases
+    drush_set_option('aliases', drush_get_option('aliases'), 'site');
     _provision_drupal_delete_aliases(drush_get_option('aliases', array(), 'site'));
 
     if (!drush_get_option('redirection')) {
