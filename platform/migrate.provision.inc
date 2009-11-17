@@ -31,6 +31,10 @@ function drush_provision_drupal_provision_migrate_validate($url = null, $platfor
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
 function drush_provision_drupal_pre_provision_migrate($url, $platform) {
+  /* Set offline mode to true and re-generate the settings.php. This will write a 
+   * $conf['site_offline'] = 1; to the settings.php
+   */
+  drush_log(dt("Putting site under maintenance"));
   drush_set_option('site_offline', 1);
   _provision_drupal_create_settings_file($url);
   drush_invoke('provision backup', $url);
@@ -41,6 +45,8 @@ function drush_provision_drupal_pre_provision_migrate($url, $platform) {
  * Restore the vhost conf per the original platform
  */
 function drush_provision_drupal_pre_provision_migrate_rollback($url, $platform) {
+  // Set site_offline to false and regenerate the config 
+  drush_log(dt("Bringing site out of maintenance"));
   drush_set_option('site_offline', 0);
   _provision_drupal_create_settings_file($url);
   $success =  provision_path("unlink", drush_get_option('backup_file'), TRUE, dt('Removed unused migration site package'), dt('Could not remove unused migration site package'));
