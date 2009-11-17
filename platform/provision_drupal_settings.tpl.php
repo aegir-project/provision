@@ -49,6 +49,10 @@
   $conf['cache'] = 1;
   $conf['clean_url'] = 1;
 
+  <?php if ($site_offline) : ?>
+    $conf['site_offline'] = 1;
+  <?php endif ?>
+
 <?php print $extra_config; ?>
 
   /**

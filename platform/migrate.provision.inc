@@ -31,6 +31,8 @@ function drush_provision_drupal_provision_migrate_validate($url = null, $platfor
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
 function drush_provision_drupal_pre_provision_migrate($url, $platform) {
+  drush_set_option('site_offline', 1);
+  _provision_drupal_create_settings_file($url);
   drush_invoke('provision backup', $url);
 }
 
