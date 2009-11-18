@@ -54,6 +54,24 @@ function drush_provision_drupal_provision_verify($url = null) {
    _provision_drupal_create_settings_file($url);
   }
 
+  $paths = array(
+    "sites/all/themes"          => 0755,
+    "sites/all/modules"         => 0755,  
+    "sites/all/libraries"       => 0755, # http://drupal.org/node/496240
+  );
+  foreach ($paths as $path => $perm) {
+    if (!is_dir($path)) {
+      provision_path("mkdir", $path, TRUE, 
+        dt("Created <code>@path</code>"),
+        dt("Could not create <code>@path</code>"),
+        'DRUSH_PERM_ERROR');
+    }
+    provision_path("chmod_recursive", $path, $perm, 
+      dt("Changed permissions of <code>@path</code> to @confirm"),
+      dt("Could not change permissions of <code>@path</code> to @confirm"),
+      'DRUSH_PERM_ERROR');
+  }
+
 }
 
 

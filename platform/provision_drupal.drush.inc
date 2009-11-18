@@ -225,6 +225,7 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
     "sites/$url/files/pictures"  => 02770,
     "sites/$url/themes"          => 0755,
     "sites/$url/modules"         => 0755,  
+    "sites/$url/libraries"       => 0755, # http://drupal.org/node/496240
   );
   $grps = array(
     "sites/$url/files",
