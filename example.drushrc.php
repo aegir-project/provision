@@ -9,12 +9,12 @@
  */
 
 /**
- * Directory to store site backups.
+ * Directory to store site backups
  *
  * If you have multiple provision managed platforms on this system, it is highly
  * recommended to use the same path for each platform you have.
  */
-# $options['backup_path'] = '/path/to/backups';
+# $options['backup_path'] = '/var/aegir/backups';
 
 /**
  * Directory to store configuration files
@@ -24,7 +24,7 @@
  * If you have multiple provision managed platforms on this server, it is highly
  * recommended to use the same path for each platform you have.
  */
-# $options['config_path'] = '/path/to/configs';
+# $options['config_path'] = '/var/aegir/config';
 
 /**
  * The login name for the shell user who will be running the provision scripts
@@ -52,4 +52,4 @@
  * The address of the Hostmaster installation
  * This url will be used to redirect sites that haven't been found or have been disabled.
  */
-# $options['master_url'] = 'http://aegir.company.com';
+# $options['master_url'] = 'http://aegir.example.com';
