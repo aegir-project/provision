@@ -44,6 +44,23 @@ function drush_provision_drupal_provision_verify($url = null) {
     drush_set_option('sites', array_keys((array) provision_drupal_find_sites()), 'drupal'); 
     drush_log(dt("This platform is running @short_name @version", array('@short_name' => 'drupal', '@version' => VERSION)));
     drush_set_option('packages', _scrub_object(provision_find_packages()), 'drupal');
+    $paths = array(
+      "sites/all/themes"          => 0755,
+      "sites/all/modules"         => 0755,  
+      "sites/all/libraries"       => 0755, # http://drupal.org/node/496240
+    );
+    foreach ($paths as $path => $perm) {
+      if (!is_dir($path)) {
+        provision_path("mkdir", $path, TRUE, 
+          dt("Created <code>@path</code>"),
+          dt("Could not create <code>@path</code>"),
+          'DRUSH_PERM_ERROR');
+      }
+      provision_path("chmod_recursive", $path, $perm, 
+        dt("Changed permissions of <code>@path</code> to @confirm"),
+        dt("Could not change permissions of <code>@path</code> to @confirm"),
+        'DRUSH_PERM_ERROR');
+    }
   }
   else {
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
@@ -53,25 +70,6 @@ function drush_provision_drupal_provision_verify($url = null) {
     // Requires at least the database settings to complete.
    _provision_drupal_create_settings_file($url);
   }
-
-  $paths = array(
-    "sites/all/themes"          => 0755,
-    "sites/all/modules"         => 0755,  
-    "sites/all/libraries"       => 0755, # http://drupal.org/node/496240
-  );
-  foreach ($paths as $path => $perm) {
-    if (!is_dir($path)) {
-      provision_path("mkdir", $path, TRUE, 
-        dt("Created <code>@path</code>"),
-        dt("Could not create <code>@path</code>"),
-        'DRUSH_PERM_ERROR');
-    }
-    provision_path("chmod_recursive", $path, $perm, 
-      dt("Changed permissions of <code>@path</code> to @confirm"),
-      dt("Could not change permissions of <code>@path</code> to @confirm"),
-      'DRUSH_PERM_ERROR');
-  }
-
 }
 
 
