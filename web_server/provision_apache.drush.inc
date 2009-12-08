@@ -224,11 +224,12 @@ function _provision_apache_restart_apache($cause_error = FALSE) {
   //TODO : test for this instead of relying on a configuration setting?
   $return = drush_shell_exec(escapeshellcmd(drush_get_option('restart_cmd')));
   if (!$return) {
+    $msg = join("\n", drush_shell_exec_output());
     if ($cause_error) {
-      return drush_set_error('PROVISION_WEB_RESTART_FAILED', dt("Web server could not be restarted. Changes might not be available until this has been done."));
+      return drush_set_error('PROVISION_WEB_RESTART_FAILED', dt("Web server could not be restarted. Changes might not be available until this has been done. (error: %msg)", array("%msg" => $msg)));
     }
     else {
-      drush_log(dt("Web server could not be restarted. Changes might not be available until this has been done."), "warning");
+      drush_log(dt("Web server could not be restarted. Changes might not be available until this has been done. (error: %msg)", array("%msg" => $msg)), "warning");
     }
   }
   else {
