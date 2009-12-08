@@ -217,21 +217,24 @@ function _provision_drupal_create_settings_file($url = NULL) {
  * Also maintains permissions on existing directories.
  */
 function _provision_drupal_create_directories($url, $profile = NULL) {  
-  $readonly = array(
+  # those directories will be created and their modes changed
+  $mkdir = array(
     "sites/$url"                 => 0755,
-    "sites/$url/themes"          => 0755,
-    "sites/$url/modules"         => 0755,  
-    "sites/$url/libraries"       => 0755, # http://drupal.org/node/496240
+    # those should be writable by the aegir primary group to ease development
+    "sites/$url/themes"          => 0775,
+    "sites/$url/modules"         => 0775,  
+    "sites/$url/libraries"       => 0775, # http://drupal.org/node/496240
   );
-  // special case: platform. do not create files dir
+  // special case: platform. do not handle files dir
   if ($url == 'all') {
-    $readwrite = array();
+    $chown = array();
   } else {
-    $readonly["sites/$url/files"]          = 02770;
-    $readonly["sites/$url/files/tmp"]      = 02770;
-    $readonly["sites/$url/files/images"]   = 02770;
-    $readonly["sites/$url/files/pictures"] = 02770;
-    $readwrite = array(
+    $mkdir["sites/$url/files"]          = 02770;
+    $mkdir["sites/$url/files/tmp"]      = 02770;
+    $mkdir["sites/$url/files/images"]   = 02770;
+    $mkdir["sites/$url/files/pictures"] = 02770;
+    # the owner/group of those directories will be changed
+    $chown = array(
       "sites/$url/files",
       "sites/$url/files/tmp",
       "sites/$url/files/images",
@@ -239,7 +242,7 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
     );
   }
 
-  foreach ($readonly as $path => $perm) {
+  foreach ($mkdir as $path => $perm) {
     if (!is_dir($path)) {
       provision_path("mkdir", $path, TRUE, 
         dt("Created <code>@path</code>"),
@@ -252,7 +255,7 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
       dt("Could not change permissions <code>@path</code> to @confirm")
       );
   }
-  foreach ($readwrite as $path) {
+  foreach ($chown as $path) {
     provision_path("chown_recursive", $path, drush_get_option('script_user'), 
       dt("Changed ownership of <code>@path</code>"),
       dt("Could not change ownership <code>@path</code>"),
