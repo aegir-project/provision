@@ -225,21 +225,23 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
     "sites/$url/modules"         => 0775,  
     "sites/$url/libraries"       => 0775, # http://drupal.org/node/496240
   );
+  $chown = array();
+  $chgrp = array();
   // special case: platform. do not handle files dir
-  if ($url == 'all') {
-    $chown = array();
-  } else {
+  if ($url != 'all') {
     $mkdir["sites/$url/files"]          = 02770;
     $mkdir["sites/$url/files/tmp"]      = 02770;
     $mkdir["sites/$url/files/images"]   = 02770;
     $mkdir["sites/$url/files/pictures"] = 02770;
     # the owner/group of those directories will be changed
-    $chown = array(
-      "sites/$url/files",
-      "sites/$url/files/tmp",
-      "sites/$url/files/images",
-      "sites/$url/files/pictures",
-    );
+    $chown["sites/$url/files"]          = drush_get_option('script_user');
+    $chown["sites/$url/files/tmp"]      = drush_get_option('script_user');
+    $chown["sites/$url/files/images"]   = drush_get_option('script_user');
+    $chown["sites/$url/files/pictures"] = drush_get_option('script_user');
+    $chgrp["sites/$url/files"]          = drush_get_option('web_group');
+    $chgrp["sites/$url/files/tmp"]      = drush_get_option('web_group');
+    $chgrp["sites/$url/files/images"]   = drush_get_option('web_group');
+    $chgrp["sites/$url/files/pictures"] = drush_get_option('web_group');
   }
 
   foreach ($mkdir as $path => $perm) {
@@ -255,12 +257,14 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
       dt("Could not change permissions <code>@path</code> to @confirm")
       );
   }
-  foreach ($chown as $path) {
-    provision_path("chown_recursive", $path, drush_get_option('script_user'), 
+  foreach ($chown as $path => $owner) {
+    provision_path("chown_recursive", $path, $owner,
       dt("Changed ownership of <code>@path</code>"),
       dt("Could not change ownership <code>@path</code>"),
      'DRUSH_PERM_ERROR' );
-    provision_path("chgrp_recursive", $path, drush_get_option('web_group'),
+  }
+  foreach ($chgrp as $path => $group) {
+    provision_path("chgrp_recursive", $path, $group,
       dt("Changed group ownership of <code>@path</code>"),
       dt("Could not change group ownership <code>@path</code>"));
   }
