@@ -221,9 +221,9 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
   $mkdir = array(
     "sites/$url"                 => 0755,
     # those should be writable by the aegir primary group to ease development
-    "sites/$url/themes"          => 0775,
-    "sites/$url/modules"         => 0775,  
-    "sites/$url/libraries"       => 0775, # http://drupal.org/node/496240
+    "sites/$url/themes"          => 02775,
+    "sites/$url/modules"         => 02775,  
+    "sites/$url/libraries"       => 02775, # http://drupal.org/node/496240
   );
   $chown = array();
   $chgrp = array();
