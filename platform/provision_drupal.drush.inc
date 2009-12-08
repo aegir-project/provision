@@ -217,24 +217,29 @@ function _provision_drupal_create_settings_file($url = NULL) {
  * Also maintains permissions on existing directories.
  */
 function _provision_drupal_create_directories($url, $profile = NULL) {  
-  $paths = array(
+  $readonly = array(
     "sites/$url"                 => 0755,
-    "sites/$url/files"           => 02770,
-    "sites/$url/files/tmp"       => 02770,
-    "sites/$url/files/images"    => 02770,
-    "sites/$url/files/pictures"  => 02770,
     "sites/$url/themes"          => 0755,
     "sites/$url/modules"         => 0755,  
     "sites/$url/libraries"       => 0755, # http://drupal.org/node/496240
   );
-  $grps = array(
-    "sites/$url/files",
-    "sites/$url/files/tmp",
-    "sites/$url/files/images",
-    "sites/$url/files/pictures",
-  );
+  // special case: platform. do not create files dir
+  if ($url == 'all') {
+    $readwrite = array();
+  } else {
+    $readonly["sites/$url/files"]          = 02770;
+    $readonly["sites/$url/files/tmp"]      = 02770;
+    $readonly["sites/$url/files/images"]   = 02770;
+    $readonly["sites/$url/files/pictures"] = 02770;
+    $readwrite = array(
+      "sites/$url/files",
+      "sites/$url/files/tmp",
+      "sites/$url/files/images",
+      "sites/$url/files/pictures",
+    );
+  }
 
-  foreach ($paths as $path => $perm) {
+  foreach ($readonly as $path => $perm) {
     if (!is_dir($path)) {
       provision_path("mkdir", $path, TRUE, 
         dt("Created <code>@path</code>"),
@@ -247,8 +252,8 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
       dt("Could not change permissions <code>@path</code> to @confirm")
       );
   }
-  foreach ($grps as $path) {
-      provision_path("chown_recursive", $path, drush_get_option('script_user'), 
+  foreach ($readwrite as $path) {
+    provision_path("chown_recursive", $path, drush_get_option('script_user'), 
       dt("Changed ownership of <code>@path</code>"),
       dt("Could not change ownership <code>@path</code>"),
      'DRUSH_PERM_ERROR' );
