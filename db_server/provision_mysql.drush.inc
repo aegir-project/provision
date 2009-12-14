@@ -16,11 +16,11 @@ function provision_mysql_drush_init() {
     drush_set_default('master_db', $GLOBALS['db_url']);
     $master_db = drush_get_option('master_db');
     $db = parse_url($master_db);
-    drush_set_default('master_db_user', $db['user']);
-    drush_set_default('master_db_passwd', $db['pass']);
+    drush_set_default('master_db_user', urldecode($db['user']));
+    drush_set_default('master_db_passwd', urldecode($db['pass']));
 
-    drush_set_default('master_db_host', $db['host']);
-    drush_set_default('db_host', $db['host']);
+    drush_set_default('master_db_host', urldecode($db['host']));
+    drush_set_default('db_host', urldecode($db['host']));
 
     drush_set_default('master_db_type', $db['scheme']);
     drush_set_default('db_type', $db['scheme']);
