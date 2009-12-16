@@ -1,6 +1,7 @@
 <?php
 
 function drush_provision_mysql_pre_provision_backup($url = NULL) {
+  provision_mysql_creds_from_drush();
   # set the umask to 077 so that the dump itself is generated so it's non-readable by the webserver
   umask(0077);
   drush_log("Generating mysql dump for $url.", 'backup');
