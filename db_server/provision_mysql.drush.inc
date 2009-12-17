@@ -24,32 +24,6 @@ function provision_mysql_drush_init() {
 
     drush_set_default('master_db_type', $db['scheme']);
     drush_set_default('db_type', $db['scheme']);
-
-    // profit from drush credentials if we're bootstrapped far enough
-    provision_mysql_creds_from_drush();
-  }
-}
-
-/**
- * Import database settings from drush bootstrapped settings
- *
- * This should normally not be necessary: we should not do our own parsing in the first place, see:
- * http://drupal.org/node/661720
- */
-function provision_mysql_creds_from_drush() {
-  if ($drush_creds = drush_get_context('DRUSH_DB_CREDENTIALS')) {
-    foreach (array('user', 'host', 'name') as $part) {
-      if (!drush_get_option("db_$part")) {
-        drush_set_default("db_$part", $drush_creds[$part]);
-      }
-    }
-    if (!drush_get_option('db_passwd')) {
-      drush_set_default('db_passwd', $drush_creds['pass']);
-    }
-    if (!drush_get_option('db_type')) {
-      drush_set_default('db_type', $drush_creds['driver']);
-    }
-    // XXX: port not handled
   }
 }
 
