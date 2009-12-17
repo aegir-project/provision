@@ -12,5 +12,9 @@
        endforeach;
      endif; ?>
 
+<?php if ($ssl_redirect): ?>
+    RedirectMatch permanent ^(.*) https://<?php print $site_url ?>$1
+<?php else: ?>
     RedirectMatch permanent ^(.*) http://<?php print $site_url ?>$1
+<?php endif; ?>
 </VirtualHost>
