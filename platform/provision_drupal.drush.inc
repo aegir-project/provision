@@ -595,4 +595,9 @@ function provision_prepare_environment() {
   foreach ($fields as $key) {
     $_SERVER[$key] = drush_get_option($key, null, 'site');
   }
+
+  // As of Drupal 7 there is no more mysqli type
+  if (drush_drupal_major_version() >= 7) {
+    $_SERVER['db_type'] = ($_SERVER['db_type'] == 'mysqli') ? 'mysql' : $_SERVER['db_type'];
+  }
 }

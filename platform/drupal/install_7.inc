@@ -56,25 +56,34 @@ function install_main() {
 
   require_once('install.php');
 
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
+
+  // We have an existing settings.php.
+
+  $db_spec = _drush_sql_get_db_spec();
+  $db_spec['db_prefix'] = $GLOBALS['db_prefix'];
+
+  if ($db_spec['driver'] == 'mysqli') {
+    $db_spec['driver'] = 'mysql';
+  }
+
+
+  unset($conf['site_name']);
+  unset($conf['site_mail']);
+  unset($GLOBALS['db_url']);
+
   $account_pass = provision_password();
   $settings = array(
     'parameters' => array(
       'profile' => $profile,
       'locale' => $install_locale,
     ),
+    'settings_verified' => TRUE,
     'forms' => array(
-   /*   'install_settings_form' =>  array(
-          'driver' => drush_get_option('db_type'),
-          'host' => drush_get_option('db_host'),
-          'port' => drush_get_option('db_port'),
-          'database' => drush_get_option('db_name'),
-          'username' => drush_get_option('db_user'),
-          'password' => drush_get_option('db_passwd'),
-        ),*/
+      'install_settings_form' => $db_spec,
       'install_configure_form' => array(
         'site_name' => $url,
         'site_mail' => $client_email ? $client_email : 'admin@example.com',
-        'theme' => 'garland',
         'account' => array(
           'name' => 'admin',
           'mail' => $client_email ? $client_email : 'admin@example.com',
@@ -91,13 +100,11 @@ function install_main() {
       ),
     ),
   );
-  set_exception_handler('install_exception_handler');
-  set_error_handler('install_exception_handler');
   try {
     install_drupal($settings);
   }
   catch (Exception $e) {
-    drush_log($e->message());
+    drush_set_error('DRUPAL_INSTALL_FAILED');
     dlm($e);
   }
   _provision_drupal_create_directories($url);
