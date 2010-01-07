@@ -119,7 +119,7 @@ function _provision_mysql_flush_privileges() {
 }
 
 function _provision_mysql_can_create_database() {
-  $test = 'provision_test';
+  $test = 'site_test';
   _provision_mysql_create_database($test);
   if (_provision_mysql_database_exists($test)) {
     if (!_provision_mysql_drop_database($test)) {
