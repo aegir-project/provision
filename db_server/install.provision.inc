@@ -5,7 +5,14 @@ function drush_provision_mysql_provision_install_validate() {
 }
 
 function drush_provision_mysql_pre_provision_install($url = NULL) {
-  $db_type = drush_set_option('db_type', drush_get_option('db_type'), 'site');
+
+  $db_type = drush_get_option('db_type');
+  // As of Drupal 7 there is no more mysqli type
+  if (drush_drupal_major_version() >= 7) {
+    $db_type = ($db_type == 'mysqli') ? 'mysql' : $db_type;
+  }
+  $db_type = drush_set_option('db_type', $db_type, 'site');
+
   $db_host = drush_set_option('db_host', drush_get_option('db_host'), 'site');
   $db_passwd = drush_set_option('db_passwd', provision_password(), 'site');
   $db_name = drush_set_option('db_name', _provision_mysql_suggest_db_name($url), 'site');

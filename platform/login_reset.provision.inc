@@ -21,5 +21,12 @@ function drush_provision_drupal_provision_login_reset($url) {
   // pass the login link to the front end
   drush_set_option('login_link', $onetime);
   drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
-  sess_destroy_uid(1);
+
+  if (drush_drupal_major_version() >= 7) {
+    drupal_session_destroy_uid(1);
+  }
+  else {
+    // valid for d5 and d6
+    sess_destroy_uid(1);
+  }
 }
