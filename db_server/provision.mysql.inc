@@ -24,14 +24,7 @@ function provision_db_connect() {
     drush_set_error('PROVISION_MASTER_DB_FAILED', dt('Could not connect to the master database server (%err).', array('%err' => mysql_error())), 'error');
   }
   else {
-    $success = @mysql_select_db('mysql', $connection);
-    if ($success) {
-      _provision_db_connection($connection);
-    }
-    else {
-      drush_set_error('PROVISION_MASTER_DB_FAILED', dt('Could not select the mysql database (%err).', array('%err' => mysql_error())), 'error');
-      return FALSE;
-    }
+    _provision_db_connection($connection);
   }
   return TRUE;
 }
