@@ -20,7 +20,7 @@
 function provision_apache_drush_init() {
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
-  if ($command[0] == 'provision') {
+  if (preg_match("/^provision-/", $command[0])) {
     // Set up defines for platform
     $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
 

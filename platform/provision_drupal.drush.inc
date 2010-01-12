@@ -50,7 +50,7 @@ function provision_drupal_drush_engine_drupal() {
 function provision_drupal_drush_init($url = NULL) {
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
-  if ($command[0] == 'provision') {
+  if (preg_match("/^provision-/", $command[0])) {
 
     if ($url) {
       drush_set_option('uri' , 'http://' . $url);
@@ -76,7 +76,8 @@ function provision_drupal_drush_init($url = NULL) {
 function provision_drupal_drush_exit($url = NULL) {
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
-  if ($command[0] == 'provision') {
+
+  if (preg_match("/^provision-/", $command[0])) {
     if (PROVISION_CONTEXT_SITE) {
       if (drush_get_option('installed')) {
         drush_set_option('site_url', drush_get_option('site_url'), 'site');

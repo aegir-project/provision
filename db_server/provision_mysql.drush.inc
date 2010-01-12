@@ -12,7 +12,7 @@ include_once('provision.mysql.inc');
 function provision_mysql_drush_init() {
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
-  if ($command[0] == 'provision') {
+  if (preg_match("/^provision-/", $command[0])) {
     drush_set_default('master_db', $GLOBALS['db_url']);
     $master_db = drush_get_option('master_db');
     $db = parse_url($master_db);
