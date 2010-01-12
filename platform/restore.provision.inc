@@ -39,7 +39,7 @@ function drush_provision_drupal_provision_restore_validate($url = null, $restore
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
 function drush_provision_drupal_pre_provision_restore($url, $restore_file) {
-  drush_invoke('provision backup', $url);
+  drush_invoke('provision-backup', $url);
 
   provision_path("extract", drush_get_option('restore_file'), drush_get_option('sites_path') ."/$url.restore", 
     dt('Successfully extracted the contents of @path'),

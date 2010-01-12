@@ -13,7 +13,7 @@
  */
 function drush_provision_drupal_pre_provision_disable($url, $backup_file = null) {
   drush_set_option('force', true, 'process');
-  drush_invoke("provision backup", $url, $backup_file);
+  drush_invoke("provision-backup", $url, $backup_file);
   drush_unset_option('force', 'process');
 }
 

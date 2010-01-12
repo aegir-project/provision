@@ -53,64 +53,64 @@ include_once('provision.path.inc');
  */
 function provision_drush_command() {
 
-  $items['provision install'] = array(
+  $items['provision-install'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to install.')),
     'description' => dt('Provision a new site using the provided data.'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
-  $items['provision import'] = array(
+  $items['provision-import'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to import.')),
     'description' => dt('Turn an already running site into a provisioned site.'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
-  $items['provision backup'] = array(
+  $items['provision-backup'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to back up.')),
     'optional arguments' => array('backup-file' => dt('The file to save the backup to. This will be a gzipped tarball.')),
     'description' => dt('Generate a back up for the site.'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
   
-  $items['provision enable'] = array(
+  $items['provision-enable'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to enable (only if enabled).')),
     'description' => 'Enable a disabled site.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
-  $items['provision disable'] = array(
+  $items['provision-disable'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to disable (only if disabled).')),    
     'description' => 'Disable a site.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
-  $items['provision verify'] = array(
+  $items['provision-verify'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to verify).')),    
     'description' => 'Verify that the provisioning framework is correctly installed.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, 
   );
  
-  $items['provision restore'] = array(
+  $items['provision-restore'] = array(
     'description' => 'Restore the site to a previous backup. This will also generate a backup of the site as it was.',
     'arguments' => array('domain.com' => dt('The domain of the site to be restored'),
       'site_backup.tar.gz' => dt('The backup to restore the site to.')),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
-  $items['provision deploy'] = array(
+  $items['provision-deploy'] = array(
     'description' => 'Deploy an existing backup to a new url.',
     'arguments' => array('domain.com' => dt('The domain to deploy the site package to.'),
       'site_backup.tar.gz' => dt('The backup to deploy.')),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
-  $items['provision migrate'] = array(
+  $items['provision-migrate'] = array(
     'description' => 'Migrate a site between platforms.',
     'arguments' => array('domain.com' => dt('The domain to migrate. Any outstanding updates will be run.'),
       '/path/to/platform' => dt('The platform to migrate the site to.')),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
-  $items['provision clone'] = array(
+  $items['provision-clone'] = array(
     'description' => 'Clone a site between platforms.',
     'arguments' => array('domain.com' => dt('The domain to clone. Any outstanding updates will be run.'),
       'new.domain.com' => dt('The new domain name to use.'),
@@ -118,18 +118,18 @@ function provision_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
  
-  $items['provision delete'] = array(
+  $items['provision-delete'] = array(
     'description' => 'Delete a site.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
-  $items['provision login_reset'] = array(
+  $items['provision-login_reset'] = array(
     'description' => 'Generate a one-time login reset URL.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
   
 
-  $items['hostmaster migrate'] = array(
+  $items['hostmaster-migrate'] = array(
     'description' => dt('Migrate an instance of the Hostmaster front end to a new platform'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
     'arguments' => array(
@@ -138,7 +138,7 @@ function provision_drush_command() {
     ),
   );
 
-  $items['hostmaster make'] = array(
+  $items['hostmaster-make'] = array(
     'description' => dt('Build a platform containing the Hostmaster user interface for provision.'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
     'arguments' => array(
@@ -147,13 +147,13 @@ function provision_drush_command() {
   );
 
   
-  $items['hostmaster pause'] = array(
+  $items['hostmaster-pause'] = array(
     'description' => dt('Prepare the site to be migrated to a new platform.'),
     'arguments' => array(
       'example.com' => dt('The url of the site being migrated.')),
   );
 
-  $items['hostmaster resume'] = array(
+  $items['hostmaster-resume'] = array(
     'description' => dt('Complete the migration of the site to a new platform.'),
     'arguments' => array(
       'example.com' => dt('The url of the site being migrated.')),

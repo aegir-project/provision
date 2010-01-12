@@ -20,7 +20,7 @@ function drush_provision_drupal_provision_clone_validate($url = null, $new_url =
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
 function drush_provision_drupal_pre_provision_clone($url, $new_url, $platform = null) {
-  drush_invoke('provision backup', $url);
+  drush_invoke('provision-backup', $url);
 }
 
 /**
@@ -35,7 +35,7 @@ function drush_provision_drupal_pre_provision_clone_rollback($url, $new_url, $pl
  */
 function drush_provision_drupal_provision_clone($url, $new_url, $platform = null) {
   # note that we reset the aliases so they don't conflict with the original site
-  drush_backend_invoke('provision deploy', array(
+  drush_backend_invoke('provision-deploy', array(
     $new_url, 
     drush_get_option('backup_file'), 
     'root' => $platform, 
