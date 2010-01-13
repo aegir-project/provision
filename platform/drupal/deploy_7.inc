@@ -19,6 +19,6 @@ drush_log(
 
 db_query("UPDATE {files} SET filepath=replace(filepath, :oldpath, :newpath)", $sql_args);
 db_query("UPDATE {users} SET picture = replace(picture, :oldpath, :newpath)", $sql_args);
-variable_set('files_directory_path', "sites/$new_url/files");
-variable_set('files_directory_temp', "sites/$new_url/files/tmp");
+variable_set('file_directory_path', "sites/$new_url/files");
+variable_set('file_directory_temp', "sites/$new_url/files/tmp");
 
