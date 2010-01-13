@@ -19,11 +19,11 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
   $data['root'] = $platform;
   $data['r'] = $platform;
   $data['publish_path'] = $platform;
-  drush_backend_invoke('provision verify', $data);
+  drush_backend_invoke('provision-verify', $data);
   // verify the current platform
-  drush_backend_invoke('provision verify', array('root' => drush_get_option(array('r', 'root'), drush_locate_root())));
+  drush_backend_invoke('provision-verify', array('root' => drush_get_option(array('r', 'root'), drush_locate_root())));
   // verify the site prior to migration
-  drush_backend_invoke('provision verify', array($site));
+  drush_backend_invoke('provision-verify', array($site));
 }
 
 function drush_provision_pre_hostmaster_migrate($site, $platform) {
@@ -34,14 +34,14 @@ function drush_provision_pre_hostmaster_migrate($site, $platform) {
   exec('crontab -r');
 
   // we can't rely on the park command to exist in pre-0.4 alpha 2 releases
-  drush_backend_invoke('hostmaster pause', array($site, 'uri' => $site));
+  drush_backend_invoke('hostmaster-pause', array($site, 'uri' => $site));
 }
 
 function drush_provision_hostmaster_migrate($site, $platform) { 
-  drush_backend_invoke('provision migrate', array($site, $platform));
+  drush_backend_invoke('provision-migrate', array($site, $platform));
 }
 
 function drush_provision_post_hostmaster_migrate($site, $platform) {
-  drush_backend_invoke('hostmaster resume', array($site, 'uri' => $site, 'root' => $platform));
+  drush_backend_invoke('hostmaster-resume', array($site, 'uri' => $site, 'root' => $platform));
 }
 
