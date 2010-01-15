@@ -57,8 +57,8 @@ function drush_provision_drupal_pre_provision_deploy($url, $backup_file) {
         else {
           if (($merged_modules[$name]['schema_version'] > 0) && ($module['schema_version'] > $merged_modules[$name]['schema_version'])) {
             drush_set_error('PROVISION_SCHEMA_UPGRADE_FAILURE', 
-              dt("The version of the !name module found on this platform has a lower Schema version than the one the site has installed", 
-              array('!name' => $name)));
+              dt("The version of the !name module found on this platform (!versionB) has a lower Schema version than the one the site has installed (!versionA)", 
+              array('!name' => $name, '!versionA' => $module['schema_version'], '!versionB' => $merged_modules[$name]['schema_version'])));
           }
           else {
             drush_log(dt("Found a valid version of the !name module with schema version !schema_version", 
