@@ -77,15 +77,15 @@ function provision_load_site_data($url) {
 }
 
 /**
- * Save modified options to the site.php file
+ * Save modified options to the drushrc.php file
  */
 function provision_save_site_data() {
   $context = 'site';
   drush_save_config($context);
 
+  $filename = _drush_config_file($context);
   if (!drush_get_error()) {
     // append the db settings in the _SERVER variable so normal drush commands can still read it.
-    $filename = _drush_config_file($context);
     $cache = drush_get_context($context);
 
     $fp = fopen($filename, "a+");
@@ -98,6 +98,11 @@ function provision_save_site_data() {
      fwrite($fp, "\n");
      fclose($fp);
   }
+
+  provision_path("chmod", $filename, 0600,
+    dt('Changed permissions of drushrc.php to @confirm'),
+    dt('Could not change permissions of drushrc.php to @confirm'));
+
 }
 
 /**
