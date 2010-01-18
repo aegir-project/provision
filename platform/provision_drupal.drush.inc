@@ -404,7 +404,7 @@ function _provision_drupal_delete_aliases($aliases) {
     $aliases = explode(",", $aliases);
   }
   foreach ($aliases as $alias) {
-    if (trim($alias)) {
+    if ($alias = trim($alias)) {
       provision_path("unlink", drush_get_option('docroot_path') . "/sites/" . $alias, TRUE,
             dt("Removed symlink for alias @alias", array("@alias" => $alias)), 
             dt("Could not remove symlink for alias @alias", array("@alias" => $alias)));
