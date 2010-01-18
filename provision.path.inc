@@ -146,11 +146,11 @@ function provision_path_mkdir($path) {
 }
 
 function provision_path_rmdir($path) {
-  return (file_exists($path) && is_dir($path)) ? rmdir($path) : false;
+  return rmdir($path);
 }
 
 function provision_path_unlink($path) {
-  return (file_exists($path)) ? unlink($path) : false;
+  return unlink($path);
 }
 
 
