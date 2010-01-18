@@ -13,6 +13,7 @@
     '%db_host' => '$_SERVER[db_host]', 
     '%db_name' => '$_SERVER[db_name]')); ?>";
 
+
   $profile = "<?php print $profile ?>";
   /**
   * PHP settings:
@@ -43,6 +44,7 @@
 
 
   global $conf;
+  $conf['install_profile'] = '<?php print $profile ?>';
   $conf['file_directory_path'] = 'sites/<?php print $site_url ?>/files';
   $conf['file_directory_temp'] = 'sites/<?php print $site_url ?>/files/tmp';
   $conf['file_downloads'] = 1;
