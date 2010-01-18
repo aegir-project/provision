@@ -42,6 +42,7 @@ function drush_provision_drupal_provision_clone($url, $new_url, $platform = null
     'aliases' => drush_get_option('aliases'),
     'redirection' => drush_get_option('redirection'),
     'web_host' => drush_get_option('web_host'), 
+    'profile' => drush_get_option('profile'), 
     'web_ip' => drush_get_option('web_ip'), 
     'db_host' => drush_get_option('db_host')
   ));
