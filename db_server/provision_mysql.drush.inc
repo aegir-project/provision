@@ -119,7 +119,7 @@ function _provision_mysql_flush_privileges() {
 }
 
 function _provision_mysql_can_create_database() {
-  $test = 'site_test';
+  $test = drush_get_option('aegir_db_prefix', 'site_') .'test';
   _provision_mysql_create_database($test);
   if (_provision_mysql_database_exists($test)) {
     if (!_provision_mysql_drop_database($test)) {
@@ -216,7 +216,7 @@ password=%s
  */ 
 function _provision_mysql_suggest_db_name($url) {
   if ($sid = drush_get_option('site_id')) {
-    $suggest_base = 'site_'. $sid;
+    $suggest_base = drush_get_option('aegir_db_prefix', 'site_') . $sid;
   }
   elseif ($name = drush_get_option('db_name')) {
     // consider the verified database name if no site id was provided

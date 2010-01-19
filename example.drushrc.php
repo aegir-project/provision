@@ -53,3 +53,8 @@
  * This url will be used to redirect sites that haven't been found or have been disabled.
  */
 # $options['master_url'] = 'http://aegir.example.com';
+
+/**
+ * The database prefix to use instead of the default 'site_'
+ */
+# $options['aegir_db_prefix'] = 'prefix_';
