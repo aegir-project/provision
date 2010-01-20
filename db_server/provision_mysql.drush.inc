@@ -61,7 +61,6 @@ function _provision_mysql_new_site_db($db_name, $db_user, $db_passwd, $db_grant_
   if (!_provision_mysql_grant($db_name, $db_user, $db_passwd, $db_grant_host)) {
     drush_log("Could not GRANT user access.", 'warning');
   }
-  _provision_mysql_flush_privileges();
 
   $status = _provision_mysql_database_exists($db_name);
 
@@ -95,7 +94,6 @@ function _provision_mysql_destroy_site_db($db_name, $db_user, $db_passwd, $db_gr
   }
   
   drush_log(dt("Revoking privileges of %user@%client from %database", array('%user' => $db_user, '%client' => $db_grant_host, '%database' => $db_name)));
-  _provision_mysql_flush_privileges();
   if (!_provision_mysql_revoke($db_name, $db_user, $db_grant_host)) {
       drush_log(dt("Failed to revoke user privileges"), 'warning');
   }
