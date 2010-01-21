@@ -26,6 +26,8 @@ function provision_ssl_provision_apache_vhost_config($url, $options) {
       // XXX: we need a better way to identify if this is legit
       provision_path('exists', drush_get_option('vhost_path') . '/' . $url . '_80', FALSE, NULL, dt("Overwriting existing vhost %url:80 with redirection", array('%url' => $url)));
       $newoptions = $options;
+      // in the redirection template, the ServerName is the first alias in the list
+      array_push($newoptions['aliases'], $options['site_url']);
       $newoptions['site_port'] = 80;
       _provision_apache_create_config($url . '_80', $newoptions, _provision_apache_redirect_template());
     }
