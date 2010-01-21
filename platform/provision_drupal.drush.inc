@@ -371,7 +371,7 @@ function _provision_drupal_maintain_aliases($url) {
   if (PROVISION_CONTEXT_SITE) {
     // First we delete all the old aliases
     drush_set_option('aliases', drush_get_option('aliases'), 'site');
-    _provision_drupal_delete_aliases(drush_get_option('aliases', array(), 'site'));
+    _provision_drupal_delete_aliases(drush_get_option('aliases', array(), 'site'), false);
 
     if (!drush_get_option('redirection')) {
       $aliases = drush_get_option('aliases');
@@ -392,15 +392,19 @@ function _provision_drupal_maintain_aliases($url) {
 /**
  * Delete a list of aliases
  */
-function _provision_drupal_delete_aliases($aliases) {
+function _provision_drupal_delete_aliases($aliases, $silent = false) {
   if (!is_array($aliases)) {
     $aliases = explode(",", $aliases);
+  }
+  if ($silent) {
+    $error = NULL;
+  } else {
+    $error = dt("Could not remove symlink for alias @alias", array("@alias" => $alias));
   }
   foreach ($aliases as $alias) {
     if ($alias = trim($alias)) {
       provision_path("unlink", drush_get_option('docroot_path') . "/sites/" . $alias, TRUE,
-            dt("Removed symlink for alias @alias", array("@alias" => $alias)), 
-            dt("Could not remove symlink for alias @alias", array("@alias" => $alias)));
+            dt("Removed symlink for alias @alias", array("@alias" => $alias)), $error);
     }
   }
 }
