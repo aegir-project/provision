@@ -51,6 +51,42 @@ function install_send_welcome_mail($url, $profile, $language, $client_email) {
   }
 }
 
+
+function install_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'welcome-admin':
+      // allow the profile to override welcome email text
+      if (file_exists("./profiles/$profile/provision_welcome_mail.inc")) {
+        require_once "./profiles/$profile/provision_welcome_mail.inc";
+        $custom = TRUE;
+      }
+      elseif (file_exists(dirname(__FILE__) . '/../provision_welcome_mail.inc')) { 
+        /** use the module provided welcome email
+         * We can not use drupal_get_path here,
+         * as we are connected to the provisioned site's database
+         */
+        require_once dirname(__FILE__) . '/../provision_welcome_mail.inc';
+        $custom = TRUE;
+      }
+      else {
+        // last resort use the user-pass mail text
+        $custom = FALSE;
+      }
+
+      if ($custom) {
+        $message['subject'] = st($mail['subject'], $params['variables']);
+        $message['body'][] = st($mail['body'], $params['variables']);
+      }
+      else {
+        $message['subject'] = _user_mail_text('pass_subject', $params['variables']);
+        $message['body'][] = _user_mail_text('pass_body', $params['variables']);
+      }
+
+      break;
+    }
+}
+
+
 function install_main() {
   global $profile, $install_locale, $client_email, $conf, $url, $base_url;
 
