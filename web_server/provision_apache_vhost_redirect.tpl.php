@@ -3,14 +3,17 @@
       ServerAdmin <?php  print $site_mail; ?> 
     <?php endif;?>
 
-    ServerName <?php print $site_url; ?>
+    <?php if (is_array($aliases) && count($aliases)): ?>
+      ServerName <?php print array_pop($aliases); ?>
     
-    <?php if (is_array($aliases)) :
-     foreach ($aliases as $alias) : ?>
-       ServerAlias <?php print $alias; ?>
-     <?php
-       endforeach;
-     endif; ?>
+      <?php if (count($aliases)): ?>
+        ServerAlias <?php print join(" ", $aliases); ?>
+      <?php endif; ?>
+    <?php else:
+    # this should never happen and has the potential of creating an infinite redirection loop
+     ?>
+      ServerName <?php print $site_url ?>
+    <?php endif; ?>
 
 <?php if ($ssl_redirect): ?>
     RedirectMatch permanent ^(.*) https://<?php print $site_url ?>$1
