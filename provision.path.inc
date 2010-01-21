@@ -255,8 +255,14 @@ function provision_path_extract($path, &$target, &$reason) {
   if (file_exists($path) && is_readable($path)) {
     if (is_writeable(dirname($target)) && !file_exists($target) && !is_dir($target)) {
       mkdir($target);
-      drush_log(sprintf("Running: tar -zpxf %s -C %s", $path, $target));
-      $result = provision_shell_exec("tar -zpxf %s -C %s", $path, $target);
+      $oldcwd = getcwd();
+      // we need to do this because some retarded implementations of tar (e.g. SunOS) don't support -C
+      chdir($target);
+      // same here: some do not support -z
+      $command = 'gunzip -c %s | tar pxf -';
+      drush_log(dt('Running: %comand in %target', array('%command' => sprintf($command, $path), '%target' => $target)));
+      $result = provision_shell_exec($command, $path);
+      chdir($oldcwd);
 
       if ($result && is_writeable(dirname($target)) && is_readable(dirname($target)) && is_dir($target)) {
         $target = TRUE;
