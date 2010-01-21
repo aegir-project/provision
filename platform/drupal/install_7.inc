@@ -109,9 +109,9 @@ function install_main() {
   }
   _provision_drupal_create_directories($url);
 
-#  if ($client_email) {
-#    install_send_welcome_mail($url, $profile, $install_locale, $client_email);
-#  }
+  if ($client_email) {
+    install_send_welcome_mail($url, $profile, $install_locale, $client_email);
+  }
 }
 install_main();
 
