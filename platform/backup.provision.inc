@@ -54,12 +54,17 @@ function drush_provision_drupal_provision_backup($url) {
   $backup_file = drush_get_option('backup_file');
   // Adds the site directory into the backup file
   drush_log(dt("Adding sites directory to !backup_file", array('!backup_file' => $backup_file)), 'backup');
+  $olddir = getcwd();
+  // we need to do this because some retarded implementations of tar (e.g. SunOS) don't support -C
+  chdir(drush_get_option('sites_path') . "/$url");
   if (substr($backup_file, -2) == 'gz') {
-    $command = "tar -C %s -p -c -z -f %s .";
+    // same as above: some do not support -z
+    $command = "tar cpf - . | gzip -c > %s";
   } else {
-    $command = "tar -C %s -p -c -f %s .";
+    $command = "tar cpf %s .";
   }
-  $result = provision_shell_exec($command, drush_get_option('sites_path') . "/$url",  $backup_file);
+  $result = provision_shell_exec($command,  $backup_file);
+  chdir($olddir);
 
   if (!$result && !drush_get_option('force', false)) {
     drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not back up sites directory for drupal"));
