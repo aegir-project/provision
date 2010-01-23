@@ -260,7 +260,7 @@ function provision_path_extract($path, &$target, &$reason) {
       chdir($target);
       // same here: some do not support -z
       $command = 'gunzip -c %s | tar pxf -';
-      drush_log(dt('Running: %comand in %target', array('%command' => sprintf($command, $path), '%target' => $target)));
+      drush_log(dt('Running: %command in %target', array('%command' => sprintf($command, $path), '%target' => $target)));
       $result = provision_shell_exec($command, $path);
       chdir($oldcwd);
 
