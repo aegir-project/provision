@@ -243,6 +243,9 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
     $chgrp["sites/$url/files/tmp"]      = drush_get_option('web_group');
     $chgrp["sites/$url/files/images"]   = drush_get_option('web_group');
     $chgrp["sites/$url/files/pictures"] = drush_get_option('web_group');
+    // d7 support
+    $chgrp["sites/$url/private/files"]  = drush_get_option('web_group');
+    $chgrp["sites/$url/private/temp"]  = drush_get_option('web_group');
   }
 
   foreach ($mkdir as $path => $perm) {
