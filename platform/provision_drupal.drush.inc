@@ -244,8 +244,14 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
     $chgrp["sites/$url/files/images"]   = drush_get_option('web_group');
     $chgrp["sites/$url/files/pictures"] = drush_get_option('web_group');
     // d7 support
+    $mkdir["sites/$url/private"]        = 0755;
+    $mkdir["sites/$url/private/files"]  = 02770;
+    $mkdir["sites/$url/private/temp"]   = 02770;
+    $chown["sites/$url/private"]        = drush_get_option('script_user');
+    $chown["sites/$url/private/files"]  = drush_get_option('script_user');
+    $chown["sites/$url/private/temp"]   = drush_get_option('script_user');
     $chgrp["sites/$url/private/files"]  = drush_get_option('web_group');
-    $chgrp["sites/$url/private/temp"]  = drush_get_option('web_group');
+    $chgrp["sites/$url/private/temp"]   = drush_get_option('web_group');
   }
 
   foreach ($mkdir as $path => $perm) {
