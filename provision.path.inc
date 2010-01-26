@@ -371,7 +371,7 @@ function _provision_call_recursive($func, $path, $arg) {
   $status = 1;
   // do not follow symlinks as it could lead to a DOS attack
   // consider someone creating a symlink from files/foo to ..: it would create an infinite loop
-  if ($dh = @opendir($path) && !is_link($path)) {
+  if (!is_link($path) && ($dh = @opendir($path))) {
     while (($file = readdir($dh)) !== false) {
       if ($file != '.' && $file != '..') {
         $status = _provision_call_recursive($func, $path . "/" . $file, $arg) && $status;
