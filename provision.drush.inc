@@ -11,8 +11,8 @@
  * Each site has the following commands that can be run on it.
  *
  * Implemented : 
- *   install - Install a new Drupal site. The install command uses 3 separate hooks to do it's job, 
- *              namely hook_provision_pre_install(), hook_provision_install() and hook_provision_post_install()
+ *   install - Install a new Drupal site. The install command uses 3 separate hooks to do its job,
+ *             namely hook_pre_provision_install(), hook_provision_install() and hook_post_provision_install().
  *   verify  - Recreate all configuration files, to be in synch with changes in the front end. And test that they are correct.
  *   stats   - Return an associated array of site statistics. (implemented in provision_stats module, is thus optional)
  *   import  - Import the details of an already existing site into the provisioning framework.
