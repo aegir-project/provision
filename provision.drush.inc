@@ -270,6 +270,11 @@ function _provision_default_web_group() {
  * If no method can be found to figure out the number of CPUs, this will return
  * FALSE.
  *
+ * People wishing to extend this to other platforms should look at
+ * suggestions at:
+ *
+ * http://groups.google.com/group/sage-devel/browse_thread/thread/d65209f7ad6057fc
+ *
  * @see provision_load_critical()
  * @todo implement for other systems than Linux
  */
