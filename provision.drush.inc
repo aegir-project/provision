@@ -49,6 +49,21 @@ include_once('provision.inc');
 include_once('provision.path.inc');
 
 /**
+ * implementation of hook_drush_init().
+ *
+ * This will abort any process running drush if the load is critical.
+ *
+ * @see provision_load_critical()
+ */
+function provision_drush_init() {
+  $load = sys_getloadavg();
+  if (provision_load_critical($load)) {
+    drush_log(dt("load on system too heavy (@load), aborting", array('@load' => join(" ", $load))));
+    exit(1);
+  }
+}
+
+/**
  * Implementation of hook_drush_command().
  */
 function provision_drush_command() {
@@ -231,3 +246,73 @@ function _provision_default_web_group() {
   return null;
 }
 
+/**
+ * determine the number of CPU on the machine
+ *
+ * This tries a best guess at the number of CPUs running on the system. This is
+ * useful for calculating sane load threshold.
+ *
+ * On Linux, this parses /proc/cpuinfo and looks for lines like this:
+ * 
+ * processor	: 0
+ * ...
+ * processor	: 1
+ * processor	: n
+ *
+ * The number of CPUs on the system is n+1, we just count the number of lines.
+ *
+ * Other systems remain to be implemented, and would be best implemetend
+ * through a PECL (or similar) extension that would use the POSIX sysconf
+ * interface, as such:
+ *
+ * ncpus = sysconf(_SC_NPROCESSORS_ONLN);
+ *
+ * If no method can be found to figure out the number of CPUs, this will return
+ * FALSE.
+ *
+ * @see provision_load_critical()
+ * @todo implement for other systems than Linux
+ */
+function provision_count_cpus() {
+  $ncpus = FALSE;
+  # this should work on Linux with a /proc filesystem
+  $cpuinfo = file_get_contents("/proc/cpuinfo");
+  if ($cpuinfo !== FALSE) {
+    if (preg_match_all("/^processor.*:.*[0-9]+$/m", $cpuinfo, $matches)) {
+      $ncpus = count(array_pop($matches));
+    }
+  }
+  return $ncpus;
+}
+
+/**
+ * determine if overall load of the machine is critical
+ *
+ * We use the "average system load" of the system as a metric, as available
+ * through 'uptime' or in PHP sys_getloadavg() since 5.1. The load is usually
+ * defined as "the number of processes in the system run queue"
+ *
+ * It's not a really reliable metric, but it's the best shot we've got without
+ * getting into real specific details about I/O, CPU or memory load that are
+ * going to be even tougher to evaluate.
+ *
+ * We base our evaluation on the number of CPUs on the servers. If there are
+ * more than 5 processes waiting per CPU, we abort completely. If we ignore the
+ * number of available CPUs, we assume a critical limit is a load of 10.
+ *
+ * @see sys_getloadavg()
+ */
+function provision_load_critical($load = null, $threshold = null) {
+  if (is_null($load)) {
+    $load = sys_getloadavg();
+  }
+  if (is_null($threshold)) {
+    if ($ncpus = provision_count_cpus()) {
+      $threshold = $ncpus * 5;
+    } else {
+      // can't determine the number of CPU, we hardcode at load 10
+      $threshold = 10;
+    }
+  }
+  return ($load[0] > $threshold);
+}

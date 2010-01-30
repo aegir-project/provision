@@ -225,31 +225,20 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
     "sites/$url/themes"          => 02775,
     "sites/$url/modules"         => 02775,  
     "sites/$url/libraries"       => 02775, # http://drupal.org/node/496240
+    // d7 support
+    "sites/$url/private"         => 0755,
+    "sites/$url/private/files"   => 02770,
+    "sites/$url/private/temp"    => 02770,
   );
   $chown = array();
   $chgrp = array();
   // special case: platform. do not handle files dir
   if ($url != 'all') {
     $mkdir["sites/$url/files"]          = 02770;
-    $mkdir["sites/$url/files/tmp"]      = 02770;
-    $mkdir["sites/$url/files/images"]   = 02770;
-    $mkdir["sites/$url/files/pictures"] = 02770;
     # the owner/group of those directories will be changed
     $chown["sites/$url/files"]          = drush_get_option('script_user');
-    $chown["sites/$url/files/tmp"]      = drush_get_option('script_user');
-    $chown["sites/$url/files/images"]   = drush_get_option('script_user');
-    $chown["sites/$url/files/pictures"] = drush_get_option('script_user');
     $chgrp["sites/$url/files"]          = drush_get_option('web_group');
-    $chgrp["sites/$url/files/tmp"]      = drush_get_option('web_group');
-    $chgrp["sites/$url/files/images"]   = drush_get_option('web_group');
-    $chgrp["sites/$url/files/pictures"] = drush_get_option('web_group');
-    // d7 support
-    $mkdir["sites/$url/private"]        = 0755;
-    $mkdir["sites/$url/private/files"]  = 02770;
-    $mkdir["sites/$url/private/temp"]   = 02770;
     $chown["sites/$url/private"]        = drush_get_option('script_user');
-    $chown["sites/$url/private/files"]  = drush_get_option('script_user');
-    $chown["sites/$url/private/temp"]   = drush_get_option('script_user');
     $chgrp["sites/$url/private/files"]  = drush_get_option('web_group');
     $chgrp["sites/$url/private/temp"]   = drush_get_option('web_group');
   }
