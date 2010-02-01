@@ -26,7 +26,7 @@ function provision_apache_drush_init() {
 
     $path = drush_set_default('docroot_path', rtrim(($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'], '/'));
     drush_set_default('sites_path', $path . '/sites');
-    drush_set_default('publish_path', drush_get_option('docroot_path'));
+    drush_set_default('publish_path', realpath(drush_get_option('docroot_path')));
 
     $parts = explode("/", $path);
     array_pop($parts);
