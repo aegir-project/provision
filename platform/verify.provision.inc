@@ -70,13 +70,23 @@ function drush_provision_drupal_post_provision_verify($url = NULL) {
 }
 
 /**
- * Inject the relevant .htacces configuration into the global apache configuration
+ * Inject the relevant .htacces configuration into the global apache
+ * configuration
+ *
+ * This basically loads the regular .htacess but adds an AllowOverride
+ * none so the .htaccess are ignored, as a performance improvement.
+ *
+ * @see platform/provision_drupal_htaccess.tpl.php
+ * @see hook_provision_apache_dir_config()
  */
 function provision_drupal_provision_apache_dir_config($data = null) {
   $htaccess = file_get_contents(dirname(__FILE__) . "/provision_drupal_htaccess.tpl.php");
   $htaccess .= <<<EOF
+
 # Do not read the platform's .htaccess
 AllowOverride none
+
 EOF;
+  # the trailing newline above is necessary
   return $htaccess;
 }
