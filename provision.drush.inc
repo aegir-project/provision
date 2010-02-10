@@ -58,7 +58,7 @@ include_once('provision.path.inc');
 function provision_drush_init() {
   $load = sys_getloadavg();
   if (provision_load_critical($load)) {
-    drush_log(dt("load on system too heavy (@load), aborting", array('@load' => join(" ", $load))));
+    drush_set_error('PROVISION_OVERLOAD', dt("load on system too heavy (@load), aborting", array('@load' => join(" ", $load))));
     exit(1);
   }
 }
