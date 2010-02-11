@@ -28,11 +28,16 @@ Aegir to new platforms or installing on alien platform for which Aegir is not
 yet packaged.
 
 Platform-specific cheat sheets are also available for other platforms in
-HINTS_.txt files alongside this document. Those files are basically a
+HINTS_*.txt files alongside this document. Those files are basically a
 bullet-point summary of the steps required for the installation. In case of
 conflict between INSTALL.txt and other documentation, INSTALL.txt should be
 considered the canonical source of information.
 
+Also note that those instructions setup a complete Aegir system. If you want
+to only setup a new server, it should be sufficient to install requirement
+(step 1) and configure them (step 2). You will then need a copy of provision
+and drush installed (parts of install.sh, which will need to be re-written to
+take into account this use case).
 
 1. Install software requirements
 ================================
