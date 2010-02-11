@@ -1,0 +1,205 @@
+#! /bin/sh
+
+# $Id$
+
+########################################################################
+# Aegir quick install script
+#
+# This script takes care of deploying all the required PHP scripts for
+# the frontend to run properly. It should be ran as the Aegir user.
+#
+# It should keep to strict POSIX shell syntax to ensure maximum
+# portability. The aim here is to ease the burden on porters but also
+# allow people using various platforms to zip through the install quicker.
+#
+# Eventually, all this should be performed by the Provision backend.
+#
+# This script also *DOES NOT CHECK* if the requirements have been met.
+# It's up to the admin to follow the proper install instructions or use
+# the packages provided by their platform.
+
+########################################################################
+# basic variables, change before release
+AEGIR_DOMAIN=aegir.example.com 
+AEGIR_VERSION=HEAD
+AEGIR_HOME=$HOME
+WEB_GROUP=www-data
+DRUSH_VERSION=6.x-3.0-alpha1
+DRUSH_MAKE_VERSION=6.x-2.0-beta6
+
+# when adding a variable here, add it to the display below
+
+########################################################################
+# functions
+
+# noticeable messages
+msg() {
+  echo "==> $*"
+}
+
+# simple prompt
+prompt_yes_no() {
+  while true ; do
+    printf "$* [Y/n] "
+    read answer
+    if [ -z "$answer" ] ; then
+      return 0
+    fi
+    case $answer in
+      [Yy]|[Yy][Ee][Ss])
+        return 0
+        ;;
+      [Nn]|[Nn][Oo])
+        return 1
+        ;;
+      *)
+        echo "Please answer yes or no"
+        ;;
+    esac
+ done 
+
+}
+
+usage() {
+  cat <<EOF
+Usage: $0 [ -V version ] [ -h ] [ -w group ] [ -d home ] hostname
+EOF
+}
+
+########################################################################
+# Main script
+
+# stop on error
+set -e
+
+# parse commandline
+args=`getopt V:w:d:h $*`
+set -- $args
+
+for i
+do
+  case "$i" in
+    -w) shift; WEB_GROUP=$1; shift;;
+    -h) shift; usage; exit;;
+    -V) shift; AEGIR_VERSION=$1; shift;;
+    -d) shift; AEGIR_HOME=$1; shift;;
+    --) shift; break;;
+  esac
+done
+
+AEGIR_DOMAIN=${1:-$AEGIR_DOMAIN}
+DRUSH="$AEGIR_HOME/drush/drush.php"
+HOSTMASTER_DIR=$AEGIR_HOME/hostmaster-$AEGIR_VERSION
+
+msg "Aegir automated install script"
+
+if [ `whoami` = "root" ] ; then
+  msg "This script should be ran as a non-root user"
+  exit 1
+fi
+
+msg "This script makes the following assumptions: "
+cat <<EOF
+ * you have read INSTALL.txt and prepared the platform accordingly
+ * you are running as your "aegir" user
+ * the following settings are correct:
+AEGIR_DOMAIN=$AEGIR_DOMAIN
+AEGIR_VERSION=$AEGIR_VERSION
+AEGIR_HOME=$AEGIR_HOME
+WEB_GROUP=$WEB_GROUP
+HOSTMASTER_DIR=$HOSTMASTER_DIR
+DRUSH=$DRUSH
+DRUSH_VERSION=$DRUSH_VERSION
+
+Some of those settings can be changed on the commandline, see:
+
+ $0 -h
+
+for more information.
+EOF
+
+if prompt_yes_no "Do you want to proceed with the install?" ; then
+  true
+else
+  echo "installation aborted by user"
+  exit 1
+fi
+
+msg "Creating basic directory structure"
+mkdir -p $AEGIR_HOME/config/vhost.d
+mkdir -p $AEGIR_HOME/backups
+chmod 0711 $AEGIR_HOME/config
+chmod 0700 $AEGIR_HOME/backups
+
+# we need to check both because some platforms (like SunOS) return 0 even if the binary is not found
+if which drush 2> /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
+  msg "Drush is in the path, good"
+  DRUSH=drush
+elif [ -x $DRUSH ] ; then
+  msg "Drush found in $DRUSH, good"
+  DRUSH="php $AEGIR_HOME/drush/drush.php"
+else
+  msg "Installing drush in $AEGIR_HOME"
+  cd $AEGIR_HOME
+  wget http://ftp.drupal.org/files/projects/drush-$DRUSH_VERSION.tar.gz
+  gunzip -c drush-$DRUSH_VERSION.tar.gz | tar -xf -
+  rm drush-$DRUSH_VERSION.tar.gz
+  DRUSH="php $AEGIR_HOME/drush/drush.php"
+fi
+
+if $DRUSH help > /dev/null ; then
+  msg "Drush seems to be functionning properly"
+else
+  msg "Drush is broken ($DRUSH help failed)"
+  exit 1
+fi
+
+if $DRUSH help | grep "^ make" > /dev/null ; then
+  msg "Drush make already seems to be installed"
+else
+  msg "Installing drush make in $AEGIR_HOME/.drush"
+  mkdir -p $AEGIR_HOME/.drush
+  $DRUSH dl drush_make-$DRUSH_MAKE_VERSION --destination=$AEGIR_HOME/.drush
+fi
+
+if $DRUSH help | grep "^ provision install" > /dev/null ; then
+  msg "Provision already seems to be installed"
+else
+  msg "Installing provision backend in $AEGIR_HOME/.drush"
+  mkdir -p $AEGIR_HOME/.drush
+  if [ "$AEGIR_VERSION" = "HEAD" ]; then
+    git clone git://git.aegirproject.org/provision $AEGIR_HOME/.drush/provision
+  else
+    cd $AEGIR_HOME/.drush
+    wget http://files.aegirproject.org/provision-$AEGIR_VERSION.tgz
+    gunzip -c provision-$AEGIR_VERSION.tgz | tar -xf -
+    rm provision-$AEGIR_VERSION.tgz
+  fi
+fi
+
+if [ ! -d $HOSTMASTER_DIR ] ; then
+  msg "Deploying hostmaster application"
+  $DRUSH hostmaster-make $HOSTMASTER_DIR
+  cd $HOSTMASTER_DIR
+  mkdir sites/$AEGIR_DOMAIN
+  cp sites/default/default.settings.php sites/$AEGIR_DOMAIN/settings.php
+  chmod g+w sites/$AEGIR_DOMAIN/settings.php
+  mkdir sites/$AEGIR_DOMAIN/files
+  chmod 2770 sites/$AEGIR_DOMAIN/files
+  chgrp $WEB_GROUP sites/$AEGIR_DOMAIN/settings.php
+  chgrp $WEB_GROUP sites/$AEGIR_DOMAIN/files
+fi
+
+if [ ! -f $AEGIR_HOME/config/vhost.d/$AEGIR_DOMAIN ]; then
+  sed -e "s#DocumentRoot .*#DocumentRoot $HOSTMASTER_DIR#" -e "s#Directory .*#Directory $HOSTMASTER_DIR>#" -e "s/ServerName .*/ServerName $AEGIR_DOMAIN/" $HOSTMASTER_DIR/profiles/hostmaster/apache2.conf.txt > $AEGIR_HOME/config/vhost.d/$AEGIR_DOMAIN
+  msg "Installed apache configuration file for $AEGIR_DOMAIN, you will need to restart apache"
+fi
+
+msg "Install process complete: follow the wizard"
+
+cat <<EOF
+Now point your browser to http://$AEGIR_DOMAIN/install.php and proceed
+with the remainder of the installation using the Hostmaster Install profile.
+Some of the instructions given, you will already have completed, but carefully
+read each step in turn to ensure you don't miss anything.
+EOF

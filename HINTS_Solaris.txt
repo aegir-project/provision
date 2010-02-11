@@ -1,0 +1,127 @@
+.. This document is formatted using the ReST syntax.
+
+================================================
+Aegir -- Solaris installation instructions hints
+================================================
+
+This is a helper file to the canonical INSTALL.txt. It is aimed at
+helping you install Aegir on Solaris. It simply lists commands that
+diverge from the base INSTALL.txt in a concise document that will be
+easy to maintain in the long term.
+
+It is recommended that the INSTALL.txt document is consulted before
+going ahead with this install.
+
+We reuse the same process describe in that document:
+
+ 1. Install requirements
+ 2. Configure system requirements, which include:
+    * create a Aegir user
+    * configure Apache, MySQL, DNS, etc
+ 3. Install the Aegir files
+ 4. Follow the install wizard
+
+1. Install software requirements
+================================
+
+TODO: Show how to install:
+
+ * Apache2
+ * git
+ * sudo
+ * mysql
+ * PHP 5.2
+ * wget
+
+unzip and sendmail should be part of the base Solaris install. Other
+applications should be available on the companion CDs or:
+
+http://www.sunfreeware.com/
+
+In particular, git can be compiled easily by exporting the following
+environment::
+ export CFLAGS="-I/usr/sfw/include -I/opt/sfw/include"
+ export LD_LIBRARY_PATH="/usr/sfw/lib:/opt/sfw/lib:$LD_LIBRARY_PATH"
+
+Then the compile instructions bundled with git should just be followed
+plainly.
+
+XXX: I had trouble installing the binaries, as git expects ginstall to
+be available in the path. I ended up adding the source directory in
+the path, which works fine for most uses.
+
+2. Configure system requirements
+================================
+
+Shell commands::
+ groupadd aegir
+ useradd -g aegir -G webservd -d /var/aegir -s /bin/bash -c "Aegir sandbox" aegir
+ chown aegir:aegir /var/aegir
+ echo "Include /var/aegir/config/vhost.d/" >> /etc/apache2/httpd.conf
+
+MySQL commands::
+ # Replace 'aegir_password' with the chosen password for 'aegir' mysql account
+ CREATE DATABASE aegir;
+ GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, \
+   CREATE TEMPORARY TABLES, LOCK TABLES ON aegir.* TO \
+   'aegir'@'localhost' IDENTIFIED BY 'aegir_password';
+ # Create a mysql super user (with GRANT OPTION)
+ # Replace 'aegir_root_password' with a new password
+ GRANT USAGE,CREATE USER ON *.* TO 'aegir_root'@'localhost' \
+   IDENTIFIED BY 'aegir_root_password' WITH GRANT OPTION;
+ GRANT ALL PRIVILEGES ON `site\_%`.* TO 'aegir_root'@'localhost';
+
+3. Install the Aegir files
+==========================
+
+Shell commands::
+ su - aegir
+ bash install.sh.txt -w webservd -d /var/aegir
+
+4. Follow the install wizard
+============================
+
+You should now be in the installation wizard. The wizard is usually
+self-documenting so you should just be able to follow the instructions
+in the wizard to configure Aegir to properly use the webserver and
+database server.
+
+5. Common issues
+================
+
+Drush issue
+-----------
+
+Solaris suffers from the dreaded execution issues of drush:
+
+http://drupal.org/node/637574
+http://drupal.org/node/586466
+
+Those can be worked around by hardcoding the --php executable on the
+commandline path. Adding the proper shebang header and using a proper
+PATH that includes the PHP executable also helps.
+
+Cron issues
+-----------
+
+I had numerous problems setting up a proper cron job, as Solaris'
+crond seems pretty anal about what it accepts. The only way I could
+get it to work was to create a wrapper shell script that would be
+called using the simplest cron tab.
+
+Crontab entry::
+
+ * * * * * /var/aegir/dispatch.sh
+
+Content of dispatch.sh::
+ #!/usr/bin/bash
+ 
+ HOME=/var/aegir
+ LD_LIBRARY_PATH=/usr/lib:/usr/local/lib:/usr/lib/sparcv9:/opt/mysql/mysql/lib:/usr/sfw/lib:/usr/sfw/lib/gcc:/opt/sfw/lib
+ PATH=/usr/bin:/opt/mysql/mysql/bin:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/local/bin:/opt/csw/bin
+ 
+ export HOME
+ export LD_LIBRARY_PATH
+ export PATH
+ 
+ php '/var/aegir/drush/drush.php' --php=/usr/local/bin/php hosting tasks --root='/var/aegir/hostmaster-HEAD' --uri='http://aegir.example.com'
