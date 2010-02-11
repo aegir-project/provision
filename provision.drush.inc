@@ -22,13 +22,18 @@
  *             or used for an upgrade.
  *   disable - Disable an installed Drupal site. Changes the virtual host config file so that it redirects to provision_disabled_site_redirect_url
  *   enable  - Re-enable a site that has already been disabled. Recreates the virtual host file.
- *   delete  - Generates a back up of the site, and then removes all references to it.
+ *   delete  - In a site context: generates a back up of the site, and then removes all references to it.
+ *             In a platform context: removes the platform and its vhost config from the server if no sites are currently running on it
  *   restore - Revert to a previous backup of the site.
  *
  *   deploy  - Accepts a site package (backup) as argument, and redeploys it, running the upgrade processes on it.
  *             Uses hook_provision_pre_upgrade(), hook_provision_upgrade() and hook_provision_post_upgrade() hooks,
  *             and allows clean roll back if any errors occur. Will include stringent checking of module versions,
  *             and allow unit tests to be run.
+ *   lock    - Lock a platform so that sites cannot be provisioned on it. This does not disable or delete the platform
+ *             nor any sites currently provisioned on it.
+ *   unlock  - Unlock a platform so that sites can be provisioned on it.
+ *
  *   login_reset - Generate a one-time login reset URL.
  *
  * Not implemented yet :
@@ -95,6 +100,16 @@ function provision_drush_command() {
   $items['provision-disable'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to disable (only if disabled).')),    
     'description' => 'Disable a site.',
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
+  );
+
+  $items['provision-lock'] = array(
+    'description' => 'Lock a platform from having any other sites provisioned on it.',
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
+  );
+
+  $items['provision-unlock'] = array(
+    'description' => 'Unlock a platform so that sites can be provisioned on it.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 

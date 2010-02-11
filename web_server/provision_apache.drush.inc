@@ -216,6 +216,12 @@ function _provision_apache_create_config($file, $data, $template) {
   }
 }
 
+function _provision_apache_delete_config($file) {
+  provision_path("unlink", drush_get_option('vhost_path') ."/" . $file, TRUE, dt("Removed apache platform vhost configuration"));
+}
+
+
+
 /**
  * Restart Apache
  */

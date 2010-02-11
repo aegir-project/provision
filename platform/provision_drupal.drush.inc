@@ -87,7 +87,10 @@ function provision_drupal_drush_exit($url = NULL) {
       }
     }
     else {
-      _provision_generate_config();
+      // Generate a drushrc.php for the platform unless it's being deleted
+      if (!preg_match("/^provision-delete/", $command[0])) {
+        _provision_generate_config();
+      }
     }
   }
 }
