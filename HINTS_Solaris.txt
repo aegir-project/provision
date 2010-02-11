@@ -1,16 +1,17 @@
+.. -*- mode: rst; fill-column: 78; -*-
 .. This document is formatted using the ReST syntax.
 
 ================================================
 Aegir -- Solaris installation instructions hints
 ================================================
 
-This is a helper file to the canonical INSTALL.txt. It is aimed at
-helping you install Aegir on Solaris. It simply lists commands that
-diverge from the base INSTALL.txt in a concise document that will be
-easy to maintain in the long term.
+This is a helper file to the canonical INSTALL.txt. It is aimed at helping you
+install Aegir on Solaris. It simply lists commands that diverge from the base
+INSTALL.txt in a concise document that will be easy to maintain in the long
+term.
 
-It is recommended that the INSTALL.txt document is consulted before
-going ahead with this install.
+It is recommended that the INSTALL.txt document is consulted before going
+ahead with this install.
 
 We reuse the same process describe in that document:
 
@@ -46,9 +47,9 @@ environment::
 Then the compile instructions bundled with git should just be followed
 plainly.
 
-XXX: I had trouble installing the binaries, as git expects ginstall to
-be available in the path. I ended up adding the source directory in
-the path, which works fine for most uses.
+XXX: I had trouble installing the binaries, as git expects ginstall to be
+available in the path. I ended up adding the source directory in the path,
+which works fine for most uses.
 
 2. Configure system requirements
 ================================
@@ -82,9 +83,8 @@ Shell commands::
 ============================
 
 You should now be in the installation wizard. The wizard is usually
-self-documenting so you should just be able to follow the instructions
-in the wizard to configure Aegir to properly use the webserver and
-database server.
+self-documenting so you should just be able to follow the instructions in the
+wizard to configure Aegir to properly use the webserver and database server.
 
 5. Common issues
 ================
@@ -98,16 +98,16 @@ http://drupal.org/node/637574
 http://drupal.org/node/586466
 
 Those can be worked around by hardcoding the --php executable on the
-commandline path. Adding the proper shebang header and using a proper
-PATH that includes the PHP executable also helps.
+commandline path. Adding the proper shebang header and using a proper PATH
+that includes the PHP executable also helps.
 
 Cron issues
 -----------
 
-I had numerous problems setting up a proper cron job, as Solaris'
-crond seems pretty anal about what it accepts. The only way I could
-get it to work was to create a wrapper shell script that would be
-called using the simplest cron tab.
+I had numerous problems setting up a proper cron job, as Solaris' crond seems
+pretty anal about what it accepts. The only way I could get it to work was to
+create a wrapper shell script that would be called using the simplest cron
+tab.
 
 Crontab entry::
 

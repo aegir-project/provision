@@ -1,15 +1,17 @@
+.. -*- mode: rst; fill-column: 78; -*-
 .. This document is formatted using the ReST syntax.
 
 =================================
  Aegir Installation Instructions
 =================================
 
-------------------------------------------------------------------------------------------------------------------
- This document describes briefly how to install a multi-platform, single-server Aegir Drupal provisionning system.
-------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+This document describes briefly how to install a multi-platform, single-server
+Aegir Drupal provisionning system.
+------------------------------------------------------------------------------
 
-Aegir installation seems difficult at first, but once you get around it,
-it's fairly simple. It's 4 basic steps:
+Aegir installation seems difficult at first, but once you get around it, it's
+fairly simple. It's 4 basic steps:
 
  1. Install requirements
  2. Configure system requirements, which include:
@@ -18,86 +20,84 @@ it's fairly simple. It's 4 basic steps:
  3. Install the Aegir files
  4. Follow the install wizard
 
-Those steps are detailed below. The following instructions provide
-example commands for a Debian-like distribution, but should be fairly
-easy to adapt to your environment. In fact, this document is meant as a
-canonical reference that should work on every platform and that can be
-used for people porting Aegir to new platforms or installing on alien
-platform for which Aegir is not yet packaged.
+Those steps are detailed below. The following instructions provide example
+commands for a Debian-like distribution, but should be fairly easy to adapt to
+your environment. In fact, this document is meant as a canonical reference
+that should work on every platform and that can be used for people porting
+Aegir to new platforms or installing on alien platform for which Aegir is not
+yet packaged.
 
 Platform-specific cheat sheets are also available for other platforms in
 HINTS_.txt files alongside this document. Those files are basically a
-bullet-point summary of the steps required for the installation. In case
-of conflict between INSTALL.txt and other documentation, INSTALL.txt
-should be considered the canonical source of information.
+bullet-point summary of the steps required for the installation. In case of
+conflict between INSTALL.txt and other documentation, INSTALL.txt should be
+considered the canonical source of information.
 
 
 1. Install software requirements
 ================================
 
-This section describes what is expected of the servers Aegir is running
-on.
+This section describes what is expected of the servers Aegir is running on.
 
-Aegir must run some UNIX flavour because the majority of functionality
-in this system occurs in the back-end, through command line scripting.
-There are also several features (such as symlinks), that are not
-available to users on Windows. There are no plans currently to add
-windows support.
+Aegir must run some UNIX flavour because the majority of functionality in this
+system occurs in the back-end, through command line scripting.  There are also
+several features (such as symlinks), that are not available to users on
+Windows. There are no plans currently to add windows support.
 
-The level of access required to be able to configure this system is very
-far beyond what is commonly available to users with shared hosting.
-Commands are assumed to be run as root user. 
+The level of access required to be able to configure this system is very far
+beyond what is commonly available to users with shared hosting.  Commands are
+assumed to be run as root user.
 
 Web server
 ----------
 
-You will need at least one dedicated web server, running Apache. We
-generally work with Apache 2 but we should be compatible with the 1.x
-series. You will need root access to that server and the server must
-be reserved for Aegir. Sharing the server with other control panels
-such as Cpanel, Plesk or AlternC will very likely create problems and
-is not supported.
+You will need at least one dedicated web server, running Apache. We generally
+work with Apache 2 but we should be compatible with the 1.x series. You will
+need root access to that server and the server must be reserved for
+Aegir. Sharing the server with other control panels such as Cpanel, Plesk or
+AlternC will very likely create problems and is not supported.
 
 PHP 5.2
 -------
 
-Since Aegir strongly depends on Drush, we therefore depend on PHP 5.2
-or above. You also need to have the commandline version of PHP to run
-Drush properly and the MySQL extensions.
+Since Aegir strongly depends on Drush, we therefore depend on PHP 5.2 or
+above. You also need to have the commandline version of PHP to run Drush
+properly and the MySQL extensions.
 
 Database server
 ---------------
 
-You will require a database server, obviously. Aegir currently only 
-supports MySQL. It is preferable to use a dedicated server since Aegir 
-will create database users and will require a privileged user.
+You will require a database server, obviously. Aegir currently only supports
+MySQL. It is preferable to use a dedicated server since Aegir will create
+database users and will require a privileged user.
 
 Mail transfer agent
 -------------------
 
-Aegir requires an MTA (Mail Transfer Agent) installed on your webserver
-in order to be able to install new sites to your new platform. If you
-don't have an MTA, the site installation will fail with message like
-"could not send email". Additional messages will show that site has been
-removed because of this problem. To remedy the situation simply install
-an MTA like sendmail, postfix, or exim and do the minimal configuration.
+Aegir requires an MTA (Mail Transfer Agent) installed on your webserver in
+order to be able to install new sites to your new platform. If you don't have
+an MTA, the site installation will fail with message like "could not send
+email". Additional messages will show that site has been removed because of
+this problem. To remedy the situation simply install an MTA like sendmail,
+postfix, or exim and do the minimal configuration.
 
 Other utilities: sudo, git and unzip
 ------------------------------
 
 Aegir installs itself via a drush_make file that downloads via git if you want
 the bleeding edge code, or via wget if you want the latest official release.
-If you want the latest development version, and don't have the git program you 
+If you want the latest development version, and don't have the git program you
 will need to install it on the server.
+
 The jQueryUI library is used in the Aegir UI, unzip is required to extract it.
-Sudo is required to allow the aegir user the limited privilege to restart the webserver
-when required.
+Sudo is required to allow the aegir user the limited privilege to restart the
+webserver when required.
 
 Summary
 -------
 
-This may vary according to your platform, but under a Debian derivative,
-you can install all those packages using the following.
+This may vary according to your platform, but under a Debian derivative, you
+can install all those packages using the following.
 
 Shell commands::
 
@@ -108,31 +108,31 @@ Shell commands::
 2. Configure system requirements
 ================================
 
-The following details what configuration needs to be performed on the 
-server before going ahead with the install.
+The following details what configuration needs to be performed on the server
+before going ahead with the install.
 
 Aegir user
 ----------
 
-The provision framework of Aegir requires that the scripts run as a 
-non-root system account, to ensure that it can correctly set the file
-permissions on the hosted files. 
+The provision framework of Aegir requires that the scripts run as a non-root
+system account, to ensure that it can correctly set the file permissions on
+the hosted files.
 
-Also to ensure that the file permissions of the hosted sites are
-always as safe as can be, and especially to make sure that the web
-server does not have the ability to modify the code of the site, the
-configured system account needs to be a member of the web server group,
-in order to be able to correctly set the file permissions.
+Also to ensure that the file permissions of the hosted sites are always as
+safe as can be, and especially to make sure that the web server does not have
+the ability to modify the code of the site, the configured system account
+needs to be a member of the web server group, in order to be able to correctly
+set the file permissions.
 
-More detailed instructions on this topic will be given later in the web 
+More detailed instructions on this topic will be given later in the web
 installation wizard.
 
 This document assumes the Aegir user is ``aegir``, its home directory is
-``/var/aegir`` and the webserver group is ``www-data``. You can choose
-another username if desired.
+``/var/aegir`` and the webserver group is ``www-data``. You can choose another
+username if desired.
 
-In addition we will create a directory layout for Aegir configuration
-and backups.
+In addition we will create a directory layout for Aegir configuration and
+backups.
 
 Shell commands::
 
@@ -143,13 +143,12 @@ Shell commands::
 Apache configuration
 --------------------
 
-The rewrite module must be enabled and also Apache must be given a
-directive to include Aegir's vhosts path, to read configurations from
-there.  In Debian-based systems you can put a file inside
-``/etc/apache2/conf.d`` that will be parsed on startup or
-alternatively you can place the directive in apache.conf/httpd.conf.
-We prefer the former. In other systems there are similar ways to 
-accomplish this. Consult your OS's documentation if unsure.
+The rewrite module must be enabled and also Apache must be given a directive
+to include Aegir's vhosts path, to read configurations from there.  In
+Debian-based systems you can put a file inside ``/etc/apache2/conf.d`` that
+will be parsed on startup or alternatively you can place the directive in
+apache.conf/httpd.conf.  We prefer the former. In other systems there are
+similar ways to accomplish this. Consult your OS's documentation if unsure.
 
 Shell commands as root::
 
@@ -160,9 +159,9 @@ Shell commands as root::
 Database configuration
 ----------------------
 
-Here you want to make a basic database configuration for the Drupal site
-you are going to install. You want to run these commands using your
-mysql 'root' user, substituting the 'XXXXXXXX' with a real password.
+Here you want to make a basic database configuration for the Drupal site you
+are going to install. You want to run these commands using your mysql 'root'
+user, substituting the 'XXXXXXXX' with a real password.
 
 SQL commands::
 
@@ -177,9 +176,9 @@ DNS Configuration
 
 Configuring DNS is up to you. Currently Aegir does nothing with DNS. 
 
-As a help trick, if you are installing Aegir locally to try and test it,
-you can do local DNS by adding entries to file ``/etc/hosts``. First
-line of this file looks like:
+As a help trick, if you are installing Aegir locally to try and test it, you
+can do local DNS by adding entries to file ``/etc/hosts``. First line of this
+file looks like:
 
 ``127.0.0.1  localhost your-machine-name``
 
@@ -190,31 +189,29 @@ Simply add all domains you want to this line. e.g:
 3. Install the Aegir files
 ==========================
 
-This section deals with the installation of Aegir proper. These
-instructions limit themselves to getting you into the Aegir install wizard,
-which will then give you further configuration instructions.
+This section deals with the installation of Aegir proper. These instructions
+limit themselves to getting you into the Aegir install wizard, which will then
+give you further configuration instructions.
 
-There is an install script part of the hostmaster profile that takes care
-of installing the right packages and preparing the Drupal frontend install
-for you. That script needs to be run as the aegir user created above.
-This file is available alongside this one or can be downloaded through the 
-web at:
+There is an install script part of the hostmaster profile that takes care of
+installing the right packages and preparing the Drupal frontend install for
+you. That script needs to be run as the aegir user created above.  This file
+is available alongside this one or can be downloaded through the web at:
 
 http://git.aegirproject.org/?p=hostmaster.git;a=blob_plain;f=install.sh.txt;hb=HEAD
 
-By default, the install script will install the "correct" version of
-Aegir (ie. if it was downloaded through git, it will install the version
-from the git master branch. If you downloaded an official release, it should 
-install the official release.). You can modify which version to install by 
-editing the AEGIR_VERSION variable in the script.
+By default, the install script will install the "correct" version of Aegir
+(ie. if it was downloaded through git, it will install the version from the
+git master branch. If you downloaded an official release, it should install
+the official release.). You can modify which version to install by editing the
+AEGIR_VERSION variable in the script.
 
-The install script is shipped with other default settings that you 
-will likely need to change (such as the URL of the Aegir site) prior 
-to running it.
+The install script is shipped with other default settings that you will likely
+need to change (such as the URL of the Aegir site) prior to running it.
 
 You can change which release to install or other parameters such as these
-through options passed to the script. Run "sh
-install.sh.txt -h" for more information on the available options.
+through options passed to the script. Run "sh install.sh.txt -h" for more
+information on the available options.
 
 Shell commands::
 
@@ -226,10 +223,10 @@ Note you must run this as root or prefix with sudo.
 Checkpoint!
 -----------
 
-At this point, you have checked out all the code and setup your basic
-Drupal system (Drupal core, hosting, hostmaster and eldir) that will be the
-Aegir frontend and the backend system (provision and drush). Your
-filesystem layout should look something like this::
+At this point, you have checked out all the code and setup your basic Drupal
+system (Drupal core, hosting, hostmaster and eldir) that will be the Aegir
+frontend and the backend system (provision and drush). Your filesystem layout
+should look something like this::
 
  /var/aegir/hostmaster-0.x/
  /var/aegir/hostmaster-0.x/profiles/hostmaster/
@@ -246,20 +243,19 @@ filesystem layout should look something like this::
  /var/aegir/.drush/drush_make/
  /var/aegir/.drush/provision/
 
-Variations on this are acceptable (for example, the Drush Debian
-package works out of ``/usr/bin/drush`` and that's fine), but you are
-better to stick with the defaults if you really want to get through this. 
+Variations on this are acceptable (for example, the Drush Debian package works
+out of ``/usr/bin/drush`` and that's fine), but you are better to stick with
+the defaults if you really want to get through this.
 
 
 4. Follow the install wizard
 ============================
 
-Now point your browser to http://$AEGIR_DOMAIN/install.php and proceed
-with the remainder of the installation using the Hostmaster Install
-profile.  Some of the instructions given, you will already have
-completed, but carefully read each step in turn to ensure you don't miss
-anything.  Specifically you must still provide the database credentials,
-add the Aegir user to /etc/sudoers with the relevant command to restart
-the webserver, create a MySQL superuser capable of creating more databases, 
-and initialise the hosting system.  These instructions are provided to you
-by the Hostmaster install profile.
+Now point your browser to http://$AEGIR_DOMAIN/install.php and proceed with
+the remainder of the installation using the Hostmaster Install profile.  Some
+of the instructions given, you will already have completed, but carefully read
+each step in turn to ensure you don't miss anything.  Specifically you must
+still provide the database credentials, add the Aegir user to /etc/sudoers
+with the relevant command to restart the webserver, create a MySQL superuser
+capable of creating more databases, and initialise the hosting system.  These
+instructions are provided to you by the Hostmaster install profile.

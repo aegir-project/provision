@@ -1,3 +1,4 @@
+.. -*- mode: rst; fill-column: 78; -*-
 .. This document is formatted using the ReST syntax.
 
 ==========================
@@ -11,8 +12,8 @@ This document describes briefly how to upgrade an existing Aegir installation
 Conventions and tips
 ====================
 
-All instructions and in general all commands must be run as aegir user,
-so all permissions are always set correctly.
+All instructions and in general all commands must be run as aegir user, so all
+permissions are always set correctly.
 
 To become aegir user you can issue this command::
 
@@ -20,11 +21,11 @@ To become aegir user you can issue this command::
 
 (Note you must run this as root or prefix with sudo).
 
-Note that /bin/sh is an example. You may wish to instead use the shell
-of your choice, i.e /bin/bash
+Note that /bin/sh is an example. You may wish to instead use the shell of your
+choice, i.e /bin/bash
 
-Additionally to make following instructions generic and not dependant on
-a concrete Drupal or Aegir version, we will use shell environment
+Additionally to make following instructions generic and not dependant on a
+concrete Drupal or Aegir version, we will use shell environment
 variables. Since 0.4, the hostmaster platform is prepended with 'hostmaster'
 so as not to clash with any other Drupal platforms. If you are upgrading from
 Aegir version 0.3, your hostmaster platform may be called 'drupal-6.14'.
@@ -47,17 +48,17 @@ Shell commands::
 
   export DRUSH='php /var/aegir/drush/drush.php'
 
-As of the 0.4-alpha3 release, 'unzip' is a required dependency on your 
-server in order to successfully extract the jquery.ui library that is
-part of some UI improvements. On Debian, this means:
+As of the 0.4-alpha3 release, 'unzip' is a required dependency on your server
+in order to successfully extract the jquery.ui library that is part of some UI
+improvements. On Debian, this means:
 
 Shell commands::
 
  apt-get install unzip
 
 If you intend on upgrading your system to the bleeding edge version of the
-code from our git repositories, you will need the git program installed.
-On Debian, this means:
+code from our git repositories, you will need the git program installed.  On
+Debian, this means:
 
 Shell commands::
 
@@ -66,31 +67,31 @@ Shell commands::
 Generic upgrade instructions
 ============================
 
-We aim to create a generic upgrade process that will be consistent
-across versions. This section describes this process. However, there
-are version-specific upgrade instructions that may be more relevant to
-your installation in the next section.
+We aim to create a generic upgrade process that will be consistent across
+versions. This section describes this process. However, there are
+version-specific upgrade instructions that may be more relevant to your
+installation in the next section.
 
 Upgrading the backend
 ---------------------
 
-In general, we try to keep the backend and the frontend compatible
-with each other during release cycles. That is: provision 0.3 and
-hosting 0.3 will always be able to talk to each other. hosting 0.2 was
-able to talk to provision 0.3 too, but the API is not well enough
-defined so that can be counted upon.
+In general, we try to keep the backend and the frontend compatible with each
+other during release cycles. That is: provision 0.3 and hosting 0.3 will
+always be able to talk to each other. hosting 0.2 was able to talk to
+provision 0.3 too, but the API is not well enough defined so that can be
+counted upon.
 
-Therefore, you want to keep the frontend and the backend in sync. When
-you do a major upgrade (e.g. 0.3 -> 0.4) of the backend, you *must*
-upgrade the frontend soon after.
+Therefore, you want to keep the frontend and the backend in sync. When you do
+a major upgrade (e.g. 0.3 -> 0.4) of the backend, you *must* upgrade the
+frontend soon after.
 
 Bottomline: first you upgrade the backend, then the frontend.
 
-Upgrading the backend is as simple as installing a new version of
-Drush and Provision over the old ones.
+Upgrading the backend is as simple as installing a new version of Drush and
+Provision over the old ones.
 
-Keep a copy of the old Provision and Drush in case something goes wrong 
-in the frontend.
+Keep a copy of the old Provision and Drush in case something goes wrong in the
+frontend.
 
 Shell commands::
 
@@ -105,9 +106,9 @@ Shell commands::
   gunzip -c provision-$AEGIR_VERSION.tgz | tar -xf -
   rm provision-$AEGIR_VERSION.tgz
 
-Provision 0.4 has added a new dependency on drush_make, which will also
-need to be installed to upgrade the front end if you are upgrading from
-a pre-0.4 release.
+Provision 0.4 has added a new dependency on drush_make, which will also need
+to be installed to upgrade the front end if you are upgrading from a pre-0.4
+release.
 
 If you are upgrading from an earlier 0.4 release, replace your copy of
 drush_make with the latest recommended release.
@@ -119,13 +120,13 @@ Shell commands::
 Upgrading the frontend
 ----------------------
 
-These are generic instructions to upgrade your hosting, hostmaster,
-eldir or Drupal core installation to new versions. As of 0.4 this process
-has largely been automated, and will be able to upgrade 0.3 and any of
-the 0.4 development releases to the latest applicable versions.
+These are generic instructions to upgrade your hosting, hostmaster, eldir or
+Drupal core installation to new versions. As of 0.4 this process has largely
+been automated, and will be able to upgrade 0.3 and any of the 0.4 development
+releases to the latest applicable versions.
 
-Once you have upgraded the backend, and you have installed drush_make
-you will need to run the hostmaster migrate command.
+Once you have upgraded the backend, and you have installed drush_make you will
+need to run the hostmaster migrate command.
 
 
 Shell commands::
@@ -133,15 +134,15 @@ Shell commands::
   cd $OLD_DRUPAL_DIR
   $DRUSH hostmaster-migrate aegir.example.com $DRUPAL_DIR
 
-The directory specified must be an absolute path to where you want
-the new release to be stored. If the directory does not exist, provision
-will use drush_make to fetch and assemble the correct version of the front
-end for the specific release of the backend you are running.
+The directory specified must be an absolute path to where you want the new
+release to be stored. If the directory does not exist, provision will use
+drush_make to fetch and assemble the correct version of the front end for the
+specific release of the backend you are running.
 
-This command will completely replace the crontab entry for the aegir user,
-and asks for confirmation before it does so. If you do not confirm, the process
+This command will completely replace the crontab entry for the aegir user, and
+asks for confirmation before it does so. If you do not confirm, the process
 will be halted as it is necessary for the task queue to be processed.
 
-The command above will fetch the latest stable Drupal release, so it can simply
-be run again when a new security release of Drupal is made available.
+The command above will fetch the latest stable Drupal release, so it can
+simply be run again when a new security release of Drupal is made available.
 

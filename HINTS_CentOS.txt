@@ -1,3 +1,4 @@
+.. -*- mode: rst; fill-column: 78; -*-
 .. This document is formatted using the ReST syntax.
 
 ===============================================
