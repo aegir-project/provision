@@ -17,7 +17,18 @@
 # This script also *DOES NOT CHECK* if the requirements have been met.
 # It's up to the admin to follow the proper install instructions or use
 # the packages provided by their platform.
-
+########################################################################
+# This script takes the following steps:
+#
+# 1. parse commandline
+# 2. prompt for confirmation
+# 3. creates a basic directory structure in $AEGIR_HOME
+# 4. downloads drush in $AEGIR_HOME
+# 5. downloads drush_make in $AEGIR_HOME/.drush
+# 6. downloads provision in $AEGIR_HOME/.drush
+# 7. deploys hostmaster in $AEGIR_HOME using drush
+# 8. creates an apache config file in $AEGIR_HOME/config/vhost.d
+#
 ########################################################################
 # basic variables, change before release
 AEGIR_DOMAIN=aegir.example.com 
