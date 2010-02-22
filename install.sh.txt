@@ -10,9 +10,8 @@
 #
 # It should keep to strict POSIX shell syntax to ensure maximum
 # portability. The aim here is to ease the burden on porters but also
-# allow people using various platforms to zip through the install quicker.
-#
-# Eventually, all this should be performed by the Provision backend.
+# allow people using various platforms to zip through the install
+# quicker.
 #
 # This script also *DOES NOT CHECK* if the requirements have been met.
 # It's up to the admin to follow the proper install instructions or use
@@ -84,7 +83,7 @@ EOF
 set -e
 
 # parse commandline
-args=`getopt V:w:d:h $*`
+args=`getopt bV:w:d:h $*`
 set -- $args
 
 for i
@@ -93,6 +92,7 @@ do
     -w) shift; WEB_GROUP=$1; shift;;
     -V) shift; AEGIR_VERSION=$1; shift;;
     -d) shift; AEGIR_HOME=$1; shift;;
+    -b) BACKEND_ONLY=1; shift;;
     -h) shift; usage; exit;;
     --) shift; break;;
   esac
@@ -186,6 +186,29 @@ else
     gunzip -c provision-$AEGIR_VERSION.tgz | tar -xf -
     rm provision-$AEGIR_VERSION.tgz
   fi
+fi
+
+if [ -f $AEGIR_HOME/apache.conf ]; then
+  cat > $AEGIR_HOME/apache.conf <<EOF
+NameVirtualHost *:80  
+NameVirtualHost *:443  
+
+<IfModule !env_module>
+  LoadModule env_module modules/mod_env.so
+</IfModule>
+
+<IfModule !rewrite_module>
+  LoadModule rewrite_module modules/mod_rewrite.so
+</IfModule>
+
+Include /var/aegir/config/vhost.d/
+EOF
+fi
+
+msg "Aegir provision backend installed successfully"
+
+if [ ! -z "$BACKEND_ONLY" ] ; then
+  exit 0
 fi
 
 if [ ! -d $HOSTMASTER_DIR ] ; then

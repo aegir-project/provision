@@ -35,9 +35,8 @@ considered the canonical source of information.
 
 Also note that those instructions setup a complete Aegir system. If you want
 to only setup a new server, it should be sufficient to install requirement
-(step 1) and configure them (step 2). You will then need a copy of provision
-and drush installed (parts of install.sh, which will need to be re-written to
-take into account this use case).
+(step 1) and configure them (step 2). You will just need the -b flag to
+avoid installing the frontend on the server.
 
 1. Install software requirements
 ================================
@@ -148,17 +147,18 @@ Shell commands::
 Apache configuration
 --------------------
 
-The rewrite module must be enabled and also Apache must be given a directive
-to include Aegir's vhosts path, to read configurations from there.  In
-Debian-based systems you can put a file inside ``/etc/apache2/conf.d`` that
-will be parsed on startup or alternatively you can place the directive in
-apache.conf/httpd.conf.  We prefer the former. In other systems there are
-similar ways to accomplish this. Consult your OS's documentation if unsure.
+Aegir assumes a few Apache modules are available on the server, and
+generates its own configuration files. The way we enable this is by
+symlinking a single file which contains all the configuration necessary.
+In Debian-based systems, you should symlink this file inside
+``/etc/apache2/conf.d`` that will be parsed on startup or alternatively
+you can place include that file in your apache.conf/httpd.conf. We
+prefer the former. In other systems there are similar ways to accomplish
+this. Consult your OS's documentation if unsure.
 
 Shell commands as root::
 
- a2enmod rewrite
- echo "Include /var/aegir/config/vhost.d/" > /etc/apache2/conf.d/aegir
+ ln -s /var/aegir/config/apache.conf /etc/apache2/conf.d/aegir.conf
 
 
 Database configuration
