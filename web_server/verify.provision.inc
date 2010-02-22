@@ -3,14 +3,10 @@
 function drush_provision_apache_provision_verify($url = null) {
   if (PROVISION_CONTEXT_PLATFORM) {
     _provision_create_dir(drush_get_option('vhost_path'), dt("Virtual host configuration"), 0700);
+    _provision_create_dir(drush_get_option('platform_conf_path'), dt("Platforms configuration"), 0700);
     
     if (drush_get_option('platform', null)) {
-      // only create a platform level config if the platform is specified
-      $data = drush_get_merged_options();
-      $options = drush_get_merged_options();
-      $data['extra_config'] = "# Extra configuration from modules:\n";
-      $data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_dir_config', $data));
-      _provision_apache_create_config('platform_' . $options['platform'] . '.conf', $data, _provision_apache_platform_template());
+      _provision_apache_create_platform_config($url);
     }
 
     _provision_apache_create_server_config($url);

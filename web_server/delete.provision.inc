@@ -11,7 +11,7 @@ function drush_provision_apache_provision_delete($url = NULL) {
       drush_set_error(dt('Existing sites were found on this platform. These sites will need to be deleted before this platform can be deleted.'));
     }
     else {
-      _provision_apache_delete_config('platform_' . $options['platform'] . '.conf');
+      _provision_apache_delete_platform_config('platform_' . $options['platform'] . '.conf');
     }
   }
   return _provision_apache_restart_apache();  

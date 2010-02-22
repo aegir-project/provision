@@ -146,3 +146,26 @@ will be halted as it is necessary for the task queue to be processed.
 The command above will fetch the latest stable Drupal release, so it can
 simply be run again when a new security release of Drupal is made available.
 
+Version-specific upgrade notes
+==============================
+
+0.4 - multi server support
+--------------------------
+
+This release introduces multi-server support and required reorganizing
+the Apache configuration files in ~aegir/config. Instead of having all
+files in config/vhost.d, they are now split between vhost.d, platform.d
+and a single apache.conf. The vhost.d directory is for virtual hosts,
+platform.d is for platform-specific configuration and apache.conf is the
+server-wide configuration file.
+
+You will need to move all platform_* configuration file to the
+platform.d directory for Aegir to operate properly. Failure to do so
+will yield unpredictable results as multiple definitions will be loaded
+by Apache for the same platform. This can be fixed by doing:
+
+
+Shell commands::
+
+  mkdir /var/aegir/config/platform.d/
+  mv /var/aegir/config/vhost.d/platform_*.conf /var/aegir/config/platform.d/
