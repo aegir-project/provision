@@ -12,7 +12,8 @@
 # portability. The aim here is to ease the burden on porters but also
 # allow people using various platforms to zip through the install quicker.
 #
-# Eventually, all this should be performed by the Provision backend.
+# Eventually, this should just be a wrapper to install-provision, drush make
+# and provision-install, see http://drupal.org/node/711760
 #
 # This script also *DOES NOT CHECK* if the requirements have been met.
 # It's up to the admin to follow the proper install instructions or use
@@ -22,12 +23,9 @@
 #
 # 1. parse commandline
 # 2. prompt for confirmation
-# 3. creates a basic directory structure in $AEGIR_HOME
-# 4. downloads drush in $AEGIR_HOME
-# 5. downloads drush_make in $AEGIR_HOME/.drush
-# 6. downloads provision in $AEGIR_HOME/.drush
-# 7. deploys hostmaster in $AEGIR_HOME using drush
-# 8. creates an apache config file in $AEGIR_HOME/config/vhost.d
+# 3. call install-provision.sh to deploy the backend
+# 4. deploys hostmaster in $AEGIR_HOME using drush
+# 5. creates an apache config file in $AEGIR_HOME/config/vhost.d
 #
 ########################################################################
 # basic variables, change before release
@@ -136,57 +134,8 @@ else
   exit 1
 fi
 
-msg "Creating basic directory structure"
-mkdir -p $AEGIR_HOME/config/vhost.d
-mkdir -p $AEGIR_HOME/backups
-chmod 0711 $AEGIR_HOME/config
-chmod 0700 $AEGIR_HOME/backups
-
-# we need to check both because some platforms (like SunOS) return 0 even if the binary is not found
-if which drush 2> /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
-  msg "Drush is in the path, good"
-  DRUSH=drush
-elif [ -x $DRUSH ] ; then
-  msg "Drush found in $DRUSH, good"
-  DRUSH="php $AEGIR_HOME/drush/drush.php"
-else
-  msg "Installing drush in $AEGIR_HOME"
-  cd $AEGIR_HOME
-  wget http://ftp.drupal.org/files/projects/drush-$DRUSH_VERSION.tar.gz
-  gunzip -c drush-$DRUSH_VERSION.tar.gz | tar -xf -
-  rm drush-$DRUSH_VERSION.tar.gz
-  DRUSH="php $AEGIR_HOME/drush/drush.php"
-fi
-
-if $DRUSH help > /dev/null ; then
-  msg "Drush seems to be functionning properly"
-else
-  msg "Drush is broken ($DRUSH help failed)"
-  exit 1
-fi
-
-if $DRUSH help | grep "^ make" > /dev/null ; then
-  msg "Drush make already seems to be installed"
-else
-  msg "Installing drush make in $AEGIR_HOME/.drush"
-  mkdir -p $AEGIR_HOME/.drush
-  $DRUSH dl drush_make-$DRUSH_MAKE_VERSION --destination=$AEGIR_HOME/.drush
-fi
-
-if $DRUSH help | grep "^ provision install" > /dev/null ; then
-  msg "Provision already seems to be installed"
-else
-  msg "Installing provision backend in $AEGIR_HOME/.drush"
-  mkdir -p $AEGIR_HOME/.drush
-  if [ "$AEGIR_VERSION" = "HEAD" ]; then
-    git clone git://git.aegirproject.org/provision $AEGIR_HOME/.drush/provision
-  else
-    cd $AEGIR_HOME/.drush
-    wget http://files.aegirproject.org/provision-$AEGIR_VERSION.tgz
-    gunzip -c provision-$AEGIR_VERSION.tgz | tar -xf -
-    rm provision-$AEGIR_VERSION.tgz
-  fi
-fi
+DIR=`dirname $0`
+. $DIR/install-provision.sh -w $WEB_GROUP -d $AEGIR_HOME
 
 if [ ! -d $HOSTMASTER_DIR ] ; then
   msg "Deploying hostmaster application"
