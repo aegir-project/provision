@@ -70,7 +70,7 @@ prompt_yes_no() {
 
 usage() {
   cat <<EOF
-Usage: $0 [ -h ] [ -w group ] [ -d home ]
+Usage: $0 [ -h ] [ -V version ] [ -w group ] [ -d home ]
 EOF
 }
 
@@ -89,6 +89,7 @@ do
   case "$i" in
     -w) shift; WEB_GROUP=$1; shift;;
     -h) shift; usage; exit;;
+    -V) shift; AEGIR_VERSION=$1; shift;;
     -d) shift; AEGIR_HOME=$1; shift;;
     --) shift; break;;
   esac
@@ -106,6 +107,7 @@ fi
 msg "Configuring provision backend with the following settings:"
 cat <<EOF
 AEGIR_HOME=$AEGIR_HOME
+AEGIR_VERSION=$AEGIR_VERSION
 WEB_GROUP=$WEB_GROUP
 DRUSH=$DRUSH
 DRUSH_VERSION=$DRUSH_VERSION
@@ -153,7 +155,7 @@ if $DRUSH help | grep "^ provision install" > /dev/null ; then
 else
   msg "Installing provision backend in $AEGIR_HOME/.drush"
   mkdir -p $AEGIR_HOME/.drush
-  if [ "$AEGIR_VERSION" = "HEAD" ]; then
+  if [ "$AEGIR_VERSION" = "HEAD" ] || [ -z "$AEGIR_VERSION" ]; then
     git clone -q git://git.aegirproject.org/provision $AEGIR_HOME/.drush/provision
   else
     cd $AEGIR_HOME/.drush

@@ -135,7 +135,7 @@ else
 fi
 
 DIR=`dirname $0`
-. $DIR/install-provision.sh -w $WEB_GROUP -d $AEGIR_HOME
+. $DIR/install-provision.sh -V $AEGIR_VERSION -w $WEB_GROUP -d $AEGIR_HOME
 
 if [ ! -d $HOSTMASTER_DIR ] ; then
   msg "Deploying hostmaster application"
