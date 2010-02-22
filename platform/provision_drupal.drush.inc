@@ -238,7 +238,10 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
   // special case: platform. do not handle files dir
   if ($url != 'all') {
     $mkdir["sites/$url/files"]          = 02770;
-    # the owner/group of those directories will be changed
+    $mkdir["sites/$url/files/tmp"]          = 02770;
+    $mkdir["sites/$url/files/images"]          = 02770;
+    $mkdir["sites/$url/files/pictures"]          = 02770;
+    # the owner/group of those directories will be changed recursively
     $chown["sites/$url/files"]          = drush_get_option('script_user');
     $chgrp["sites/$url/files"]          = drush_get_option('web_group');
     $chown["sites/$url/private"]        = drush_get_option('script_user');
