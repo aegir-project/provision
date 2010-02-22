@@ -35,8 +35,9 @@ considered the canonical source of information.
 
 Also note that those instructions setup a complete Aegir system. If you want
 to only setup a new server, it should be sufficient to install requirement
-(step 1) and configure them (step 2). Then you can run install-provision.sh
-instead of running the whole install.sh script, to install the backend.
+(step 1) and configure them (step 2). You will then need a copy of provision
+and drush installed (parts of install.sh, which will need to be re-written to
+take into account this use case).
 
 1. Install software requirements
 ================================
