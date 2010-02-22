@@ -91,9 +91,9 @@ for i
 do
   case "$i" in
     -w) shift; WEB_GROUP=$1; shift;;
-    -h) shift; usage; exit;;
     -V) shift; AEGIR_VERSION=$1; shift;;
     -d) shift; AEGIR_HOME=$1; shift;;
+    -h) shift; usage; exit;;
     --) shift; break;;
   esac
 done
