@@ -61,6 +61,7 @@ function provision_mysql_drush_init() {
       system('stty -echo');
       $db['pass'] = provision_prompt(dt("Database password"));
       system('stty echo');
+      print "\n"; # add a cr since the user's didn't echo
     }
     drush_set_default('master_db_user', urldecode($db['user']));
     drush_set_default('master_db_passwd', urldecode($db['pass']));
