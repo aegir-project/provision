@@ -30,7 +30,8 @@ function provision_apache_drush_init() {
 
     $parts = explode("/", $path);
     array_pop($parts);
-    $parent_path = drush_set_default('parent_path', implode("/" , $parts));
+    drush_set_default('parent_path', implode("/" , $parts));
+    $parent_path = drush_get_option('parent_path');
 
     drush_set_default('backup_path', $parent_path . '/backups');
     drush_set_default('config_path', $parent_path . '/config');
