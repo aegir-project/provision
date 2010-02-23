@@ -119,6 +119,11 @@ function provision_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, 
   );
  
+  $items['provision-server'] = array(
+    'description' => 'Prepare a server as a provision backend.',
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH, 
+  );
+    
   $items['provision-restore'] = array(
     'description' => 'Restore the site to a previous backup. This will also generate a backup of the site as it was.',
     'arguments' => array('domain.com' => dt('The domain of the site to be restored'),

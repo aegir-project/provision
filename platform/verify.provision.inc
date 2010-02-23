@@ -25,22 +25,6 @@ function drush_provision_drupal_provision_verify_validate($url = null) {
  */
 function drush_provision_drupal_provision_verify($url = null) {
   if (PROVISION_CONTEXT_PLATFORM) {
-    _provision_create_dir(drush_get_option('config_path'), dt('Provision configuration'), 0711);
-    _provision_create_dir(drush_get_option('config_path') . '/includes', dt('Provision PHP configuration'), 0711);
-    if (!provision_path('exists', drush_get_option('config_path') .  '/includes/global.inc', TRUE, dt("Global configuration file exists"))) {
-      # create an empty global.inc so the include doesn't fail with
-      # open_basedir restrictions
-      if (!$file = fopen(drush_get_option('config_path') .  '/includes/global.inc', 'a')) {
-        drush_set_error('PROVISION_FRAMEWORK_ERROR', dt('Cannot create global settings configuration'));
-      } else {
-        fwrite($file, "<?php # global settings.php");
-        fclose($file);
-      }
-    }
-    _provision_create_dir(drush_get_option('backup_path'), dt('Backup'), 0700);
-    provision_path("writable", drush_get_option('sites_path'), TRUE, dt("Drupal sites directory is writable by the provisioning script"),
-      dt("Drupal sites directory is not writable by the provisioning script"), 'PROVISION_SITES_DIR_NOT_WRITABLE');
-
     drush_set_option('sites', array_keys((array) provision_drupal_find_sites()), 'drupal'); 
     drush_log(dt("This platform is running @short_name @version", array('@short_name' => 'drupal', '@version' => VERSION)));
     drush_set_option('packages', _scrub_object(provision_find_packages()), 'drupal');
