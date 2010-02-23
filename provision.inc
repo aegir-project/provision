@@ -141,6 +141,19 @@ function provision_render_config($template, $variables) {
 }
 
 /**
+ * Write a config based on a template
+ *
+ * @see provision_render_config()
+ */
+function provision_write_config($file, $template, $data) {
+  $file = fopen($file, "w");
+  $text = provision_render_config($template, $data);
+  fwrite($file, $text);
+  fclose($file);
+}
+
+
+/**
  * @} End of "defgroup provisionvalues".
  */
 

@@ -37,6 +37,7 @@ function provision_apache_drush_init() {
 
     $config_path = drush_get_option('config_path');
     drush_set_default('vhost_path', $config_path . '/vhost.d');
+    drush_set_default('platform_conf_path', $config_path . '/platform.d');
 
     // Commands
     drush_set_default('restart_cmd', _provision_default_restart_cmd());
@@ -107,7 +108,7 @@ function _provision_apache_delete_vhost_config($url) {
  * Generate virtual host file
  *
  * This will create a VirtualHost configuration file for the domain
- * $url. This is really a stub to _create_config() that sets up the
+ * $url. This is really a stub to provision_write_config() that sets up the
  * options properly, guesses the right template and fires a hook to
  * allow other modules to add lines to the default config, using
  * hook_provision_apache_vhost_config(). Parameters in the template
@@ -121,7 +122,7 @@ function _provision_apache_delete_vhost_config($url) {
  *
  * @see _provision_apache_default_template()
  * @see _provision_apache_redirect_template()
- * @see _provision_apache_create_config()
+ * @see provision_write_config()
  * @see hook_provision_apache_vhost_config()
  * @see drush_get_merged_options()
  */
@@ -155,7 +156,41 @@ function _provision_apache_create_vhost_config($url, $template = NULL) {
   if (provision_path_exists(drush_get_option('vhost_path') .'/'. $url)) {
     rename(drush_get_option('vhost_path') .'/'. $url, drush_get_option('vhost_path') .'/'. $file);
   }
-  return _provision_apache_create_config($file, $options, $template);
+  drush_log(dt("Generating apache host configuration file %file.", array('%file' => $file)));
+  $writable = provision_path("writable", drush_get_option('vhost_path'), TRUE , NULL,
+      dt("Virtual host configuration path @path is not writable."), 
+      'PROVISION_VHOST_PATH_NOT_WRITABLE');
+  
+  if ($writable) {
+    return provision_write_config(drush_get_option('vhost_path') .'/'. $file, $template, $options);
+  } else {
+    return $writable;
+  }
+}
+
+/**
+ * Create a platform-level Apache cofniguration file
+ *
+ * This creates a config file for the <Directory> the platform is in
+ *
+ * most of what is done here is add the relevant .htaccess directives to
+ * the platform configuration.
+ */
+function _provision_apache_create_platform_config($url) {
+  // only create a platform level config if the platform is specified
+  $data = drush_get_merged_options();
+  $options = drush_get_merged_options();
+  $data['extra_config'] = "# Extra configuration from modules:\n";
+  $data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_dir_config', $data));
+  $file = 'platform_' . $options['platform'] .  '.conf';
+  drush_log(dt("Generating apache platform configuration file %file.", array('%file' => $file)));
+  $writable = provision_path("writable", drush_get_option('platform_conf_path'), TRUE , NULL, dt("Platform configuration path @path is not writable."), 'PROVISION_VHOST_PATH_NOT_WRITABLE');
+
+  if ($writable) {
+    return provision_write_config(drush_get_option('platform_conf_path') . $file, _provision_apache_platform_template(), $data);
+  } else {
+    return $writable;
+  }
 }
 
 /**
@@ -167,7 +202,7 @@ function _provision_apache_create_vhost_config($url, $template = NULL) {
  * third party extensions to add stuff to the configuration file.
  *
  * @see _provision_apache_default_server_template()
- * @see _provision_apache_create_config()
+ * @see provision_write_config()
  */
 function _provision_apache_create_server_config($url) {
   $options = drush_get_merged_options();
@@ -175,7 +210,17 @@ function _provision_apache_create_server_config($url) {
   
   $options['extra_config'] = "# Extra configuration from modules:\n";
   $options['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_server_config', $url, $options));
-  return _provision_apache_create_config($options['web_host'] .".server", $options, $template);
+
+  drush_log(dt("Generating apache server configuration file %file.", array('%file' => $file)));
+  $writable = provision_path("writable", drush_get_option('config_path'), TRUE , NULL,
+      dt("Virtual host configuration path @path is not writable."), 
+      'PROVISION_VHOST_PATH_NOT_WRITABLE');
+  
+  if ($writable) {
+    return provision_write_config(drush_get_option('config_path') .'/apache.conf', $template, $options);
+  } else {
+    return $writable;
+  }
 }
 
 /**
@@ -187,37 +232,8 @@ function _provision_apache_default_server_template() {
     return file_get_contents(dirname(__FILE__) ."/provision_apache_server.tpl.php");
 }
 
-/**
- * Write an apache configuration file
- *
- * Write an apache configuration file to the Aegir configuration
- * directory `vhost_path` (generally /var/aegir/config/vhost.d).
- *
- * @param $file
- *    the name of the file in the directory
- * @param $data
- *    name => value pairs of settings to be passed to the template
- * @param $template
- *    the template expanded with provision_render_config()
- *
- * @see provision_render_config()
- */
-function _provision_apache_create_config($file, $data, $template) {
-  drush_log(dt("Generating apache host configuration file %file.", array('%file' => $file)));
-  $writable = provision_path("writable", drush_get_option('vhost_path'), TRUE , NULL,
-      dt("Virtual host configuration path @path is not writable."), 
-      'PROVISION_VHOST_PATH_NOT_WRITABLE');
-  
-  if ($writable) {
-    $file = fopen(drush_get_option('vhost_path') .'/'. $file, "w");
-    $text = provision_render_config($template, $data);
-    fwrite($file, $text);
-    fclose($file);
-  }
-}
-
-function _provision_apache_delete_config($file) {
-  provision_path("unlink", drush_get_option('vhost_path') ."/" . $file, TRUE, dt("Removed apache platform vhost configuration"));
+function _provision_apache_delete_platform_config($file) {
+  provision_path("unlink", drush_get_option('platform_conf_path') ."/" . $file, TRUE, dt("Removed apache platform vhost configuration"));
 }
 
 

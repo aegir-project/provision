@@ -29,7 +29,7 @@ function provision_ssl_provision_apache_vhost_config($url, $options) {
       // in the redirection template, the ServerName is the first alias in the list
       array_push($newoptions['aliases'], $options['site_url']);
       $newoptions['site_port'] = 80;
-      _provision_apache_create_config($url . '_80', $newoptions, _provision_apache_redirect_template());
+      provision_write_config(drush_get_option('vhost_path') . '/' . $url . '_80', _provision_apache_redirect_template(), $newoptions);
     }
     return array("php_value session.cookie_secure 1", "SSLEngine On");
   } else {
