@@ -191,7 +191,9 @@ fi
 if [ ! -f $AEGIR_HOME/config/apache.conf ]; then
   cat > $AEGIR_HOME/config/apache.conf <<EOF
 NameVirtualHost *:80  
-NameVirtualHost *:443  
+<IfModule ssl_module>
+  NameVirtualHost *:443  
+</IfModule>
 
 <IfModule !env_module>
   LoadModule env_module modules/mod_env.so
