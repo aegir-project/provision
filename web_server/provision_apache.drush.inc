@@ -211,13 +211,14 @@ function _provision_apache_create_server_config($url) {
   $options['extra_config'] = "# Extra configuration from modules:\n";
   $options['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_server_config', $url, $options));
 
+  $file = drush_get_option('config_path') .'/apache.conf';
   drush_log(dt("Generating apache server configuration file %file.", array('%file' => $file)));
   $writable = provision_path("writable", drush_get_option('config_path'), TRUE , NULL,
       dt("Virtual host configuration path @path is not writable."), 
       'PROVISION_VHOST_PATH_NOT_WRITABLE');
   
   if ($writable) {
-    return provision_write_config(drush_get_option('config_path') .'/apache.conf', $template, $options);
+    return provision_write_config($file, $template, $options);
   } else {
     return $writable;
   }
