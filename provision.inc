@@ -235,7 +235,7 @@ function provision_shell_exec() {
  * The input can be anything that fits on a single line (not only y/n,
  * so we can't use drush_confirm()
  *
- * @todo put this in drush
+ * @todo put this in drush: http://drupal.org/node/722722
  * @see drush_confirm()
  */
 function provision_prompt($prompt, $default = null) {
