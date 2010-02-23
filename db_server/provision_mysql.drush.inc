@@ -9,6 +9,43 @@
  */
 include_once('provision.mysql.inc');
 
+/**
+ * Prompt the user for input
+ * 
+ * The input can be anything that fits on a single line (not only y/n,
+ * so we can't use drush_confirm()
+ *
+ * @todo put this in drush
+ * @see drush_confirm()
+ */
+function provision_prompt($prompt, $default = null) {
+  if (!is_null($default)) {
+    $prompt .= " [" . $default . "]";
+  }
+  $prompt .= ": ";
+
+  print $prompt;
+
+  if (drush_get_context('DRUSH_AFFIRMATIVE')) {
+    return $default;
+  }
+
+  $stdin = fopen('php://stdin', 'r');
+  stream_set_blocking($stdin, TRUE);
+  while (($line = fgets($stdin)) !== FALSE) {
+    $line = trim($line);
+    if ($line === "") {
+      $line = $default;
+    }
+    if ($line) {
+      break;
+    }
+    print $prompt;
+  }
+  fclose($stdin);
+  return $line;
+}
+
 function provision_mysql_drush_init() {
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
@@ -16,6 +53,15 @@ function provision_mysql_drush_init() {
     drush_set_default('master_db', $GLOBALS['db_url']);
     $master_db = drush_get_option('master_db');
     $db = parse_url($master_db);
+    if (!$master_db) {
+      drush_print(dt("No database configuration provided, asking for one interactively"));
+      $db['scheme'] = provision_prompt(dt("Database type"), "mysql");
+      $db['host'] = provision_prompt(dt("Database server"), "localhost");
+      $db['user'] = provision_prompt(dt("Database user"), "root");
+      system('stty -echo');
+      $db['pass'] = provision_prompt(dt("Database password"));
+      system('stty +echo');
+    }
     drush_set_default('master_db_user', urldecode($db['user']));
     drush_set_default('master_db_passwd', urldecode($db['pass']));
 
