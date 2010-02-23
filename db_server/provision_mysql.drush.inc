@@ -60,7 +60,7 @@ function provision_mysql_drush_init() {
       $db['user'] = provision_prompt(dt("Database user"), "root");
       system('stty -echo');
       $db['pass'] = provision_prompt(dt("Database password"));
-      system('stty +echo');
+      system('stty echo');
     }
     drush_set_default('master_db_user', urldecode($db['user']));
     drush_set_default('master_db_passwd', urldecode($db['pass']));
