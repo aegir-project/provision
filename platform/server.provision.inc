@@ -15,6 +15,4 @@ function drush_provision_drupal_provision_server() {
     }
   }
   _provision_create_dir(drush_get_option('backup_path'), dt('Backup'), 0700);
-  provision_path("writable", drush_get_option('sites_path'), TRUE, dt("Drupal sites directory is writable by the provisioning script"),
-                 dt("Drupal sites directory is not writable by the provisioning script"), 'PROVISION_SITES_DIR_NOT_WRITABLE');
 }

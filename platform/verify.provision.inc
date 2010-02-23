@@ -25,6 +25,9 @@ function drush_provision_drupal_provision_verify_validate($url = null) {
  */
 function drush_provision_drupal_provision_verify($url = null) {
   if (PROVISION_CONTEXT_PLATFORM) {
+    provision_path("writable", drush_get_option('sites_path'), TRUE, dt("Drupal sites directory is writable by the provisioning script"),
+                   dt("Drupal sites directory is not writable by the provisioning script"), 'PROVISION_SITES_DIR_NOT_WRITABLE');
+
     drush_set_option('sites', array_keys((array) provision_drupal_find_sites()), 'drupal'); 
     drush_log(dt("This platform is running @short_name @version", array('@short_name' => 'drupal', '@version' => VERSION)));
     drush_set_option('packages', _scrub_object(provision_find_packages()), 'drupal');
