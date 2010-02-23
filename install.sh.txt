@@ -189,6 +189,9 @@ else
   fi
 fi
 
+# this should be handled by provision server verification, as it is a
+# duplicate of web_server/provision_apache_server.tpl.php
+# http://drupal.org/node/586000
 if [ ! -f $AEGIR_HOME/config/apache.conf ]; then
   cat > $AEGIR_HOME/config/apache.conf <<EOF
 NameVirtualHost *:80  
