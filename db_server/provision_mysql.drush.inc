@@ -52,25 +52,31 @@ function provision_mysql_drush_init() {
   if (preg_match("/^provision-/", $command[0])) {
     drush_set_default('master_db', $GLOBALS['db_url']);
     $master_db = drush_get_option('master_db');
-    $db = parse_url($master_db);
-    if (!$master_db) {
+    if ($master_db) {
+      $db = parse_url($master_db);
+      $host = urldecode($db['host']);
+      $user = urldecode($db['user']);
+      $pass = urldecode($db['pass']);
+      $scheme = $db['scheme'];
+    } else {
       drush_print(dt("No database configuration provided, asking for one interactively"));
-      $db['scheme'] = provision_prompt(dt("Database type"), "mysql");
-      $db['host'] = provision_prompt(dt("Database server"), "localhost");
-      $db['user'] = provision_prompt(dt("Database user"), "root");
+      $scheme = provision_prompt(dt("Database type"), "mysql");
+      $host = provision_prompt(dt("Database server"), "localhost");
+      $user = provision_prompt(dt("Database user"), "root");
       system('stty -echo');
-      $db['pass'] = provision_prompt(dt("Database password"));
+      $pass = provision_prompt(dt("Database password"));
       system('stty echo');
       print "\n"; # add a cr since the user's didn't echo
+      
     }
-    drush_set_default('master_db_user', urldecode($db['user']));
-    drush_set_default('master_db_passwd', urldecode($db['pass']));
+    drush_set_default('master_db_user', $user);
+    drush_set_default('master_db_passwd', $pass);
 
-    drush_set_default('master_db_host', urldecode($db['host']));
-    drush_set_default('db_host', urldecode($db['host']));
+    drush_set_default('master_db_host', $host);
+    drush_set_default('db_host', $host);
 
-    drush_set_default('master_db_type', $db['scheme']);
-    drush_set_default('db_type', $db['scheme']);
+    drush_set_default('master_db_type', $scheme);
+    drush_set_default('db_type', $scheme);
   }
 }
 
