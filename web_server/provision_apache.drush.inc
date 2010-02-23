@@ -205,12 +205,12 @@ function _provision_apache_create_platform_config($url) {
  * @see _provision_apache_default_server_template()
  * @see provision_write_config()
  */
-function _provision_apache_create_server_config($url) {
+function _provision_apache_create_server_config() {
   $options = drush_get_merged_options();
   $template = _provision_apache_default_server_template();
   
   $options['extra_config'] = "# Extra configuration from modules:\n";
-  $options['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_server_config', $url, $options));
+  $options['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_server_config', $options));
 
   $file = drush_get_option('config_path') .'/apache.conf';
   drush_log(dt("Generating apache server configuration file %file.", array('%file' => $file)));
