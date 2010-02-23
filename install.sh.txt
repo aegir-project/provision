@@ -189,28 +189,7 @@ else
   fi
 fi
 
-# this should be handled by provision server verification, as it is a
-# duplicate of web_server/provision_apache_server.tpl.php
-# http://drupal.org/node/586000
-if [ ! -f $AEGIR_HOME/config/apache.conf ]; then
-  cat > $AEGIR_HOME/config/apache.conf <<EOF
-NameVirtualHost *:80  
-<IfModule ssl_module>
-  NameVirtualHost *:443  
-</IfModule>
-
-<IfModule !env_module>
-  LoadModule env_module modules/mod_env.so
-</IfModule>
-
-<IfModule !rewrite_module>
-  LoadModule rewrite_module modules/mod_rewrite.so
-</IfModule>
-
-Include /var/aegir/config/vhost.d/
-Include /var/aegir/config/platform.d/
-EOF
-fi
+$DRUSH provision-server --parent_path=$AEGIR_HOME --web_group=$WEB_GROUP --drush_path=$DRUSH
 
 msg "Aegir provision backend installed successfully"
 
