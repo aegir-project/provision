@@ -214,7 +214,7 @@ function _provision_apache_create_server_config($url) {
   $file = drush_get_option('config_path') .'/apache.conf';
   drush_log(dt("Generating apache server configuration file %file.", array('%file' => $file)));
   $writable = provision_path("writable", drush_get_option('config_path'), TRUE , NULL,
-      dt("Virtual host configuration path @path is not writable."), 
+      dt("Apache server configuration path @path is not writable."), 
       'PROVISION_VHOST_PATH_NOT_WRITABLE');
   
   if ($writable) {
