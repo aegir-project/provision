@@ -187,7 +187,7 @@ function _provision_apache_create_platform_config($url) {
   $writable = provision_path("writable", drush_get_option('platform_conf_path'), TRUE , NULL, dt("Platform configuration path @path is not writable."), 'PROVISION_VHOST_PATH_NOT_WRITABLE');
 
   if ($writable) {
-    return provision_write_config(drush_get_option('platform_conf_path') . $file, _provision_apache_platform_template(), $data);
+    return provision_write_config(drush_get_option('platform_conf_path') . '/' . $file, _provision_apache_platform_template(), $data);
   } else {
     return $writable;
   }
