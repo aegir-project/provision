@@ -269,7 +269,7 @@ function _provision_mysql_grant_host($db_host, $web_ip, $web_host) {
   elseif ($web_ip) {
     $grant = $web_ip;
   } else {
-    $grant = $web_host;
+    $grant = gethostbyname($web_host);
   }
   return $grant;
 }
