@@ -187,6 +187,11 @@ function _provision_apache_create_platform_config($url) {
   $writable = provision_path("writable", drush_get_option('platform_conf_path'), TRUE , NULL, dt("Platform configuration path @path is not writable."), 'PROVISION_VHOST_PATH_NOT_WRITABLE');
 
   if ($writable) {
+    // remove the old path first.
+    $oldfile = drush_get_option('vhost_path') . '/' . $file;
+    if (file_exists($oldfile) && is_writable($oldfile)) {
+      unlink($oldfile);
+    }
     return provision_write_config(drush_get_option('platform_conf_path') . '/' . $file, _provision_apache_platform_template(), $data);
   } else {
     return $writable;
@@ -217,6 +222,11 @@ function _provision_apache_create_server_config($url) {
       'PROVISION_VHOST_PATH_NOT_WRITABLE');
   
   if ($writable) {
+    // remove the old path first.
+    $oldfile = drush_get_option('vhost_path') . '/' . drush_get_option('web_host') . '.server';
+    if (file_exists($oldfile) && is_writable($oldfile)) {
+      unlink($oldfile);
+    }
     return provision_write_config(drush_get_option('config_path') .'/apache.conf', $template, $options);
   } else {
     return $writable;
