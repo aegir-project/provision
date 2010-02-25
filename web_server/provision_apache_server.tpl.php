@@ -3,6 +3,11 @@
 <?php if (is_array($web_ports)) :
   foreach ($web_ports as $web_port) :?>
   NameVirtualHost *:<?php print $web_port; ?>
+
+  <VirtualHost *:<?php print $web_port; ?>>
+    ServerName default
+    Redirect 404 /
+  </VirtualHost>
   
 <?php
 endforeach;

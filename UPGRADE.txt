@@ -159,13 +159,17 @@ and a single apache.conf. The vhost.d directory is for virtual hosts,
 platform.d is for platform-specific configuration and apache.conf is the
 server-wide configuration file.
 
-You will need to move all platform_* configuration file to the
-platform.d directory for Aegir to operate properly. Failure to do so
-will yield unpredictable results as multiple definitions will be loaded
-by Apache for the same platform. This can be fixed by doing:
+After you have completed the migration process as outlined above, 
+you will need to change the line you added to the httpd.conf file during
+installation.
 
+Open your httpd.conf file and modify :
 
-Shell commands::
+  Include /var/aegir/config/vhost.d/*
 
-  mkdir /var/aegir/config/platform.d/
-  mv /var/aegir/config/vhost.d/platform_*.conf /var/aegir/config/platform.d/
+To read :
+
+  Include /var/aegir/config/apache.conf
+
+Now log into Aegir, and verify the hostmaster platform, this will generate
+the correct apache.conf file and restart apache.
