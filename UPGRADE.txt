@@ -36,9 +36,9 @@ you are reading this document.
 Shell commands::
 
   export AEGIR_VERSION=HEAD
-  export DRUPAL_DIR=/var/aegir/hostmaster-$AEGIR_TAG
+  export DRUPAL_DIR=/var/aegir/hostmaster-$AEGIR_VERSION
   export OLD_DRUPAL_DIR=/var/aegir/drupal-6.14
-  export DRUSH_VERSION=6.x-3.0-alpha1.tar.gz
+  export DRUSH_VERSION=All-versions-3.0-alpha1
   export DRUSH_MAKE_VERSION=6.x-2.0-beta6
 
 This document also assumes drush is installed properly and we use an
