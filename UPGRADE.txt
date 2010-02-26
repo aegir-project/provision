@@ -38,7 +38,7 @@ Shell commands::
   export AEGIR_VERSION=HEAD
   export DRUPAL_DIR=/var/aegir/hostmaster-$AEGIR_VERSION
   export OLD_DRUPAL_DIR=/var/aegir/drupal-6.14
-  export DRUSH_VERSION=All-versions-3.0-alpha1
+  export DRUSH_VERSION=All-versions-3.0-beta1
   export DRUSH_MAKE_VERSION=6.x-2.0-beta6
 
 This document also assumes drush is installed properly and we use an
@@ -160,16 +160,16 @@ platform.d is for platform-specific configuration and apache.conf is the
 server-wide configuration file.
 
 After you have completed the migration process as outlined above, 
-you will need to change the line you added to the httpd.conf file during
-installation.
+you will need to change the line you added to either the httpd.conf file 
+or /etc/apache2/conf.d/aegir file during installation.
 
 Open your httpd.conf file and modify :
 
-  Include /var/aegir/config/vhost.d/*
+  Include /var/aegir/config/vhost.d
 
 To read :
 
   Include /var/aegir/config/apache.conf
 
-Now log into Aegir, and verify the hostmaster platform, this will generate
+Now log into Aegir, and verify the hostmaster platform. This will generate
 the correct apache.conf file and restart apache.
