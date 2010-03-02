@@ -1,0 +1,6 @@
+name = Provision: BIND
+description = Provides provisioning requirements for Bind servers
+package = Provision
+dependencies[] = provision
+
+core = 6.x
