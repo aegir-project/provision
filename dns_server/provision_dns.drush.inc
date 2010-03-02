@@ -22,16 +22,16 @@ include_once('provision_dns.bind.inc');
  *   The zone object, whether newly created, or already existing.
  **/
 function provision_dns_create_zone($domain) {
-  /*
-    $writable = provision_path("writable", PROVISION_NAMED_PATH, TRUE, NULL,
+
+  $writable = provision_path("writable", PROVISION_NAMED_PATH, TRUE, NULL,
                              t("DNS configuration path @path is not writable"),
                              PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-  */
-#  if ($zone = provision_dns_status('zone', array('domain' => $domain))) {
-#    drush_log("Notice", t("Loading zone file for url @url", array('@url' => $domain)));
-#    return $zone;
-#  } else {
-/**
+
+  if ($zone = provision_dns_status('zone', array('domain' => $domain))) {
+    drush_log("Notice", t("Loading zone file for url @url", array('@url' => $domain)));
+    return $zone;
+  } else {
+
   drush_log("Notice", dt("Generating zone file for url @url on dns server @id", array('@url' => $domain, '@id' => drush_get_option('dns_id'))));
     # Setup args array from defaults
     $dns = node_load(drush_get_option('dns_id'));
@@ -45,13 +45,13 @@ drush_log("notice", "provision_dns_create_zone ns_recs: ".$ns_recs[0].", ".$ns_r
     $zone_fields['ns2'] = $ns_recs[1];
     $zone_fields['mbox'] = $dns->mbox;
     provision_dns_zone('add', $zone_fields);
- */
-#    $zone = provision_dns_status('zone', array('domain' => $domain));
-#    foreach ($ns_recs as $ns) {
-#      provision_dns_create_record('@', $zone, array('type' => 'NS', 'dns_ip' => trim($ns)));
-#    }
-#    return provision_dns_status('zone', array('domain' => $domain));
-#  }
+
+    $zone = provision_dns_status('zone', array('domain' => $domain));
+    foreach ($ns_recs as $ns) {
+      provision_dns_create_record('@', $zone, array('type' => 'NS', 'dns_ip' => trim($ns)));
+    }
+    return provision_dns_status('zone', array('domain' => $domain));
+  }
 }
 
 /**
