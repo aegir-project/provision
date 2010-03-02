@@ -34,7 +34,8 @@ AEGIR_DOMAIN=aegir.example.com
 AEGIR_VERSION=HEAD
 AEGIR_HOME=$HOME
 WEB_GROUP=www-data
-DRUSH_VERSION=6.x-3.0-alpha1
+# doesn't exist yet, but we need drush_prompt in HEAD
+DRUSH_VERSION=6.x-3.0-beta2
 DRUSH_MAKE_VERSION=6.x-2.0-beta6
 
 # when adding a variable here, add it to the display below

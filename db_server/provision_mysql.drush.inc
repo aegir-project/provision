@@ -23,11 +23,11 @@ function provision_mysql_drush_init() {
       $scheme = $db['scheme'];
     } else {
       drush_print(dt("No database configuration provided, asking for one interactively"));
-      $scheme = provision_prompt(dt("Database type"), "mysql");
-      $host = provision_prompt(dt("Database server"), "localhost");
-      $user = provision_prompt(dt("Database user"), "root");
+      $scheme = drush_prompt(dt("Database type"), "mysql");
+      $host = drush_prompt(dt("Database server"), "localhost");
+      $user = drush_prompt(dt("Database user"), "root");
       system('stty -echo');
-      $pass = provision_prompt(dt("Database password"));
+      $pass = drush_prompt(dt("Database password"));
       system('stty echo');
       print "\n"; # add a cr since the user's didn't echo
       
