@@ -44,10 +44,9 @@ function provision_bind_create_zone_config($zone) {
  * $template = variable_get('provision_dns_zonefile_template', _provision_dns_default_template());
  * But currently, just writes hardcoded string for all of this stuff directly into the zonefile.
  **/
-function provision_bind_update_zone($origin) {
+function provision_bind_update_zone($zone) {
   // write a zonefile in the appropriate place
   $path = drush_get_option('config_path') . '/named/';
-  $zone = (object) drush_get_option('zone');
   # First setup the SOA record
   $zone_str = sprintf("\$TTL %s\n", $zone->ttl);
   $zone_str .= sprintf("@\t IN\t SOA\t %s. %s. (\n", $zone->origin, str_replace('@', '.', $zone->mbox));
@@ -64,11 +63,10 @@ function provision_bind_update_zone($origin) {
   $conf = drush_get_option('config_path') . '/named.conf.aegir';
 
   if (file_exists($path . $zone->old_origin)) {
-#drush_log("notice", "Updating zone ".$zone->old_origin." to ".$zone->origin);
     provision_path("unlink", $path . '/' . $zone->old_origin);            # Remove the old zonefile
   }
   if (isset($zone->old_origin)) { 				  # The name of the zone has changed
-    _provision_bind_editfile($conf, '^zone..'.$zone->old_origin.'.*$');   # Remove the old zone from named.conf
+    _provision_bind_editline($conf, '^zone..'.$zone->old_origin.'.*$');   # Remove the old zone from named.conf
   }
   if (!file_exists($path . $zone->origin)) {
     provision_bind_create_zone_config($zone);                             # And re-create the zone in named.conf
@@ -97,7 +95,7 @@ function provision_bind_delete_zone($zone) {
   $path = variable_get('provision_bind_zonedata', PROVISION_CONFIG_PATH .'/named');
   $conf = PROVISION_CONFIG_PATH . '/' . variable_get('provision_bind_conf', 'named.conf.drupal');
   $zone_re = sprintf('^zone..%s.*$', $zone->origin);
-  _provision_bind_editfile($conf, $zone_re);
+  _provision_bind_editline($conf, $zone_re);
 
   # and remove the zonefile itself
   $zonefile = $path . '/' . $zone->origin;
@@ -144,7 +142,7 @@ function _provision_bind_update_record($zone, $record) {
   $file = $path . '/' . $zone->origin;
   if (!isset($record->old_name)) { $record->old_name = $record->name; }
   $line = _provision_bind_record_string($record);
-  _provision_bind_editfile($file, '^'.$record->old_name.'\t.*$', $line);
+  _provision_bind_editline($file, '^'.$record->old_name.'\t.*$', $line);
 }
 
 /**
@@ -159,15 +157,19 @@ function _provision_bind_delete_record($zone, $record) {
   $path = variable_get('provision_bind_zonedata', PROVISION_CONFIG_PATH .'/named');
   $file = $path . '/' . $zone->origin;
   $line = _provision_bind_record_string($record);
-  _provision_bind_editfile($file, '^'.$line.'$');
+  _provision_bind_editline($file, '^'.$line.'$');
 }
 
 /**
  * Helper function to restart BIND
  **/
 function _provision_bind_restart() {
+  return _provision_bind_reload();
+}
+
+function _provision_bind_reload($zone = "") {
   // restart bind
-  $cmd = drush_get_option('provision_bind_rndc', 'sudo /usr/sbin/rndc') . " reload";
+  $cmd = drush_get_option('provision_bind_rndc', 'sudo /usr/sbin/rndc') . " reload " . $zone;
   system($cmd, $status);
   return ($status == 0);
 }
@@ -212,7 +214,7 @@ function _provision_bind_namedcheckconf($zone) {
  * @param $new
  *   A replacement string for the $old pattern. If this is empty, the $old pattern will be removed completely.
  **/
-function _provision_bind_editfile($file, $old, $new = '') {
+function _provision_bind_editline($file, $old, $new = '') {
 
   # Read in the file, checking each line and doing a preg_replace on matching lines
   if ($fd = fopen($file, 'r')) {
