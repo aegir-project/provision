@@ -66,7 +66,7 @@ function provision_bind_create_zone($zone) {
 
   provision_bind_create_zone_config($zone);                             # And re-create the zone in named.conf
 
-  drush_log("notice", dt("Creating zonefile @zonefile", array('@zonefile' => $zone_str));
+  drush_log("notice", dt("Creating zonefile @zonefile", array('@zonefile' => $zone->origin)));
   $zonefile = $path . '/'. $zone->origin;
   if ($fd = fopen($zonefile, "w")) {
     $status = fwrite($fd, $zone_str);  # Write the zonefile
