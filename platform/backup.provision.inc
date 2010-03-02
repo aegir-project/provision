@@ -74,7 +74,7 @@ function drush_provision_drupal_provision_backup($url) {
 /**
  * Remove the backup file if something went wrong
  */
-function drush_provision_drupal_provision_backup_rollback($url=NULL) {
+function drush_provision_drupal_provision_backup_rollback() {
   $backup_file = drush_get_option('backup_file');
   if (file_exists($backup_file)) {
     provision_path('unlink', $backup_file, TRUE, 
