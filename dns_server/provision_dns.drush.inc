@@ -9,14 +9,10 @@
  * tie into the right places in the site creation work flow.
  */
 
-// BIND engine is the only one (for now)
-include_once('provision_dns.bind.inc');
-
 /**
  * Implementation of hok_drush_command().
  */
 function provision_dns_drush_command() {
-
   $items['provision zone'] = array(
     'arguments' => array('operation' => dt('The operation to perform on a zone (verify, delete, modify)')),
     'description' => dt('Manipulate a zonefile'),
