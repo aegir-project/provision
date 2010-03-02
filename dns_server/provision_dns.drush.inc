@@ -13,6 +13,19 @@
 include_once('provision_dns.bind.inc');
 
 /**
+ * Implementation of hook_drush_command().
+ */
+function provision_dns_drush_command() {
+
+  $items['provision zone'] = array(
+    'arguments' => array('domain.com' => dt('The domain of the zone name to configure.')),
+    'description' => dt('Setup a zonefile'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+  );
+  return $items;
+}
+
+/**
  * Helper function for creating a new zone via the provision_dns_zone API function.
  *
  * @param $domain
@@ -26,31 +39,10 @@ function provision_dns_create_zone($domain) {
   $writable = provision_path("writable", PROVISION_NAMED_PATH, TRUE, NULL,
                              t("DNS configuration path @path is not writable"),
                              PROVISION_PERM_ERROR | PROVISION_FRAMEWORK_ERROR);
-
-  if ($zone = provision_dns_status('zone', array('domain' => $domain))) {
-    drush_log("Notice", t("Loading zone file for url @url", array('@url' => $domain)));
-    return $zone;
-  } else {
-
-  drush_log("Notice", dt("Generating zone file for url @url on dns server @id", array('@url' => $domain, '@id' => drush_get_option('dns_id'))));
-    # Setup args array from defaults
-    $dns = node_load(drush_get_option('dns_id'));
-    $zone_fields['dns_id'] = drush_get_option('dns_id');
-    $zone_fields['origin'] = $domain;
-    $zone_fields['serial'] = date('Ymd') . '01';
-    $ns_recs = explode("\n", $dns->ns);
-#ob_start(); print_r($ns_recs); $out = ob_get_contents(); ob_end_clean();
-drush_log("notice", "provision_dns_create_zone ns_recs: ".$ns_recs[0].", ".$ns_recs[1]);
-    $zone_fields['ns1'] = $ns_recs[0];
-    $zone_fields['ns2'] = $ns_recs[1];
-    $zone_fields['mbox'] = $dns->mbox;
-    provision_dns_zone('add', $zone_fields);
-
-    $zone = provision_dns_status('zone', array('domain' => $domain));
-    foreach ($ns_recs as $ns) {
-      provision_dns_create_record('@', $zone, array('type' => 'NS', 'dns_ip' => trim($ns)));
-    }
-    return provision_dns_status('zone', array('domain' => $domain));
+  drush_log("Notice", dt("Generating zone file for url @url", array('@url' => $domain)));
+  provision_dns_zone('add', $zone_fields);
+  foreach ($ns_recs as $ns) {
+    provision_dns_create_record('@', $zone, array('type' => 'NS', 'dns_ip' => trim($ns)));
   }
 }
 

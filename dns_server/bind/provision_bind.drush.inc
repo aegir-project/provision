@@ -9,56 +9,6 @@
  */
 
 /**
- * Implementation of hook_dns_zone from provision_dns.api.inc
- *
- * @param $op
- *   The operation to be executed on the zone. Valid operations are 'add', 'update', and 'delete'.
- * @param $zone
- *   The zone object to be operated on (as returned by provision_dns_status).
- **/
-function provision_bind_provision_dns_zone($op, $zone) {
-  switch ($op) {
-    case 'add':
-     provision_bind_create_zone_config($zone);
-     provision_bind_update_zone($zone);
-     break;
-   case 'update':
-     provision_bind_update_zone($zone, TRUE);
-     break;
-   case 'delete':
-     provision_bind_delete_zone($zone); # And all it's records with it!
-     break;
-   // do others later
-  }
-  _provision_bind_restart();
-}
-
-/**
- * Implementation of hook_dns_rr from provision_dns.api.inc
- *
- * @param $op
- *   The operation to be executed on the record. Valid operations are 'add', 'update', and 'delete'.
- * @param $zone
- *   The zone object on which to operate (as returned by provision_dns_status)
- * @param $record
- *   The record object on which to operate (as returned by provision_dns_status)
- **/
-function provision_bind_provision_dns_rr($op, $zone, $record) {
-
-  switch ($op) {
-    case 'add':
-      _provision_bind_add_record($zone, $record);
-      break;
-    case 'update':
-      _provision_bind_update_record($zone, $record);
-      break;
-    case 'delete':
-      _provision_bind_delete_record($zone, $record);
-      break;
-  }
-}
-
-/**
  * Create a new entry for the zone provided in the local named.conf file, pointing to the zonefile.
  *
  * @param $zone
@@ -66,8 +16,8 @@ function provision_bind_provision_dns_rr($op, $zone, $record) {
  **/
 function provision_bind_create_zone_config($zone) {
   // add the zone to our local named.conf file
-  $path = variable_get('provision_bind_zonedata', PROVISION_CONFIG_PATH .'/named');
-  $conf = PROVISION_CONFIG_PATH . '/' . variable_get('provision_bind_conf', 'named.conf.drupal');
+  $path = drush_get_option('config_path') . '/named/';
+  $conf = drush_get_option('config_path') . '/named.conf.aegir';
 
   $zone_str = sprintf('zone "%s" { type master; file "%s/%s"; allow-query { any; }; };%s', $zone->origin, $path, $zone->origin, "\n");
 
@@ -75,8 +25,7 @@ function provision_bind_create_zone_config($zone) {
     $fd = fwrite($fd, $zone_str);
   }
   if (!$fd) {
-    drush_log("Error", dt("error adding the zone to the bind configuration in @path", array("@path" => $conf)));
-    drush_set_error(PROVISION_PERM_ERROR);
+    drush_set_error(PROVISION_PERM_ERROR, dt("error adding the zone to the bind configuration in @path", array("@path" => $conf)));
   }
   @fclose($fd);
 }
@@ -95,10 +44,10 @@ function provision_bind_create_zone_config($zone) {
  * $template = variable_get('provision_dns_zonefile_template', _provision_dns_default_template());
  * But currently, just writes hardcoded string for all of this stuff directly into the zonefile.
  **/
-function provision_bind_update_zone($zone, $exists = FALSE) {
+function provision_bind_update_zone($origin) {
   // write a zonefile in the appropriate place
-  $path = variable_get('provision_bind_zonedata', '');
-
+  $path = drush_get_option('config_path') . '/named/';
+  $zone = (object) drush_get_option('zone');
   # First setup the SOA record
   $zone_str = sprintf("\$TTL %s\n", $zone->ttl);
   $zone_str .= sprintf("@\t IN\t SOA\t %s. %s. (\n", $zone->origin, str_replace('@', '.', $zone->mbox));
@@ -108,29 +57,28 @@ function provision_bind_update_zone($zone, $exists = FALSE) {
   $zone_str .= sprintf("\t\t\t %s ; Expire\n", $zone->expire);
   $zone_str .= sprintf("\t\t\t %s)\t\t; Negative Cache TTL\n\n", $zone->ttl);
 
-  # Next do the NS records
-  $zone_str .= sprintf("@\t IN\t NS\t\t %s.\n", $zone->ns1);
-  if ($zone->ns2) {
-    $zone_str .= sprintf("@\t IN\t NS\t\t %s.\n", $zone->ns2);
+  foreach ($zone->records as $rid => $rec) {
+    $zone_str .= _provision_bind_record_string((object)$rec);
   }
 
-  $records = provision_dns_getrecords($zone->zid);
-  foreach ($records as $rid => $rec) {
-    $zone_str .= _provision_bind_record_string($rec);
-  }
+  $conf = drush_get_option('config_path') . '/named.conf.aegir';
 
-  $path = variable_get('provision_bind_zonedata', PROVISION_CONFIG_PATH .'/named');
-  $conf = PROVISION_CONFIG_PATH . '/' . variable_get('provision_bind_conf', 'named.conf.drupal');
-
-  if ($exists && isset($zone->old_origin)) { 				  # The name of the zone has changed
+  if (file_exists($path . $zone->old_origin)) {
 #drush_log("notice", "Updating zone ".$zone->old_origin." to ".$zone->origin);
     provision_path("unlink", $path . '/' . $zone->old_origin);            # Remove the old zonefile
+  }
+  if (isset($zone->old_origin)) { 				  # The name of the zone has changed
     _provision_bind_editfile($conf, '^zone..'.$zone->old_origin.'.*$');   # Remove the old zone from named.conf
+  }
+  if (!file_exists($path . $zone->origin)) {
     provision_bind_create_zone_config($zone);                             # And re-create the zone in named.conf
   }
 
 #drush_log("notice", "Writing zonefile: ".$zone_str);
-  if ($fd = fopen($path . '/'. $zone->origin, "w")) {
+  drush_log("zone: " . var_export($zone, true));
+  $zonefile = $path . '/'. $zone->origin;
+  drush_log("zonefile: $zonefile");
+  if ($fd = fopen($zonefile, "w")) {
     fwrite($fd, $zone_str);  # Write the zonefile
     fclose($fd);
   } else {
@@ -219,9 +167,9 @@ function _provision_bind_delete_record($zone, $record) {
  **/
 function _provision_bind_restart() {
   // restart bind
-  $cmd = "sudo ". variable_get('provision_bind_rndc', '/usr/sbin/rndc') . " reload > /dev/null";
+  $cmd = drush_get_option('provision_bind_rndc', 'sudo /usr/sbin/rndc') . " reload";
   system($cmd, $status);
-  return $status;
+  return ($status == 0);
 }
 
 /**
@@ -230,7 +178,7 @@ function _provision_bind_restart() {
 function _provision_bind_status() {
   $cmd = "sudo ". variable_get('provision_bind_rndc', '/usr/sbin/rndc') . " status > /dev/null";
   system($cmd, $status);
-  return $status;
+  return ($status == 0);
 }
 
 /**
