@@ -604,7 +604,10 @@ function provision_parse_info_file($filename) {
 }
 
 /**
- * Set up the $_SERVER environment variable so that drupal can correctly parse the settings.php file
+ * Set up the $_SERVER environment variable so that drupal can correctly parse the settings.php file.
+ * The real credentials are stored in the Apache vhost of the relevant site, to prevent leaking of 
+ * sensitive data to site administrators with PHP access who might otherwise access such credentials 
+ * potentially of other sites' settings.php in a multisite set-up.
  */
 function provision_prepare_environment() {
   $fields = array('db_type', 'db_host', 'db_user', 'db_passwd', 'db_name');

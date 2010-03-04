@@ -1,4 +1,12 @@
-
+  /**
+   * The database credentials are stored in the Apache vhost config
+   * of the associated site with SetEnv parameters.
+   * They are called here with $_SERVER environment variables to 
+   * prevent sensitive data from leaking to site administrators 
+   * with PHP access, that potentially might be of other sites in
+   * Drupal's multisite set-up.
+   * This is a security measure implemented by the Aegir project.
+   */
   $databases['default']['default'] = array(
     'driver' => urldecode($_SERVER['db_type']),
     'database' => urldecode($_SERVER['db_name']),
