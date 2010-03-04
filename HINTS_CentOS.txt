@@ -49,8 +49,8 @@ Shell commands::
  useradd --home-dir /var/aegir aegir
  gpasswd -a aegir www-data
  chmod -R 755 /var/aegir
- # Include the Aegir config
- echo "Include /var/aegir/config/vhost.d/" > /etc/httpd/conf.d/aegir.conf
+ # Include the Aegir configs
+ ln -s /var/aegir/config/apache.conf /etc/httpd/conf.d/aegir.conf
  service mysqld start
  # Optional: set the mysql root password
  mysqladmin password $password
