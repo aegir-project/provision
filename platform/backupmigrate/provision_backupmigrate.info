@@ -1,0 +1,6 @@
+name = Provision: backup_migrate
+description = Backup migrate specific configuration
+package = Provision
+dependencies[] = provision
+
+core = 6.x
