@@ -174,7 +174,7 @@ else
   $DRUSH dl drush_make-$DRUSH_MAKE_VERSION --destination=$AEGIR_HOME/.drush
 fi
 
-if $DRUSH help | grep "^ provision install" > /dev/null ; then
+if $DRUSH help | grep "^ provision-install" > /dev/null ; then
   msg "Provision already seems to be installed"
 else
   msg "Installing provision backend in $AEGIR_HOME/.drush"
