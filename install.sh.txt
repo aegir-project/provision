@@ -207,8 +207,8 @@ NameVirtualHost *:80
   LoadModule rewrite_module modules/mod_rewrite.so
 </IfModule>
 
-Include /var/aegir/config/vhost.d/
-Include /var/aegir/config/platform.d/
+Include $AEGIR_HOME/config/vhost.d/
+Include $AEGIR_HOME/config/platform.d/
 EOF
 fi
 
