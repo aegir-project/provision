@@ -1,7 +1,7 @@
 <?php
 
 function drush_provision_mysql_provision_verify_validate() {
-  provision_db_connect();
+  provision_service('db')->connect();
 }
 
 /**
@@ -11,7 +11,7 @@ function drush_provision_mysql_provision_verify_validate() {
  */
 function drush_provision_mysql_provision_verify() {
   if (PROVISION_CONTEXT_PLATFORM) {
-    if (!_provision_mysql_can_create_database()) {
+    if (!provision_service('db')->can_create_database()) {
       drush_set_error('PROVISION_CREATE_DB_FAILED');
     }
     else {

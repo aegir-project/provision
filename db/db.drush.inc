@@ -11,6 +11,35 @@
 function db_drush_init() {
   include_once('mysql/mysql_service.inc');
 
+  $command = drush_get_command();
+  $command = explode(" ", $command['command']);
+  if (preg_match("/^provision-/", $command[0])) {
+    // TODO - remove this shit
+    $master_db = drush_get_option('master_db');
+    $db = parse_url($master_db);
+    drush_set_default('master_db_user', urldecode($db['user']));
+    drush_set_default('master_db_passwd', urldecode($db['pass']));
+
+    drush_set_default('master_db_host', urldecode($db['host']));
+    drush_set_default('db_host', urldecode($db['host']));
+
+    drush_set_default('master_db_type', $db['scheme']);
+    drush_set_default('db_type', $db['scheme']);
+
+    $creds = array();
+    $options = array(
+      'master_db_user' => 'user',
+      'master_db_passwd' => 'pass',
+      'master_db_host' => 'host',
+      'master_db_type' => 'type');
+
+    foreach ($options as $option => $key) {
+      $creds[$key] = drush_get_option($option, '');
+    }
+
+    provision_service('db', new provisionService_db_mysql($creds));
+
+  }
 
   // this is where we generate the db service object.
 }
@@ -262,7 +291,8 @@ class provisionService_db_pdo extends provisionService_db {
   function __construct($creds) {
     parent::__construct($creds);
 
-    $this->dsn = sprintf("%s:dbname=%s;host=%s", $this->db_type, $this->creds['name'], $this->creds['host']);
+    
+    $this->dsn = sprintf("%s:dbname=%s;host=%s", $this->PDO_type, $this->creds['name'], $this->creds['host']);
 
   }
 
@@ -292,7 +322,7 @@ class provisionService_db_pdo extends provisionService_db {
     try {
       $result = $this->conn->query($query);
     }
-    catch (PDOException e) {
+    catch (PDOException $e) {
       drush_log($e->getMessage(), 'warning');
       return FALSE;
     } 
