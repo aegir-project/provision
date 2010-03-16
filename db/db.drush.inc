@@ -8,7 +8,10 @@
  * It uses the provision API to tie into the right places in the site creation work flow.
  */
 
+
+  include_once(dirname(__FILE__) . '/../provision.service.inc');
 function db_drush_init() {
+
   include_once('mysql/mysql_service.inc');
 
   $command = drush_get_command();
