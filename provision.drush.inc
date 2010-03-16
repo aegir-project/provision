@@ -338,3 +338,24 @@ function provision_load_critical($load = null, $threshold = null) {
   }
   return ($load[0] > $threshold);
 }
+
+
+class provisionService {
+
+
+
+}
+
+function provision_service($type, $object = null) {
+  static $instances = null;
+
+  if (is_object($object)) {
+    $instances[$type] = $object;
+  }
+
+  if (isset($instances[$type])) {
+    return $instances[$type];
+  }
+
+  return false;
+}
