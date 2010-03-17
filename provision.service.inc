@@ -1,6 +1,15 @@
 <?php
 
 class provisionService {
+  protected $configs = array();
+  function verify() {
+    return TRUE;
+  }
+
+  function templates() {
+    $this->configs = array();
+  }
+
 
 }
 

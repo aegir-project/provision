@@ -72,6 +72,15 @@ class provisionService_db extends provisionService {
   }
 
 
+  function verify() { 
+    if (!$this->can_create_database()) {
+      drush_set_error('PROVISION_CREATE_DB_FAILED');
+    }
+    else {
+      drush_log(dt('Provision can create new databases.'), 'message');
+    }
+  }
+
   /**
    * Find a viable database name, based on available information.
    *

@@ -1,20 +1,7 @@
 <?php
 
 function drush_provision_apache_provision_verify($url = null) {
-  if (PROVISION_CONTEXT_PLATFORM) {
-    _provision_create_dir(drush_get_option('vhost_path'), dt("Virtual host configuration"), 0700);
-    _provision_create_dir(drush_get_option('platform_conf_path'), dt("Platforms configuration"), 0700);
-    
-    if (drush_get_option('platform', null)) {
-      _provision_apache_create_platform_config($url);
-    }
-
-    _provision_apache_create_server_config($url);
-  }
-  else {
-    _provision_apache_create_vhost_config($url);
-  }
-  _provision_apache_restart_apache(TRUE);
+  provision_service('http')->verify($url);
 }
 
 function drush_provision_apache_post_provision_verify($url = null) {

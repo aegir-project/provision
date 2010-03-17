@@ -11,12 +11,7 @@ function drush_db_provision_verify_validate() {
  */
 function drush_db_provision_verify() {
   if (PROVISION_CONTEXT_PLATFORM) {
-    if (!provision_service('db')->can_create_database()) {
-      drush_set_error('PROVISION_CREATE_DB_FAILED');
-    }
-    else {
-      drush_log(dt('Mysql can create new databases.'), 'message');
-    }
+    provision_service('db')->verify();
   }
 }
 
