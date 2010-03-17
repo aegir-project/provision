@@ -323,8 +323,6 @@ class provisionService_db_pdo extends provisionService_db {
     $this->query_callback($args, TRUE);
     $query = preg_replace_callback(PROVISION_QUERY_REGEXP, array($this, 'query_callback'), $query);
     
-    drush_log($query);
-
     try {
       $result = $this->conn->query($query);
     }
