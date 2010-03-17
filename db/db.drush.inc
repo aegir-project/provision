@@ -121,7 +121,7 @@ class provisionService_db extends provisionService {
    * Generate a new mysql database and user account for the specified credentials
    */
   function create_site_database($url) {
-    $creds = $this->create_site_credentials($url);
+    $creds = $this->generate_site_credentials($url);
     extract($creds);
     
 
@@ -139,6 +139,7 @@ class provisionService_db extends provisionService {
       drush_log("Could not GRANT user access.", 'warning');
     }
 
+    $this->create_database($db_name);
     $status = $this->database_exists($db_name);
 
     if ($status) {
@@ -218,7 +219,7 @@ class provisionService_db extends provisionService {
     $creds['db_host'] = drush_set_option('db_host', drush_get_option('db_host'), 'site');
     $creds['db_passwd'] = drush_set_option('db_passwd', provision_password(), 'site');
     $creds['db_name'] = drush_set_option('db_name', $this->suggest_db_name($url), 'site');
-    $creds['db_user'] = drush_set_option('db_user', $db_name, 'site');
+    $creds['db_user'] = drush_set_option('db_user', $creds['db_name'], 'site');
     $creds['db_grant_host'] = $this->grant_host();
 
     return $creds;
@@ -268,7 +269,7 @@ class provisionService_db extends provisionService {
     return FALSE;
   }
 
-  function grant_host($db_host, $web_ip, $web_host) {
+  function grant_host() {
     return 'localhost';
   }
 
@@ -321,7 +322,8 @@ class provisionService_db_pdo extends provisionService_db {
     $this->query_callback($args, TRUE);
     $query = preg_replace_callback(PROVISION_QUERY_REGEXP, array($this, 'query_callback'), $query);
     
-    print_r($query);
+    drush_log($query);
+
     try {
       $result = $this->conn->query($query);
     }
