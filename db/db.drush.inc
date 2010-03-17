@@ -294,14 +294,14 @@ class provisionService_db_pdo extends provisionService_db {
   function __construct($creds) {
     parent::__construct($creds);
 
-    
+    print_r($creds);
     $this->dsn = sprintf("%s:dbname=%s;host=%s", $this->PDO_type, $this->creds['name'], $this->creds['host']);
 
   }
 
   function connect() {
     try {
-      $this->conn = new PDO($constr, $creds['user'], $creds['pass']);
+      $this->conn = new PDO($this->dsn, $this->creds['user'], $this->creds['pass']);
     }
     catch (PDOException $e) {
       return drush_set_error('PROVISION_DB_CONNECT_FAIL', $e->getMessage());
@@ -312,16 +312,16 @@ class provisionService_db_pdo extends provisionService_db {
     $this->conn = null;
   }
 
-  function query() {
+  function query($query) {
     $args = func_get_args();
     array_shift($args);
     if (isset($args[0]) and is_array($args[0])) { // 'All arguments in one array' syntax
       $args = $args[0];
     }
     $this->query_callback($args, TRUE);
-
     $query = preg_replace_callback(PROVISION_QUERY_REGEXP, array($this, 'query_callback'), $query);
-
+    
+    print_r($query);
     try {
       $result = $this->conn->query($query);
     }
@@ -334,7 +334,7 @@ class provisionService_db_pdo extends provisionService_db {
 
   }
 
-  private function query_callback($match, $init = FALSE) {
+  function query_callback($match, $init = FALSE) {
     static $args = NULL;
     if ($init) {
       $args = $match;
@@ -345,7 +345,7 @@ class provisionService_db_pdo extends provisionService_db {
       case '%d': // We must use type casting to int to convert FALSE/NULL/(TRUE?)
         return (int) array_shift($args); // We don't need db_escape_string as numbers are db-safe
       case '%s':
-        return $this->conn->quote(array_shift($args));
+        return substr($this->conn->quote(array_shift($args)), 1, -1);
       case '%%':
         return '%';
       case '%f':

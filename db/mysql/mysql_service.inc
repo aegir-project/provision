@@ -5,22 +5,24 @@
 
 // extends the pdo implementation
 class provisionService_db_mysql extends provisionService_db_pdo {
-  static public $PDO_type = 'mysql';
+   public $PDO_type = 'mysql';
 
 
   function database_exists($name) {
-    $result = $this->query("SHOW DATABASES LIKE %s", $name);
-    return $result->fetchColumn(0);
+    $result = $this->query("SHOW DATABASES LIKE '%s'", $name);
+    if ($result) {
+      return $result->fetchColumn(0);
+    }
   }
 
 
   function drop_database($name) {
-    return $this->query("DROP DATABASE %s", $name);
+    return $this->query("DROP DATABASE `%s`", $name);
   }
 
 
   function create_database($name) {
-    return $this->query("CREATE DATABASE %s", $name);  
+    return $this->query("CREATE DATABASE `%s`", $name);  
   }
 
   function can_create_database() {
