@@ -9,7 +9,8 @@
  */
 
 
-  include_once(dirname(__FILE__) . '/../provision.service.inc');
+include_once(dirname(__FILE__) . '/../provision.service.inc');
+
 function db_drush_init() {
 
   include_once('mysql/mysql_service.inc');
