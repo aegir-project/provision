@@ -139,6 +139,7 @@ fi
 msg "Creating basic directory structure"
 mkdir -p $AEGIR_HOME/config/vhost.d
 mkdir -p $AEGIR_HOME/config/platform.d
+mkdir -p $AEGIR_HOME/config/apache.d
 mkdir -p $AEGIR_HOME/backups
 chmod 0711 $AEGIR_HOME/config
 chmod 0700 $AEGIR_HOME/backups
@@ -207,8 +208,12 @@ NameVirtualHost *:80
   LoadModule rewrite_module modules/mod_rewrite.so
 </IfModule>
 
+# virtual hosts
 Include $AEGIR_HOME/config/vhost.d/
+# platforms
 Include $AEGIR_HOME/config/platform.d/
+# other configuration, not touched by aegir
+Include $AEGIR_HOME/config/apache.d/
 EOF
 fi
 
