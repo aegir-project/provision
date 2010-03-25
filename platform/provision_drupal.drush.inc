@@ -445,10 +445,6 @@ function provision_find_packages() {
     $packages['profiles'][$profile] =  _provision_find_packages('profiles', $profile);
   }
 
-  // Iterate through the sites, finding site specific packages
-  foreach (drush_get_option('sites', array()) as $site) {
-    $packages['sites'][$site] = _provision_find_packages('sites', $site);
-  }
   return $packages;
 }
 
@@ -501,6 +497,11 @@ function provision_drupal_system_map() {
   $packages['profiles'][$profile]->status = 1;
 
   foreach (_provision_system_query("module") as $module) { 
+    $frags = explode("/", $module->filename);
+    // ignore site-specific modules
+    if ($frags[0] == 'sites' && $frags[1] != 'all') {
+      continue;
+    }
     $info_file = sprintf("%s/%s.info", dirname($module->filename), $module->name);
     $module->info = provision_parse_info_file($info_file);
 
@@ -514,7 +515,13 @@ function provision_drupal_system_map() {
 
   drush_log(dt("Found !count modules", array('!count' => sizeof($packages['modules']))));
 
+  // XXX: mostly a copy-paste from above
   foreach (_provision_system_query("theme") as $theme) { 
+    $frags = explode("/", $theme->filename);
+    // ignore site-specific themes
+    if ($frags[0] == 'sites' && $frags[1] != 'all') {
+      continue;
+    }
     $info_file = sprintf("%s/%s.info", dirname($theme->filename), $theme->name);
     $theme->info = provision_parse_info_file($info_file);
     _provision_cvs_deploy($theme);
