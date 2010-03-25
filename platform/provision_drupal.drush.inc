@@ -571,7 +571,7 @@ function _provision_drupal_find_modules($scope, $key = '') {
       $source = str_replace("\r\n", "\n", $source);
       $source = str_replace("\r", "\n", $source);
       $function_matches = array();
-        preg_match_all('!function\s*&?([a-zA-Z0-9_]+)_update_([0-9]+)\(.*?\s*\{!', $source, $function_matches);
+        preg_match_all('!function\s*&?([a-zA-Z0-9_]+)_update_([0-9]+)\s*\(.*?\s*\{!', $source, $function_matches);
       
       if (sizeof($function_matches[0])) {
         $schema_version = max($function_matches[2]);
