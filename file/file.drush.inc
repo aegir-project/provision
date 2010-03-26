@@ -20,8 +20,7 @@ function file_drush_init() {
 }
 
 function file_drush_exit() {
-  // todo sync out to other servers
-  //provision_service('file')->sync();
+  provision_service('file')->drush_exit();
 }
 
 class provisionService_file extends provisionService {
@@ -449,5 +448,11 @@ class provisionService_file extends provisionService {
    */
   function _chgrp_recursive($path, $group) {
     return $this->_call_recursive('chgrp', $path, $group);
+  }
+
+  /**
+   * Stub for extensions that need to happen on exit, like syncing out to anther server.
+   */
+  function drush_exit() {
   }
 }
