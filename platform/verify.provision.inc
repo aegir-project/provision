@@ -80,8 +80,13 @@ function drush_provision_drupal_post_provision_verify($url = NULL) {
  * @see hook_provision_apache_dir_config()
  */
 function provision_drupal_provision_apache_dir_config($data = null) {
-  $htaccess = file_get_contents(dirname(__FILE__) . "/provision_drupal_htaccess.tpl.php");
+  $htaccess = file_get_contents(drush_get_option('publish_path') . '/.htaccess');
   $htaccess .= <<<EOF
+
+<IfModule mod_rewrite.c>
+  # allow files to be accessed without /sites/fqdn/
+  RewriteRule ^files/(.*)$ /sites/%{HTTP_HOST}/files/$1 [L]
+</IfModule>
 
 # Do not read the platform's .htaccess
 AllowOverride none
