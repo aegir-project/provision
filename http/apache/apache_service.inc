@@ -3,14 +3,42 @@
 class provisionService_http_apache extends provisionService {
 
   function templates() {
-    $this->configs['vhost'] = 'vhost.tpl.php';
-    $this->configs['vhost_redirect'] = 'vhost_redirect.tpl.php';
-    $this->configs['vhost_disabled'] = 'vhost_disabled.tpl.php';
-    $this->configs['platform'] = 'platform.tpl.php';
-    $this->configs['server'] = 'server.tpl.php';
+    $this->templates['vhost'] = 'vhost.tpl.php';
+    $this->templates['vhost_disabled'] = 'vhost_disabled.tpl.php';
+    $this->templates['platform'] = 'platform.tpl.php';
+    $this->templates['server'] = 'server.tpl.php';
   }
 
 
+  function create_site_config($url) {
+    $file = drush_get_option('vhost_path') . '/' . $url . '_' . drush_get_option('site_port');
+    drush_log(dt("Generating apache host configuration file %file.", array('%file' => basename($file))));
+    return $this->write_config($file, 'vhost', drush_get_merged_options());
+  }
+
+  function delete_site_config($url) {
+    $file = drush_get_option('vhost_path') . '/' . $url . '_' . drush_get_option('site_port');
+    provision_path("unlink", $file, TRUE, dt("Removed apache virtual host configuration"));
+  }
+
+  function create_platform_config() {
+    $file = drush_get_option('platform_conf_path') . '/platform_' . drush_get_option('platform') . '.conf';
+    drush_log(dt("Generating apache host configuration file %file.", array('%file' => basename($file))));
+    return $this->write_config($file, 'platform', drush_get_merged_options());
+  }
+
+  function delete_site_config($url) {
+    $file = drush_get_option('platform_conf_path') . '/platform_' . drush_get_option('platform');
+    provision_path("unlink", $file, TRUE, dt("Removed apache platform configuration"));
+  }
+
+
+  function create_server_config() {
+    $file = drush_get_option('conf_path') . '/apache.conf';
+
+    drush_log(dt("Generating apache host configuration file %file.", array('%file' => basename($file))));
+    return $this->write_config($file, 'server', drush_get_merged_options());
+   }
 
   function verify($url) {
     if (PROVISION_CONTEXT_PLATFORM) {
@@ -52,4 +80,7 @@ class provisionService_http_apache extends provisionService {
 
 
 
+  function delete_server_config() {
+
+  }
 }

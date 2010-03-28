@@ -57,33 +57,6 @@ function provision_apache_drush_init() {
   }
 }
 
-/**
- * The default template provided for the virtual host configuration
- */
-function _provision_apache_default_template() {
-  return file_get_contents(dirname(__FILE__) ."/provision_apache_vhost.tpl.php");
-}
-
-/**
- * The template for site redirection
- */
-function _provision_apache_redirect_template() {
-  return file_get_contents(dirname(__FILE__) ."/provision_apache_vhost_redirect.tpl.php");
-}
-
-/**
- * The default template for disabled sites
- */
-function _provision_apache_disabled_template() {
-  return file_get_contents(dirname(__FILE__) ."/provision_apache_vhost_disabled.tpl.php");
-}
-
-/**
- * The template for platform configuration settings
- */
-function _provision_apache_platform_template() {
-  return file_get_contents(dirname(__FILE__) ."/provision_apache_platform.tpl.php");
-}
 
 /**
  * Delete virtual host file
@@ -233,14 +206,7 @@ function _provision_apache_create_server_config($url) {
   }
 }
 
-/**
- * default template for server-wide configurations
- * 
- * @see _provision_apache_create_server_config()
- */
-function _provision_apache_default_server_template() {
-    return file_get_contents(dirname(__FILE__) ."/provision_apache_server.tpl.php");
-}
+
 
 function _provision_apache_delete_platform_config($file) {
   provision_path("unlink", drush_get_option('platform_conf_path') ."/" . $file, TRUE, dt("Removed apache platform vhost configuration"));
