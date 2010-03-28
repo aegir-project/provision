@@ -47,10 +47,12 @@ function provision_apache_drush_init() {
     drush_set_default('script_user', get_current_user());
 
     // Redirection urls
-    drush_set_default('master_url', $GLOBALS['base_url']);
-    $master_url = drush_get_option('master_url');
-    drush_set_default('web_disable_url', $master_url .'/hosting/disabled');
-    drush_set_default('web_maintenence_url', $master_url .'/hosting/maintenance');
+    if (isset($GLOBALS['base_url'])) {
+      drush_set_default('master_url', $GLOBALS['base_url']);
+      $master_url = drush_get_option('master_url');
+      drush_set_default('web_disable_url', $master_url .'/hosting/disabled');
+      drush_set_default('web_maintenence_url', $master_url .'/hosting/maintenance');
+    }
 
     drush_set_default('web_ip', '127.0.0.1');
     drush_set_default('web_port', 80);
@@ -90,8 +92,8 @@ function _provision_apache_platform_template() {
  */
 function _provision_apache_delete_vhost_config($url) {
   // backward compatibility with 0.3
-  if (provision_path_exists(drush_get_option('vhost_path') .'/'. $url)) {
-    provision_path("unlink", drush_get_option('vhost_path') ."/" . $url, TRUE, dt("Removed apache virtual host configuration"));
+  if (provision_service('file')->path('exists', drush_get_option('vhost_path') .'/'. $url)) {
+    provision_service('file')->path("unlink", drush_get_option('vhost_path') ."/" . $url, TRUE, dt("Removed apache virtual host configuration"));
   } else {
     $options = drush_get_merged_options();
     // backward compatibility with 0.3
@@ -99,7 +101,7 @@ function _provision_apache_delete_vhost_config($url) {
       $options['site_port'] = 80;
     }
     $file = $url . '_' . $options['site_port'];
-    provision_path("unlink", drush_get_option('vhost_path') ."/" . $file, TRUE, dt("Removed apache virtual host configuration"));
+    provision_service('file')->path("unlink", drush_get_option('vhost_path') ."/" . $file, TRUE, dt("Removed apache virtual host configuration"));
   }
   drush_command_invoke_all('provision_apache_delete_vhost', $url, $options);
 }
@@ -153,16 +155,16 @@ function _provision_apache_create_vhost_config($url, $template = NULL) {
    */
   $file = $url . '_' . $options['site_port'];
   // backward compatibility with 0.3
-  if (provision_path_exists(drush_get_option('vhost_path') .'/'. $url)) {
+  if (provision_service('file')->path('exists', drush_get_option('vhost_path') .'/'. $url)) {
     rename(drush_get_option('vhost_path') .'/'. $url, drush_get_option('vhost_path') .'/'. $file);
   }
   drush_log(dt("Generating apache host configuration file %file.", array('%file' => $file)));
-  $writable = provision_path("writable", drush_get_option('vhost_path'), TRUE , NULL,
+  $writable = provision_service('file')->path("writable", drush_get_option('vhost_path'), TRUE , NULL,
       dt("Virtual host configuration path @path is not writable."), 
       'PROVISION_VHOST_PATH_NOT_WRITABLE');
   
   if ($writable) {
-    return provision_write_config(drush_get_option('vhost_path') .'/'. $file, $template, $options);
+    return provision_write_config('vhost_path', $file, $template, $options);
   } else {
     return $writable;
   }
@@ -184,7 +186,7 @@ function _provision_apache_create_platform_config($url) {
   $data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_dir_config', $data));
   $file = 'platform_' . $options['platform'] .  '.conf';
   drush_log(dt("Generating apache platform configuration file %file.", array('%file' => $file)));
-  $writable = provision_path("writable", drush_get_option('platform_conf_path'), TRUE , NULL, dt("Platform configuration path @path is not writable."), 'PROVISION_VHOST_PATH_NOT_WRITABLE');
+  $writable = provision_service('file')->path("writable", drush_get_option('platform_conf_path'), TRUE , NULL, dt("Platform configuration path @path is not writable."), 'PROVISION_VHOST_PATH_NOT_WRITABLE');
 
   if ($writable) {
     // remove the old path first.
@@ -192,7 +194,7 @@ function _provision_apache_create_platform_config($url) {
     if (file_exists($oldfile) && is_writable($oldfile)) {
       unlink($oldfile);
     }
-    return provision_write_config(drush_get_option('platform_conf_path') . '/' . $file, _provision_apache_platform_template(), $data);
+    return provision_write_config('platform_conf_path', $file, _provision_apache_platform_template(), $data);
   } else {
     return $writable;
   }
@@ -216,8 +218,8 @@ function _provision_apache_create_server_config($url) {
   $options['extra_config'] = "# Extra configuration from modules:\n";
   $options['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_server_config', $url, $options));
 
-  drush_log(dt("Generating apache server configuration file %file.", array('%file' => $file)));
-  $writable = provision_path("writable", drush_get_option('config_path'), TRUE , NULL,
+  drush_log(dt("Generating apache server configuration file %file.", array('%file' => drush_get_option('config_path') . '/apache.conf')));
+  $writable = provision_service('file')->path("writable", drush_get_option('config_path'), TRUE , NULL,
       dt("Virtual host configuration path @path is not writable."), 
       'PROVISION_VHOST_PATH_NOT_WRITABLE');
   
@@ -227,7 +229,7 @@ function _provision_apache_create_server_config($url) {
     if (file_exists($oldfile) && is_writable($oldfile)) {
       unlink($oldfile);
     }
-    return provision_write_config(drush_get_option('config_path') .'/apache.conf', $template, $options);
+    return provision_write_config('config_path', 'apache.conf', $template, $options);
   } else {
     return $writable;
   }
@@ -243,7 +245,7 @@ function _provision_apache_default_server_template() {
 }
 
 function _provision_apache_delete_platform_config($file) {
-  provision_path("unlink", drush_get_option('platform_conf_path') ."/" . $file, TRUE, dt("Removed apache platform vhost configuration"));
+  provision_service('file')->path("unlink", drush_get_option('platform_conf_path') ."/" . $file, TRUE, dt("Removed apache platform vhost configuration"));
 }
 
 

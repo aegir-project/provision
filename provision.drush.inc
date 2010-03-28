@@ -51,7 +51,6 @@ if ($name['name'] == 'root') {
  * @{
  */
 include_once('provision.inc');
-include_once('provision.path.inc');
 
 /**
  * implementation of hook_drush_init().
@@ -202,10 +201,10 @@ function drush_provision_hostmaster_make($platform) {
  * Generate a provision.settings.php file to configure provision
  */
 function _provision_generate_config() {
-  $exists = provision_path_exists(drush_get_option('docroot_path') . '/drushrc.php');
+  $exists = provision_service('file')->path('exists', drush_get_option('docroot_path') . '/drushrc.php');
   if ($exists) {
     drush_log(dt("Found existing drushrc.php file"));
-    provision_path("chmod", drush_get_option('docroot_path') . '/drushrc.php', 0600,
+    provision_service('file')->path("chmod", drush_get_option('docroot_path') . '/drushrc.php', 0600,
        dt('Changed permissions of drushrc.php to @confirm'),
         dt('Could not change permissions of drushrc.php to @confirm'));
   }
@@ -213,7 +212,7 @@ function _provision_generate_config() {
     drush_log(dt("Generating drushrc.php file"));
   }
   provision_save_platform_data();
-  provision_path("chmod", drush_get_option('docroot_path') . '/drushrc.php', 0400,
+  provision_service('file')->path("chmod", drush_get_option('docroot_path') . '/drushrc.php', 0400,
     dt('Changed permissions of drushrc.php to @confirm'),
     dt('Could not change permissions of drushrc.php to @confirm'));
   return TRUE;

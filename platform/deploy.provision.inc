@@ -21,7 +21,7 @@
 function drush_provision_drupal_provision_deploy_validate($url = null, $backup_file = null) {
   _provision_drupal_url_required();
 
-  $exists = provision_path("exists", $backup_file, TRUE,
+  $exists = provision_service('file')->path("exists", $backup_file, TRUE,
       dt("Deploying site from @path"),
       dt("Could not find backup file @path"),
       'PROVISION_BACKUP_NOT_FOUND');
@@ -36,7 +36,7 @@ function drush_provision_drupal_provision_deploy_validate($url = null, $backup_f
 function drush_provision_drupal_pre_provision_deploy($url, $backup_file) {
   // the url is likely to have changed in the deployment
   drush_set_option('site_url', $url);
-  $extracted = provision_path("extract", drush_get_option('backup_file'), drush_get_option('sites_path') ."/$url", 
+  $extracted = provision_service('file')->path("extract", drush_get_option('backup_file'), drush_get_option('sites_path') ."/$url", 
     dt('Successfully extracted the contents of @path'),
     dt('Failed to extract the contents of @path'),
     'PROVISION_BACKUP_EXTRACTION_FAILED');

@@ -64,7 +64,7 @@ function provision_load_site_data($url) {
 
   $conf_file = "sites/$url/site.php";
   if (file_exists($conf_file)) {
-    provision_path('chmod', $conf_file, 0400);
+    provision_service('file')->path('chmod', $conf_file, 0400);
     require($conf_file);
 
     // The provision 0.1 config data might contain older data,
@@ -88,21 +88,20 @@ function provision_save_site_data() {
     // append the db settings in the _SERVER variable so normal drush commands can still read it.
     $cache = drush_get_context($context);
 
-    $fp = fopen($filename, "a+");
+    $fp = provision_service('file')->path('fopen', $filename, 'a+');
     $fields = array('db_type', 'db_host', 'db_user', 'db_passwd', 'db_name');
 
     foreach ($fields as $key) {
       $line = "\n\$_SERVER['$key'] = ". var_export($cache[$key], TRUE) .';';
       fwrite($fp, $line);  
-     }
-     fwrite($fp, "\n");
-     fclose($fp);
+    }
+    fwrite($fp, "\n");
+    fclose($fp);
   }
 
-  provision_path("chmod", $filename, 0600,
+  provision_service('file')->path("chmod", $filename, 0600,
     dt('Changed permissions of drushrc.php to @confirm'),
     dt('Could not change permissions of drushrc.php to @confirm'));
-
 }
 
 /**
@@ -133,7 +132,7 @@ function provision_render_config($template, $variables) {
   drush_errors_off();
   extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
   ob_start();                      // Start output buffering
-  eval('?>'. $template);                 // Generate content
+  eval('?'.'>' . $template);                 // Generate content
   $contents = ob_get_contents();   // Get the contents of the buffer
   ob_end_clean();                  // End buffering and discard
   drush_errors_on();
@@ -145,8 +144,8 @@ function provision_render_config($template, $variables) {
  *
  * @see provision_render_config()
  */
-function provision_write_config($file, $template, $data) {
-  $file = fopen($file, "w");
+function provision_write_config($drush_option, $file, $template, $data) {
+  $file = provision_service('file')->path('fopen', drush_get_option($drush_option) . '/' . $file, 'w');
   $text = provision_render_config($template, $data);
   fwrite($file, $text);
   fclose($file);
@@ -181,14 +180,14 @@ function _provision_recursive_delete($path) {
       }
     }
 
-    $rm = provision_path('rmdir', $path, TRUE,
+    $rm = provision_service('file')->path('rmdir', $path, TRUE,
       dt('Deleting @path directory successful.', array('@path' => $path)),
       dt('Deleting @path directory failed.', array('@path' => $path)));
 
     $ret = $ret && $rm;
   }
   else {
-    $rm = provision_path('unlink', $path, TRUE, NULL, 
+    $rm = provision_service('file')->path('unlink', $path, TRUE, NULL, 
       dt('Deleting @path file failed.', array('@path' => $path)));
     $ret = $ret && $rm;
   }

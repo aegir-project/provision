@@ -24,12 +24,12 @@ function provision_ssl_provision_apache_vhost_config($url, $options) {
     if ($options['ssl_redirect']) {
       // That's pretty bad, but if we *don't* do that, the vhost is never updated after the first write
       // XXX: we need a better way to identify if this is legit
-      provision_path('exists', drush_get_option('vhost_path') . '/' . $url . '_80', FALSE, NULL, dt("Overwriting existing vhost %url:80 with redirection", array('%url' => $url)));
+      provision_service('file')->path('exists', drush_get_option('vhost_path') . '/' . $url . '_80', FALSE, NULL, dt("Overwriting existing vhost %url:80 with redirection", array('%url' => $url)));
       $newoptions = $options;
       // in the redirection template, the ServerName is the first alias in the list
       array_push($newoptions['aliases'], $options['site_url']);
       $newoptions['site_port'] = 80;
-      provision_write_config(drush_get_option('vhost_path') . '/' . $url . '_80', _provision_apache_redirect_template(), $newoptions);
+      provision_write_config('vhost_path', $url . '_80', _provision_apache_redirect_template(), $newoptions);
     }
     return array("php_value session.cookie_secure 1", "SSLEngine On");
   } else {
@@ -44,6 +44,6 @@ function provision_ssl_provision_apache_vhost_config($url, $options) {
  */
 function provision_ssl_provision_apache_delete_vhost($url, $options) {
   if ($options['ssl'] && $options['ssl_redirect']) {
-    provision_path('unlink', drush_get_option('vhost_path') . '/' . $url . '_80', TRUE, NULL, dt("Failed deleting redirection vhost."));
+    provision_service('file')->path('unlink', drush_get_option('vhost_path') . '/' . $url . '_80', TRUE, NULL, dt("Failed deleting redirection vhost."));
   }
 }
