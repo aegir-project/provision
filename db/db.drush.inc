@@ -194,12 +194,12 @@ class provisionService_db extends provisionService {
 
     $creds = $this->fetch_site_credentials();
 
-    $exists = provision_path("exists", $dump_file, TRUE,
+    $exists = provision_service('file')->path("exists", $dump_file, TRUE,
       dt('Found database dump at @path.'),
       dt('No database dump was found at @path.'),
       'PROVISION_DB_DUMP_NOT_FOUND');
     if ($exists) {
-      $readable = provision_path("readable", $dump_file, TRUE, dt('Database dump at @path is readable'), 
+      $readable = provision_service('file')->path("readable", $dump_file, TRUE, dt('Database dump at @path is readable'), 
         dt('The database dump at @path could not be read.'), 
         'PROVISION_DB_DUMP_NOT_READABLE');
       if ($readable) {
@@ -332,8 +332,6 @@ class provisionService_db_pdo extends provisionService_db {
     $this->query_callback($args, TRUE);
     $query = preg_replace_callback(PROVISION_QUERY_REGEXP, array($this, 'query_callback'), $query);
     
-    drush_log($query);
-
     try {
       $result = $this->conn->query($query);
     }

@@ -194,23 +194,23 @@ function _provision_drupal_create_settings_file($url = NULL) {
   $options['extra_config'] .= join("\n", drush_command_invoke_all('provision_drupal_config', $url, $options));
 
   drush_log(dt("Generate settings.php file"));
-  if (provision_path("exists", "sites/$url/settings.php")) {
-    provision_path("chmod", "sites/$url/settings.php", 0640,
+  if (provision_service('file')->path("exists", "sites/$url/settings.php")) {
+    provision_service('file')->path("chmod", "sites/$url/settings.php", 0640,
       dt('Changed permissions of settings.php to @confirm'),
       dt('Could not change permissions of settings.php to @confirm'));
   }
 
-  $fp = fopen("sites/$url/settings.php", "w");
+  $fp = provision_service('file')->path('fopen', 'sites/' . $url . '/settings.php', 'w');
   $text =  _provision_drupal_default_template();
   fwrite($fp, "<?php\n". provision_render_config($text, $options));
   fclose($fp);
 
   # Change the permissions of the file
-  provision_path("chmod", "sites/$url/settings.php", 0440,
+  provision_service('file')->path("chmod", "sites/$url/settings.php", 0440,
     dt('Changed permissions of settings.php to @confirm'),
     dt('Could not change permissions of settings.php to @confirm'));
 
-  provision_path("chgrp", "sites/$url/settings.php", drush_get_option('web_group'),
+  provision_service('file')->path("chgrp", "sites/$url/settings.php", drush_get_option('web_group'),
     dt('Change group ownership of settings.php to @confirm'),
     dt('Could not change group ownership of settings.php to @confirm'));
 }
@@ -251,25 +251,25 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
 
   foreach ($mkdir as $path => $perm) {
     if (!is_dir($path)) {
-      provision_path("mkdir", $path, TRUE, 
+      provision_service('file')->path("mkdir", $path, TRUE, 
         dt("Created <code>@path</code>"),
         dt("Could not create <code>@path</code>"),
         'DRUSH_PERM_ERROR');
     }
 
-    provision_path("chmod_recursive", $path, $perm, 
+    provision_service('file')->path("chmod_recursive", $path, $perm, 
       dt("Changed permissions of <code>@path</code> to @confirm"),
       dt("Could not change permissions <code>@path</code> to @confirm")
       );
   }
   foreach ($chown as $path => $owner) {
-    provision_path("chown_recursive", $path, $owner,
+    provision_service('file')->path("chown_recursive", $path, $owner,
       dt("Changed ownership of <code>@path</code>"),
       dt("Could not change ownership <code>@path</code>"),
      'DRUSH_PERM_ERROR' );
   }
   foreach ($chgrp as $path => $group) {
-    provision_path("chgrp_recursive", $path, $group,
+    provision_service('file')->path("chgrp_recursive", $path, $group,
       dt("Changed group ownership of <code>@path</code>"),
       dt("Could not change group ownership <code>@path</code>"));
   }
@@ -391,7 +391,7 @@ function _provision_drupal_maintain_aliases($url) {
       }
       foreach($aliases as $alias) {
         if (trim($alias)) {
-          provision_path("symlink", $url, drush_get_option('docroot_path') . "/sites/" . $alias, 
+          provision_service('file')->path("symlink", $url, drush_get_option('docroot_path') . "/sites/" . $alias, 
             dt("Created symlink for alias @alias", array("@alias" => $alias)), 
             dt("Could not create symlink for alias @alias", array("@alias" => $alias)));
         }
@@ -414,7 +414,7 @@ function _provision_drupal_delete_aliases($aliases, $silent = false) {
   }
   foreach ($aliases as $alias) {
     if ($alias = trim($alias)) {
-      provision_path("unlink", drush_get_option('docroot_path') . "/sites/" . $alias, TRUE,
+      provision_service('file')->path("unlink", drush_get_option('docroot_path') . "/sites/" . $alias, TRUE,
             dt("Removed symlink for alias @alias", array("@alias" => $alias)), $error);
     }
   }
