@@ -1,16 +1,60 @@
 <?php
 
 class provisionService {
-  protected $templates = array();
+  function __construct() {
+    $this->init();
+  }
+
   function verify() {
     return TRUE;
   }
 
-  function templates() {
-    $this->templates = array();
+  function init() {
+    return TRUE;
   }
 
-  function render_config($template, $variables) {
+}
+
+class provisionConfig {
+  public $template = null;
+  public $data = array();
+  public $description = null;
+
+  function __construct($data = array()) {
+    if (is_null($this->template)) {
+      throw(exception);
+    }
+    if (sizeof($data)) {
+      $this->data = $data;
+    }
+  }
+
+  function process() {
+    parent::process();
+    return true;
+  }
+
+  function filename() {
+    return false;
+  }
+
+
+  private function load_template() {
+    $reflect = new reflectionObject($this);
+    $base_dir = dirname($reflect->getFilename());
+
+    if (isset($this->template)) {
+      $file = $base_dir . '/' . $this->template;
+      drush_log("Template loaded: $file");
+      if (file_exists($file) && is_readable($file)) {
+        return file_get_contents($file);
+      }
+    }
+    return false;
+  }
+
+
+  private function render_template($template, $variables) {
     drush_errors_off();
     extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
     ob_start();                      // Start output buffering
@@ -21,54 +65,28 @@ class provisionService {
     return $contents;                // Return the contents
   }
 
-  function write_config($file, $key, $extra_data = array()) {
-    $data = drush_get_merged_options();
-     
-    if (is_writeable($file)) {
-      if ($template = $this->load_template($key)) {
-        $file = fopen($file, "w");
-        $text = $this->render_config($template, $data);
+
+  function write() {
+    $filename = $this->filename();
+    if ($filename && is_writeable(dirname($filename))) {
+      // manipulate data before passing to template.
+      $this->process();
+
+      if ($template = $this->load_template()) {
+        #todo - convert to file_service
+        $file = fopen($filename, "w");
+        $text = $this->render_template($template, $this->data);
         fwrite($file, $text);
         fclose($file);
+        if ($this->description) {
+          drush_log("Generated config : " . $this->description, 'success');
+        }
       }
     }
   }
-}
 
-class provisionConfig {
-  public $template = null;
-
-  function __construct() {
-    if (is_null($this->template)) {
-      throw(exception);
-    }
-  }
-
-  function filename() {
-    return false;
-  }
-
-  function load() {
-    $reflect = new reflectionObject($this);
-    $base_dir = $reflect->getFilename();
-
-    if (isset($this->templates[$key])) {
-      $file = $base_dir . '/' . $this->templates[$key];
-
-      if (file_exists($file) && is_readable($file)) {
-        return file_get_contents($file);
-      }
-    }
-    return false;
-  }
-
-
-  function render($template, $variables) {
-
-  }
-
-  function write_config($extra_data) {
-
+  function unlink() {
+    return provision_service('file')->path('unlink', $this->filename());
   }
 
 }

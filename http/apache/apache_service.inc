@@ -1,49 +1,47 @@
 <?php
 
-class provisionService_http_apache extends provisionService {
 
-  function templates() {
-    $this->templates['vhost'] = 'vhost.tpl.php';
-    $this->templates['vhost_disabled'] = 'vhost_disabled.tpl.php';
-    $this->templates['platform'] = 'platform.tpl.php';
-    $this->templates['server'] = 'server.tpl.php';
-  }
 
+
+class provisionService_http_apache extends provisionService_http {
 
   function create_site_config($url) {
-    $file = drush_get_option('vhost_path') . '/' . $url . '_' . drush_get_option('site_port');
-    drush_log(dt("Generating apache host configuration file %file.", array('%file' => basename($file))));
-    return $this->write_config($file, 'vhost', drush_get_merged_options());
+    $config = new provisionConfig_apache_site(drush_get_merged_options());
+    return $config->write();
   }
 
   function delete_site_config($url) {
-    $file = drush_get_option('vhost_path') . '/' . $url . '_' . drush_get_option('site_port');
-    provision_path("unlink", $file, TRUE, dt("Removed apache virtual host configuration"));
+    $config = new provisionConfig_apache_site(drush_get_merged_options());
+    return $config->unlink();
   }
 
   function create_platform_config() {
-    $file = drush_get_option('platform_conf_path') . '/platform_' . drush_get_option('platform') . '.conf';
-    drush_log(dt("Generating apache host configuration file %file.", array('%file' => basename($file))));
-    return $this->write_config($file, 'platform', drush_get_merged_options());
+    $config = new provisionConfig_apache_platform(drush_get_merged_options());
+    return $config->write();
   }
 
-  function delete_site_config($url) {
-    $file = drush_get_option('platform_conf_path') . '/platform_' . drush_get_option('platform');
-    provision_path("unlink", $file, TRUE, dt("Removed apache platform configuration"));
+  function delete_platform_config($url) {
+    $config = new provisionConfig_apache_platform(drush_get_merged_options());
+    return $config->unlink();
   }
 
 
   function create_server_config() {
-    $file = drush_get_option('conf_path') . '/apache.conf';
+    $config = new provisionConfig_apache_server(drush_get_merged_options());
+    return $config->write();
+  }
 
-    drush_log(dt("Generating apache host configuration file %file.", array('%file' => basename($file))));
-    return $this->write_config($file, 'server', drush_get_merged_options());
-   }
+  
+  function delete_server_config($url) {
+    $config = new provisionConfig_apache_server(drush_get_merged_options());
+    return $config->unlink();
+  }
+
 
   function verify($url) {
     if (PROVISION_CONTEXT_PLATFORM) {
-      _provision_create_dir(drush_get_option('vhost_path'), dt("Virtual host configuration"), 0700);
-      _provision_create_dir(drush_get_option('platform_conf_path'), dt("Platforms configuration"), 0700);
+      provision_service('file')->create_dir(drush_get_option('vhost_path'), dt("Virtual host configuration"), 0700);
+      provision_service('file')->create_dir(drush_get_option('platform_conf_path'), dt("Platforms configuration"), 0700);
       
       if (drush_get_option('platform', null)) {
         $this->create_platform_config();
@@ -79,8 +77,61 @@ class provisionService_http_apache extends provisionService {
   }
 
 
+}
 
-  function delete_server_config() {
+class provisionConfig_apache extends provisionConfig {
+
+}
+
+
+class provisionConfig_apache_server extends provisionConfig_apache {
+  public $template = 'server.tpl.php';
+  public $description = 'apache server configuration file';
+
+  function filename() {
+    return $this->data['config_path'] . '/' . 'apache.conf';
+  }
+
+  function process() {
+    $this->data['extra_config'] = "# Extra configuration from modules:\n";
+    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_server_config', $this->data));
+  }
+}
+
+class provisionConfig_apache_platform extends provisionConfig_apache {
+  public $template = 'platform.tpl.php';
+  public $description = 'apache platform configuration file';
+
+  function filename() {
+    return $this->data['platform_conf_path'] . '/platform_' . $this->data['platform'] . '.conf';
+  }
+
+  function process() {
+    $this->data['extra_config'] = "# Extra configuration from modules:\n";
+    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_dir_config', $this->data));
+  }
+}
+
+class provisionConfig_apache_site extends provisionConfig_apache {
+  public $template = 'vhost.tpl.php';
+  public $description = 'apache site configuration file';
+
+  function filename() {
+    return $this->data['vhost_path'] . '/' . $this->data['site_url'] . '_' . $this->data['site_port'];
+  }
+
+  function process() {
+    if (!$this->data['site_port'] || $this->data['site_port'] < 1 || $this->data['site_port'] > 66535) { 
+      $this->data['site_port'] = 80;
+    }
+    
+    if ($this->data['aliases'] && !is_array($this->data['aliases'])) {
+      $this->data['aliases'] = explode(",", $this->data['aliases']);
+    }
+
+    $this->data['extra_config'] = "# Extra configuration from modules:\n";
+    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_vhost_config', $this->data['site_url'], $this->data));
 
   }
 }
+

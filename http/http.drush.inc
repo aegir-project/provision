@@ -5,7 +5,12 @@ include_once(dirname(__FILE__) . '/../provision.service.inc');
 function http_drush_init() {
  $command = drush_get_command();
   $command = explode(" ", $command['command']);
-  if (preg_match("/^provision-/", $command[0])) {
+ if (preg_match("/^provision-/", $command[0])) {
+
+    include_once('apache/apache_service.inc');
+    provision_service('http', new provisionService_http_apache());
+
+
     // Set up defines for platform
     $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
 
@@ -52,7 +57,7 @@ class provisionService_http extends provisionService {
    * Ask the web server to check for and load configuration changes.
    */
   function parse_configs() {
-    return TRUE
+    return TRUE;
   }
 
   /**
