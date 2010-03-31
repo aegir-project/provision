@@ -1,9 +1,6 @@
 <?php
 
 class provisionService {
-  function __construct() {
-    $this->init();
-  }
 
   function verify() {
     return TRUE;
@@ -11,6 +8,27 @@ class provisionService {
 
   function init() {
     return TRUE;
+  }
+
+  static function spawn($service, $default = null) {
+    $reflect = new reflectionClass('provisionService_' . $service);
+    $base_dir = dirname($reflect->getFilename());
+
+    $type = drush_get_option($service . '-service-type', $default);
+
+    
+    if ($type) {
+      $file = sprintf("%s/%s/%s_service.inc", $base_dir, $type, $type);
+      $className = sprintf("provisionService_%s_%s", $service, $type);
+      if (file_exists($file)) {
+        drush_log("Loading $type driver for the $service service");
+        include_once($file);
+        provision_service($service, new $className())->init(); 
+        return TRUE;
+      }
+    }
+
+    return false;
   }
 
 }
