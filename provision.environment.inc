@@ -14,14 +14,31 @@ function provision_environment_factory($options) {
   }
 
   $object = new $classname($options);
+  $object->init();
   $object->clean();
   return $object;
 }
+
+function & d($short_name = '@self', $object = null) {
+  static $instances = null;
+
+  if (is_object($object)) {
+    $instances[$short_name] = $object;
+  }
+
+  if (isset($instances[$short_name])) {
+    return $instances[$short_name];
+  }
+
+  return $instances['@self'];
+}
+
 
 class provisionEnvironment {
   protected $options = array();
   protected $properties = array();
   protected $map = array();
+  protected $short_name = null;
   protected $type = null;
 
   function __get($name) {
@@ -61,6 +78,10 @@ class provisionEnvironment {
     $this->options = $options;
   }
 
+  function init() {
+    return true;
+  }
+
   function clean() {
     $this->options = array();
   }
@@ -90,8 +111,46 @@ class provisionServer extends provisionEnvironment {
     $this->setProperty('remote_host', 'localhost');
     $this->setProperty('script_user', get_current_user());
     $this->setProperty('aegir_root', '/var/aegir');
-    $this->setProperty('config_path', $this->aegir_root . '/config');
     $this->setProperty('backup_path', $this->aegir_root . '/backup');
+
+    $this->setProperty('config_path', $this->aegir_root . '/config');
+    $this->setProperty('alias_path', $this->config_path . '/drush.d');
+  }
+
+  function init() {
+    parent::init();
+    $this->load_services();
+  }
+
+  function load_services() {
+    $service_list = drush_command_invoke_all('provision_services');
+    foreach ($service_list as $service => $default) {
+      $this->spawn_service($service, $default);
+    }
+  }
+
+
+  function spawn_service($service, $default = null) {
+    $reflect = new reflectionClass('provisionService_' . $service);
+    $base_dir = dirname($reflect->getFilename());
+
+    $type_option = "$service-service-type";
+    
+    $type = isset($this->options[$type_option]) ? $this->options[$type_option] : $default;
+    if ($type) {
+      $file = sprintf("%s/%s/%s_service.inc", $base_dir, $type, $type);
+      $className = sprintf("provisionService_%s_%s", $service, $type);
+      if (file_exists($file)) {
+        drush_log("Loading $type driver for the $service service");
+        include_once($file);
+        $object = new $className();
+        $object->init();
+        $this->$service = $object;
+      }
+    }
+    else {
+      $this->$service = new provisionService_null();
+    }
   }
 }
 

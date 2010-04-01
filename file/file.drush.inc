@@ -11,18 +11,20 @@
 
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
-function file_drush_init() {
-  $command = drush_get_command();
-  $command = explode(" ", $command['command']);
-  if (preg_match("/^provision-/", $command[0])) {
-    provision_service('file', new provisionService_file());
-  }
+function file_provision_services() {
+  return array('file' => 'local');
 }
+
 
 function file_drush_exit() {
   // todo sync out to other servers
   //provision_service('file')->sync();
 }
+
+class provisionService_file_local extends provisionService_file {
+
+}
+
 
 class provisionService_file extends provisionService {
   /**

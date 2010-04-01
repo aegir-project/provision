@@ -2,13 +2,11 @@
 
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
-function http_drush_init() {
- $command = drush_get_command();
-  $command = explode(" ", $command['command']);
-  if (preg_match("/^provision-/", $command[0])) {
-    provisionService::spawn('http', 'apache'); 
-  }
+
+function http_provision_services() {
+  return array('http' => 'apache');
 }
+
 
 class provisionService_http extends provisionService {
   function init() {

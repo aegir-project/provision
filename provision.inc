@@ -1,5 +1,7 @@
 <?php
 // $Id$
+include_once('provision.environment.inc');
+include_once('provision.service.inc');
 
 /**
  * @file

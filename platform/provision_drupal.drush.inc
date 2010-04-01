@@ -53,6 +53,7 @@ function provision_drupal_drush_init($url = NULL) {
   if (preg_match("/^provision-/", $command[0])) {
 
     if ($url) {
+      // this stuff gets moved to environment
       drush_set_option('uri' , 'http://' . $url);
       provision_load_site_data($url);
       drush_set_default('site_url', $url);

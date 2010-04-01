@@ -11,13 +11,10 @@
 
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
-function db_drush_init() {
-  $command = drush_get_command();
-  $command = explode(" ", $command['command']);
-  if (preg_match("/^provision-/", $command[0])) {
-    provisionService::spawn('db', 'mysql'); 
-  }
+function db_provision_services() {
+  return array('db' => 'mysql');
 }
+
 
 function db_drush_exit() {
   // determine how to close it too.
