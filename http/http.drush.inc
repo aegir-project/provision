@@ -9,7 +9,7 @@ function http_provision_services() {
 
 
 class provisionService_http extends provisionService {
-  function init() {
+  function init($options) {
     // Set up defines for platform
     $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
 

@@ -144,7 +144,7 @@ class provisionServer extends provisionEnvironment {
         drush_log("Loading $type driver for the $service service");
         include_once($file);
         $object = new $className();
-        $object->init();
+        $object->init($this->options);
         $this->$service = $object;
       }
     }
@@ -180,6 +180,19 @@ class provisionSite extends provisionPlatform {
     parent::__construct($options);
     $this->type = 'site';
     $this->setProperty('uri');
+    $this->setProperty('site_url', str_replace(array('https://', 'http://'), '', $this->uri));
+    $this->setProperty('profile', 'default');
+    $this->setProperty('language', 'en');
+    $this->setProperty('aliases', array());
+
+    // todo - turn into a re-usable mechanism for comma separated values
+    if ($this->options['aliases'] && !is_array($site_data['aliases'])) {
+      $this->aliases = explode(",", $site_data['aliases']);
+    }
+    else {
+      $this->aliases = array();
+    }
+
   }
 }
 

@@ -1,7 +1,7 @@
 <?php
 
 class provisionService {
-
+  
   function verify() {
     return TRUE;
   }
