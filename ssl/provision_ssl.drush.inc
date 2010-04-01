@@ -31,10 +31,12 @@ function provision_ssl_provision_apache_vhost_config($url, $options) {
       $newoptions['site_port'] = 80;
       provision_write_config(drush_get_option('vhost_path') . '/' . $url . '_80', _provision_apache_redirect_template(), $newoptions);
     }
-    return array("php_value session.cookie_secure 1", "SSLEngine On");
-  } else {
-    return NULL;
+    $newoptions = $options;
+    $newoptions['site_port'] = 443;
+    $newoptions['extra_config'] = "php_value session.cookie_secure 1\nSSLEngine On\n";
+    provision_write_config(drush_get_option('vhost_path') . '/' . $url .  '_443', _provision_apache_default_template(), $newoptions);
   }
+  return NULL;
 }
 
 /**
