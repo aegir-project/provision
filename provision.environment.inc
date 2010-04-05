@@ -98,6 +98,10 @@ class provisionEnvironment {
   function setMap($field, $context) {
     $this->map[$field] = $context;
   }
+
+  function getProperties() {
+    return $this->properties;
+  }
 }
 
 class provisionServer extends provisionEnvironment {
@@ -115,6 +119,8 @@ class provisionServer extends provisionEnvironment {
 
     $this->setProperty('config_path', $this->aegir_root . '/config');
     $this->setProperty('alias_path', $this->config_path . '/drush.d');
+    $this->setProperty('master_url');
+
   }
 
   function init() {
@@ -128,7 +134,6 @@ class provisionServer extends provisionEnvironment {
       $this->spawn_service($service, $default);
     }
   }
-
 
   function spawn_service($service, $default = null) {
     $reflect = new reflectionClass('provisionService_' . $service);
@@ -145,6 +150,7 @@ class provisionServer extends provisionEnvironment {
         include_once($file);
         $object = new $className();
         $object->init($this->options);
+        $this->services[$service] = $object;
         $this->$service = $object;
       }
     }
@@ -165,6 +171,11 @@ class provisionPlatform extends provisionServer {
     parent::__construct($options);
     $this->type = 'platform';
     $this->setProperty('root', $_SERVER['PWD']);
+
+    // publish path can really be removed ...
+    $this->setProperty('publish_path', $this->root);
+
+    $this->setProperty('sites_path', $this->root . '/sites');
   }
 }
 
@@ -181,9 +192,11 @@ class provisionSite extends provisionPlatform {
     $this->type = 'site';
     $this->setProperty('uri');
     $this->setProperty('site_url', str_replace(array('https://', 'http://'), '', $this->uri));
-    $this->setProperty('profile', 'default');
     $this->setProperty('language', 'en');
     $this->setProperty('aliases', array());
+    $this->setProperty('site_port', 80);
+
+    $this->setProperty('client_email');
 
     // todo - turn into a re-usable mechanism for comma separated values
     if ($this->options['aliases'] && !is_array($site_data['aliases'])) {
@@ -192,6 +205,10 @@ class provisionSite extends provisionPlatform {
     else {
       $this->aliases = array();
     }
+
+
+    // this can potentially be handled by a drupal sub class
+    $this->setProperty('profile', 'default');
 
   }
 }

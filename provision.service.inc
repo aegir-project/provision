@@ -1,7 +1,8 @@
 <?php
 
 class provisionService {
-  
+  protected $owner_name = '@self';
+
   function verify() {
     return TRUE;
   }
@@ -9,8 +10,6 @@ class provisionService {
   function init() {
     return TRUE;
   }
-
-
 }
 
 class provisionConfig {

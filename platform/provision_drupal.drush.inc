@@ -52,17 +52,7 @@ function provision_drupal_drush_init($url = NULL) {
   $command = explode(" ", $command['command']);
   if (preg_match("/^provision-/", $command[0])) {
 
-    if ($url) {
-      // this stuff gets moved to environment
-      drush_set_option('uri' , 'http://' . $url);
-      provision_load_site_data($url);
-      drush_set_default('site_url', $url);
-      drush_set_default('profile', 'default');
-      drush_set_default('language', 'en');
-      drush_set_default('aliases', array());
-    }
-
-    define('PROVISION_CONTEXT_SITE', ($url) ? TRUE : FALSE);
+    define('PROVISION_CONTEXT_SITE', (d()->type == 'site') ? TRUE : FALSE);
     define('PROVISION_CONTEXT_PLATFORM', !PROVISION_CONTEXT_SITE);
   }
 }

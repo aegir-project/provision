@@ -4,6 +4,14 @@
 
 
 class provisionService_http_apache extends provisionService_http {
+  function init(&$owner) {
+    parent::init($owner);
+    $owner->setProperty('apache_site_conf_path', $owner->config_path . '/vhost.d');
+    $owner->setProperty('apache_platform_conf_path', $owner->config_path . '/platform.d');
+
+    // Commands
+    $owner->setProperty('restart_cmd', _provision_default_restart_cmd());
+  }
 
   function create_site_config($url) {
     $config = new provisionConfig_apache_site(drush_get_merged_options());
