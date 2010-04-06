@@ -1,6 +1,6 @@
 <?php
 
-function provision_environment_factory($options) {
+function provision_environment_factory($name, $options, $root_object = FALSE) {
   $classes = array('provisionServer', 'provisionPlatform', 'provisionSite');
 
   if (provisionServer::evaluate($options)) {
@@ -13,24 +13,31 @@ function provision_environment_factory($options) {
     }
   }
 
-  $object = new $classname($options);
-  $object->init();
-  $object->clean();
-  return $object;
+  d($name,  new $classname($name, $options), $root_object);
+  d($name)->init();
+  d($name)->clean();
+  return d($name);
 }
 
-function & d($short_name = '@self', $object = null) {
+function & d($name = '@self', $object = null, $root_object = FALSE) {
   static $instances = null;
+  static $default_instance = '@self';
 
-  if (is_object($object)) {
-    $instances[$short_name] = $object;
+  if ($name) {
+    if ($root_object) {
+      $default_instance = $name;
+    }
+
+    if (is_object($object)) {
+      $instances[$name] = $object;
+    }
+
+    if (isset($instances[$name])) {
+      return $instances[$name];
+    }
   }
 
-  if (isset($instances[$short_name])) {
-    return $instances[$short_name];
-  }
-
-  return $instances['@self'];
+  return $instances[$default_instance];
 }
 
 
@@ -38,7 +45,7 @@ class provisionEnvironment {
   protected $options = array();
   protected $properties = array();
   protected $map = array();
-  protected $short_name = null;
+  protected $name = null;
   protected $type = null;
 
   function __get($name) {
@@ -74,8 +81,10 @@ class provisionEnvironment {
 
   }
 
-  function __construct($options) {
+  function __construct($name, $options) {
+    $this->name = $name;
     $this->options = $options;
+    unset($this->options['packages']);
   }
 
   function init() {
@@ -109,8 +118,10 @@ class provisionServer extends provisionEnvironment {
     return TRUE;
   }
 
-  function __construct($options) {
-    parent::__construct($options);
+  function init() {
+    parent::init();
+
+    print_r($this->options);
     $this->type = 'server';
     $this->setProperty('remote_host', 'localhost');
     $this->setProperty('script_user', get_current_user());
@@ -120,11 +131,6 @@ class provisionServer extends provisionEnvironment {
     $this->setProperty('config_path', $this->aegir_root . '/config');
     $this->setProperty('alias_path', $this->config_path . '/drush.d');
     $this->setProperty('master_url');
-
-  }
-
-  function init() {
-    parent::init();
     $this->load_services();
   }
 
@@ -148,8 +154,8 @@ class provisionServer extends provisionEnvironment {
       if (file_exists($file)) {
         drush_log("Loading $type driver for the $service service");
         include_once($file);
-        $object = new $className();
-        $object->init($this->options);
+        $object = new $className($this->name);
+        $object->init();
         $this->services[$service] = $object;
         $this->$service = $object;
       }
@@ -167,8 +173,8 @@ class provisionPlatform extends provisionServer {
     }
   }
 
-  function __construct($options) {
-    parent::__construct($options);
+  function init() {
+    parent::init();
     $this->type = 'platform';
     $this->setProperty('root', $_SERVER['PWD']);
 
@@ -187,8 +193,8 @@ class provisionSite extends provisionPlatform {
     }
   }
 
-  function __construct($options) {
-    parent::__construct($options);
+  function init() {
+    parent::init();
     $this->type = 'site';
     $this->setProperty('uri');
     $this->setProperty('site_url', str_replace(array('https://', 'http://'), '', $this->uri));

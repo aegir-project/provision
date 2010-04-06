@@ -1,12 +1,29 @@
 <?php
 
 class provisionService {
-  protected $owner_name = '@self';
+  protected $owner = '@self';
   protected $last_status;
   protected $tokens;
 
-  function __construct() {
-    $this->init();
+  function __get($name) {
+    return d($this->owner)->$name;
+  }
+
+  function __set($name, $value) {
+    d($this->owner)->$name = $value;
+  }
+
+  function __isset($name) {
+    return isset(d($this->owner)->$name);
+  }
+
+  function __unset($name) {
+    unset(d($this->owner)->$name);
+
+  }
+
+  function __construct($owner) {
+    $this->owner = $owner;
   }
 
   function verify() {
@@ -15,6 +32,10 @@ class provisionService {
 
   function init() {
     return TRUE;
+  }
+
+  function setProperty($field, $default = null) {
+    d($this->owner)->setProperty($field, $default);
   }
 
   /**
@@ -87,14 +108,27 @@ class provisionConfig {
   public $template = null;
   public $data = array();
   public $description = null;
+  public $owner = '@self';
 
-  function __construct($data = array()) {
-    if (is_null($this->template)) {
-      throw(exception);
-    }
-    if (sizeof($data)) {
-      $this->data = $data;
-    }
+  function __get($name) {
+    return d($this->owner)->$name;
+  }
+
+  function __set($name, $value) {
+    d($this->owner)->$name = $value;
+  }
+
+  function __isset($name) {
+    return isset(d($this->owner)->$name);
+  }
+
+  function __unset($name) {
+    unset(d($this->owner)->$name);
+
+  }
+
+  function __construct($owner) {
+    $this->owner = $owner;
   }
 
   function process() {
@@ -132,7 +166,6 @@ class provisionConfig {
     drush_errors_on();
     return $contents;                // Return the contents
   }
-
 
   function write() {
     $filename = $this->filename();

@@ -9,17 +9,17 @@ function http_provision_services() {
 
 
 class provisionService_http extends provisionService {
-  function init(&$owner) {
-    parent::init($owner);
+  function init() {
+    parent::init();
     // System account
-    $owner->setProperty('web_group', _provision_default_web_group());
+    $this->setProperty('web_group', _provision_default_web_group());
 
     // Redirection urls
-    $owner->setProperty('web_disable_url', $this->master_url .'/hosting/disabled');
-    $owner->setProperty('web_maintenence_url', $this->master_url .'/hosting/maintenance');
+    $this->setProperty('web_disable_url', $this->master_url .'/hosting/disabled');
+    $this->setProperty('web_maintenence_url', $this->master_url .'/hosting/maintenance');
 
-    $owner->setProperty('web_ip', '127.0.0.1');
-    $owner->setProperty('web_port', 80);
+    $this->setProperty('web_ip', '127.0.0.1');
+    $this->setProperty('web_port', 80);
   }
 
   /**

@@ -27,26 +27,6 @@ drush_errors_on();
  * values, that allow sites to be more easily moved between different provisioned platforms.
  */
 
-/**
- * Returns the aggregated site data from both the pre-existing site.php file, and the options passed to Drush
- *
- * This function merges the data from the command line parser, and the information already saved by previous invokations
- * of the api. This provides a single view of all data relating to the site.
- * This function also provides sensible defaults for some of the settings.
- *
- * @param url
- *   The url of the site being invoked.
- * @return
- *   An associated array containing the relevant settings for the site.
- */
-function provision_get_site_data($url) {
- 
-  if ($site_data['aliases'] && !is_array($site_data['aliases'])) {
-    $site_data['aliases'] = explode(",", $site_data['aliases']);
-  }  
-  return $site_data;
-}
-
 
 /**
  * Save modified options to the drushrc.php file
@@ -58,7 +38,6 @@ function provision_save_site_data() {
 
   drush_set_option('config-file', drush_get_option('config-file', null, 'site'));
   drush_unset_option('config-file', 'site');
-
 
   drush_save_config($context);
 

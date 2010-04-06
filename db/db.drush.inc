@@ -37,16 +37,17 @@ function db_drush_help($section) {
 class provisionService_db extends provisionService {
 
   function init() {
-    $master_db = drush_get_option('master_db');
-    $db = parse_url($master_db);
-    drush_set_default('master_db_user', urldecode($db['user']));
-    drush_set_default('master_db_passwd', urldecode($db['pass']));
+    $this->setProperty('master_db');
+    $db = parse_url($this->master_db);
 
-    drush_set_default('master_db_host', urldecode($db['host']));
-    drush_set_default('db_host', urldecode($db['host']));
+    $this->setProperty('master_db_user', urldecode($db['user']));
+    $this->setProperty('master_db_passwd', urldecode($db['pass']));
 
-    drush_set_default('master_db_type', $db['scheme']);
-    drush_set_default('db_type', $db['scheme']);
+    $this->setProperty('master_db_host', urldecode($db['host']));
+    $this->setProperty('db_host', urldecode($db['host']));
+
+    $this->setProperty('master_db_type', $db['scheme']);
+    $this->setProperty('db_type', $db['scheme']);
 
     $creds = array();
     $options = array(
@@ -56,7 +57,7 @@ class provisionService_db extends provisionService {
       'master_db_type' => 'type');
 
     foreach ($options as $option => $key) {
-      $creds[$key] = drush_get_option($option, '');
+      $creds[$key] = $this->$option;
     }
     $this->creds = $creds;
     return TRUE;
