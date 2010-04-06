@@ -53,6 +53,13 @@ function provision_get_site_data($url) {
  */
 function provision_save_site_data() {
   $context = 'site';
+  drush_set_option('context-path', drush_get_option('context-path', null, 'site'));
+  drush_unset_option('context-path', 'site');
+
+  drush_set_option('config-file', drush_get_option('config-file', null, 'site'));
+  drush_unset_option('config-file', 'site');
+
+
   drush_save_config($context);
 
   $filename = _drush_config_file($context);
@@ -71,9 +78,9 @@ function provision_save_site_data() {
     fclose($fp);
   }
 
-  provision_service('file')->path("chmod", $filename, 0600,
-    dt('Changed permissions of drushrc.php to @confirm'),
-    dt('Could not change permissions of drushrc.php to @confirm'));
+  provision_service('file')->chmod($filename, 0600)
+    ->succeed('Changed permissions of drushrc.php to @perm')
+    ->fail('Could not change permissions of drushrc.php to @perm');
 }
 
 /**
@@ -89,6 +96,13 @@ function provision_save_site_data() {
  *   Boolean. The value returned by drush_save_config().
  */
 function provision_save_platform_data() {
+  drush_set_option('context-path', drush_get_option('context-path', null, 'drupal'));
+  drush_unset_option('context-path', 'drupal');
+
+  drush_set_option('config-file', drush_get_option('config-file', null, 'drupal'));
+  drush_unset_option('config-file', 'drupal');
+
+
   return drush_save_config('drupal');
 }
 
@@ -152,15 +166,17 @@ function _provision_recursive_delete($path) {
       }
     }
 
-    $rm = provision_service('file')->path('rmdir', $path, TRUE,
-      dt('Deleting @path directory successful.', array('@path' => $path)),
-      dt('Deleting @path directory failed.', array('@path' => $path)));
+    $rm = provision_service('file')->rmdir($path)
+      ->succeed('Deleting @path directory successful.')
+      ->fail('Deleting @path directory failed.')
+      ->status();
 
     $ret = $ret && $rm;
   }
   else {
-    $rm = provision_service('file')->path('unlink', $path, TRUE, NULL, 
-      dt('Deleting @path file failed.', array('@path' => $path)));
+    $rm = provision_service('file')->unlink($path)
+      ->fail('Deleting @path file failed.')
+      ->status();
     $ret = $ret && $rm;
   }
   return $ret;

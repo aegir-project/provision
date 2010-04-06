@@ -40,20 +40,6 @@ class provisionService_file extends provisionService {
    *
    * @param type
    *    The type of operation to perform. One of the following:
-   *      writable - The $path can be written to.
-   *      exists - The $path exists.
-   *      is_dir - The $path is a directory.
-   *      readable - The $path is readable.
-   *      owner - The $path belongs to the user in $confirm.
-   *      group - The $path belongs to the group in $confirm.
-   *      mkdir - Create the $path directory.
-   *      unlink - Delete the file $path.
-   *      symlink - Create a symlink from $path to $confirm.
-   *      rmdir - Delete the directory $path.
-   *      chmod - Change the file permissions of $path to the octal value in $confirm.
-   *      chown - Change the owner of $path to the user in $confirm.
-   *      chgrp - Change the group of $path to the group in $confirm.
-   *      switch_paths - Move $path to $confirm, and vice versa.
    *      fopen - Get a file pointer for writing.
    *
    * @param path
@@ -63,16 +49,7 @@ class provisionService_file extends provisionService {
    *    Confirm that the final value of the file operation matches this value.
    *    This value defaults to TRUE, which is sufficient for most file operations.
    *
-   *    Certain tasks such as chmod, chown and chgp will attempt to change the
-   *    properties of $path to match the value in $confirm, and then test that
-   *    the change was completed succesfully afterwards.
-   *    
    *    These exceptions are :
-   *      symlink - $confirm is the path to the symlink being created
-   *      chmod - $confirm is an octal value denoting the desired file permissions.
-   *      chown - $confirm is the name or user id you wish to change the file ownership to.
-   *      chgrp - $confirm is the name of group id you wish to change the file group ownership to.
-   *      switch_paths - $confirm is the path that you want to replace the $path with.
    *      fopen - $confirm is the $mode
    *
    * @param succeed_message
@@ -129,41 +106,106 @@ class provisionService_file extends provisionService {
     }
   }
 
+  /**
+   * Determine if $path can be written to.
+   *
+   * Sets @path token for ->succeed and ->fail.
+   *
+   * @param $path
+   *   The path you want to perform this operation on.
+   */
   function writable($path) {
-    return is_writable($path);
+    $this->_clear_state();
+
+    $this->last_status = is_writable($path);
+    $this->tokens = array('@path' => $path);
+
+    return $this;
   }
 
+  /**
+   * Determine if $path exists.
+   *
+   * Sets @path token for ->succeed and ->fail.
+   *
+   * @param $path
+   *   The path you want to perform this operation on.
+   */
   function exists($path) {
-    return file_exists($path);
+    $this->_clear_state();
+
+    $this->last_status = file_exists($path);
+    $this->tokens = array('@path' => $path);
+
+    return $this;
   }
 
-  function is_dir($path) {
-    return is_dir($path);
-  }
-
+  /**
+   * Determine if $path is readable.
+   *
+   * Sets @path token for ->succeed and ->fail.
+   *
+   * @param $path
+   *   The path you want to perform this operation on.
+   */
   function readable($path) {
-    return is_readable($path);
+    $this->_clear_state();
+
+    $this->last_status = is_readable($path);
+    $this->tokens = array('@path' => $path);
+
+    return $this;
   }
 
-  function owner($path) {
-    $info = posix_getpwuid(fileowner($path));
-    return $info['name'];
-  }
-
-  function group($path) {
-    return filegroup($path);
-  }
-
+  /**
+   * Create the $path directory.
+   *
+   * Sets @path token for ->succeed and ->fail.
+   *
+   * @param $path
+   *   The path you want to perform this operation on.
+   */
   function mkdir($path) {
-    return mkdir($path, 0770, TRUE);
+    $this->_clear_state();
+
+    $this->last_status = mkdir($path, 0770, TRUE);
+    $this->tokens = array('@path' => $path);
+
+    return $this;
   }
 
+  /**
+   * Delete the directory $path.
+   *
+   * Sets @path token for ->succeed and ->fail.
+   *
+   * @param $path
+   *   The path you want to perform this operation on.
+   */
   function rmdir($path) {
-    return rmdir($path);
+    $this->_clear_state();
+
+    $this->last_status = rmdir($path);
+    $this->tokens = array('@path' => $path);
+
+    return $this;
   }
 
+  /**
+   * Delete the file $path.
+   *
+   * Sets @path token for ->succeed and ->fail.
+   *
+   * @param $path
+   *   The path you want to perform this operation on.
+   */
   function unlink($path) {
-    return unlink($path);
+    $this->_clear_state();
+
+    $this->last_status = unlink($path);
+    $this->tokens = array('@path' => $path);
+
+    return $this;
   }
 
   function fopen($path, $mode) {
@@ -174,106 +216,158 @@ class provisionService_file extends provisionService {
     return array(TRUE, $fp);
   }
 
-
-  /*
-   * This is where the more complex file operations start
+  /**
+   * Change the file permissions of $path to the octal value in $perms.
+   *
+   * @param $perms
+   *   An octal value denoting the desired file permissions.
    */
+  function chmod($path, $perms, $recursive = FALSE) {
+    $this->_clear_state();
 
-  function chmod($path, &$perms, &$reason, $recursive = FALSE) {
+    $this->tokens = array('@path' => $path, '@perm' => sprintf('%o', $perms));
+
     $func = ($recursive) ? array($this, '_chmod_recursive') : 'chmod';
-
     if (!@call_user_func($func, $path, $perms)) {
-      $reason = dt('chmod to @perm failed on @path', array('@perm' => sprintf('%o', $perms), '@path' => $path));
+      $this->tokens['@reason'] = dt('chmod to @perm failed on @path', array('@perm' => sprintf('%o', $perms), '@path' => $path));
       return false;
     }
     clearstatcache(); // this needs to be called, otherwise we get the old info 
-    $value = substr(sprintf('%o', fileperms($path)), -4);
-    $perms = sprintf('%04o', $perms);
-    return $value;
+    $this->last_status = substr(sprintf('%o', fileperms($path)), -4) == sprintf('%04o', $perms);
+
+    return $this;
   }
 
-  function chown($path, &$owner, &$reason, $recursive = FALSE) {
+  /**
+   * Change the owner of $path to the user in $owner.
+   *
+   * Sets @path, @owner, and @reason tokens for ->succeed and ->fail.
+   *
+   * @param $path
+   *   The path you want to perform this operation on.
+   * @param $owner
+   *   The name or user id you wish to change the file ownership to.
+   * @param $recursive
+   *   TRUE to descend into subdirectories.
+   */
+  function chown($path, $owner, $recursive = FALSE) {
+    $this->_clear_state();
+
+    $this->tokens = array('@path' => $path, '@gid' => $gid);
+
     $func = ($recursive) ? array($this, '_chown_recursive') : 'chown';
     if ($owner = provision_posix_username($owner)) {
       if (!call_user_func($func, $path, $owner)) {
-        $reason = dt("chown to @owner failed on @path", array('@owner' => $owner, '@path' => $path)) ; 
+        $this->tokens['@reason'] = dt("chown to @owner failed on @path", array('@owner' => $owner, '@path' => $path)) ; 
       }
     }
     else {
-      $reason = dt("the user does not exist");
+      $this->tokens['@reason'] = dt("the user does not exist");
     }
 
     clearstatcache(); // this needs to be called, otherwise we get the old info 
-    return provision_posix_username(fileowner($path));
+    $this->last_status = $owner == provision_posix_username(fileowner($path));
+
+    return $this;
   }
 
-  function chgrp($path, &$gid, &$reason, $recursive = FALSE) {
+  /**
+   * Change the group of $path to the group in $gid.
+   *
+   * Sets @path, @gid, and @reason tokens for ->succeed and ->fail.
+   *
+   * @param $path
+   *   The path you want to perform this operation on.
+   * @param $gid
+   *   The name of group id you wish to change the file group ownership to.
+   * @param $recursive
+   *   TRUE to descend into subdirectories.
+   */
+  function chgrp($path, $gid, $recursive = FALSE) {
+    $this->_clear_state();
+
+    $this->tokens = array('@path' => $path, '@gid' => $gid);
+
     $func = ($recursive) ? array($this, '_chgrp_recursive') : 'chgrp';
     if ($group = provision_posix_groupname($gid)) {
       if (provision_user_in_group(drush_get_option('script_user'), $gid)) {
-        if (call_user_func($func, $path, $group)) {
-          return $group;
-        }
-        else {
-          $reason = dt("chgrp to @group failed on @path", array('@group' => $group, '@path' => $path));
+        if (!call_user_func($func, $path, $group)) {
+          $this->tokens['@reason'] = dt("chgrp to @group failed on @path", array('@group' => $group, '@path' => $path));
         }
       }
       else {
-        $reason = dt("@user is not in @group group", array("@user" => drush_get_option('script_user'), "@group" => $group));
+        $this->tokens['@reason'] = dt("@user is not in @group group", array("@user" => drush_get_option('script_user'), "@group" => $group));
       }
     }
     elseif (!@call_user_func($func, $path, $gid)) { # try to change the group anyways
-      $reason = dt("the group does not exist");
+      $this->tokens['@reason'] = dt("the group does not exist");
     }
 
     clearstatcache(); // this needs to be called, otherwise we get the old info 
-    return provision_posix_groupname(filegroup($path));
+    $this->last_status = $group == provision_posix_groupname(filegroup($path));
+
+    return $this;
   }
 
-  function chmod_recursive($path, &$perms, &$reason) {
-    return $this->chmod($path, $perms, $reason, TRUE);
-  }
+  /**
+   * Move $path1 to $path2, and vice versa.
+   *
+   * @param $path1
+   *   The path that you want to replace the $path2 with.
+   * @param $path2
+   *   The path that you want to replace the $path1 with.
+   */
+  function switch_paths($path1, $path2) {
+    $this->_clear_state();
 
-  function chown_recursive($path, &$owner, &$reason) {
-    return $this->chown($path, $owner, $reason, TRUE);
-  }
+    $this->tokens = array('@path1' => $path1, '@path2' => $path2);
 
-  function chgrp_recursive($path, &$gid, &$reason) {
-    return $this->chgrp($path, $gid, $reason, TRUE);
-  }
-
-  function switch_paths($path1, &$path2, &$reason) {
     //TODO : Add error reasons.
-    $temp = $path1 .'.tmp';
+    $temp = $path1 . '.tmp';
     if (!file_exists($path1)) {
-      return rename($path2, $path1);
+      $this->last_status = rename($path2, $path1);
     }
     elseif (!file_exists($path2)) {
-      return rename($path1, $path2);
+      $this->last_status = rename($path1, $path2);
     }
     elseif (rename($path1, $temp)) { 
       if (rename($path2, $path1)) {
         if (rename($temp, $path2)) {
-          return $path2; // path1 is now path2
+          $this->last_status = $path2; // path1 is now path2
         }
         else {
           // same .. just in reverse
-          return rename($path1, $path2) && rename($temp, $path1);
+          $this->last_status = rename($path1, $path2) && rename($temp, $path1);
         }
       }
       else {
         // same .. just in reverse
-        return rename($temp, $path1);
+        $this->last_status = rename($temp, $path1);
       }   
-
     }
-    return FALSE;
+    $this->last_status = FALSE;
+
+    return $this;
   }
 
-  function extract($path, &$target, &$reason) {
+  /**
+   * Extract gzip-compressed tar archive.
+   *
+   * Sets @path, @target, and @reason tokens for ->succeed and ->fail.
+   *
+   * @param $path
+   *   The path you want to extract.
+   * @param $target
+   *   The destination path to extract to.
+   */
+  function extract($path, $target) {
+    $this->_clear_state();
+
+    $this->tokens = array('@path' => $path, '@target' => $target);
+
     if (file_exists($path) && is_readable($path)) {
       if (is_writeable(dirname($target)) && !file_exists($target) && !is_dir($target)) {
-        mkdir($target);
+        $this->mkdir($target);
         $oldcwd = getcwd();
         // we need to do this because some retarded implementations of tar (e.g. SunOS) don't support -C
         chdir($target);
@@ -284,82 +378,94 @@ class provisionService_file extends provisionService {
         chdir($oldcwd);
 
         if ($result && is_writeable(dirname($target)) && is_readable(dirname($target)) && is_dir($target)) {
-          $target = TRUE;
-          return TRUE;
+          $this->last_status = TRUE;
         }
         else {
-          $reason = dt("The file could not be extracted");
+          $this->tokens['@reason'] = dt('The file could not be extracted');
+          $this->last_status = FALSE;
         }
       }
       else {
-        $reason = dt("The target directory could not be written to");
-        return false;
+        $this->tokens['@reason'] = dt('The target directory could not be written to');
+        $this->last_status = FALSE;
       }
     }
     else {
-      $reason = dt("Backup file could not be opened");
-      return false;
+      $this->tokens['@reason'] = dt('Backup file could not be opened');
+      $this->last_status = FALSE;
     }
+
+    return $this;
   }
 
-  function symlink($path, &$target, &$reason) {
+  /**
+   * Create a symlink from $path to $target.
+   *
+   * Sets @path, @target, and @reason tokens for ->succeed and ->fail.
+   *
+   * @param $path
+   *   The path you want to perform this operation on.
+   * @param $target
+   *   The path you want the link to point to.
+   */
+  function symlink($path, $target) {
+    $this->_clear_state();
+
+    $this->tokens = array('@path' => $path, '@target' => $target);
+
     if (file_exists($target) && !is_link($target)) {
-      $reason = dt("A file already exists at @path");
-      return FALSE;
+      $this->tokens['@reason'] = dt("A file already exists at @path");
+      $this->last_status = FALSE;
     }
-    if (is_link($target) && (readlink($target) != $path)) {
-      $reason = dt("A symlink already exists at target, but it is pointing to @link", array("@link" => readlink($target)));
-      return FALSE;
+    elseif (is_link($target) && (readlink($target) != $path)) {
+      $this->tokens['@reason'] = dt("A symlink already exists at target, but it is pointing to @link", array("@link" => readlink($target)));
+      $this->last_status = FALSE;
     }
-    if (is_link($target) && (readlink($target) == $path)) {
-      $target = TRUE;
-      return TRUE;
+    elseif (is_link($target) && (readlink($target) == $path)) {
+      $this->last_status = TRUE;
     }
-    if (symlink($path, $target)) {
-      $target = TRUE;
-      return TRUE;
+    elseif (symlink($path, $target)) {
+      $this->last_status = TRUE;
     }
     else {
-      $reason = dt('The symlink could not be created, an error has occured');
-      return FALSE;
+      $this->tokens['@reason'] = dt('The symlink could not be created, an error has occured');
+      $this->last_status = FALSE;
     }
+
+    return $this;
   }
 
   /**
    * Small helper function for creation of configuration directories.
    */
   function create_dir($path, $name, $perms) {
-    $exists = $this->path("exists", $path, TRUE,
-      $name . ' ' . dt("path exists."),
-      $name . ' ' . dt("path does not exist.")
-    );
+    $exists = $this->exists($path)
+      ->succeed($name . ' path @path exists.')
+      ->fail($name . ' path @path does not exist.')
+      ->status();
 
     if (!$exists) {
-      $exists = $this->path("mkdir", $path, TRUE,
-        $name . ' ' . dt("path has been created."),
-        $name . ' ' . dt("path could not be created."),
-        'DRUSH_PERM_ERROR');
+      $exists = $this->mkdir($path)
+        ->succeed($name . ' path @path has been created.')
+        ->fail($name . ' path @path could not be created.', 'DRUSH_PERM_ERROR')
+        ->status();
     }
 
     if ($exists) {
-      $this->path("chown", $path, drush_get_option('script_user'), 
-        $name . ' ' . dt("ownership of path has been changed to @confirm."),
-        $name . ' ' . dt("ownership of path could not be changed to @confirm."),
-        'DRUSH_PERM_ERROR');
+      $this->chown($path, drush_get_option('script_user'))
+        ->succeed($name . ' ownership of path has been changed to @perm.')
+        ->fail($name . ' ownership of path could not be changed to @perm.', 'DRUSH_PERM_ERROR');
 
-      $this->path("chmod", $path, $perms, 
-        $name . ' ' . dt("permissions of path have been changed to @confirm."),
-        $name . ' ' . dt("permissions of path could not be changed to @confirm."),
-        'DRUSH_PERM_ERROR' );
+      $this->chmod($path, $perms)
+        ->succeed($name . ' permissions of path have been changed to @perm.')
+        ->fail($name . ' permissions of path could not be changed to @perm.', 'DRUSH_PERM_ERROR');
 
-      $writable = $this->path("writable", $path, TRUE,
-        $name . ' ' . dt("path is writable."),
-        $name . ' ' . dt("path is not writable."),
-        'DRUSH_PERM_ERROR');
-
+      $this->writable($path)
+        ->succeed($name . ' path @path is writable.')
+        ->fail($name . ' path @path is not writable.', 'DRUSH_PERM_ERROR');
     }
 
-    return ($exists && $writable);
+    return $exists;
   }
 
   /**
@@ -394,20 +500,20 @@ class provisionService_file extends provisionService {
    *
    */
   function _chmod_recursive($path, $filemode) {
-    return $this->_call_recursive("chmod", $path, $filemode);
+    return $this->_call_recursive('chmod', $path, $filemode);
   }
 
   /**
    * Chown a directory recursively
    */
   function _chown_recursive($path, $owner) {
-    return $this->_call_recursive("chown", $path, $owner);
+    return $this->_call_recursive('chown', $path, $owner);
   }
 
   /**
    * Chgrp a directory recursively
    */
-  function _chgrp_recursive($path, $owner) {
-    return $this->_call_recursive("chgrp", $path, $owner);
+  function _chgrp_recursive($path, $group) {
+    return $this->_call_recursive('chgrp', $path, $group);
   }
 }

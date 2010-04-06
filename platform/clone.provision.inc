@@ -27,7 +27,9 @@ function drush_provision_drupal_pre_provision_clone($url, $new_url, $platform = 
  * Remove the extracted site directory
  */
 function drush_provision_drupal_pre_provision_clone_rollback($url, $new_url, $platform = null) {
-  $success =  provision_service('file')->path("unlink", drush_get_option('backup_file'), TRUE, dt('Removed unused clone site package'), dt('Could not remove unused clone site package'));
+  $success =  provision_service('file')->unlink(drush_get_option('backup_file'))
+    ->succeed('Removed unused clone site package')
+    ->fail('Could not remove unused clone site package');
 }
 
 /**
