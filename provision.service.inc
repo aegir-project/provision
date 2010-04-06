@@ -155,7 +155,6 @@ class provisionConfig {
     return false;
   }
 
-
   private function render_template($template, $variables) {
     drush_errors_off();
     extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
@@ -206,5 +205,5 @@ class provisionService_null extends provisionService {
 
 
 function provision_service($type, $object = null) {
-  return d()->$type;
+  return d()->service($type);
 }

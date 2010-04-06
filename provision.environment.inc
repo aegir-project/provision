@@ -114,6 +114,7 @@ class provisionEnvironment {
 }
 
 class provisionServer extends provisionEnvironment {
+  protected $services = array();
   public static function evaluate($options) {
     return TRUE;
   }
@@ -121,7 +122,6 @@ class provisionServer extends provisionEnvironment {
   function init() {
     parent::init();
 
-    print_r($this->options);
     $this->type = 'server';
     $this->setProperty('remote_host', 'localhost');
     $this->setProperty('script_user', get_current_user());
@@ -157,12 +157,15 @@ class provisionServer extends provisionEnvironment {
         $object = new $className($this->name);
         $object->init();
         $this->services[$service] = $object;
-        $this->$service = $object;
       }
     }
     else {
-      $this->$service = new provisionService_null();
+      $this->services[$service] = new provisionService_null();
     }
+  }
+
+  function service($service) {
+    return $this->services[$service];
   }
 }
 
