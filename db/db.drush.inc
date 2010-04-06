@@ -194,14 +194,15 @@ class provisionService_db extends provisionService {
 
     $creds = $this->fetch_site_credentials();
 
-    $exists = provision_service('file')->path("exists", $dump_file, TRUE,
-      dt('Found database dump at @path.'),
-      dt('No database dump was found at @path.'),
-      'PROVISION_DB_DUMP_NOT_FOUND');
+    $exists = provision_service('file')->exists($dump_file)
+      ->succeed('Found database dump at @path.')
+      ->fail('No database dump was found at @path.', 'PROVISION_DB_DUMP_NOT_FOUND')
+      ->status();
     if ($exists) {
-      $readable = provision_service('file')->path("readable", $dump_file, TRUE, dt('Database dump at @path is readable'), 
-        dt('The database dump at @path could not be read.'), 
-        'PROVISION_DB_DUMP_NOT_READABLE');
+      $readable = provision_service('file')->readable($dump_file)
+        ->succeed('Database dump at @path is readable')
+        ->fail('The database dump at @path could not be read.', 'PROVISION_DB_DUMP_NOT_READABLE')
+        ->status();
       if ($readable) {
         $this->import_dump($dump_file, $creds);
       }

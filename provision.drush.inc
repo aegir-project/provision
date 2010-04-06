@@ -201,20 +201,20 @@ function drush_provision_hostmaster_make($platform) {
  * Generate a provision.settings.php file to configure provision
  */
 function _provision_generate_config() {
-  $exists = provision_service('file')->path('exists', drush_get_option('docroot_path') . '/drushrc.php');
+  $exists = provision_service('file')->exists(drush_get_option('docroot_path') . '/drushrc.php')->status();
   if ($exists) {
     drush_log(dt("Found existing drushrc.php file"));
-    provision_service('file')->path("chmod", drush_get_option('docroot_path') . '/drushrc.php', 0600,
-       dt('Changed permissions of drushrc.php to @confirm'),
-        dt('Could not change permissions of drushrc.php to @confirm'));
+    provision_service('file')->chmod(drush_get_option('docroot_path') . '/drushrc.php', 0600)
+      ->succeed('Changed permissions of drushrc.php to @perm')
+      ->fail('Could not change permissions of drushrc.php to @perm');
   }
   else {
     drush_log(dt("Generating drushrc.php file"));
   }
   provision_save_platform_data();
-  provision_service('file')->path("chmod", drush_get_option('docroot_path') . '/drushrc.php', 0400,
-    dt('Changed permissions of drushrc.php to @confirm'),
-    dt('Could not change permissions of drushrc.php to @confirm'));
+  provision_service('file')->chmod(drush_get_option('docroot_path') . '/drushrc.php', 0400)
+    ->succeed('Changed permissions of drushrc.php to @perm')
+    ->fail('Could not change permissions of drushrc.php to @perm');
   return TRUE;
 }
 

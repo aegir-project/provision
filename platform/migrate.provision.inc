@@ -49,7 +49,9 @@ function drush_provision_drupal_pre_provision_migrate_rollback($url, $platform =
   drush_log(dt("Bringing site out of maintenance"));
   drush_set_option('site_offline', 0);
   _provision_drupal_create_settings_file($url);
-  $success =  provision_service('file')->path("unlink", drush_get_option('backup_file'), TRUE, dt('Removed unused migration site package'), dt('Could not remove unused migration site package'));
+  $success =  provision_service('file')->unlink(drush_get_option('backup_file'))
+    ->succeed('Removed unused migration site package')
+    ->fail('Could not remove unused migration site package');
   _provision_apache_create_vhost_config($url);
   _provision_apache_restart_apache();
 }

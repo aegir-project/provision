@@ -27,7 +27,7 @@ function drush_provision_drupal_provision_verify($url = null) {
   if (PROVISION_CONTEXT_PLATFORM) {
     provision_service('file')->create_dir(drush_get_option('config_path'), dt('Provision configuration'), 0711);
     provision_service('file')->create_dir(drush_get_option('config_path') . '/includes', dt('Provision PHP configuration'), 0711);
-    if (!provision_service('file')->path('exists', drush_get_option('config_path') .  '/includes/global.inc', TRUE, dt("Global configuration file exists"))) {
+    if (!provision_service('file')->exists(drush_get_option('config_path') . '/includes/global.inc')->succeed('Global configuration file exists')->status()) {
       # create an empty global.inc so the include doesn't fail with
       # open_basedir restrictions
       if (!$file = provision_service('file')->path('fopen', drush_get_option('config_path') .  '/includes/global.inc', 'a')) {
@@ -38,8 +38,9 @@ function drush_provision_drupal_provision_verify($url = null) {
       }
     }
     provision_service('file')->create_dir(drush_get_option('backup_path'), dt('Backup'), 0700);
-    provision_service('file')->path("writable", drush_get_option('sites_path'), TRUE, dt("Drupal sites directory is writable by the provisioning script"),
-      dt("Drupal sites directory is not writable by the provisioning script"), 'PROVISION_SITES_DIR_NOT_WRITABLE');
+    provision_service('file')->writable(drush_get_option('sites_path'))
+      ->succeed('Drupal sites directory @path is writable by the provisioning script')
+      ->fail('Drupal sites directory @path is not writable by the provisioning script', 'PROVISION_SITES_DIR_NOT_WRITABLE');
 
     drush_set_option('sites', array_keys((array) provision_drupal_find_sites()), 'drupal'); 
     drush_log(dt("This platform is running @short_name @version", array('@short_name' => 'drupal', '@version' => VERSION)));
