@@ -21,11 +21,6 @@ function file_drush_exit() {
   //provision_service('file')->sync();
 }
 
-class provisionService_file_local extends provisionService_file {
-
-}
-
-
 class provisionService_file extends provisionService {
   /**
    * Perform tasks on a path.
