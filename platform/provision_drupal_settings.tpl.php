@@ -1,3 +1,4 @@
+<?php print '<?php' ?>
   /**
    * The database credentials are stored in the Apache vhost config
    * of the associated site with SetEnv parameters.

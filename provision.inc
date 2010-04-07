@@ -90,25 +90,27 @@ function provision_save_site_data() {
 
   drush_save_config($context);
 
-  $filename = _drush_config_file($context);
   if (!drush_get_error()) {
-    // append the db settings in the _SERVER variable so normal drush commands can still read it.
-    $cache = drush_get_context($context);
-
-    $fp = provision_service('file')->path('fopen', $filename, 'a+');
-    $fields = array('db_type', 'db_host', 'db_user', 'db_passwd', 'db_name');
-
-    foreach ($fields as $key) {
-      $line = "\n\$_SERVER['$key'] = ". var_export($cache[$key], TRUE) .';';
-      fwrite($fp, $line);  
-    }
-    fwrite($fp, "\n");
-    fclose($fp);
+    $config = new provisionConfig_drushrc(drush_get_merged_options());
+    $config->write();
   }
 
-  provision_service('file')->chmod($filename, 0600)
+  provision_service('file')->chmod(_drush_config_file($context), 0600)
     ->succeed('Changed permissions of drushrc.php to @perm')
     ->fail('Could not change permissions of drushrc.php to @perm');
+}
+
+class provisionConfig_drushrc extends provisionConfig {
+  public $template = 'provision_drushrc.tpl.php';
+  public $description = 'Drush configuration file';
+
+  function filename() {
+    return $this->data['config-file'];
+  }
+
+  function process() {
+    $this->mode = 'a+';
+  }
 }
 
 /**
@@ -133,43 +135,6 @@ function provision_save_platform_data() {
 
   return drush_save_config('drupal');
 }
-
-/**
- * @defgroup provisionvalues Value replacement support for the provisioning framework
- * @{
- */
-
-/**
- * Generate the text for a config file using php
- */
-function provision_render_config($template, $variables) {
-  drush_errors_off();
-  extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
-  ob_start();                      // Start output buffering
-  eval('?'.'>' . $template);                 // Generate content
-  $contents = ob_get_contents();   // Get the contents of the buffer
-  ob_end_clean();                  // End buffering and discard
-  drush_errors_on();
-  return $contents;                // Return the contents
-}
-
-/**
- * Write a config based on a template
- *
- * @see provision_render_config()
- */
-function provision_write_config($drush_option, $file, $template, $data) {
-  $file = provision_service('file')->path('fopen', drush_get_option($drush_option) . '/' . $file, 'w');
-  $text = provision_render_config($template, $data);
-  fwrite($file, $text);
-  fclose($file);
-}
-
-
-/**
- * @} End of "defgroup provisionvalues".
- */
-
 
 /**
  * Remove files or directories, recursively

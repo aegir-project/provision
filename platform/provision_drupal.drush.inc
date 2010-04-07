@@ -164,16 +164,6 @@ function _provision_drupal_site_installed($url) {
 }
 
 /**
- * The default template to use while generating config files.
- *
- * @return
- *   The default template for the config file
- */
-function _provision_drupal_default_template() {
-  return file_get_contents(dirname(__FILE__) .'/provision_drupal_settings.tpl.php');
-}
-
-/**
  * Generate a settings file for the site.
  *
  * @param url
@@ -183,27 +173,14 @@ function _provision_drupal_default_template() {
  *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file($url = NULL) {
-  $options = drush_get_merged_options();
-
-  // As of Drupal 7 there is no more mysqli type
-  if (drush_drupal_major_version() >= 7) {
-    $options['db_type'] = ($options['db_type'] == 'mysqli') ? 'mysql' : $options['db_type'];
-  }
-
-  $options['extra_config'] = "# Extra configuration from modules:\n";
-  $options['extra_config'] .= join("\n", drush_command_invoke_all('provision_drupal_config', $url, $options));
-
-  drush_log(dt("Generate settings.php file"));
   if (provision_service('file')->exists('sites/' . $url . '/settings.php')->status()) {
     provision_service('file')->chmod('sites/' . $url . '/settings.php', 0640)
       ->succeed('Changed permissions of settings.php to @perm')
       ->fail('Could not change permissions of settings.php to @perm');
   }
 
-  $fp = provision_service('file')->path('fopen', 'sites/' . $url . '/settings.php', 'w');
-  $text =  _provision_drupal_default_template();
-  fwrite($fp, "<?php\n". provision_render_config($text, $options));
-  fclose($fp);
+  $config = new provisionConfig_drupal_settings(drush_get_merged_options());
+  $config->write();
 
   # Change the permissions of the file
   provision_service('file')->chmod('sites/' . $url . '/settings.php', 0440)
@@ -213,6 +190,24 @@ function _provision_drupal_create_settings_file($url = NULL) {
   provision_service('file')->chgrp('sites/' . $url . '/settings.php', drush_get_option('web_group'))
     ->succeed('Change group ownership of settings.php to @gid')
     ->fail('Could not change group ownership of settings.php to @gid');
+}
+
+class provisionConfig_drupal_settings extends provisionConfig {
+  public $template = 'provision_drupal_settings.tpl.php';
+  public $description = 'Drupal settings.php file';
+
+  function filename() {
+    return $this->data['sites_path'] . '/' . $this->data['site_url'] . '/settings.php';
+  }
+
+  function process() {
+    if (drush_drupal_major_version() >= 7) {
+      $this->data['db_type'] = ($this->data['db_type'] == 'mysqli') ? 'mysql' : $this->data['db_type'];
+    }
+
+    $this->data['extra_config'] = "# Extra configuration from modules:\n";
+    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_drupal_config', $this->data['site_url'], $this->data));
+  }
 }
 
 /**

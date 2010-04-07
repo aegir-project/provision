@@ -86,6 +86,7 @@ class provisionConfig {
   public $template = null;
   public $data = array();
   public $description = null;
+  protected $mode = 'w';
 
   function __construct($data = array()) {
     if (is_null($this->template)) {
@@ -141,7 +142,7 @@ class provisionConfig {
 
       if ($template = $this->load_template()) {
         #todo - convert to file_service
-        $file = fopen($filename, "w");
+        $file = fopen($filename, $this->mode);
         $text = $this->render_template($template, $this->data);
         fwrite($file, $text);
         fclose($file);
