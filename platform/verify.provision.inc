@@ -28,14 +28,10 @@ function drush_provision_drupal_provision_verify($url = null) {
     provision_service('file')->create_dir(drush_get_option('config_path'), dt('Provision configuration'), 0711);
     provision_service('file')->create_dir(drush_get_option('config_path') . '/includes', dt('Provision PHP configuration'), 0711);
     if (!provision_service('file')->exists(drush_get_option('config_path') . '/includes/global.inc')->succeed('Global configuration file exists')->status()) {
-      # create an empty global.inc so the include doesn't fail with
-      # open_basedir restrictions
-      if (!$file = provision_service('file')->path('fopen', drush_get_option('config_path') .  '/includes/global.inc', 'a')) {
-        drush_set_error('PROVISION_FRAMEWORK_ERROR', dt('Cannot create global settings configuration'));
-      } else {
-        fwrite($file, "<?php # global settings.php");
-        fclose($file);
-      }
+      // Create an empty global.inc so the include doesn't fail with
+      // open_basedir restrictions
+      $config = new provisionConfig_global_settings(drush_get_merged_options());
+      $config->write();
     }
     provision_service('file')->create_dir(drush_get_option('backup_path'), dt('Backup'), 0700);
     provision_service('file')->writable(drush_get_option('sites_path'))
@@ -57,6 +53,17 @@ function drush_provision_drupal_provision_verify($url = null) {
   }
 }
 
+class provisionConfig_global_settings extends provisionConfig {
+  public $template = 'global_settings.tpl.php';
+  public $description = 'Global settings.php file';
+
+  function filename() {
+    return $this->data['config_path'] . '/includes/global.inc';
+  }
+
+  function process() {
+  }
+}
 
 /**
  * Implementation of hook_provision_post_verify

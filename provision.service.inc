@@ -109,6 +109,7 @@ class provisionConfig {
   public $data = array();
   public $description = null;
   public $owner = '@self';
+  protected $mode = 'w';
 
   function __get($name) {
     return d($this->owner)->$name;
@@ -174,7 +175,7 @@ class provisionConfig {
 
       if ($template = $this->load_template()) {
         #todo - convert to file_service
-        $file = fopen($filename, "w");
+        $file = fopen($filename, $this->mode);
         $text = $this->render_template($template, $this->data);
         fwrite($file, $text);
         fclose($file);

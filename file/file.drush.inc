@@ -23,85 +23,6 @@ function file_drush_exit() {
 
 class provisionService_file extends provisionService {
   /**
-   * Perform tasks on a path.
-   *
-   * Perform tasks on a path, and logs error messages / codes on success or
-   * failure.  This function will call another method which defines the
-   * functionality, and exists to provide a consistent interface for file
-   * operations with error logging integration.
-   *
-   * Many of the $op methods are really simple, but are wrapped in methods to
-   * provide a consistent interface for path to operate with.
-   *
-   * @param type
-   *    The type of operation to perform. One of the following:
-   *      fopen - Get a file pointer for writing.
-   *
-   * @param path
-   *    The path you want to perform the file operation on.
-   *
-   * @param confirm
-   *    Confirm that the final value of the file operation matches this value.
-   *    This value defaults to TRUE, which is sufficient for most file operations.
-   *
-   *    These exceptions are :
-   *      fopen - $confirm is the $mode
-   *
-   * @param succeed_message
-   *    Log this as a notice into the logging system, if the operation completed succesfully.
-   *
-   * @param fail_message
-   *    Log this as a error to the logging system, if the $error_codes parameter has been set,
-   *    otherwise, log this as a warning. If the operation specifies an additional reason for
-   *    the operation failing, it will be appended to this message.
-   *
-   * @param error_codes
-   *    Generate these system level errors using the provision error bitmasks.
-   *
-   * @return
-   *    Returns TRUE if the test against $confirm passed, otherwise returns FALSE.
-   */
-  function path($op, $path, $confirm = TRUE, $succeed_message = NULL, $fail_message = NULL, $error_codes = NULL) {
-    if (method_exists($this, $op)) {
-      // The reason variable is passed into the operation function, to allow the function
-      // to specify an additional reason as to why the operation failed.
-      $reason = '';
-
-      $value = $this->$op($path, $confirm, $reason);
-
-      clearstatcache(); // this needs to be called, otherwise we get the old info 
-      $tokens = array("@path" => $path, "@op" => $op, "@confirm" => $confirm);
-      if ($reason) {
-        $fail_message .= " (" . $reason . ")";
-      }
-      $status = is_array($value) ? ($value[0] == $confirm) : ($value == $confirm);
-      if ($status) {
-        if (!is_null($succeed_message)) {
-          drush_log(dt($succeed_message, $tokens), 'message');      
-        }
-      }
-      else {
-        if ($error_codes) {
-          // Trigger a sysem halting error
-          if (!is_null($fail_message)) {
-            drush_set_error($error_codes, dt($fail_message, $tokens));
-          }
-          else {
-            drush_set_error($error_codes);
-          }
-        }
-        else {
-          // Trigger a warning
-          if (!is_null($fail_message)) {
-            drush_log(dt($fail_message, $tokens), 'warning');
-          }
-        }
-      }
-      return is_array($value) ? $value[1] : $status;
-    }
-  }
-
-  /**
    * Determine if $path can be written to.
    *
    * Sets @path token for ->succeed and ->fail.
@@ -201,14 +122,6 @@ class provisionService_file extends provisionService {
     $this->tokens = array('@path' => $path);
 
     return $this;
-  }
-
-  function fopen($path, $mode) {
-    $fp = fopen($path, $mode);
-    if ($fp === FALSE) {
-      return FALSE;
-    }
-    return array(TRUE, $fp);
   }
 
   /**

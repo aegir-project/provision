@@ -1,5 +1,6 @@
 <?php
 
+include_once(dirname(__FILE__) . '/../provision.service.inc');
 /**
  * @file
  *
@@ -24,18 +25,26 @@ function provision_ssl_provision_apache_vhost_config($url, $options) {
     if ($options['ssl_redirect']) {
       // That's pretty bad, but if we *don't* do that, the vhost is never updated after the first write
       // XXX: we need a better way to identify if this is legit
-      if (provision_service('file')->exists(drush_get_option('vhost_path') . '/' . $url . '_80')->status()) {
-        drush_log(dt('Overwriting existing vhost %url:80 with redirection', array('%url' => $url)), 'warning');
-      }
-      $newoptions = $options;
-      // in the redirection template, the ServerName is the first alias in the list
-      array_push($newoptions['aliases'], $options['site_url']);
-      $newoptions['site_port'] = 80;
-      provision_write_config('vhost_path', $url . '_80', _provision_apache_redirect_template(), $newoptions);
+      $config = new provisionConfig_ssl_vhost(drush_get_merged_options());
+      $config->write();
     }
     return array("php_value session.cookie_secure 1", "SSLEngine On");
   } else {
     return NULL;
+  }
+}
+
+class provisionConfig_ssl_vhost extends provisionConfig {
+  public $template = '../http/apache/vhost_redirect.tpl.php';
+  public $description = 'Redirect for SSL';
+
+  function filename() {
+    return $this->data['vhost_path'] . '/' . $this->data['site_url'] . '_80';
+  }
+
+  function process() {
+    array_push($this->data['aliases'], $this->data['site_url']);
+    $this->data['site_port'] = 80;
   }
 }
 
