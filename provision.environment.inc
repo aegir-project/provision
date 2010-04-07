@@ -1,24 +1,14 @@
 <?php
+/**
+ * Provision environment API
+ *
+ *
+ */
 
-function provision_environment_factory($name, $options, $root_object = FALSE) {
-  $classes = array('provisionServer', 'provisionPlatform', 'provisionSite');
-
-  if (provisionServer::evaluate($options)) {
-    $classname = array_shift($classes);
-    if (provisionPlatform::evaluate($options)) {
-      $classname = array_shift($classes);
-      if (provisionSite::evaluate($options)) {
-        $classname = array_shift($classes);
-      }
-    }
-  }
-
-  d($name,  new $classname($name, $options), $root_object);
-  d($name)->init();
-  d($name)->clean();
-  return d($name);
-}
-
+/**
+ * Store and access environment objects by their alias name
+ *
+ */
 function & d($name = '@self', $object = null, $root_object = FALSE) {
   static $instances = null;
   static $default_instance = '@self';
@@ -40,7 +30,34 @@ function & d($name = '@self', $object = null, $root_object = FALSE) {
   return $instances[$default_instance];
 }
 
+/**
+ * Create a new environment object and cache it in the d() static cache function.
+ */
+function provision_environment_factory($name, $options, $root_object = FALSE) {
+  $classes = array('provisionServer', 'provisionPlatform', 'provisionSite');
 
+  if (provisionServer::evaluate($options)) {
+    $classname = array_shift($classes);
+    if (provisionPlatform::evaluate($options)) {
+      $classname = array_shift($classes);
+      if (provisionSite::evaluate($options)) {
+        $classname = array_shift($classes);
+      }
+    }
+  }
+
+  d($name,  new $classname($name, $options), $root_object);
+  d($name)->init();
+  d($name)->clean();
+  return d($name);
+}
+
+
+/**
+ * Base environment class.
+ *
+ * Contains magic getter/setter functions
+ */
 class provisionEnvironment {
   protected $options = array();
   protected $properties = array();
@@ -48,12 +65,21 @@ class provisionEnvironment {
   protected $name = null;
   protected $type = null;
 
+  /**
+   * Retrieve value from $properties array if property does not exist in class proper.
+   */
   function __get($name) {
     if (array_key_exists($name, $this->properties)) {
       return $this->properties[$name];
     }
   }
 
+  /**
+   * Store value in properties array if the property does not exist in class proper.
+   *
+   * Keep a map of what the $this->type is when the value is set, so we can retrieve
+   * specific values later.
+   */
   function __set($name, $value) {
     if (!property_exists($this, $name)) {
       $this->properties[$name] = $value;
@@ -64,6 +90,9 @@ class provisionEnvironment {
     }
   }
 
+  /**
+   * Check the properties array if the property does not exist in the class proper.
+   */
   function __isset($name) {
     if (property_exists($this->properties, $name) || property_exists($this, $name)) {
       return TRUE;
@@ -71,6 +100,9 @@ class provisionEnvironment {
     return FALSE;
   }
 
+  /**
+   * Remove the value from the properties array if the property does not exist in the class proper.
+   */
   function __unset($name) {
     if (property_exists($this->properties, $name)) {
       unset($this->properties[$name]);
@@ -81,20 +113,25 @@ class provisionEnvironment {
 
   }
 
+  /**
+   * Constructor for the environment.
+   */
   function __construct($name, $options) {
     $this->name = $name;
     $this->options = $options;
     unset($this->options['packages']);
   }
 
+  /**
+   * Init stub function/
+   */
   function init() {
     return true;
   }
 
-  function clean() {
-    $this->options = array();
-  }
-
+  /**
+   * Check the $options property for a field, saving to the properties array.
+   */
   function setProperty($field, $default = null) {
     if (isset($this->options[$field])) {
       $this->$field = $this->options[$field];
@@ -104,15 +141,21 @@ class provisionEnvironment {
     }
   }
 
+  /**
+   * Alter the map array to move a value between stacks.
+   */
   function setMap($field, $context) {
     $this->map[$field] = $context;
   }
 
-  function getProperties() {
-    return $this->properties;
-  }
 }
 
+/**
+ * Server environment class.
+ *
+ * This class bootstraps the Service API by generating server
+ * objects for each of the available service types.
+ */
 class provisionServer extends provisionEnvironment {
   protected $services = array();
   public static function evaluate($options) {
@@ -134,6 +177,9 @@ class provisionServer extends provisionEnvironment {
     $this->load_services();
   }
 
+  /**
+   * Iterate through the available service types and spawn a handler for each type.
+   */
   function load_services() {
     $service_list = drush_command_invoke_all('provision_services');
     foreach ($service_list as $service => $default) {
@@ -141,6 +187,9 @@ class provisionServer extends provisionEnvironment {
     }
   }
 
+  /**
+   * Spawn an instance for a specific service type and associate it to the owner.
+   */
   function spawn_service($service, $default = null) {
     $reflect = new reflectionClass('provisionService_' . $service);
     $base_dir = dirname($reflect->getFilename());
@@ -164,11 +213,17 @@ class provisionServer extends provisionEnvironment {
     }
   }
 
+  /**
+   * Retrieve a service of a specific type from the environment.
+   */
   function service($service) {
     return $this->services[$service];
   }
 }
 
+/**
+ * Class for the platform environment.
+ */
 class provisionPlatform extends provisionServer {
   public static function evaluate($options) {
     if ($options['root']) {
