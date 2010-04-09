@@ -9,7 +9,7 @@
  * Store and access environment objects by their alias name
  *
  */
-function & d($name = '@self', $object = null, $root_object = FALSE) {
+function & d($name = '@self', $root_object = FALSE) {
   static $instances = null;
   static $default_instance = '@self';
 
@@ -18,11 +18,12 @@ function & d($name = '@self', $object = null, $root_object = FALSE) {
       $default_instance = $name;
     }
 
-    if (is_object($object)) {
-      $instances[$name] = $object;
-    }
-
     if (isset($instances[$name])) {
+      return $instances[$name];
+    }
+    else {
+      $instances[$name] = provision_environment_factory($name, $root_object);
+      $instances[$name]->init();
       return $instances[$name];
     }
   }
@@ -33,8 +34,10 @@ function & d($name = '@self', $object = null, $root_object = FALSE) {
 /**
  * Create a new environment object and cache it in the d() static cache function.
  */
-function provision_environment_factory($name, $options, $root_object = FALSE) {
+function provision_environment_factory($name,  $root_object = FALSE) {
   $classes = array('provisionServer', 'provisionPlatform', 'provisionSite');
+
+  $options = drush_sitealias_get_record($name);
 
   if (provisionServer::evaluate($options)) {
     $classname = array_shift($classes);
@@ -46,10 +49,7 @@ function provision_environment_factory($name, $options, $root_object = FALSE) {
     }
   }
 
-  d($name,  new $classname($name, $options), $root_object);
-  d($name)->init();
-  d($name)->clean();
-  return d($name);
+  return new $classname($name);
 }
 
 
@@ -59,19 +59,37 @@ function provision_environment_factory($name, $options, $root_object = FALSE) {
  * Contains magic getter/setter functions
  */
 class provisionEnvironment {
-  protected $options = array();
-  protected $properties = array();
-  protected $map = array();
   protected $name = null;
+  protected $properties = array();
+
   protected $type = null;
+  protected $oid_map = array();
+
+  protected $map = array();
 
   /**
    * Retrieve value from $properties array if property does not exist in class proper.
+   *
+   * TODO: consider returning a reference to the value, so we can do things like:
+   *       `$this->options['option'] = 'value'` and it will correctly set it in the
+   *       drush context cache.
    */
   function __get($name) {
-    if (array_key_exists($name, $this->properties)) {
-      return $this->properties[$name];
+    if ($name == 'options') {
+      return drush_sitealias_get_record($this->name);
     }
+    if (array_key_exists($name, $this->properties)) {
+      if (isset($oid_map[$name])) {
+        return d($this->properties[$name]);
+      }
+      else {
+        return $this->properties[$name];
+      }
+    }
+  }
+
+  function is_oid($name) {
+    $this->oid_map[$name] = TRUE;
   }
 
   /**
@@ -116,9 +134,8 @@ class provisionEnvironment {
   /**
    * Constructor for the environment.
    */
-  function __construct($name, $options) {
+  function __construct($name) {
     $this->name = $name;
-    $this->options = $options;
     unset($this->options['packages']);
   }
 
@@ -236,6 +253,9 @@ class provisionPlatform extends provisionServer {
     $this->type = 'platform';
     $this->setProperty('root', $_SERVER['PWD']);
 
+    $this->setProperty('web_server', $this->name);
+    $this->is_oid('web_server');
+
     // publish path can really be removed ...
     $this->setProperty('publish_path', $this->root);
 
@@ -259,6 +279,10 @@ class provisionSite extends provisionPlatform {
     $this->setProperty('language', 'en');
     $this->setProperty('aliases', array());
     $this->setProperty('site_port', 80);
+
+    $this->setProperty('db_server', $this->name);
+    $this->is_oid('db_server');
+
 
     $this->setProperty('client_email');
 

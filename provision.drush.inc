@@ -60,10 +60,8 @@ include_once('provision.inc');
  * @see provision_load_critical()
  */
 function provision_drush_init() {
-  $name = drush_get_option('name', '@self', 'alias');
-  provision_environment_factory($name, drush_get_merged_options(), true);
+  print_r( d( drush_get_option('name', '@self', 'alias'), TRUE) );
 
-  print_r(d($name));
   $load = sys_getloadavg();
   if (provision_load_critical($load)) {
     drush_set_error('PROVISION_OVERLOAD', dt("load on system too heavy (@load), aborting", array('@load' => join(" ", $load))));
