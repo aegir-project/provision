@@ -22,7 +22,7 @@ function & d($name = '@self', $root_object = FALSE) {
       return $instances[$name];
     }
     else {
-      $instances[$name] = provision_environment_factory($name, $root_object);
+      $instances[$name] = provision_environment_factory($name);
       $instances[$name]->init();
       return $instances[$name];
     }
@@ -34,7 +34,7 @@ function & d($name = '@self', $root_object = FALSE) {
 /**
  * Create a new environment object and cache it in the d() static cache function.
  */
-function provision_environment_factory($name,  $root_object = FALSE) {
+function provision_environment_factory($name) {
   $classes = array('provisionServer', 'provisionPlatform', 'provisionSite');
 
   $options = drush_sitealias_get_record($name);
@@ -79,7 +79,7 @@ class provisionEnvironment {
       return drush_sitealias_get_record($this->name);
     }
     if (array_key_exists($name, $this->properties)) {
-      if (isset($oid_map[$name])) {
+      if (isset($this->oid_map[$name]) && !empty($this->properties[$name])) {
         return d($this->properties[$name]);
       }
       else {
@@ -136,7 +136,8 @@ class provisionEnvironment {
    */
   function __construct($name) {
     $this->name = $name;
-    unset($this->options['packages']);
+    $this->setProperty('parent', null);
+    $this->is_oid('parent');
   }
 
   /**
@@ -280,7 +281,7 @@ class provisionSite extends provisionPlatform {
     $this->setProperty('aliases', array());
     $this->setProperty('site_port', 80);
 
-    $this->setProperty('db_server', $this->name);
+    $this->setProperty('db_server', $this->parent->parent->name);
     $this->is_oid('db_server');
 
 
