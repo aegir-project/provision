@@ -216,9 +216,9 @@ the official release.). You can modify which version to install by editing the
 AEGIR_VERSION variable in the script.
 
 The install script is shipped with other default settings that you will likely
-need to change (such as the URL of the Aegir site) prior to running it.
+need to change, especially the value of AEGIR_DOMAIN to match the URL of your site.
 
-You can change which release to install or other parameters such as these
+You can also change which release to install or other parameters such as these
 through options passed to the script. Run "sh install.sh.txt -h" for more
 information on the available options.
 
