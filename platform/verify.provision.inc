@@ -10,7 +10,7 @@ function drush_provision_drupal_provision_verify_validate($url = null) {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
     provision_prepare_environment();
 
-      _provision_drupal_create_settings_file($url);
+      _provision_drupal_create_settings_file();
      drush_errors_on();
      drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   }
@@ -49,7 +49,7 @@ function drush_provision_drupal_provision_verify($url = null) {
     _provision_drupal_create_directories($url);
     _provision_drupal_maintain_aliases($url);
     // Requires at least the database settings to complete.
-   _provision_drupal_create_settings_file($url);
+   _provision_drupal_create_settings_file();
   }
 }
 

@@ -14,6 +14,6 @@ function drush_db_provision_delete_validate($url = null) {
  */
 function drush_db_provision_delete($url = NULL) {
   if (PROVISION_CONTEXT_SITE) {
-    provision_service('db')->destroy_site_db($url);
+    provision_service('db')->destroy_site_database($url);
   }
 }

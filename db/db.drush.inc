@@ -212,7 +212,7 @@ class provisionService_db extends provisionService {
 
   // todo - SORT THIS SHIT OUT!
   function dump_site_database($url) {
-    return $this->dump_database($url);
+    return $this->generate_dump($url);
   }
 
 

@@ -63,7 +63,7 @@ function drush_provision_drupal_provision_restore($url) {
     ->succeed('Swapping out the @path1 and @path2 directories was successful.')
     ->fail('Swapping the @path1 and @path2 directories has failed.', 'DRUSH_PERM_ERROR');
   // make sure it has the latest site data available
-  _provision_drupal_create_settings_file($url);
+  _provision_drupal_create_settings_file();
   provision_save_site_data($url);
 }
 
@@ -79,7 +79,7 @@ function drush_provision_drupal_post_provision_restore($url) {
   _provision_recursive_delete(drush_get_option('sites_path') ."/$url.restore");
   // This is the actual drupal provisioning requirements. 
   _provision_drupal_create_directories($url);
-  _provision_drupal_create_settings_file($url);
+  _provision_drupal_create_settings_file();
 }
 
 

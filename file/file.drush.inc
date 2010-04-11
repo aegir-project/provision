@@ -380,6 +380,29 @@ class provisionService_file extends provisionService {
   }
 
   /**
+   * Write $data to $path.
+   *
+   * Sets @path token for ->succeed and ->fail.
+   *
+   * @param $path
+   *   The path you want to perform this operation on.
+   * @param $data
+   *   The data to write.
+   * @param $flags
+   *   The file_put_contents() flags to use.
+   *
+   * @see file_put_contents()
+   */
+  function file_put_contents($path, $data, $flags) {
+    $this->_clear_state();
+
+    $this->tokens = array('@path' => $path);
+    $this->last_status = file_put_contents($path, $data, $flags) !== FALSE;
+
+    return $this;
+  }
+
+  /**
    * Walk the given tree recursively (depth first), calling a function on each file
    *
    * $func is not checked for existence and called directly with $path and $arg

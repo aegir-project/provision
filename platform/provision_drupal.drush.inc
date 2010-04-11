@@ -89,7 +89,27 @@ function provision_drupal_drush_exit($url = NULL) {
     else {
       // Generate a drushrc.php for the platform unless it's being deleted
       if (!preg_match("/^provision-delete/", $command[0])) {
-        _provision_generate_config();
+        $exists = provision_service('file')->exists(drush_get_option('docroot_path') . '/drushrc.php')
+          ->succeed('Found existing drushrc.php file')
+          ->fail('Generating drushrc.php file')
+          ->status();
+        if ($exists) {
+          provision_service('file')->chmod(drush_get_option('docroot_path') . '/drushrc.php', 0600)
+            ->succeed('Changed permissions of drushrc.php to @perm')
+            ->fail('Could not change permissions of drushrc.php to @perm');
+        }
+
+        drush_set_option('context-path', drush_get_option('context-path', null, 'drupal'));
+        drush_unset_option('context-path', 'drupal');
+
+        drush_set_option('config-file', drush_get_option('config-file', null, 'drupal'));
+        drush_unset_option('config-file', 'drupal');
+
+        drush_save_config('drupal');
+
+        provision_service('file')->chmod(drush_get_option('docroot_path') . '/drushrc.php', 0400)
+          ->succeed('Changed permissions of drushrc.php to @perm')
+          ->fail('Could not change permissions of drushrc.php to @perm');
       }
     }
   }
@@ -172,29 +192,15 @@ function _provision_drupal_site_installed($url) {
  *   A reference to the associated array containing the data for the site. This needs to be a reference, 
  *   because the modules might provide additional information about the site.
  */
-function _provision_drupal_create_settings_file($url = NULL) {
-  if (provision_service('file')->exists('sites/' . $url . '/settings.php')->status()) {
-    provision_service('file')->chmod('sites/' . $url . '/settings.php', 0640)
-      ->succeed('Changed permissions of settings.php to @perm')
-      ->fail('Could not change permissions of settings.php to @perm');
-  }
-
+function _provision_drupal_create_settings_file() {
   $config = new provisionConfig_drupal_settings(drush_get_merged_options());
   $config->write();
-
-  # Change the permissions of the file
-  provision_service('file')->chmod('sites/' . $url . '/settings.php', 0440)
-    ->succeed('Changed permissions of settings.php to @perm')
-    ->fail('Could not change permissions of settings.php to @perm');
-
-  provision_service('file')->chgrp('sites/' . $url . '/settings.php', drush_get_option('web_group'))
-    ->succeed('Change group ownership of settings.php to @gid')
-    ->fail('Could not change group ownership of settings.php to @gid');
 }
 
 class provisionConfig_drupal_settings extends provisionConfig {
   public $template = 'provision_drupal_settings.tpl.php';
   public $description = 'Drupal settings.php file';
+  protected $mode = 0440;
 
   function filename() {
     return $this->data['sites_path'] . '/' . $this->data['site_url'] . '/settings.php';
@@ -207,6 +213,8 @@ class provisionConfig_drupal_settings extends provisionConfig {
 
     $this->data['extra_config'] = "# Extra configuration from modules:\n";
     $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_drupal_config', $this->data['site_url'], $this->data));
+
+    $this->group = drush_get_option('web_group');
   }
 }
 
