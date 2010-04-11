@@ -136,8 +136,11 @@ class provisionEnvironment {
    */
   function __construct($name) {
     $this->name = $name;
-    $this->setProperty('parent', null);
-    $this->is_oid('parent');
+
+    if ($this->options['parent']) {
+      $this->parent = $this->options['parent'];
+      d($this->options['parent']);
+    }
   }
 
   /**
