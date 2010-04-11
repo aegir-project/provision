@@ -136,11 +136,6 @@ class provisionEnvironment {
    */
   function __construct($name) {
     $this->name = $name;
-
-    if ($this->options['parent']) {
-      $this->parent = $this->options['parent'];
-      d($this->options['parent']);
-    }
   }
 
   /**
@@ -257,9 +252,6 @@ class provisionPlatform extends provisionServer {
     $this->type = 'platform';
     $this->setProperty('root', $_SERVER['PWD']);
 
-    $this->setProperty('web_server', $this->name);
-    $this->is_oid('web_server');
-
     // publish path can really be removed ...
     $this->setProperty('publish_path', $this->root);
 
@@ -283,9 +275,6 @@ class provisionSite extends provisionPlatform {
     $this->setProperty('language', 'en');
     $this->setProperty('aliases', array());
     $this->setProperty('site_port', 80);
-
-    $this->setProperty('db_server', $this->parent->parent->name);
-    $this->is_oid('db_server');
 
 
     $this->setProperty('client_email');
