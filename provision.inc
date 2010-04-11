@@ -40,52 +40,31 @@ function provision_save_site_data() {
   drush_unset_option('config-file', 'site');
 
   drush_save_config($context);
+  drush_set_option('config-file', _drush_config_file('site'));
 
   if (!drush_get_error()) {
     $config = new provisionConfig_drushrc(drush_get_merged_options());
     $config->write();
   }
-
-  provision_service('file')->chmod(_drush_config_file($context), 0600)
-    ->succeed('Changed permissions of drushrc.php to @perm')
-    ->fail('Could not change permissions of drushrc.php to @perm');
 }
 
 class provisionConfig_drushrc extends provisionConfig {
   public $template = 'provision_drushrc.tpl.php';
   public $description = 'Drush configuration file';
+  protected $append = TRUE;
+  protected $mode = 0600;
 
   function filename() {
     return $this->data['config-file'];
   }
 
   function process() {
-    $this->mode = 'a+';
   }
 }
 
 /**
  * @} End of "defgroup sitedata".
  */
-
-
-/**
- * Save the options for the platform to the drushrc.php in the root of
- * the platform. 
- *
- * @return 
- *   Boolean. The value returned by drush_save_config().
- */
-function provision_save_platform_data() {
-  drush_set_option('context-path', drush_get_option('context-path', null, 'drupal'));
-  drush_unset_option('context-path', 'drupal');
-
-  drush_set_option('config-file', drush_get_option('config-file', null, 'drupal'));
-  drush_unset_option('config-file', 'drupal');
-
-
-  return drush_save_config('drupal');
-}
 
 /**
  * Remove files or directories, recursively

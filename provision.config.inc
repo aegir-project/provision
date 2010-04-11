@@ -10,7 +10,9 @@ class provisionConfig {
   public $template = null;
   public $data = array();
   public $description = null;
-  protected $mode = 'w';
+  protected $append = FALSE;
+  protected $mode = NULL;
+  protected $group = NULL;
 
   function __construct($data = array()) {
     if (is_null($this->template)) {
@@ -57,7 +59,6 @@ class provisionConfig {
     return $contents;                // Return the contents
   }
 
-
   function write() {
     $filename = $this->filename();
     if ($filename && is_writeable(dirname($filename))) {
@@ -65,13 +66,26 @@ class provisionConfig {
       $this->process();
 
       if ($template = $this->load_template()) {
-        #todo - convert to file_service
-        $file = fopen($filename, $this->mode);
-        $text = $this->render_template($template, $this->data);
-        fwrite($file, $text);
-        fclose($file);
-        if ($this->description) {
-          drush_log("Generated config : " . $this->description, 'success');
+        // Make sure we can write to the file
+        if (!is_null($this->mode) && !($this->mode & 0200) && provision_service('file')->exists($filename)->status()) {
+          provision_service('file')->chmod($filename, $this->mode | 0200)
+            ->succeed('Changed permissions of @path to @perm')
+            ->fail('Could not change permissions of @path to @perm');
+        }
+
+        provision_service('file')->file_put_contents($filename, $this->render_template($template, $this->data), $this->append ? FILE_APPEND : 0)
+          ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description), 'success');
+
+        // Change the permissions of the file if needed
+        if (!is_null($this->mode)) {
+          provision_service('file')->chmod($filename, $this->mode)
+            ->succeed('Changed permissions of @path to @perm')
+            ->fail('Could not change permissions of @path to @perm');
+        }
+        if (!is_null($this->group)) {
+          provision_service('file')->chgrp($filename, $this->group)
+            ->succeed('Change group ownership of @path to @gid')
+            ->fail('Could not change group ownership of @path to @gid');
         }
       }
     }

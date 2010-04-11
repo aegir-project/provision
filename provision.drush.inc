@@ -200,29 +200,6 @@ function drush_provision_hostmaster_make($platform) {
   drush_backend_invoke('make', array(dirname(__FILE__) . '/aegir.make', $platform));
 }
 
-/**
- * Generate a provision.settings.php file to configure provision
- */
-function _provision_generate_config() {
-  $exists = provision_service('file')->exists(drush_get_option('docroot_path') . '/drushrc.php')->status();
-  if ($exists) {
-    drush_log(dt("Found existing drushrc.php file"));
-    provision_service('file')->chmod(drush_get_option('docroot_path') . '/drushrc.php', 0600)
-      ->succeed('Changed permissions of drushrc.php to @perm')
-      ->fail('Could not change permissions of drushrc.php to @perm');
-  }
-  else {
-    drush_log(dt("Generating drushrc.php file"));
-  }
-  provision_save_platform_data();
-  provision_service('file')->chmod(drush_get_option('docroot_path') . '/drushrc.php', 0400)
-    ->succeed('Changed permissions of drushrc.php to @perm')
-    ->fail('Could not change permissions of drushrc.php to @perm');
-  return TRUE;
-}
-
-
-
 function _provision_default_restart_cmd() {
   $command = '/usr/sbin/apachectl'; # a proper default for most of the world
   foreach (explode(':', $_SERVER['PATH']) as $path) {
