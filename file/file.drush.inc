@@ -141,7 +141,6 @@ class provisionService_file extends provisionService {
     $func = ($recursive) ? array($this, '_chmod_recursive') : 'chmod';
     if (!@call_user_func($func, $path, $perms)) {
       $this->tokens['@reason'] = dt('chmod to @perm failed on @path', array('@perm' => sprintf('%o', $perms), '@path' => $path));
-      return false;
     }
     clearstatcache(); // this needs to be called, otherwise we get the old info 
     $this->last_status = substr(sprintf('%o', fileperms($path)), -4) == sprintf('%04o', $perms);
