@@ -42,6 +42,7 @@ class provisionService_http_apache extends provisionService_http {
     if (PROVISION_CONTEXT_PLATFORM) {
       provision_service('file')->create_dir(drush_get_option('vhost_path'), dt("Virtual host configuration"), 0700);
       provision_service('file')->create_dir(drush_get_option('platform_conf_path'), dt("Platforms configuration"), 0700);
+      provision_service('file')->create_dir(drush_get_option('config_path') . '/apache.d' , dt("Apache configuration"), 0700);
       
       if (drush_get_option('platform', null)) {
         $this->create_platform_config();
