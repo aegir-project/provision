@@ -28,10 +28,12 @@ function provision_ssl_provision_apache_vhost_config($url, $options) {
       $config = new provisionConfig_ssl_vhost(drush_get_merged_options());
       $config->write();
     }
-    return array("php_value session.cookie_secure 1", "SSLEngine On");
-  } else {
-    return NULL;
+    $newoptions = $options;
+    $newoptions['site_port'] = 443;
+    $newoptions['extra_config'] = "php_value session.cookie_secure 1\nSSLEngine On\n";
+    provision_write_config(drush_get_option('vhost_path') . '/' . $url .  '_443', _provision_apache_default_template(), $newoptions);
   }
+  return NULL;
 }
 
 class provisionConfig_ssl_vhost extends provisionConfig {
