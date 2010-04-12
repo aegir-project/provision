@@ -34,8 +34,8 @@ AEGIR_DOMAIN=aegir.example.com
 AEGIR_VERSION=HEAD
 AEGIR_HOME=$HOME
 WEB_GROUP=www-data
-DRUSH_VERSION=All-versions-3.0-beta1
-DRUSH_MAKE_VERSION=6.x-2.0-beta6
+# doesn't exist yet, but we need drush_prompt in HEAD
+DRUSH_VERSION=All-versions-3.0-rc3
 
 # when adding a variable here, add it to the display below
 
@@ -190,6 +190,10 @@ else
   fi
 fi
 
+<<<<<<< HEAD
+# this will prompt the user for the database password if not provided through stdin in JSON
+$DRUSH provision-server --parent_path=$AEGIR_HOME --web_group=$WEB_GROUP --drush_path=$DRUSH
+=======
 # this should be handled by provision server verification, as it is a
 # duplicate of web_server/provision_apache_server.tpl.php
 # http://drupal.org/node/586000
@@ -216,6 +220,7 @@ Include $AEGIR_HOME/config/platform.d/
 Include $AEGIR_HOME/config/apache.d/
 EOF
 fi
+>>>>>>> master
 
 msg "Aegir provision backend installed successfully"
 
