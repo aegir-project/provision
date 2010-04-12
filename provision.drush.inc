@@ -300,11 +300,13 @@ function _provision_default_web_group() {
  */
 function provision_count_cpus() {
   $ncpus = FALSE;
-  # this should work on Linux with a /proc filesystem
-  $cpuinfo = file_get_contents("/proc/cpuinfo");
-  if ($cpuinfo !== FALSE) {
-    if (preg_match_all("/^processor.*:.*[0-9]+$/m", $cpuinfo, $matches)) {
-      $ncpus = count(array_pop($matches));
+  if (file_exists("/proc/cpuinfo")) {
+    # this should work on Linux with a /proc filesystem
+    $cpuinfo = file_get_contents("/proc/cpuinfo");
+    if ($cpuinfo !== FALSE) {
+      if (preg_match_all("/^processor.*:.*[0-9]+$/m", $cpuinfo, $matches)) {
+        $ncpus = count(array_pop($matches));
+      }
     }
   }
   return $ncpus;

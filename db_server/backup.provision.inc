@@ -21,7 +21,7 @@ function drush_provision_mysql_pre_provision_backup($url = NULL) {
 host=%s
 user=%s
 password=%s
-', drush_get_option('db_host'), drush_get_option('db_user'), drush_get_option('db_passwd'));
+', drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
 
   $descriptorspec = array(
    // 0 => array("pipe", "r"),  // this would be stdin, but we don't need to input into mysqldump

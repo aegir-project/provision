@@ -35,8 +35,7 @@ AEGIR_VERSION=HEAD
 AEGIR_HOME=$HOME
 WEB_GROUP=www-data
 # doesn't exist yet, but we need drush_prompt in HEAD
-DRUSH_VERSION=6.x-3.0-beta2
-DRUSH_MAKE_VERSION=6.x-2.0-beta6
+DRUSH_VERSION=All-versions-3.0-rc3
 
 # when adding a variable here, add it to the display below
 
@@ -140,6 +139,7 @@ fi
 msg "Creating basic directory structure"
 mkdir -p $AEGIR_HOME/config/vhost.d
 mkdir -p $AEGIR_HOME/config/platform.d
+mkdir -p $AEGIR_HOME/config/apache.d
 mkdir -p $AEGIR_HOME/backups
 chmod 0711 $AEGIR_HOME/config
 chmod 0700 $AEGIR_HOME/backups
@@ -175,7 +175,7 @@ else
   $DRUSH dl drush_make-$DRUSH_MAKE_VERSION --destination=$AEGIR_HOME/.drush
 fi
 
-if $DRUSH help | grep "^ provision install" > /dev/null ; then
+if $DRUSH help | grep "^ provision-install" > /dev/null ; then
   msg "Provision already seems to be installed"
 else
   msg "Installing provision backend in $AEGIR_HOME/.drush"
@@ -190,8 +190,37 @@ else
   fi
 fi
 
+<<<<<<< HEAD
 # this will prompt the user for the database password if not provided through stdin in JSON
 $DRUSH provision-server --parent_path=$AEGIR_HOME --web_group=$WEB_GROUP --drush_path=$DRUSH
+=======
+# this should be handled by provision server verification, as it is a
+# duplicate of web_server/provision_apache_server.tpl.php
+# http://drupal.org/node/586000
+if [ ! -f $AEGIR_HOME/config/apache.conf ]; then
+  cat > $AEGIR_HOME/config/apache.conf <<EOF
+NameVirtualHost *:80  
+<IfModule ssl_module>
+  NameVirtualHost *:443  
+</IfModule>
+
+<IfModule !env_module>
+  LoadModule env_module modules/mod_env.so
+</IfModule>
+
+<IfModule !rewrite_module>
+  LoadModule rewrite_module modules/mod_rewrite.so
+</IfModule>
+
+# virtual hosts
+Include $AEGIR_HOME/config/vhost.d/
+# platforms
+Include $AEGIR_HOME/config/platform.d/
+# other configuration, not touched by aegir
+Include $AEGIR_HOME/config/apache.d/
+EOF
+fi
+>>>>>>> master
 
 msg "Aegir provision backend installed successfully"
 

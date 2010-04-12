@@ -70,3 +70,14 @@ function drush_provision_drupal_provision_backup($url) {
     drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not back up sites directory for drupal"));
   }
 }
+
+/**
+ * Remove the backup file if something went wrong
+ */
+function drush_provision_drupal_provision_backup_rollback() {
+  $backup_file = drush_get_option('backup_file');
+  if (file_exists($backup_file)) {
+    provision_path('unlink', $backup_file, TRUE, 
+          dt("Removed stale backup file $backup_file"), dt("Failed deleting backup file $backup_file"));
+  }
+}

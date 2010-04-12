@@ -277,15 +277,7 @@ function _provision_mysql_suggest_db_name($url) {
  *
  */
 function _provision_mysql_grant_host($db_host, $web_ip, $web_host) {
-  // The database hostname is localhost, not defined or on the same ip/host as the webserver.
-  if (in_array($db_host, array('127.0.0.1', 'localhost', '', $web_ip, $web_host))) {
-    $grant = 'localhost';
-  }
-  // if we have the web ip, use that first.
-  elseif ($web_ip) {
-    $grant = $web_ip;
-  } else {
-    $grant = $web_host;
-  }
-  return $grant;
+  $result = provision_db_result(provision_db_query("select current_user()"));
+  preg_match('/^.*@(.*)$/', $result, $matches);
+  return $matches[1];
 }

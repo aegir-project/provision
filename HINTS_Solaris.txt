@@ -58,7 +58,7 @@ Shell commands::
  groupadd aegir
  useradd -g aegir -G webservd -d /var/aegir -s /bin/bash -c "Aegir sandbox" aegir
  chown aegir:aegir /var/aegir
- echo "Include /var/aegir/config/vhost.d/" >> /etc/apache2/httpd.conf
+ echo "Include /var/aegir/config/apache.conf" >> /etc/apache2/httpd.conf
 
 MySQL commands::
  # Replace 'aegir_password' with the chosen password for 'aegir' mysql account
