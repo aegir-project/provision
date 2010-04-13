@@ -95,3 +95,51 @@ class provisionConfig {
     return provision_service('file')->unlink($this->filename())->status();
   }
 }
+
+/**
+ * Specialized class to handle the creation of drushrc.php files.
+ *
+ * This is based on the drush_save_config code, but has been abstracted
+ * for our purposes.
+ */ 
+class provisionConfig_drushrc extends provisionConfig {
+  public $template = 'provision_drushrc.tpl.php';
+  public $description = 'Drush configuration file';
+  protected $mode = 0400;
+  protected $context_name = 'drush';
+
+  function filename() {
+    return _drush_config_file($this->context_name);
+  }
+
+  function __construct($data = array()) {
+    parent::__construct($data);
+
+    // we fetch the context to pass into the template based on the context name
+    $this->data = array_merge(drush_get_context($this->context_name), $this->data);
+  }
+
+  function process() {
+    unset($this->data['context-path']);
+    unset($this->data['config-file']);
+    $this->data['option_keys'] = array_keys($this->data);
+  }
+}
+
+/**
+ * Class for writing $platform/drushrc.php files.
+ */
+class provisionConfig_drushrc_platform extends provisionConfig_drushrc {
+  protected $context_name = 'drupal';
+  public $description = 'Platform Drush configuration file';
+}
+
+/**
+ * Class for writing $platform/sites/$url/drushrc.php files.
+ */
+class provisionConfig_drushrc_site extends provisionConfig_drushrc {
+  protected $context_name = 'site';
+  public $template = 'provision_drushrc_site.tpl.php';
+  public $description = 'Site Drush configuration file';
+}
+

@@ -88,27 +88,7 @@ function provision_drupal_drush_exit($url = NULL) {
     else {
       // Generate a drushrc.php for the platform unless it's being deleted
       if (!preg_match("/^provision-delete/", $command[0])) {
-        $exists = provision_service('file')->exists(drush_get_option('docroot_path') . '/drushrc.php')
-          ->succeed('Found existing drushrc.php file')
-          ->fail('Generating drushrc.php file')
-          ->status();
-        if ($exists) {
-          provision_service('file')->chmod(drush_get_option('docroot_path') . '/drushrc.php', 0600)
-            ->succeed('Changed permissions of drushrc.php to @perm')
-            ->fail('Could not change permissions of drushrc.php to @perm');
-        }
-
-        drush_set_option('context-path', drush_get_option('context-path', null, 'drupal'));
-        drush_unset_option('context-path', 'drupal');
-
-        drush_set_option('config-file', drush_get_option('config-file', null, 'drupal'));
-        drush_unset_option('config-file', 'drupal');
-
-        drush_save_config('drupal');
-
-        provision_service('file')->chmod(drush_get_option('docroot_path') . '/drushrc.php', 0400)
-          ->succeed('Changed permissions of drushrc.php to @perm')
-          ->fail('Could not change permissions of drushrc.php to @perm');
+        provision_save_platform_data();
       }
     }
   }

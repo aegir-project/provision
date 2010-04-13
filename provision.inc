@@ -30,33 +30,20 @@ drush_errors_on();
  * Save modified options to the drushrc.php file
  */
 function provision_save_site_data() {
-  $context = 'site';
-  drush_set_option('context-path', drush_get_option('context-path', null, 'site'));
-  drush_unset_option('context-path', 'site');
-
-  drush_set_option('config-file', drush_get_option('config-file', null, 'site'));
-  drush_unset_option('config-file', 'site');
-
-  drush_save_config($context);
-  drush_set_option('config-file', _drush_config_file('site'));
-
   if (!drush_get_error()) {
-    $config = new provisionConfig_drushrc(drush_get_merged_options());
+    $config = new provisionConfig_drushrc_site();
     $config->write();
   }
 }
 
-class provisionConfig_drushrc extends provisionConfig {
-  public $template = 'provision_drushrc.tpl.php';
-  public $description = 'Drush configuration file';
-  protected $append = TRUE;
-  protected $mode = 0600;
 
-  function filename() {
-    return $this->data['config-file'];
-  }
-
-  function process() {
+/**
+ * Save modified options to the drushrc.php file
+ */
+function provision_save_platform_data() {
+  if (!drush_get_error()) {
+    $config = new provisionConfig_drushrc_platform();
+    $config->write();
   }
 }
 
