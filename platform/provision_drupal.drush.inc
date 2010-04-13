@@ -54,7 +54,6 @@ function provision_drupal_drush_init($url = NULL) {
 
     if ($url) {
       drush_set_option('uri' , 'http://' . $url);
-      provision_load_site_data($url);
       drush_set_default('site_url', $url);
       drush_set_default('profile', 'default');
       drush_set_default('language', 'en');
@@ -177,7 +176,6 @@ function _provision_drupal_valid_not_installed_site() {
  */
 function _provision_drupal_site_installed($url) {
   if (_provision_drupal_site_exists($url)) {
-    provision_load_site_data($url);
     return drush_get_option('installed');
   }
   return FALSE;

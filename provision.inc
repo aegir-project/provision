@@ -25,56 +25,6 @@ drush_errors_on();
  * values, that allow sites to be more easily moved between different provisioned platforms.
  */
 
-/**
- * Returns the aggregated site data from both the pre-existing site.php file, and the options passed to Drush
- *
- * This function merges the data from the command line parser, and the information already saved by previous invokations
- * of the api. This provides a single view of all data relating to the site.
- * This function also provides sensible defaults for some of the settings.
- *
- * @param url
- *   The url of the site being invoked.
- * @return
- *   An associated array containing the relevant settings for the site.
- */
-function provision_get_site_data($url) {
-  if ($old_data = provision_load_site_data($url)) {
-    //Merge previously saved data with the new data. This way, new parameters overwrite old ones.
-    $site_data = array_merge($old_data, $site_data);    
-  }
-  
-  if ($site_data['aliases'] && !is_array($site_data['aliases'])) {
-    $site_data['aliases'] = explode(",", $site_data['aliases']);
-  }  
-  return $site_data;
-}
-
-/**
- * Load site data stored in the site.php file for the specified site.
- *
- * @param url
- *   The url of the site being invoked
- * @return
- *   If the file was found, an associative array of the data that was loaded. Otherwise returns FALSE.
- */
-function provision_load_site_data($url) {
-  //Load the configuration data.
-
-  //@TODO remove this, it is a temporary measure until all site.php files are placed by drushrc.php files
-
-  $conf_file = "sites/$url/site.php";
-  if (file_exists($conf_file)) {
-    provision_service('file')->chmod($conf_file, 0400);
-    require($conf_file);
-
-    // The provision 0.1 config data might contain older data,
-    // so any data in the new drushrc.php file would be newer.
-    $site_context = drush_get_context('site');
-    $site_context = array_merge($data, $site_context);
-    drush_set_context('site', $site_context);
-  }
-  return FALSE;
-}
 
 /**
  * Save modified options to the drushrc.php file
