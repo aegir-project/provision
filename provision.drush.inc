@@ -224,6 +224,7 @@ function _provision_default_web_group() {
     'httpd',
     'www-data', 
     'apache',
+    'webservd',
     'nogroup',
     'nobody',
     $info['name']);
