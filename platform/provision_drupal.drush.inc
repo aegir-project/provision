@@ -58,26 +58,32 @@ function provision_drupal_drush_init($url = NULL) {
 }
 
 function _provision_context_init($url) {
-    $context = 'server';
-    if (drush_bootstrap_validate(DRUSH_BOOTSTRAP_DRUPAL_ROOT)) { 
-      // i don't think i should be bootstrapping here yet ... but i have no choice yet.
-      drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
-      $context = 'platform';
-      if ($url) {
-        $context = 'site';
-        drush_set_option('uri' , 'http://' . $url);
-        drush_set_default('site_url', $url);
-        drush_set_default('profile', 'default');
-        drush_set_default('language', 'en');
-        drush_set_default('aliases', array());
-      }
+  static $is_run = false;
 
+  if ($is_run) {
+    return TRUE;
+  }
+
+  $context = 'server';
+  if (drush_bootstrap_validate(DRUSH_BOOTSTRAP_DRUPAL_ROOT)) { 
+    // i don't think i should be bootstrapping here yet ... but i have no choice yet.
+    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
+    $context = 'platform';
+    if ($url) {
+      $context = 'site';
+      drush_set_option('uri' , 'http://' . $url);
+      drush_set_default('site_url', $url);
+      drush_set_default('profile', 'default');
+      drush_set_default('language', 'en');
+      drush_set_default('aliases', array());
     }
 
-    define('PROVISION_CONTEXT_SERVER', $context == 'server');
-    define('PROVISION_CONTEXT_PLATFORM', $context == 'platform');
-    define('PROVISION_CONTEXT_SITE', $context == 'site');
+  }
 
+  define('PROVISION_CONTEXT_SERVER', $context == 'server');
+  define('PROVISION_CONTEXT_PLATFORM', $context == 'platform');
+  define('PROVISION_CONTEXT_SITE', $context == 'site');
+  $is_run = TRUE;
 
 }
 
