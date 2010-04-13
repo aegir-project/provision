@@ -315,4 +315,3 @@ function provision_load_critical($load = null, $threshold = null) {
   return ($load[0] > $threshold);
 }
 
-

@@ -114,7 +114,10 @@ class provisionConfig_drushrc extends provisionConfig {
 
   function __construct($data = array()) {
     parent::__construct($data);
+    $this->load_data();
 
+  }
+  function load_data() {
     // we fetch the context to pass into the template based on the context name
     $this->data = array_merge(drush_get_context($this->context_name), $this->data);
   }
@@ -124,6 +127,31 @@ class provisionConfig_drushrc extends provisionConfig {
     unset($this->data['config-file']);
     $this->data['option_keys'] = array_keys($this->data);
   }
+}
+
+// class to read and write an alias record
+class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
+  function __construct($aliasname, $data = array()) {
+    parent::construct($data);
+    $this->alias_name = $aliasname;
+  }
+
+  function load_data() {
+     // do something about alias_load_data
+  }
+
+  function filename() {
+    return drush_get_option('alias-path', drush_server_home() . '/.drush/aliases/') . trim($this->aliasname, '@'); 
+  }
+}
+
+
+/**
+ * Server level config for drushrc.php files.
+ */
+class provisionConfig_drushrc_server extends provisionconfig_drushrc {
+  protected $context_name = 'home.drush';
+  public $description = 'Server drush configuration';
 }
 
 /**
