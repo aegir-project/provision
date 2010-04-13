@@ -47,10 +47,11 @@ class provisionService_http_apache extends provisionService_http {
       if (drush_get_option('platform', null)) {
         $this->create_platform_config();
       }
-
+    }
+    elseif (PROVISION_CONTEXT_SERVER) {
       $this->create_server_config();
     }
-    else {
+    elseif (PROVISION_CONTEXT_SITE) {
       $this->create_site_config($url);
     }
 

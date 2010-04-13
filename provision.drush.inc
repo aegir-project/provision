@@ -115,7 +115,7 @@ function provision_drush_command() {
   $items['provision-verify'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to verify).')),    
     'description' => 'Verify that the provisioning framework is correctly installed.',
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, 
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH, 
   );
  
   $items['provision-restore'] = array(
