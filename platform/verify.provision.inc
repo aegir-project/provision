@@ -43,7 +43,7 @@ function drush_provision_drupal_provision_verify($url = null) {
     drush_set_option('packages', _scrub_object(provision_find_packages()), 'drupal');
     _provision_drupal_create_directories('all');
   }
-  else {
+  elseif (PROVISION_CONTEXT_SITE) {
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
       // This is the actual drupal provisioning requirements. 
     _provision_drupal_create_directories($url);

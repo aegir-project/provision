@@ -11,13 +11,14 @@
 
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
-function db_drush_init() {
+function db_drush_init($url) {
 
   include_once('mysql/mysql_service.inc');
 
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
   if (preg_match("/^provision-/", $command[0])) {
+    _provision_context_init($url);
     // TODO - remove this shit
     $master_db = drush_get_option('master_db');
 
@@ -37,6 +38,7 @@ function db_drush_init() {
       $pass = drush_prompt(dt("Database password"));
       system('stty echo');
       print "\n"; # add a cr since the user's didn't echo
+      drush_set_option('master_db', "$scheme://$user:$pass@$host", 'home.drush');
     }
 
     drush_set_default('master_db_user', $user);

@@ -50,19 +50,35 @@ function provision_drupal_drush_engine_drupal() {
 function provision_drupal_drush_init($url = NULL) {
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
-  if (preg_match("/^provision-/", $command[0])) {
 
-    if ($url) {
-      drush_set_option('uri' , 'http://' . $url);
-      drush_set_default('site_url', $url);
-      drush_set_default('profile', 'default');
-      drush_set_default('language', 'en');
-      drush_set_default('aliases', array());
+
+  if (preg_match("/^provision-/", $command[0])) {
+    _provision_context_init($url);
+  }
+}
+
+function _provision_context_init($url) {
+    $context = 'server';
+    if (drush_bootstrap_validate(DRUSH_BOOTSTRAP_DRUPAL_ROOT)) { 
+      // i don't think i should be bootstrapping here yet ... but i have no choice yet.
+      drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
+      $context = 'platform';
+      if ($url) {
+        $context = 'site';
+        drush_set_option('uri' , 'http://' . $url);
+        drush_set_default('site_url', $url);
+        drush_set_default('profile', 'default');
+        drush_set_default('language', 'en');
+        drush_set_default('aliases', array());
+      }
+
     }
 
-    define('PROVISION_CONTEXT_SITE', ($url) ? TRUE : FALSE);
-    define('PROVISION_CONTEXT_PLATFORM', !PROVISION_CONTEXT_SITE);
-  }
+    define('PROVISION_CONTEXT_SERVER', $context == 'server');
+    define('PROVISION_CONTEXT_PLATFORM', $context == 'platform');
+    define('PROVISION_CONTEXT_SITE', $context == 'site');
+
+
 }
 
 /**
@@ -85,11 +101,14 @@ function provision_drupal_drush_exit($url = NULL) {
         provision_save_site_data($url);
       }
     }
-    else {
+    elseif (PROVISION_CONTEXT_PLATFORM) {
       // Generate a drushrc.php for the platform unless it's being deleted
       if (!preg_match("/^provision-delete/", $command[0])) {
         provision_save_platform_data();
       }
+    }
+    elseif (PROVISION_CONTEXT_SERVER) {
+      provision_save_server_data();
     }
   }
 }
