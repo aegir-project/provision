@@ -24,7 +24,7 @@ function drush_provision_drupal_provision_verify_validate($url = null) {
  * implementation of provision_verify
  */
 function drush_provision_drupal_provision_verify($url = null) {
-  if (PROVISION_CONTEXT_PLATFORM) {
+  if (PROVISION_CONTEXT_SERVER) {
     provision_service('file')->create_dir(drush_get_option('config_path'), dt('Provision configuration'), 0711);
     provision_service('file')->create_dir(drush_get_option('config_path') . '/includes', dt('Provision PHP configuration'), 0711);
     if (!provision_service('file')->exists(drush_get_option('config_path') . '/includes/global.inc')->succeed('Global configuration file exists')->status()) {
@@ -34,6 +34,8 @@ function drush_provision_drupal_provision_verify($url = null) {
       $config->write();
     }
     provision_service('file')->create_dir(drush_get_option('backup_path'), dt('Backup'), 0700);
+  }
+  elseif (PROVISION_CONTEXT_PLATFORM) {
     provision_service('file')->writable(drush_get_option('sites_path'))
       ->succeed('Drupal sites directory @path is writable by the provisioning script')
       ->fail('Drupal sites directory @path is not writable by the provisioning script', 'PROVISION_SITES_DIR_NOT_WRITABLE');

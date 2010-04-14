@@ -11,7 +11,7 @@
 
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
-function db_drush_init($url) {
+function db_drush_init($url = null) {
 
   include_once('mysql/mysql_service.inc');
 
@@ -326,8 +326,7 @@ class provisionService_db_pdo extends provisionService_db {
   function __construct($creds) {
     parent::__construct($creds);
 
-    print_r($creds);
-    $this->dsn = sprintf("%s:dbname=%s;host=%s", $this->PDO_type, $this->creds['name'], $this->creds['host']);
+    $this->dsn = sprintf("%s:host=%s", $this->PDO_type,  $this->creds['host']);
 
   }
 
