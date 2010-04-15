@@ -193,7 +193,8 @@ wizard using the following command.
 
 SQL commands::
 
-  GRANT ALL PRIVILEGES ON *.* TO 'aegir_root'@'localhost' IDENTIFIED BY 'XXXXXXXX';
+  GRANT ALL PRIVILEGES ON *.* TO 'aegir_root'@'localhost' IDENTIFIED \
+  BY 'XXXXXXXX' WITH GRANT OPTION;
 
 Again, change 'XXXXXXXX' with a real password.
 
