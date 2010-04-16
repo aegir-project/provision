@@ -3,10 +3,9 @@
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
 function http_drush_init($url = null) {
- $command = drush_get_command();
+  $command = drush_get_command();
   $command = explode(" ", $command['command']);
- if (preg_match("/^provision-/", $command[0])) {
-
+  if (preg_match("/^provision-/", $command[0])) {
     _provision_context_init($url);
     include_once('apache/apache_service.inc');
     provision_service('http', new provisionService_http_apache());
