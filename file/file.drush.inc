@@ -163,7 +163,7 @@ class provisionService_file extends provisionService {
   function chown($path, $owner, $recursive = FALSE) {
     $this->_clear_state();
 
-    $this->tokens = array('@path' => $path, '@gid' => $gid);
+    $this->tokens = array('@path' => $path, '@uid' => $owner);
 
     $func = ($recursive) ? array($this, '_chown_recursive') : 'chown';
     if ($owner = provision_posix_username($owner)) {
