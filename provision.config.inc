@@ -150,7 +150,7 @@ class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
  * Server level config for drushrc.php files.
  */
 class provisionConfig_drushrc_server extends provisionconfig_drushrc {
-  protected $context_name = 'home.drush';
+  protected $context_name = 'user';
   public $description = 'Server drush configuration';
 }
 

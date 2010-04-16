@@ -17,13 +17,14 @@ function drush_http_post_provision_verify($url = null) {
     drush_unset_option('config_path', 'drupal');
   }
   elseif (PROVISION_CONTEXT_SERVER) {
-    drush_set_option('master_url', drush_get_option('master_url'), 'home.drush');
-    drush_set_option('web_host', drush_get_option('web_host', '127.0.0.1'), 'home.drush');
-    drush_set_option('web_ip', drush_get_option('web_ip', ''), 'home.drush');
-    drush_set_option('web_group', drush_get_option('web_group'), 'home.drush');
-    drush_set_option('script_user', drush_get_option('script_user'), 'home.drush');
-    drush_set_option('restart_cmd', drush_get_option('restart_cmd'), 'home.drush');
-    drush_set_option('backup_path', drush_get_option('backup_path'), 'home.drush');
-    drush_set_option('config_path', drush_get_option('config_path'), 'home.drush');
+    drush_log("saving settings in the server context");
+    drush_set_option('master_url', drush_get_option('master_url'), 'user');
+    drush_set_option('web_host', drush_get_option('web_host', '127.0.0.1'), 'user');
+    drush_set_option('web_ip', drush_get_option('web_ip', ''), 'user');
+    drush_set_option('web_group', drush_get_option('web_group'), 'user');
+    drush_set_option('script_user', drush_get_option('script_user'), 'user');
+    drush_set_option('restart_cmd', drush_get_option('restart_cmd'), 'user');
+    drush_set_option('backup_path', drush_get_option('backup_path'), 'user');
+    drush_set_option('config_path', drush_get_option('config_path'), 'user');
   }
 }

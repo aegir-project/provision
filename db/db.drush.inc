@@ -38,7 +38,7 @@ function db_drush_init($url = null) {
       $pass = drush_prompt(dt("Database password"));
       system('stty echo');
       print "\n"; # add a cr since the user's didn't echo
-      drush_set_option('master_db', "$scheme://$user:$pass@$host", 'home.drush');
+      drush_set_option('master_db', "$scheme://$user:$pass@$host", 'user');
     }
 
     drush_set_default('master_db_user', $user);

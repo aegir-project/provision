@@ -20,7 +20,7 @@ function drush_db_post_provision_verify() {
     drush_unset_option('master_db', 'drupal');
   }
   if (PROVISION_CONTEXT_SERVER) {
-    drush_set_option('master_db', drush_get_option('master_db'), 'home.drush');
+    drush_set_option('master_db', drush_get_option('master_db'), 'user');
   }
 }
 
