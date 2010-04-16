@@ -161,6 +161,10 @@ class provisionService_file extends provisionService {
    *   TRUE to descend into subdirectories.
    */
   function chown($path, $owner, $recursive = FALSE) {
+    // we do not attempt to chown symlinks
+    if (is_link($path)) {
+      return TRUE;
+    } 
     $this->_clear_state();
 
     $this->tokens = array('@path' => $path, '@uid' => $owner);
@@ -194,6 +198,10 @@ class provisionService_file extends provisionService {
    *   TRUE to descend into subdirectories.
    */
   function chgrp($path, $gid, $recursive = FALSE) {
+    // we do not attempt to chown symlinks
+    if (is_link($path)) {
+      return TRUE;
+    } 
     $this->_clear_state();
 
     $this->tokens = array('@path' => $path, '@gid' => $gid);
@@ -416,15 +424,17 @@ class provisionService_file extends provisionService {
     $status = 1;
     // do not follow symlinks as it could lead to a DOS attack
     // consider someone creating a symlink from files/foo to ..: it would create an infinite loop
-    if (!is_link($path) && ($dh = @opendir($path))) {
-      while (($file = readdir($dh)) !== false) {
-        if ($file != '.' && $file != '..') {
-          $status = $this->_call_recursive($func, $path . "/" . $file, $arg) && $status;
+    if (!is_link($path)) {
+      if ($dh = @opendir($path)) {
+        while (($file = readdir($dh)) !== false) {
+          if ($file != '.' && $file != '..') {
+            $status = $this->_call_recursive($func, $path . "/" . $file, $arg) && $status;
+          }
         }
+        closedir($dh);
       }
-      closedir($dh);
+      $status = call_user_func($func, $path, $arg) && $status;
     }
-    $status = call_user_func($func, $path, $arg) && $status;
     return $status;
   }
 
