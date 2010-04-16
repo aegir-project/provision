@@ -172,6 +172,10 @@ function provision_path_chmod($path, &$perms, &$reason, $recursive = FALSE) {
 }
 
 function provision_path_chown($path, &$owner, &$reason, $recursive = FALSE) {
+  // we do not attempt to chown symlinks
+  if (is_link($path)) {
+    return TRUE;
+  }
   $func = ($recursive) ? '_provision_chown_recursive' : 'chown';
   if ($owner = provision_posix_username($owner)) {
     if (!$func($path, $owner)) {
@@ -187,13 +191,14 @@ function provision_path_chown($path, &$owner, &$reason, $recursive = FALSE) {
 }
 
 function provision_path_chgrp($path, &$gid, &$reason, $recursive = FALSE) {
+  // we do not attempt to chown symlinks
+  if (is_link($path)) {
+    return TRUE;
+  }
   $func = ($recursive) ? '_provision_chgrp_recursive' : 'chgrp';
   if ($group = provision_posix_groupname($gid)) {
     if (provision_user_in_group(drush_get_option('script_user'), $gid)) {
-      if ($func($path, $group)) {
-        return $group;
-      }
-      else {
+      if (!$func($path, $group)) {
         $reason = dt("chgrp to @group failed on @path", array('@group' => $group, '@path' => $path));
       }
     }
