@@ -35,7 +35,8 @@ function http_drush_init($url = null) {
 
     // System account
     drush_set_default('web_group', _provision_default_web_group());
-    drush_set_default('script_user', posix_getpwuid(posix_geteuid());
+    $pw = posix_getpwuid(posix_geteuid());
+    drush_set_default('script_user', $pw['name']);
 
     // Redirection urls
     drush_set_default('master_url', $GLOBALS['base_url']);
