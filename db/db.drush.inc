@@ -12,7 +12,6 @@
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
 function db_drush_init($url = null) {
-
   include_once('mysql/mysql_service.inc');
 
   $command = drush_get_command();
@@ -28,7 +27,8 @@ function db_drush_init($url = null) {
       $user = urldecode($db['user']);
       $pass = urldecode($db['pass']);
       $scheme = $db['scheme'];
-    } else {
+    }
+    else {
       #TODO - this stuff is all pretty wrong imo. it should not be asked here
       drush_print(dt("No database configuration provided, asking for one interactively"));
       $scheme = drush_prompt(dt("Database type"), "mysql");
@@ -62,7 +62,6 @@ function db_drush_init($url = null) {
     }
 
     provision_service('db', new provisionService_db_mysql($creds));
-
   }
 
   // this is where we generate the db service object.
