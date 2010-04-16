@@ -271,12 +271,12 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
   }
   foreach ($chown as $path => $owner) {
     provision_service('file')->chown($path, $owner, TRUE)
-      ->succeed('Changed ownership of <code>@path</code>')
+      ->succeed('Changed ownership of <code>@path</code> to @uid')
       ->fail('Could not change ownership <code>@path</code>', 'DRUSH_PERM_ERROR');
   }
   foreach ($chgrp as $path => $group) {
     provision_service('file')->chgrp($path, $group, TRUE)
-      ->succeed('Changed group ownership of <code>@path</code>')
+      ->succeed('Changed group ownership of <code>@path</code> to @gid')
       ->fail('Could not change group ownership <code>@path</code>');
   }
 }
