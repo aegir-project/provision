@@ -192,7 +192,7 @@ else
 fi
 
 # this will prompt the user for the database password if not provided through stdin in JSON
-$DRUSH provision-verify --parent_path=$AEGIR_HOME --web_group=$WEB_GROUP --drush_path=$DRUSH
+$DRUSH provision-verify --parent_path="$AEGIR_HOME" --web_group="$WEB_GROUP" --drush_path="$DRUSH"
 
 msg "Aegir provision backend installed successfully"
 
