@@ -211,7 +211,7 @@ function _provision_drupal_create_settings_file($url = NULL) {
     dt('Could not change permissions of settings.php to @confirm'));
 
   provision_path("chgrp", "sites/$url/settings.php", drush_get_option('web_group'),
-    dt('Change group ownership of settings.php to @confirm'),
+    dt('Changed group ownership of settings.php to @confirm'),
     dt('Could not change group ownership of settings.php to @confirm'));
 }
 
@@ -264,14 +264,14 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
   }
   foreach ($chown as $path => $owner) {
     provision_path("chown_recursive", $path, $owner,
-      dt("Changed ownership of <code>@path</code>"),
-      dt("Could not change ownership <code>@path</code>"),
+      dt("Changed ownership of <code>@path</code> to @confirm"),
+      dt("Could not change ownership <code>@path</code> to @confirm"),
      'DRUSH_PERM_ERROR' );
   }
   foreach ($chgrp as $path => $group) {
     provision_path("chgrp_recursive", $path, $group,
-      dt("Changed group ownership of <code>@path</code>"),
-      dt("Could not change group ownership <code>@path</code>"));
+      dt("Changed group ownership of <code>@path</code> to @confirm"),
+      dt("Could not change group ownership <code>@path</code> to @confirm"));
   }
 }
 
