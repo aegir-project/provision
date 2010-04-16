@@ -1,5 +1,8 @@
 <?php
 // $Id$
+
+include_once(dirname(__FILE__) . '/../provision.config.inc');
+
 /**
  * @file
  * Drupal specific functions for the provisioning framework.
