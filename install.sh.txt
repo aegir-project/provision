@@ -239,7 +239,7 @@ if [ ! -d $HOSTMASTER_DIR ] ; then
 fi
 
 if [ ! -f $AEGIR_HOME/config/vhost.d/$AEGIR_DOMAIN ]; then
-  sed -e "s#DocumentRoot .*#DocumentRoot $HOSTMASTER_DIR#" -e "s#Directory .*#Directory $HOSTMASTER_DIR>#" -e "s/ServerName .*/ServerName $AEGIR_DOMAIN/" $HOSTMASTER_DIR/profiles/hostmaster/apache2.conf.txt > $AEGIR_HOME/config/vhost.d/$AEGIR_DOMAIN
+  sed -e "s#DocumentRoot .*#DocumentRoot $HOSTMASTER_DIR#" -e "s#Directory .*#Directory $HOSTMASTER_DIR>#" -e "s/ServerName .*/ServerName $AEGIR_DOMAIN/" $HOSTMASTER_DIR/profiles/hostmaster/apache2.conf.txt > $AEGIR_HOME/config/vhost.d/${AEGIR_DOMAIN}_80
   msg "Installed apache configuration file for $AEGIR_DOMAIN, you will need to restart apache"
 fi
 
