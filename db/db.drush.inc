@@ -12,13 +12,49 @@
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
 function db_drush_init($url = null) {
-  include_once('mysql/mysql_service.inc');
-
+  // todo same as http, consolidate
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
   if (preg_match("/^provision-/", $command[0])) {
     _provision_context_init($url);
-    // TODO - remove this shit
+
+    if (PROVISION_CONTEXT_SERVER) {
+      if (!is_null(drush_get_option('init_db'))) {
+        // Bootstrap for alias creation.
+        include_once(drush_get_option('init_db') . '/'. drush_get_option('init_db') .'_service.inc');
+        $class = 'provisionService_db_' . drush_get_option('init_db');
+        provision_service('db', new $class());
+      }
+    }
+    else {
+      // todo should be constructed based on drush aliases
+      include_once('mysql/mysql_service.inc');
+      provision_service('db', new provisionService_db_mysql());
+    }
+  }
+
+  // this is where we generate the db service object.
+}
+
+function db_drush_exit() {
+  // determine how to close it too.
+  provision_service('db')->close();
+}
+
+
+
+function db_drush_help($section) {
+  switch ($section) {
+    case 'error:PROVISION_CREATE_DB_FAILED' :
+      return dt('Unable to create new databases.');
+    case 'error:PROVISION_DROP_DB_FAILED' :
+      return dt('Unable to drop database.');
+  }
+}
+
+
+class provisionService_db extends provisionService {
+  function __construct() {
     $master_db = drush_get_option('master_db');
 
     if ($master_db) {
@@ -61,36 +97,8 @@ function db_drush_init($url = null) {
     foreach ($options as $option => $key) {
       $creds[$key] = drush_get_option($option, '');
     }
-
-    provision_service('db', new provisionService_db_mysql($creds));
-  }
-
-  // this is where we generate the db service object.
-}
-
-function db_drush_exit() {
-  // determine how to close it too.
-  provision_service('db')->close();
-}
-
-
-
-function db_drush_help($section) {
-  switch ($section) {
-    case 'error:PROVISION_CREATE_DB_FAILED' :
-      return dt('Unable to create new databases.');
-    case 'error:PROVISION_DROP_DB_FAILED' :
-      return dt('Unable to drop database.');
-  }
-}
-
-
-
-class provisionService_db extends provisionService {
-  function __construct($creds) {
     $this->creds = $creds;
   }
-
 
   function verify() { 
     if (!$this->can_create_database()) {
@@ -323,11 +331,10 @@ class provisionService_db_pdo extends provisionService_db {
   protected $creds;
   private $dsn;
 
-  function __construct($creds) {
-    parent::__construct($creds);
+  function __construct() {
+    parent::__construct();
 
     $this->dsn = sprintf("%s:host=%s", $this->PDO_type,  $this->creds['host']);
-
   }
 
   function connect() {

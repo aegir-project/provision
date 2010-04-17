@@ -3,14 +3,33 @@
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
 function http_drush_init($url = null) {
+  // todo same as http, consolidate
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
   if (preg_match("/^provision-/", $command[0])) {
     _provision_context_init($url);
-    include_once('apache/apache_service.inc');
-    provision_service('http', new provisionService_http_apache());
 
+    if (PROVISION_CONTEXT_SERVER) {
+      if (!is_null(drush_get_option('init_http'))) {
+        // Bootstrap for alias creation.
+        include_once(drush_get_option('init_http') . '/'. drush_get_option('init_http') .'_service.inc');
+        $class = 'provisionService_http_' . drush_get_option('init_http');
+        provision_service('http', new $class());
+      }
+    }
+    else {
+      // todo should be constructed based on drush aliases
+      include_once('apache/apache_service.inc');
+      provision_service('http', new provisionService_http_apache());
+    }
+  }
+}
 
+class provisionService_http extends provisionService {
+  /**
+   * Set defaults
+   */
+  function __construct() {
     // Set up defines for platform
     $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
 
@@ -49,11 +68,6 @@ function http_drush_init($url = null) {
 
     drush_set_default('site_port', 80);
   }
-
-}
-
-class provisionService_http extends provisionService {
-
 
   /**
    * Ask the web server to check for and load configuration changes.

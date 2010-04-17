@@ -67,13 +67,12 @@ function _provision_context_init($url) {
     return TRUE;
   }
 
-  $context = 'server';
-  if (drush_bootstrap_validate(DRUSH_BOOTSTRAP_DRUPAL_ROOT)) { 
+  $context = drush_get_option('provision_context');
+  // todo could probably clean this up, may want to throw errors
+  if (($context === 'platform' || $context === 'site') && drush_bootstrap_validate(DRUSH_BOOTSTRAP_DRUPAL_ROOT)) { 
     // i don't think i should be bootstrapping here yet ... but i have no choice yet.
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
-    $context = 'platform';
-    if ($url) {
-      $context = 'site';
+    if ($context === 'site' && $url) {
       drush_set_option('uri' , 'http://' . $url);
       drush_set_default('site_url', $url);
       drush_set_default('profile', 'default');
