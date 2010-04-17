@@ -163,7 +163,7 @@ class provisionService_file extends provisionService {
   function chown($path, $owner, $recursive = FALSE) {
     // we do not attempt to chown symlinks
     if (is_link($path)) {
-      return TRUE;
+      return $this;
     } 
     $this->_clear_state();
 
@@ -200,7 +200,7 @@ class provisionService_file extends provisionService {
   function chgrp($path, $gid, $recursive = FALSE) {
     // we do not attempt to chown symlinks
     if (is_link($path)) {
-      return TRUE;
+      return $this;
     } 
     $this->_clear_state();
 
