@@ -80,14 +80,15 @@ function _provision_context_init($url) {
       drush_set_default('language', 'en');
       drush_set_default('aliases', array());
     }
-
   }
 
-  define('PROVISION_CONTEXT_SERVER', $context == 'server');
-  define('PROVISION_CONTEXT_PLATFORM', $context == 'platform');
-  define('PROVISION_CONTEXT_SITE', $context == 'site');
-  $is_run = TRUE;
+  define('PROVISION_CONTEXT_SERVER', $context === 'server');
+  define('PROVISION_CONTEXT_PLATFORM', $context === 'platform');
+  define('PROVISION_CONTEXT_SITE', $context === 'site');
 
+  drush_log(dt('Using context @context', array('@context' => $context)));
+
+  $is_run = TRUE;
 }
 
 /**
