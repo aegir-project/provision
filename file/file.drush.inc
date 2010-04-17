@@ -151,7 +151,7 @@ class provisionService_file extends provisionService {
   /**
    * Change the owner of $path to the user in $owner.
    *
-   * Sets @path, @owner, and @reason tokens for ->succeed and ->fail.
+   * Sets @path, @uid, and @reason tokens for ->succeed and ->fail.
    *
    * @param $path
    *   The path you want to perform this operation on.
@@ -161,13 +161,13 @@ class provisionService_file extends provisionService {
    *   TRUE to descend into subdirectories.
    */
   function chown($path, $owner, $recursive = FALSE) {
-    // we do not attempt to chown symlinks
+    $this->_clear_state();
+    $this->tokens = array('@path' => $path, '@uid' => $owner);
+
+    // We do not attempt to chown symlinks.
     if (is_link($path)) {
       return $this;
     } 
-    $this->_clear_state();
-
-    $this->tokens = array('@path' => $path, '@uid' => $owner);
 
     $func = ($recursive) ? array($this, '_chown_recursive') : 'chown';
     if ($owner = provision_posix_username($owner)) {
@@ -198,13 +198,13 @@ class provisionService_file extends provisionService {
    *   TRUE to descend into subdirectories.
    */
   function chgrp($path, $gid, $recursive = FALSE) {
-    // we do not attempt to chown symlinks
+    $this->_clear_state();
+    $this->tokens = array('@path' => $path, '@gid' => $gid);
+
+    // We do not attempt to chown symlinks.
     if (is_link($path)) {
       return $this;
     } 
-    $this->_clear_state();
-
-    $this->tokens = array('@path' => $path, '@gid' => $gid);
 
     $func = ($recursive) ? array($this, '_chgrp_recursive') : 'chgrp';
     if ($group = provision_posix_groupname($gid)) {
@@ -371,8 +371,8 @@ class provisionService_file extends provisionService {
 
     if ($exists) {
       $this->chown($path, drush_get_option('script_user'))
-        ->succeed($name . ' ownership of path has been changed to @perm.')
-        ->fail($name . ' ownership of path could not be changed to @perm.', 'DRUSH_PERM_ERROR');
+        ->succeed($name . ' ownership of path has been changed to @uid.')
+        ->fail($name . ' ownership of path could not be changed to @uid.', 'DRUSH_PERM_ERROR');
 
       $this->chmod($path, $perms)
         ->succeed($name . ' permissions of path have been changed to @perm.')
