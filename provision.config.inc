@@ -61,6 +61,14 @@ class provisionConfig {
 
   function write() {
     $filename = $this->filename();
+
+    // Make directory structure if it does not exist.
+    if (!provision_service('file')->exists(dirname($filename))->status()) {
+      provision_service('file')->mkdir(dirname($filename))
+        ->succeed('Created directory @path.')
+        ->fail('Could not create directory @path.');
+    }
+
     if ($filename && is_writeable(dirname($filename))) {
       // manipulate data before passing to template.
       $this->process();
@@ -131,13 +139,18 @@ class provisionConfig_drushrc extends provisionConfig {
 
 // class to read and write an alias record
 class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
+  public $template = 'provision_drushrc_alias.tpl.php';
+
   function __construct($aliasname, $data = array()) {
-    parent::construct($data);
-    $this->alias_name = $aliasname;
+    $this->aliasname = $aliasname;
+    parent::__construct($data);
   }
 
   function load_data() {
-     // do something about alias_load_data
+    $this->data = array(
+      'aliasname' => $this->aliasname,
+      'alias' => $this->data,
+    );
   }
 
   function filename() {
