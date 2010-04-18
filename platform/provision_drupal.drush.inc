@@ -11,8 +11,6 @@ include_once(dirname(__FILE__) . '/../provision.config.inc');
  * and all the install api code. 
  */
 
-include_once(dirname(__FILE__) . '/../provision.config.inc');
-
 function provision_drupal_drush_help($section) {
   switch ($section) {
     case 'error:PROVISION_CONFIG_NOT_VALID' : 
