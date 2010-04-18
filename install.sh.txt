@@ -37,6 +37,7 @@ WEB_GROUP=www-data
 # doesn't exist yet, but we need drush_prompt in HEAD
 DRUSH_VERSION=All-versions-3.0-rc4
 DRUSH_MAKE_VERSION=6.x-2.0-beta6
+CLIENT_EMAIL="you@example.com"
 
 # when adding a variable here, add it to the display below
 
@@ -122,6 +123,7 @@ WEB_GROUP=$WEB_GROUP
 HOSTMASTER_DIR=$HOSTMASTER_DIR
 DRUSH=$DRUSH
 DRUSH_VERSION=$DRUSH_VERSION
+CLIENT_EMAIL=$CLIENT_EMAIL
 
 Some of those settings can be changed on the commandline, see:
 
@@ -206,7 +208,7 @@ if [ ! -d $HOSTMASTER_DIR ] ; then
 
   $DRUSH provision-verify --root="$HOSTMASTER_DIR" --provision_context="platform"
 
-  $DRUSH provision-install --root="$HOSTMASTER_DIR" --provision_context="site" --profile="hostmaster" "$AEGIR_DOMAIN"
+  $DRUSH provision-install --root="$HOSTMASTER_DIR" --provision_context="site" --client_email=$CLIENT_EMAIL --profile="hostmaster" "$AEGIR_DOMAIN"
 
   cd $HOSTMASTER_DIR
 
