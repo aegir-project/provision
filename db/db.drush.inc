@@ -174,7 +174,7 @@ class provisionService_db extends provisionService {
 
 
     if (!$this->grant($db_name, $db_user, $db_passwd, $db_grant_host)) {
-      drush_log("Could not GRANT user access.", 'warning');
+      drush_set_error('PROVISION_CREATE_DB_FAILED', dt(("Could not create database user @user", array('@user' => $db_user)));
     }
 
     $this->create_database($db_name);
