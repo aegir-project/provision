@@ -35,7 +35,7 @@ AEGIR_VERSION=HEAD
 AEGIR_HOME=$HOME
 WEB_GROUP=www-data
 # doesn't exist yet, but we need drush_prompt in HEAD
-DRUSH_VERSION=6.x-3.0-rc3
+DRUSH_VERSION=All-versions-3.0-rc4
 DRUSH_MAKE_VERSION=6.x-2.0-beta6
 
 # when adding a variable here, add it to the display below
@@ -192,7 +192,7 @@ else
 fi
 
 # this will prompt the user for the database password if not provided through stdin in JSON
-$DRUSH provision-verify --parent_path="$AEGIR_HOME" --web_group="$WEB_GROUP" --drush_path="$DRUSH"
+$DRUSH provision-verify --parent_path="$AEGIR_HOME" --web_group="$WEB_GROUP" --drush_path="$DRUSH" --provision_context="server" --init_http="apache"
 
 msg "Aegir provision backend installed successfully"
 
@@ -203,28 +203,18 @@ fi
 if [ ! -d $HOSTMASTER_DIR ] ; then
   msg "Deploying hostmaster application"
   $DRUSH hostmaster-make $HOSTMASTER_DIR
-  # this, and the remaining of this file, should be handled by
-  # provision-install, see http://drupal.org/node/711740
+
+  $DRUSH provision-verify --root="$HOSTMASTER_DIR" --provision_context="platform"
+
+  $DRUSH provision-install --root="$HOSTMASTER_DIR" --provision_context="site" --profile="hostmaster" "$AEGIR_DOMAIN"
+
   cd $HOSTMASTER_DIR
-  mkdir sites/$AEGIR_DOMAIN
-  cp sites/default/default.settings.php sites/$AEGIR_DOMAIN/settings.php
-  chmod g+w sites/$AEGIR_DOMAIN/settings.php
-  mkdir sites/$AEGIR_DOMAIN/files
-  chmod 2770 sites/$AEGIR_DOMAIN/files
-  chgrp $WEB_GROUP sites/$AEGIR_DOMAIN/settings.php
-  chgrp $WEB_GROUP sites/$AEGIR_DOMAIN/files
-fi
 
-if [ ! -f $AEGIR_HOME/config/vhost.d/$AEGIR_DOMAIN ]; then
-  sed -e "s#DocumentRoot .*#DocumentRoot $HOSTMASTER_DIR#" -e "s#Directory .*#Directory $HOSTMASTER_DIR>#" -e "s/ServerName .*/ServerName $AEGIR_DOMAIN/" $HOSTMASTER_DIR/profiles/hostmaster/apache2.conf.txt > $AEGIR_HOME/config/vhost.d/${AEGIR_DOMAIN}_80
-  msg "Installed apache configuration file for $AEGIR_DOMAIN, you will need to restart apache"
+  $DRUSH hosting-setup --uri="$AEGIR_DOMAIN" -y
+  
 fi
-
-msg "Install process complete: follow the wizard"
 
 cat <<EOF
-Now point your browser to http://$AEGIR_DOMAIN/install.php and proceed
-with the remainder of the installation using the Hostmaster Install profile.
-Some of the instructions given, you will already have completed, but carefully
-read each step in turn to ensure you don't miss anything.
+Aegir is installed. You can visit it at http://$AEGIR_DOMAIN 
 EOF
+
