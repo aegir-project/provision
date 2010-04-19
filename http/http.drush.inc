@@ -39,9 +39,9 @@ class provisionService_http extends provisionService {
     // Set up defines for platform
     $docroot = drush_get_option(array("r", "root"), $_SERVER['PWD']);
 
-    $path = drush_set_default('docroot_path', rtrim(($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'], '/'));
+    $path = drush_set_default('publish_path', rtrim(($docroot) ? $docroot : $_SERVER['DOCUMENT_ROOT'], '/'));
     drush_set_default('sites_path', $path . '/sites');
-    drush_set_default('publish_path', realpath(drush_get_option('docroot_path')));
+    drush_set_default('publish_path', realpath(drush_get_option('publish_path')));
 
     $parts = explode("/", $path);
     array_pop($parts);
