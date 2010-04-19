@@ -141,8 +141,14 @@ class provisionConfig_drushrc extends provisionConfig {
 class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
   public $template = 'provision_drushrc_alias.tpl.php';
 
-  function __construct($aliasname, $data = array()) {
+  function __construct($aliasname, $options = array()) {
     $this->aliasname = $aliasname;
+
+    $data = array();
+    foreach ($options as $key) {
+      $data[$key] = drush_get_option($key);
+    }
+
     parent::__construct($data);
   }
 
