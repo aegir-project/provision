@@ -20,6 +20,7 @@ function drush_provision_hostmaster_install($site) {
     $site, 
     'uri' => $site, 
     'root' => $platform, 
+    'client_email' => drush_get_option('client_email', 'webmaster@localhost'),
     'profile' => "hostmaster",
     'provision_context' => "site",
     'site_port' => drush_get_option('web_port', 80)),
