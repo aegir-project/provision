@@ -206,17 +206,15 @@ if [ ! -d $HOSTMASTER_DIR ] ; then
   msg "Deploying hostmaster application"
   $DRUSH hostmaster-make $HOSTMASTER_DIR
 
-  $DRUSH provision-verify --root="$HOSTMASTER_DIR" --provision_context="platform"
+  msg "Installing hostmaster"
+  $DRUSH hostmaster-install $AEGIR_DOMAIN $HOSTMASTER_DIR $CLIENT_EMAIL
 
-  $DRUSH provision-install --root="$HOSTMASTER_DIR" --provision_context="site" --client_email=$CLIENT_EMAIL --profile="hostmaster" "$AEGIR_DOMAIN"
-
-  cd $HOSTMASTER_DIR
-
-  $DRUSH hosting-setup --uri="$AEGIR_DOMAIN" -y
+  msg "Initializing the hosting system"
+  $DRUSH hosting-setup --root="$HOSTMASTER_DIR" --uri="$AEGIR_DOMAIN" -y
   
 fi
 
 cat <<EOF
-Aegir is installed. You can visit it at http://$AEGIR_DOMAIN 
+Aegir is now installed. You can visit it at http://$AEGIR_DOMAIN 
 EOF
 
