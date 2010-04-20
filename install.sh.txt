@@ -37,6 +37,7 @@ WEB_GROUP=www-data
 # doesn't exist yet, but we need drush_prompt in HEAD
 DRUSH_VERSION=All-versions-3.0-rc4
 DRUSH_MAKE_VERSION=6.x-2.0-beta6
+CLIENT_EMAIL="you@example.com"
 
 # when adding a variable here, add it to the display below
 
@@ -138,14 +139,6 @@ else
   exit 1
 fi
 
-msg "Creating basic directory structure"
-mkdir -p $AEGIR_HOME/config/vhost.d
-mkdir -p $AEGIR_HOME/config/platform.d
-mkdir -p $AEGIR_HOME/config/apache.d
-mkdir -p $AEGIR_HOME/backups
-chmod 0711 $AEGIR_HOME/config
-chmod 0700 $AEGIR_HOME/backups
-
 # we need to check both because some platforms (like SunOS) return 0 even if the binary is not found
 if which drush 2> /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
   msg "Drush is in the path, good"
@@ -192,19 +185,6 @@ else
   fi
 fi
 
-# this will prompt the user for the database password if not provided through stdin in JSON
-$DRUSH provision-verify --parent_path="$AEGIR_HOME" --web_group="$WEB_GROUP" --drush_path="$DRUSH" --provision_context="server" --init_http="apache" --init_db="mysql"
+msg "Installing the frontend"
+$DRUSH hostmaster-install --client_email="$CLIENT_EMAIL" --backend-only=$BACKEND_ONLY --root="$HOSTMASTER_DIR" --version="$AEGIR_VERSION" --parent_path="$AEGIR_HOME" --web_group="$WEB_GROUP" $AEGIR_DOMAIN
 
-msg "Aegir provision backend installed successfully"
-
-if [ ! -z "$BACKEND_ONLY" ] ; then
-  exit 0
-fi
-
-if [ ! -d $HOSTMASTER_DIR ] ; then
-  msg "Deploying hostmaster application"
-  $DRUSH hostmaster-make $HOSTMASTER_DIR
-
-  msg "Installing hostmaster"
-  $DRUSH hostmaster-install --root="$HOSTMASTER_DIR" $AEGIR_DOMAIN  
-fi

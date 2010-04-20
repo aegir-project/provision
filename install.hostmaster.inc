@@ -5,7 +5,41 @@
  */
 
 function drush_provision_hostmaster_install($site) {
-  $platform = drush_locate_root(drush_get_option(array('r', 'root'), NULL));
+  $version = drush_get_option('version', 'HEAD');
+  $platform = drush_get_option(array('r', 'root'), drush_server_home() . '/' . 'hostmaster-' . $version);
+
+  if (!drush_get_option('backend-only')) {
+    drush_backend_invoke('hostmaster-make', array($platform));
+  }
+
+  $data['master_db'] = drush_get_option('master_db');
+
+  if (!$data['master_db']) {
+    drush_print(dt("No database configuration provided, asking for one interactively"));
+    $scheme = drush_prompt(dt("Database type"), "mysql");
+    $host = drush_prompt(dt("Database server"), "localhost");
+    $user = drush_prompt(dt("Database user"), "root");
+    system('stty -echo');
+    $pass = drush_prompt(dt("Database password"));
+    system('stty echo');
+    print "\n"; # add a cr since the user's didn't echo
+    $data['master_db'] = "$scheme://$user:$pass@$host";
+  }
+  
+  $data['init_http'] = 'apache';
+  $data['init_db'] = 'mysql';
+  $data['provision_context'] = 'server';
+  $data['parent_path'] = drush_server_home();
+  $data['web_group'] = 'www-data'; #for now
+  $data['drush_path'] = DRUSH_COMMAND;
+
+  // verify the server
+  drush_backend_invoke('provision-verify', $data, 'POST');
+
+  if (drush_get_option('backend-only')) {
+    return;
+  }
+
   // verify the current platform
   drush_backend_invoke('provision-verify', array(
     'root' => $platform,

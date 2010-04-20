@@ -57,26 +57,15 @@ class provisionService_db extends provisionService {
   function __construct() {
     $master_db = drush_get_option('master_db');
 
-    if ($master_db) {
-      $db = parse_url($master_db);
-      $host = urldecode($db['host']);
-      $user = urldecode($db['user']);
-      $pass = urldecode($db['pass']);
-      $scheme = $db['scheme'];
+    if (!$master_db) {
+      drush_set_error("PROVISION_DB_FAILED", dt("Database credentials unavailable, run provision-verify"));
     }
-    else {
-      #TODO - this stuff is all pretty wrong imo. it should not be asked here
-      drush_print(dt("No database configuration provided, asking for one interactively"));
-      $scheme = drush_prompt(dt("Database type"), "mysql");
-      $host = drush_prompt(dt("Database server"), "localhost");
-      $user = drush_prompt(dt("Database user"), "root");
-      system('stty -echo');
-      $pass = drush_prompt(dt("Database password"));
-      system('stty echo');
-      print "\n"; # add a cr since the user's didn't echo
-      drush_set_option('master_db', "$scheme://$user:$pass@$host", 'user');
-    }
-
+    $db = parse_url($master_db);
+    $host = urldecode($db['host']);
+    $user = urldecode($db['user']);
+    $pass = urldecode($db['pass']);
+    $scheme = $db['scheme'];
+    
     drush_set_default('master_db_user', $user);
     drush_set_default('master_db_passwd', $pass);
 
