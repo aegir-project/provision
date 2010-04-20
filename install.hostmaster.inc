@@ -4,7 +4,7 @@
  * @file install the hostmaster system
  */
 
-function drush_provision_hostmaster_install($site, $client_email) {
+function drush_provision_hostmaster_install($site) {
   $platform = drush_locate_root(drush_get_option(array('r', 'root'), NULL));
   // verify the current platform
   drush_backend_invoke('provision-verify', array(
@@ -16,15 +16,16 @@ function drush_provision_hostmaster_install($site, $client_email) {
   );
 
   // install the hostmaster site
-  drush_backend_invoke('provision-install', array(
+  $data = drush_backend_invoke('provision-install', array(
     $site, 
     'uri' => $site, 
     'root' => $platform, 
     'profile' => "hostmaster",
     'provision_context' => "site",
-    'client_email' => $client_email,
-    'site_port' => drush_get_option('web_port', 80))
+    'site_port' => drush_get_option('web_port', 80)),
+    'GET', TRUE
   );
-
+  $context = $data['context'];
+  drush_print('Login link is ' . $context['login_link']);
 }
 

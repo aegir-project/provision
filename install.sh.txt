@@ -30,14 +30,13 @@
 #
 ########################################################################
 # basic variables, change before release
-AEGIR_DOMAIN=aegir.example.com 
+AEGIR_DOMAIN=aegir.example.com
 AEGIR_VERSION=HEAD
 AEGIR_HOME=$HOME
 WEB_GROUP=www-data
 # doesn't exist yet, but we need drush_prompt in HEAD
 DRUSH_VERSION=All-versions-3.0-rc4
 DRUSH_MAKE_VERSION=6.x-2.0-beta6
-CLIENT_EMAIL="you@example.com"
 
 # when adding a variable here, add it to the display below
 
@@ -207,7 +206,7 @@ if [ ! -d $HOSTMASTER_DIR ] ; then
   $DRUSH hostmaster-make $HOSTMASTER_DIR
 
   msg "Installing hostmaster"
-  $DRUSH hostmaster-install --root="$HOSTMASTER_DIR" $AEGIR_DOMAIN $CLIENT_EMAIL
+  $DRUSH hostmaster-install --root="$HOSTMASTER_DIR" $AEGIR_DOMAIN
 
   msg "Initializing the hosting system"
   $DRUSH hosting-setup --root="$HOSTMASTER_DIR" --uri="$AEGIR_DOMAIN" -y
