@@ -26,6 +26,10 @@ function drush_provision_hostmaster_install($site) {
     'site_port' => drush_get_option('web_port', 80)),
     'GET', TRUE
   );
-  drush_print('Login link is ' . $data['context']['login_link']);
+
+  drush_print("Initializing the hosting system");
+  drush_backend_invoke('hosting-setup', array('uri' => $site, 'root' => $platform));
+  
+  drush_print(dt("Aegir is now installed. You can visit it at @link", array('@link' => $data['context']['login_link'])));
 }
 
