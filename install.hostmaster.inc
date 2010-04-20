@@ -25,7 +25,6 @@ function drush_provision_hostmaster_install($site) {
     'site_port' => drush_get_option('web_port', 80)),
     'GET', TRUE
   );
-  $context = $data['context'];
-  drush_print('Login link is ' . $context['login_link']);
+  drush_print('Login link is ' . $data['context']['login_link']);
 }
 
