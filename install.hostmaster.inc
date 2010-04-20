@@ -4,13 +4,13 @@
  * @file install the hostmaster system
  */
 
-function drush_provision_hostmaster_install($site, $platform, $client_email) {
-
+function drush_provision_hostmaster_install($site, $client_email) {
+  $platform = drush_locate_root(drush_get_option(array('r', 'root'), NULL));
   // verify the current platform
   drush_backend_invoke('provision-verify', array(
-    'root' => $platform, //drush_get_option(array('r', 'root'), $platform),
+    'root' => $platform,
     'provision_context' => "platform",
-    'publish_path' => drush_locate_root(drush_get_option(array('r', 'root'), NULL)),
+    'publish_path' => $platform,
     'platform' => '5') // dirty hardcoded to create the first platform apache config
                        // this will become unnecessary when we have drush aliases
   );

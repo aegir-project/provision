@@ -207,7 +207,7 @@ if [ ! -d $HOSTMASTER_DIR ] ; then
   $DRUSH hostmaster-make $HOSTMASTER_DIR
 
   msg "Installing hostmaster"
-  $DRUSH hostmaster-install $AEGIR_DOMAIN $HOSTMASTER_DIR $CLIENT_EMAIL
+  $DRUSH hostmaster-install --root="$HOSTMASTER_DIR" $AEGIR_DOMAIN $CLIENT_EMAIL
 
   msg "Initializing the hosting system"
   $DRUSH hosting-setup --root="$HOSTMASTER_DIR" --uri="$AEGIR_DOMAIN" -y
