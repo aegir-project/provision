@@ -34,7 +34,6 @@ AEGIR_DOMAIN=aegir.example.com
 AEGIR_VERSION=HEAD
 AEGIR_HOME=$HOME
 WEB_GROUP=www-data
-# doesn't exist yet, but we need drush_prompt in HEAD
 DRUSH_VERSION=All-versions-3.0-rc4
 DRUSH_MAKE_VERSION=6.x-2.0-beta6
 CLIENT_EMAIL="you@example.com"
