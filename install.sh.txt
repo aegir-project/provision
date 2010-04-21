@@ -31,10 +31,10 @@
 ########################################################################
 # basic variables, change before release
 AEGIR_DOMAIN=aegir.example.com 
-AEGIR_VERSION=HEAD
+AEGIR_VERSION=0.4-alpha7
 AEGIR_HOME=$HOME
 WEB_GROUP=www-data
-DRUSH_VERSION=All-versions-3.0-beta1
+DRUSH_VERSION=All-versions-3.0-rc4
 DRUSH_MAKE_VERSION=6.x-2.0-beta6
 
 # when adding a variable here, add it to the display below

@@ -35,7 +35,7 @@ you are reading this document.
 
 Shell commands::
 
-  export AEGIR_VERSION=HEAD
+  export AEGIR_VERSION=0.4-alpha7
   export DRUPAL_DIR=/var/aegir/hostmaster-$AEGIR_VERSION
   export OLD_DRUPAL_DIR=/var/aegir/drupal-6.14
   export DRUSH_VERSION=All-versions-3.0-beta1
