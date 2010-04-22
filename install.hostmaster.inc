@@ -29,10 +29,12 @@ function drush_provision_hostmaster_install($site) {
   $data['init_http'] = 'apache';
   $data['init_db'] = 'mysql';
   $data['provision_context'] = 'server';
-  $data['parent_path'] = drush_server_home();
+  $data['parent_path'] = drush_get_option('publish_path', drush_server_home());
   $data['script_user'] = drush_get_option('script_user');
   $data['web_group'] = drush_get_option('web_group', _provision_default_web_group());
   $data['web_port'] = drush_get_option('web_port', 80);
+  $data['config_path'] = drush_get_option('config_path', $data['parent_path'] . '/config');
+  $data['backup_path'] = drush_get_option('backup_path', $data['parent_path'] . '/backups');
   $data['drush_path'] = DRUSH_COMMAND;
 
   // verify the server
