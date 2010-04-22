@@ -10,9 +10,16 @@ function drush_provision_hostmaster_install($site) {
   }
 
   $version = drush_get_option('version', 'HEAD');
-  $platform = drush_get_option(array('r', 'root'), drush_server_home() . '/' . 'hostmaster-' . $version);
+  $parent_path = drush_get_option('parent_path', drush_server_home());
+  $platform = drush_get_option(array('r', 'root'), $parent_path . '/' . 'hostmaster-' . $version);
 
   if (!drush_get_option('backend-only')) {
+
+    if (!function_exists('drush_make_drush_command')) {
+      drush_backend_invoke('dl', array('drush_make-' . drush_get_option('drush_make_version', '6.x-2.0-beta6'), 'destination' => $parent_path . '/.drush/'));
+    }
+
+    drush_print(dt("deploying hostmaster application"));
     drush_backend_invoke('hostmaster-make', array($platform));
   }
 
@@ -33,12 +40,12 @@ function drush_provision_hostmaster_install($site) {
   $data['init_http'] = 'apache';
   $data['init_db'] = 'mysql';
   $data['provision_context'] = 'server';
-  $data['parent_path'] = drush_get_option('parent_path', drush_server_home());
+  $data['parent_path'] = $parent_path;
   $data['script_user'] = drush_get_option('script_user', 'aegir');
   $data['web_group'] = drush_get_option('web_group', _provision_default_web_group());
   $data['web_port'] = drush_get_option('web_port', 80);
-  $data['config_path'] = drush_get_option('config_path', $data['parent_path'] . '/config');
-  $data['backup_path'] = drush_get_option('backup_path', $data['parent_path'] . '/backups');
+  $data['config_path'] = drush_get_option('config_path', $parent_path . '/config');
+  $data['backup_path'] = drush_get_option('backup_path', $parent_path . '/backups');
   $data['drush_path'] = DRUSH_COMMAND;
 
   // verify the server
