@@ -30,7 +30,9 @@ function drush_provision_hostmaster_install($site) {
   $data['init_db'] = 'mysql';
   $data['provision_context'] = 'server';
   $data['parent_path'] = drush_server_home();
-  $data['web_group'] = 'www-data'; #for now
+  $data['script_user'] = drush_get_option('script_user');
+  $data['web_group'] = drush_get_option('web_group', _provision_default_web_group());
+  $data['web_port'] = drush_get_option('web_port', 80);
   $data['drush_path'] = DRUSH_COMMAND;
 
   // verify the server
@@ -63,7 +65,7 @@ function drush_provision_hostmaster_install($site) {
 
   drush_print("Initializing the hosting system");
   drush_backend_invoke('hosting-setup', array('uri' => $site, 'root' => $platform));
-  
+
   drush_print(dt("Aegir is now installed. You can visit it at @link", array('@link' => $data['context']['login_link'])));
 }
 

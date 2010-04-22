@@ -185,5 +185,5 @@ else
 fi
 
 msg "Installing the frontend"
-$DRUSH hostmaster-install --client_email="$CLIENT_EMAIL" --backend-only=$BACKEND_ONLY --root="$HOSTMASTER_DIR" --version="$AEGIR_VERSION" --parent_path="$AEGIR_HOME" --web_group="$WEB_GROUP" $AEGIR_DOMAIN
+$DRUSH hostmaster-install --client_email="$CLIENT_EMAIL" --backend-only=$BACKEND_ONLY --root="$HOSTMASTER_DIR" --version="$AEGIR_VERSION" --parent_path="$AEGIR_HOME" --script_user='$USER' --web_group="$WEB_GROUP" $AEGIR_DOMAIN
 
