@@ -80,13 +80,17 @@ function drush_provision_drupal_post_provision_verify($url = NULL) {
  * @see hook_provision_apache_dir_config()
  */
 function provision_drupal_provision_apache_dir_config($data = null) {
-  $htaccess = file_get_contents(drush_get_option('publish_path') . '/.htaccess');
-  $htaccess .= <<<EOF
-
+  $htaccess = <<<EOF
 <IfModule mod_rewrite.c>
+  RewriteEngine on
   # allow files to be accessed without /sites/fqdn/
   RewriteRule ^files/(.*)$ /sites/%{HTTP_HOST}/files/$1 [L]
 </IfModule>
+
+EOF;
+
+  $htaccess .= file_get_contents(drush_get_option('publish_path') . '/.htaccess');
+  $htaccess .= <<<EOF
 
 # Do not read the platform's .htaccess
 AllowOverride none
