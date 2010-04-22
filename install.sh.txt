@@ -30,13 +30,7 @@
 #
 ########################################################################
 # basic variables, change before release
-AEGIR_DOMAIN=aegir.example.com
-AEGIR_VERSION=HEAD
-AEGIR_HOME=$HOME
-WEB_GROUP=www-data
 DRUSH_VERSION=All-versions-3.0-rc4
-DRUSH_MAKE_VERSION=6.x-2.0-beta6
-CLIENT_EMAIL="you@example.com"
 
 # when adding a variable here, add it to the display below
 
@@ -71,37 +65,11 @@ prompt_yes_no() {
 
 }
 
-usage() {
-  cat <<EOF
-Usage: $0 [ -V version ] [ -h ] [ -w group ] [ -d home ] hostname
-EOF
-}
-
 ########################################################################
 # Main script
 
-# stop on error
-set -e
-
-# parse commandline
-args=`getopt bV:w:d:h $*`
-set -- $args
-
-for i
-do
-  case "$i" in
-    -w) shift; WEB_GROUP=$1; shift;;
-    -V) shift; AEGIR_VERSION=$1; shift;;
-    -d) shift; AEGIR_HOME=$1; shift;;
-    -b) BACKEND_ONLY=1; shift;;
-    -h) shift; usage; exit;;
-    --) shift; break;;
-  esac
-done
-
-AEGIR_DOMAIN=${1:-$AEGIR_DOMAIN}
+AEGIR_HOME="$HOME"
 DRUSH="$AEGIR_HOME/drush/drush.php"
-HOSTMASTER_DIR=$AEGIR_HOME/hostmaster-$AEGIR_VERSION
 
 msg "Aegir automated install script"
 
@@ -114,21 +82,6 @@ msg "This script makes the following assumptions: "
 cat <<EOF
  * you have read INSTALL.txt and prepared the platform accordingly
  * you are running as your "aegir" user
- * the following settings are correct:
-AEGIR_DOMAIN=$AEGIR_DOMAIN
-AEGIR_VERSION=$AEGIR_VERSION
-AEGIR_HOME=$AEGIR_HOME
-WEB_GROUP=$WEB_GROUP
-HOSTMASTER_DIR=$HOSTMASTER_DIR
-DRUSH=$DRUSH
-DRUSH_VERSION=$DRUSH_VERSION
-CLIENT_EMAIL=$CLIENT_EMAIL
-
-Some of those settings can be changed on the commandline, see:
-
- $0 -h
-
-for more information.
 EOF
 
 if prompt_yes_no "Do you want to proceed with the install?" ; then
@@ -185,5 +138,4 @@ else
 fi
 
 msg "Installing the frontend"
-$DRUSH hostmaster-install --client_email="$CLIENT_EMAIL" --backend-only=$BACKEND_ONLY --root="$HOSTMASTER_DIR" --version="$AEGIR_VERSION" --parent_path="$AEGIR_HOME" --script_user="$USER" --web_group="$WEB_GROUP" --config_path="$AEGIR_HOME/config" --backup_path="$AEGIR_HOME/backups" $AEGIR_DOMAIN
-
+$DRUSH hostmaster-install $*
