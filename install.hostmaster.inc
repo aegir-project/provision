@@ -5,6 +5,10 @@
  */
 
 function drush_provision_hostmaster_install($site) {
+  if (!$site) {
+    return drush_set_error('SITE_MISSING', dt('You need to specify the FQDN of the hostmaster install'));
+  }
+
   $version = drush_get_option('version', 'HEAD');
   $platform = drush_get_option(array('r', 'root'), drush_server_home() . '/' . 'hostmaster-' . $version);
 
