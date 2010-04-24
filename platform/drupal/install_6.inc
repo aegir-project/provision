@@ -102,6 +102,7 @@ function install_send_welcome_mail($url, $account, $profile, $language, $client_
 }
 
 function install_mail($key, &$message, $params) {
+  global $profile;
   switch ($key) {
     case 'welcome-admin':
       // allow the profile to override welcome email text
