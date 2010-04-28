@@ -30,7 +30,8 @@
 #
 ########################################################################
 # basic variables, change before release
-DRUSH_VERSION=All-versions-3.0-rc4
+AEGIR_VERSION="HEAD"
+DRUSH_VERSION=All-versions-3.0
 
 # when adding a variable here, add it to the display below
 
