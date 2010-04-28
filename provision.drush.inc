@@ -35,8 +35,6 @@
  *   unlock  - Unlock a platform so that sites can be provisioned on it.
  *
  *   login_reset - Generate a one-time login reset URL.
- *
- * Not implemented yet :
  *   rename  - Change the url of a site. This requires moving of files, and numerous other issues.
  */
 
@@ -189,6 +187,12 @@ function provision_drush_command() {
       'example.com' => dt('The url of the site being migrated.')),
   );
 
+  $items['provision-rename'] = array(
+    'description' => 'Rename a site.',
+    'arguments' => array('domain.com' => dt('The domain to rename. Any outstanding updates will be run.'),
+      'new.domain.com' => dt('The new domain name to use.')),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
+  );
 
   return $items;
 }
