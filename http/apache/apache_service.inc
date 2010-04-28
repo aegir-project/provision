@@ -119,14 +119,14 @@ class provisionConfig_apache_site extends provisionConfig_apache {
   public $description = 'apache site configuration file';
 
   function filename() {
+    if (!$this->data['site_port'] || $this->data['site_port'] < 1 || $this->data['site_port'] > 66535) {
+      $this->data['site_port'] = 80;
+    }
+
     return $this->data['vhost_path'] . '/' . $this->data['site_url'] . '_' . $this->data['site_port'];
   }
 
   function process() {
-    if (!$this->data['site_port'] || $this->data['site_port'] < 1 || $this->data['site_port'] > 66535) { 
-      $this->data['site_port'] = 80;
-    }
-    
     if ($this->data['aliases'] && !is_array($this->data['aliases'])) {
       $this->data['aliases'] = explode(",", $this->data['aliases']);
     }

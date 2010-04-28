@@ -175,6 +175,15 @@ function provision_drush_command() {
     ),
   );
 
+  $items['hostmaster-install'] = array(
+    'description' => dt('Install and verify the Hostmaster frontend.'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+    'arguments' => array(
+      'example.com' => dt('The name of the site to install'),
+      '/path/to/platform' => dt('The platform to install the site on.'),
+      'you@example.com' => dt('The email account to send a welcome mail to'),
+    ),
+  );
   
   $items['hostmaster-pause'] = array(
     'description' => dt('Prepare the site to be migrated to a new platform.'),

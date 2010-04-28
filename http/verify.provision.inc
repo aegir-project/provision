@@ -21,9 +21,10 @@ function drush_http_post_provision_verify($url = null) {
     drush_set_option('master_url', drush_get_option('master_url'), 'user');
     drush_set_option('web_host', drush_get_option('web_host', '127.0.0.1'), 'user');
     drush_set_option('web_ip', drush_get_option('web_ip', ''), 'user');
+    drush_set_option('web_port', drush_get_option('web_port', 80), 'user');
     drush_set_option('web_group', drush_get_option('web_group'), 'user');
     drush_set_option('script_user', drush_get_option('script_user'), 'user');
-    drush_set_option('restart_cmd', drush_get_option('restart_cmd'), 'user');
+    drush_set_option('restart_cmd', drush_get_option('restart_cmd', _provision_default_restart_cmd(), 'user'), 'user');
     drush_set_option('backup_path', drush_get_option('backup_path'), 'user');
     drush_set_option('config_path', drush_get_option('config_path'), 'user');
   }
