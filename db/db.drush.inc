@@ -37,6 +37,9 @@ function db_drush_init($url = null) {
 }
 
 function db_drush_exit() {
+  if (PROVISION_CONTEXT_SERVER) {
+    provision_service('db')->write_alias();
+  }
   // determine how to close it too.
   provision_service('db')->close();
 }
@@ -301,6 +304,13 @@ class provisionService_db extends provisionService {
     return 'localhost';
   }
 
+  /**
+   * Write out server's drushrc alias file.
+   */
+  function write_alias() {
+    $config = new provisionConfig_drushrc_alias(drush_get_option('db_host') . '-db', array('db_host', 'master_db_host', 'master_db_user', 'master_db_passwd'));
+    $config->write();
+  }
 }
 
 

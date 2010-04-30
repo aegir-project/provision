@@ -3,7 +3,7 @@
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
 function http_drush_init($url = null) {
-  // todo same as http, consolidate
+  // todo same as db, consolidate
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
   if (preg_match("/^provision-/", $command[0])) {
@@ -128,7 +128,7 @@ class provisionService_http extends provisionService {
    * Write out server's drushrc alias file.
    */
   function write_alias() {
-    $config = new provisionConfig_drushrc_alias(drush_get_option('web_host'), array('web_id', 'web_host', 'web_ports', 'web_group', 'restart_cmd'));
+    $config = new provisionConfig_drushrc_alias(drush_get_option('web_host') . '-web', array('web_host', 'web_ports', 'web_group', 'restart_cmd'));
     $config->write();
   }
 }
