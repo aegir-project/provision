@@ -131,4 +131,4 @@ else
 fi
 
 msg "Installing the frontend"
-$DRUSH hostmaster-install "$*"
+$DRUSH hostmaster-install $@
