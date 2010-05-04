@@ -26,7 +26,7 @@ function db_drush_init($url = null) {
         provision_service('db', new $class());
       }
     }
-    else {
+    elseif (PROVISION_CONTEXT_SITE) {
       // todo should be constructed based on drush aliases
       include_once('mysql/mysql_service.inc');
       provision_service('db', new provisionService_db_mysql());
@@ -308,7 +308,7 @@ class provisionService_db extends provisionService {
    * Write out server's drushrc alias file.
    */
   function write_alias() {
-    $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name') . '-' . drush_get_option('init_db'), array('db_host', 'master_db_host', 'master_db_user', 'master_db_passwd'));
+    $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name') . '-' . drush_get_option('init_db'), array('master_db'));
     $config->write();
   }
 }
