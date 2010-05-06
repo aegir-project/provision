@@ -71,7 +71,11 @@ function provision_drush_init() {
  * Implementation of hook_drush_command().
  */
 function provision_drush_command() {
-
+  $items['provision-named-context-save'] = array(
+    'arguments' => array(),
+    'description' => dt('Save Drush aliases'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+  );
   $items['provision-install'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to install.')),
     'description' => dt('Provision a new site using the provided data.'),

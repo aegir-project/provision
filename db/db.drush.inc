@@ -36,15 +36,16 @@ function db_drush_init($url = null) {
   // this is where we generate the db service object.
 }
 
-function db_drush_exit() {
+function drush_db_provision_named_context_save() {
   if (PROVISION_CONTEXT_SERVER) {
     provision_service('db')->write_alias();
   }
+}
+
+function db_drush_exit() {
   // determine how to close it too.
   provision_service('db')->close();
 }
-
-
 
 function db_drush_help($section) {
   switch ($section) {

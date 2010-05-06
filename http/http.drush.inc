@@ -25,7 +25,7 @@ function http_drush_init($url = null) {
   }
 }
 
-function http_drush_exit() {
+function drush_http_provision_named_context_save() {
   if (PROVISION_CONTEXT_SERVER) {
     provision_service('http')->write_alias();
   }
