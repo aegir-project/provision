@@ -36,12 +36,6 @@ function db_drush_init($url = null) {
   // this is where we generate the db service object.
 }
 
-function drush_db_provision_named_context_save() {
-  if (PROVISION_CONTEXT_SERVER) {
-    provision_service('db')->write_alias();
-  }
-}
-
 function db_drush_exit() {
   // determine how to close it too.
   provision_service('db')->close();
@@ -309,12 +303,7 @@ class provisionService_db extends provisionService {
    * Write out server's drushrc alias file.
    */
   function write_alias() {
-    $config = new provisionConfig_drushrc_alias(array(
-      drush_get_option('hosting_name') . '-' . drush_get_option('init_db') => array(
-        'master_db',
-      ),
-    ));
-    $config->write();
+    return array(drush_get_option('init_db') => array('master_db'));
   }
 }
 

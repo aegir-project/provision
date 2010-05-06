@@ -25,12 +25,6 @@ function http_drush_init($url = null) {
   }
 }
 
-function drush_http_provision_named_context_save() {
-  if (PROVISION_CONTEXT_SERVER) {
-    provision_service('http')->write_alias();
-  }
-}
-
 class provisionService_http extends provisionService {
   /**
    * Set defaults
@@ -128,14 +122,6 @@ class provisionService_http extends provisionService {
    * Write out server's drushrc alias file.
    */
   function write_alias() {
-    $config = new provisionConfig_drushrc_alias(array(
-      drush_get_option('hosting_name') . '-' . drush_get_option('init_http') => array(
-        'web_host',
-        'web_ports',
-        'web_group',
-        'restart_cmd',
-      ),
-    ));
-    $config->write();
+    return array(drush_get_option('init_http') => array('web_host', 'web_ports', 'web_group', 'restart_cmd'));
   }
 }

@@ -82,11 +82,10 @@ class provisionService {
 
     return $this;
   }
+
+  function write_alias() {
+  }
 }
-
-
-
-
 
 class provisionService_null extends provisionService {
 

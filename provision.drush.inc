@@ -201,13 +201,31 @@ function provision_drush_command() {
       'example.com' => dt('The url of the site being migrated.')),
   );
 
-
   return $items;
 }
 
-
 function drush_provision_hostmaster_make($platform) {
   drush_backend_invoke('make', array(dirname(__FILE__) . '/aegir.make', $platform));
+}
+
+function drush_http_provision_named_context_save() {
+  if (PROVISION_CONTEXT_SERVER) {
+    $parents = array();
+    $contexts = array(
+      drush_get_option('hosting_name') => array('parents'),
+    );
+
+    foreach (provision_service('all') as $service) {
+      foreach ($service->write_alias() as $key => $value) {
+        $parents[] = drush_get_option('hosting_name') . '-' . $key;
+        $contexts[drush_get_option('hosting_name') . '-' . $key] = $value; 
+      }
+    }
+
+    drush_set_option('parents', '@' . implode(',@', $parents));
+    $config = new provisionConfig_drushrc_alias($contexts);
+    $config->write();
+  }
 }
 
 function _provision_default_restart_cmd() {
