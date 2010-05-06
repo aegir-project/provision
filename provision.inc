@@ -46,7 +46,12 @@ function provision_save_platform_data() {
     $config->write();
 
     // Save platform alias
-    $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name'), array('parent', 'publish_path'));
+    $config = new provisionConfig_drushrc_alias(array(
+      drush_get_option('hosting_name') => array(
+        'parent',
+        'publish_path',
+      ),
+    ));
     $config->write();
   }
 }

@@ -1,2 +1,4 @@
 <?php print "<?php \n"; ?>
-$aliases['<?php print $aliasname; ?>'] = <?php print var_export($alias, TRUE); ?>;
+<?php foreach ($contexts as $name => $data) { ?>
+$aliases['<?php print $name; ?>'] = <?php print var_export($data, TRUE); ?>;
+<?php } ?>

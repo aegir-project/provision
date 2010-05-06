@@ -309,13 +309,14 @@ class provisionService_db extends provisionService {
    * Write out server's drushrc alias file.
    */
   function write_alias() {
-    $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name') . '-' . drush_get_option('init_db'), array('master_db'));
+    $config = new provisionConfig_drushrc_alias(array(
+      drush_get_option('hosting_name') . '-' . drush_get_option('init_db') => array(
+        'master_db',
+      ),
+    ));
     $config->write();
   }
 }
-
-
-
 
 /**
  * Indicates the place holders that should be replaced in _db_query_callback().

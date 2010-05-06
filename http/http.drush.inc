@@ -128,7 +128,14 @@ class provisionService_http extends provisionService {
    * Write out server's drushrc alias file.
    */
   function write_alias() {
-    $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name') . '-' . drush_get_option('init_http'), array('web_host', 'web_ports', 'web_group', 'restart_cmd'));
+    $config = new provisionConfig_drushrc_alias(array(
+      drush_get_option('hosting_name') . '-' . drush_get_option('init_http') => array(
+        'web_host',
+        'web_ports',
+        'web_group',
+        'restart_cmd',
+      ),
+    ));
     $config->write();
   }
 }

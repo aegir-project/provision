@@ -123,8 +123,8 @@ class provisionConfig_drushrc extends provisionConfig {
   function __construct($data = array()) {
     parent::__construct($data);
     $this->load_data();
-
   }
+
   function load_data() {
     // we fetch the context to pass into the template based on the context name
     $this->data = array_merge(drush_get_context($this->context_name), $this->data);
@@ -137,33 +137,39 @@ class provisionConfig_drushrc extends provisionConfig {
   }
 }
 
-// class to read and write an alias record
+/**
+ * Class to write an alias records.
+ */
 class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
   public $template = 'provision_drushrc_alias.tpl.php';
 
-  function __construct($aliasname, $options = array()) {
-    $this->aliasname = $aliasname;
-
-    $data = array();
-    foreach ($options as $key) {
-      $data[$key] = drush_get_option($key);
+  /**
+   * An array of contexts to write. The first key will determine the title.
+   *
+   * @param $contexts
+   *   An associative array of named contexts, like
+   *   @code '\@name' => array('option1', 'option2'), @endcode
+   *   will save the current values of option1 and option2 to @name.
+   */
+  function __construct($contexts) {
+    $contexts_expanded = array();
+    foreach ($contexts as $name => $options) {
+      $contexts_expanded[$name] = array();
+      foreach ($options as $key) {
+        $contexts_expanded[$name][$key] = drush_get_option($key);
+      }
     }
 
-    parent::__construct($data);
-  }
-
-  function load_data() {
     $this->data = array(
-      'aliasname' => $this->aliasname,
-      'alias' => $this->data,
+      'aliasname' => reset(array_keys($contexts)),
+      'contexts' => $contexts_expanded,
     );
   }
 
   function filename() {
-    return drush_get_option('alias-path', drush_server_home() . '/.drush/aliases/') . trim($this->aliasname, '@'); 
+    return drush_get_option('alias-path', drush_server_home() . '/.drush/aliases/') . trim($this->data['aliasname'], '@'); 
   }
 }
-
 
 /**
  * Server level config for drushrc.php files.
