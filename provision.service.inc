@@ -101,11 +101,28 @@ class provisionService_null extends provisionService {
 
 provision_service('null', new provisionService_null());
 
-function provision_service($type, $object = null) {
+/**
+ * Retrieve and register provisionService objects. There should be at most one
+ * of each service.
+ *
+ * @param $type
+ *   The service type, like 'db', 'http', or 'file'. 'all' for an associative
+ *   array of all services.
+ * @param $_object
+ *   Set the service type to $_object, an instance of a provisionService
+ *   subclass.
+ *
+ * @return A provisionService object.
+ */
+function provision_service($type, $_object = NULL) {
   static $instances = null;
 
-  if (is_object($object)) {
-    $instances[$type] = $object;
+  if ($type === 'all') {
+    return $instances;
+  }
+
+  if (is_object($_object)) {
+    $instances[$type] = $_object;
   }
 
   if (isset($instances[$type])) {
