@@ -40,7 +40,7 @@ enabled=1
 gpgcheck=1
 gpgkey=http://www.jasonlitka.com/media/RPM-GPG-KEY-jlitka
 EOF
- yum install httpd postfix cvs sudo unzip mysql-server php php-mysql
+ yum install httpd postfix sudo unzip mysql-server php php-mysql
 
 2. Configure system requirements
 ================================
