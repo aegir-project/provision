@@ -224,6 +224,14 @@ function drush_http_provision_named_context_save() {
     $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent')));
     $config->write();
   }
+  elseif (PROVISION_CONTEXT_PLATFORM) {
+    // Save platform alias
+    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'publish_path')));
+    $config->write();
+  }
+  elseif (PROVISION_CONTEXT_SITE) {
+    //todo
+  }
 }
 
 function _provision_default_restart_cmd() {
