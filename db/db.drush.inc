@@ -303,7 +303,7 @@ class provisionService_db extends provisionService {
    * Write out server's drushrc alias file.
    */
   function write_alias() {
-    return array(drush_get_option('init_db') => array('master_db'));
+    return array(drush_get_option('init_db') => array('init_db', 'master_db'));
   }
 }
 

@@ -167,7 +167,7 @@ class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
   }
 
   function filename() {
-    return drush_get_option('alias-path', drush_server_home() . '/.drush/aliases/') . $this->data['aliasname']; 
+    return drush_get_option('alias-path', drush_server_home() . '/.drush/aliases') . '/' . $this->data['aliasname'] . '.alias.drushrc.php'; 
   }
 }
 

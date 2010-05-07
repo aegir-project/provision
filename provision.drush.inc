@@ -211,19 +211,17 @@ function drush_provision_hostmaster_make($platform) {
 function drush_http_provision_named_context_save() {
   if (PROVISION_CONTEXT_SERVER) {
     $parents = array();
-    $contexts = array(
-      drush_get_option('hosting_name') => array('parents'),
-    );
 
     foreach (provision_service('all') as $service) {
       foreach ($service->write_alias() as $key => $value) {
         $parents[] = drush_get_option('hosting_name') . '-' . $key;
-        $contexts[drush_get_option('hosting_name') . '-' . $key] = $value; 
+        $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') . '-' . $key => $value));
+        $config->write();
       }
     }
 
-    drush_set_option('parents', '@' . implode(',@', $parents));
-    $config = new provisionConfig_drushrc_alias($contexts);
+    drush_set_option('parent', '@' . implode(',@', $parents));
+    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent')));
     $config->write();
   }
 }

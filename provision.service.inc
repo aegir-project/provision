@@ -84,6 +84,7 @@ class provisionService {
   }
 
   function write_alias() {
+    return array();
   }
 }
 
