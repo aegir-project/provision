@@ -164,7 +164,7 @@ Shell commands as root::
  a2enmod rewrite
  ln -s /var/aegir/config/apache.conf /etc/apache2/conf.d/aegir.conf
 
-That user needs to have sudo access. The wizard will explain you how to
+The aegir user needs to have sudo access. The wizard will explain how to
 do this, but you can already just add the relevant line to your sudoers
 file.
 
