@@ -89,13 +89,11 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     return $matches[1];
   }
 
-
-  //todo - SORT THIS SHIT OUT!
   function generate_dump() {
-
-    # set the umask to 077 so that the dump itself is generated so it's non-readable by the webserver
+    // Aet the umask to 077 so that the dump itself is generated so it's
+    // non-readable by the webserver.
     umask(0077);
-    # mixed copy-paste of drush_shell_exec and provision_shell_exec
+    // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
     $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 -rsites/%s/database.sql %s", escapeshellcmd(drush_get_option('uri')), escapeshellcmd(drush_get_option('db_name'))); 
 
     $this->safe_shell_exec($cmd, drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
@@ -104,11 +102,9 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     if (!$result && !drush_get_option('force', false)) {
       drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not generate database backup from mysqldump"));
     }
-    # reset the umask to normal permissions
+    // Reset the umask to normal permissions.
     umask(0022);
-
   }
-
 
   function safe_shell_exec($cmd, $db_host, $db_user, $db_passwd) {
     # we go through all this trouble to hide the password from the commandline, it's the most secure way (apart from writing a temporary file, which would create conflicts in parallel runs)
