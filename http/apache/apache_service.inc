@@ -5,12 +5,12 @@
 
 class provisionService_http_apache extends provisionService_http {
 
-  function create_site_config($url) {
+  function create_site_config() {
     $config = new provisionConfig_apache_site(drush_get_merged_options());
     return $config->write();
   }
 
-  function delete_site_config($url) {
+  function delete_site_config() {
     $config = new provisionConfig_apache_site(drush_get_merged_options());
     return $config->unlink();
   }
@@ -20,7 +20,7 @@ class provisionService_http_apache extends provisionService_http {
     return $config->write();
   }
 
-  function delete_platform_config($url) {
+  function delete_platform_config() {
     $config = new provisionConfig_apache_platform(drush_get_merged_options());
     return $config->unlink();
   }
@@ -32,13 +32,13 @@ class provisionService_http_apache extends provisionService_http {
   }
 
   
-  function delete_server_config($url) {
+  function delete_server_config() {
     $config = new provisionConfig_apache_server(drush_get_merged_options());
     return $config->unlink();
   }
 
 
-  function verify($url) {
+  function verify() {
     if (PROVISION_CONTEXT_PLATFORM) {
       if (drush_get_option('platform', null)) {
         $this->create_platform_config();
@@ -52,7 +52,7 @@ class provisionService_http_apache extends provisionService_http {
       $this->create_server_config();
     }
     elseif (PROVISION_CONTEXT_SITE) {
-      $this->create_site_config($url);
+      $this->create_site_config();
     }
 
     $this->parse_configs();

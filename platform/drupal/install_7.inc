@@ -143,7 +143,7 @@ function install_main() {
     drush_set_error('DRUPAL_INSTALL_FAILED');
     dlm($e);
   }
-  _provision_drupal_create_directories($url);
+  _provision_drupal_create_directories();
 
   if ($client_email) {
     install_send_welcome_mail($url, $profile, $install_locale, $client_email);

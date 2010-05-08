@@ -225,12 +225,14 @@ function drush_http_provision_named_context_save() {
     $config->write();
   }
   elseif (PROVISION_CONTEXT_PLATFORM) {
-    // Save platform alias
     $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'publish_path')));
     $config->write();
   }
   elseif (PROVISION_CONTEXT_SITE) {
-    //todo
+    drush_set_option('uri', drush_get_option('provision-uri'));
+    drush_set_option('root', drush_get_option('publish_path'));
+    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'root', 'uri', 'site_port', 'site_id', 'language')));
+    $config->write();
   }
 }
 

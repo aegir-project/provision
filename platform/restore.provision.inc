@@ -23,7 +23,7 @@
 /**
  * Make sure we have a valid site being restored, and that the file being restored from exists
  */
-function drush_provision_drupal_provision_restore_validate($url = null, $restore_file = null) {
+function drush_provision_drupal_provision_restore_validate($restore_file = null) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
   $exists = provision_service('file')->exists($restore_file)
@@ -38,10 +38,10 @@ function drush_provision_drupal_provision_restore_validate($url = null, $restore
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
-function drush_provision_drupal_pre_provision_restore($url, $restore_file) {
-  drush_invoke('provision-backup', $url);
+function drush_provision_drupal_pre_provision_restore($restore_file) {
+  drush_invoke('provision-backup');
 
-  provision_service('file')->extract(drush_get_option('restore_file'), drush_get_option('sites_path') . '/' . $url . '.restore') 
+  provision_service('file')->extract(drush_get_option('restore_file'), drush_get_option('sites_path') . '/' . drush_get_option('uri') . '.restore') 
     ->succeed('Successfully extracted the contents of @path')
     ->fail('Failed to extract the contents of @path', 'PROVISION_BACKUP_EXTRACTION_FAILED');
 }
@@ -49,36 +49,36 @@ function drush_provision_drupal_pre_provision_restore($url, $restore_file) {
 /**
  * Remove the extracted site directory
  */
-function drush_provision_drupal_pre_provision_restore_rollback($url) {
-  _provision_recursive_delete(drush_get_option('sites_path') ."/$url.restore");
+function drush_provision_drupal_pre_provision_restore_rollback() {
+  _provision_recursive_delete(drush_get_option('sites_path') . '/' . drush_get_option('uri') . '.restore');
 }
 
 /**
  * Switch the restore directories around now that we have the new db installed
  */
-function drush_provision_drupal_provision_restore($url) {
-  $old = drush_get_option('sites_path') . '/' . $url . '.restore';
-  $new = drush_get_option('sites_path') . '/' . $url;
+function drush_provision_drupal_provision_restore() {
+  $old = drush_get_option('sites_path') . '/' . drush_get_option('uri') . '.restore';
+  $new = drush_get_option('sites_path') . '/' . drush_get_option('uri');
   provision_service('file')->switch_paths($old, $new)
     ->succeed('Swapping out the @path1 and @path2 directories was successful.')
     ->fail('Swapping the @path1 and @path2 directories has failed.', 'DRUSH_PERM_ERROR');
   // make sure it has the latest site data available
   _provision_drupal_create_settings_file();
-  provision_save_site_data($url);
+  provision_save_site_data();
 }
 
 // Luckily this is reversable =)
-function drush_provision_drupal_provision_restore_rollback($url) {
-  drush_provision_drupal_provision_restore($url);
+function drush_provision_drupal_provision_restore_rollback() {
+  drush_provision_drupal_provision_restore();
 }
 
 /**
  * Delete the old site directory and recreate the settings file
  */
-function drush_provision_drupal_post_provision_restore($url) {
-  _provision_recursive_delete(drush_get_option('sites_path') ."/$url.restore");
+function drush_provision_drupal_post_provision_restore() {
+  _provision_recursive_delete(drush_get_option('sites_path') . '/' . drush_get_option('uri') . '.restore');
   // This is the actual drupal provisioning requirements. 
-  _provision_drupal_create_directories($url);
+  _provision_drupal_create_directories();
   _provision_drupal_create_settings_file();
 }
 

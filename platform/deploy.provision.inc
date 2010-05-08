@@ -18,7 +18,7 @@
 /**
  * Make sure we have a valid site being deployd, and that the file being deployd from exists
  */
-function drush_provision_drupal_provision_deploy_validate($url = null, $backup_file = null) {
+function drush_provision_drupal_provision_deploy_validate($backup_file = null) {
   _provision_drupal_url_required();
 
   $exists = provision_service('file')->exists($backup_file)
@@ -33,10 +33,10 @@ function drush_provision_drupal_provision_deploy_validate($url = null, $backup_f
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
-function drush_provision_drupal_pre_provision_deploy($url, $backup_file) {
+function drush_provision_drupal_pre_provision_deploy($backup_file) {
   // the url is likely to have changed in the deployment
-  drush_set_option('site_url', $url);
-  $extracted = provision_service('file')->extract(drush_get_option('backup_file'), drush_get_option('sites_path') . '/' . $url) 
+  drush_set_option('site_url', drush_get_option('uri'));
+  $extracted = provision_service('file')->extract(drush_get_option('backup_file'), drush_get_option('sites_path') . '/' . drush_get_option('uri')) 
     ->succeed('Successfully extracted the contents of @path')
     ->fail('Failed to extract the contents of @path', 'PROVISION_BACKUP_EXTRACTION_FAILED')
     ->status();
@@ -73,24 +73,23 @@ function drush_provision_drupal_pre_provision_deploy($url, $backup_file) {
 /**
  * Remove the extracted site directory
  */
-function drush_provision_drupal_pre_provision_deploy_rollback($url) {
+function drush_provision_drupal_pre_provision_deploy_rollback() {
   if ($site_root = drush_get_context('DRUSH_DRUPAL_SITE_ROOT')) {
     _provision_recursive_delete($site_root);
   }
 }
 
-function drush_provision_drupal_provision_deploy($url) {
-  $url = drush_get_option('site_url');
-  _provision_drupal_maintain_aliases($url);
+function drush_provision_drupal_provision_deploy() {
+  _provision_drupal_maintain_aliases(drush_get_option('site_url'));
 }
 
 
-function drush_provision_drupal_post_provision_deploy($url) {
+function drush_provision_drupal_post_provision_deploy() {
   provision_prepare_environment();
   _provision_drupal_create_settings_file();
-  provision_save_site_data($url);
+  provision_save_site_data();
   // call the drush updatedb command.
-  drush_backend_invoke("updatedb", array('uri' => "http://$url"));
+  drush_backend_invoke("updatedb", array('uri' => 'http://' . drush_get_option('uri')));
   // We should be able to fully load Drupal now.
   if (drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL)) {
     drush_include_engine('drupal', 'deploy');

@@ -1,10 +1,10 @@
 <?php
 
-function drush_http_provision_verify($url = null) {
-  provision_service('http')->verify($url);
+function drush_http_provision_verify() {
+  provision_service('http')->verify();
 }
 
-function drush_http_post_provision_verify($url = null) {
+function drush_http_post_provision_verify() {
   if (PROVISION_CONTEXT_PLATFORM) {
     drush_set_option('publish_path', realpath(drush_get_option('publish_path')), 'drupal');
     drush_unset_option('master_url',  'drupal');

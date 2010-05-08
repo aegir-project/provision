@@ -50,17 +50,17 @@ function provision_drupal_drush_engine_drupal() {
  * This function is executed by drush_invoke, and is responsible
  * for populating the $data context array
  */
-function provision_drupal_drush_init($url = NULL) {
+function provision_drupal_drush_init() {
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
 
 
   if (preg_match("/^provision-/", $command[0])) {
-    _provision_context_init($url);
+    _provision_context_init();
   }
 }
 
-function _provision_context_init($url) {
+function _provision_context_init() {
   static $is_run = false;
 
   if ($is_run) {
@@ -72,9 +72,8 @@ function _provision_context_init($url) {
   if (($context === 'platform' || $context === 'site') && drush_bootstrap_validate(DRUSH_BOOTSTRAP_DRUPAL_ROOT)) { 
     // i don't think i should be bootstrapping here yet ... but i have no choice yet.
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
-    if ($context === 'site' && $url) {
-      drush_set_option('uri' , 'http://' . $url);
-      drush_set_default('site_url', $url);
+    if ($context === 'site') {
+      drush_set_default('site_url', drush_get_option('uri'));
       drush_set_default('profile', 'default');
       drush_set_default('language', 'en');
       drush_set_default('aliases', array());
@@ -97,7 +96,7 @@ function _provision_context_init($url) {
  * and will allow us to cache the successful settings to the site.php/ drushrc.php
  * files for future runs.
  */
-function provision_drupal_drush_exit($url = NULL) {
+function provision_drupal_drush_exit() {
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
 
@@ -107,7 +106,7 @@ function provision_drupal_drush_exit($url = NULL) {
         drush_set_option('site_url', drush_get_option('site_url'), 'site');
         drush_set_option('site_id', drush_get_option('site_id'), 'site');
         drush_set_option('client_email', drush_get_option('client_email'), 'site');
-        provision_save_site_data($url);
+        provision_save_site_data();
       }
     }
     elseif (PROVISION_CONTEXT_PLATFORM) {
@@ -139,7 +138,7 @@ function _provision_drupal_url_required() {
  */
 function _provision_drupal_valid_site() {
   if (PROVISION_CONTEXT_SITE) {
-    if (!_provision_drupal_site_exists(drush_get_option('site_url'))) {
+    if (!_provision_drupal_site_exists()) {
       drush_set_error('PROVISION_DRUPAL_SITE_NOT_FOUND');
     }
   }
@@ -153,8 +152,8 @@ function _provision_drupal_valid_site() {
  * @return
  *   If the file exists, return TRUE, else return FALSE.
  */
-function _provision_drupal_site_exists($url) {
-  return file_exists("sites/$url/settings.php");
+function _provision_drupal_site_exists() {
+  return file_exists('sites/' . drush_get_option('uri') . '/settings.php');
 }
 
 
@@ -165,7 +164,7 @@ function _provision_drupal_site_exists($url) {
  */
 function _provision_drupal_valid_installed_site() {
   if (PROVISION_CONTEXT_SITE) {
-    if (!_provision_drupal_site_installed(drush_get_option('site_url'))) {
+    if (!_provision_drupal_site_installed()) {
       drush_set_error('PROVISION_DRUPAL_SITE_NOT_FOUND');
     }
   }
@@ -173,7 +172,7 @@ function _provision_drupal_valid_installed_site() {
 
 function _provision_drupal_valid_not_installed_site() {
   if (PROVISION_CONTEXT_SITE) {
-    if (_provision_drupal_site_installed(drush_get_option('site_url'))) {
+    if (_provision_drupal_site_installed()) {
       drush_set_error('PROVISION_DRUPAL_SITE_INSTALLED');
     }
   }
@@ -182,8 +181,8 @@ function _provision_drupal_valid_not_installed_site() {
 /**
  * Test to see if the site has a site.php and has it set to 'installed'
  */
-function _provision_drupal_site_installed($url) {
-  if (_provision_drupal_site_exists($url)) {
+function _provision_drupal_site_installed() {
+  if (_provision_drupal_site_exists()) {
     return drush_get_option('installed');
   }
   return FALSE;
@@ -229,7 +228,10 @@ class provisionConfig_drupal_settings extends provisionConfig {
  * 
  * Also maintains permissions on existing directories.
  */
-function _provision_drupal_create_directories($url, $profile = NULL) {  
+function _provision_drupal_create_directories($url = NULL, $profile = NULL) {  
+  if (is_null($url)) {
+    $url = drush_get_option('uri');
+  }
   # those directories will be created and their modes changed
   $mkdir = array(
     "sites/$url"                 => 0755,
@@ -284,7 +286,7 @@ function _provision_drupal_create_directories($url, $profile = NULL) {
 /**
  * Runs an external script to reload all the various drupal caches
  */
-function _provision_drupal_rebuild_caches($url = NULL) {
+function _provision_drupal_rebuild_caches() {
   if (PROVISION_CONTEXT_SITE) {
     drush_include_engine('drupal', 'clear');
   }
@@ -384,7 +386,7 @@ function _provision_drupal_get_cvs_versions($files) {
 /**
  * Create and remove symlinks for each of the possible domain aliases of an existing site
  */
-function _provision_drupal_maintain_aliases($url) {
+function _provision_drupal_maintain_aliases() {
   if (PROVISION_CONTEXT_SITE) {
     // First we delete all the old aliases
     drush_set_option('aliases', drush_get_option('aliases'), 'site');
@@ -397,7 +399,7 @@ function _provision_drupal_maintain_aliases($url) {
       }
       foreach($aliases as $alias) {
         if (trim($alias)) {
-          provision_service('file')->symlink($url, drush_get_option('publish_path') . '/sites/' . $alias)
+          provision_service('file')->symlink(drush_get_option('uri'), drush_get_option('publish_path') . '/sites/' . $alias)
             ->succeed('Created symlink for alias @target')
             ->fail('Could not create symlink for alias @target');
         }

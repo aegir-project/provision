@@ -1,20 +1,20 @@
 <?php
 
-function drush_db_provision_restore_validate($url) {
-  provision_service('db')->connect($url);
+function drush_db_provision_restore_validate() {
+  provision_service('db')->connect();
 }
 
-function drush_db_pre_provision_restore($url = NULL) {
-  provision_service('db')->create_site_database($url);
+function drush_db_pre_provision_restore() {
+  provision_service('db')->create_site_database();
 }
 
-function drush_db_provision_restore($url) {
-  provision_service('db')->import_site_database($url);
+function drush_db_provision_restore() {
+  provision_service('db')->import_site_database();
 }
 
 
-function drush_db_pre_provision_restore_rollback($url = NULL) {
-  provision_service('db')->destroy_site_db($url);
+function drush_db_pre_provision_restore_rollback() {
+  provision_service('db')->destroy_site_database();
 
   $keys = array('db_name', 'db_passwd', 'db_user', 'db_host');
 
@@ -29,12 +29,12 @@ function drush_db_pre_provision_restore_rollback($url = NULL) {
 
 // Rollback doesn't apply here yet. Unless we trigger a restore of the first dump
 // made. Which could go on infinitely if something is really long.
-function drush_db_post_provision_restore($url = NULL) {
-  provision_service('file')->unlink(drush_get_option('sites_path') . '/' . $url . '/database.sql')
+function drush_db_post_provision_restore() {
+  provision_service('file')->unlink(drush_get_option('sites_path') . '/' . drush_get_option('uri') . '/database.sql')
     ->succeed('Removed dump file @path after restoring from it')
     ->fail('Could not remove dump file @path', 'DRUSH_PERM_ERROR');
 
-  provision_service('db')->destroy_site_database($url);
+  provision_service('db')->destroy_site_database();
 
   // TODO - test this .. it's probably horribly broken .. deleting the newly restored db instead of the old one.
 

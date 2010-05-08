@@ -11,12 +11,12 @@
 
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
-function db_drush_init($url = null) {
+function db_drush_init() {
   // todo same as http, consolidate
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
   if (preg_match("/^provision-/", $command[0])) {
-    _provision_context_init($url);
+    _provision_context_init();
 
     if (PROVISION_CONTEXT_SERVER) {
       if (!is_null(drush_get_option('init_db'))) {
@@ -106,7 +106,7 @@ class provisionService_db extends provisionService {
    *
    * TODO: abstract this properly.
    */ 
-  function suggest_db_name($url) {
+  function suggest_db_name() {
     if ($sid = drush_get_option('site_id')) {
       $suggest_base = drush_get_option('aegir_db_prefix', 'site_') . $sid;
     }
@@ -123,7 +123,7 @@ class provisionService_db extends provisionService {
       // site name
       //
       // Provision only users will trigger this mostly.
-      $suggest_base = substr(str_replace(array(".", "-"), '' , ereg_replace("^www\.", "", $url)), 0, 14);
+      $suggest_base = substr(str_replace(array('.', '-'), '' , ereg_replace('^www\.', '', drush_get_option('uri'))), 0, 14);
     }
     $suggest[] = $suggest_base;
     for ($i = 0; $i < 100; $i++) {
@@ -145,8 +145,8 @@ class provisionService_db extends provisionService {
   /**
    * Generate a new mysql database and user account for the specified credentials
    */
-  function create_site_database($url) {
-    $creds = $this->generate_site_credentials($url);
+  function create_site_database() {
+    $creds = $this->generate_site_credentials();
     extract($creds);
     
 
@@ -181,7 +181,7 @@ class provisionService_db extends provisionService {
   /**
    * Remove the database and user account for the supplied credentials
    */
-  function destroy_site_database($url) {
+  function destroy_site_database() {
     $creds = $this->fetch_site_credentials();
     extract($creds);
 
@@ -204,8 +204,8 @@ class provisionService_db extends provisionService {
   }
 
 
-  function import_site_database($url) {
-    $dump_file = drush_get_option('sites_path') .'/'. $url .'/database.sql';
+  function import_site_database() {
+    $dump_file = drush_get_option('sites_path') . '/' . drush_get_option('uri') . '/database.sql';
 
     $creds = $this->fetch_site_credentials();
 
@@ -224,14 +224,7 @@ class provisionService_db extends provisionService {
     }
   }
 
-
-  // todo - SORT THIS SHIT OUT!
-  function dump_site_database($url) {
-    return $this->generate_dump($url);
-  }
-
-
-  function generate_site_credentials($url) {
+  function generate_site_credentials() {
     $creds = array();
     // replace with service type 
     $db_type = drush_get_option('db_type');
@@ -244,14 +237,14 @@ class provisionService_db extends provisionService {
     $creds['db_type'] = drush_set_option('db_type', $db_type, 'site');
     $creds['db_host'] = drush_set_option('db_host', drush_get_option('db_host'), 'site');
     $creds['db_passwd'] = drush_set_option('db_passwd', provision_password(), 'site');
-    $creds['db_name'] = drush_set_option('db_name', $this->suggest_db_name($url), 'site');
+    $creds['db_name'] = drush_set_option('db_name', $this->suggest_db_name(), 'site');
     $creds['db_user'] = drush_set_option('db_user', $creds['db_name'], 'site');
     $creds['db_grant_host'] = $this->grant_host();
 
     return $creds;
   }
 
-  function fetch_site_credentials($url) {
+  function fetch_site_credentials() {
     $creds = array();
 
     $keys = array('db_type', 'db_user', 'db_name', 'db_host', 'db_passwd');
@@ -291,7 +284,7 @@ class provisionService_db extends provisionService {
     return FALSE;
   }
 
-  function generate_dump($url) {
+  function generate_dump() {
     return FALSE;
   }
 

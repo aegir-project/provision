@@ -2,12 +2,12 @@
 
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
-function http_drush_init($url = null) {
+function http_drush_init() {
   // todo same as db, consolidate
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
   if (preg_match("/^provision-/", $command[0])) {
-    _provision_context_init($url);
+    _provision_context_init();
 
     if (PROVISION_CONTEXT_SERVER) {
       if (!is_null(drush_get_option('init_http'))) {
@@ -79,21 +79,21 @@ class provisionService_http extends provisionService {
   /**
    * Generate a site specific configuration file
    */
-  function create_site_config($url) {
+  function create_site_config() {
     return TRUE;
   }
 
   /**
    * Remove an existing site configuration file.
    */
-  function delete_site_config($url) {
+  function delete_site_config() {
     return TRUE;
   }
 
   /**
    * Add a new platform specific configuration file.
    */
-  function create_platform_config($url) {
+  function create_platform_config() {
     return TRUE;
   }
 

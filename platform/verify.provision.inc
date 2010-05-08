@@ -5,8 +5,8 @@
  *
  * Disable an enabled and installed site
  */
-function drush_provision_drupal_provision_verify_validate($url = null) {
-  if ($url) {
+function drush_provision_drupal_provision_verify_validate() {
+  if (PROVISION_CONTEXT_SITE) {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
     provision_prepare_environment();
 
@@ -24,7 +24,7 @@ function drush_provision_drupal_provision_verify_validate($url = null) {
 /**
  * implementation of provision_verify
  */
-function drush_provision_drupal_provision_verify($url = null) {
+function drush_provision_drupal_provision_verify() {
   if (PROVISION_CONTEXT_SERVER) {
     provision_service('file')->create_dir(drush_get_option('config_path'), dt('Provision configuration'), 0711);
     provision_service('file')->create_dir(drush_get_option('config_path') . '/includes', dt('Provision PHP configuration'), 0711);
@@ -48,9 +48,9 @@ function drush_provision_drupal_provision_verify($url = null) {
   }
   elseif (PROVISION_CONTEXT_SITE) {
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
-      // This is the actual drupal provisioning requirements. 
-    _provision_drupal_create_directories($url);
-    _provision_drupal_maintain_aliases($url);
+    // This is the actual drupal provisioning requirements. 
+    _provision_drupal_create_directories();
+    _provision_drupal_maintain_aliases();
     // Requires at least the database settings to complete.
    _provision_drupal_create_settings_file();
   }
@@ -71,9 +71,9 @@ class provisionConfig_global_settings extends provisionConfig {
 /**
  * Implementation of hook_provision_post_verify
  */
-function drush_provision_drupal_post_provision_verify($url = NULL) {
+function drush_provision_drupal_post_provision_verify() {
   if (PROVISION_CONTEXT_SITE) {
-    _provision_drupal_rebuild_caches($url);
+    _provision_drupal_rebuild_caches();
     drush_set_option('aliases', drush_get_option('aliases'), 'site');
     drush_set_option('redirection', drush_get_option('redirection'), 'site');
     drush_set_option('installed', TRUE, 'site');
