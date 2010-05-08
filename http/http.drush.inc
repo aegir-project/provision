@@ -2,29 +2,6 @@
 
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
-function http_drush_init() {
-  // todo same as db, consolidate
-  $command = drush_get_command();
-  $command = explode(" ", $command['command']);
-  if (preg_match("/^provision-/", $command[0])) {
-    _provision_context_init();
-
-    if (PROVISION_CONTEXT_SERVER) {
-      if (!is_null(drush_get_option('init_http'))) {
-        // Bootstrap for alias creation.
-        include_once(drush_get_option('init_http') . '/'. drush_get_option('init_http') .'_service.inc');
-        $class = 'provisionService_http_' . drush_get_option('init_http');
-        provision_service('http', new $class());
-      }
-    }
-    else {
-      // todo should be constructed based on drush aliases
-      include_once('apache/apache_service.inc');
-      provision_service('http', new provisionService_http_apache());
-    }
-  }
-}
-
 class provisionService_http extends provisionService {
   /**
    * Set defaults

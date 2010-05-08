@@ -54,7 +54,6 @@ function provision_drupal_drush_init() {
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
 
-
   if (preg_match("/^provision-/", $command[0])) {
     _provision_context_init();
   }
@@ -85,6 +84,15 @@ function _provision_context_init() {
   define('PROVISION_CONTEXT_SITE', $context === 'site');
 
   drush_log(dt('Using context @context', array('@context' => $context)));
+
+  // Initialize services.
+  foreach (array('db', 'http') as $service) {
+    if (!is_null(drush_get_option('init_' . $service))) {
+      include_once(drush_get_option('init_' . $service) . '/'. drush_get_option('init_' . $service) .'_service.inc');
+      $class = 'provisionService_' . $service . '_' . drush_get_option('init_' . $service);
+      provision_service($service, new $class());
+    }
+  }
 
   $is_run = TRUE;
 }

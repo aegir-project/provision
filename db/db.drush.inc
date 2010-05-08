@@ -8,33 +8,7 @@
  * It uses the provision API to tie into the right places in the site creation work flow.
  */
 
-
 include_once(dirname(__FILE__) . '/../provision.service.inc');
-
-function db_drush_init() {
-  // todo same as http, consolidate
-  $command = drush_get_command();
-  $command = explode(" ", $command['command']);
-  if (preg_match("/^provision-/", $command[0])) {
-    _provision_context_init();
-
-    if (PROVISION_CONTEXT_SERVER) {
-      if (!is_null(drush_get_option('init_db'))) {
-        // Bootstrap for alias creation.
-        include_once(drush_get_option('init_db') . '/'. drush_get_option('init_db') .'_service.inc');
-        $class = 'provisionService_db_' . drush_get_option('init_db');
-        provision_service('db', new $class());
-      }
-    }
-    elseif (PROVISION_CONTEXT_SITE) {
-      // todo should be constructed based on drush aliases
-      include_once('mysql/mysql_service.inc');
-      provision_service('db', new provisionService_db_mysql());
-    }
-  }
-
-  // this is where we generate the db service object.
-}
 
 function db_drush_exit() {
   // determine how to close it too.
