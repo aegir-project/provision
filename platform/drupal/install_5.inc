@@ -66,7 +66,11 @@ function install_create_admin_user($client_email = NULL) {
   if (!$account) {
     $account = new stdClass();
   }
-  $edit['name'] = 'admin';
+  $edit['name'] = drush_get_option('admin_user', 'admin');
+  if ($error = user_validate_name($edit['name'])) {
+    // 'admin' is a sane default
+    $edit['name'] = 'admin';
+  }
   $edit['pass'] = user_password();
   $edit['mail'] = $client_email;
   $edit['status'] = 1;

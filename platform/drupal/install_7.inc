@@ -15,7 +15,11 @@ function install_send_welcome_mail($url, $profile, $language, $client_email) {
   if ($client_email) {
     // create the admin account
     $account = user_load(1);
-    $edit['name'] = 'admin';
+    $edit['name'] = drush_get_option('admin_user', 'admin');
+    if ($error = user_validate_name($edit['name'])) {
+      // 'admin' is a sane default
+      $edit['name'] = 'admin';
+    }
     $edit['pass'] = user_password();
     $edit['mail'] = $client_email;
     $edit['status'] = 1;
