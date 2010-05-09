@@ -59,8 +59,8 @@ class provisionService_http_apache extends provisionService_http {
   }
 
   function parse_configs($cause_error = FALSE) {
-    //This is required to be configurable, due to the fact that different hosts might need to do this differently.
-    //TODO : test for this instead of relying on a configuration setting?
+    // This is required to be configurable, due to the fact that different
+    // hosts might need to do this differently.
     $return = drush_shell_exec(escapeshellcmd(drush_get_option('restart_cmd')));
     if (!$return) {
       $msg = join("\n", drush_shell_exec_output());

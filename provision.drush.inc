@@ -237,14 +237,15 @@ function drush_http_provision_named_context_save() {
 }
 
 function _provision_default_restart_cmd() {
-  $command = '/usr/sbin/apachectl'; # a proper default for most of the world
+  $command = '/usr/sbin/apachectl'; // A proper default for most of the world
   foreach (explode(':', $_SERVER['PATH']) as $path) {
     $options[] = "$path/apache2ctl";
     $options[] = "$path/apachectl";
   }
-  # try to detect the apache restart command
-  $options[] = '/usr/local/sbin/apachectl'; # freebsd
-  $options[] = '/usr/sbin/apache2ctl'; # debian + apache2
+  // Try to detect the apache restart command.
+  $options[] = '/usr/local/sbin/apachectl'; // freebsd
+  $options[] = '/usr/sbin/apache2ctl'; // debian + apache2
+  $options[] = '/usr/apache2/2.2/bin'; // Solaris
   $options[] = $command;
 
   foreach ($options as $test) {
