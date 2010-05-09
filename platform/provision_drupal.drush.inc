@@ -86,11 +86,11 @@ function _provision_context_init() {
   drush_log(dt('Using context @context', array('@context' => $context)));
 
   // Initialize services.
-  foreach (array('db', 'http') as $service) {
-    if (!is_null(drush_get_option('provision-service-' . $service))) {
-      include_once dirname(__FILE__) . '/../' . $service . '/' . drush_get_option('provision-service-' . $service) . '/'. drush_get_option('provision-service-' . $service) .'_service.inc';
-      $class = 'provisionService_' . $service . '_' . drush_get_option('provision-service-' . $service);
-      provision_service($service, new $class());
+  foreach (drush_get_merged_options() as $option => $value) {
+    if (preg_match('/^provision-service-([a-z]*)/', $option, $match)) {
+      include_once dirname(__FILE__) . '/../' . $match[1] . '/' . $value . '/'. $value .'_service.inc';
+      $class = 'provisionService_' . $match[1] . '_' . $value;
+      provision_service($match[1], new $class());
     }
   }
 
