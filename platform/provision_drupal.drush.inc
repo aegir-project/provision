@@ -87,9 +87,9 @@ function _provision_context_init() {
 
   // Initialize services.
   foreach (array('db', 'http') as $service) {
-    if (!is_null(drush_get_option('init_' . $service))) {
-      include_once(drush_get_option('init_' . $service) . '/'. drush_get_option('init_' . $service) .'_service.inc');
-      $class = 'provisionService_' . $service . '_' . drush_get_option('init_' . $service);
+    if (!is_null(drush_get_option('provision-service-' . $service))) {
+      include_once dirname(__FILE__) . '/../' . $service . '/' . drush_get_option('provision-service-' . $service) . '/'. drush_get_option('provision-service-' . $service) .'_service.inc';
+      $class = 'provisionService_' . $service . '_' . drush_get_option('provision-service-' . $service);
       provision_service($service, new $class());
     }
   }

@@ -99,6 +99,6 @@ class provisionService_http extends provisionService {
    * Write out server's drushrc alias file.
    */
   function write_alias() {
-    return array(drush_get_option('init_http') => array('init_http', 'web_host', 'web_ports', 'web_group', 'restart_cmd'));
+    return array(drush_get_option('provision-service-http') => array('provision-service-http', 'web_host', 'web_ports', 'web_group', 'restart_cmd'));
   }
 }

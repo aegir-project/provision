@@ -37,8 +37,8 @@ function drush_provision_hostmaster_install($site) {
     $data['master_db'] = "$scheme://$user:$pass@$host";
   }
   
-  $data['init_http'] = 'apache';
-  $data['init_db'] = 'mysql';
+  $data['provision-service-http'] = 'apache';
+  $data['provision-service-db'] = 'mysql';
   $data['provision_context'] = 'server';
   $data['parent_path'] = $parent_path;
   $data['script_user'] = drush_get_option('script_user', 'aegir');
