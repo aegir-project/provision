@@ -221,17 +221,17 @@ function drush_http_provision_named_context_save() {
     }
 
     drush_set_option('parent', '@' . implode(',@', $parents));
-    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent')));
+    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'provision-context')));
     $config->write();
   }
   elseif (PROVISION_CONTEXT_PLATFORM) {
-    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'publish_path')));
+    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'provision-context', 'publish_path')));
     $config->write();
   }
   elseif (PROVISION_CONTEXT_SITE) {
     drush_set_option('uri', drush_get_option('provision-uri'));
     drush_set_option('root', drush_get_option('publish_path'));
-    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'root', 'uri', 'site_port', 'site_id', 'language')));
+    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'provision-context', 'root', 'uri', 'site_port', 'site_id', 'language')));
     $config->write();
   }
 }

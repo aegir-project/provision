@@ -66,8 +66,7 @@ function _provision_context_init() {
     return TRUE;
   }
 
-  $context = drush_get_option('provision_context');
-  // todo could probably clean this up, may want to throw errors
+  $context = drush_get_option('provision-context');
   if (($context === 'platform' || $context === 'site') && drush_bootstrap_validate(DRUSH_BOOTSTRAP_DRUPAL_ROOT)) { 
     // i don't think i should be bootstrapping here yet ... but i have no choice yet.
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);

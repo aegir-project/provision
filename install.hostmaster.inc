@@ -39,7 +39,7 @@ function drush_provision_hostmaster_install($site) {
   
   $data['provision-service-http'] = 'apache';
   $data['provision-service-db'] = 'mysql';
-  $data['provision_context'] = 'server';
+  $data['provision-context'] = 'server';
   $data['parent_path'] = $parent_path;
   $data['script_user'] = drush_get_option('script_user', 'aegir');
   $data['web_group'] = drush_get_option('web_group', _provision_default_web_group());
@@ -58,7 +58,7 @@ function drush_provision_hostmaster_install($site) {
   // verify the current platform
   drush_backend_invoke('provision-verify', array(
     'root' => $platform,
-    'provision_context' => "platform",
+    'provision-context' => "platform",
     'publish_path' => $platform,
     'platform' => '5') // dirty hardcoded to create the first platform apache config
                        // this will become unnecessary when we have drush aliases
@@ -71,7 +71,7 @@ function drush_provision_hostmaster_install($site) {
     'root' => $platform, 
     'client_email' => drush_get_option('client_email', 'webmaster@localhost'),
     'profile' => "hostmaster",
-    'provision_context' => "site",
+    'provision-context' => "site",
     'site_port' => drush_get_option('web_port', 80)),
     'GET', TRUE
   );
