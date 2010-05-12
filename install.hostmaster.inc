@@ -5,6 +5,7 @@
  */
 
 function drush_provision_hostmaster_install($site) {
+  drush_set_option('alias-path', drush_server_home() . '/.drush/aliases');
   if (!$site) {
     return drush_set_error('SITE_MISSING', dt('You need to specify the FQDN of the hostmaster install'));
   }
@@ -36,7 +37,8 @@ function drush_provision_hostmaster_install($site) {
     print "\n"; # add a cr since the user's didn't echo
     $data['master_db'] = "$scheme://$user:$pass@$host";
   }
-  
+
+  $data['hosting_name'] = 'server_localhost';
   $data['provision-service-http'] = 'apache';
   $data['provision-service-db'] = 'mysql';
   $data['provision-context'] = 'server';
@@ -49,26 +51,27 @@ function drush_provision_hostmaster_install($site) {
   $data['drush_path'] = DRUSH_COMMAND;
 
   // verify the server
-  drush_backend_invoke('provision-verify', $data, 'POST');
+  drush_backend_invoke('provision-named-context-save', $data, 'POST');
+  drush_do_site_command(drush_sitealias_get_record('@server_localhost'), 'provision-verify');
 
   if (drush_get_option('backend-only')) {
     return;
   }
 
   // verify the current platform
-  drush_backend_invoke('provision-verify', array(
+  drush_backend_invoke('provision-named-context-save', array(
+    'parent' => '@server_localhost-apache', // todo should match future node title
+    'hosting_name' => 'platform_Hostmaster', // todo should match future node title
+    'provision-context' => 'platform',
     'root' => $platform,
-    'provision-context' => "platform",
-    'publish_path' => $platform,
-    'platform' => '5') // dirty hardcoded to create the first platform apache config
-                       // this will become unnecessary when we have drush aliases
-  );
+  ));
+  drush_do_site_command(drush_sitealias_get_record('@platform_Hostmaster'), 'provision-verify');
 
   // install the hostmaster site
   $data = drush_backend_invoke('provision-install', array(
-    $site, 
+    'hosting_name' => '',//todo
+    'parent' => '@server_localhost-mysql,@platform_Hostmaster',
     'uri' => $site, 
-    'root' => $platform, 
     'client_email' => drush_get_option('client_email', 'webmaster@localhost'),
     'profile' => "hostmaster",
     'provision-context' => "site",

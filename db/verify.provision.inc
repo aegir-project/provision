@@ -14,13 +14,3 @@ function drush_db_provision_verify() {
     provision_service('db')->verify();
   }
 }
-
-function drush_db_post_provision_verify() {
-  if (PROVISION_CONTEXT_PLATFORM) {
-    drush_unset_option('master_db', 'drupal');
-  }
-  if (PROVISION_CONTEXT_SERVER) {
-    drush_set_option('master_db', drush_get_option('master_db'), 'user');
-  }
-}
-

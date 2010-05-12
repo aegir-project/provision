@@ -37,12 +37,9 @@ class provisionService_http_apache extends provisionService_http {
     return $config->unlink();
   }
 
-
   function verify() {
     if (PROVISION_CONTEXT_PLATFORM) {
-      if (drush_get_option('platform', null)) {
-        $this->create_platform_config();
-      }
+      $this->create_platform_config();
     }
     elseif (PROVISION_CONTEXT_SERVER) {
       provision_service('file')->create_dir(drush_get_option('vhost_path'), dt("Virtual host configuration"), 0700);
@@ -105,7 +102,7 @@ class provisionConfig_apache_platform extends provisionConfig_apache {
   public $description = 'apache platform configuration file';
 
   function filename() {
-    return $this->data['platform_conf_path'] . '/platform_' . $this->data['platform'] . '.conf';
+    return $this->data['platform_conf_path'] . '/platform_' . $this->data['platform-name'] . '.conf';
   }
 
   function process() {
