@@ -1,0 +1,307 @@
+Day changed to Monday March 01 2010
+<sebas891> anarcat: back
+<@anarcat> sebas891: hello
+<@anarcat> you are or..
+<sebas891> :) I'm debugging ubuntu wifi here
+<@anarcat> yay
+<sebas891> ok, for aegir, I need to know how to install SPIPS
+<sebas891> kind of specs ?
+<sebas891> what does SPIP need to do to Aegir in order to have Aegir install it?
+<@anarcat> alright
+<sebas891> you see?
+<@anarcat> !pi aegir/dev talk about spip integration
+<@anarcat> yes
+<goumbot> kproject: owner: punched in 20280=Koumbit/Aegir::Ongoing tasks/Développement
+<@anarcat> I can explain to you how aegir works, now?
+<@anarcat> or do you understand the setup well?
+<sebas891> I'll then use these specs to make a dev (module) that will make a sort of wrapper so that it works
+<@anarcat> hehe
+<@anarcat> It's not obvious actually
+<sebas891> anarcat: go, explain it to me a bit. Please.
+<@anarcat> alright then
+<@anarcat> so aegir, it's two parts
+<@anarcat> the frontend and the backend
+<sebas891> ok
+<@anarcat> the frontend, is more or less a normal Drupal site, which runs the 'Hosting' module
+<@anarcat> The backend is mainly Drush and an extension which is called Provision
+<@anarcat> That, you must be aware of :)
+<sebas891> Yes :)
+<@anarcat> The general idea is that the frontend is the part that handles 'sites', 'platforms' etc
+<@anarcat> that also, you know
+<@anarcat> Each gizmo is represented by some nodes in the Drupal (system)
+<@anarcat> it's all in the Hosting module's code
+<@anarcat> that's Drupal again but non-standard
+<@anarcat> when you want to do something with the nodes, you create 'tasks'
+<sebas891> ok
+<@anarcat> that's where it starts to get a bit complicated
+<@anarcat> each frontend module (sites, platforms etc) declares some tasks that apply to its context
+<@anarcat> install' type for 'site', 'verify' for platform etc
+::: alberto56 [~alberto56@koumbit.org] has joined #koumbit-ct
+<sebas891> if I understand it right, one must register it then drush installs SPIPs before passing it to the frontend, right?
+<@anarcat> I'm getting there :)
+<@anarcat> the tasks are registered in the MySQL DB
+<sebas891> ok
+<@anarcat> and after, the backend goes and reads the DB and calls the right provision command with drush
+<@anarcat> eg drush provision-install site.example.com
+<@anarcat> the arguments are passed via STDIN, in JSON, or via arguments (--argument=valeur)
+<sebas891> ok
+<@anarcat> http://www.json.org/
+<@anarcat> a fairly standard javascript standard
+<@anarcat> so, to do new things in aegir, there's two pieces
+<@anarcat> one typically begins in the backend
+<sebas891> ok
+<@anarcat> So you code in Drush in order to do something
+<@anarcat> example: the provision_boost module 'modifies' the existing Verify tasks in order to configure the 'boost' module in an existing Drupal site
+<@anarcat> A certain provision_civicrm module is supposed to do the same thing, soon :)
+<@anarcat> after that, once you have it working well, you then code the stuff in the frontend that is going to pass the right arguments to the backend so that Drush / Provision can call it as needed
+<sebas891> ok
+<@anarcat> that's the second piece
+<@anarcat> you with me?
+<sebas891> so, we want a 'provision_spip' module :)
+<@anarcat> maybe
+<@anarcat> it's there that it starts to get complicated
+<@anarcat> A priori, Drush is a very Drupal-specific application
+<@anarcat> You might want to avoid working with Drush
+<@anarcat> Presently, the frontend is hardcoded to call drush provision-$something
+<@anarcat> But there's a bug open re: changing that
+<@anarcat> So that one can call any command
+<@anarcat> So long as the command respects the frontend protocol, it could be called
+<@anarcat> no need to be in drush
+<@anarcat> evidently, passing via dursh saves a lot of trouble because there are lots of functions already there
+<sebas891> ok
+<@anarcat> that's our first design decision to take
+<@anarcat> drush or no drush?
+<@anarcat> we can't decide this now, really
+<sebas891> yeah...
+<@yannn> !po
+<goumbot> kproject: yannn: punched out, worked 1h35m1s on task Développement id=20081 (Gestion facturation)
+<@anarcat> but I think that it will be perhaps better to try to use drush
+<goumbot> kproject: yannn: worked 5h10m10s in 6 punches
+<sebas891> ok
+<@anarcat> the thing is that if the installer is based on drush, it can not be returned back into the SPIP community
+<@anarcat> it's separate
+::: alberto56 [~alberto56@koumbit.org] has quit [Quit: This computer has gone to sleep]
+::: yannn [~yannn@koumbit.org] has quit [Quit: yannn]
+<@anarcat> for example, drush provision-install copies all the Drupal install.php code
+<@anarcat> because install.php cannot be called via the command line
+<@anarcat> in that area, d7 has come a long way
+<@anarcat> And we could remove a lot of Provision code which was duplicated from Drupal
+<@anarcat> that makes maintenance easier
+<@anarcat> if you don't do that, you're stuck synchronising your installation code with SPIP constantly
+<@anarcat> you'll always forget something
+<@anarcat> If you have a separate commandline installer, it can be delivered to SPIP and they can maintain it
+<@anarcat> You're just responsible for the 'glue' in aegir
+<@anarcat> If you do it directly in drush, it's going to be better, but harder
+<sebas891> ok
+<@anarcat> so, first decision
+<@anarcat> drush or no drush
+<@anarcat> the second decision, I believe, is multi-spip or not
+<@anarcat> presently, Drupal is multi-site
+<@anarcat> and aegir utilises that to the maximum
+<@anarcat> There is the concept of the platform and the site which is very present and distinct
+<@anarcat> Logically, one does it similarly with SPIP
+<@anarcat> in the frontend
+<@anarcat> and in the backend
+<@anarcat> in the frontend, it's necessary to add a 'type' of platforms
+<@anarcat> ... this brings me back to the backend
+<@anarcat> In drush, there's the concept of the 'engine'
+<@anarcat> eg, Drupal is an 'engine' of Drush
+<sebas891> yeah.. not simple, all that
+<@anarcat> ok, I have lost you here :)
+<@anarcat> Let's back up
+<@anarcat> Drush / drupal/ aegir are multisites, presently
+<sebas891> I see, I see
+<sebas891> yes, ok
+<@anarcat> SPIP supports multisite as well, if I understand well
+<sebas891> I'm trying to think in SPIP mode, a bit, and SPIP by default, is not multisite
+<@anarcat> yeah
+<sebas891> Multisite is a hack, it's that that you have seen the other time
+<@anarcat> Well let's put the idea that you will have SPIP 1.9.1 which will be a directory, which is going to contain many sites
+<@anarcat> yes yes, but the most biggest hack, is the installer, not necessarily how it does it underneath
+<@anarcat> as long as there's one database per site, that's not so bad
+<sebas891> ok
+<@anarcat> so
+<@anarcat> you have your SPIP 1.9.1
+<@anarcat> your code
+<@anarcat> which is a 'platform'
+<sebas891> ok
+<@anarcat> like how Drupal 6.15 is a platform in aegir
+<@anarcat> except there, it's going to be another type of platform
+<@anarcat> the concept is not very well developed in aegir
+<@anarcat> it's embryonic
+<@anarcat> but there is the space and the opening for that
+<@anarcat> in the community I mean
+<sebas891> so, SPIP will be a type of platform, 1.9 the version of the SPIP platform type
+<@anarcat> yes, that's it
+<@anarcat> after that, in SPIP, I don't know how it works, but a 'site' in Drupal is a directory (sites/site.example.com/), a MySQL database, and an Apache config (more or less)
+<sebas891> how one passes from the platform to the site, that's it, the passing. How one does the multi-spip
+<@anarcat> I imagine that in SPIP, that's what's similar: it's going to create a config file for the database, create a database, etc
+<@anarcat> that's it
+<@anarcat> so, that's something that needs knowing in SPIP
+<@anarcat> Dissect the installation code to see what it does exactly
+<sebas891> yes, there are some repositories. Eg /IMG
+<@anarcat> yeah
+<@anarcat> similar in Drupal (sites/example.com/files .../files/pictures/ ... settings.php etc)
+<@anarcat> A good way to see would be to start with a naked SPIP, install a site (a multisite!) and check what's changed
+<@anarcat> Both the DB file (?)
+<@anarcat> after that, you can retrace the PHP code which generates these gizmos
+<@anarcat> and port it in Drush
+<@anarcat> ok. that's a good start
+<@anarcat> the part 'port to drush' is a horrible understatement :P
+<@anarcat> I think that w'ell have to go with drush to start with
+<@anarcat> it will be easier for aegir
+<@anarcat> so let's take that route for the first decision
+<sebas891> so, it means rewriting the multi-site code of spip in Drush :)
+<@anarcat> for the multi-spip part, it's going to require searching, testing, trying perhaps to create a site in arms (?), without writing any PHP
+<@anarcat> that's it
+<@anarcat> after that the script in Drush
+<@anarcat> ideally copying the code directly
+<@anarcat> ideally, it will be an 'engine' in the Provision module
+<@anarcat> I can give you a bit of code
+<@anarcat> http://git.aegirproject.org/?p=provision.git;a=tree;f=platform
+<sebas891> ok
+<@anarcat> the platform code from the backend
+<@anarcat> you see there is a 'Drupal' directory there
+<sebas891> yes.
+<@anarcat> In there, there's an .inc file for each Provision command (install, verify etc)
+<@anarcat> which has the specific code to install Drupal
+<@anarcat> I'm checking where the engine is declared
+<@anarcat> ./platform/provision_drupal.drush.inc:function provision_drupal_drush_engine_drupal() {
+<mvc> !po
+<goumbot> kproject: mvc: punched out, worked 1h59m55s on task Développement id=21895 (views3 test)
+<goumbot> kproject: mvc: worked 10h9m20s in 5 punches
+<@anarcat> http://git.aegirproject.org/?p=provision.git;a=blob;f=platform/provision_drupal.drush.inc;h=9d37cf879bd1264fad24a7375ed9b4c94194d78d;hb=HEAD#l33
+<@anarcat> The pass will probably declare an example function (?)
+<sebas891> OK, I see
+<@anarcat> make a platform/provision_spip.drush.inc file
+<@anarcat> actually, it won't be directly in Provision, it'll be a contrib module
+<@anarcat> but it will be provision_spip.drush.inc
+<@anarcat> after that, it's there where it starts to be difficult
+<@anarcat> These declarations serve just to call the right engine
+<@anarcat> but at the moment all that is hardcoded in provision
+<@anarcat> when you do provision-install, provision won't care that you're using SPIP
+<@anarcat> It assumes that you're using Drupal
+<@anarcat> so it'll do things likeso
+<@anarcat>  283     drush_include_engine('drupal', 'clear');
+<@anarcat> au lieu de drush_include_engine($engine, 'clear')
+<@anarcat> worse than that, that's install.inc
+<@anarcat> http://git.aegirproject.org/?p=provision.git;a=blob;f=platform/install.provision.inc
+<@anarcat> install.provision.inc
+<@anarcat> http://git.aegirproject.org/?p=provision.git;a=blob;f=platform/install.provision.inc#l40
+<@anarcat>   40 function drush_provision_drupal_provision_install($url) {
+<@anarcat>   43   _provision_drupal_create_settings_file($url);
+<@anarcat>   44   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
+<@anarcat>   45 
+<@anarcat>   46   drush_include_engine('drupal', 'install');
+<@anarcat>   47   drush_set_option('installed', TRUE, 'site');
+<@anarcat>   48   _provision_drupal_maintain_aliases($url);
+<@anarcat> beurk
+<@anarcat> That's got Drupal all over it :)
+<sebas891> It's very Drupal
+<@anarcat> It'll be necessary to refactor this code so that it is called only if the platform is 'Drupal'
+<sebas891> so, it's asking for a rewrite of the code, there
+<@anarcat> completely
+<@anarcat> should probably fix the platform verification code (provision-verify) to detect what the correct platform is and store it
+<sebas891> that'll make the code more proper and flexible
+<@anarcat> yep that's it
+<sebas891> it's no small task, all that
+<@anarcat> But once it's done, it opens the door towards installing any sort of platform
+<@anarcat> no, indeed
+<@anarcat> but it's not so far off
+<@anarcat> it's a week's work, I'd say
+<@anarcat> especially since it's not in the 0.4 roadmap
+<sebas891> in Aegir, are you able to push to make it more flexible?
+<@anarcat> it may be blocked a bit
+<@anarcat> I think it's not in the priorities prior to the 1.0 (release), which is still not far off
+<sebas891> it's in the roadmap?
+<@anarcat> well, it's the notion of 'API Freeze'
+<@anarcat> because basically, that's the way
+<@anarcat> all the concepts of the engines, of commands... that's the Aegir API
+<@anarcat> which is really not stable
+<@anarcat> it's changed completely between two releases
+<@anarcat> So someone who will do a SPIP plugin will have a job to do to follow the next release
+<@anarcat> I think the (current) focus on multiserver is not (a) bad (thing)
+<@anarcat> it will surely be possible to do a huge cleanup after the 0.4 (release)
+<@anarcat> it will be more open
+<@anarcat> it'll be a bit difficult to push
+<@anarcat> but I can try, if there realy are some good patches which return
+<sebas891> So, it'll happen, but not in the short term
+<@anarcat> well..
+<@anarcat> the problem is that it there isn't interest in the community to do it directly
+<@anarcat> everyone is whole-heartedly Drupal
+<@anarcat> (it's not that) everyone is not against it
+<@anarcat> but it's the not the actual community who's going to do the job
+<@anarcat> They'll accept the patches
+<@anarcat> but they're going to be very critical :)
+<sebas891> it'll take a new (?),.. with patches (?)
+<@anarcat> yes
+<@anarcat> He must understand very well what I've explained above
+<@anarcat> (he should log somewhere else besides) (?)
+<@anarcat> in fact
+<@anarcat> http://groups.drupal.org/aegir/roadmap
+<@anarcat> honestly, I don't see it arriving before 0.4 is out
+<sebas891> what's cool is that SPIP is super-stable from the side of the installer
+<@anarcat> because we'll want to get a beta out for Drupalcon, in April
+<@anarcat> and try to keep the code stable
+<@anarcat> on the other hand, it's perfectly possible to have a parallel development branch in git
+<@anarcat> also
+<@anarcat> one thing that is possible to do immediately, is to make a command line installer in SPIP
+<@anarcat> make a clean web installer
+<sebas891> that's what I thought
+<@anarcat> and it'll be just a couple PHP functions which take some arguments
+<@anarcat> a CLI installer
+<@anarcat> in any case, it's a big job
+<@anarcat> and make it in drush
+<@anarcat> in fact, I would do it in two passes
+<@anarcat> put:
+<@anarcat> 0. test multispip in order to see how it works and successfully install a site by hand, without the web installer, just create the files and load the SQL dumps
+<@anarcat> 1. code the PHP funcitons which do it, very simply, but with some arguments
+<@anarcat> 2. integrate that in a Drush module, to understand how Drush works
+<@anarcat> after that, we'll start speaking with aegir
+<@anarcat> 3. do a code cleanup of the platform verifucation (provision-verify) in order to detect the platforms, around the engines
+<@anarcat> 4. Call the right functions when a task is called, simply via the engine system
+<@anarcat> 5. correct the drush module to implement the engine commands
+<@anarcat> after that, do the frontend
+<@anarcat> 6. add the fields in the database for the platform type
+<@anarcat> 7. add the fields in the interface for choosing the platform type.. etc
+<@anarcat> there you go, that's not bad
+<sebas891> wow
+<@anarcat> I think that 3) to 7) won't get into Aegir before April
+<@anarcat> But it's possible to do the development in parallel in git
+<@anarcat> 0) to 5) are in the backend
+<@anarcat> 3) to 5) in provision
+<@anarcat> We should seek integration with drush firstly
+<@anarcat> 6) and 7) are in the frontend
+<@anarcat> yes
+<@anarcat> it's in order, the list
+<sebas891> yes yes
+<@anarcat> http://groups.drupal.org/node/25841
+<@anarcat> !snarf
+<goumbot> groups.drupal.org: Release goals for 0.4 | groups.drupal.org
+<@anarcat>note that here, we make the choice to use drush as the backend
+<@anarcat>And thus, to not do evil with Provision to digest it (?), we want to work with something other than Drupal – this is a good thing I think
+<@anarcat>on the other hand, it will also be possible to implant a backend of something other than drush
+<@anarcat>that itself is based on the JSON protocol
+<@anarcat>This time the work is done more in the frontend
+<@anarcat>And here I'm less familiar with the patent, I'm worried it's too complicated
+<sebas891> with JSON?
+<@anarcat>yes
+<@anarcat>JSON is the giving format that passes the information between the frontend and the backend
+<@anarcat>eg the DB passwords, the choice of the frontend user, all passed via that
+<sebas891> the Drush people, are open to do management of other CMSs? You believe?
+<@anarcat>No, I don't think so
+<@anarcat>But who cares, Provision is
+<@anarcat>Drush doesn't depend on Drupal
+<@anarcat>That, that won't change
+<@anarcat>It's very specific to Drupal
+<@anarcat>But it can roll without it
+<sebas891> The coolest thing, will be to copy as much as possible the method of Drupal installation/management (?)
+<sebas891> So that it thinks it installs Drupal :) but it's SPIP
+<@anarcat>ok, I'm going home
+<sebas891> ok
+<sebas891> thanks for the session
+<@anarcat>what'll we do with all this good info
+<@anarcat>I should translate it into English to do something good with it
+<sebas891> copy and paste it into the wiki?
+<@anarcat>ok I'll do that for the moment
+
