@@ -1,0 +1,167 @@
+.. -*- mode: rst; fill-column: 78; -*-
+.. This document is formatted using the ReST syntax.
+
+=================================================
+Aegir -- Mac OS X installation instructions hints
+=================================================
+
+This is a helper file to the canonical INSTALL.txt. It is aimed at
+helping you install Aegir on Mac OS X. It simply lists commands that
+diverge from the base INSTALL.txt in a concise document that will be
+easy to maintain in the long term.
+
+It is recommended that the INSTALL.txt document is consulted before
+going ahead with this install.
+
+We reuse the same process describe in that document:
+
+ 1. Install requirements
+ 2. Configure system requirements, which include:
+    * create a Aegir user
+    * configure Apache, MySQL, DNS, etc
+ 3. Install the Aegir files
+ 4. Follow the install wizard
+
+1. Install software requirements
+================================
+
+While Mac OS X comes with Apache & PHP (and even MySQL on the Server
+version), the version of PHP shipped with 10.6 Snow Leopard is 5.3.x
+and thus will not work with Aegir (as of the 0.4alpha-era) and various
+other software. If you're running 10.5 Leopard, it may work out of the
+box, but I haven't tested it.
+
+There are several different ways to get Apache, PHP 5.2, and MySQL 5
+onto a Mac OS X machine. I give detailed instructions for MacPorts
+below, but if that's a bit more than you're ready to bite off right
+now, feel free to use an alternative approach.
+
+One such alternative is MAMP. There is a good but outdated HOWTO for
+installing Aegir on Mac OS X 10.6 (Snow Leopard) using MAMP located
+here: http://groups.drupal.org/node/30270
+
+MAMP stands for Mac, Apache, MySQL, and PHP and is the Mac equivalent
+of "LAMP". It is a self-contained package of all of these programs
+with a nice graphical installer and control panel.  You can find it
+here: http://www.mamp.info/
+
+MAMP is pretty straightforward, but it's also not very flexible
+(IMHO).  While certainly not without its own headaches, MacPorts is a
+decently powerful way to sanely manage a healthy stack of open source
+UNIX software on your Mac. Since this is what I use, I'm going to
+assume MacPorts is in use for the rest of this HINTS file. I have also
+only tested this on Mac OS X 10.6 Snow Leopard.
+
+If you don't yet have MacPorts installed, go here to get it:
+http://www.macports.org/install.php
+
+Once it's installed, quit and re-launch your Terminal before
+continuing.  Otherwise MacPorts won't yet be in your PATH.
+
+The first two commands below are optional but recommended.
+
+Shell commands::
+ sudo port selfupdate
+ sudo port upgrade outdated
+ sudo port install apache2 mysql5-server git-core unzip php52 +mysql5
+
+Watch the output of the last port command carefully, as there are
+usually some boring tasks for you to perform once the install is
+done. You'll be wishing you were running Ubuntu/Debian and apt-get by
+the time you're done.
+
+2. Configure system requirements
+================================
+
+Next we'll create the aegir user and add it to the _www group. This
+part is very different on Mac OS X than Linux or most other
+Unices. Must be a NeXTism.
+
+Shell commands::
+ sudo dscl . -create /Users/aegir NFSHomeDirectory /var/aegir
+
+Now you need to find the next spare UID to assign the user.
+
+Here's how you find out on your system:
+
+Shell commands::
+ sudo dsexport users.out /Local/Default dsRecTypeStandard:Users
+
+Then open the file users.out in a text editor, search for the highest
+5xx user ID and add 1 to it (in your brain, not in the file). So if
+you find 506 but no 507, use 507. When you're done, delete users.out
+to be safe.
+
+Shell commands::
+ sudo rm users.out
+
+Now assign this UID to the aegir user, replacing "5xx" with the UID.
+
+Shell commands::
+ sudo dscl . -create /Users/aegir UniqueID 5xx
+
+Set a secure password for the aegir user, as it needs shell access.
+
+Shell Commands::
+ sudo passwd aegir
+
+Create the aegir home directory and set its permissions.
+
+Shell Commands::
+ sudo mkdir /var/aegir
+ sudo chown aegir /var/aegir
+ sudo chgrp _www /var/aegir
+
+Add the aegir user to the _www group. This is the group Apache runs as.
+
+Shell Commands::
+ sudo dscl . -append /Groups/_www GroupMembership aegir
+
+Give the aegir user the ability to restart Apache.
+
+Shell Commands::
+ sudo mv /usr/sbin/apachectl /usr/sbin/apachectl-apple
+ sudo ln -s /opt/local/apache2/bin/apachectl /usr/sbin/apachectl
+ sudo visudo
+
+Go to the last line of the file and add the following.
+
+Sudoers file content::
+ aegir ALL=NOPASSWD: /usr/sbin/apachectl
+
+Save the file and exit your text editor.
+
+Next configure Apache to include the Aegir config.
+
+Shell Commands::
+ echo "Include /var/aegir/config/apache.conf" >> /opt/local/apache2/conf/httpd.conf
+ /opt/local/apache2/bin/apachectl restart
+
+Configuring your MySQL database and user accounts is the same as in
+the INSTALL.txt file. But you probably want to add the path to its
+executables to your user's PATH and the aegir user's PATH.
+
+Shell Commands::
+
+ echo 'export PATH=/opt/local/lib/mysql5/bin:$PATH' >> ~/.profile
+ su - aegir
+ Password: (the password you setup earlier)
+ echo 'export PATH=/opt/local/lib/mysql5/bin:$PATH' >> ~/.profile
+ exit
+
+3. Install the Aegir files
+==========================
+
+Now follow the instructions of section 3 of INSTALL.txt, except for
+when it tells you to run "su -s /bin/sh aegir -c "sh install.sh.txt"
+do the following instead.
+
+Shell commands::
+ su - aegir
+ Password: (you know the drill)
+ sh /path/to/install.sh.txt
+ sudo /usr/sbin/apachectl restart
+ exit
+
+Now you really can just follow the rest of INSTALL.txt and it should
+work.
