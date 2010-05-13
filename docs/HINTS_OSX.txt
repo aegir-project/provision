@@ -27,7 +27,7 @@ We reuse the same process describe in that document:
 
 While Mac OS X comes with Apache & PHP (and even MySQL on the Server
 version), the version of PHP shipped with 10.6 Snow Leopard is 5.3.x
-and thus will not work with Aegir (as of the 0.4alpha-era) and various
+and thus may not work with Aegir (as of the 0.4alpha-era) and various
 other software. If you're running 10.5 Leopard, it may work out of the
 box, but I haven't tested it.
 
@@ -75,7 +75,9 @@ the time you're done.
 
 Next we'll create the aegir user and add it to the _www group. This
 part is very different on Mac OS X than Linux or most other
-Unices. Must be a NeXTism.
+Unices. Must be a NeXTism. The command we will use he is "dscl", which
+is a short for Directory Service Command Line. In OSX 10.3 and
+earlier, that command is "nicl" (short for Net Info Command Line).
 
 Shell commands::
  sudo dscl . -create /Users/aegir NFSHomeDirectory /var/aegir
