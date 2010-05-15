@@ -48,6 +48,16 @@ function provision_save_platform_data() {
 }
 
 /**
+ * Save modified options to the drushrc.php file
+ */
+function provision_save_server_data() {
+  if (!drush_get_error()) {
+    $config = new provisionConfig_drushrc_server();
+    $config->write();
+  }
+}
+
+/**
  * @} End of "defgroup sitedata".
  */
 
