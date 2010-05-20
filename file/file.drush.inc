@@ -138,7 +138,6 @@ class provisionService_file extends provisionService {
     $func = ($recursive) ? array($this, '_chmod_recursive') : 'chmod';
     if (!@call_user_func($func, $path, $perms)) {
       $this->tokens['@reason'] = dt('chmod to @perm failed on @path', array('@perm' => sprintf('%o', $perms), '@path' => $path));
-      return false;
     }
     clearstatcache(); // this needs to be called, otherwise we get the old info 
     $this->last_status = substr(sprintf('%o', fileperms($path)), -4) == sprintf('%04o', $perms);
@@ -149,7 +148,7 @@ class provisionService_file extends provisionService {
   /**
    * Change the owner of $path to the user in $owner.
    *
-   * Sets @path, @owner, and @reason tokens for ->succeed and ->fail.
+   * Sets @path, @uid, and @reason tokens for ->succeed and ->fail.
    *
    * @param $path
    *   The path you want to perform this operation on.
@@ -160,8 +159,12 @@ class provisionService_file extends provisionService {
    */
   function chown($path, $owner, $recursive = FALSE) {
     $this->_clear_state();
+    $this->tokens = array('@path' => $path, '@uid' => $owner);
 
-    $this->tokens = array('@path' => $path, '@gid' => $gid);
+    // We do not attempt to chown symlinks.
+    if (is_link($path)) {
+      return $this;
+    } 
 
     $func = ($recursive) ? array($this, '_chown_recursive') : 'chown';
     if ($owner = provision_posix_username($owner)) {
@@ -193,8 +196,12 @@ class provisionService_file extends provisionService {
    */
   function chgrp($path, $gid, $recursive = FALSE) {
     $this->_clear_state();
-
     $this->tokens = array('@path' => $path, '@gid' => $gid);
+
+    // We do not attempt to chown symlinks.
+    if (is_link($path)) {
+      return $this;
+    } 
 
     $func = ($recursive) ? array($this, '_chgrp_recursive') : 'chgrp';
     if ($group = provision_posix_groupname($gid)) {
@@ -361,8 +368,8 @@ class provisionService_file extends provisionService {
 
     if ($exists) {
       $this->chown($path, drush_get_option('script_user'))
-        ->succeed($name . ' ownership of path has been changed to @perm.')
-        ->fail($name . ' ownership of path could not be changed to @perm.', 'DRUSH_PERM_ERROR');
+        ->succeed($name . ' ownership of path has been changed to @uid.')
+        ->fail($name . ' ownership of path could not be changed to @uid.', 'DRUSH_PERM_ERROR');
 
       $this->chmod($path, $perms)
         ->succeed($name . ' permissions of path have been changed to @perm.')
@@ -414,15 +421,17 @@ class provisionService_file extends provisionService {
     $status = 1;
     // do not follow symlinks as it could lead to a DOS attack
     // consider someone creating a symlink from files/foo to ..: it would create an infinite loop
-    if (!is_link($path) && ($dh = @opendir($path))) {
-      while (($file = readdir($dh)) !== false) {
-        if ($file != '.' && $file != '..') {
-          $status = $this->_call_recursive($func, $path . "/" . $file, $arg) && $status;
+    if (!is_link($path)) {
+      if ($dh = @opendir($path)) {
+        while (($file = readdir($dh)) !== false) {
+          if ($file != '.' && $file != '..') {
+            $status = $this->_call_recursive($func, $path . "/" . $file, $arg) && $status;
+          }
         }
+        closedir($dh);
       }
-      closedir($dh);
+      $status = call_user_func($func, $path, $arg) && $status;
     }
-    $status = call_user_func($func, $path, $arg) && $status;
     return $status;
   }
 

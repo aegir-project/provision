@@ -90,13 +90,13 @@ function install_mail($key, &$message, $params) {
 function install_main() {
   global $profile, $install_locale, $client_email, $conf, $url, $base_url;
 
-  require_once('install.php');
+  require_once DRUPAL_ROOT . '/includes/install.core.inc';
 
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
 
   // We have an existing settings.php.
 
-  $db_spec = _drush_sql_get_db_spec();
+  $db_spec = drush_core_site_install_db_spec();
   $db_spec['db_prefix'] = $GLOBALS['db_prefix'];
 
   if ($db_spec['driver'] == 'mysqli') {
@@ -143,7 +143,7 @@ function install_main() {
     drush_set_error('DRUPAL_INSTALL_FAILED');
     dlm($e);
   }
-  _provision_drupal_create_directories($url);
+  _provision_drupal_create_directories();
 
   if ($client_email) {
     install_send_welcome_mail($url, $profile, $install_locale, $client_email);

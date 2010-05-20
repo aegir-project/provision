@@ -61,6 +61,14 @@ class provisionConfig {
 
   function write() {
     $filename = $this->filename();
+
+    // Make directory structure if it does not exist.
+    if (!provision_service('file')->exists(dirname($filename))->status()) {
+      provision_service('file')->mkdir(dirname($filename))
+        ->succeed('Created directory @path.')
+        ->fail('Could not create directory @path.');
+    }
+
     if ($filename && is_writeable(dirname($filename))) {
       // manipulate data before passing to template.
       $this->process();
@@ -95,3 +103,96 @@ class provisionConfig {
     return provision_service('file')->unlink($this->filename())->status();
   }
 }
+
+/**
+ * Specialized class to handle the creation of drushrc.php files.
+ *
+ * This is based on the drush_save_config code, but has been abstracted
+ * for our purposes.
+ */ 
+class provisionConfig_drushrc extends provisionConfig {
+  public $template = 'provision_drushrc.tpl.php';
+  public $description = 'Drush configuration file';
+  protected $mode = 0400;
+  protected $context_name = 'drush';
+
+  function filename() {
+    return _drush_config_file($this->context_name);
+  }
+
+  function __construct($data = array()) {
+    parent::__construct($data);
+    $this->load_data();
+  }
+
+  function load_data() {
+    // we fetch the context to pass into the template based on the context name
+    $this->data = array_merge(drush_get_context($this->context_name), $this->data);
+  }
+
+  function process() {
+    unset($this->data['context-path']);
+    unset($this->data['config-file']);
+    $this->data['option_keys'] = array_keys($this->data);
+  }
+}
+
+/**
+ * Class to write an alias records.
+ */
+class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
+  public $template = 'provision_drushrc_alias.tpl.php';
+
+  /**
+   * An array of contexts to write. The first key will determine the title.
+   *
+   * @param $contexts
+   *   An associative array of named contexts, like
+   *   @code '\@name' => array('option1', 'option2'), @endcode
+   *   will save the current values of option1 and option2 to @name.
+   */
+  function __construct($contexts) {
+    $contexts_expanded = array();
+    foreach ($contexts as $name => $options) {
+      $contexts_expanded[$name] = array();
+      foreach ($options as $key) {
+        $contexts_expanded[$name][$key] = drush_get_option($key);
+      }
+    }
+
+    $this->data = array(
+      'aliasname' => reset(array_keys($contexts)),
+      'contexts' => $contexts_expanded,
+    );
+  }
+
+  function filename() {
+    return drush_get_option('alias-path', drush_server_home() . '/.drush/aliases') . '/' . $this->data['aliasname'] . '.alias.drushrc.php'; 
+  }
+}
+
+/**
+ * Server level config for drushrc.php files.
+ */
+class provisionConfig_drushrc_server extends provisionConfig_drushrc {
+  protected $context_name = 'user';
+  public $description = 'Server drush configuration';
+}
+
+/**
+ * Class for writing $platform/drushrc.php files.
+ */
+class provisionConfig_drushrc_platform extends provisionConfig_drushrc {
+  protected $context_name = 'drupal';
+  public $description = 'Platform Drush configuration file';
+}
+
+/**
+ * Class for writing $platform/sites/$url/drushrc.php files.
+ */
+class provisionConfig_drushrc_site extends provisionConfig_drushrc {
+  protected $context_name = 'site';
+  public $template = 'provision_drushrc_site.tpl.php';
+  public $description = 'Site Drush configuration file';
+}
+

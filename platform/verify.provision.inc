@@ -5,17 +5,18 @@
  *
  * Disable an enabled and installed site
  */
-function drush_provision_drupal_provision_verify_validate($url = null) {
-  if ($url) {
+function drush_provision_drupal_provision_verify_validate() {
+  if (PROVISION_CONTEXT_SITE) {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
     provision_prepare_environment();
 
-      _provision_drupal_create_settings_file();
-     drush_errors_on();
-     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+    _provision_drupal_create_settings_file();
+    drush_errors_on();
+    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   }
 
-  // This will not have an effect if you are running it on a platform, just tests that if a site is provided it is an existing one
+  // This will not have an effect if you are running it on a platform, just
+  // tests that if a site is provided it is an existing one
   _provision_drupal_valid_site();
 }
 
@@ -23,8 +24,8 @@ function drush_provision_drupal_provision_verify_validate($url = null) {
 /**
  * implementation of provision_verify
  */
-function drush_provision_drupal_provision_verify($url = null) {
-  if (PROVISION_CONTEXT_PLATFORM) {
+function drush_provision_drupal_provision_verify() {
+  if (PROVISION_CONTEXT_SERVER) {
     provision_service('file')->create_dir(drush_get_option('config_path'), dt('Provision configuration'), 0711);
     provision_service('file')->create_dir(drush_get_option('config_path') . '/includes', dt('Provision PHP configuration'), 0711);
     if (!provision_service('file')->exists(drush_get_option('config_path') . '/includes/global.inc')->succeed('Global configuration file exists')->status()) {
@@ -34,6 +35,8 @@ function drush_provision_drupal_provision_verify($url = null) {
       $config->write();
     }
     provision_service('file')->create_dir(drush_get_option('backup_path'), dt('Backup'), 0700);
+  }
+  elseif (PROVISION_CONTEXT_PLATFORM) {
     provision_service('file')->writable(drush_get_option('sites_path'))
       ->succeed('Drupal sites directory @path is writable by the provisioning script')
       ->fail('Drupal sites directory @path is not writable by the provisioning script', 'PROVISION_SITES_DIR_NOT_WRITABLE');
@@ -43,11 +46,11 @@ function drush_provision_drupal_provision_verify($url = null) {
     drush_set_option('packages', _scrub_object(provision_find_packages()), 'drupal');
     _provision_drupal_create_directories('all');
   }
-  else {
+  elseif (PROVISION_CONTEXT_SITE) {
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
-      // This is the actual drupal provisioning requirements. 
-    _provision_drupal_create_directories($url);
-    _provision_drupal_maintain_aliases($url);
+    // This is the actual drupal provisioning requirements. 
+    _provision_drupal_create_directories();
+    _provision_drupal_maintain_aliases();
     // Requires at least the database settings to complete.
    _provision_drupal_create_settings_file();
   }
@@ -68,9 +71,9 @@ class provisionConfig_global_settings extends provisionConfig {
 /**
  * Implementation of hook_provision_post_verify
  */
-function drush_provision_drupal_post_provision_verify($url = NULL) {
+function drush_provision_drupal_post_provision_verify() {
   if (PROVISION_CONTEXT_SITE) {
-    _provision_drupal_rebuild_caches($url);
+    _provision_drupal_rebuild_caches();
     drush_set_option('aliases', drush_get_option('aliases'), 'site');
     drush_set_option('redirection', drush_get_option('redirection'), 'site');
     drush_set_option('installed', TRUE, 'site');

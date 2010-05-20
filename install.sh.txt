@@ -30,12 +30,8 @@
 #
 ########################################################################
 # basic variables, change before release
-AEGIR_DOMAIN=aegir.example.com 
-AEGIR_VERSION=HEAD
-AEGIR_HOME=$HOME
-WEB_GROUP=www-data
-DRUSH_VERSION=All-versions-3.0-beta1
-DRUSH_MAKE_VERSION=6.x-2.0-beta6
+AEGIR_VERSION="HEAD"
+DRUSH_VERSION=All-versions-3.0
 
 # when adding a variable here, add it to the display below
 
@@ -70,37 +66,11 @@ prompt_yes_no() {
 
 }
 
-usage() {
-  cat <<EOF
-Usage: $0 [ -V version ] [ -h ] [ -w group ] [ -d home ] hostname
-EOF
-}
-
 ########################################################################
 # Main script
 
-# stop on error
-set -e
-
-# parse commandline
-args=`getopt bV:w:d:h $*`
-set -- $args
-
-for i
-do
-  case "$i" in
-    -w) shift; WEB_GROUP=$1; shift;;
-    -V) shift; AEGIR_VERSION=$1; shift;;
-    -d) shift; AEGIR_HOME=$1; shift;;
-    -b) BACKEND_ONLY=1; shift;;
-    -h) shift; usage; exit;;
-    --) shift; break;;
-  esac
-done
-
-AEGIR_DOMAIN=${1:-$AEGIR_DOMAIN}
+AEGIR_HOME="$HOME"
 DRUSH="$AEGIR_HOME/drush/drush.php"
-HOSTMASTER_DIR=$AEGIR_HOME/hostmaster-$AEGIR_VERSION
 
 msg "Aegir automated install script"
 
@@ -113,20 +83,6 @@ msg "This script makes the following assumptions: "
 cat <<EOF
  * you have read INSTALL.txt and prepared the platform accordingly
  * you are running as your "aegir" user
- * the following settings are correct:
-AEGIR_DOMAIN=$AEGIR_DOMAIN
-AEGIR_VERSION=$AEGIR_VERSION
-AEGIR_HOME=$AEGIR_HOME
-WEB_GROUP=$WEB_GROUP
-HOSTMASTER_DIR=$HOSTMASTER_DIR
-DRUSH=$DRUSH
-DRUSH_VERSION=$DRUSH_VERSION
-
-Some of those settings can be changed on the commandline, see:
-
- $0 -h
-
-for more information.
 EOF
 
 if prompt_yes_no "Do you want to proceed with the install?" ; then
@@ -135,14 +91,6 @@ else
   echo "installation aborted by user"
   exit 1
 fi
-
-msg "Creating basic directory structure"
-mkdir -p $AEGIR_HOME/config/vhost.d
-mkdir -p $AEGIR_HOME/config/platform.d
-mkdir -p $AEGIR_HOME/config/apache.d
-mkdir -p $AEGIR_HOME/backups
-chmod 0711 $AEGIR_HOME/config
-chmod 0700 $AEGIR_HOME/backups
 
 # we need to check both because some platforms (like SunOS) return 0 even if the binary is not found
 if which drush 2> /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
@@ -167,14 +115,6 @@ else
   exit 1
 fi
 
-if $DRUSH help | grep "^ make" > /dev/null ; then
-  msg "Drush make already seems to be installed"
-else
-  msg "Installing drush make in $AEGIR_HOME/.drush"
-  mkdir -p $AEGIR_HOME/.drush
-  $DRUSH dl drush_make-$DRUSH_MAKE_VERSION --destination=$AEGIR_HOME/.drush
-fi
-
 if $DRUSH help | grep "^ provision-install" > /dev/null ; then
   msg "Provision already seems to be installed"
 else
@@ -190,64 +130,5 @@ else
   fi
 fi
 
-# this should be handled by provision server verification, as it is a
-# duplicate of web_server/provision_apache_server.tpl.php
-# http://drupal.org/node/586000
-if [ ! -f $AEGIR_HOME/config/apache.conf ]; then
-  cat > $AEGIR_HOME/config/apache.conf <<EOF
-NameVirtualHost *:80  
-<IfModule ssl_module>
-  NameVirtualHost *:443  
-</IfModule>
-
-<IfModule !env_module>
-  LoadModule env_module modules/mod_env.so
-</IfModule>
-
-<IfModule !rewrite_module>
-  LoadModule rewrite_module modules/mod_rewrite.so
-</IfModule>
-
-# virtual hosts
-Include $AEGIR_HOME/config/vhost.d/
-# platforms
-Include $AEGIR_HOME/config/platform.d/
-# other configuration, not touched by aegir
-Include $AEGIR_HOME/config/apache.d/
-EOF
-fi
-
-msg "Aegir provision backend installed successfully"
-
-if [ ! -z "$BACKEND_ONLY" ] ; then
-  exit 0
-fi
-
-if [ ! -d $HOSTMASTER_DIR ] ; then
-  msg "Deploying hostmaster application"
-  $DRUSH hostmaster-make $HOSTMASTER_DIR
-  # this, and the remaining of this file, should be handled by
-  # provision-install, see http://drupal.org/node/711740
-  cd $HOSTMASTER_DIR
-  mkdir sites/$AEGIR_DOMAIN
-  cp sites/default/default.settings.php sites/$AEGIR_DOMAIN/settings.php
-  chmod g+w sites/$AEGIR_DOMAIN/settings.php
-  mkdir sites/$AEGIR_DOMAIN/files
-  chmod 2770 sites/$AEGIR_DOMAIN/files
-  chgrp $WEB_GROUP sites/$AEGIR_DOMAIN/settings.php
-  chgrp $WEB_GROUP sites/$AEGIR_DOMAIN/files
-fi
-
-if [ ! -f $AEGIR_HOME/config/vhost.d/$AEGIR_DOMAIN ]; then
-  sed -e "s#DocumentRoot .*#DocumentRoot $HOSTMASTER_DIR#" -e "s#Directory .*#Directory $HOSTMASTER_DIR>#" -e "s/ServerName .*/ServerName $AEGIR_DOMAIN/" $HOSTMASTER_DIR/profiles/hostmaster/apache2.conf.txt > $AEGIR_HOME/config/vhost.d/$AEGIR_DOMAIN
-  msg "Installed apache configuration file for $AEGIR_DOMAIN, you will need to restart apache"
-fi
-
-msg "Install process complete: follow the wizard"
-
-cat <<EOF
-Now point your browser to http://$AEGIR_DOMAIN/install.php and proceed
-with the remainder of the installation using the Hostmaster Install profile.
-Some of the instructions given, you will already have completed, but carefully
-read each step in turn to ensure you don't miss anything.
-EOF
+msg "Installing the frontend"
+$DRUSH hostmaster-install $@

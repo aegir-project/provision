@@ -1,8 +1,8 @@
 <?php
 
-function drush_http_provision_delete($url = NULL) {
+function drush_http_provision_delete() {
   if (PROVISION_CONTEXT_SITE) {
-    provision_service('http')->delete_site_config($url);
+    provision_service('http')->delete_site_config();
   }
   if (PROVISION_CONTEXT_PLATFORM) {
     $sites = provision_drupal_find_sites();

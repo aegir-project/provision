@@ -14,7 +14,7 @@
 /**
  * Generate a one-time login reset url
  */
-function drush_provision_drupal_provision_login_reset($url) {
+function drush_provision_drupal_provision_login_reset() {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   $account = user_load(1);
   $onetime = user_pass_reset_url($account);

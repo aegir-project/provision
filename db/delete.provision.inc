@@ -1,7 +1,6 @@
 <?php
 
-
-function drush_db_provision_delete_validate($url = null) {
+function drush_db_provision_delete_validate() {
   if (PROVISION_CONTEXT_SITE) {
     provision_service('db')->connect();
   }
@@ -12,8 +11,8 @@ function drush_db_provision_delete_validate($url = null) {
  *
  * This will drop the database, revoke the privileges and flush the privileges.
  */
-function drush_db_provision_delete($url = NULL) {
+function drush_db_provision_delete() {
   if (PROVISION_CONTEXT_SITE) {
-    provision_service('db')->destroy_site_database($url);
+    provision_service('db')->destroy_site_database();
   }
 }

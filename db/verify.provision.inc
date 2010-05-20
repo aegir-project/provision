@@ -10,14 +10,7 @@ function drush_db_provision_verify_validate() {
  * Can't be rolled back.
  */
 function drush_db_provision_verify() {
-  if (PROVISION_CONTEXT_PLATFORM) {
+  if (PROVISION_CONTEXT_SERVER) {
     provision_service('db')->verify();
   }
 }
-
-function drush_db_post_provision_verify() {
-  if (PROVISION_CONTEXT_PLATFORM) {
-    drush_set_option('master_db', drush_get_option('master_db'), 'drupal');
-  }
-}
-

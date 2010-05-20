@@ -74,7 +74,11 @@ function provision_drush_init() {
  * Implementation of hook_drush_command().
  */
 function provision_drush_command() {
-
+  $items['provision-named-context-save'] = array(
+    'arguments' => array(),
+    'description' => dt('Save Drush aliases'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+  );
   $items['provision-install'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to install.')),
     'description' => dt('Provision a new site using the provided data.'),
@@ -118,7 +122,7 @@ function provision_drush_command() {
   $items['provision-verify'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to verify).')),    
     'description' => 'Verify that the provisioning framework is correctly installed.',
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, 
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH, 
   );
  
   $items['provision-restore'] = array(
@@ -178,6 +182,15 @@ function provision_drush_command() {
     ),
   );
 
+  $items['hostmaster-install'] = array(
+    'description' => dt('Install and verify the Hostmaster frontend.'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+    'arguments' => array(
+      'example.com' => dt('The name of the site to install'),
+      '/path/to/platform' => dt('The platform to install the site on.'),
+      'you@example.com' => dt('The email account to send a welcome mail to'),
+    ),
+  );
   
   $items['hostmaster-pause'] = array(
     'description' => dt('Prepare the site to be migrated to a new platform.'),
@@ -191,24 +204,50 @@ function provision_drush_command() {
       'example.com' => dt('The url of the site being migrated.')),
   );
 
-
   return $items;
 }
-
 
 function drush_provision_hostmaster_make($platform) {
   drush_backend_invoke('make', array(dirname(__FILE__) . '/aegir.make', $platform));
 }
 
+function drush_http_provision_named_context_save() {
+  if (PROVISION_CONTEXT_SERVER) {
+    $parents = array();
+
+    foreach (provision_service('all') as $service) {
+      foreach ($service->write_alias() as $key => $value) {
+        $parents[] = drush_get_option('hosting_name') . '-' . $key;
+        $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') . '-' . $key => $value));
+        $config->write();
+      }
+    }
+
+    drush_set_option('parent', '@' . implode(',@', $parents));
+    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'provision-context', 'config_path', 'backup_path')));
+    $config->write();
+  }
+  elseif (PROVISION_CONTEXT_PLATFORM) {
+    drush_set_option('platform-name', preg_replace('/^platform_/', '', drush_get_option('hosting_name')));
+    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'provision-context', 'root', 'platform-name')));
+    $config->write();
+  }
+  elseif (PROVISION_CONTEXT_SITE) {
+    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'provision-context', 'uri', 'site_port', 'site_id', 'language', 'client_email')));
+    $config->write();
+  }
+}
+
 function _provision_default_restart_cmd() {
-  $command = '/usr/sbin/apachectl'; # a proper default for most of the world
+  $command = '/usr/sbin/apachectl'; // A proper default for most of the world
   foreach (explode(':', $_SERVER['PATH']) as $path) {
     $options[] = "$path/apache2ctl";
     $options[] = "$path/apachectl";
   }
-  # try to detect the apache restart command
-  $options[] = '/usr/local/sbin/apachectl'; # freebsd
-  $options[] = '/usr/sbin/apache2ctl'; # debian + apache2
+  // Try to detect the apache restart command.
+  $options[] = '/usr/local/sbin/apachectl'; // freebsd
+  $options[] = '/usr/sbin/apache2ctl'; // debian + apache2
+  $options[] = '/usr/apache2/2.2/bin'; // Solaris
   $options[] = $command;
 
   foreach ($options as $test) {
@@ -227,6 +266,7 @@ function _provision_default_web_group() {
     'httpd',
     'www-data', 
     'apache',
+    'webservd',
     'nogroup',
     'nobody',
     $info['name']);
@@ -317,5 +357,4 @@ function provision_load_critical($load = null, $threshold = null) {
   }
   return ($load[0] > $threshold);
 }
-
 
