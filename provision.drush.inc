@@ -76,6 +76,11 @@ function provision_drush_command() {
     'description' => dt('Save Drush aliases'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
+  $items['provision-named-context-delete'] = array(
+    'arguments' => array(),
+    'description' => dt('Delete Drush aliases'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+  );
   $items['provision-install'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to install.')),
     'description' => dt('Provision a new site using the provided data.'),
@@ -214,18 +219,23 @@ function drush_http_provision_named_context_save() {
     foreach (provision_service('all') as $service) {
       $options = array_merge($options, $service->write_alias());
     }
-    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => $options));
+    $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name'), $options);
     $config->write();
   }
   elseif (PROVISION_CONTEXT_PLATFORM) {
     drush_set_option('platform-name', preg_replace('/^platform_/', '', drush_get_option('hosting_name')));
-    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('provision-http-server', 'provision-context', 'root', 'platform-name')));
+    $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name'), array('provision-http-server', 'provision-context', 'root', 'platform-name'));
     $config->write();
   }
   elseif (PROVISION_CONTEXT_SITE) {
-    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('provision-db-server', 'provision-platform', 'provision-context', 'uri', 'site_port', 'site_id', 'language', 'client_email')));
+    $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name'), array('provision-db-server', 'provision-platform', 'provision-context', 'uri', 'site_port', 'site_id', 'language', 'client_email'));
     $config->write();
   }
+}
+
+function drush_http_provision_named_context_delete() {
+  $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name'));
+  $config->unlink();
 }
 
 function _provision_default_restart_cmd() {
