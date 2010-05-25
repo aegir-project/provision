@@ -210,27 +210,20 @@ function drush_provision_hostmaster_make($platform) {
 
 function drush_http_provision_named_context_save() {
   if (PROVISION_CONTEXT_SERVER) {
-    $parents = array();
-
+    $options = array('provision-context', 'provision-host', 'provision-user', 'config_path', 'backup_path');
     foreach (provision_service('all') as $service) {
-      foreach ($service->write_alias() as $key => $value) {
-        $parents[] = drush_get_option('hosting_name') . '-' . $key;
-        $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') . '-' . $key => $value));
-        $config->write();
-      }
+      $options = array_merge($options, $service->write_alias());
     }
-
-    drush_set_option('parent', '@' . implode(',@', $parents));
-    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'provision-context', 'config_path', 'backup_path')));
+    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => $options));
     $config->write();
   }
   elseif (PROVISION_CONTEXT_PLATFORM) {
     drush_set_option('platform-name', preg_replace('/^platform_/', '', drush_get_option('hosting_name')));
-    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'provision-context', 'root', 'platform-name')));
+    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('provision-http-server', 'provision-context', 'root', 'platform-name')));
     $config->write();
   }
   elseif (PROVISION_CONTEXT_SITE) {
-    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('parent', 'provision-context', 'uri', 'site_port', 'site_id', 'language', 'client_email')));
+    $config = new provisionConfig_drushrc_alias(array(drush_get_option('hosting_name') => array('provision-db-server', 'provision-platform', 'provision-context', 'uri', 'site_port', 'site_id', 'language', 'client_email')));
     $config->write();
   }
 }
