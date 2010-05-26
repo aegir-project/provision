@@ -218,10 +218,10 @@ function drush_provision_hostmaster_make($platform) {
 
 function drush_http_provision_named_context_save() {
   if (PROVISION_CONTEXT_SERVER) {
-    $options = array('provision-host', 'provision-user', 'config_path', 'backup_path');
-    foreach (provision_service('all') as $service) {
-      $options = array_merge($options, $service->write_alias());
-    }
+    $options = array_merge(
+      array('provision-host', 'provision-user', 'config_path', 'backup_path'),
+      d()->services_invoke('write_alias')
+    );
     $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name'), $options);
     $config->write();
   }

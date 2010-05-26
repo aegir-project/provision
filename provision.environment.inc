@@ -235,6 +235,14 @@ class provisionServer extends provisionEnvironment {
   function service($service) {
     return $this->services[$service];
   }
+
+  function services_invoke($callback) {
+    $return = array();
+    foreach ($this->services as $service) {
+      $return = array_merge($return, $service->$callback());
+    }
+    return $return;
+  }
 }
 
 /**
