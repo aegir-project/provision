@@ -49,7 +49,8 @@ class provisionService_db extends provisionService {
       'master_db_user' => 'user',
       'master_db_passwd' => 'pass',
       'master_db_host' => 'host',
-      'master_db_type' => 'type');
+      'master_db_type' => 'type',
+    );
 
     foreach ($options as $option => $key) {
       $creds[$key] = $this->$option;

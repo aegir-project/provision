@@ -15,7 +15,6 @@ function file_provision_services() {
   return array('file' => 'local');
 }
 
-
 function file_drush_exit() {
   // todo sync out to other servers
   //provision_service('file')->sync();
