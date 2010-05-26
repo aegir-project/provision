@@ -236,6 +236,14 @@ class provisionServer extends provisionEnvironment {
     return $this->services[$service];
   }
 
+  /**
+   * Call method $callback on each of the environment's service objects.
+   *
+   * @param $callback
+   *   A provisionService method.
+   * @return
+   *   An array of return values from method implementations.
+   */
   function services_invoke($callback) {
     $return = array();
     foreach ($this->services as $service) {
