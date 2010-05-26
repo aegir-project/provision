@@ -75,10 +75,6 @@ class provisionService_http extends provisionService {
    * Write out server's drushrc alias file.
    */
   function write_alias() {
-    drush_set_option('path-aliases', array(
-      '%drush-script' => drush_get_option('drush_path'),
-    ));
-    drush_set_option('remote-host', drush_get_option('web_host'));
-    return array(drush_get_option('provision-service-http') => array('provision-service-http', 'remote-host', 'remote-user', 'path-aliases', 'web_host', 'web_ip', 'web_ports', 'web_group', 'restart_cmd'));
+    return array('provision-service-http', 'web_ports', 'web_group', 'restart_cmd');
   }
 }

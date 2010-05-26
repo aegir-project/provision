@@ -151,18 +151,15 @@ class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
    *   @code '\@name' => array('option1', 'option2'), @endcode
    *   will save the current values of option1 and option2 to @name.
    */
-  function __construct($contexts) {
-    $contexts_expanded = array();
-    foreach ($contexts as $name => $options) {
-      $contexts_expanded[$name] = array();
-      foreach ($options as $key) {
-        $contexts_expanded[$name][$key] = drush_get_option($key);
-      }
+  function __construct($name, $options = array()) {
+    $options_expanded = array();
+    foreach ($options as $key) {
+      $options_expanded[$key] = drush_get_option($key);
     }
 
     $this->data = array(
-      'aliasname' => reset(array_keys($contexts)),
-      'contexts' => $contexts_expanded,
+      'aliasname' => $name,
+      'options' => $options_expanded,
     );
   }
 
