@@ -70,11 +70,4 @@ class provisionService_http extends provisionService {
   function delete_server_config() {
     return TRUE;
   }
-
-  /**
-   * Write out server's drushrc alias file.
-   */
-  function context_options() {
-    return array('web_ports', 'web_group', 'restart_cmd');
-  }
 }

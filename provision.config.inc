@@ -150,14 +150,9 @@ class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
    *   Array of string option names to save.
    */
   function __construct($name, $options = array()) {
-    $options_expanded = array();
-    foreach ($options as $key) {
-      $options_expanded[$key] = drush_get_option($key);
-    }
-
     $this->data = array(
       'aliasname' => ltrim($name, '@'),
-      'options' => $options_expanded,
+      'options' => $options,
     );
   }
 

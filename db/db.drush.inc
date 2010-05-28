@@ -263,13 +263,6 @@ class provisionService_db extends provisionService {
   function grant_host() {
     return 'localhost';
   }
-
-  /**
-   * Write out server's drushrc alias file.
-   */
-  function context_options() {
-    return array('master_db');
-  }
 }
 
 /**

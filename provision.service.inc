@@ -104,10 +104,6 @@ class provisionService {
 
     return $this;
   }
-
-  function context_options() {
-    return array();
-  }
 }
 
 class provisionService_null extends provisionService {
