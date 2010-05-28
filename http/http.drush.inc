@@ -4,7 +4,7 @@ include_once(dirname(__FILE__) . '/../provision.service.inc');
 
 
 function http_provision_services() {
-  return array('http' => 'apache');
+  return array('http' => NULL);
 }
 
 
@@ -75,6 +75,6 @@ class provisionService_http extends provisionService {
    * Write out server's drushrc alias file.
    */
   function context_options() {
-    return array('provision-service-http', 'web_ports', 'web_group', 'restart_cmd');
+    return array('web_ports', 'web_group', 'restart_cmd');
   }
 }

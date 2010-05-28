@@ -264,10 +264,14 @@ class provisionServer extends provisionEnvironment {
    * Options this environment will save in its context file.
    */
   function context_options() {
-    return array_merge(
+    $options = array_merge(
       array('provision-host', 'provision-user', 'config_path', 'backup_path'),
       d()->services_invoke('context_options')
     );
+    foreach (array_keys($this->services) as $service) {
+      $options[] = $service . '-service-type';
+    }
+    return $options;
   }
 }
 

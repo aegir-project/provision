@@ -11,7 +11,7 @@
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
 function db_provision_services() {
-  return array('db' => 'mysql');
+  return array('db' => NULL);
 }
 
 function db_drush_exit() {
@@ -268,7 +268,7 @@ class provisionService_db extends provisionService {
    * Write out server's drushrc alias file.
    */
   function context_options() {
-    return array('provision-service-db', 'master_db');
+    return array('master_db');
   }
 }
 
