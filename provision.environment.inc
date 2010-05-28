@@ -233,7 +233,7 @@ class provisionServer extends provisionEnvironment {
       }
     }
     else {
-      $this->services[$service] = new provisionService_null();
+      $this->services[$service] = new provisionService_null($this->name);
     }
   }
 
