@@ -105,7 +105,7 @@ class provisionService {
     return $this;
   }
 
-  function write_alias() {
+  function context_options() {
     return array();
   }
 }

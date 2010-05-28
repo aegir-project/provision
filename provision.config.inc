@@ -144,12 +144,10 @@ class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
   public $template = 'provision_drushrc_alias.tpl.php';
 
   /**
-   * An array of contexts to write. The first key will determine the title.
-   *
-   * @param $contexts
-   *   An associative array of named contexts, like
-   *   @code '\@name' => array('option1', 'option2'), @endcode
-   *   will save the current values of option1 and option2 to @name.
+   * @param $name
+   *   String '\@name' for named context.
+   * @param $options
+   *   Array of string option names to save.
    */
   function __construct($name, $options = array()) {
     $options_expanded = array();
@@ -158,7 +156,7 @@ class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
     }
 
     $this->data = array(
-      'aliasname' => $name,
+      'aliasname' => ltrim($name, '@'),
       'options' => $options_expanded,
     );
   }

@@ -60,7 +60,7 @@ include_once('provision.inc');
  * @see provision_load_critical()
  */
 function provision_drush_init() {
-  d( drush_get_option('name', '@self', 'alias'), TRUE);
+  d(drush_get_option('hosting-name', '@self'), TRUE);
 
   print_r(d());
   $load = sys_getloadavg();
@@ -217,23 +217,7 @@ function drush_provision_hostmaster_make($platform) {
 }
 
 function drush_http_provision_named_context_save() {
-  if (PROVISION_CONTEXT_SERVER) {
-    $options = array_merge(
-      array('provision-host', 'provision-user', 'config_path', 'backup_path'),
-      d()->services_invoke('write_alias')
-    );
-    $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name'), $options);
-    $config->write();
-  }
-  elseif (PROVISION_CONTEXT_PLATFORM) {
-    drush_set_option('platform-name', preg_replace('/^platform_/', '', drush_get_option('hosting_name')));
-    $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name'), array('provision-http-server', 'root', 'platform-name'));
-    $config->write();
-  }
-  elseif (PROVISION_CONTEXT_SITE) {
-    $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name'), array('provision-db-server', 'provision-platform', 'uri', 'site_port', 'site_id', 'language', 'client_email'));
-    $config->write();
-  }
+  d()->write_alias();
 }
 
 function drush_http_provision_named_context_delete() {

@@ -74,7 +74,7 @@ class provisionService_http extends provisionService {
   /**
    * Write out server's drushrc alias file.
    */
-  function write_alias() {
+  function context_options() {
     return array('provision-service-http', 'web_ports', 'web_group', 'restart_cmd');
   }
 }

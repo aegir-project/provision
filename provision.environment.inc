@@ -9,11 +9,14 @@
  * Store and access environment objects by their alias name
  *
  */
-function & d($name = '@self', $root_object = FALSE) {
+function & d($name = NULL, $root_object = FALSE) {
   static $instances = null;
   static $default_instance = '@self';
 
-  if ($name) {
+  if (is_null($name)) {
+    return $instances[$default_instance];
+  }
+  else {
     if ($root_object) {
       $default_instance = $name;
     }
@@ -27,8 +30,6 @@ function & d($name = '@self', $root_object = FALSE) {
       return $instances[$name];
     }
   }
-
-  return $instances[$default_instance];
 }
 
 /**
@@ -164,6 +165,13 @@ class provisionEnvironment {
     $this->map[$field] = $context;
   }
 
+  /**
+   * Write out this named context to an alias file.
+   */
+  function write_alias() {
+    $config = new provisionConfig_drushrc_alias($this->name, $this->context_options());
+    $config->write();
+  }
 }
 
 /**
@@ -251,6 +259,16 @@ class provisionServer extends provisionEnvironment {
     }
     return $return;
   }
+
+  /**
+   * Options this environment will save in its context file.
+   */
+  function context_options() {
+    return array_merge(
+      array('provision-host', 'provision-user', 'config_path', 'backup_path'),
+      d()->services_invoke('context_options')
+    );
+  }
 }
 
 /**
@@ -258,9 +276,7 @@ class provisionServer extends provisionEnvironment {
  */
 class provisionPlatform extends provisionServer {
   public static function evaluate($options) {
-    if ($options['root']) {
-      return true;
-    }
+    return isset($options['root']);
   }
 
   function init() {
@@ -273,10 +289,17 @@ class provisionPlatform extends provisionServer {
 
     $this->setProperty('sites_path', $this->root . '/sites');
   }
+
+  /**
+   * Options this environment will save in its context file.
+   */
+  function context_options() {
+    drush_set_option('platform-name', preg_replace('/^platform_/', '', drush_get_option('hosting_name')));
+    return array('provision-http-server', 'root', 'platform-name');
+  }
 }
 
 class provisionSite extends provisionPlatform {
-
   public static function evaluate($options) {
     if ($options['uri']) {
       return true;
@@ -292,7 +315,6 @@ class provisionSite extends provisionPlatform {
     $this->setProperty('aliases', array());
     $this->setProperty('site_port', 80);
 
-
     $this->setProperty('client_email');
 
     // todo - turn into a re-usable mechanism for comma separated values
@@ -303,10 +325,15 @@ class provisionSite extends provisionPlatform {
       $this->aliases = array();
     }
 
-
     // this can potentially be handled by a drupal sub class
     $this->setProperty('profile', 'default');
+  }
 
+  /**
+   * Options this environment will save in its context file.
+   */
+  function context_options() {
+    return array('provision-db-server', 'provision-platform', 'uri', 'site_port', 'site_id', 'language', 'client_email');
   }
 }
 

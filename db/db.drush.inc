@@ -267,7 +267,7 @@ class provisionService_db extends provisionService {
   /**
    * Write out server's drushrc alias file.
    */
-  function write_alias() {
+  function context_options() {
     return array('provision-service-db', 'master_db');
   }
 }
