@@ -30,32 +30,10 @@ function db_drush_help($section) {
 
 
 class provisionService_db extends provisionService {
-
   function init() {
     $this->setProperty('master_db');
-    $db = parse_url($this->master_db);
+    $this->creds = array_map('urldecode', parse_url($this->master_db));
 
-    $this->setProperty('master_db_user', urldecode($db['user']));
-    $this->setProperty('master_db_passwd', urldecode($db['pass']));
-
-    $this->setProperty('master_db_host', urldecode($db['host']));
-    $this->setProperty('db_host', urldecode($db['host']));
-
-    $this->setProperty('master_db_type', $db['scheme']);
-    $this->setProperty('db_type', $db['scheme']);
-
-    $creds = array();
-    $options = array(
-      'master_db_user' => 'user',
-      'master_db_passwd' => 'pass',
-      'master_db_host' => 'host',
-      'master_db_type' => 'type',
-    );
-
-    foreach ($options as $option => $key) {
-      $creds[$key] = $this->$option;
-    }
-    $this->creds = $creds;
     return TRUE;
   }
 
@@ -281,7 +259,6 @@ class provisionService_db_pdo extends provisionService_db {
 
   function init() {
     parent::init();
-    $this->dsn = sprintf("%s:dbname=%s;host=%s", $this->PDO_type, $this->creds['name'], $this->creds['host']);
     $this->dsn = sprintf("%s:host=%s", $this->PDO_type,  $this->creds['host']);
   }
 
