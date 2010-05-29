@@ -63,7 +63,7 @@ class provisionEnvironment {
   protected $name = null;
   protected $properties = array();
 
-  protected $type = null;
+  public $type = null;
   protected $oid_map = array();
 
   protected $map = array();
@@ -235,6 +235,7 @@ class provisionServer extends provisionEnvironment {
         $object = new $className($this->name);
         $object->init();
         $this->services[$service] = $object;
+        $this->setProperty($type_option, $type);
       }
     }
     else {
@@ -258,11 +259,13 @@ class provisionServer extends provisionEnvironment {
    *   An array of return values from method implementations.
    */
   function services_invoke($callback) {
-    $return = array();
     foreach ($this->services as $service) {
-      $return = array_merge($return, $service->$callback());
+      $service->$callback();
     }
-    return $return;
+  }
+
+  function verify() {
+    $this->services_invoke('verify');
   }
 }
 

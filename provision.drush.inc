@@ -62,7 +62,6 @@ include_once('provision.inc');
 function provision_drush_init() {
   d(drush_get_option('hosting-name', '@self'), TRUE);
 
-  print_r(d());
   $load = sys_getloadavg();
   if (provision_load_critical($load)) {
     drush_set_error('PROVISION_OVERLOAD', dt("load on system too heavy (@load), aborting", array('@load' => join(" ", $load))));
@@ -216,13 +215,17 @@ function drush_provision_hostmaster_make($platform) {
   drush_backend_invoke('make', array(dirname(__FILE__) . '/aegir.make', $platform));
 }
 
-function drush_http_provision_named_context_save() {
+function drush_provision_named_context_save() {
   d()->write_alias();
 }
 
-function drush_http_provision_named_context_delete() {
+function drush_provision_named_context_delete() {
   $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name'));
   $config->unlink();
+}
+
+function drush_provision_verify() {
+  d()->verify();
 }
 
 function _provision_default_restart_cmd() {

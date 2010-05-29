@@ -46,18 +46,22 @@ class provisionService_http_apache extends provisionService_http {
   }
 
   function verify() {
-    if (PROVISION_CONTEXT_PLATFORM) {
-      $this->create_platform_config();
-    }
-    elseif (PROVISION_CONTEXT_SERVER) {
-      provision_service('file')->create_dir(drush_get_option('vhost_path'), dt("Virtual host configuration"), 0700);
-      provision_service('file')->create_dir(drush_get_option('platform_conf_path'), dt("Platforms configuration"), 0700);
-      provision_service('file')->create_dir(drush_get_option('config_path') . '/apache.d' , dt("Apache configuration"), 0700);
- 
-      $this->create_server_config();
-    }
-    elseif (PROVISION_CONTEXT_SITE) {
-      $this->create_site_config();
+    switch (d($this->owner)->type) {
+      case 'server':
+        provision_service('file')->create_dir(drush_get_option('vhost_path'), dt("Virtual host configuration"), 0700);
+        provision_service('file')->create_dir(drush_get_option('platform_conf_path'), dt("Platforms configuration"), 0700);
+        provision_service('file')->create_dir(drush_get_option('config_path') . '/apache.d' , dt("Apache configuration"), 0700);
+
+        $this->create_server_config();
+        break;
+
+      case 'platform':
+        $this->create_platform_config();
+        break;
+
+      case 'site':
+        $this->create_site_config();
+        break;
     }
 
     $this->parse_configs();
