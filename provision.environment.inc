@@ -77,7 +77,7 @@ class provisionEnvironment {
    */
   function __get($name) {
     if ($name == 'options') {
-      return array_merge(drush_sitealias_get_record($this->name), drush_get_context('stdin'));
+      return array_merge(drush_sitealias_get_record($this->name), drush_get_context('stdin'), drush_get_context('options'));
     }
     if (array_key_exists($name, $this->properties)) {
       if (isset($this->oid_map[$name]) && !empty($this->properties[$name])) {

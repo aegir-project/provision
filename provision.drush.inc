@@ -60,7 +60,7 @@ include_once('provision.inc');
  * @see provision_load_critical()
  */
 function provision_drush_init() {
-  d(drush_get_option('hosting-name', '@self'), TRUE);
+  d(drush_get_option('name', '@self', 'alias'), TRUE);
 
   $load = sys_getloadavg();
   if (provision_load_critical($load)) {
@@ -215,8 +215,8 @@ function drush_provision_hostmaster_make($platform) {
   drush_backend_invoke('make', array(dirname(__FILE__) . '/aegir.make', $platform));
 }
 
-function drush_provision_named_context_save() {
-  d()->write_alias();
+function drush_provision_named_context_save($alias = null) {
+  d($alias)->write_alias();
 }
 
 function drush_provision_named_context_delete() {
