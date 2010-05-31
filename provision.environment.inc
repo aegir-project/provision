@@ -42,9 +42,6 @@ function provision_environment_factory($name) {
   $type = isset($options['context_type']) ? $options['context_type'] : 'server';
   $classname = $classes[$type];
 
-
-  
-
   return new $classname($name);
 }
 
@@ -61,7 +58,6 @@ class provisionEnvironment {
   public $type = null;
   protected $oid_map = array();
 
-  protected $map = array();
 
   /**
    * Retrieve value from $properties array if property does not exist in class proper.
@@ -90,9 +86,6 @@ class provisionEnvironment {
 
   /**
    * Store value in properties array if the property does not exist in class proper.
-   *
-   * Keep a map of what the $this->type is when the value is set, so we can retrieve
-   * specific values later.
    */
   function __set($name, $value) {
     if (!property_exists($this, $name)) {
@@ -267,10 +260,10 @@ class provisionPlatform extends provisionEnvironment {
     $this->setProperty('publish_path', $this->root);
     $this->setProperty('sites_path', $this->root . '/sites');
 
-    $this->setProperty('server');
+    $this->setProperty('server', '@server_localhost');
     $this->is_oid('server');
 
-    $this->setProperty('web_server');
+    $this->setProperty('web_server', '@server_localhost');
     $this->is_oid('web_server');
   }
 
