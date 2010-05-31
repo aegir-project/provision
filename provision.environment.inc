@@ -38,7 +38,7 @@ function & d($name = NULL, $root_object = FALSE) {
 function provision_environment_factory($name) {
   $classes = array('provisionServer', 'provisionPlatform', 'provisionSite');
 
-  $options = drush_sitealias_get_record($name);
+  $options = array_merge(drush_sitealias_get_record($name), drush_get_context('stdin'), drush_get_context('options'));
 
   if (provisionServer::evaluate($options)) {
     $classname = array_shift($classes);
@@ -284,8 +284,9 @@ class provisionPlatform extends provisionServer {
 
     // publish path can really be removed ...
     $this->setProperty('publish_path', $this->root);
-
     $this->setProperty('sites_path', $this->root . '/sites');
+    $this->setProperty('web_server');
+    $this->is_oid('web_server');
   }
 }
 
