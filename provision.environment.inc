@@ -36,19 +36,14 @@ function & d($name = NULL, $root_object = FALSE) {
  * Create a new environment object and cache it in the d() static cache function.
  */
 function provision_environment_factory($name) {
-  $classes = array('provisionServer', 'provisionPlatform', 'provisionSite');
+  $classes = array('server' => 'provisionServer', 'platform' => 'provisionPlatform', 'site' => 'provisionSite');
 
-  $options = array_merge(drush_sitealias_get_record($name), drush_get_context('stdin'), drush_get_context('options'));
+  $options = drush_sitealias_get_record($name);
+  $type = isset($options['context_type']) ? $options['context_type'] : 'server';
+  $classname = $classes[$type];
 
-  if (provisionServer::evaluate($options)) {
-    $classname = array_shift($classes);
-    if (provisionPlatform::evaluate($options)) {
-      $classname = array_shift($classes);
-      if (provisionSite::evaluate($options)) {
-        $classname = array_shift($classes);
-      }
-    }
-  }
+
+  
 
   return new $classname($name);
 }
@@ -102,7 +97,6 @@ class provisionEnvironment {
   function __set($name, $value) {
     if (!property_exists($this, $name)) {
       $this->properties[$name] = $value;
-      $this->map[$name] = (array_key_exists($name, $this->map)) ? $this->map[$name] : $this->type;
     }
     else {
       $this->$name = $value;
@@ -143,6 +137,7 @@ class provisionEnvironment {
    * Init stub function/
    */
   function init() {
+    $this->setProperty('context_type', 'server');
     return true;
   }
 
@@ -159,23 +154,15 @@ class provisionEnvironment {
   }
 
   /**
-   * Alter the map array to move a value between stacks.
-   */
-  function setMap($field, $context) {
-    $this->map[$field] = $context;
-  }
-
-  /**
    * Write out this named context to an alias file.
    */
   function write_alias() {
-    foreach ($this->map as $key => $type) {
-      if ($type === $this->type) {
-        $options[$key] = $this->properties[$key];
-      }
-    }
-    $config = new provisionConfig_drushrc_alias($this->name, $options);
+    $config = new provisionConfig_drushrc_alias($this->name, $this->properties);
     $config->write();
+  }
+
+  function service($service) {
+    return new provisionService_null($this->name);
   }
 }
 
@@ -187,9 +174,6 @@ class provisionEnvironment {
  */
 class provisionServer extends provisionEnvironment {
   protected $services = array();
-  public static function evaluate($options) {
-    return TRUE;
-  }
 
   function init() {
     parent::init();
@@ -272,10 +256,7 @@ class provisionServer extends provisionEnvironment {
 /**
  * Class for the platform environment.
  */
-class provisionPlatform extends provisionServer {
-  public static function evaluate($options) {
-    return isset($options['root']);
-  }
+class provisionPlatform extends provisionEnvironment {
 
   function init() {
     parent::init();
@@ -285,17 +266,29 @@ class provisionPlatform extends provisionServer {
     // publish path can really be removed ...
     $this->setProperty('publish_path', $this->root);
     $this->setProperty('sites_path', $this->root . '/sites');
+
+    $this->setProperty('server');
+    $this->is_oid('server');
+
     $this->setProperty('web_server');
     $this->is_oid('web_server');
   }
-}
 
-class provisionSite extends provisionPlatform {
-  public static function evaluate($options) {
-    if ($options['uri']) {
-      return true;
+  function verify() {
+    $this->web_server->service('http')->verify();
+  }
+
+  function service($service) {
+    if ($service == 'http') {
+      return $this->web_server->service($service);
+    }
+    else {
+      return $this->server->service($service);
     }
   }
+}
+
+class provisionSite extends provisionEnvironment {
 
   function init() {
     parent::init();
@@ -307,6 +300,9 @@ class provisionSite extends provisionPlatform {
     $this->setProperty('site_port', 80);
 
     $this->setProperty('client_email');
+
+    $this->setProperty('db_server');
+    $this->is_oid('db_server');
 
     // todo - turn into a re-usable mechanism for comma separated values
     if ($this->options['aliases'] && !is_array($site_data['aliases'])) {
