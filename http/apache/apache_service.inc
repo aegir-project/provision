@@ -48,8 +48,8 @@ class provisionService_http_apache extends provisionService_http {
   function verify() {
     switch (d($this->owner)->type) {
       case 'server':
-        provision_service('file')->create_dir(drush_get_option('vhost_path'), dt("Virtual host configuration"), 0700);
-        provision_service('file')->create_dir(drush_get_option('platform_conf_path'), dt("Platforms configuration"), 0700);
+        provision_service('file')->create_dir(drush_get_option('apache_site_conf_path'), dt("Virtual host configuration"), 0700);
+        provision_service('file')->create_dir(drush_get_option('apache_platform_conf_path'), dt("Platforms configuration"), 0700);
         provision_service('file')->create_dir(drush_get_option('config_path') . '/apache.d' , dt("Apache configuration"), 0700);
 
         $this->create_server_config();
@@ -70,7 +70,7 @@ class provisionService_http_apache extends provisionService_http {
   function parse_configs($cause_error = FALSE) {
     // This is required to be configurable, due to the fact that different
     // hosts might need to do this differently.
-    if (drush_is_local_host(drush_get_option('web_host'))) {
+    if (drush_is_local_host(drush_get_option('host-name', 'localhost'))) {
       $return = drush_shell_exec(escapeshellcmd(drush_get_option('restart_cmd')));
     }
     else {
