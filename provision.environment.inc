@@ -54,10 +54,15 @@ function provision_environment_factory($name) {
 class provisionEnvironment {
   protected $name = null;
   protected $properties = array();
+  protected $parent_key = null;
 
   public $type = null;
   protected $oid_map = array();
 
+
+  function getName() {
+    return $this->name;
+  }
 
   /**
    * Retrieve value from $properties array if property does not exist in class proper.
@@ -155,7 +160,12 @@ class provisionEnvironment {
   }
 
   function service($service) {
-    return new provisionService_null($this->name);
+    if (!is_null($this->parent_key)) {
+      return $this->{$this->parent_key}->service($service);
+    }
+    else {
+      return new provisionService_null($this->name);
+    }
   }
 }
 
@@ -252,6 +262,8 @@ class provisionServer extends provisionEnvironment {
 class provisionPlatform extends provisionEnvironment {
 
   function init() {
+    $this->parent_key = 'server';
+
     parent::init();
     $this->type = 'platform';
     $this->setProperty('root', $_SERVER['PWD']);
@@ -268,22 +280,16 @@ class provisionPlatform extends provisionEnvironment {
   }
 
   function verify() {
-    $this->web_server->service('http')->verify();
+    $this->server->verify();
   }
 
-  function service($service) {
-    if ($service == 'http') {
-      return $this->web_server->service($service);
-    }
-    else {
-      return $this->server->service($service);
-    }
-  }
 }
 
 class provisionSite extends provisionEnvironment {
 
   function init() {
+    $this->parent_key = 'platform';
+
     parent::init();
     $this->type = 'site';
     $this->setProperty('uri');

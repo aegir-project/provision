@@ -6,11 +6,13 @@
 class provisionService_http_apache extends provisionService_http {
   function init() {
     parent::init();
-    $this->setProperty('apache_site_conf_path', $this->config_path . '/vhost.d');
-    $this->setProperty('apache_platform_conf_path', $this->config_path . '/platform.d');
+    $this->apache_site_conf_path = $this->config_path . '/vhost.d';
+    $this->apache_platform_conf_path = $this->config_path . '/platform.d';
+    $this->apache_conf_path = $this->config_path . '/apache.d';
 
     // Commands
     $this->setProperty('restart_cmd', _provision_default_restart_cmd());
+    $this->setProperty('web_ports', array(80));
   }
 
   function create_site_config() {
@@ -24,7 +26,7 @@ class provisionService_http_apache extends provisionService_http {
   }
 
   function create_platform_config() {
-    $config = new provisionConfig_apache_platform(drush_get_merged_options());
+    $config = new provisionConfig_apache_platform(array('d' => d()));
     return $config->write();
   }
 
@@ -35,7 +37,7 @@ class provisionService_http_apache extends provisionService_http {
 
 
   function create_server_config() {
-    $config = new provisionConfig_apache_server(drush_get_merged_options());
+    $config = new provisionConfig_apache_server(array('d' => d()));
     return $config->write();
   }
 
@@ -46,11 +48,11 @@ class provisionService_http_apache extends provisionService_http {
   }
 
   function verify() {
-    switch (d($this->owner)->type) {
+    switch (d()->type) {
       case 'server':
-        provision_service('file')->create_dir(drush_get_option('apache_site_conf_path'), dt("Virtual host configuration"), 0700);
-        provision_service('file')->create_dir(drush_get_option('apache_platform_conf_path'), dt("Platforms configuration"), 0700);
-        provision_service('file')->create_dir(drush_get_option('config_path') . '/apache.d' , dt("Apache configuration"), 0700);
+        provision_service('file')->create_dir($this->apache_site_conf_path, dt("Virtual host configuration"), 0700);
+        provision_service('file')->create_dir($this->apache_platform_conf_path, dt("Platforms configuration"), 0700);
+        provision_service('file')->create_dir($this->apache_conf_path , dt("Apache configuration"), 0700);
 
         $this->create_server_config();
         break;
@@ -105,7 +107,7 @@ class provisionConfig_apache_server extends provisionConfig_apache {
   public $description = 'apache server configuration file';
 
   function filename() {
-    return $this->data['config_path'] . '/' . 'apache.conf';
+    return $this->data['d']->config_path . '/' . 'apache.conf';
   }
 
   function process() {
@@ -119,7 +121,7 @@ class provisionConfig_apache_platform extends provisionConfig_apache {
   public $description = 'apache platform configuration file';
 
   function filename() {
-    return $this->data['platform_conf_path'] . '/platform_' . $this->data['platform-name'] . '.conf';
+    return $this->data['d']->server->apache_platform_conf_path . '/' . ltrim($this->data['d']->getName(), '@') . '.conf';
   }
 
   function process() {

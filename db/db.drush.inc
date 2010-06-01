@@ -38,7 +38,7 @@ class provisionService_db extends provisionService {
   }
 
   function verify() { 
-    if (d($this->owner)->type === 'server') {
+    if (d()->type === 'server') {
       $this->connect();
       if ($this->can_create_database()) {
         drush_log(dt('Provision can create new databases.'), 'message');
