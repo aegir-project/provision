@@ -26,18 +26,18 @@ function drush_provision_drupal_provision_verify_validate() {
  */
 function drush_provision_drupal_provision_verify() {
   if (PROVISION_CONTEXT_SERVER) {
-    provision_service('file')->create_dir(drush_get_option('config_path'), dt('Provision configuration'), 0711);
-    provision_service('file')->create_dir(drush_get_option('config_path') . '/includes', dt('Provision PHP configuration'), 0711);
-    if (!provision_service('file')->exists(drush_get_option('config_path') . '/includes/global.inc')->succeed('Global configuration file exists')->status()) {
+    provision_service('file')->create_dir(d()->config_path, dt('Provision configuration'), 0711);
+    provision_service('file')->create_dir(d()->config_path . '/includes', dt('Provision PHP configuration'), 0711);
+    if (!provision_service('file')->exists(d()->config_path . '/includes/global.inc')->succeed('Global configuration file exists')->status()) {
       // Create an empty global.inc so the include doesn't fail with
       // open_basedir restrictions
-      $config = new provisionConfig_global_settings(drush_get_merged_options());
+      $config = new provisionConfig_global_settings(d()->name);
       $config->write();
     }
-    provision_service('file')->create_dir(drush_get_option('backup_path'), dt('Backup'), 0700);
+    provision_service('file')->create_dir(d()->backup_path, dt('Backup'), 0700);
   }
   elseif (PROVISION_CONTEXT_PLATFORM) {
-    provision_service('file')->writable(drush_get_option('sites_path'))
+    provision_service('file')->writable(d()->sites_path)
       ->succeed('Drupal sites directory @path is writable by the provisioning script')
       ->fail('Drupal sites directory @path is not writable by the provisioning script', 'PROVISION_SITES_DIR_NOT_WRITABLE');
 
@@ -61,7 +61,7 @@ class provisionConfig_global_settings extends provisionConfig {
   public $description = 'Global settings.php file';
 
   function filename() {
-    return $this->data['config_path'] . '/includes/global.inc';
+    return $this->config_path . '/includes/global.inc';
   }
 
   function process() {

@@ -9,18 +9,26 @@
 class provisionConfig {
   public $template = null;
   public $data = array();
+  public $owner = null;
   public $description = null;
   protected $append = FALSE;
   protected $mode = NULL;
   protected $group = NULL;
 
-  function __construct($data = array()) {
+  function __get($name) {
+    if ($this->owner) {
+      return d($this->owner)->$name;
+    }
+  }
+  
+  function __construct($owner, $data = array()) {
     if (is_null($this->template)) {
       throw(exception);
     }
     if (sizeof($data)) {
       $this->data = $data;
     }
+    $this->owner = $owner;
   }
 
   function process() {
@@ -61,7 +69,6 @@ class provisionConfig {
 
   function write() {
     $filename = $this->filename();
-
     // Make directory structure if it does not exist.
     if (!provision_service('file')->exists(dirname($filename))->status()) {
       provision_service('file')->mkdir(dirname($filename))
@@ -120,8 +127,8 @@ class provisionConfig_drushrc extends provisionConfig {
     return _drush_config_file($this->context_name);
   }
 
-  function __construct($data = array()) {
-    parent::__construct($data);
+  function __construct($owner, $data = array()) {
+    parent::__construct($owner, $data);
     $this->load_data();
   }
 
@@ -149,9 +156,10 @@ class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
    * @param $options
    *   Array of string option names to save.
    */
-  function __construct($name, $options = array()) {
+  function __construct($owner, $options = array()) {
+    $this->owner = $owner;
     $this->data = array(
-      'aliasname' => ltrim($name, '@'),
+      'aliasname' => ltrim($owner, '@'),
       'options' => $options,
     );
   }

@@ -2,7 +2,7 @@
     <?php if ($site_mail) : ?>
       ServerAdmin <?php  print $site_mail; ?> 
     <?php endif;?>
-    DocumentRoot <?php print $publish_path; ?> 
+    DocumentRoot <?php print $this->platform->root; ?> 
     
     ServerName <?php print $site_url; ?>
 

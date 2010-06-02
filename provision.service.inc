@@ -3,29 +3,30 @@
 include_once('provision.config.inc');
 
 class provisionService {
-  protected $owner = '@self';
+  protected $server = '@self';
+  public $context;
   protected $last_status;
   protected $tokens;
 
   function __get($name) {
-    return d($this->owner)->$name;
+    return d($this->server)->$name;
   }
 
   function __set($name, $value) {
-    d($this->owner)->$name = $value;
+    d($this->server)->$name = $value;
   }
 
   function __isset($name) {
-    return isset(d($this->owner)->$name);
+    return isset(d($this->server)->$name);
   }
 
   function __unset($name) {
-    unset(d($this->owner)->$name);
+    unset(d($this->server)->$name);
 
   }
 
-  function __construct($owner) {
-    $this->owner = $owner;
+  function __construct($server) {
+    $this->server = $server;
   }
 
   function verify() {
@@ -37,7 +38,7 @@ class provisionService {
   }
 
   function setProperty($field, $default = null) {
-    d($this->owner)->setProperty($field, $default);
+    d($this->server)->setProperty($field, $default);
   }
 
   /**

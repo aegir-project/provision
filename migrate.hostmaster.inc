@@ -16,7 +16,7 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
   }
 
   $data = drush_get_merged_options(); 
-  $data['publish_path'] = $data['r'] = $data['root'] = realpath($platform);
+  $data['r'] = $data['root'] = realpath($platform);
   drush_backend_invoke('provision-verify', $data);
   // verify the current platform
   drush_backend_invoke('provision-verify', array('root' => drush_get_option(array('r', 'root'), drush_locate_root())));

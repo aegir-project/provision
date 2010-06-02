@@ -33,10 +33,30 @@ drush_errors_on();
  */
 function provision_save_server_data() {
   if (!drush_get_error()) {
-    $config = new provisionConfig_drushrc_server();
+    $config = new provisionConfig_drushrc_server(d()->name);
     $config->write();
   }
 }
+
+
+function provision_save_site_data() {
+  if (!drush_get_error()) {
+    $config = new provisionConfig_drushrc_site(d()->name);
+    $config->write();
+  }
+}
+
+
+/**
+ * Save modified options to the drushrc.php file
+ */
+function provision_save_platform_data() {
+  if (!drush_get_error()) {
+    $config = new provisionConfig_drushrc_platform(d()->name);
+    $config->write();
+  }
+}
+
 
 /**
  * @} End of "defgroup sitedata".

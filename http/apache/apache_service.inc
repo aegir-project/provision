@@ -20,34 +20,34 @@ class provisionService_http_apache extends provisionService_http {
   }
 
   function create_site_config() {
-    $config = new provisionConfig_apache_site(drush_get_merged_options());
+    $config = new provisionConfig_apache_site($this->context);
     return $config->write();
   }
 
   function delete_site_config() {
-    $config = new provisionConfig_apache_site(drush_get_merged_options());
+    $config = new provisionConfig_apache_site($this->context);
     return $config->unlink();
   }
 
   function create_platform_config() {
-    $config = new provisionConfig_apache_platform(array('d' => d()));
+    $config = new provisionConfig_apache_platform($this->context);
     return $config->write();
   }
 
   function delete_platform_config() {
-    $config = new provisionConfig_apache_platform(drush_get_merged_options());
+    $config = new provisionConfig_apache_platform($this->context);
     return $config->unlink();
   }
 
 
   function create_server_config() {
-    $config = new provisionConfig_apache_server(array('d' => d()));
+    $config = new provisionConfig_apache_server($this->context);
     return $config->write();
   }
 
   
   function delete_server_config() {
-    $config = new provisionConfig_apache_server(drush_get_merged_options());
+    $config = new provisionConfig_apache_server($this->context);
     return $config->unlink();
   }
 
@@ -111,7 +111,7 @@ class provisionConfig_apache_server extends provisionConfig_apache {
   public $description = 'apache server configuration file';
 
   function filename() {
-    return $this->data['d']->config_path . '/' . 'apache.conf';
+    return $this->config_path . '/' . 'apache.conf';
   }
 
   function process() {
@@ -125,7 +125,7 @@ class provisionConfig_apache_platform extends provisionConfig_apache {
   public $description = 'apache platform configuration file';
 
   function filename() {
-    return $this->data['d']->server->apache_platform_conf_path . '/' . ltrim($this->data['d']->getName(), '@') . '.conf';
+    return $this->server->apache_platform_conf_path . '/' . ltrim($this->owner, '@') . '.conf';
   }
 
   function process() {

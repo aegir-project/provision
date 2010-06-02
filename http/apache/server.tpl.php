@@ -1,7 +1,7 @@
 # Aegir web server configuration file
 
-<?php if (is_array($d->web_ports)) :
-  foreach ($d->web_ports as $web_port) :?>
+<?php if (is_array($this->web_ports)) :
+  foreach ($this->web_ports as $web_port) :?>
   NameVirtualHost *:<?php print $web_port; ?>
 
   <VirtualHost *:<?php print $web_port; ?>>
@@ -23,13 +23,13 @@ endif;
 </IfModule>
 
 # virtual hosts
-Include <?php print $d->apache_site_conf_path ?>
+Include <?php print $this->apache_site_conf_path ?>
 
 # platforms
-Include <?php print $d->apache_platform_conf_path ?>
+Include <?php print $this->apache_platform_conf_path ?>
 
 # other configuration, not touched by aegir
-Include <?php print $d->apache_conf_path ?>
+Include <?php print $this->apache_conf_path ?>
 
 
 <?php print $extra_config; ?>

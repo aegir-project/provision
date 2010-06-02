@@ -52,17 +52,13 @@ function provision_environment_factory($name) {
  * Contains magic getter/setter functions
  */
 class provisionEnvironment {
-  protected $name = null;
+  public $name = null;
+  public $type = null;
+
   protected $properties = array();
   protected $parent_key = null;
 
-  public $type = null;
   protected $oid_map = array();
-
-
-  function getName() {
-    return $this->name;
-  }
 
   /**
    * Retrieve value from $properties array if property does not exist in class proper.
@@ -85,6 +81,9 @@ class provisionEnvironment {
     }
   }
 
+  /**
+   * Specify that a property contains a named context.
+   */
   function is_oid($name) {
     $this->oid_map[$name] = TRUE;
   }
@@ -159,9 +158,9 @@ class provisionEnvironment {
     $config->write();
   }
 
-  function service($service) {
+  function service($service, $name = null) {
     if (!is_null($this->parent_key)) {
-      return $this->{$this->parent_key}->service($service);
+      return $this->{$this->parent_key}->service($service, ($name) ? $name : $this->name);
     }
     else {
       return new provisionService_null($this->name);
@@ -212,8 +211,7 @@ class provisionServer extends provisionEnvironment {
     $this->setProperty('remote_host', 'localhost');
     $this->setProperty('script_user', get_current_user());
     $this->setProperty('aegir_root', '/var/aegir');
-    $this->setProperty('backup_path', $this->aegir_root . '/backup');
-
+    $this->setProperty('backup_path', $this->aegir_root . '/backups');
     $this->setProperty('config_path', $this->aegir_root . '/config');
     $this->setProperty('alias_path', $this->config_path . '/drush.d');
     $this->setProperty('master_url');
@@ -260,7 +258,8 @@ class provisionServer extends provisionEnvironment {
   /**
    * Retrieve a service of a specific type from the environment.
    */
-  function service($service) {
+  function service($service, $name = null) {
+    $this->services[$service]->context = ($name) ? $name : $this->name;
     return $this->services[$service];
   }
 
@@ -273,8 +272,8 @@ class provisionServer extends provisionEnvironment {
    *   An array of return values from method implementations.
    */
   function services_invoke($callback) {
-    foreach ($this->services as $service) {
-      $service->$callback();
+    foreach (array_keys($this->services) as $service) {
+      $this->service($service)->$callback();
     }
   }
 
@@ -301,7 +300,6 @@ class provisionPlatform extends provisionEnvironment {
     $this->setProperty('root', $_SERVER['PWD']);
 
     // publish path can really be removed ...
-    $this->setProperty('publish_path', $this->root);
     $this->setProperty('sites_path', $this->root . '/sites');
 
     $this->setProperty('server', '@server_localhost');
@@ -312,7 +310,7 @@ class provisionPlatform extends provisionEnvironment {
   }
 
   function verify() {
-    $this->server->verify();
+    $this->service('http')->verify();
   }
 }
 
