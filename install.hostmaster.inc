@@ -5,7 +5,6 @@
  */
 
 function drush_provision_hostmaster_install($site) {
-  drush_set_option('alias-path', drush_server_home() . '/.drush/aliases');
   if (!$site) {
     return drush_set_error('SITE_MISSING', dt('You need to specify the FQDN of the hostmaster install'));
   }

@@ -184,7 +184,6 @@ class provisionServer extends provisionEnvironment {
       '--aegir_root' => 'server: Aegir root; default /var/aegir',
       '--backup_path' => 'server: Aegir backup path; default {aegir_root}/backup',
       '--config_path' => 'server: Aegir configuration path; default {aegir_root}/config',
-      '--alias_path' => 'server: Aegir Drush alias path; default {config_path}/drush.d',
       '--master_url' => 'server: Hostmaster URL',
     );
     foreach (drush_command_invoke_all('provision_services') as $service => $default) {
@@ -213,7 +212,6 @@ class provisionServer extends provisionEnvironment {
     $this->setProperty('aegir_root', '/var/aegir');
     $this->setProperty('backup_path', $this->aegir_root . '/backups');
     $this->setProperty('config_path', $this->aegir_root . '/config');
-    $this->setProperty('alias_path', $this->config_path . '/drush.d');
     $this->setProperty('master_url');
     $this->load_services();
   }
