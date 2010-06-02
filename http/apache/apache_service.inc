@@ -1,9 +1,13 @@
 <?php
 
-
-
-
 class provisionService_http_apache extends provisionService_http {
+  static function option_documentation() {
+    return array_merge(parent::option_documentation(), array(
+      '--restart_cmd' => 'server with apache: shell command to restart the server; working default will be attepted',
+      '--web_ports' => 'server with apache: array of ports to make available; default 80',
+    ));
+  }
+
   function init() {
     parent::init();
     $this->apache_site_conf_path = $this->config_path . '/vhost.d';

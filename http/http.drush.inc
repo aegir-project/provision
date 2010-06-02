@@ -9,6 +9,14 @@ function http_provision_services() {
 
 
 class provisionService_http extends provisionService {
+  static function option_documentation() {
+    return array(
+      '--web_group' => 'server with http: OS group for permissions; working default will be attepted',
+      '--web_disable_url' => 'server with http: URL disabled sites are redirected to; default {master_url}/hosting/disabled',
+      '--web_maintenence_url' => 'server with http: URL maintenance sites are redirected to; default {master_url}/hosting/maintenance',
+    );
+  }
+
   function init() {
     parent::init();
     // System account
@@ -17,9 +25,6 @@ class provisionService_http extends provisionService {
     // Redirection urls
     $this->setProperty('web_disable_url', $this->master_url .'/hosting/disabled');
     $this->setProperty('web_maintenence_url', $this->master_url .'/hosting/maintenance');
-
-    $this->setProperty('web_ip', '127.0.0.1');
-    $this->setProperty('web_port', 80);
   }
 
   /**

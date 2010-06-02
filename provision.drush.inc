@@ -73,8 +73,13 @@ function provision_drush_init() {
  */
 function provision_drush_command() {
   $items['provision-named-context-save'] = array(
-    'arguments' => array(),
-    'description' => dt('Save Drush aliases'),
+    'description' => dt('Save Drush alias'),
+    'arguments' => array(
+      '@context_name' => 'Context to save',
+    ),
+    'options' => array_merge(array(
+      '--context_type' => 'server, platform, or site; default server',
+    ), provisionServer::option_documentation(), provisionPlatform::option_documentation(), provisionSite::option_documentation()),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
   $items['provision-named-context-delete'] = array(

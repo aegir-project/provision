@@ -104,6 +104,16 @@ class provisionService {
 
     return $this;
   }
+
+  /**
+   * Return service-specific configuration options for help.
+   *
+   * @return
+   *   array('--option' => 'description')
+   */
+  static function option_documentation() {
+    return array();
+  }
 }
 
 class provisionService_null extends provisionService {

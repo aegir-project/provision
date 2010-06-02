@@ -178,6 +178,33 @@ class provisionEnvironment {
 class provisionServer extends provisionEnvironment {
   protected $services = array();
 
+  static function option_documentation() {
+    $options = array(
+      '--remote_host' => 'server: host name; default localhost',
+      '--script_user' => 'server: OS user name; default current user',
+      '--aegir_root' => 'server: Aegir root; default /var/aegir',
+      '--backup_path' => 'server: Aegir backup path; default {aegir_root}/backup',
+      '--config_path' => 'server: Aegir configuration path; default {aegir_root}/config',
+      '--alias_path' => 'server: Aegir Drush alias path; default {config_path}/drush.d',
+      '--master_url' => 'server: Hostmaster URL',
+    );
+    foreach (drush_command_invoke_all('provision_services') as $service => $default) {
+      $reflect = new reflectionClass('provisionService_' . $service);
+      $base_dir = dirname($reflect->getFilename());
+      $types = array();
+      $options['--' . $service . '-service-type'] = 'placeholder';
+      foreach (array_keys(drush_scan_directory($base_dir, '%.*_service\.inc%')) as $service_file) {
+        if (preg_match('%^' . $base_dir . '/([a-z]+)/(?:\1)_service.inc$%', $service_file, $match)) {
+          $types[] = $match[1];
+          include_once($service_file);
+          $options = array_merge($options, call_user_func(array(sprintf('provisionService_%s_%s', $service, $match[1]), 'option_documentation')));
+        }
+      }
+      $options['--' . $service . '-service-type'] = 'server: ' . implode(', ', $types) . ', or null; default ' . (empty($default) ? 'null' : $default);
+    }
+    return $options;
+  }
+
   function init() {
     parent::init();
 
@@ -260,6 +287,11 @@ class provisionServer extends provisionEnvironment {
  * Class for the platform environment.
  */
 class provisionPlatform extends provisionEnvironment {
+  static function option_documentation() {
+    return array(
+      //todo
+    );
+  }
 
   function init() {
     $this->parent_key = 'server';
@@ -282,10 +314,14 @@ class provisionPlatform extends provisionEnvironment {
   function verify() {
     $this->server->verify();
   }
-
 }
 
 class provisionSite extends provisionEnvironment {
+  static function option_documentation() {
+    return array(
+      //todo
+    );
+  }
 
   function init() {
     $this->parent_key = 'platform';
