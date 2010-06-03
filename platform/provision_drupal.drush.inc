@@ -107,7 +107,7 @@ function provision_drupal_drush_exit() {
         drush_set_option('site_url', drush_get_option('site_url'), 'site');
         drush_set_option('site_id', drush_get_option('site_id'), 'site');
         drush_set_option('client_email', drush_get_option('client_email'), 'site');
-//        provision_save_site_data();
+        provision_save_site_data();
       }
     }
     elseif (PROVISION_CONTEXT_PLATFORM) {
@@ -524,7 +524,7 @@ function provision_drupal_system_map() {
   drush_log(dt("Found !count modules", array('!count' => sizeof($packages['modules']))));
 
   // XXX: mostly a copy-paste from above
-  foreach (_provision_system_query("theme") as $theme) { 
+  foreach (_provision_system_query("theme") as $theme) {
     $frags = explode("/", $theme->filename);
     // ignore site-specific themes
     if ($frags[0] == 'sites' && $frags[1] != 'all') {
