@@ -218,7 +218,7 @@ function drush_provision_hostmaster_make($platform) {
 function drush_provision_save($alias = null) {
   if (drush_get_option('delete', false)) {
     // remove an existing alias 
-    $config = new provisionConfig_drushrc_alias($name);
+    $config = new provisionConfig_drushrc_alias($alias);
     $config->unlink();
   }
   else {
