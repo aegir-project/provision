@@ -236,6 +236,8 @@ class provisionService_file extends provisionService {
 
     $this->tokens = array('@path1' => $path1, '@path2' => $path2);
 
+    $this->last_status = FALSE;
+
     //TODO : Add error reasons.
     $temp = $path1 . '.tmp';
     if (!file_exists($path1)) {
@@ -247,7 +249,7 @@ class provisionService_file extends provisionService {
     elseif (rename($path1, $temp)) { 
       if (rename($path2, $path1)) {
         if (rename($temp, $path2)) {
-          $this->last_status = $path2; // path1 is now path2
+          $this->last_status = TRUE; // path1 is now path2
         }
         else {
           // same .. just in reverse
@@ -259,7 +261,6 @@ class provisionService_file extends provisionService {
         $this->last_status = rename($temp, $path1);
       }   
     }
-    $this->last_status = FALSE;
 
     return $this;
   }

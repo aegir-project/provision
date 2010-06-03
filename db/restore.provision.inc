@@ -5,6 +5,8 @@ function drush_db_provision_restore_validate() {
 }
 
 function drush_db_pre_provision_restore() {
+  drush_set_option('old_db_creds', provision_service('db')->fetch_site_credentials());
+
   provision_service('db')->create_site_database();
 }
 
@@ -34,7 +36,7 @@ function drush_db_post_provision_restore() {
     ->succeed('Removed dump file @path after restoring from it')
     ->fail('Could not remove dump file @path', 'DRUSH_PERM_ERROR');
 
-  provision_service('db')->destroy_site_database();
+  provision_service('db')->destroy_site_database(drush_get_option('old_db_creds'));
 
   // TODO - test this .. it's probably horribly broken .. deleting the newly restored db instead of the old one.
 

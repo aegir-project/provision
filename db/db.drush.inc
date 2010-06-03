@@ -140,8 +140,10 @@ class provisionService_db extends provisionService {
   /**
    * Remove the database and user account for the supplied credentials
    */
-  function destroy_site_database() {
-    $creds = $this->fetch_site_credentials();
+  function destroy_site_database($creds = array()) {
+    if (!sizeof($creds)) {
+      $creds = $this->fetch_site_credentials();
+    }
     extract($creds);
 
     if ( $this->database_exists($db_name) ) {

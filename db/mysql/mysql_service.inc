@@ -73,11 +73,11 @@ class provisionService_db_mysql extends provisionService_db_pdo {
 
     $cmd = sprintf("mysql --defaults-file=/dev/fd/3 %s", escapeshellcmd($db_name));
 
-    $this->safe_shell_exec($cmd, $db_host, $db_user, $db_passwd, $dump_file);
+    $success = $this->safe_shell_exec($cmd, $db_host, $db_user, $db_passwd, $dump_file);
 
     drush_log(sprintf("Importing database using command: %s", $cmd));
 
-    if ($return_value != 0) {
+    if (!$success) {
       drush_set_error('PROVISION_DB_IMPORT_FAILED', dt("Database import failed: %output", array('%output' => $output)));
     }
   }
@@ -94,12 +94,10 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     // non-readable by the webserver.
     umask(0077);
     // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
-    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 -rsites/%s/database.sql %s", escapeshellcmd(d($this->context)->uri), escapeshellcmd(drush_get_option('db_name'))); 
+    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 -r%s/sites/%s/database.sql %s", escapeshellcmd(d($this->context)->root), escapeshellcmd(d($this->context)->uri), escapeshellcmd(drush_get_option('db_name'))); 
+    $success = $this->safe_shell_exec($cmd, drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
 
-    $this->safe_shell_exec($cmd, drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
-
-    $result = ($return_value == 0);
-    if (!$result && !drush_get_option('force', false)) {
+    if (!$success && !drush_get_option('force', false)) {
       drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not generate database backup from mysqldump"));
     }
     // Reset the umask to normal permissions.
@@ -138,7 +136,7 @@ password=%s
       // XXX: failed to execute? unsure when this happens
       $return_value = -1;
     }
-
+    dlm($output);
     return ($return_value == 0);
   }
 
