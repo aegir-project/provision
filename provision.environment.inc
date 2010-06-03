@@ -69,7 +69,7 @@ class provisionEnvironment {
    */
   function __get($name) {
     if ($name == 'options') {
-      return array_merge(drush_sitealias_get_record($this->name), drush_get_context('stdin'), drush_get_context('options'));
+      return array_merge(drush_sitealias_get_record($this->name), array_filter(drush_get_context('stdin')), array_filter(drush_get_context('options')));
     }
     if (array_key_exists($name, $this->properties)) {
       if (isset($this->oid_map[$name]) && !empty($this->properties[$name])) {
@@ -295,9 +295,8 @@ class provisionPlatform extends provisionEnvironment {
 
     parent::init();
     $this->type = 'platform';
-    $this->setProperty('root', $_SERVER['PWD']);
+    $this->setProperty('root');
 
-    // publish path can really be removed ...
     $this->setProperty('sites_path', $this->root . '/sites');
 
     $this->setProperty('server', '@server_localhost');
@@ -324,6 +323,13 @@ class provisionSite extends provisionEnvironment {
 
     parent::init();
     $this->type = 'site';
+    
+    $this->setProperty('platform');
+    $this->is_oid('platform');
+
+    // we need to set the alias root to the platform root, otherwise drush will cause problems.
+    $this->root = $this->platform->root;
+
     $this->setProperty('uri');
     $this->setProperty('site_url', str_replace(array('https://', 'http://'), '', $this->uri));
     $this->setProperty('language', 'en');
@@ -345,5 +351,10 @@ class provisionSite extends provisionEnvironment {
 
     // this can potentially be handled by a drupal sub class
     $this->setProperty('profile', 'default');
+  }
+
+  function verify() {
+    $this->service('db')->verify();
+    $this->service('http')->verify();
   }
 }
