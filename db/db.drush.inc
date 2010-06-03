@@ -186,7 +186,7 @@ class provisionService_db extends provisionService {
   function generate_site_credentials() {
     $creds = array();
     // replace with service type 
-    $db_type = drush_get_option('db_type');
+    $db_type = drush_get_option('db_type', 'mysql');
     // As of Drupal 7 there is no more mysqli type
     if (drush_drupal_major_version() >= 7) {
       $db_type = ($db_type == 'mysqli') ? 'mysql' : $db_type;
@@ -194,7 +194,7 @@ class provisionService_db extends provisionService {
 
     //TODO - this should not be here at all
     $creds['db_type'] = drush_set_option('db_type', $db_type, 'site');
-    $creds['db_host'] = drush_set_option('db_host', drush_get_option('db_host'), 'site');
+    $creds['db_host'] = drush_set_option('db_host', $this->remote_host, 'site');
     $creds['db_passwd'] = drush_set_option('db_passwd', provision_password(), 'site');
     $creds['db_name'] = drush_set_option('db_name', $this->suggest_db_name(), 'site');
     $creds['db_user'] = drush_set_option('db_user', $creds['db_name'], 'site');

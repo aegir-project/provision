@@ -73,11 +73,6 @@ function _provision_context_init() {
   if (($context === 'platform' || $context === 'site') && drush_bootstrap_validate(DRUSH_BOOTSTRAP_DRUPAL_ROOT)) { 
     // i don't think i should be bootstrapping here yet ... but i have no choice yet.
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
-    if ($context === 'site') {
-      drush_set_default('profile', 'default');
-      drush_set_default('language', 'en');
-      drush_set_default('aliases', array());
-    }
   }
 
   define('PROVISION_CONTEXT_SERVER', $context === 'server');
@@ -104,7 +99,6 @@ function provision_drupal_drush_exit() {
     if (PROVISION_CONTEXT_SITE) {
       if (drush_get_option('installed')) {
         drush_set_option('site_id', drush_get_option('site_id'), 'site');
-        drush_set_option('client_email', drush_get_option('client_email'), 'site');
         provision_save_site_data();
       }
     }

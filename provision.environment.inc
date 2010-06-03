@@ -38,8 +38,17 @@ function & d($name = NULL, $root_object = FALSE) {
 function provision_environment_factory($name) {
   $classes = array('server' => 'provisionServer', 'platform' => 'provisionPlatform', 'site' => 'provisionSite');
 
-  $options = drush_sitealias_get_record($name);
-  $type = isset($options['context_type']) ? $options['context_type'] : 'server';
+  $type = 'server';
+
+  $record = drush_sitealias_get_record($name);
+  $options = drush_get_context('options');
+
+  if (isset($record['context_type'])) {
+    $type = $record['context_type'];
+  }
+  elseif (isset($options['context_type'])) {
+    $type = $options['context_type'];
+  }
   $classname = $classes[$type];
 
   return new $classname($name);

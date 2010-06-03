@@ -15,7 +15,7 @@
  * Check that we are trying to install a new site , and a new site only
  */
 function drush_provision_drupal_provision_install_validate() {
-  if (!drush_get_option('uri')) {
+  if (!d()->uri) {
     return drush_set_error("PROVISION_URL_REQUIRED", dt("You need to specify a valid url to install a site"));
   }
   if (_provision_drupal_site_exists()) {
@@ -52,7 +52,7 @@ function drush_provision_drupal_provision_install() {
  * If the install went south, and the site is not PROVISION_SITE_INSTALLED, clean up behind ourselves
  */
 function drush_provision_drupal_provision_install_rollback() {
-  if (drush_get_option('uri')) {
+  if (d()->uri) {
     if (!_provision_drupal_site_installed()) {
       _provision_recursive_delete('sites/' . drush_get_option('uri'));
     }
