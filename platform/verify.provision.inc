@@ -91,7 +91,7 @@ function drush_provision_drupal_post_provision_verify() {
  * @see hook_provision_apache_dir_config()
  */
 function provision_drupal_provision_apache_dir_config($data = null) {
-  $htaccess = file_get_contents(drush_get_option('root') . '/.htaccess');
+  $htaccess = file_get_contents(d()->root . '/.htaccess');
   $htaccess .= <<<EOF
 
 <IfModule mod_rewrite.c>
