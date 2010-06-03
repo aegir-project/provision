@@ -1,10 +1,10 @@
-<VirtualHost *:<?php print $site_port; ?>>
-<?php if ($site_mail) : ?>
-  ServerAdmin <?php  print $site_mail; ?> 
+<VirtualHost *:<?php print $this->site_port; ?>>
+<?php if ($this->site_mail) : ?>
+  ServerAdmin <?php  print $this->site_mail; ?> 
 <?php endif;?>
-  DocumentRoot <?php print $this->platform->root; ?> 
+  DocumentRoot <?php print $this->root; ?> 
     
-  ServerName <?php print $uri; ?>
+  ServerName <?php print $this->uri; ?>
 
   SetEnv db_type  <?php print urlencode($db_type); ?>
 

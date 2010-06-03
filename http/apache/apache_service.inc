@@ -20,7 +20,7 @@ class provisionService_http_apache extends provisionService_http {
   }
 
   function create_site_config() {
-    $config = new provisionConfig_apache_site($this->context);
+    $config = new provisionConfig_apache_site($this->context, drush_get_context('site'));
     return $config->write();
   }
 
@@ -139,21 +139,16 @@ class provisionConfig_apache_site extends provisionConfig_apache {
   public $description = 'apache site configuration file';
 
   function filename() {
-    if (!$this->data['site_port'] || $this->data['site_port'] < 1 || $this->data['site_port'] > 66535) {
-      $this->data['site_port'] = 80;
-    }
-
-    return $this->data['vhost_path'] . '/' . $this->data['uri'] . '_' . $this->data['site_port'];
+    return $this->platform->server->apache_site_conf_path . '/' . $this->uri . '_' . $this->site_port;
   }
 
   function process() {
-    if ($this->data['aliases'] && !is_array($this->data['aliases'])) {
-      $this->data['aliases'] = explode(",", $this->data['aliases']);
+    if ($this->aliases && !is_array($this->aliases)) {
+      $this->aliases = explode(",", $this->aliases);
     }
 
     $this->data['extra_config'] = "# Extra configuration from modules:\n";
-    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_vhost_config', $this->data['uri'], $this->data));
-
+    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_vhost_config', $this->uri, $this->data));
   }
 }
 
