@@ -196,7 +196,7 @@ function _provision_drupal_site_installed() {
  *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file() {
-  $config = new provisionConfig_drupal_settings(drush_get_merged_options());
+  $config = new provisionConfig_drupal_settings(d()->name);
   $config->write();
 }
 
@@ -206,7 +206,7 @@ class provisionConfig_drupal_settings extends provisionConfig {
   protected $mode = 0440;
 
   function filename() {
-    return $this->data['root'] . '/sites/' . $this->data['uri'] . '/settings.php';
+    return $this->root . '/sites/' . $this->uri . '/settings.php';
   }
 
   function process() {
