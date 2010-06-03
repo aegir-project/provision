@@ -116,9 +116,6 @@ function provision_drupal_drush_exit() {
         provision_save_platform_data();
       }
     }
-    elseif (PROVISION_CONTEXT_SERVER) {
-//      provision_save_server_data();
-    }
   }
 }
 
