@@ -74,7 +74,6 @@ function _provision_context_init() {
     // i don't think i should be bootstrapping here yet ... but i have no choice yet.
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
     if ($context === 'site') {
-      drush_set_default('site_url', drush_get_option('uri'));
       drush_set_default('profile', 'default');
       drush_set_default('language', 'en');
       drush_set_default('aliases', array());
@@ -104,7 +103,6 @@ function provision_drupal_drush_exit() {
   if (preg_match("/^provision-/", $command[0])) {
     if (PROVISION_CONTEXT_SITE) {
       if (drush_get_option('installed')) {
-        drush_set_option('site_url', drush_get_option('site_url'), 'site');
         drush_set_option('site_id', drush_get_option('site_id'), 'site');
         drush_set_option('client_email', drush_get_option('client_email'), 'site');
         provision_save_site_data();
@@ -215,7 +213,7 @@ class provisionConfig_drupal_settings extends provisionConfig {
     }
 
     $this->data['extra_config'] = "# Extra configuration from modules:\n";
-    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_drupal_config', $this->data['site_url'], $this->data));
+    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_drupal_config', $this->data['uri'], $this->data));
 
     $this->group = drush_get_option('web_group');
   }

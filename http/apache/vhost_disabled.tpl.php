@@ -4,7 +4,7 @@
     <?php endif;?>
     DocumentRoot <?php print $this->platform->root; ?> 
     
-    ServerName <?php print $site_url; ?>
+    ServerName <?php print $uri; ?>
 
     <?php if (is_array($aliases)) :
      foreach ($aliases as $alias) : ?>
@@ -15,6 +15,6 @@
 
     RewriteEngine on
     # the ? at the end is to remove any query string in the original url
-    RewriteRule ^(.*)$ <?php print $redirect_url . '/' . $site_url ?>?
+    RewriteRule ^(.*)$ <?php print $redirect_url . '/' . $uri ?>?
 
 </VirtualHost>

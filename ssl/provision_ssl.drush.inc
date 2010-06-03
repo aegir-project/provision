@@ -41,11 +41,11 @@ class provisionConfig_ssl_vhost extends provisionConfig {
   public $description = 'Redirect for SSL';
 
   function filename() {
-    return $this->data['vhost_path'] . '/' . $this->data['site_url'] . '_80';
+    return $this->data['vhost_path'] . '/' . $this->data['uri'] . '_80';
   }
 
   function process() {
-    array_push($this->data['aliases'], $this->data['site_url']);
+    array_push($this->data['aliases'], $this->data['uri']);
     $this->data['site_port'] = 80;
   }
 }

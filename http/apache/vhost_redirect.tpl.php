@@ -12,12 +12,12 @@
     <?php else:
     # this should never happen and has the potential of creating an infinite redirection loop
      ?>
-      ServerName <?php print $site_url ?>
+      ServerName <?php print $uri ?>
     <?php endif; ?>
 
 <?php if ($ssl_redirect): ?>
-    RedirectMatch permanent ^(.*) https://<?php print $site_url ?>$1
+    RedirectMatch permanent ^(.*) https://<?php print $uri ?>$1
 <?php else: ?>
-    RedirectMatch permanent ^(.*) http://<?php print $site_url ?>$1
+    RedirectMatch permanent ^(.*) http://<?php print $uri ?>$1
 <?php endif; ?>
 </VirtualHost>

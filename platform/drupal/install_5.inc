@@ -4,7 +4,7 @@
  *    Rebuild all the caches
  */
 
-$GLOBALS['url'] = drush_get_option('site_url');
+$GLOBALS['url'] = drush_get_option('uri');
 $GLOBALS['profile'] = drush_get_option('profile');
 $GLOBALS['install_locale'] = drush_get_option('language');
 $GLOBALS['client_email'] = drush_get_option('client_email');

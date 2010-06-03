@@ -4,7 +4,7 @@
 <?php endif;?>
   DocumentRoot <?php print $this->platform->root; ?> 
     
-  ServerName <?php print $site_url; ?>
+  ServerName <?php print $uri; ?>
 
   SetEnv db_type  <?php print urlencode($db_type); ?>
 
@@ -29,7 +29,7 @@
 <?php print $extra_config; ?>
 
     # Error handler for Drupal > 4.6.7
-    <Directory "<?php print $this->platform->root; ?>/sites/<?php print trim($site_url, '/'); ?>/files">
+    <Directory "<?php print $this->platform->root; ?>/sites/<?php print $uri; ?>/files">
       SetHandler This_is_a_Drupal_security_line_do_not_remove
     </Directory>
 

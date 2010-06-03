@@ -143,7 +143,7 @@ class provisionConfig_apache_site extends provisionConfig_apache {
       $this->data['site_port'] = 80;
     }
 
-    return $this->data['vhost_path'] . '/' . $this->data['site_url'] . '_' . $this->data['site_port'];
+    return $this->data['vhost_path'] . '/' . $this->data['uri'] . '_' . $this->data['site_port'];
   }
 
   function process() {
@@ -152,7 +152,7 @@ class provisionConfig_apache_site extends provisionConfig_apache {
     }
 
     $this->data['extra_config'] = "# Extra configuration from modules:\n";
-    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_vhost_config', $this->data['site_url'], $this->data));
+    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_vhost_config', $this->data['uri'], $this->data));
 
   }
 }

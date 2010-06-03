@@ -286,7 +286,7 @@ class provisionServer extends provisionEnvironment {
 class provisionPlatform extends provisionEnvironment {
   static function option_documentation() {
     return array(
-      '--root' => 'platform: path to a drupal installation',
+      '--root' => 'platform: path to a Drupal installation',
       '--server' => 'drush backend server; default @server_localhost',
       '--web_server' => 'web server hosting the platform; default @server_localhost',
     );
@@ -331,7 +331,6 @@ class provisionSite extends provisionEnvironment {
     $this->root = $this->platform->root;
 
     $this->setProperty('uri');
-    $this->setProperty('site_url', str_replace(array('https://', 'http://'), '', $this->uri));
     $this->setProperty('language', 'en');
     $this->setProperty('aliases', array());
     $this->setProperty('site_port', 80);
@@ -349,7 +348,7 @@ class provisionSite extends provisionEnvironment {
       $this->aliases = array();
     }
 
-    // this can potentially be handled by a drupal sub class
+    // this can potentially be handled by a Drupal sub class
     $this->setProperty('profile', 'default');
   }
 
