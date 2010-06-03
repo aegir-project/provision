@@ -286,7 +286,9 @@ class provisionServer extends provisionEnvironment {
 class provisionPlatform extends provisionEnvironment {
   static function option_documentation() {
     return array(
-      //todo
+      '--root' => 'platform: path to a drupal installation',
+      '--server' => 'drush backend server; default @server_localhost',
+      '--web_server' => 'web server hosting the platform; default @server_localhost',
     );
   }
 
@@ -296,8 +298,6 @@ class provisionPlatform extends provisionEnvironment {
     parent::init();
     $this->type = 'platform';
     $this->setProperty('root');
-
-    $this->setProperty('sites_path', $this->root . '/sites');
 
     $this->setProperty('server', '@server_localhost');
     $this->is_oid('server');

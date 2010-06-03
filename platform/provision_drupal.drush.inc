@@ -206,7 +206,7 @@ class provisionConfig_drupal_settings extends provisionConfig {
   protected $mode = 0440;
 
   function filename() {
-    return $this->data['sites_path'] . '/' . $this->data['site_url'] . '/settings.php';
+    return $this->data['root'] . '/sites/' . $this->data['uri'] . '/settings.php';
   }
 
   function process() {
