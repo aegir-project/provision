@@ -297,9 +297,6 @@ class provisionPlatform extends provisionEnvironment {
     $this->type = 'platform';
     $this->setProperty('root', $_SERVER['PWD']);
 
-    // publish path can really be removed ...
-    $this->setProperty('sites_path', $this->root . '/sites');
-
     $this->setProperty('server', '@server_localhost');
     $this->is_oid('server');
 

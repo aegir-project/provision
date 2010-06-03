@@ -164,7 +164,7 @@ class provisionService_db extends provisionService {
 
 
   function import_site_database() {
-    $dump_file = drush_get_option('sites_path') . '/' . drush_get_option('uri') . '/database.sql';
+    $dump_file = d()->root . '/sites/' . d()->uri . '/database.sql';
 
     $creds = $this->fetch_site_credentials();
 

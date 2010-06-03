@@ -37,7 +37,7 @@ function drush_provision_drupal_provision_verify() {
     provision_service('file')->create_dir(d()->backup_path, dt('Backup'), 0700);
   }
   elseif (PROVISION_CONTEXT_PLATFORM) {
-    provision_service('file')->writable(d()->sites_path)
+    provision_service('file')->writable(d()->root . '/sites')
       ->succeed('Drupal sites directory @path is writable by the provisioning script')
       ->fail('Drupal sites directory @path is not writable by the provisioning script', 'PROVISION_SITES_DIR_NOT_WRITABLE');
 
