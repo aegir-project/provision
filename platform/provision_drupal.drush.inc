@@ -66,20 +66,10 @@ function _provision_context_init() {
     return TRUE;
   }
 
-  //  define('PROVISION_CONTEXT_SITE', (d()->type == 'site') ? TRUE : FALSE);
-  //  define('PROVISION_CONTEXT_PLATFORM', !PROVISION_CONTEXT_SITE);
-
-  $context = d()->type;
-  if (($context === 'platform' || $context === 'site') && drush_bootstrap_validate(DRUSH_BOOTSTRAP_DRUPAL_ROOT)) { 
+  if ((d()->type === 'platform' || d()->type === 'site') && drush_bootstrap_validate(DRUSH_BOOTSTRAP_DRUPAL_ROOT)) { 
     // i don't think i should be bootstrapping here yet ... but i have no choice yet.
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
   }
-
-  define('PROVISION_CONTEXT_SERVER', $context === 'server');
-  define('PROVISION_CONTEXT_PLATFORM', $context === 'platform');
-  define('PROVISION_CONTEXT_SITE', $context === 'site');
-
-  drush_log(dt('Using context @context', array('@context' => $context)));
 
   $is_run = TRUE;
 }
@@ -96,7 +86,7 @@ function provision_drupal_drush_exit() {
   $command = explode(" ", $command['command']);
 
   if (preg_match("/^provision-/", $command[0])) {
-    if (PROVISION_CONTEXT_SITE) {
+    if (d()->type === 'site') {
       if (drush_get_option('installed')) {
         // dont generate the drushrc.php on provision-save commands.
         if (!preg_match("/^provision-save/", $command[0])) {
@@ -105,7 +95,7 @@ function provision_drupal_drush_exit() {
         }
       }
     }
-    elseif (PROVISION_CONTEXT_PLATFORM) {
+    elseif (d()->type === 'platform') {
       // Generate a drushrc.php for the platform unless it's being deleted
       if (!preg_match("/^provision-delete/", $command[0])) {
         provision_save_platform_data();
@@ -119,7 +109,7 @@ function provision_drupal_drush_exit() {
  *  This prints out a message to that effect.
  */
 function _provision_drupal_url_required() {
-  if (PROVISION_CONTEXT_PLATFORM) {
+  if (d()->type === 'platform') {
     drush_set_error('PROVISION_REQUIRES_URL');
   }
 }
@@ -130,7 +120,7 @@ function _provision_drupal_url_required() {
  * This will return an error for sites that haven't been created yet
  */
 function _provision_drupal_valid_site() {
-  if (PROVISION_CONTEXT_SITE) {
+  if (d()->type === 'site') {
     if (!_provision_drupal_site_exists()) {
       drush_set_error('PROVISION_DRUPAL_SITE_NOT_FOUND');
     }
@@ -156,7 +146,7 @@ function _provision_drupal_site_exists() {
  * This will return an error for sites that haven't been installed yet
  */
 function _provision_drupal_valid_installed_site() {
-  if (PROVISION_CONTEXT_SITE) {
+  if (d()->type === 'site') {
     if (!_provision_drupal_site_installed()) {
       drush_set_error('PROVISION_DRUPAL_SITE_NOT_FOUND');
     }
@@ -164,7 +154,7 @@ function _provision_drupal_valid_installed_site() {
 }
 
 function _provision_drupal_valid_not_installed_site() {
-  if (PROVISION_CONTEXT_SITE) {
+  if (d()->type === 'site') {
     if (_provision_drupal_site_installed()) {
       drush_set_error('PROVISION_DRUPAL_SITE_INSTALLED');
     }
@@ -280,7 +270,7 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
  * Runs an external script to reload all the various drupal caches
  */
 function _provision_drupal_rebuild_caches() {
-  if (PROVISION_CONTEXT_SITE) {
+  if (d()->type === 'site') {
     drush_include_engine('drupal', 'clear');
   }
 }
@@ -380,7 +370,7 @@ function _provision_drupal_get_cvs_versions($files) {
  * Create and remove symlinks for each of the possible domain aliases of an existing site
  */
 function _provision_drupal_maintain_aliases() {
-  if (PROVISION_CONTEXT_SITE) {
+  if (d()->type === 'site') {
     // First we delete all the old aliases
     drush_set_option('aliases', drush_get_option('aliases'), 'site');
     _provision_drupal_delete_aliases(drush_get_option('aliases', array(), 'site'), false);

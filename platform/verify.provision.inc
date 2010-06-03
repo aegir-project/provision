@@ -6,7 +6,7 @@
  * Disable an enabled and installed site
  */
 function drush_provision_drupal_provision_verify_validate() {
-  if (PROVISION_CONTEXT_SITE) {
+  if (d()->type === 'site') {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
     provision_prepare_environment();
 
@@ -25,7 +25,7 @@ function drush_provision_drupal_provision_verify_validate() {
  * implementation of provision_verify
  */
 function drush_provision_drupal_provision_verify() {
-  if (PROVISION_CONTEXT_SERVER) {
+  if (d()->type === 'server') {
     provision_service('file')->create_dir(d()->config_path, dt('Provision configuration'), 0711);
     provision_service('file')->create_dir(d()->config_path . '/includes', dt('Provision PHP configuration'), 0711);
     if (!provision_service('file')->exists(d()->config_path . '/includes/global.inc')->succeed('Global configuration file exists')->status()) {
@@ -36,7 +36,7 @@ function drush_provision_drupal_provision_verify() {
     }
     provision_service('file')->create_dir(d()->backup_path, dt('Backup'), 0700);
   }
-  elseif (PROVISION_CONTEXT_PLATFORM) {
+  elseif (d()->type === 'platform') {
     provision_service('file')->writable(d()->root . '/sites')
       ->succeed('Drupal sites directory @path is writable by the provisioning script')
       ->fail('Drupal sites directory @path is not writable by the provisioning script', 'PROVISION_SITES_DIR_NOT_WRITABLE');
@@ -45,7 +45,7 @@ function drush_provision_drupal_provision_verify() {
     drush_log(dt("This platform is running @short_name @version", array('@short_name' => 'drupal', '@version' => VERSION)));
     drush_set_option('packages', _scrub_object(provision_find_packages()), 'drupal');
   }
-  elseif (PROVISION_CONTEXT_SITE) {
+  elseif (d()->type === 'site') {
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
     // This is the actual drupal provisioning requirements. 
     _provision_drupal_create_directories();
@@ -71,7 +71,7 @@ class provisionConfig_global_settings extends provisionConfig {
  * Implementation of hook_provision_post_verify
  */
 function drush_provision_drupal_post_provision_verify() {
-  if (PROVISION_CONTEXT_SITE) {
+  if (d()->type === 'site') {
     _provision_drupal_rebuild_caches();
     drush_set_option('aliases', drush_get_option('aliases'), 'site');
     drush_set_option('redirection', drush_get_option('redirection'), 'site');
