@@ -314,7 +314,14 @@ class provisionPlatform extends provisionEnvironment {
 class provisionSite extends provisionEnvironment {
   static function option_documentation() {
     return array(
-      //todo
+      '--platform' => 'site: the platform the site is run on',
+      '--db_server' => 'site: the db server the site is run on',
+      '--uri' => 'site: example.com URI, no http:// or trailing /',
+      '--site_port' => 'site: port the site is hosted on; default 80',
+      '--language' => 'site: site language; default en',
+      '--aliases' => 'site: comma-separated URIs',
+      '--client_email' => 'site: email for the site owner',
+      '--profile' => 'site: Drupal profile to use; default default',
     );
   }
 
