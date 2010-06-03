@@ -72,19 +72,15 @@ function provision_drush_init() {
  * Implementation of hook_drush_command().
  */
 function provision_drush_command() {
-  $items['provision-named-context-save'] = array(
+  $items['provision-save'] = array(
     'description' => dt('Save Drush alias'),
     'arguments' => array(
       '@context_name' => 'Context to save',
     ),
     'options' => array_merge(array(
       '--context_type' => 'server, platform, or site; default server',
+      '--delete' => 'Remove the alias.',
     ), provisionServer::option_documentation(), provisionPlatform::option_documentation(), provisionSite::option_documentation()),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
-  );
-  $items['provision-named-context-delete'] = array(
-    'arguments' => array(),
-    'description' => dt('Delete Drush aliases'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
   $items['provision-install'] = array(
@@ -219,13 +215,16 @@ function drush_provision_hostmaster_make($platform) {
   drush_backend_invoke('make', array(dirname(__FILE__) . '/aegir.make', $platform));
 }
 
-function drush_provision_named_context_save($alias = null) {
-  d($alias)->write_alias();
-}
-
-function drush_provision_named_context_delete() {
-  $config = new provisionConfig_drushrc_alias(drush_get_option('hosting_name'));
-  $config->unlink();
+function drush_provision_save($alias = null) {
+  if (drush_get_option('delete', false)) {
+    // remove an existing alias 
+    $config = new provisionConfig_drushrc_alias($name);
+    $config->unlink();
+  }
+  else {
+    // create or update the record
+    d($alias)->write_alias();
+  }
 }
 
 function drush_provision_verify() {
