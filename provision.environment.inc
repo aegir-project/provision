@@ -190,7 +190,7 @@ class provisionServer extends provisionEnvironment {
       $reflect = new reflectionClass('provisionService_' . $service);
       $base_dir = dirname($reflect->getFilename());
       $types = array();
-      $options['--' . $service . '-service-type'] = 'placeholder';
+      $options['--' . $service . '_service_type'] = 'placeholder';
       foreach (array_keys(drush_scan_directory($base_dir, '%.*_service\.inc%')) as $service_file) {
         if (preg_match('%^' . $base_dir . '/([a-z]+)/(?:\1)_service.inc$%', $service_file, $match)) {
           $types[] = $match[1];
@@ -198,7 +198,7 @@ class provisionServer extends provisionEnvironment {
           $options = array_merge($options, call_user_func(array(sprintf('provisionService_%s_%s', $service, $match[1]), 'option_documentation')));
         }
       }
-      $options['--' . $service . '-service-type'] = 'server: ' . implode(', ', $types) . ', or null; default ' . (empty($default) ? 'null' : $default);
+      $options['--' . $service . '_service_type'] = 'server: ' . implode(', ', $types) . ', or null; default ' . (empty($default) ? 'null' : $default);
     }
     return $options;
   }
@@ -233,7 +233,7 @@ class provisionServer extends provisionEnvironment {
     $reflect = new reflectionClass('provisionService_' . $service);
     $base_dir = dirname($reflect->getFilename());
 
-    $type_option = "$service-service-type";
+    $type_option = "{$service}_service_type";
     
     $type = isset($this->options[$type_option]) ? $this->options[$type_option] : $default;
     if ($type) {
