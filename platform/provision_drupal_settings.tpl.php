@@ -23,7 +23,7 @@
     '%db_name' => '$_SERVER[db_name]')); ?>";
 
 
-  $profile = "<?php print $profile ?>";
+  $profile = "<?php print $this->profile ?>";
   /**
   * PHP settings:
   *
@@ -53,14 +53,14 @@
 
 
   global $conf;
-  $conf['install_profile'] = '<?php print $profile ?>';
-  $conf['file_directory_path'] = 'sites/<?php print $uri ?>/files';
-  $conf['file_directory_temp'] = 'sites/<?php print $uri ?>/files/tmp';
+  $conf['install_profile'] = '<?php print $this->profile ?>';
+  $conf['file_directory_path'] = 'sites/<?php print $this->uri ?>/files';
+  $conf['file_directory_temp'] = 'sites/<?php print $this->uri ?>/files/tmp';
   $conf['file_downloads'] = 1;
   $conf['cache'] = 1;
   $conf['clean_url'] = 1;
 
-  <?php if ($site_offline) : ?>
+  <?php if ($this->site_offline) : ?>
     $conf['site_offline'] = 1;
   <?php endif ?>
 
@@ -83,6 +83,6 @@
   }
 
   # Additional host wide configuration settings. Useful for safely specifying configuration settings.
-  if (file_exists('<?php print $config_path  ?>/includes/global.inc')) {
-    include_once('<?php print $config_path  ?>/includes/global.inc');
+  if (file_exists('<?php print $this->platform->server->config_path  ?>/includes/global.inc')) {
+    include_once('<?php print $this->platform->server->config_path  ?>/includes/global.inc');
   }
