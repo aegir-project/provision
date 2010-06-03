@@ -9,7 +9,7 @@ function drush_db_pre_provision_restore() {
 }
 
 function drush_db_provision_restore() {
-  provision_service('db')->import_site_database();
+  provision_service('db')->import_site_database(d()->root . '/sites/' . d()->uri . '.restore/database.sql');
 }
 
 

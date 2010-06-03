@@ -73,7 +73,7 @@ class provisionService_db_mysql extends provisionService_db_pdo {
 
     $cmd = sprintf("mysql --defaults-file=/dev/fd/3 %s", escapeshellcmd($db_name));
 
-    $this->safe_shell_exec($cmd, $db_host, $db_user, $db_passwd);
+    $this->safe_shell_exec($cmd, $db_host, $db_user, $db_passwd, $dump_file);
 
     drush_log(sprintf("Importing database using command: %s", $cmd));
 
@@ -94,7 +94,7 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     // non-readable by the webserver.
     umask(0077);
     // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
-    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 -rsites/%s/database.sql %s", escapeshellcmd(drush_get_option('uri')), escapeshellcmd(drush_get_option('db_name'))); 
+    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 -rsites/%s/database.sql %s", escapeshellcmd(d($this->context)->uri), escapeshellcmd(drush_get_option('db_name'))); 
 
     $this->safe_shell_exec($cmd, drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
 
@@ -106,7 +106,7 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     umask(0022);
   }
 
-  function safe_shell_exec($cmd, $db_host, $db_user, $db_passwd) {
+  function safe_shell_exec($cmd, $db_host, $db_user, $db_passwd, $dump_file = null) {
     # we go through all this trouble to hide the password from the commandline, it's the most secure way (apart from writing a temporary file, which would create conflicts in parallel runs)
    $mycnf = sprintf('[client]
 host=%s
@@ -114,8 +114,10 @@ user=%s
 password=%s
 ', $db_host, $db_user, $db_passwd);
 
+   $stdin_spec = (!is_null($dump_file)) ? array("file", $dump_file, "r") : array("pipe", "r");
+
     $descriptorspec = array(
-      0 => array("file", $dump_file, "r"),
+      0 => $stdin_spec,
       1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
       2 => array("pipe", "w"),  // stderr is a file to write to
       3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials

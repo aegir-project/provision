@@ -163,8 +163,10 @@ class provisionService_db extends provisionService {
   }
 
 
-  function import_site_database() {
-    $dump_file = d()->root . '/sites/' . d()->uri . '/database.sql';
+  function import_site_database($dump_file = null) {
+    if (is_null($dump_file)) {
+      $dump_file = d()->root . '/sites/' . d()->uri . '/database.sql';
+    }
 
     $creds = $this->fetch_site_credentials();
 

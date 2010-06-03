@@ -98,8 +98,11 @@ function provision_drupal_drush_exit() {
   if (preg_match("/^provision-/", $command[0])) {
     if (PROVISION_CONTEXT_SITE) {
       if (drush_get_option('installed')) {
-        drush_set_option('site_id', drush_get_option('site_id'), 'site');
-        provision_save_site_data();
+        // dont generate the drushrc.php on provision-save commands.
+        if (!preg_match("/^provision-save/", $command[0])) {
+          drush_set_option('site_id', drush_get_option('site_id'), 'site');
+          provision_save_site_data();
+        }
       }
     }
     elseif (PROVISION_CONTEXT_PLATFORM) {
@@ -209,7 +212,7 @@ class provisionConfig_drupal_settings extends provisionConfig {
     $this->data['extra_config'] = "# Extra configuration from modules:\n";
     $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_drupal_config', $this->data['uri'], $this->data));
 
-    $this->group = drush_get_option('web_group');
+    $this->group = $this->platform->server->web_group;
   }
 }
 
@@ -243,11 +246,11 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     $mkdir["sites/$url/files/images"]          = 02770;
     $mkdir["sites/$url/files/pictures"]          = 02770;
     # the owner/group of those directories will be changed recursively
-    $chown["sites/$url/files"]          = drush_get_option('script_user');
-    $chgrp["sites/$url/files"]          = drush_get_option('web_group');
-    $chown["sites/$url/private"]        = drush_get_option('script_user');
-    $chgrp["sites/$url/private/files"]  = drush_get_option('web_group');
-    $chgrp["sites/$url/private/temp"]   = drush_get_option('web_group');
+    $chown["sites/$url/files"]          = d()->platform->server->script_user;
+    $chgrp["sites/$url/files"]          = d()->platform->server->web_group;
+    $chown["sites/$url/private"]        = d()->platform->server->script_user;
+    $chgrp["sites/$url/private/files"]  = d()->platform->server->web_group;
+    $chgrp["sites/$url/private/temp"]   = d()->platform->server->web_group;
   }
 
   foreach ($mkdir as $path => $perm) {
@@ -269,7 +272,7 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
   foreach ($chgrp as $path => $group) {
     provision_service('file')->chgrp($path, $group, TRUE)
       ->succeed('Changed group ownership of <code>@path</code> to @gid')
-      ->fail('Could not change group ownership <code>@path</code>');
+      ->fail('Could not change group ownership <code>@path</code> to @gid');
   }
 }
 
