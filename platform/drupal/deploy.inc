@@ -1,8 +1,8 @@
 <?php
 // $Id$
 
-$new_url = drush_get_option('site_url');
-$old_url = drush_get_option('site_url', '', 'site');
+$new_url = drush_get_option('uri');
+$old_url = drush_get_option('uri', '', 'site');
 
 /**
  * @file
