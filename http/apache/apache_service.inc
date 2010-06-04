@@ -76,11 +76,11 @@ class provisionService_http_apache extends provisionService_http {
   function parse_configs($cause_error = FALSE) {
     // This is required to be configurable, due to the fact that different
     // hosts might need to do this differently.
-    if (drush_is_local_host(drush_get_option('host-name', 'localhost'))) {
-      $return = drush_shell_exec(escapeshellcmd(drush_get_option('restart_cmd')));
+    if (drush_is_local_host(d()->remote_host)) {
+      $return = drush_shell_exec(escapeshellcmd(d()->restart_cmd));
     }
     else {
-      $return = drush_shell_exec('ssh ' . drush_get_option('ssh-options', '-o PasswordAuthentication=no') . ' %s %s', drush_get_option('script_user') . '@' . drush_get_option('web_host'), escapeshellcmd(drush_get_option('restart_cmd')));
+      $return = drush_shell_exec('ssh ' . drush_get_option('ssh-options', '-o PasswordAuthentication=no') . ' %s %s', d()->script_user . '@' . d()->remote_host, escapeshellcmd(d()->restart_cmd));
     }
     if (!$return) {
       $msg = join("\n", drush_shell_exec_output());
