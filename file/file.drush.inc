@@ -16,8 +16,7 @@ function file_provision_services() {
 }
 
 function file_drush_exit() {
-  // todo sync out to other servers
-  //provision_service('file')->sync();
+  d()->service('file')->sync();
 }
 
 class provisionService_file extends provisionService {
@@ -455,5 +454,11 @@ class provisionService_file extends provisionService {
    */
   function _chgrp_recursive($path, $group) {
     return $this->_call_recursive('chgrp', $path, $group);
+  }
+
+  /**
+   * If necessary, sync files out to a remote server.
+   */
+  function sync() {
   }
 }

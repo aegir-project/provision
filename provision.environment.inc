@@ -245,6 +245,14 @@ class provisionServer extends provisionEnvironment {
     $type_option = "{$service}_service_type";
     
     $type = isset($this->options[$type_option]) ? $this->options[$type_option] : $default;
+    if ($service === 'file') {
+      // Force provision-save local
+      $command = drush_get_command();
+      $command = explode(" ", $command['command']);
+      if (preg_match("/^provision-save/", $command[0])) {
+        $type = 'local';
+      }
+    }
     if ($type) {
       $file = sprintf("%s/%s/%s_service.inc", $base_dir, $type, $type);
       $className = sprintf("provisionService_%s_%s", $service, $type);

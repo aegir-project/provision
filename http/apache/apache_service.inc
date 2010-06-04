@@ -54,9 +54,9 @@ class provisionService_http_apache extends provisionService_http {
   function verify() {
     switch (d()->type) {
       case 'server':
-        provision_service('file')->create_dir($this->apache_site_conf_path, dt("Virtual host configuration"), 0700);
-        provision_service('file')->create_dir($this->apache_platform_conf_path, dt("Platforms configuration"), 0700);
-        provision_service('file')->create_dir($this->apache_conf_path , dt("Apache configuration"), 0700);
+        d()->service('file')->create_dir($this->apache_site_conf_path, dt("Virtual host configuration"), 0700);
+        d()->service('file')->create_dir($this->apache_platform_conf_path, dt("Platforms configuration"), 0700);
+        d()->service('file')->create_dir($this->apache_conf_path , dt("Apache configuration"), 0700);
 
         $this->create_server_config();
         break;
@@ -70,6 +70,7 @@ class provisionService_http_apache extends provisionService_http {
         break;
     }
 
+    d()->service('file')->sync();
     $this->parse_configs();
   }
 
