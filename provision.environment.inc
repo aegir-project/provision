@@ -248,8 +248,7 @@ class provisionServer extends provisionEnvironment {
     if ($service === 'file') {
       // Force provision-save local
       $command = drush_get_command();
-      $command = explode(" ", $command['command']);
-      if (preg_match("/^provision-save/", $command[0])) {
+      if (preg_match("/^provision-save\b/", $command['command'])) {
         $type = 'local';
       }
     }
