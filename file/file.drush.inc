@@ -459,6 +459,9 @@ class provisionService_file extends provisionService {
   /**
    * If necessary, sync files out to a remote server.
    */
-  function sync() {
+  function sync($path = NULL) {
+    if (is_null($path)) {
+      $path = $this->config_path;
+    }
   }
 }
