@@ -41,7 +41,7 @@ function provision_environment_factory($name) {
   $type = 'server';
 
   $record = drush_sitealias_get_record($name);
-  $options = drush_get_context('options');
+  $options = array_merge(drush_get_context('stdin'), drush_get_context('options'));
 
   if (isset($record['context_type'])) {
     $type = $record['context_type'];
