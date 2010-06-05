@@ -118,9 +118,9 @@ class provisionService_db extends provisionService {
     if (!$this->grant($db_name, $db_user, $db_passwd, $db_grant_host)) {
       drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not create database user @user", array('@user' => $db_user)));
     }
-    if ($this->remote_host !== $db_grant_host) {
-      drush_log(dt("Granting privileges to %user@%client on %database", array('%user' => $db_user, '%client' => $this->remote_host, '%database' => $db_name)));
-      if (!$this->grant($db_name, $db_user, $db_passwd, $this->remote_host)) {
+    if (d()->platform->web_server->remote_host !== $db_grant_host) {
+      drush_log(dt("Granting privileges to %user@%client on %database", array('%user' => $db_user, '%client' => d()->platform->web_server->remote_host, '%database' => $db_name)));
+      if (!$this->grant($db_name, $db_user, $db_passwd, d()->platform->web_server->remote_host)) {
         drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not create database user @user", array('@user' => $db_user)));
       }
     }
