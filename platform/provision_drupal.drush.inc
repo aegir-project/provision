@@ -183,6 +183,7 @@ function _provision_drupal_site_installed() {
 function _provision_drupal_create_settings_file() {
   $config = new provisionConfig_drupal_settings(d()->name);
   $config->write();
+  d()->service('file')->sync(d()->root);
 }
 
 class provisionConfig_drupal_settings extends provisionConfig {

@@ -74,9 +74,6 @@ class provisionService_http_apache extends provisionService_http {
 
   function parse_configs($cause_error = FALSE) {
     d()->service('file')->sync();
-    if (d()->type === 'platform' || d()->type === 'site') {
-      d()->service('file')->sync(d()->root);
-    }
     // This is required to be configurable, due to the fact that different
     // hosts might need to do this differently.
     if (drush_is_local_host($this->remote_host)) {
