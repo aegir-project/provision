@@ -45,26 +45,26 @@ class provisionService_db_mysql extends provisionService_db_pdo {
   }
 
   function revoke($name, $username, $host = '') {
-      $host = ($host) ? $host : '%';
-      $success = $this->query("REVOKE ALL PRIVILEGES ON `%s`.* FROM `%s`@`%s`", $name, $username, $host);
-      
-      // check if there are any privileges left for the user
-      $grants = $this->query("SHOW GRANTS FOR `%s`@`%s`", $username, $host);
-      $grant_found = FALSE;
-      if ($grants) {
-        while ($grant = $grants->fetch()) {
-          // those are empty grants: just the user line
-          if (!preg_match("/^GRANT USAGE ON /", array_pop($grant))) {
-            // real grant, we shouldn't remove the user
-            $grant_found = TRUE;
-            break;
-          }
+    $host = ($host) ? $host : '%';
+    $success = $this->query("REVOKE ALL PRIVILEGES ON `%s`.* FROM `%s`@`%s`", $name, $username, $host);
+
+    // check if there are any privileges left for the user
+    $grants = $this->query("SHOW GRANTS FOR `%s`@`%s`", $username, $host);
+    $grant_found = FALSE;
+    if ($grants) {
+      while ($grant = $grants->fetch()) {
+        // those are empty grants: just the user line
+        if (!preg_match("/^GRANT USAGE ON /", array_pop($grant))) {
+          // real grant, we shouldn't remove the user
+          $grant_found = TRUE;
+          break;
         }
       }
-      if (!$grant_found) {
-        $success = $this->query("DROP USER `%s`@`%s`", $username, $host) && $success;
-      }
-      return $success;
+    }
+    if (!$grant_found) {
+      $success = $this->query("DROP USER `%s`@`%s`", $username, $host) && $success;
+    }
+    return $success;
   }
 
 
