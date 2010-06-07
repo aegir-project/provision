@@ -64,7 +64,10 @@ class provisionEnvironment {
   public $name = null;
   public $type = null;
 
+
   protected $properties = array();
+
+  protected $service_subs = array();
   protected $parent_key = null;
 
   protected $oid_map = array();
@@ -167,8 +170,28 @@ class provisionEnvironment {
     $config->write();
   }
 
+  /**
+   * Subscribe a service handler.
+   *
+   * All future calls to $this->service($service) will be redirected
+   * to the context object of #name you specify.
+   */
+  function service_subscribe($service, $name) {
+    $this->service_subs[$service] = $name;
+  }
+
+  /**
+   * Return a service object for the specific service type.
+   *
+   * This will return a specifically subscribed service object when 
+   * one has been registered with service_subscribe, otherwise it will
+   * return the value specified by the property specified by $this->parent_key.
+   */
   function service($service, $name = null) {
-    if (!is_null($this->parent_key)) {
+    if (isset($this->service_subs[$service])) {
+      return d($this->service_subs[$service])->service($service, ($name) ? $name : $this->name);
+    }
+    elseif (!is_null($this->parent_key)) {
       return $this->{$this->parent_key}->service($service, ($name) ? $name : $this->name);
     }
     else {
@@ -184,8 +207,8 @@ class provisionEnvironment {
  * objects for each of the available service types.
  */
 class provisionServer extends provisionEnvironment {
-  protected $services = array();
 
+  protected $services = array();
   static function option_documentation() {
     $options = array(
       '--remote_host' => 'server: host name; default localhost',
@@ -334,6 +357,8 @@ class provisionPlatform extends provisionEnvironment {
     $this->type = 'platform';
     $this->setProperty('root');
 
+    $this->service_subscribe("http", $this->web_server);
+
     $this->setProperty('server', '@server_localhost');
     $this->is_oid('server');
 
@@ -379,6 +404,7 @@ class provisionSite extends provisionEnvironment {
 
     $this->setProperty('client_email');
 
+    $this->service_subscribe("db", $this->db_server);
     $this->setProperty('db_server');
     $this->is_oid('db_server');
 

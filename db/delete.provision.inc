@@ -2,7 +2,7 @@
 
 function drush_db_provision_delete_validate() {
   if (d()->type === 'site') {
-    provision_service('db')->connect();
+    d()->service('db')->connect();
   }
 }
 
@@ -13,6 +13,6 @@ function drush_db_provision_delete_validate() {
  */
 function drush_db_provision_delete() {
   if (d()->type === 'site') {
-    provision_service('db')->destroy_site_database();
+    d()->service('db')->destroy_site_database();
   }
 }

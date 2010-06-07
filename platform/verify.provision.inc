@@ -26,18 +26,18 @@ function drush_provision_drupal_provision_verify_validate() {
  */
 function drush_provision_drupal_provision_verify() {
   if (d()->type === 'server') {
-    provision_service('file')->create_dir(d()->config_path, dt('Provision configuration'), 0711);
-    provision_service('file')->create_dir(d()->config_path . '/includes', dt('Provision PHP configuration'), 0711);
-    if (!provision_service('file')->exists(d()->config_path . '/includes/global.inc')->succeed('Global configuration file exists')->status()) {
+    d()->service('file')->create_dir(d()->config_path, dt('Provision configuration'), 0711);
+    d()->service('file')->create_dir(d()->config_path . '/includes', dt('Provision PHP configuration'), 0711);
+    if (!d()->service('file')->exists(d()->config_path . '/includes/global.inc')->succeed('Global configuration file exists')->status()) {
       // Create an empty global.inc so the include doesn't fail with
       // open_basedir restrictions
       $config = new provisionConfig_global_settings(d()->name);
       $config->write();
     }
-    provision_service('file')->create_dir(d()->backup_path, dt('Backup'), 0700);
+    d()->service('file')->create_dir(d()->backup_path, dt('Backup'), 0700);
   }
   elseif (d()->type === 'platform') {
-    provision_service('file')->writable(d()->root . '/sites')
+    d()->service('file')->writable(d()->root . '/sites')
       ->succeed('Drupal sites directory @path is writable by the provisioning script')
       ->fail('Drupal sites directory @path is not writable by the provisioning script', 'PROVISION_SITES_DIR_NOT_WRITABLE');
 

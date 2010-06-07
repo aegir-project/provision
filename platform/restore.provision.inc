@@ -26,7 +26,7 @@
 function drush_provision_drupal_provision_restore_validate($restore_file = null) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
-  $exists = provision_service('file')->exists($restore_file)
+  $exists = d()->service('file')->exists($restore_file)
     ->succeed('Restoring site from @path')
     ->fail('Could not find backup file @path', 'PROVISION_BACKUP_NOT_FOUND')
     ->status();
@@ -41,7 +41,7 @@ function drush_provision_drupal_provision_restore_validate($restore_file = null)
 function drush_provision_drupal_pre_provision_restore($restore_file) {
   drush_invoke('provision-backup');
 
-  provision_service('file')->extract(drush_get_option('restore_file'), d()->root . '/sites/' . d()->uri . '.restore') 
+  d()->service('file')->extract(drush_get_option('restore_file'), d()->root . '/sites/' . d()->uri . '.restore') 
     ->succeed('Successfully extracted the contents of @path')
     ->fail('Failed to extract the contents of @path', 'PROVISION_BACKUP_EXTRACTION_FAILED');
 }
@@ -59,7 +59,7 @@ function drush_provision_drupal_pre_provision_restore_rollback() {
 function drush_provision_drupal_provision_restore() {
   $old = d()->root . '/sites/' . d()->uri . '.restore';
   $new = d()->root . '/sites/' . d()->uri;
-  provision_service('file')->switch_paths($old, $new)
+  d()->service('file')->switch_paths($old, $new)
     ->succeed('Swapping out the @path1 and @path2 directories was successful.')
     ->fail('Swapping the @path1 and @path2 directories has failed.', 'DRUSH_PERM_ERROR');
   // make sure it has the latest site data available

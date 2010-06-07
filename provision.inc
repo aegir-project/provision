@@ -87,7 +87,7 @@ function _provision_recursive_delete($path) {
       }
     }
 
-    $rm = provision_service('file')->rmdir($path)
+    $rm = d()->service('file')->rmdir($path)
       ->succeed('Deleting @path directory successful.')
       ->fail('Deleting @path directory failed.')
       ->status();
@@ -95,7 +95,7 @@ function _provision_recursive_delete($path) {
     $ret = $ret && $rm;
   }
   else {
-    $rm = provision_service('file')->unlink($path)
+    $rm = d()->service('file')->unlink($path)
       ->fail('Deleting @path file failed.')
       ->status();
     $ret = $ret && $rm;

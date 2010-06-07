@@ -136,7 +136,6 @@ password=%s
       // XXX: failed to execute? unsure when this happens
       $return_value = -1;
     }
-    dlm($output);
     return ($return_value == 0);
   }
 

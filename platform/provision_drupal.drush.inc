@@ -246,22 +246,22 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
 
   foreach ($mkdir as $path => $perm) {
     if (!is_dir($path)) {
-      provision_service('file')->mkdir($path) 
+      d()->service('file')->mkdir($path) 
         ->succeed('Created <code>@path</code>')
         ->fail('Could not create <code>@path</code>', 'DRUSH_PERM_ERROR');
     }
 
-    provision_service('file')->chmod($path, $perm, TRUE)
+    d()->service('file')->chmod($path, $perm, TRUE)
       ->succeed('Changed permissions of <code>@path</code> to @perm')
       ->fail('Could not change permissions <code>@path</code> to @perm');
   }
   foreach ($chown as $path => $owner) {
-    provision_service('file')->chown($path, $owner, TRUE)
+    d()->service('file')->chown($path, $owner, TRUE)
       ->succeed('Changed ownership of <code>@path</code> to @uid')
       ->fail('Could not change ownership <code>@path</code>', 'DRUSH_PERM_ERROR');
   }
   foreach ($chgrp as $path => $group) {
-    provision_service('file')->chgrp($path, $group, TRUE)
+    d()->service('file')->chgrp($path, $group, TRUE)
       ->succeed('Changed group ownership of <code>@path</code> to @gid')
       ->fail('Could not change group ownership <code>@path</code> to @gid');
   }
@@ -383,7 +383,7 @@ function _provision_drupal_maintain_aliases() {
       }
       foreach($aliases as $alias) {
         if (trim($alias)) {
-          provision_service('file')->symlink(d()->uri, d()->root . '/sites/' . $alias)
+          d()->service('file')->symlink(d()->uri, d()->root . '/sites/' . $alias)
             ->succeed('Created symlink for alias @target')
             ->fail('Could not create symlink for alias @target');
         }
@@ -407,7 +407,7 @@ function _provision_drupal_delete_aliases($aliases, $silent = false) {
   }
   foreach ($aliases as $alias) {
     if ($alias = trim($alias)) {
-      provision_service('file')->unlink(d()->root . '/sites/' . $alias)
+      d()->service('file')->unlink(d()->root . '/sites/' . $alias)
         ->succeed('Removed symlink for alias @path')
         ->fail($error);
     }

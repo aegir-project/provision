@@ -1,22 +1,22 @@
 <?php
 
 function drush_db_provision_restore_validate() {
-  provision_service('db')->connect();
+  d()->service('db')->connect();
 }
 
 function drush_db_pre_provision_restore() {
-  drush_set_option('old_db_creds', provision_service('db')->fetch_site_credentials());
+  drush_set_option('old_db_creds', d()->service('db')->fetch_site_credentials());
 
-  provision_service('db')->create_site_database();
+  d()->service('db')->create_site_database();
 }
 
 function drush_db_provision_restore() {
-  provision_service('db')->import_site_database(d()->root . '/sites/' . d()->uri . '.restore/database.sql');
+  d()->service('db')->import_site_database(d()->root . '/sites/' . d()->uri . '.restore/database.sql');
 }
 
 
 function drush_db_pre_provision_restore_rollback() {
-  provision_service('db')->destroy_site_database();
+  d()->service('db')->destroy_site_database();
 
   $keys = array('db_name', 'db_passwd', 'db_user', 'db_host');
 
@@ -32,11 +32,11 @@ function drush_db_pre_provision_restore_rollback() {
 // Rollback doesn't apply here yet. Unless we trigger a restore of the first dump
 // made. Which could go on infinitely if something is really long.
 function drush_db_post_provision_restore() {
-  provision_service('file')->unlink(d()->root . '/sites/' . d()->uri . '/database.sql')
+  d()->service('file')->unlink(d()->root . '/sites/' . d()->uri . '/database.sql')
     ->succeed('Removed dump file @path after restoring from it')
     ->fail('Could not remove dump file @path', 'DRUSH_PERM_ERROR');
 
-  provision_service('db')->destroy_site_database(drush_get_option('old_db_creds'));
+  d()->service('db')->destroy_site_database(drush_get_option('old_db_creds'));
 
   // TODO - test this .. it's probably horribly broken .. deleting the newly restored db instead of the old one.
 

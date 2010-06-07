@@ -138,7 +138,3 @@ class provisionService_null extends provisionService {
   }
 }
 
-
-function provision_service($type, $object = null) {
-  return d()->service($type);
-}
