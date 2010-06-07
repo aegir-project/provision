@@ -31,7 +31,7 @@
 ########################################################################
 # basic variables, change before release
 AEGIR_DOMAIN=aegir.example.com 
-AEGIR_VERSION=0.4-alpha8
+AEGIR_VERSION=HEAD
 AEGIR_HOME=$HOME
 WEB_GROUP=www-data
 DRUSH_VERSION=All-versions-3.0
