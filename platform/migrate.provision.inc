@@ -53,7 +53,7 @@ function drush_provision_drupal_pre_provision_migrate_rollback($platform = null)
     ->succeed('Removed unused migration site package')
     ->fail('Could not remove unused migration site package');
   d()->service('http')->create_site_config();
-  _provision_apache_restart_apache();
+  d()->service('http')->parse_configs();
 }
 
 /**
