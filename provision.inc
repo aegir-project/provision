@@ -239,3 +239,10 @@ function provision_password($length = 10) {
 function _scrub_object($input) {
   return json_decode(json_encode($input), TRUE);
 }
+
+/**
+ * Execute a command against a specific context object.
+ */
+function provision_backend_invoke($target, $command, $arguments = array(), $options = array(), $mode = 'GET') {
+  return drush_backend_invoke_args('@' . ltrim($target, '@') . ' ' . $command, $arguments, $options + array('root' => null, 'uri' => null), $mode);
+}
