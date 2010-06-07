@@ -26,7 +26,7 @@ function drush_provision_drupal_provision_backup_validate($backup_file = NULL) {
   }
 
   if ($backup_file) {
-    if (provision_service('file')->exists($backup_file)->status()) {
+    if (d()->service('file')->exists($backup_file)->status()) {
       drush_set_error('PROVISION_BACKUP_ALREADY_EXISTS', dt('Back up file @path already exists.', array('@path' => $backup_file)));
     }
     else {
@@ -78,7 +78,7 @@ function drush_provision_drupal_provision_backup() {
 function drush_provision_drupal_provision_backup_rollback() {
   $backup_file = drush_get_option('backup_file');
   if (file_exists($backup_file)) {
-    provision_service('file')->unlink($backup_file)
+    d()->service('file')->unlink($backup_file)
       ->succeed('Removed stale backup file @path')
       ->fail('Failed deleting backup file @path');
   }

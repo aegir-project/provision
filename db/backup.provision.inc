@@ -1,12 +1,11 @@
 <?php
 
 function drush_db_pre_provision_backup() {
-  provision_service('db')->generate_dump();
-
+  d()->service('db')->generate_dump();
 }
 
 function drush_db_pre_provision_backup_rollback() {
-  provision_service('file')->unlink(d()->root . '/sites/' . d()->uri . '/database.sql')
+  d()->service('file')->unlink(d()->root . '/sites/' . d()->uri . '/database.sql')
     ->succeed('Deleted mysql dump from sites directory')
     ->fail('Could not delete mysql dump from sites directory');
 }

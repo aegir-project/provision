@@ -5,18 +5,18 @@
  */
 function drush_http_pre_provision_restore() {
   drush_set_option('redirect_url', drush_get_option('web_maintenance_url'));
-  provision_service('http')->create_site_config();
-  provision_service('http')->parse_configs();
+  d()->service('http')->create_site_config();
+  d()->service('http')->parse_configs();
 }
 
 function drush_http_pre_provision_restore_rollback() {
-  provision_service('http')->create_site_config();
-  provision_service('http')->parse_configs();
+  d()->service('http')->create_site_config();
+  d()->service('http')->parse_configs();
 }
 
 function drush_http_post_provision_restore() {
-  provision_service('http')->create_site_config();
-  provision_service('http')->parse_configs();
+  d()->service('http')->create_site_config();
+  d()->service('http')->parse_configs();
 
 }
 
