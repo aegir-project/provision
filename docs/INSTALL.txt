@@ -68,6 +68,12 @@ Since Aegir strongly depends on Drush, we therefore depend on PHP 5.2 or
 above. You also need to have the commandline version of PHP to run Drush
 properly and the MySQL extensions.
 
+Note that Drupal's support for PHP 5.3 is still under development.
+Currently, using PHP 5.3 will cause (innocuous) warnings on every page
+load. As a result, we suggest using PHP 5.2 for the time-being.
+
+See http://drupal.org/node/360605 (amongst other issues) for details.
+
 Database server
 ---------------
 
@@ -164,7 +170,7 @@ Shell commands as root::
  a2enmod rewrite
  ln -s /var/aegir/config/apache.conf /etc/apache2/conf.d/aegir.conf
 
-That user needs to have sudo access. The wizard will explain you how to
+The aegir user needs to have sudo access. The wizard will explain how to
 do this, but you can already just add the relevant line to your sudoers
 file.
 
