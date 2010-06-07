@@ -294,6 +294,25 @@ class provisionServer extends provisionEnvironment {
   function verify() {
     $this->services_invoke('verify');
   }
+
+  /**
+   * Execute $command on this server, using SSH if necessary.
+   *
+   * @param $command
+   *   Shell command to execute.
+   *
+   * @return
+   *   Same as drush_shell_exec(). Use drush_shell_exec_output() for standard
+   *   out and error.
+   */
+  function shell_exec($command) {
+    if (drush_is_local_host($this->remote_host)) {
+      return drush_shell_exec(escapeshellcmd($command));
+    }
+    else {
+      return drush_shell_exec('ssh ' . drush_get_option('ssh-options', '-o PasswordAuthentication=no') . ' %s %s', $this->script_user . '@' . $this->remote_host, escapeshellcmd($command));
+    }
+  }
 }
 
 /**

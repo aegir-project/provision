@@ -72,33 +72,17 @@ class provisionService_http_apache extends provisionService_http {
     $this->parse_configs();
   }
 
-  function parse_configs($cause_error = FALSE) {
+  function parse_configs() {
     d()->service('file')->sync();
     // This is required to be configurable, due to the fact that different
     // hosts might need to do this differently.
-    if (drush_is_local_host($this->remote_host)) {
-      $return = drush_shell_exec(escapeshellcmd($this->restart_cmd));
-    }
-    else {
-      $return = drush_shell_exec('ssh ' . drush_get_option('ssh-options', '-o PasswordAuthentication=no') . ' %s %s', $this->script_user . '@' . $this->remote_host, escapeshellcmd($this->restart_cmd));
-    }
-    if (!$return) {
-      $msg = join("\n", drush_shell_exec_output());
-      if ($cause_error) {
-        return drush_set_error('PROVISION_WEB_RESTART_FAILED', dt("Web server could not be restarted. Changes might not be available until this has been done. (error: %msg)", array("%msg" => $msg)));
-      }
-      else {
-        drush_log(dt("Web server could not be restarted. Changes might not be available until this has been done. (error: %msg)", array("%msg" => $msg)), "warning");
-      }
-    }
-    else {
+    if (d()->service('http')->server()->shell_exec($this->restart_cmd)) {
       drush_log(dt('Apache has been restarted'));
     }
-
-    return $return;
+    else {
+      drush_log(dt('Web server could not be restarted. Changes might not be available until this has been done. (error: %msg)', array('%msg' => join("\n", drush_shell_exec_output()))), 'warning');
+    }
   }
-
-
 }
 
 class provisionConfig_apache extends provisionConfig {

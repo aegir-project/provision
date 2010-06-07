@@ -11,9 +11,7 @@ function drush_http_provision_delete() {
     }
     else {
       provision_service('http')->delete_platform_config();
-
     }
   }
-  return provision_service('http')->parse_configs();
+  provision_service('http')->parse_configs();
 }
-

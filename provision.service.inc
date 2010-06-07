@@ -42,6 +42,16 @@ class provisionService {
   }
 
   /**
+   * Find the server environment this service is running on.
+   *
+   * @return
+   *   A provisionServer object.
+   */
+  function server() {
+    return d($this->server);
+  }
+
+  /**
    * Clear internal state
    */
   protected function _clear_state() {
