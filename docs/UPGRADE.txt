@@ -36,6 +36,7 @@ you are reading this document.
 Shell commands::
 
   export AEGIR_VERSION=HEAD
+  export AEGIR_DOMAIN=aegir.example.com 
   export DRUPAL_DIR=/var/aegir/hostmaster-$AEGIR_VERSION
   export OLD_DRUPAL_DIR=/var/aegir/hostmaster-0.4-alpha6
   export DRUSH_VERSION=All-versions-3.0
@@ -132,7 +133,7 @@ need to run the hostmaster migrate command.
 Shell commands::
 
   cd $OLD_DRUPAL_DIR
-  $DRUSH hostmaster-migrate aegir.example.com $DRUPAL_DIR
+  $DRUSH hostmaster-migrate $AEGIR_DOMAIN $DRUPAL_DIR
 
 The directory specified must be an absolute path to where you want the new
 release to be stored. If the directory does not exist, provision will use
