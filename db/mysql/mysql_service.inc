@@ -97,7 +97,7 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     // non-readable by the webserver.
     umask(0077);
     // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
-    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 -r%s/sites/%s/database.sql %s", escapeshellcmd(d($this->context)->root), escapeshellcmd(d($this->context)->uri), escapeshellcmd(drush_get_option('db_name'))); 
+    $cmd = sprintf('mysqldump --defaults-file=/dev/fd/3 -r%s/sites/%s/database.sql %s', escapeshellcmd(d()->root), escapeshellcmd(d()->uri), escapeshellcmd(drush_get_option('db_name'))); 
     $success = $this->safe_shell_exec($cmd, drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
 
     if (!$success && !drush_get_option('force', false)) {
@@ -107,8 +107,12 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     umask(0022);
   }
 
+  /**
+   * We go through all this trouble to hide the password from the commandline,
+   * it's the most secure way (apart from writing a temporary file, which would
+   * create conflicts in parallel runs)
+   */
   function safe_shell_exec($cmd, $db_host, $db_user, $db_passwd, $dump_file = null) {
-    # we go through all this trouble to hide the password from the commandline, it's the most secure way (apart from writing a temporary file, which would create conflicts in parallel runs)
    $mycnf = sprintf('[client]
 host=%s
 user=%s
@@ -117,29 +121,29 @@ password=%s
 
    $stdin_spec = (!is_null($dump_file)) ? array("file", $dump_file, "r") : array("pipe", "r");
 
-    $descriptorspec = array(
-      0 => $stdin_spec,
-      1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
-      2 => array("pipe", "w"),  // stderr is a file to write to
-      3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials
-    );
-    $process = proc_open($cmd, $descriptorspec, $pipes);
-    $output = "";
-    if (is_resource($process)) {
-      fwrite($pipes[3], $mycnf);
-      fclose($pipes[3]);
-  
-      $output = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
-      // "It is important that you close any pipes before calling
-      // proc_close in order to avoid a deadlock"
-      fclose($pipes[1]);
-      fclose($pipes[2]);
-      $return_value = proc_close($process);
-    } else {
-      // XXX: failed to execute? unsure when this happens
-      $return_value = -1;
-    }
-    return ($return_value == 0);
-  }
+   $descriptorspec = array(
+     0 => $stdin_spec,
+     1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+     2 => array("pipe", "w"),  // stderr is a file to write to
+     3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials
+   );
+   $process = proc_open($cmd, $descriptorspec, $pipes);
+   $output = "";
+   if (is_resource($process)) {
+     fwrite($pipes[3], $mycnf);
+     fclose($pipes[3]);
 
+     $output = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
+     // "It is important that you close any pipes before calling
+     // proc_close in order to avoid a deadlock"
+     fclose($pipes[1]);
+     fclose($pipes[2]);
+     $return_value = proc_close($process);
+   }
+   else {
+     // XXX: failed to execute? unsure when this happens
+     $return_value = -1;
+   }
+   return ($return_value == 0);
+  }
 }
