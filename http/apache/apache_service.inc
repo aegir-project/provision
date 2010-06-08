@@ -21,12 +21,12 @@ class provisionService_http_apache extends provisionService_http {
 
   function create_site_config() {
     $config = new provisionConfig_apache_site($this->context, drush_get_context('site'));
-    return $config->write();
+    $config->write();
   }
 
   function delete_site_config() {
     $config = new provisionConfig_apache_site($this->context);
-    return $config->unlink();
+    $config->unlink();
   }
 
   function create_platform_config() {
@@ -36,7 +36,7 @@ class provisionService_http_apache extends provisionService_http {
 
   function delete_platform_config() {
     $config = new provisionConfig_apache_platform($this->context);
-    return $config->unlink();
+    $config->unlink();
   }
 
   function create_server_config() {
@@ -47,7 +47,7 @@ class provisionService_http_apache extends provisionService_http {
   
   function delete_server_config() {
     $config = new provisionConfig_apache_server($this->context);
-    return $config->unlink();
+    $config->unlink();
   }
 
   function verify() {
@@ -73,7 +73,6 @@ class provisionService_http_apache extends provisionService_http {
   }
 
   function parse_configs() {
-    d()->service('file')->sync();
     // This is required to be configurable, due to the fact that different
     // hosts might need to do this differently.
     if (d()->service('http')->server()->shell_exec($this->restart_cmd)) {
