@@ -19,8 +19,6 @@
  * Make sure we have a valid site being deployd, and that the file being deployd from exists
  */
 function drush_provision_drupal_provision_deploy_validate($backup_file = null) {
-  _provision_drupal_url_required();
-
   $exists = d()->service('file')->exists($backup_file)
     ->succeed('Deploying site from @path')
     ->fail('Could not find backup file @path', 'PROVISION_BACKUP_NOT_FOUND')
@@ -35,9 +33,9 @@ function drush_provision_drupal_provision_deploy_validate($backup_file = null) {
  */
 function drush_provision_drupal_pre_provision_deploy($backup_file) {
   // the url is likely to have changed in the deployment
-  $extracted = d()->service('file')->extract(drush_get_option('backup_file'), d()->root . '/sites/' . d()->uri) 
+  $extracted = d()->service('file')->extract($backup_file, d()->root . '/sites/' . d()->uri) 
     ->succeed('Successfully extracted the contents of @path')
-    ->fail('Failed to extract the contents of @path', 'PROVISION_BACKUP_EXTRACTION_FAILED')
+    ->fail('Failed to extract the contents of @path to @target', 'PROVISION_BACKUP_EXTRACTION_FAILED')
     ->status();
   if ($extracted) {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
@@ -88,7 +86,7 @@ function drush_provision_drupal_post_provision_deploy() {
   _provision_drupal_create_settings_file();
   provision_save_site_data();
   // call the drush updatedb command.
-  drush_backend_invoke("updatedb", array('uri' => 'http://' . drush_get_option('uri')));
+  provision_backend_invoke(d()->name, 'updatedb');
   // We should be able to fully load Drupal now.
   if (drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL)) {
     drush_include_engine('drupal', 'deploy');

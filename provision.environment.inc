@@ -13,12 +13,24 @@ function & d($name = NULL, $root_object = FALSE) {
   static $instances = null;
   static $default_instance = '@self';
 
+  if ($name == 'all') {
+    return $instances;
+  }
+
   if (is_null($name)) {
     return $instances[$default_instance];
   }
   else {
     if ($root_object) {
       $default_instance = $name;
+      if ($name != '@self') {
+        // This is an unfortunate workaround to the drush sitealias functionality, which pollutes
+        // the options namespace with the alias sourced settings.
+        drush_set_option('root', drush_get_option('root', null, 'options'), 'process');
+        drush_set_option('uri', drush_get_option('uri', null, 'options'), 'process');
+        drush_unset_option('root', 'options');
+        drush_unset_option('uri', 'options');
+      }
     }
 
     if (isset($instances[$name])) {

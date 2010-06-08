@@ -9,7 +9,6 @@ function drush_db_provision_deploy() {
   d()->service('db')->import_site_database();
 }
 
-
 function drush_db_provision_deploy_rollback() {
   d()->service('db')->destroy_site_database();
 }

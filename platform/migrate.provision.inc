@@ -44,7 +44,7 @@ function drush_provision_drupal_pre_provision_migrate($platform = null) {
  * Remove the extracted site directory
  * Restore the vhost conf per the original platform
  */
-function drush_provision_drupal_pre_provision_migrate_rollback($platform = null) {
+function drush_provision_drupal_pre_provision_migrate_rollback($platform) {
   // Set site_offline to false and regenerate the config 
   drush_log(dt("Bringing site out of maintenance"));
   drush_set_option('site_offline', 0);
@@ -60,11 +60,10 @@ function drush_provision_drupal_pre_provision_migrate_rollback($platform = null)
  * Switch the migrate directories around now that we have the new db installed
  */
 function drush_provision_drupal_provision_migrate($platform) {
-  drush_backend_invoke('provision-deploy', array(drush_get_option('backup_file'), 'root' => $platform, 
-    'web_host' => drush_get_option('web_host'), 
-    'db_host' => drush_get_option('db_host'), 'profile' => drush_get_option('profile')));
+  drush_set_option('old_platform', d()->platform->name);
+  drush_backend_invoke_args('provision-save', array(d()->name), array('platform' => $platform, 'root' => null, 'uri' => null));
+  provision_backend_invoke(d()->name, 'provision-deploy', array(drush_get_option('backup_file')));
 }
-
 
 /**
  * Delete the old site directory and recreate the settings file
