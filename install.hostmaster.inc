@@ -37,49 +37,54 @@ function drush_provision_hostmaster_install($site) {
     $data['master_db'] = "$scheme://$user:$pass@$host";
   }
 
-  $data['hosting_name'] = 'server_localhost';
-  $data['provision-service-http'] = 'apache';
-  $data['provision-service-db'] = 'mysql';
-  $data['provision-context'] = 'server';
-  $data['aegir_root'] = $aegir_root;
-  $data['script_user'] = drush_get_option('script_user', 'aegir');
-  $data['web_group'] = drush_get_option('web_group', _provision_default_web_group());
-  $data['web_port'] = drush_get_option('web_port', 80);
-  $data['config_path'] = drush_get_option('config_path', $aegir_root . '/config');
-  $data['backup_path'] = drush_get_option('backup_path', $aegir_root . '/backups');
-  $data['drush_path'] = DRUSH_COMMAND;
+  $server = '@server_localhost';
+  drush_backend_invoke_args("provision-save", array($server), array(
+    'context_type' => 'server',
+   // files
+    'file_service_type' => 'local',
+    'aegir_root' => $aegir_root,
+    'config_path' => $aegir_root . '/config',
+    'backup_path' => $aegir_root . '/backups',
+    'script_user' => drush_get_option('script_user', 'aegir'),
+   // apache 
+    'http_service_type' => 'apache',
+    'web_group' => drush_get_option('web_group', _provision_default_web_group()),
+   // mysql
+    'db_service_type' => 'mysql',
+    'master_db' => $data['master_db'],
 
-  // verify the server
-  drush_backend_invoke('provision-named-context-save', $data, 'POST');
-  drush_do_site_command(drush_sitealias_get_record('@server_localhost'), 'provision-verify');
+  ));
+  provision_backend_invoke($server, 'provision-verify');
 
   if (drush_get_option('backend-only')) {
     return;
   }
 
-  // verify the current platform
-  drush_backend_invoke('provision-named-context-save', array(
-    'parent' => '@server_localhost-apache', // todo should match future node title
-    'hosting_name' => 'platform_Hostmaster', // todo should match future node title
-    'provision-context' => 'platform',
+  $platform_name = '@platform_hostmaster';
+  drush_backend_invoke_args("provision-save", array($platform_name), array(
+    'context_type' => 'platform',
+    'server' => $server,
+    'web_server' => $server,
     'root' => $platform,
   ));
-  drush_do_site_command(drush_sitealias_get_record('@platform_Hostmaster'), 'provision-verify');
+  provision_backend_invoke($platform_name, 'provision-verify');
 
-  // install the hostmaster site
-  $data = drush_backend_invoke('provision-install', array(
-    'hosting_name' => '',//todo
-    'parent' => '@server_localhost-mysql,@platform_Hostmaster',
-    'uri' => $site, 
+
+  $site_name = '@hostmaster';
+  drush_backend_invoke_args("provision-save", array($site_name), array(
+    'context_type' => 'site',
+    'platform' => $platform_name,
+    'db_server' => $server,
+    'uri' => $site,
     'client_email' => drush_get_option('client_email', 'webmaster@localhost'),
-    'profile' => "hostmaster",
-    'provision-context' => "site",
-    'site_port' => drush_get_option('web_port', 80)),
-    'GET', TRUE
-  );
+    'site_port' => drush_get_option('web_port', 80),
+    'profile' => 'hostmaster',
+  ));
+  provision_backend_invoke($site_name, 'provision-install');
+  provision_backend_invoke($site_name, 'provision-verify');
 
   drush_print("Initializing the hosting system");
-  drush_backend_invoke('hosting-setup', array('uri' => $site, 'root' => $platform));
+  provision_backend_invoke($site_name, 'hosting-setup');
 
   drush_print(dt("Aegir is now installed. You can visit it at @link", array('@link' => $data['context']['login_link'])));
 }

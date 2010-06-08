@@ -17,7 +17,7 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
 
   $data = drush_get_merged_options();
   // add a server record :
-  $server = '@server_' . preg_replace("/[!\W\.\-]/", "", $data['web_host']);
+  $server = '@server_localhost';
   drush_backend_invoke_args("provision-save", array($server), array(
     'context_type' => 'server',
    // files
@@ -25,11 +25,11 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
     'aegir_root' => dirname(rtrim($data['config_path'], '/')),
     'config_path' => $data['config_path'],
     'backup_path' => $data['backup_path'],
+    'script_user' => $data['script_user'],
    // apache 
     'http_service_type' => 'apache',
     'web_group' => $data['web_group'],
     'master_url' => $data['master_url'],
-    'script_user' => $data['script_user'],
     'restart_cmd' => $data['restart_cmd'],
    // mysql
     'db_service_type' => 'mysql',
@@ -59,7 +59,7 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
   provision_backend_invoke($new_platform, 'provision-verify');
   drush_set_option('new_platform', $new_platform);
 
-  $site_name = '@' . $site;
+  $site_name = '@hostmaster';
   drush_backend_invoke_args("provision-save", array($site_name), array(
     'context_type' => 'site',
     'platform' => $old_platform,
@@ -85,8 +85,6 @@ function drush_provision_pre_hostmaster_migrate($site, $platform) {
 
 function drush_provision_hostmaster_migrate($site, $platform) {
   provision_backend_invoke(drush_get_option('site_name'), 'provision-migrate', drush_get_option('new_platform'));
-
-  drush_backend_invoke('provision-migrate', array($site, $platform));
 }
 
 function drush_provision_post_hostmaster_migrate($site, $platform) {
@@ -95,7 +93,6 @@ function drush_provision_post_hostmaster_migrate($site, $platform) {
   provision_backend_invoke(drush_get_option('site_name'), 'hostmaster-resume', array(), 
     'old_platform_name' => drush_get_option('old_platform'),
     'new_platform_name' => drush_get_option('new_platform'),
-    'server_name' => drush_get_option('server_name'),
   );
 }
 
