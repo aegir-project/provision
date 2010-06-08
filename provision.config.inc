@@ -31,10 +31,22 @@ class provisionConfig {
     $this->owner = $owner;
   }
 
+  /**
+   * process the data before writing it
+   *
+   * this is called right before the file is written
+   *
+   * this is a stub to be implemented by subclasses
+   */
   function process() {
     return true;
   }
 
+  /**
+   * the filename where the filename is read/written from/to
+   * 
+   * this is a stub to be implemented by subclasses
+   */
   function filename() {
     return false;
   }
