@@ -43,7 +43,7 @@ function provision_save_site_data() {
   if (!drush_get_error()) {
     $config = new provisionConfig_drushrc_site(d()->name);
     $config->write();
-    d()->service('file')->sync(d()->root);
+    provision_drupal_sync_site();
   }
 }
 
@@ -55,7 +55,7 @@ function provision_save_platform_data() {
   if (!drush_get_error()) {
     $config = new provisionConfig_drushrc_platform(d()->name);
     $config->write();
-    d()->service('file')->sync(d()->root);
+    provision_drupal_sync_site();
   }
 }
 

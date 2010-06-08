@@ -1,16 +1,23 @@
 <?php
 
+require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
+
 class provisionService_file_remote extends provisionService_file {
   function init() {
     $this->config_path = $this->config_path . '--' . $this->remote_host;
     parent::init();
   }
 
-  function sync($path = NULL) {
+  function sync($path = NULL, $exclude_sites = FALSE) {
     if (is_null($path)) {
       $path = $this->config_path;
     }
-    if (drush_shell_exec('rsync -azC --delete %s/ %s@%s:%s', $path, $this->script_user, $this->remote_host, $path)) {
+
+    $options = array(
+      'delete' => TRUE,
+      'exclude-sites' => $exclude_sites,
+    );
+    if (drush_core_call_rsync(escapeshellarg($path . '/'), escapeshellarg($this->script_user . '@' . $this->remote_host . ':' . $path), $options)) {
       drush_log(dt('@path has been synced to remote server.', array('@path' => $path)));
     }
     else {
