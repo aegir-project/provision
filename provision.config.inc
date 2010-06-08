@@ -32,7 +32,6 @@ class provisionConfig {
   }
 
   function process() {
-    parent::process();
     return true;
   }
 
