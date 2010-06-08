@@ -1,6 +1,0 @@
-name = Provision: Mysql
-description = Provides provisioning requirements for the Mysql database
-package = Provision
-dependencies[] = provision
-
-core = 6.x

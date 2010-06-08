@@ -28,7 +28,9 @@ function drush_provision_drupal_pre_provision_rename($url, $new_url, $platform =
  * Remove the extracted site directory
  */
 function drush_provision_drupal_pre_provision_rename_rollback($url, $new_url, $platform = null) {
-  $success =  provision_path("unlink", drush_get_option('backup_file'), TRUE, dt('Removed unused rename site package'), dt('Could not remove unused site package'));
+  d()->service('file')->unlink(drush_get_option('backup_file'))
+    ->succeed('Removed unused rename site package')
+    ->fail('Could not remove unused site package');
 }
 
 /**

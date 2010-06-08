@@ -1,5 +1,7 @@
 <?php
 // $Id$
+include_once('provision.environment.inc');
+include_once('provision.service.inc');
 
 /**
  * @file
@@ -25,138 +27,42 @@ drush_errors_on();
  * values, that allow sites to be more easily moved between different provisioned platforms.
  */
 
-/**
- * Returns the aggregated site data from both the pre-existing site.php file, and the options passed to Drush
- *
- * This function merges the data from the command line parser, and the information already saved by previous invokations
- * of the api. This provides a single view of all data relating to the site.
- * This function also provides sensible defaults for some of the settings.
- *
- * @param url
- *   The url of the site being invoked.
- * @return
- *   An associated array containing the relevant settings for the site.
- */
-function provision_get_site_data($url) {
-  if ($old_data = provision_load_site_data($url)) {
-    //Merge previously saved data with the new data. This way, new parameters overwrite old ones.
-    $site_data = array_merge($old_data, $site_data);    
-  }
-  
-  if ($site_data['aliases'] && !is_array($site_data['aliases'])) {
-    $site_data['aliases'] = explode(",", $site_data['aliases']);
-  }  
-  return $site_data;
-}
-
-/**
- * Load site data stored in the site.php file for the specified site.
- *
- * @param url
- *   The url of the site being invoked
- * @return
- *   If the file was found, an associative array of the data that was loaded. Otherwise returns FALSE.
- */
-function provision_load_site_data($url) {
-  //Load the configuration data.
-
-  //@TODO remove this, it is a temporary measure until all site.php files are placed by drushrc.php files
-
-  $conf_file = "sites/$url/site.php";
-  if (file_exists($conf_file)) {
-    provision_path('chmod', $conf_file, 0400);
-    require($conf_file);
-
-    // The provision 0.1 config data might contain older data,
-    // so any data in the new drushrc.php file would be newer.
-    $site_context = drush_get_context('site');
-    $site_context = array_merge($data, $site_context);
-    drush_set_context('site', $site_context);
-  }
-  return FALSE;
-}
 
 /**
  * Save modified options to the drushrc.php file
  */
-function provision_save_site_data() {
-  $context = 'site';
-  drush_save_config($context);
-
-  $filename = _drush_config_file($context);
+function provision_save_server_data() {
   if (!drush_get_error()) {
-    // append the db settings in the _SERVER variable so normal drush commands can still read it.
-    $cache = drush_get_context($context);
-
-    $fp = fopen($filename, "a+");
-    $fields = array('db_type', 'db_host', 'db_user', 'db_passwd', 'db_name');
-
-    foreach ($fields as $key) {
-      $line = "\n\$_SERVER['$key'] = ". var_export($cache[$key], TRUE) .';';
-      fwrite($fp, $line);  
-     }
-     fwrite($fp, "\n");
-     fclose($fp);
+    $config = new provisionConfig_drushrc_server(d()->name);
+    $config->write();
   }
-
-  provision_path("chmod", $filename, 0600,
-    dt('Changed permissions of drushrc.php to @confirm'),
-    dt('Could not change permissions of drushrc.php to @confirm'));
-
 }
+
+
+function provision_save_site_data() {
+  if (!drush_get_error()) {
+    $config = new provisionConfig_drushrc_site(d()->name);
+    $config->write();
+    provision_drupal_sync_site();
+  }
+}
+
+
+/**
+ * Save modified options to the drushrc.php file
+ */
+function provision_save_platform_data() {
+  if (!drush_get_error()) {
+    $config = new provisionConfig_drushrc_platform(d()->name);
+    $config->write();
+    provision_drupal_sync_site();
+  }
+}
+
 
 /**
  * @} End of "defgroup sitedata".
  */
-
-
-/**
- * Save the options for the platform to the drushrc.php in the root of
- * the platform. 
- *
- * @return 
- *   Boolean. The value returned by drush_save_config().
- */
-function provision_save_platform_data() {
-  return drush_save_config('drupal');
-}
-
-/**
- * @defgroup provisionvalues Value replacement support for the provisioning framework
- * @{
- */
-
-/**
- * Generate the text for a config file using php
- */
-function provision_render_config($template, $variables) {
-  drush_errors_off();
-  extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
-  ob_start();                      // Start output buffering
-  eval('?>'. $template);                 // Generate content
-  $contents = ob_get_contents();   // Get the contents of the buffer
-  ob_end_clean();                  // End buffering and discard
-  drush_errors_on();
-  return $contents;                // Return the contents
-}
-
-/**
- * Write a config based on a template
- *
- * @see provision_render_config()
- */
-function provision_write_config($file, $template, $data) {
-  $file = fopen($file, "w");
-  $text = provision_render_config($template, $data);
-  fwrite($file, $text);
-  fclose($file);
-}
-
-
-/**
- * @} End of "defgroup provisionvalues".
- */
-
 
 /**
  * Remove files or directories, recursively
@@ -181,15 +87,17 @@ function _provision_recursive_delete($path) {
       }
     }
 
-    $rm = provision_path('rmdir', $path, TRUE,
-      dt('Deleting @path directory successful.', array('@path' => $path)),
-      dt('Deleting @path directory failed.', array('@path' => $path)));
+    $rm = d()->service('file')->rmdir($path)
+      ->succeed('Deleting @path directory successful.')
+      ->fail('Deleting @path directory failed.')
+      ->status();
 
     $ret = $ret && $rm;
   }
   else {
-    $rm = provision_path('unlink', $path, TRUE, NULL, 
-      dt('Deleting @path file failed.', array('@path' => $path)));
+    $rm = d()->service('file')->unlink($path)
+      ->fail('Deleting @path file failed.')
+      ->status();
     $ret = $ret && $rm;
   }
   return $ret;
@@ -330,4 +238,11 @@ function provision_password($length = 10) {
  */
 function _scrub_object($input) {
   return json_decode(json_encode($input), TRUE);
+}
+
+/**
+ * Execute a command against a specific context object.
+ */
+function provision_backend_invoke($target, $command, $arguments = array(), $options = array(), $mode = 'GET') {
+  return drush_backend_invoke_args('@' . ltrim($target, '@') . ' ' . $command, $arguments, $options + array('root' => null, 'uri' => null), $mode);
 }

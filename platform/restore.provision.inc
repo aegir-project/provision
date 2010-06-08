@@ -23,13 +23,13 @@
 /**
  * Make sure we have a valid site being restored, and that the file being restored from exists
  */
-function drush_provision_drupal_provision_restore_validate($url = null, $restore_file = null) {
+function drush_provision_drupal_provision_restore_validate($restore_file = null) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
-  $exists = provision_path("exists", $restore_file, TRUE,
-      dt("Restoring site from @path"),
-      dt("Could not find backup file @path"),
-      'PROVISION_BACKUP_NOT_FOUND');
+  $exists = d()->service('file')->exists($restore_file)
+    ->succeed('Restoring site from @path')
+    ->fail('Could not find backup file @path', 'PROVISION_BACKUP_NOT_FOUND')
+    ->status();
   if ($exists) {
     drush_set_option('restore_file', $restore_file);
   }
@@ -38,50 +38,48 @@ function drush_provision_drupal_provision_restore_validate($url = null, $restore
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
-function drush_provision_drupal_pre_provision_restore($url, $restore_file) {
-  drush_invoke('provision-backup', $url);
+function drush_provision_drupal_pre_provision_restore($restore_file) {
+  drush_invoke('provision-backup');
 
-  provision_path("extract", drush_get_option('restore_file'), drush_get_option('sites_path') ."/$url.restore", 
-    dt('Successfully extracted the contents of @path'),
-    dt('Failed to extract the contents of @path'),
-    'PROVISION_BACKUP_EXTRACTION_FAILED');
+  d()->service('file')->extract(drush_get_option('restore_file'), d()->root . '/sites/' . d()->uri . '.restore') 
+    ->succeed('Successfully extracted the contents of @path')
+    ->fail('Failed to extract the contents of @path', 'PROVISION_BACKUP_EXTRACTION_FAILED');
 }
 
 /**
  * Remove the extracted site directory
  */
-function drush_provision_drupal_pre_provision_restore_rollback($url) {
-  _provision_recursive_delete(drush_get_option('sites_path') ."/$url.restore");
+function drush_provision_drupal_pre_provision_restore_rollback() {
+  _provision_recursive_delete(d()->root . '/sites/' . d()->uri . '.restore');
 }
 
 /**
  * Switch the restore directories around now that we have the new db installed
  */
-function drush_provision_drupal_provision_restore($url) {
-  $old = drush_get_option('sites_path') ."/$url.restore";
-  $new = drush_get_option('sites_path') ."/$url";
-  provision_path("switch_paths", $old, $new ,
-    dt('Swapping out the @path and @confirm directories was successful.'),
-    dt('Swapping the @path and @confirm directories has failed.'),
-    'DRUSH_PERM_ERROR');
+function drush_provision_drupal_provision_restore() {
+  $old = d()->root . '/sites/' . d()->uri . '.restore';
+  $new = d()->root . '/sites/' . d()->uri;
+  d()->service('file')->switch_paths($old, $new)
+    ->succeed('Swapping out the @path1 and @path2 directories was successful.')
+    ->fail('Swapping the @path1 and @path2 directories has failed.', 'DRUSH_PERM_ERROR');
   // make sure it has the latest site data available
-  _provision_drupal_create_settings_file($url);
-  provision_save_site_data($url);
+  _provision_drupal_create_settings_file();
+  provision_save_site_data();
 }
 
 // Luckily this is reversable =)
-function drush_provision_drupal_provision_restore_rollback($url) {
-  drush_provision_drupal_provision_restore($url);
+function drush_provision_drupal_provision_restore_rollback() {
+  drush_provision_drupal_provision_restore();
 }
 
 /**
  * Delete the old site directory and recreate the settings file
  */
-function drush_provision_drupal_post_provision_restore($url) {
-  _provision_recursive_delete(drush_get_option('sites_path') ."/$url.restore");
+function drush_provision_drupal_post_provision_restore() {
+  _provision_recursive_delete(d()->root . '/sites/' . d()->uri . '.restore');
   // This is the actual drupal provisioning requirements. 
-  _provision_drupal_create_directories($url);
-  _provision_drupal_create_settings_file($url);
+  _provision_drupal_create_directories();
+  _provision_drupal_create_settings_file();
 }
 
 

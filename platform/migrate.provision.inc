@@ -23,56 +23,57 @@
 /**
  * Make sure we have a valid site being migrated, and that the file being migrated from exists
  */
-function drush_provision_drupal_provision_migrate_validate($url = null, $platform = null) {
+function drush_provision_drupal_provision_migrate_validate($platform = null) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 }
 
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
-function drush_provision_drupal_pre_provision_migrate($url, $platform = null) {
+function drush_provision_drupal_pre_provision_migrate($platform = null) {
   /* Set offline mode to true and re-generate the settings.php. This will write a 
    * $conf['site_offline'] = 1; to the settings.php
    */
   drush_log(dt("Putting site under maintenance"));
   drush_set_option('site_offline', 1);
-  _provision_drupal_create_settings_file($url);
-  drush_invoke('provision-backup', $url);
+  _provision_drupal_create_settings_file();
+  drush_invoke('provision-backup');
 }
 
 /**
  * Remove the extracted site directory
  * Restore the vhost conf per the original platform
  */
-function drush_provision_drupal_pre_provision_migrate_rollback($url, $platform = null) {
+function drush_provision_drupal_pre_provision_migrate_rollback($platform) {
   // Set site_offline to false and regenerate the config 
   drush_log(dt("Bringing site out of maintenance"));
   drush_set_option('site_offline', 0);
-  _provision_drupal_create_settings_file($url);
-  $success =  provision_path("unlink", drush_get_option('backup_file'), TRUE, dt('Removed unused migration site package'), dt('Could not remove unused migration site package'));
-  _provision_apache_create_vhost_config($url);
-  _provision_apache_restart_apache();
+  _provision_drupal_create_settings_file();
+  $success =  d()->service('file')->unlink(drush_get_option('backup_file'))
+    ->succeed('Removed unused migration site package')
+    ->fail('Could not remove unused migration site package');
+  d()->service('http')->create_site_config();
+  d()->service('http')->parse_configs();
 }
 
 /**
  * Switch the migrate directories around now that we have the new db installed
  */
-function drush_provision_drupal_provision_migrate($url, $platform) {
-  drush_backend_invoke('provision-deploy', array($url, drush_get_option('backup_file'), 'root' => $platform, 
-    'web_host' => drush_get_option('web_host'), 'web_ip' => drush_get_option('web_ip'), 
-    'db_host' => drush_get_option('db_host'), 'profile' => drush_get_option('profile')));
+function drush_provision_drupal_provision_migrate($platform) {
+  drush_set_option('old_platform', d()->platform->name);
+  drush_backend_invoke_args('provision-save', array(d()->name), array('platform' => $platform, 'root' => null, 'uri' => null));
+  provision_backend_invoke(d()->name, 'provision-deploy', array(drush_get_option('backup_file')));
 }
-
 
 /**
  * Delete the old site directory and recreate the settings file
  */
-function drush_provision_drupal_post_provision_migrate($url) {
+function drush_provision_drupal_post_provision_migrate() {
   drush_set_option('installed', FALSE);
   // we remove the aliases even if redirection is enabled as a precaution
   // if redirection is enabled, keep silent about errors
   _provision_drupal_delete_aliases(drush_get_option('aliases', array()), drush_get_option('redirection'));
-  _provision_recursive_delete(drush_get_option('sites_path') ."/$url");
+  _provision_recursive_delete(d()->root . '/sites/' . d()->uri);
 }
 
 

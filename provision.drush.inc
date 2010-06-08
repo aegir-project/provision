@@ -49,7 +49,6 @@ if ($name['name'] == 'root') {
  * @{
  */
 include_once('provision.inc');
-include_once('provision.path.inc');
 
 /**
  * implementation of hook_drush_init().
@@ -59,6 +58,7 @@ include_once('provision.path.inc');
  * @see provision_load_critical()
  */
 function provision_drush_init() {
+  d(drush_get_option('name', '@self', 'alias'), TRUE);
   $load = sys_getloadavg();
   if (provision_load_critical($load)) {
     drush_set_error('PROVISION_OVERLOAD', dt("load on system too heavy (@load), aborting", array('@load' => join(" ", $load))));
@@ -70,7 +70,17 @@ function provision_drush_init() {
  * Implementation of hook_drush_command().
  */
 function provision_drush_command() {
-
+  $items['provision-save'] = array(
+    'description' => dt('Save Drush alias'),
+    'arguments' => array(
+      '@context_name' => 'Context to save',
+    ),
+    'options' => array_merge(array(
+      '--context_type' => 'server, platform, or site; default server',
+      '--delete' => 'Remove the alias.',
+    ), provisionServer::option_documentation(), provisionPlatform::option_documentation(), provisionSite::option_documentation()),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+  );
   $items['provision-install'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to install.')),
     'description' => dt('Provision a new site using the provided data.'),
@@ -114,7 +124,7 @@ function provision_drush_command() {
   $items['provision-verify'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to verify).')),    
     'description' => 'Verify that the provisioning framework is correctly installed.',
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT, 
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH, 
   );
  
   $items['provision-restore'] = array(
@@ -174,6 +184,15 @@ function provision_drush_command() {
     ),
   );
 
+  $items['hostmaster-install'] = array(
+    'description' => dt('Install and verify the Hostmaster frontend.'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+    'arguments' => array(
+      'example.com' => dt('The name of the site to install'),
+      '/path/to/platform' => dt('The platform to install the site on.'),
+      'you@example.com' => dt('The email account to send a welcome mail to'),
+    ),
+  );
   
   $items['hostmaster-pause'] = array(
     'description' => dt('Prepare the site to be migrated to a new platform.'),
@@ -197,43 +216,36 @@ function provision_drush_command() {
   return $items;
 }
 
-
 function drush_provision_hostmaster_make($platform) {
   drush_backend_invoke('make', array(dirname(__FILE__) . '/aegir.make', $platform));
 }
 
-/**
- * Generate a provision.settings.php file to configure provision
- */
-function _provision_generate_config() {
-  $exists = provision_path_exists(drush_get_option('docroot_path') . '/drushrc.php');
-  if ($exists) {
-    drush_log(dt("Found existing drushrc.php file"));
-    provision_path("chmod", drush_get_option('docroot_path') . '/drushrc.php', 0600,
-       dt('Changed permissions of drushrc.php to @confirm'),
-        dt('Could not change permissions of drushrc.php to @confirm'));
+function drush_provision_save($alias = null) {
+  if (drush_get_option('delete', false)) {
+    // remove an existing alias 
+    $config = new provisionConfig_drushrc_alias($alias);
+    $config->unlink();
   }
   else {
-    drush_log(dt("Generating drushrc.php file"));
+    // create or update the record
+    d($alias)->write_alias();
   }
-  provision_save_platform_data();
-  provision_path("chmod", drush_get_option('docroot_path') . '/drushrc.php', 0400,
-    dt('Changed permissions of drushrc.php to @confirm'),
-    dt('Could not change permissions of drushrc.php to @confirm'));
-  return TRUE;
 }
 
-
+function drush_provision_verify() {
+  d()->verify();
+}
 
 function _provision_default_restart_cmd() {
-  $command = '/usr/sbin/apachectl'; # a proper default for most of the world
+  $command = '/usr/sbin/apachectl'; // A proper default for most of the world
   foreach (explode(':', $_SERVER['PATH']) as $path) {
     $options[] = "$path/apache2ctl";
     $options[] = "$path/apachectl";
   }
-  # try to detect the apache restart command
-  $options[] = '/usr/local/sbin/apachectl'; # freebsd
-  $options[] = '/usr/sbin/apache2ctl'; # debian + apache2
+  // Try to detect the apache restart command.
+  $options[] = '/usr/local/sbin/apachectl'; // freebsd
+  $options[] = '/usr/sbin/apache2ctl'; // debian + apache2
+  $options[] = '/usr/apache2/2.2/bin'; // Solaris
   $options[] = $command;
 
   foreach ($options as $test) {
@@ -252,6 +264,7 @@ function _provision_default_web_group() {
     'httpd',
     'www-data', 
     'apache',
+    'webservd',
     'nogroup',
     'nobody',
     $info['name']);
@@ -342,3 +355,4 @@ function provision_load_critical($load = null, $threshold = null) {
   }
   return ($load[0] > $threshold);
 }
+
