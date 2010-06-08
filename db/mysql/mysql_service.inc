@@ -101,7 +101,7 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     $success = $this->safe_shell_exec($cmd, drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
 
     if (!$success && !drush_get_option('force', false)) {
-      drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not generate database backup from mysqldump"));
+      drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not generate database backup from mysqldump. (error: %msg)', array('%msg' => $this->safe_shell_exec_output)));
     }
     // Reset the umask to normal permissions.
     umask(0022);
@@ -128,12 +128,12 @@ password=%s
      3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials
    );
    $process = proc_open($cmd, $descriptorspec, $pipes);
-   $output = "";
+   $this->safe_shell_exec_output = '';
    if (is_resource($process)) {
      fwrite($pipes[3], $mycnf);
      fclose($pipes[3]);
 
-     $output = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
+     $this->safe_shell_exec_output = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
      // "It is important that you close any pipes before calling
      // proc_close in order to avoid a deadlock"
      fclose($pipes[1]);
