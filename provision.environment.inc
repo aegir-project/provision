@@ -357,13 +357,12 @@ class provisionPlatform extends provisionEnvironment {
     $this->type = 'platform';
     $this->setProperty('root');
 
-    $this->service_subscribe("http", $this->web_server);
-
     $this->setProperty('server', '@server_localhost');
     $this->is_oid('server');
 
     $this->setProperty('web_server', '@server_localhost');
     $this->is_oid('web_server');
+    $this->service_subscribe('http', $this->web_server->name);
   }
 
   function verify() {
@@ -404,9 +403,9 @@ class provisionSite extends provisionEnvironment {
 
     $this->setProperty('client_email');
 
-    $this->service_subscribe("db", $this->db_server);
     $this->setProperty('db_server');
     $this->is_oid('db_server');
+    $this->service_subscribe('db', $this->db_server->name);
 
     // todo - turn into a re-usable mechanism for comma separated values
     if ($this->options['aliases'] && !is_array($site_data['aliases'])) {
