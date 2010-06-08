@@ -78,7 +78,7 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     drush_log(sprintf("Importing database using command: %s", $cmd));
 
     if (!$success) {
-      drush_set_error('PROVISION_DB_IMPORT_FAILED', dt("Database import failed: %output", array('%output' => $output)));
+      drush_set_error('PROVISION_DB_IMPORT_FAILED', dt("Database import failed: %output", array('%output' => $this->safe_shell_exec_output)));
     }
   }
   
