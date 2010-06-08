@@ -82,11 +82,14 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     }
   }
   
-
-  function grant_host() {
-    $result = $this->query("select current_user()")->fetchColumn(0);
-    preg_match('/^.*@(.*)$/', $result, $matches);
-    return $matches[1];
+  function grant_host(provisionServer $server) {
+    $server->shell_exec('mysql -u intntnllyInvalid -h ' . escapeshellarg($this->remote_host));
+    if (preg_match("/Access denied for user 'intntnllyInvalid'@'([^']*)'/", implode('', drush_shell_exec_output()), $match)) {
+      return $match[1];
+    }
+    else {
+      return drush_set_error('PROVISION_DB_CONNECT_FAIL', dt('Dummy connection failed to fail: %msg', array('%msg' => join("\n", drush_shell_exec_output()))));
+    }
   }
 
   function generate_dump() {

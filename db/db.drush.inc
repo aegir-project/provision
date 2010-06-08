@@ -44,14 +44,12 @@ class provisionService_db extends provisionService {
   }
 
   function verify() { 
-    if (d()->type === 'server') {
-      $this->connect();
-      if ($this->can_create_database()) {
-        drush_log(dt('Provision can create new databases.'), 'message');
-      }
-      else {
-        drush_set_error('PROVISION_CREATE_DB_FAILED');
-      }
+    $this->connect();
+    if ($this->can_create_database()) {
+      drush_log(dt('Provision can create new databases.'), 'message');
+    }
+    else {
+      drush_set_error('PROVISION_CREATE_DB_FAILED');
     }
   }
 
@@ -100,7 +98,6 @@ class provisionService_db extends provisionService {
 
   }
 
-
   /**
    * Generate a new mysql database and user account for the specified credentials
    */
@@ -118,9 +115,11 @@ class provisionService_db extends provisionService {
     if (!$this->grant($db_name, $db_user, $db_passwd, $db_grant_host)) {
       drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not create database user @user", array('@user' => $db_user)));
     }
-    if (d()->platform->web_server->remote_host !== $db_grant_host) {
-      drush_log(dt("Granting privileges to %user@%client on %database", array('%user' => $db_user, '%client' => d()->platform->web_server->remote_host, '%database' => $db_name)));
-      if (!$this->grant($db_name, $db_user, $db_passwd, d()->platform->web_server->remote_host)) {
+    // todo use d()->platform->server once hostmaster sets this to a real value
+    $local_grant_host = $this->grant_host(d('@server_localhost'));
+    if ($local_grant_host !== $db_grant_host) {
+      drush_log(dt("Granting privileges to %user@%client on %database", array('%user' => $db_user, '%client' => $local_grant_host, '%database' => $db_name)));
+      if (!$this->grant($db_name, $db_user, $db_passwd, $local_grant_host)) {
         drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not create database user @user", array('@user' => $db_user)));
       }
     }
@@ -136,8 +135,6 @@ class provisionService_db extends provisionService {
     }
     return $status; 
   }
-
-
   
   /**
    * Remove the database and user account for the supplied credentials
@@ -204,7 +201,7 @@ class provisionService_db extends provisionService {
     $creds['db_passwd'] = drush_set_option('db_passwd', provision_password(), 'site');
     $creds['db_name'] = drush_set_option('db_name', $this->suggest_db_name(), 'site');
     $creds['db_user'] = drush_set_option('db_user', $creds['db_name'], 'site');
-    $creds['db_grant_host'] = $this->grant_host();
+    $creds['db_grant_host'] = $this->grant_host(d()->service('http')->server());
 
     return $creds;
   }
@@ -217,7 +214,7 @@ class provisionService_db extends provisionService {
       $creds[$key] = drush_get_option($key, '', 'site');
     }
 
-    $creds['db_grant_host'] = $this->grant_host();
+    $creds['db_grant_host'] = $this->grant_host(d()->service('http')->server());
     return $creds;
   }
 
@@ -253,8 +250,8 @@ class provisionService_db extends provisionService {
     return FALSE;
   }
 
-  function grant_host() {
-    return 'localhost';
+  function grant_host(provisionServer $server) {
+    return $server->remote_host;
   }
 }
 
