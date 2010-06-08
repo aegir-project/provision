@@ -15,10 +15,6 @@ function file_provision_services() {
   return array('file' => 'local');
 }
 
-function file_drush_exit() {
-  d()->service('file')->sync();
-}
-
 class provisionService_file extends provisionService {
   /**
    * Determine if $path can be written to.
