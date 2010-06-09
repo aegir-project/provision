@@ -37,8 +37,8 @@ class provisionService {
     return TRUE;
   }
 
-  function setProperty($field, $default = null) {
-    d($this->server)->setProperty($field, $default);
+  function setProperty($field, $default = NULL, $array = FALSE) {
+    d($this->server)->setProperty($field, $default, $array);
   }
 
   /**
