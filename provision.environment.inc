@@ -165,9 +165,14 @@ class provisionEnvironment {
   /**
    * Check the $options property for a field, saving to the properties array.
    */
-  function setProperty($field, $default = null) {
+  function setProperty($field, $default = NULL, $array = FALSE) {
     if (isset($this->options[$field])) {
-      $this->$field = $this->options[$field];
+      if ($array && !is_array($this->options[$field])) {
+        $this->$field = explode(',', $this->options[$field]);
+      }
+      else {
+        $this->$field = $this->options[$field];
+      }
     }
     else {
       $this->$field = $default;
@@ -410,22 +415,13 @@ class provisionSite extends provisionEnvironment {
 
     $this->setProperty('uri');
     $this->setProperty('language', 'en');
-    $this->setProperty('aliases', array());
     $this->setProperty('site_port', 80);
-
     $this->setProperty('client_email');
+    $this->setProperty('aliases', array(), TRUE);
 
     $this->setProperty('db_server');
     $this->is_oid('db_server');
     $this->service_subscribe('db', $this->db_server->name);
-
-    // todo - turn into a re-usable mechanism for comma separated values
-    if ($this->options['aliases'] && !is_array($site_data['aliases'])) {
-      $this->aliases = explode(",", $site_data['aliases']);
-    }
-    else {
-      $this->aliases = array();
-    }
 
     // this can potentially be handled by a Drupal sub class
     $this->setProperty('profile', 'default');
