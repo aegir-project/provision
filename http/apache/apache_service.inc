@@ -76,7 +76,7 @@ class provisionService_http_apache extends provisionService_http {
   function parse_configs() {
     // This is required to be configurable, due to the fact that different
     // hosts might need to do this differently.
-    if (d()->service('http')->server()->shell_exec($this->restart_cmd)) {
+    if ($this->server()->shell_exec($this->restart_cmd)) {
       drush_log(dt('Apache has been restarted'));
     }
     else {
