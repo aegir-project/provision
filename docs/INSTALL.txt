@@ -11,14 +11,13 @@ Aegir Drupal provisionning system.
 ------------------------------------------------------------------------------
 
 Aegir installation seems difficult at first, but once you get around it, it's
-fairly simple. It's 4 basic steps:
+fairly simple. It's 3 basic steps:
 
  1. Install requirements
  2. Configure system requirements, which include:
     * create a Aegir user
     * configure Apache, MySQL, DNS, etc
- 3. Install the Aegir files
- 4. Follow the install wizard
+ 3. Run the install script.
 
 Those steps are detailed below. The following instructions provide example
 commands for a Debian-like distribution, but should be fairly easy to adapt to
@@ -180,29 +179,16 @@ file.
 Database configuration
 ----------------------
 
-Here you want to make a basic database configuration for the Drupal site you
-are going to install. You want to run these commands using your mysql 'root'
-user, substituting the 'XXXXXXXX' with a real password.
-
-SQL commands::
-
- CREATE DATABASE aegir;
- GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, \
-  CREATE TEMPORARY TABLES, LOCK TABLES ON aegir.* TO \
-  'aegir'@'localhost' IDENTIFIED BY 'XXXXXXXX';
-
-The wizard will prompt you for another MySQL user. This is because Aegir
-actually requires two database users: the above to drive the Drupal
-frontend, and another, more privileged, to create databases and users
-for new sites. You can already create that user before launching the
-wizard using the following command.
+The installer will prompt you for a MySQL superuser. This user is 
+required to create databases and users for new sites. 
+Create that user before running the install script using the following command.
 
 SQL commands::
 
   GRANT ALL PRIVILEGES ON *.* TO 'aegir_root'@'localhost' IDENTIFIED \
   BY 'XXXXXXXX' WITH GRANT OPTION;
 
-Again, change 'XXXXXXXX' with a real password.
+Change 'XXXXXXXX' with a real password.
 
 DNS Configuration
 -----------------
@@ -219,17 +205,15 @@ Simply add all domains you want to this line. e.g:
 
 ``127.0.0.1  localhost your-machine-name $AEGIR_DOMAIN other1 other2``
 
-3. Install the Aegir files
-==========================
+3. Run the install script
+=========================
 
-This section deals with the installation of Aegir proper. These instructions
-limit themselves to getting you into the Aegir install wizard, which will then
-give you further configuration instructions.
+This section deals with the actual installation of Aegir.
 
-There is an install script part of the hostmaster profile that takes care of
-installing the right packages and preparing the Drupal frontend install for
-you. That script needs to be run as the aegir user created above.  This file
-is available alongside this one or can be downloaded through the web at:
+There is an install script that takes care of installing the right packages and 
+preparing the backend and frontend install for you. That script needs to be run 
+as the aegir user created above.  This file is available in Provision or can be 
+downloaded through the web at:
 
 http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD
 
@@ -239,21 +223,20 @@ git master branch. If you downloaded an official release, it should install
 the official release.). You can modify which version to install by editing the
 AEGIR_VERSION variable in the script.
 
-The install script is shipped with other default settings that you will likely
-need to change, especially the value of AEGIR_DOMAIN to match the URL of your site.
-
-You can also change which release to install or other parameters such as these
-through options passed to the script. Run "sh install.sh.txt -h" for more
-information on the available options.
-
 Shell commands::
 
- su -s /bin/sh aegir -c "sh install.sh.txt"
- /etc/init.d/apache2 restart
+ su -s /bin/sh aegir -c "sh install.sh.txt aegir.example.com"
 
 Note you must run this as root or prefix with sudo.
 
-Checkpoint!
+Be sure to change 'aegir.example.com' to match the URI of your site.
+
+You can append '--client_email=you@example.com' if you wish to receive the 
+traditional Drupal 'Welcome' e-mail upon completion of the installation.
+This e-mail address will also be used as the default e-mail address of the 
+first user and client in Aegir, but can be changed later.
+
+Checkpoint / Finished!
 -----------
 
 At this point, you have checked out all the code and setup your basic Drupal
@@ -280,15 +263,5 @@ Variations on this are acceptable (for example, the Drush Debian package works
 out of ``/usr/bin/drush`` and that's fine), but you are better to stick with
 the defaults if you really want to get through this.
 
-
-4. Follow the install wizard
-============================
-
-Now point your browser to http://$AEGIR_DOMAIN/install.php and proceed with
-the remainder of the installation using the Hostmaster Install profile.  Some
-of the instructions given, you will already have completed, but carefully read
-each step in turn to ensure you don't miss anything.  Specifically you must
-still provide the database credentials, add the Aegir user to /etc/sudoers
-with the relevant command to restart the webserver, create a MySQL superuser
-capable of creating more databases, and initialise the hosting system.  These
-instructions are provided to you by the Hostmaster install profile.
+The installation will provide you with a one-time login URL to stdout or via
+an e-mail. Use this link to login to your new Aegir site for the first time.
