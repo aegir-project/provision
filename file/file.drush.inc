@@ -363,12 +363,12 @@ class provisionService_file extends provisionService {
 
     if ($exists) {
       $this->chown($path, drush_get_option('script_user'))
-        ->succeed($name . ' ownership of path has been changed to @uid.')
-        ->fail($name . ' ownership of path could not be changed to @uid.', 'DRUSH_PERM_ERROR');
+        ->succeed($name . ' ownership of @path has been changed to @uid.')
+        ->fail($name . ' ownership of @path could not be changed to @uid.', 'DRUSH_PERM_ERROR');
 
       $this->chmod($path, $perms)
-        ->succeed($name . ' permissions of path have been changed to @perm.')
-        ->fail($name . ' permissions of path could not be changed to @perm.', 'DRUSH_PERM_ERROR');
+        ->succeed($name . ' permissions of @path have been changed to @perm.')
+        ->fail($name . ' permissions of @path could not be changed to @perm.', 'DRUSH_PERM_ERROR');
 
       $this->writable($path)
         ->succeed($name . ' path @path is writable.')
