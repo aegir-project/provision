@@ -31,6 +31,10 @@ class provisionConfig {
     $this->owner = $owner;
   }
 
+  function owner() {
+    return d($this->owner);
+  }
+
   /**
    * process the data before writing it
    *
@@ -81,8 +85,8 @@ class provisionConfig {
   function write() {
     $filename = $this->filename();
     // Make directory structure if it does not exist.
-    if (!d()->service('file')->exists(dirname($filename))->status()) {
-      d()->service('file')->mkdir(dirname($filename))
+    if (!$this->owner()->service('file')->exists(dirname($filename))->status()) {
+      $this->owner()->service('file')->mkdir(dirname($filename))
         ->succeed('Created directory @path.')
         ->fail('Could not create directory @path.');
     }
@@ -93,34 +97,34 @@ class provisionConfig {
 
       if ($template = $this->load_template()) {
         // Make sure we can write to the file
-        if (!is_null($this->mode) && !($this->mode & 0200) && d()->service('file')->exists($filename)->status()) {
-          d()->service('file')->chmod($filename, $this->mode | 0200)
+        if (!is_null($this->mode) && !($this->mode & 0200) && $this->owner()->service('file')->exists($filename)->status()) {
+          $this->owner()->service('file')->chmod($filename, $this->mode | 0200)
             ->succeed('Changed permissions of @path to @perm')
             ->fail('Could not change permissions of @path to @perm');
         }
 
-        d()->service('file')->file_put_contents($filename, $this->render_template($template, $this->data), $this->append ? FILE_APPEND : 0)
+        $this->owner()->service('file')->file_put_contents($filename, $this->render_template($template, $this->data), $this->append ? FILE_APPEND : 0)
           ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description), 'success');
 
         // Change the permissions of the file if needed
         if (!is_null($this->mode)) {
-          d()->service('file')->chmod($filename, $this->mode)
+          $this->owner()->service('file')->chmod($filename, $this->mode)
             ->succeed('Changed permissions of @path to @perm')
             ->fail('Could not change permissions of @path to @perm');
         }
         if (!is_null($this->group)) {
-          d()->service('file')->chgrp($filename, $this->group)
+          $this->owner()->service('file')->chgrp($filename, $this->group)
             ->succeed('Change group ownership of @path to @gid')
             ->fail('Could not change group ownership of @path to @gid');
         }
-        d()->service('file')->sync($this->filename());
+        $this->owner()->service('file')->sync($this->filename());
       }
     }
   }
 
   function unlink() {
-    d()->service('file')->unlink($this->filename())->status();
-    d()->service('file')->sync($this->filename());
+    $this->owner()->service('file')->unlink($this->filename())->status();
+    $this->owner()->service('file')->sync($this->filename());
   }
 }
 
