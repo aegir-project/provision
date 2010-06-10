@@ -11,29 +11,22 @@ class provisionService_file_remote extends provisionService_file {
   }
 
   function chmod($path, $perms) {
-    $this->_clear_state();
-    $this->tokens = array('@path' => $path, '@perm' => sprintf('%o', $perms));
+    parent::chmod($path, $perms);
     $this->operations[] = array(__FUNCTION__, func_get_args());
-    $this->last_status = TRUE;
     return $this;
   }
 
   function chgrp($path, $gid, $recursive = FALSE) {
-    $this->_clear_state();
+    parent::chgrp($path, $gid, $recursive);
     $this->operations[] = array(__FUNCTION__, func_get_args());
-    $this->tokens = array('@path' => $path, '@gid' => $gid);
-    $this->last_status = TRUE;
     return $this;
   }
 
   function chown($path, $owner, $recursive = FALSE) {
-    $this->_clear_state();
-    $this->tokens = array('@path' => $path, '@uid' => $owner);
+    parent::chown($path, $owner, $recursive);
     $this->operations[] = array(__FUNCTION__, func_get_args());
-    $this->last_status = TRUE;
     return $this;
   }
-
 
   function sync($path = NULL, $exclude_sites = FALSE) {
     if (is_null($path)) {
