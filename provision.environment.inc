@@ -431,16 +431,19 @@ class provisionSite extends provisionEnvironment {
 
     // we need to set the alias root to the platform root, otherwise drush will cause problems.
     $this->root = $this->platform->root;
-
     $this->setProperty('uri');
+
+    // set this because this path is accessed a lot in the code, especially in config files.
+    $this->site_path = $this->root . '/sites/' . $this->uri;
+
     $this->setProperty('site_enabled', true);
     $this->setProperty('language', 'en');
     $this->setProperty('site_port', 80);
     $this->setProperty('client_email');
     $this->setProperty('aliases', array(), TRUE);
-
-    $this->setProperty('db_server');
+    $this->setProperty('db_server', '@server_localhost');
     $this->is_oid('db_server');
+
     $this->service_subscribe('db', $this->db_server->name);
 
     // this can potentially be handled by a Drupal sub class

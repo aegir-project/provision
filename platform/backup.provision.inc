@@ -57,7 +57,7 @@ function drush_provision_drupal_provision_backup() {
   drush_log(dt("Adding sites directory to !backup_file", array('!backup_file' => $backup_file)), 'backup');
   $olddir = getcwd();
   // we need to do this because some retarded implementations of tar (e.g. SunOS) don't support -C
-  chdir(d()->root . '/sites/' . d()->uri);
+  chdir(d()->site_path);
   if (substr($backup_file, -2) == 'gz') {
     // same as above: some do not support -z
     $command = "tar cpf - . | gzip -c > %s";

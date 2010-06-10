@@ -41,7 +41,7 @@ function drush_provision_drupal_provision_restore_validate($restore_file = null)
 function drush_provision_drupal_pre_provision_restore($restore_file) {
   drush_invoke('provision-backup');
 
-  d()->service('file')->extract(drush_get_option('restore_file'), d()->root . '/sites/' . d()->uri . '.restore') 
+  d()->service('file')->extract(drush_get_option('restore_file'), d()->site_path . '.restore') 
     ->succeed('Successfully extracted the contents of @path')
     ->fail('Failed to extract the contents of @path', 'PROVISION_BACKUP_EXTRACTION_FAILED');
 }
@@ -50,15 +50,15 @@ function drush_provision_drupal_pre_provision_restore($restore_file) {
  * Remove the extracted site directory
  */
 function drush_provision_drupal_pre_provision_restore_rollback() {
-  _provision_recursive_delete(d()->root . '/sites/' . d()->uri . '.restore');
+  _provision_recursive_delete(d()->site_path . '.restore');
 }
 
 /**
  * Switch the restore directories around now that we have the new db installed
  */
 function drush_provision_drupal_provision_restore() {
-  $old = d()->root . '/sites/' . d()->uri . '.restore';
-  $new = d()->root . '/sites/' . d()->uri;
+  $old = d()->site_path . '.restore';
+  $new = d()->site_path;
   d()->service('file')->switch_paths($old, $new)
     ->succeed('Swapping out the @path1 and @path2 directories was successful.')
     ->fail('Swapping the @path1 and @path2 directories has failed.', 'DRUSH_PERM_ERROR');
@@ -76,7 +76,7 @@ function drush_provision_drupal_provision_restore_rollback() {
  * Delete the old site directory and recreate the settings file
  */
 function drush_provision_drupal_post_provision_restore() {
-  _provision_recursive_delete(d()->root . '/sites/' . d()->uri . '.restore');
+  _provision_recursive_delete(d()->site_path . '.restore');
   // This is the actual drupal provisioning requirements. 
   _provision_drupal_create_directories();
   _provision_drupal_create_settings_file();

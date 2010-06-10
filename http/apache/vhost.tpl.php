@@ -29,7 +29,7 @@
 <?php print $extra_config; ?>
 
     # Error handler for Drupal > 4.6.7
-    <Directory "<?php print $this->platform->root; ?>/sites/<?php print $uri; ?>/files">
+    <Directory "<?php print $this->site_path; ?>/files">
       SetHandler This_is_a_Drupal_security_line_do_not_remove
     </Directory>
 

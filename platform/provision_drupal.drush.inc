@@ -105,29 +105,6 @@ function provision_drupal_drush_exit() {
 }
 
 /**
- * Some commands need to have a url to operate on.
- *  This prints out a message to that effect.
- */
-function _provision_drupal_url_required() {
-  if (d()->type === 'platform') {
-    drush_set_error('PROVISION_REQUIRES_URL');
-  }
-}
-
-/**
- * Validate a site exists, ie: has a settings.php file
- *
- * This will return an error for sites that haven't been created yet
- */
-function _provision_drupal_valid_site() {
-  if (d()->type === 'site') {
-    if (!_provision_drupal_site_exists()) {
-      drush_set_error('PROVISION_DRUPAL_SITE_NOT_FOUND');
-    }
-  }
-}
-
-/**
  * Test to see if the site settings.php exists
  *
  * @param url
@@ -136,39 +113,7 @@ function _provision_drupal_valid_site() {
  *   If the file exists, return TRUE, else return FALSE.
  */
 function _provision_drupal_site_exists() {
-  return file_exists('sites/' . drush_get_option('uri') . '/settings.php');
-}
-
-
-/**
- * Validate a site has been installed, by checking it's site.php file. 
- *
- * This will return an error for sites that haven't been installed yet
- */
-function _provision_drupal_valid_installed_site() {
-  if (d()->type === 'site') {
-    if (!_provision_drupal_site_installed()) {
-      drush_set_error('PROVISION_DRUPAL_SITE_NOT_FOUND');
-    }
-  }
-}
-
-function _provision_drupal_valid_not_installed_site() {
-  if (d()->type === 'site') {
-    if (_provision_drupal_site_installed()) {
-      drush_set_error('PROVISION_DRUPAL_SITE_INSTALLED');
-    }
-  }
-}
-
-/**
- * Test to see if the site has a site.php and has it set to 'installed'
- */
-function _provision_drupal_site_installed() {
-  if (_provision_drupal_site_exists()) {
-    return drush_get_option('installed');
-  }
-  return FALSE;
+  return file_exists(d()->site_path . '/settings.php');
 }
 
 /**
@@ -178,7 +123,7 @@ function _provision_drupal_site_installed() {
 function provision_drupal_sync_site() {
   d()->service('file')->sync(d()->root, TRUE);
   if (d()->type === 'site') {
-    d()->service('file')->sync(d()->root . '/sites/' . d()->uri);
+    d()->service('file')->sync(d()->site_path);
   }
 }
 
@@ -203,7 +148,7 @@ class provisionConfig_drupal_settings extends provisionConfig {
   protected $mode = 0440;
 
   function filename() {
-    return $this->root . '/sites/' . $this->uri . '/settings.php';
+    return $this->site_path . '/settings.php';
   }
 
   function process() {
