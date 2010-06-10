@@ -28,7 +28,7 @@ class provisionService_http extends provisionService {
   }
 
   function verify() {
-    switch ($this->server()->type) {
+    switch (d()->type) {
       case 'server':
         $this->create_server_config();
         break;

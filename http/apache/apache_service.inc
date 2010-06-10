@@ -102,7 +102,7 @@ class provisionConfig_apache_platform extends provisionConfig_apache {
   public $description = 'apache platform configuration file';
 
   function filename() {
-    return $this->server->apache_platform_conf_path . '/' . ltrim($this->owner, '@') . '.conf';
+    return $this->apache_platform_conf_path . '/' . ltrim(d()->name, '@') . '.conf';
   }
 
   function process() {
