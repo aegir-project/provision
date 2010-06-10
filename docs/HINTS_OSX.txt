@@ -19,8 +19,7 @@ We reuse the same process describe in that document:
  2. Configure system requirements, which include:
     * create a Aegir user
     * configure Apache, MySQL, DNS, etc
- 3. Install the Aegir files
- 4. Follow the install wizard
+ 3. Run the install script
 
 1. Install software requirements
 ================================
@@ -151,19 +150,24 @@ Shell Commands::
  echo 'export PATH=/opt/local/lib/mysql5/bin:$PATH' >> ~/.profile
  exit
 
-3. Install the Aegir files
-==========================
+3. Run the install script
+=========================
 
 Now follow the instructions of section 3 of INSTALL.txt, except for
-when it tells you to run "su -s /bin/sh aegir -c "sh install.sh.txt"
-do the following instead.
+when it tells you to run "su -s /bin/sh aegir -c "sh install.sh.txt 
+aegir.example.com" do the following instead.
 
 Shell commands::
  su - aegir
  Password: (you know the drill)
- sh /path/to/install.sh.txt
+ sh /path/to/install.sh.txt aegir.example.com
  sudo /usr/sbin/apachectl restart
  exit
 
-Now you really can just follow the rest of INSTALL.txt and it should
-work.
+Be sure to change 'aegir.example.com' to match the URI of your site.
+
+You can append '--client_email=you@example.com' if you wish to receive the
+traditional Drupal 'Welcome' e-mail upon completion of the installation.
+This e-mail address will also be used as the default e-mail address of the
+first user and client in Aegir, but can be changed later.
+

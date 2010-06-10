@@ -19,8 +19,7 @@ We reuse the same process describe in that document:
  2. Configure system requirements, which include:
     * create a Aegir user
     * configure Apache, MySQL, DNS, etc
- 3. Install the Aegir files
- 4. Follow the install wizard
+ 3. Run the install script
 
 1. Install software requirements
 ================================
@@ -72,21 +71,25 @@ MySQL commands::
    IDENTIFIED BY 'aegir_root_password' WITH GRANT OPTION;
  GRANT ALL PRIVILEGES ON `site\_%`.* TO 'aegir_root'@'localhost';
 
-3. Install the Aegir files
-==========================
+3. Run the install script
+=========================
+
+Download the install.sh script per the instructions in Step 3 of the canonical
+INSTALL.txt file, with modifications below.
 
 Shell commands::
  su - aegir
- bash install.sh.txt -w webservd -d /var/aegir
+ bash install.sh.txt aegir.example.com
 
-4. Follow the install wizard
-============================
+Be sure to change 'aegir.example.com' to match the URI of your site.
 
-You should now be in the installation wizard. The wizard is usually
-self-documenting so you should just be able to follow the instructions in the
-wizard to configure Aegir to properly use the webserver and database server.
+You can append '--client_email=you@example.com' if you wish to receive the
+traditional Drupal 'Welcome' e-mail upon completion of the installation.
+This e-mail address will also be used as the default e-mail address of the
+first user and client in Aegir, but can be changed later.
 
-5. Common issues
+
+4. Common issues
 ================
 
 Drush issue
