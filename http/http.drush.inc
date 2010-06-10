@@ -27,6 +27,24 @@ class provisionService_http extends provisionService {
     $this->setProperty('web_maintenence_url', $this->master_url .'/hosting/maintenance');
   }
 
+  function verify() {
+    switch ($this->server()->type) {
+      case 'server':
+        $this->create_server_config();
+        break;
+
+      case 'platform':
+        $this->create_platform_config();
+        break;
+
+      case 'site':
+        $this->create_site_config();
+        break;
+    }
+
+    $this->parse_configs();
+  }
+
   /**
    * Ask the web server to check for and load configuration changes.
    */

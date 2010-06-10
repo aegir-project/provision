@@ -83,6 +83,7 @@ class provisionConfig {
   }
 
   function write() {
+    drush_log(get_class($this));
     $filename = $this->filename();
     // Make directory structure if it does not exist.
     if (!$this->owner()->service('file')->exists(dirname($filename))->status()) {

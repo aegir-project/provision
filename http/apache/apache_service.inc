@@ -40,37 +40,18 @@ class provisionService_http_apache extends provisionService_http {
   }
 
   function create_server_config() {
-    d()->service('file')->create_dir($this->apache_site_conf_path, dt("Virtual host configuration"), 0700);
-    d()->service('file')->create_dir($this->apache_platform_conf_path, dt("Platforms configuration"), 0700);
-    d()->service('file')->create_dir($this->apache_conf_path , dt("Apache configuration"), 0700);
-    d()->service('file')->sync($this->apache_conf_path);
+    $this->server()->service('file')->create_dir($this->apache_site_conf_path, dt("Virtual host configuration"), 0700);
+    $this->server()->service('file')->create_dir($this->apache_platform_conf_path, dt("Platforms configuration"), 0700);
+    $this->server()->service('file')->create_dir($this->apache_conf_path , dt("Apache configuration"), 0700);
+    $this->server()->service('file')->sync($this->apache_conf_path);
 
     $config = new provisionConfig_apache_server($this->context);
     return $config->write();
   }
 
-  
   function delete_server_config() {
     $config = new provisionConfig_apache_server($this->context);
     $config->unlink();
-  }
-
-  function verify() {
-    switch (d()->type) {
-      case 'server':
-        $this->create_server_config();
-        break;
-
-      case 'platform':
-        $this->create_platform_config();
-        break;
-
-      case 'site':
-        $this->create_site_config();
-        break;
-    }
-
-    $this->parse_configs();
   }
 
   function parse_configs() {
@@ -95,7 +76,7 @@ class provisionConfig_apache_server extends provisionConfig_apache {
   public $description = 'apache server configuration file';
 
   function filename() {
-    return $this->config_path . '/' . 'apache.conf';
+    return $this->config_path . '/apache.conf';
   }
 
   function process() {
