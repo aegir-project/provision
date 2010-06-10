@@ -63,6 +63,9 @@ function drush_provision_drupal_provision_migrate($platform) {
   drush_set_option('old_platform', d()->platform->name);
   drush_backend_invoke_args('provision-save', array(d()->name), array('platform' => $platform, 'root' => null, 'uri' => null));
   provision_backend_invoke(d()->name, 'provision-deploy', array(drush_get_option('backup_file')));
+  if (!drush_get_error()) {
+    provision_backend_invoke(d()->name, 'provision-verify');
+  }
 }
 
 /**
