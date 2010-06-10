@@ -1,8 +1,6 @@
 <?php
 
 class provisionService_http_cluster extends provisionService_http {
-  private $servers = array();
-
   static function option_documentation() {
     return array(
       '--cluster_web_servers' => 'server with cluster: comma-separated list of web servers.'
@@ -11,50 +9,39 @@ class provisionService_http_cluster extends provisionService_http {
 
   function init() {
     $this->setProperty('cluster_web_servers', array(), TRUE);
+  }
+
+  function _each_server($method) {
     foreach ($this->cluster_web_servers as $server) {
-      $this->servers[] = d($server);
+      d($server)->service('http')->$method();
     }
   }
 
   function parse_configs() {
-    foreach ($this->servers as $server) {
-      $server->service('http')->parse_configs();
-    }
+    $this->_each_server(__FUNCTION__);
   }
 
   function create_site_config() {
-    foreach ($this->servers as $server) {
-      $server->service('http')->create_site_config();
-    }
+    $this->_each_server(__FUNCTION__);
   }
 
   function delete_site_config() {
-    foreach ($this->servers as $server) {
-      $server->service('http')->delete_site_config();
-    }
+    $this->_each_server(__FUNCTION__);
   }
 
   function create_platform_config() {
-    foreach ($this->servers as $server) {
-      $server->service('http')->create_platform_config();
-    }
+    $this->_each_server(__FUNCTION__);
   }
 
   function delete_platform_config() {
-    foreach ($this->servers as $server) {
-      $server->service('http')->delete_platform_config();
-    }
+    $this->_each_server(__FUNCTION__);
   }
 
   function create_server_config() {
-    foreach ($this->servers as $server) {
-      $server->service('http')->create_server_config();
-    }
+    $this->_each_server(__FUNCTION__);
   }
 
   function delete_server_config() {
-    foreach ($this->servers as $server) {
-      $server->service('http')->delete_server_config();
-    }
+    $this->_each_server(__FUNCTION__);
   }
 }
