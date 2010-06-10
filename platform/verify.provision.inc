@@ -34,7 +34,9 @@ function drush_provision_drupal_provision_verify() {
       $config = new provisionConfig_global_settings(d()->name);
       $config->write();
     }
-    d()->service('file')->create_dir(d()->backup_path, dt('Backup'), 0700);
+    if (d()->name == '@server_localhost') {
+      d()->service('file')->create_dir(d()->backup_path, dt('Backup'), 0700);
+    }
   }
   elseif (d()->type === 'platform') {
     d()->service('file')->writable(d()->root . '/sites')

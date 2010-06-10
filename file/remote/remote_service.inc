@@ -3,10 +3,37 @@
 require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
 class provisionService_file_remote extends provisionService_file {
+  protected $operations = array();
+
   function init() {
     $this->config_path = $this->config_path . '--' . $this->remote_host;
     parent::init();
   }
+
+  function chmod($path, $perms) {
+    $this->_clear_state();
+    $this->tokens = array('@path' => $path, '@perm' => sprintf('%o', $perms));
+    $this->operations[] = array(__FUNCTION__, func_get_args());
+    $this->last_status = TRUE;
+    return $this;
+  }
+
+  function chgrp($path, $gid, $recursive = FALSE) {
+    $this->_clear_state();
+    $this->operations[] = array(__FUNCTION__, func_get_args());
+    $this->tokens = array('@path' => $path, '@gid' => $gid);
+    $this->last_status = TRUE;
+    return $this;
+  }
+
+  function chown($path, $owner, $recursive = FALSE) {
+    $this->_clear_state();
+    $this->tokens = array('@path' => $path, '@uid' => $owner);
+    $this->operations[] = array(__FUNCTION__, func_get_args());
+    $this->last_status = TRUE;
+    return $this;
+  }
+
 
   function sync($path = NULL, $exclude_sites = FALSE) {
     if (is_null($path)) {
