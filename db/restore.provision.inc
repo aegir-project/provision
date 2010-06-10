@@ -11,7 +11,7 @@ function drush_db_pre_provision_restore() {
 }
 
 function drush_db_provision_restore() {
-  d()->service('db')->import_site_database(d()->root . '/sites/' . d()->uri . '.restore/database.sql');
+  d()->service('db')->import_site_database(d()->site_path . '.restore/database.sql');
 }
 
 
@@ -32,7 +32,7 @@ function drush_db_pre_provision_restore_rollback() {
 // Rollback doesn't apply here yet. Unless we trigger a restore of the first dump
 // made. Which could go on infinitely if something is really long.
 function drush_db_post_provision_restore() {
-  d()->service('file')->unlink(d()->root . '/sites/' . d()->uri . '/database.sql')
+  d()->service('file')->unlink(d()->site_path . '/database.sql')
     ->succeed('Removed dump file @path after restoring from it')
     ->fail('Could not remove dump file @path', 'DRUSH_PERM_ERROR');
 

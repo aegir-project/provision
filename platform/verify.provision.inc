@@ -15,9 +15,6 @@ function drush_provision_drupal_provision_verify_validate() {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   }
 
-  // This will not have an effect if you are running it on a platform, just
-  // tests that if a site is provided it is an existing one
-  _provision_drupal_valid_site();
 }
 
 
