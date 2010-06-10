@@ -19,20 +19,17 @@ function drush_provision_drupal_pre_provision_delete($backup_file = NULL) {
 function drush_provision_drupal_provision_delete() {
   if (d()->type === 'site') {
     _provision_recursive_delete(d()->root . '/sites/' . d()->uri);
-    d()->service('file')->sync(d()->root . '/sites/' . d()->uri);
     // we remove the aliases even if redirection is enabled as a precaution
     // if redirection is enabled, keep silent about errors
     _provision_drupal_delete_aliases(drush_get_option('aliases', array(), 'site'), drush_get_option('redirection'));
   }
-  if (d()->type === 'platform') {
+  elseif (d()->type === 'platform') {
     if (provision_drupal_find_sites()) {
       drush_set_error(dt('Existing sites were found on this platform. These sites will need to be deleted before this platform can be deleted.'));
     }
     else {
       _provision_recursive_delete(d()->root);
-      d()->service('file')->sync(d()->root);
     }
   }
+  provision_drupal_sync_site();
 }
-
-

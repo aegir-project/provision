@@ -171,6 +171,10 @@ function _provision_drupal_site_installed() {
   return FALSE;
 }
 
+/**
+ * Sync the current Drupal platform and, if applicable, site. Call after
+ * finishing operations that affect the filesystem.
+ */
 function provision_drupal_sync_site() {
   d()->service('file')->sync(d()->root, TRUE);
   if (d()->type === 'site') {
