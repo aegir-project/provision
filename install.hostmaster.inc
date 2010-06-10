@@ -76,7 +76,7 @@ function drush_provision_hostmaster_install($site) {
     'platform' => $platform_name,
     'db_server' => $server,
     'uri' => $site,
-    'client_email' => drush_get_option('client_email', 'webmaster@example.com'),
+    'client_email' => drush_get_option('client_email', 'webmaster@localhost'),
     'site_port' => drush_get_option('web_port', 80),
     'profile' => 'hostmaster',
   ));
