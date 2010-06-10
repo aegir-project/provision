@@ -20,7 +20,13 @@ class provisionService_http_apache extends provisionService_http {
   }
 
   function create_site_config() {
-    $config = new provisionConfig_apache_site($this->context, drush_get_context('site'));
+    if (d($this->context)->site_enabled) {
+      $config = new provisionConfig_apache_site($this->context, drush_get_context('site'));
+    }
+    else {
+      $config = new provisionConfig_apache_site_disabled($this->context, drush_get_context('site'));
+    }
+
     $config->write();
   }
 
@@ -71,6 +77,9 @@ class provisionConfig_apache extends provisionConfig {
 }
 
 
+/**
+ * Apache server level configuration file class
+ */
 class provisionConfig_apache_server extends provisionConfig_apache {
   public $template = 'server.tpl.php';
   public $description = 'apache server configuration file';
@@ -85,6 +94,9 @@ class provisionConfig_apache_server extends provisionConfig_apache {
   }
 }
 
+/**
+ * Apache platform level configuration file class
+ */
 class provisionConfig_apache_platform extends provisionConfig_apache {
   public $template = 'platform.tpl.php';
   public $description = 'apache platform configuration file';
@@ -99,6 +111,9 @@ class provisionConfig_apache_platform extends provisionConfig_apache {
   }
 }
 
+/** 
+ * Apache site level config class. Virtual host.
+ */
 class provisionConfig_apache_site extends provisionConfig_apache {
   public $template = 'vhost.tpl.php';
   public $description = 'apache site configuration file';
@@ -116,4 +131,12 @@ class provisionConfig_apache_site extends provisionConfig_apache {
     $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_vhost_config', $this->uri, $this->data));
   }
 }
+
+/**
+ * Apache configuration file class for disabled sites.
+ */
+class provisionConfig_apache_site_disabled extends provisionConfig_apache_site {
+  public $template = 'vhost_disabled.tpl.php';
+}
+
 

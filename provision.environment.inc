@@ -433,6 +433,7 @@ class provisionSite extends provisionEnvironment {
     $this->root = $this->platform->root;
 
     $this->setProperty('uri');
+    $this->setProperty('site_enabled', true);
     $this->setProperty('language', 'en');
     $this->setProperty('site_port', 80);
     $this->setProperty('client_email');

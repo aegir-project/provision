@@ -60,7 +60,7 @@
   $conf['cache'] = 1;
   $conf['clean_url'] = 1;
 
-  <?php if ($this->site_offline) : ?>
+  <?php if (!$this->site_enabled) : ?>
     $conf['site_offline'] = 1;
   <?php endif ?>
 
