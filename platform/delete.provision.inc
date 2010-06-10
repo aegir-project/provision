@@ -1,12 +1,5 @@
 <?php
 
-
-function drush_provision_drupal_provision_delete_validate($backup_file = NULL) {
-  if (d()->type === 'site') {
-    _provision_drupal_valid_site();
-  }
-}
-
 /**
  * Before starting to delete the site, make a backup
  */
@@ -30,7 +23,6 @@ function drush_provision_drupal_provision_delete() {
     // we remove the aliases even if redirection is enabled as a precaution
     // if redirection is enabled, keep silent about errors
     _provision_drupal_delete_aliases(drush_get_option('aliases', array(), 'site'), drush_get_option('redirection'));
-    drush_set_option('installed', FALSE, 'site');
   }
   if (d()->type === 'platform') {
     if (provision_drupal_find_sites()) {
