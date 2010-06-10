@@ -76,11 +76,11 @@ function drush_provision_hostmaster_install($site) {
     'platform' => $platform_name,
     'db_server' => $server,
     'uri' => $site,
-    'client_email' => drush_get_option('client_email', 'webmaster@localhost'),
+    'client_email' => drush_get_option('client_email', 'webmaster@example.com'),
     'site_port' => drush_get_option('web_port', 80),
     'profile' => 'hostmaster',
   ));
-  provision_backend_invoke($site_name, 'provision-install');
+  $data = provision_backend_invoke($site_name, 'provision-install');
   provision_backend_invoke($site_name, 'provision-verify');
 
   drush_print("Initializing the hosting system");

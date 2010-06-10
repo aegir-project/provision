@@ -199,13 +199,13 @@ class provisionService_file extends provisionService {
 
     $func = ($recursive) ? array($this, '_chgrp_recursive') : 'chgrp';
     if ($group = provision_posix_groupname($gid)) {
-      if (provision_user_in_group(drush_get_option('script_user'), $gid)) {
+      if (provision_user_in_group($this->script_user, $gid)) {
         if (!call_user_func($func, $path, $group)) {
           $this->tokens['@reason'] = dt("chgrp to @group failed on @path", array('@group' => $group, '@path' => $path));
         }
       }
       else {
-        $this->tokens['@reason'] = dt("@user is not in @group group", array("@user" => drush_get_option('script_user'), "@group" => $group));
+        $this->tokens['@reason'] = dt("@user is not in @group group", array("@user" => $this->script_user, "@group" => $group));
       }
     }
     elseif (!@call_user_func($func, $path, $gid)) { # try to change the group anyways
@@ -362,7 +362,7 @@ class provisionService_file extends provisionService {
     }
 
     if ($exists) {
-      $this->chown($path, drush_get_option('script_user'))
+      $this->chown($path, $this->script_user)
         ->succeed($name . ' ownership of @path has been changed to @uid.')
         ->fail($name . ' ownership of @path could not be changed to @uid.', 'DRUSH_PERM_ERROR');
 

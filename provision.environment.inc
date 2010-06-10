@@ -45,6 +45,25 @@ function & d($name = NULL, $root_object = FALSE) {
 }
 
 /**
+ * Simple access layer for drush_sitealias_get_record.
+ *
+ * Everytime sitealiases are fetched a lot of processing happens,
+ * but if the file doesnt exist yet there's a whole lot of unnecesary
+ * stuff happening. 
+ *
+ * We cache the result locally here.
+ */
+function provision_sitealias_get_record($name) {
+  static $cache = array();
+
+  if (!isset($cache[$name])) {
+    $cache[$name] = drush_sitealias_get_record($name);
+  }
+
+  return $cache[$name];
+}
+
+/**
  * Create a new environment object and cache it in the d() static cache function.
  */
 function provision_environment_factory($name) {
@@ -52,7 +71,7 @@ function provision_environment_factory($name) {
 
   $type = 'server';
 
-  $record = drush_sitealias_get_record($name);
+  $record = provision_sitealias_get_record($name);
   $options = array_merge(drush_get_context('stdin'), drush_get_context('options'));
 
   if (isset($record['context_type'])) {
@@ -93,7 +112,7 @@ class provisionEnvironment {
    */
   function __get($name) {
     if ($name == 'options') {
-      return array_merge(drush_sitealias_get_record($this->name), array_filter(drush_get_context('stdin')), array_filter(drush_get_context('options')));
+      return array_merge(provision_sitealias_get_record($this->name), array_filter(drush_get_context('stdin')), array_filter(drush_get_context('options')));
     }
     if (array_key_exists($name, $this->properties)) {
       if (isset($this->oid_map[$name]) && !empty($this->properties[$name])) {
