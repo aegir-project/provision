@@ -84,7 +84,7 @@ function drush_provision_pre_hostmaster_migrate($site, $platform) {
 }
 
 function drush_provision_hostmaster_migrate($site, $platform) {
-  provision_backend_invoke(drush_get_option('site_name'), 'provision-migrate', drush_get_option('new_platform'));
+  provision_backend_invoke(drush_get_option('site_name'), 'provision-migrate', array(drush_get_option('new_platform')));
 }
 
 function drush_provision_post_hostmaster_migrate($site, $platform) {
