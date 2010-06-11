@@ -4,9 +4,9 @@
  * @file install the hostmaster system
  */
 
-function drush_provision_hostmaster_install($site) {
+function drush_provision_hostmaster_install($site = NULL) {
   if (!$site) {
-    return drush_set_error('SITE_MISSING', dt('You need to specify the FQDN of the hostmaster install'));
+    $site = drush_prompt(dt("Aegir domain name"), "aegir.example.com");
   }
 
   $version = drush_get_option('version', 'HEAD');
@@ -69,6 +69,9 @@ function drush_provision_hostmaster_install($site) {
   ));
   provision_backend_invoke($platform_name, 'provision-verify');
 
+  if (!drush_get_option('client_email')) {
+    $client_email = drush_prompt(dt("Admin user e-mail"), "webmaster@localhost");
+  }
 
   $site_name = '@hostmaster';
   drush_backend_invoke_args("provision-save", array($site_name), array(
@@ -76,7 +79,7 @@ function drush_provision_hostmaster_install($site) {
     'platform' => $platform_name,
     'db_server' => $server,
     'uri' => $site,
-    'client_email' => drush_get_option('client_email', 'webmaster@localhost'),
+    'client_email' => $client_email,
     'site_port' => drush_get_option('web_port', 80),
     'profile' => 'hostmaster',
   ));
