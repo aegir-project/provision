@@ -10,9 +10,9 @@ class provisionService_http_apache extends provisionService_http {
 
   function init() {
     parent::init();
-    $this->apache_site_conf_path = $this->config_path . '/vhost.d';
-    $this->apache_platform_conf_path = $this->config_path . '/platform.d';
-    $this->apache_conf_path = $this->config_path . '/apache.d';
+    $this->apache_site_conf_path = d()->config_path . '/vhost.d';
+    $this->apache_platform_conf_path = d()->web_server->config_path . '/platform.d';
+    $this->apache_conf_path = d()->config_path . '/apache.d';
 
     // Commands
     $this->setProperty('restart_cmd', _provision_default_restart_cmd());
@@ -46,10 +46,10 @@ class provisionService_http_apache extends provisionService_http {
   }
 
   function create_server_config() {
-    $this->server()->service('file')->create_dir($this->apache_site_conf_path, dt("Virtual host configuration"), 0700);
-    $this->server()->service('file')->create_dir($this->apache_platform_conf_path, dt("Platforms configuration"), 0700);
-    $this->server()->service('file')->create_dir($this->apache_conf_path , dt("Apache configuration"), 0700);
-    $this->server()->service('file')->sync($this->apache_conf_path);
+    d()->service('file')->create_dir($this->apache_site_conf_path, dt("Virtual host configuration"), 0700);
+    d()->service('file')->create_dir($this->apache_platform_conf_path, dt("Platforms configuration"), 0700);
+    d()->service('file')->create_dir($this->apache_conf_path , dt("Apache configuration"), 0700);
+    d()->service('file')->sync($this->apache_conf_path);
 
     $config = new provisionConfig_apache_server($this->context);
     return $config->write();
@@ -85,7 +85,7 @@ class provisionConfig_apache_server extends provisionConfig_apache {
   public $description = 'apache server configuration file';
 
   function filename() {
-    return $this->config_path . '/apache.conf';
+    return d()->config_path . '/apache.conf';
   }
 
   function process() {
@@ -119,7 +119,7 @@ class provisionConfig_apache_site extends provisionConfig_apache {
   public $description = 'apache site configuration file';
 
   function filename() {
-    return $this->platform->server->apache_site_conf_path . '/' . $this->uri . '_' . $this->site_port;
+    return $this->apache_site_conf_path . '/' . $this->uri . '_' . $this->site_port;
   }
 
   function process() {

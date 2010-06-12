@@ -5,11 +5,6 @@ require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 class provisionService_file_remote extends provisionService_file {
   protected $operations = array();
 
-  function init() {
-    $this->config_path = $this->config_path . '--' . $this->remote_host;
-    parent::init();
-  }
-
   function chmod($path, $perms) {
     parent::chmod($path, $perms);
     $this->operations[] = array(__FUNCTION__, func_get_args());
@@ -36,12 +31,13 @@ class provisionService_file_remote extends provisionService_file {
     if ($this->exists($path)->status()) {
       $options = array(
         'relative' => TRUE,
+        'omit-dir-times' => TRUE,
         'delete' => TRUE,
       );
       if ($exclude_sites) {
         $options['exclude-sites'] = TRUE;
       }
-      if (drush_core_call_rsync(escapeshellarg($path), escapeshellarg($this->script_user . '@' . $this->remote_host . ':/'), $options)) {
+      if (drush_core_call_rsync(escapeshellarg($path), escapeshellarg($this->script_user . '@' . $this->remote_host . ':/'), $options, TRUE, FALSE)) {
         drush_log(dt('@path has been synced to remote server @remote_host.', array('@path' => $path, '@remote_host' => $this->remote_host)));
       }
       else {
