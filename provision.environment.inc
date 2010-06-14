@@ -386,7 +386,7 @@ class provisionServer extends provisionEnvironment {
         $path = $this->config_path;
       }
 
-      if (provision_path()->exists($path)->status()) {
+      if (provision_file()->exists($path)->status()) {
         $options = array(
           'relative' => TRUE,
           'omit-dir-times' => TRUE,
