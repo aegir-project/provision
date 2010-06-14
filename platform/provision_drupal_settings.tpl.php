@@ -83,6 +83,6 @@
   }
 
   # Additional host wide configuration settings. Useful for safely specifying configuration settings.
-  if (file_exists('<?php print $this->platform->server->config_path  ?>/includes/global.inc')) {
-    include_once('<?php print $this->platform->server->config_path  ?>/includes/global.inc');
+  if (file_exists('<?php print $this->platform->server->include_path  ?>/global.inc')) {
+    include_once('<?php print $this->platform->server->include_path  ?>/global.inc');
   }

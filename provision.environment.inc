@@ -277,6 +277,8 @@ class provisionServer extends provisionEnvironment {
     $this->setProperty('aegir_root', '/var/aegir');
     $this->backup_path = $this->aegir_root . '/backups';
     $this->config_path = $this->aegir_root . '/config/' . ltrim($this->name, '@');
+    $this->include_path = $this->aegir_root . '/config/includes';
+
     $this->setProperty('master_url');
     $this->load_services();
   }

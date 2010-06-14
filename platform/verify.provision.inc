@@ -24,14 +24,14 @@ function drush_provision_drupal_provision_verify_validate() {
 function drush_provision_drupal_provision_verify() {
   if (d()->type === 'server') {
     provision_file()->create_dir(d()->config_path, dt('Provision configuration'), 0711);
-    provision_file()->create_dir(d()->config_path . '/includes', dt('Provision PHP configuration'), 0711);
-    if (!provision_file()->exists(d()->config_path . '/includes/global.inc')->succeed('Global configuration file exists')->status()) {
+    provision_file()->create_dir(d()->include_path, dt('Provision PHP configuration'), 0711);
+    if (!provision_file()->exists(d()->include_path . '/global.inc')->succeed('Global configuration file exists')->status()) {
       // Create an empty global.inc so the include doesn't fail with
       // open_basedir restrictions
       $config = new provisionConfig_global_settings(d()->name);
       $config->write();
     }
-    d()->service('http')->sync(d()->config_path . '/includes');
+    d()->service('http')->sync(d()->include_path);
 
     if (d()->name == '@server_localhost') {
       provision_file()->create_dir(d()->backup_path, dt('Backup'), 0700);
@@ -61,7 +61,7 @@ class provisionConfig_global_settings extends provisionConfig {
   public $description = 'Global settings.php file';
 
   function filename() {
-    return $this->config_path . '/includes/global.inc';
+    return $this->include_path . '/global.inc';
   }
 
   function process() {
