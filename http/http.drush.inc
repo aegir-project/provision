@@ -20,11 +20,11 @@ class provisionService_http extends provisionService {
   function init() {
     parent::init();
     // System account
-    $this->setProperty('web_group', _provision_default_web_group());
+    $this->server->setProperty('web_group', _provision_default_web_group());
 
     // Redirection urls
-    $this->setProperty('web_disable_url', $this->master_url .'/hosting/disabled');
-    $this->setProperty('web_maintenence_url', $this->master_url .'/hosting/maintenance');
+    $this->server->setProperty('web_disable_url', $this->server->master_url .'/hosting/disabled');
+    $this->server->setProperty('web_maintenence_url', $this->server->master_url .'/hosting/maintenance');
   }
 
   function verify() {

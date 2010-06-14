@@ -10,13 +10,13 @@ class provisionService_http_apache extends provisionService_http {
 
   function init() {
     parent::init();
-    $this->apache_site_conf_path = $this->config_path . '/vhost.d';
-    $this->apache_platform_conf_path = $this->config_path . '/platform.d';
-    $this->apache_conf_path = $this->config_path . '/apache.d';
+    $this->server->apache_site_conf_path = $this->server->config_path . '/vhost.d';
+    $this->server->apache_platform_conf_path = $this->server->config_path . '/platform.d';
+    $this->server->apache_conf_path = $this->server->config_path . '/apache.d';
 
     // Commands
-    $this->setProperty('restart_cmd', _provision_default_restart_cmd());
-    $this->setProperty('web_ports', array(80));
+    $this->server->setProperty('restart_cmd', _provision_default_restart_cmd());
+    $this->server->setProperty('web_ports', array(80));
   }
 
   function create_site_config() {
@@ -46,10 +46,10 @@ class provisionService_http_apache extends provisionService_http {
   }
 
   function create_server_config() {
-    provision_file()->create_dir($this->apache_site_conf_path, dt("Virtual host configuration"), 0700);
-    provision_file()->create_dir($this->apache_platform_conf_path, dt("Platforms configuration"), 0700);
-    provision_file()->create_dir($this->apache_conf_path , dt("Apache configuration"), 0700);
-    $this->sync($this->apache_conf_path);
+    provision_file()->create_dir($this->server->apache_site_conf_path, dt("Virtual host configuration"), 0700);
+    provision_file()->create_dir($this->server->apache_platform_conf_path, dt("Platforms configuration"), 0700);
+    provision_file()->create_dir($this->server->apache_conf_path , dt("Apache configuration"), 0700);
+    $this->sync($this->server->apache_conf_path);
 
     $config = new provisionConfig_apache_server($this->context);
     return $config->write();
@@ -63,7 +63,7 @@ class provisionService_http_apache extends provisionService_http {
   function parse_configs() {
     // This is required to be configurable, due to the fact that different
     // hosts might need to do this differently.
-    if ($this->server()->shell_exec($this->restart_cmd)) {
+    if ($this->server->shell_exec($this->server->restart_cmd)) {
       drush_log(dt('Apache has been restarted'));
     }
     else {

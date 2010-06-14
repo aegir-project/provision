@@ -83,7 +83,7 @@ class provisionService_db_mysql extends provisionService_db_pdo {
   }
   
   function grant_host(provisionServer $server) {
-    $server->shell_exec('mysql -u intntnllyInvalid -h ' . escapeshellarg($this->remote_host));
+    $server->shell_exec('mysql -u intntnllyInvalid -h ' . escapeshellarg($this->server->remote_host));
     if (preg_match("/Access denied for user 'intntnllyInvalid'@'([^']*)'/", implode('', drush_shell_exec_output()), $match)) {
       return $match[1];
     }

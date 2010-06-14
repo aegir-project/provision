@@ -8,11 +8,11 @@ class provisionService_http_cluster extends provisionService_http {
   }
 
   function init() {
-    $this->setProperty('cluster_web_servers', array(), TRUE);
+    $this->server->setProperty('cluster_web_servers', array(), TRUE);
   }
 
   function _each_server($method) {
-    foreach ($this->cluster_web_servers as $server) {
+    foreach ($this->server->cluster_web_servers as $server) {
       d($server)->service('http')->$method();
     }
   }

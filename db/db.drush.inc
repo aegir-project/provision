@@ -37,8 +37,8 @@ class provisionService_db extends provisionService {
   }
 
   function init() {
-    $this->setProperty('master_db');
-    $this->creds = array_map('urldecode', parse_url($this->master_db));
+    $this->server->setProperty('master_db');
+    $this->creds = array_map('urldecode', parse_url($this->server->master_db));
 
     return TRUE;
   }
@@ -197,11 +197,11 @@ class provisionService_db extends provisionService {
 
     //TODO - this should not be here at all
     $creds['db_type'] = drush_set_option('db_type', $db_type, 'site');
-    $creds['db_host'] = drush_set_option('db_host', $this->remote_host, 'site');
+    $creds['db_host'] = drush_set_option('db_host', $this->server->remote_host, 'site');
     $creds['db_passwd'] = drush_set_option('db_passwd', provision_password(), 'site');
     $creds['db_name'] = drush_set_option('db_name', $this->suggest_db_name(), 'site');
     $creds['db_user'] = drush_set_option('db_user', $creds['db_name'], 'site');
-    $creds['db_grant_host'] = $this->grant_host(d()->service('http')->server());
+    $creds['db_grant_host'] = $this->grant_host(d()->service('http')->server);
 
     return $creds;
   }
@@ -214,7 +214,7 @@ class provisionService_db extends provisionService {
       $creds[$key] = drush_get_option($key, '', 'site');
     }
 
-    $creds['db_grant_host'] = $this->grant_host(d()->service('http')->server());
+    $creds['db_grant_host'] = $this->grant_host(d()->service('http')->server);
     return $creds;
   }
 
