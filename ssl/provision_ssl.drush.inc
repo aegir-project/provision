@@ -57,7 +57,7 @@ class provisionConfig_ssl_vhost extends provisionConfig {
  */
 function provision_ssl_provision_apache_delete_vhost($options) {
   if ($options['ssl'] && $options['ssl_redirect']) {
-    d()->service('file')->unlink(drush_get_option('vhost_path') . '/' . drush_get_option('uri') . '_80')
+    provision_file()->unlink(drush_get_option('vhost_path') . '/' . drush_get_option('uri') . '_80')
       ->succeed('Failed deleting redirection vhost.');
   }
 }

@@ -16,7 +16,7 @@ function drush_db_provision_deploy_rollback() {
 // Rollback doesn't apply here yet. Unless we trigger a deploy of the first dump
 // made. Which could go on infinitely if something is really long.
 function drush_db_post_provision_deploy() {
-  d()->service('file')->unlink(d()->site_path . '/database.sql')
+  provision_file()->unlink(d()->site_path . '/database.sql')
     ->succeed('Removed dump file @path after restoring from it')
     ->fail('Could not remove dump file @path', 'DRUSH_PERM_ERROR');
 }

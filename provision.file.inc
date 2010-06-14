@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file Filesystem access module.
  *
@@ -8,14 +7,19 @@
  * helper method, which will take care of verification and any error logging
  * required.
  */
+include_once('provision.inc');
 
-include_once(dirname(__FILE__) . '/../provision.service.inc');
+function provision_file() {
+  static $instance = null;
 
-function file_provision_services() {
-  return array('file' => 'local');
+  if (is_null($instance)) {
+    $instance = new provisionFileSystem();
+  }
+
+  return $instance;
 }
 
-class provisionService_file extends provisionService {
+class provisionFileSystem extends provisionChainedState {
   /**
    * Determine if $path can be written to.
    *
@@ -199,13 +203,13 @@ class provisionService_file extends provisionService {
 
     $func = ($recursive) ? array($this, '_chgrp_recursive') : 'chgrp';
     if ($group = provision_posix_groupname($gid)) {
-      if (provision_user_in_group($this->script_user, $gid)) {
+      if (provision_user_in_group(get_current_user(), $gid)) {
         if (!call_user_func($func, $path, $group)) {
           $this->tokens['@reason'] = dt("chgrp to @group failed on @path", array('@group' => $group, '@path' => $path));
         }
       }
       else {
-        $this->tokens['@reason'] = dt("@user is not in @group group", array("@user" => $this->script_user, "@group" => $group));
+        $this->tokens['@reason'] = dt("@user is not in @group group", array("@user" => get_current_user(), "@group" => $group));
       }
     }
     elseif (!@call_user_func($func, $path, $gid)) { # try to change the group anyways
@@ -362,7 +366,7 @@ class provisionService_file extends provisionService {
     }
 
     if ($exists) {
-      $this->chown($path, $this->script_user)
+      $this->chown($path, get_current_user())
         ->succeed($name . ' ownership of @path has been changed to @uid.')
         ->fail($name . ' ownership of @path could not be changed to @uid.', 'DRUSH_PERM_ERROR');
 
@@ -452,17 +456,5 @@ class provisionService_file extends provisionService {
     return $this->_call_recursive('chgrp', $path, $group);
   }
 
-  /**
-   * If necessary, sync files out to a remote server.
-   *
-   * @param $path
-   *   Full path to sync.
-   * @param $exclude_sites
-   *   Exclude sites/*, except sites/*.
-   */
-  function sync($path = NULL, $exclude_sites = FALSE) {
-    if (is_null($path)) {
-      $path = $this->config_path;
-    }
-  }
+
 }

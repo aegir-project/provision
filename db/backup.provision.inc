@@ -5,7 +5,7 @@ function drush_db_pre_provision_backup() {
 }
 
 function drush_db_pre_provision_backup_rollback() {
-  d()->service('file')->unlink(d()->site_path . '/database.sql')
+  provision_file()->unlink(d()->site_path . '/database.sql')
     ->succeed('Deleted mysql dump from sites directory')
     ->fail('Could not delete mysql dump from sites directory');
 }

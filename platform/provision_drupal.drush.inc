@@ -121,9 +121,9 @@ function _provision_drupal_site_exists() {
  * finishing operations that affect the filesystem.
  */
 function provision_drupal_sync_site() {
-  d()->service('file')->sync(d()->root, TRUE);
+  d()->service('http')->sync(d()->root, TRUE);
   if (d()->type === 'site') {
-    d()->service('file')->sync(d()->site_path);
+    d()->service('http')->sync(d()->site_path);
   }
 }
 
@@ -202,22 +202,22 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
 
   foreach ($mkdir as $path => $perm) {
     if (!is_dir($path)) {
-      d()->service('file')->mkdir($path) 
+      provision_file()->mkdir($path) 
         ->succeed('Created <code>@path</code>')
         ->fail('Could not create <code>@path</code>', 'DRUSH_PERM_ERROR');
     }
 
-    d()->service('file')->chmod($path, $perm, TRUE)
+    provision_file()->chmod($path, $perm, TRUE)
       ->succeed('Changed permissions of <code>@path</code> to @perm')
       ->fail('Could not change permissions <code>@path</code> to @perm');
   }
   foreach ($chown as $path => $owner) {
-    d()->service('file')->chown($path, $owner, TRUE)
+    provision_file()->chown($path, $owner, TRUE)
       ->succeed('Changed ownership of <code>@path</code> to @uid')
       ->fail('Could not change ownership <code>@path</code>', 'DRUSH_PERM_ERROR');
   }
   foreach ($chgrp as $path => $group) {
-    d()->service('file')->chgrp($path, $group, TRUE)
+    provision_file()->chgrp($path, $group, TRUE)
       ->succeed('Changed group ownership of <code>@path</code> to @gid')
       ->fail('Could not change group ownership <code>@path</code> to @gid');
   }
@@ -339,7 +339,7 @@ function _provision_drupal_maintain_aliases() {
       }
       foreach($aliases as $alias) {
         if (trim($alias)) {
-          d()->service('file')->symlink(d()->uri, d()->root . '/sites/' . $alias)
+          provision_file()->symlink(d()->uri, d()->root . '/sites/' . $alias)
             ->succeed('Created symlink for alias @target')
             ->fail('Could not create symlink for alias @target');
         }
@@ -363,7 +363,7 @@ function _provision_drupal_delete_aliases($aliases, $silent = false) {
   }
   foreach ($aliases as $alias) {
     if ($alias = trim($alias)) {
-      d()->service('file')->unlink(d()->root . '/sites/' . $alias)
+      provision_file()->unlink(d()->root . '/sites/' . $alias)
         ->succeed('Removed symlink for alias @path')
         ->fail($error);
     }

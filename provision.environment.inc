@@ -275,8 +275,8 @@ class provisionServer extends provisionEnvironment {
     $this->setProperty('remote_host', 'localhost');
     $this->setProperty('script_user', get_current_user());
     $this->setProperty('aegir_root', '/var/aegir');
-    $this->setProperty('backup_path', $this->aegir_root . '/backups');
-    $this->setProperty('config_path', $this->aegir_root . '/config');
+    $this->backup_path = $this->aegir_root . '/backups';
+    $this->config_path = $this->aegir_root . '/config/' . ltrim($this->name, '@');
     $this->setProperty('master_url');
     $this->load_services();
   }
@@ -368,6 +368,48 @@ class provisionServer extends provisionEnvironment {
     else {
       return drush_shell_exec('ssh ' . drush_get_option('ssh-options', '-o PasswordAuthentication=no') . ' %s %s', $this->script_user . '@' . $this->remote_host, escapeshellcmd($command));
     }
+  }
+
+  /**
+   * If necessary, sync files out to a remote server.
+   *
+   * @param $path
+   *   Full path to sync.
+   * @param $exclude_sites
+   *   Exclude sites/*, except sites/*.
+   */
+  function sync($path = NULL, $exclude_sites = FALSE) {
+    if (!drush_is_local_host($this->remote_host)) {
+      if (is_null($path)) {
+        $path = $this->config_path;
+      }
+
+      if (provision_path()->exists($path)->status()) {
+        $options = array(
+          'relative' => TRUE,
+          'omit-dir-times' => TRUE,
+          'delete' => TRUE,
+        );
+        if ($exclude_sites) {
+          $options['exclude-sites'] = TRUE;
+        }
+        if (drush_core_call_rsync(escapeshellarg($path), escapeshellarg($this->script_user . '@' . $this->remote_host . ':/'), $options, TRUE, FALSE)) {
+          drush_log(dt('@path has been synced to remote server @remote_host.', array('@path' => $path, '@remote_host' => $this->remote_host)));
+        }
+        else {
+          drush_set_error('PROVISION_FILE_SYNC_FAILED', dt('Files could not be synced to remote server @remote_host. Changes might not be available until this has been done. (error: %msg)', array('@path' => $path, '@remote_host' => $this->remote_host, '%msg' => join("\n", drush_shell_exec_output()))));
+        }
+      }
+      else { // File does not exist, remove it.
+        if ($this->server()->shell_exec('rm -rf ' . escapeshellarg($path))) {
+          drush_log(dt('@path has been removed from remote server @remote_host.', array('@path' => $path, '@remote_host' => $this->remote_host)));
+        }
+        else {
+          drush_set_error('PROVISION_FILE_SYNC_FAILED', dt('Files could not be removed from remote server @remote_host. Changes might not be available until this has been done. (error: %msg)', array('@path' => $path, '@remote_host' => $this->remote_host, '%msg' => join("\n", drush_shell_exec_output()))));
+        }
+      }
+    }
+
   }
 }
 
