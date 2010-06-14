@@ -7,7 +7,6 @@ function http_provision_services() {
   return array('http' => NULL);
 }
 
-
 class provisionService_http extends provisionService {
   static function option_documentation() {
     return array(

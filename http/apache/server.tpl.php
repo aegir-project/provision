@@ -1,7 +1,7 @@
 # Aegir web server configuration file
 
-<?php if (is_array(d()->web_ports)) :
-  foreach (d()->web_ports as $web_port) :?>
+<?php if (is_array($this->web_ports)) :
+  foreach ($this->web_ports as $web_port) :?>
   NameVirtualHost *:<?php print $web_port; ?>
 
   <VirtualHost *:<?php print $web_port; ?>>

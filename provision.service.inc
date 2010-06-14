@@ -9,7 +9,6 @@ class provisionService extends provisionChainedState {
   protected $server = '@server_localhost';
   public $context;
 
-
   function __construct($server) {
     $this->server = d($server);
   }

@@ -19,29 +19,41 @@ class provisionService_http_apache extends provisionService_http {
     $this->server->setProperty('web_ports', array(80));
   }
 
+  /**
+   * Pass some extra paths to the config file classes, which specify the server relative paths
+   * for use in the filename() methods.
+   */
+  function config_data() {
+    return array(
+      'apache_site_conf_path' => $this->server->apache_site_conf_path,
+      'apache_platform_conf_path' => $this->server->apache_platform_conf_path,
+      'apache_conf_path' => $this->server->apache_conf_path
+    );
+  }
+
   function create_site_config() {
     if (d($this->context)->site_enabled) {
-      $config = new provisionConfig_apache_site($this->context, drush_get_context('site'));
+      $config = new provisionConfig_apache_site($this->context, $this->config_data() + drush_get_context('site'));
     }
     else {
-      $config = new provisionConfig_apache_site_disabled($this->context, drush_get_context('site'));
+      $config = new provisionConfig_apache_site_disabled($this->context, $this->config_data() + drush_get_context('site'));
     }
 
     $config->write();
   }
 
   function delete_site_config() {
-    $config = new provisionConfig_apache_site($this->context);
+    $config = new provisionConfig_apache_site($this->context, $this->config_data());
     $config->unlink();
   }
 
   function create_platform_config() {
-    $config = new provisionConfig_apache_platform($this->context);
+    $config = new provisionConfig_apache_platform($this->context, $this->config_data());
     return $config->write();
   }
 
   function delete_platform_config() {
-    $config = new provisionConfig_apache_platform($this->context);
+    $config = new provisionConfig_apache_platform($this->context, $this->config_data());
     $config->unlink();
   }
 
@@ -51,12 +63,12 @@ class provisionService_http_apache extends provisionService_http {
     provision_file()->create_dir($this->server->apache_conf_path , dt("Apache configuration"), 0700);
     $this->sync($this->server->apache_conf_path);
 
-    $config = new provisionConfig_apache_server($this->context);
+    $config = new provisionConfig_apache_server($this->context, $this->config_data());
     return $config->write();
   }
 
   function delete_server_config() {
-    $config = new provisionConfig_apache_server($this->context);
+    $config = new provisionConfig_apache_server($this->context, $this->config_data());
     $config->unlink();
   }
 
@@ -75,7 +87,6 @@ class provisionService_http_apache extends provisionService_http {
 class provisionConfig_apache extends provisionConfig {
 
 }
-
 
 /**
  * Apache server level configuration file class
@@ -102,7 +113,7 @@ class provisionConfig_apache_platform extends provisionConfig_apache {
   public $description = 'apache platform configuration file';
 
   function filename() {
-    return $this->apache_platform_conf_path . '/' . ltrim(d()->name, '@') . '.conf';
+    return $this->data['apache_platform_conf_path'] . '/' . ltrim($this->owner->name, '@') . '.conf';
   }
 
   function process() {
@@ -119,7 +130,7 @@ class provisionConfig_apache_site extends provisionConfig_apache {
   public $description = 'apache site configuration file';
 
   function filename() {
-    return $this->apache_site_conf_path . '/' . $this->uri . '_' . $this->site_port;
+    return $this->data['apache_site_conf_path'] . '/' . $this->uri . '_' . $this->site_port;
   }
 
   function process() {

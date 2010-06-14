@@ -16,8 +16,8 @@ class provisionConfig {
   protected $group = NULL;
 
   function __get($name) {
-    if ($this->owner) {
-      return d($this->owner)->$name;
+    if (isset($this->owner)) {
+      return $this->owner->$name;
     }
   }
   
@@ -28,11 +28,7 @@ class provisionConfig {
     if (sizeof($data)) {
       $this->data = $data;
     }
-    $this->owner = $owner;
-  }
-
-  function owner() {
-    return d($this->owner);
+    $this->owner = d($owner);
   }
 
   /**
