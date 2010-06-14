@@ -147,17 +147,14 @@ class provisionEnvironment {
    * Check the properties array if the property does not exist in the class proper.
    */
   function __isset($name) {
-    if (property_exists($this->properties, $name) || property_exists($this, $name)) {
-      return TRUE;
-    }
-    return FALSE;
+    return isset($this->properties[$name]) || property_exists($this, $name);
   }
 
   /**
    * Remove the value from the properties array if the property does not exist in the class proper.
    */
   function __unset($name) {
-    if (property_exists($this->properties, $name)) {
+    if (isset($this->properties[$name])) {
       unset($this->properties[$name]);
     }
     elseif (property_exists($this, $name)) {
