@@ -69,6 +69,12 @@ function drush_provision_drupal_provision_migrate($platform) {
 }
 
 /**
+ * Something went wrong
+ */
+function drush_provision_drupal_provision_migrate_rollback($platform) {
+  drush_backend_invoke_args('provision-save', array(d()->name), array('platform' => drush_get_option('old_platform'), 'root' => null, 'uri' => null));
+}
+/**
  * Delete the old site directory and recreate the settings file
  */
 function drush_provision_drupal_post_provision_migrate() {
@@ -77,6 +83,7 @@ function drush_provision_drupal_post_provision_migrate() {
   // if redirection is enabled, keep silent about errors
   _provision_drupal_delete_aliases(drush_get_option('aliases', array()), drush_get_option('redirection'));
   _provision_recursive_delete(d()->site_path);
+  d()->service('http')->sync(d()->site_path);
 }
 
 

@@ -403,7 +403,7 @@ class provisionServer extends provisionEnvironment {
         }
       }
       else { // File does not exist, remove it.
-        if ($this->server()->shell_exec('rm -rf ' . escapeshellarg($path))) {
+        if ($this->shell_exec('rm -rf ' . escapeshellarg($path))) {
           drush_log(dt('@path has been removed from remote server @remote_host.', array('@path' => $path, '@remote_host' => $this->remote_host)));
         }
         else {
