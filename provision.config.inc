@@ -113,14 +113,14 @@ class provisionConfig {
             ->succeed('Change group ownership of @path to @gid')
             ->fail('Could not change group ownership of @path to @gid');
         }
-        #provision_file()->sync($this->filename());
+        $this->owner->sync($filename);
       }
     }
   }
 
   function unlink() {
     provision_file()->unlink($this->filename())->status();
-    #provision_file()->sync($this->filename());
+    $this->owner->sync($this->filename());
   }
 }
 
@@ -169,11 +169,11 @@ class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
    * @param $options
    *   Array of string option names to save.
    */
-  function __construct($owner, $options = array()) {
-    $this->owner = $owner;
+  function __construct($owner, $data = array()) {
+    parent::__construct($owner, $data);
     $this->data = array(
       'aliasname' => ltrim($owner, '@'),
-      'options' => $options,
+      'options' => $data,
     );
   }
 
