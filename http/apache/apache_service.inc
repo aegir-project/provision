@@ -85,7 +85,15 @@ class provisionService_http_apache extends provisionService_http {
 }
 
 class provisionConfig_apache extends provisionConfig {
+  function write() {
+    parent::write();
+    $this->owner->service('http')->sync($this->filename());
+  }
 
+  function unlink() {
+    parent::unlink();
+    $this->owner->service('http')->sync($this->filename());
+  }
 }
 
 /**

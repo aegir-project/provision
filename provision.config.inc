@@ -113,14 +113,12 @@ class provisionConfig {
             ->succeed('Change group ownership of @path to @gid')
             ->fail('Could not change group ownership of @path to @gid');
         }
-        $this->owner->sync($filename);
       }
     }
   }
 
   function unlink() {
     provision_file()->unlink($this->filename())->status();
-    $this->owner->sync($this->filename());
   }
 }
 
