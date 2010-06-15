@@ -56,4 +56,11 @@ class provisionService_http_cluster extends provisionService_http {
     $args = func_get_args();
     $this->_each_server(__FUNCTION__, $args);
   }
+
+  function grant_server_list() {
+    return array_merge(
+      array_map('d', $this->server->cluster_web_servers),
+      array(d($this->context)->platform->server)
+    );
+  }
 }
