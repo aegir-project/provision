@@ -23,18 +23,22 @@ function drush_provision_drupal_provision_verify_validate() {
  */
 function drush_provision_drupal_provision_verify() {
   if (d()->type === 'server') {
-    provision_file()->create_dir(d()->config_path, dt('Provision configuration'), 0711);
-    provision_file()->create_dir(d()->include_path, dt('Provision PHP configuration'), 0711);
-    if (!provision_file()->exists(d()->include_path . '/global.inc')->succeed('Global configuration file exists')->status()) {
-      // Create an empty global.inc so the include doesn't fail with
-      // open_basedir restrictions
-      $config = new provisionConfig_global_settings(d()->name);
-      $config->write();
-    }
-    d()->service('http')->sync(d()->include_path);
 
+    provision_file()->create_dir(d()->config_path, dt('Provision configuration'), 0711);
     if (d()->name == '@server_localhost') {
       provision_file()->create_dir(d()->backup_path, dt('Backup'), 0700);
+      provision_file()->create_dir(d()->include_path, dt('Provision PHP configuration'), 0711);
+      if (!provision_file()->exists(d()->include_path . '/global.inc')->succeed('Global configuration file exists')->status()) {
+        // Create an empty global.inc so the include doesn't fail with
+        // open_basedir restrictions
+        $config = new provisionConfig_global_settings(d()->name);
+        $config->write();
+      }
+    }
+    else {
+      if (provision_file()->exists(d()->include_path)) {
+        d()->service('http')->sync(d()->include_path);
+      }
     }
   }
   elseif (d()->type === 'platform') {
