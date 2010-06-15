@@ -111,15 +111,9 @@ class provisionService_db extends provisionService {
       return FALSE;
     }
 
-    drush_log(dt("Granting privileges to %user@%client on %database", array('%user' => $db_user, '%client' => $db_grant_host, '%database' => $db_name)));
-    if (!$this->grant($db_name, $db_user, $db_passwd, $db_grant_host)) {
-      drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not create database user @user", array('@user' => $db_user)));
-    }
-    // todo use d()->platform->server once hostmaster sets this to a real value
-    $local_grant_host = $this->grant_host(d('@server_localhost'));
-    if ($local_grant_host !== $db_grant_host) {
-      drush_log(dt("Granting privileges to %user@%client on %database", array('%user' => $db_user, '%client' => $local_grant_host, '%database' => $db_name)));
-      if (!$this->grant($db_name, $db_user, $db_passwd, $local_grant_host)) {
+    foreach ($this->grant_host_list() as $db_grant_host) {
+      drush_log(dt("Granting privileges to %user@%client on %database", array('%user' => $db_user, '%client' => $db_grant_host, '%database' => $db_name)));
+      if (!$this->grant($db_name, $db_user, $db_passwd, $db_grant_host)) {
         drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not create database user @user", array('@user' => $db_user)));
       }
     }
@@ -157,9 +151,11 @@ class provisionService_db extends provisionService {
      return FALSE;
     }
     
-    drush_log(dt("Revoking privileges of %user@%client from %database", array('%user' => $db_user, '%client' => $db_grant_host, '%database' => $db_name)));
-    if (!$this->revoke($db_name, $db_user, $db_grant_host)) {
-      drush_log(dt("Failed to revoke user privileges"), 'warning');
+    foreach ($this->grant_host_list() as $db_grant_host) {
+      drush_log(dt("Revoking privileges of %user@%client from %database", array('%user' => $db_user, '%client' => $db_grant_host, '%database' => $db_name)));
+      if (!$this->revoke($db_name, $db_user, $db_grant_host)) {
+        drush_log(dt("Failed to revoke user privileges"), 'warning');
+      }
     }
   }
 
@@ -201,7 +197,6 @@ class provisionService_db extends provisionService {
     $creds['db_passwd'] = drush_set_option('db_passwd', provision_password(), 'site');
     $creds['db_name'] = drush_set_option('db_name', $this->suggest_db_name(), 'site');
     $creds['db_user'] = drush_set_option('db_user', $creds['db_name'], 'site');
-    $creds['db_grant_host'] = $this->grant_host(d()->service('http')->server);
 
     return $creds;
   }
@@ -214,7 +209,6 @@ class provisionService_db extends provisionService {
       $creds[$key] = drush_get_option($key, '', 'site');
     }
 
-    $creds['db_grant_host'] = $this->grant_host(d()->service('http')->server);
     return $creds;
   }
 
@@ -250,6 +244,17 @@ class provisionService_db extends provisionService {
     return FALSE;
   }
 
+  /**
+   * Return a list of hosts, as seen by the db server, which should be granted
+   * access to the site database.
+   */
+  function grant_host_list() {
+    return array_unique(array_map(array($this, 'grant_host'), d($this->context)->service('http')->grant_server_list()));
+  }
+
+  /**
+   * Return a hostname suitable for database grants from a server object.
+   */
   function grant_host(provisionServer $server) {
     return $server->remote_host;
   }

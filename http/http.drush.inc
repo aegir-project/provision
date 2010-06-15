@@ -97,4 +97,14 @@ class provisionService_http extends provisionService {
   function delete_server_config() {
     return TRUE;
   }
+
+  /**
+   * Return a list of servers that will need database access.
+   */
+  function grant_server_list() {
+    return array(
+      $this->server,
+      d($this->context)->platform->server,
+    );
+  }
 }
