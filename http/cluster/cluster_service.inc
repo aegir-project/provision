@@ -11,14 +11,10 @@ class provisionService_http_cluster extends provisionService_http {
     $this->server->setProperty('cluster_web_servers', array(), TRUE);
   }
 
-  function _each_server($method) {
+  function _each_server($method, $args = array()) {
     foreach ($this->server->cluster_web_servers as $server) {
-      d($server)->service('http')->$method();
+      call_user_func_array(array(d($server)->service('http'), $method), $args);
     }
-  }
-
-  function _one_server($method) {
-    d($this->cluster_web_servers[0])->service('http')->$method();
   }
 
   function parse_configs() {
@@ -26,26 +22,31 @@ class provisionService_http_cluster extends provisionService_http {
   }
 
   function create_site_config() {
-    $this->_one_server(__FUNCTION__);
+    $this->_each_server(__FUNCTION__);
   }
 
   function delete_site_config() {
-    $this->_one_server(__FUNCTION__);
+    $this->_each_server(__FUNCTION__);
   }
 
   function create_platform_config() {
-    $this->_one_server(__FUNCTION__);
+    $this->_each_server(__FUNCTION__);
   }
 
   function delete_platform_config() {
-    $this->_one_server(__FUNCTION__);
+    $this->_each_server(__FUNCTION__);
   }
 
   function create_server_config() {
-    $this->_one_server(__FUNCTION__);
+    $this->_each_server(__FUNCTION__);
   }
 
   function delete_server_config() {
-    $this->_one_server(__FUNCTION__);
+    $this->_each_server(__FUNCTION__);
+  }
+
+  function sync() {
+    $args = func_get_args();
+    $this->_each_server(__FUNCTION__, $args);
   }
 }
