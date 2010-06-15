@@ -59,14 +59,18 @@ class provisionService_http_apache extends provisionService_http {
 
   function create_server_config() {
     provision_file()->create_dir($this->server->apache_site_conf_path, dt("Virtual host configuration"), 0700);
-    $this->sync($this->server->apache_site_conf_path);
     provision_file()->create_dir($this->server->apache_platform_conf_path, dt("Platforms configuration"), 0700);
-    $this->sync($this->server->apache_platform_conf_path);
     provision_file()->create_dir($this->server->apache_conf_path , dt("Apache configuration"), 0700);
     $this->sync($this->server->apache_conf_path);
 
     $config = new provisionConfig_apache_server($this->context, $this->config_data());
-    return $config->write();
+    $config->write();
+
+
+    // Create a symlink to the site specific apache config in the top level config directory of each server.
+    // This way you can still include the same file across all servers.
+
+    $this->server->shell_exec(sprintf('ln -sf %s %s', escapeshellarg($this->server->config_path . '/apache.conf'), escapeshellarg($this->server->aegir_root . '/config/apache.conf')));
   }
 
   function delete_server_config() {
