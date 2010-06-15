@@ -74,6 +74,7 @@ function drush_provision_drupal_provision_migrate($platform) {
 function drush_provision_drupal_provision_migrate_rollback($platform) {
   drush_backend_invoke_args('provision-save', array(d()->name), array('platform' => drush_get_option('old_platform'), 'root' => null, 'uri' => null));
 }
+
 /**
  * Delete the old site directory and recreate the settings file
  */

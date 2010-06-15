@@ -19,7 +19,12 @@ class provisionService_http extends provisionService {
   function init() {
     parent::init();
     // System account
-    $this->server->setProperty('web_group', _provision_default_web_group());
+    if ($this->server->name == '@server_localhost') {
+      $this->server->setProperty('web_group', _provision_default_web_group());
+    }
+    else {
+      $this->server->web_group = d('@server_localhost')->web_group;
+    }
 
     // Redirection urls
     $this->server->setProperty('web_disable_url', $this->server->master_url .'/hosting/disabled');

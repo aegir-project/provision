@@ -20,11 +20,7 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
   $server = '@server_localhost';
   drush_backend_invoke_args("provision-save", array($server), array(
     'context_type' => 'server',
-   // files
-    'file_service_type' => 'local',
     'aegir_root' => dirname(rtrim($data['config_path'], '/')),
-    'config_path' => $data['config_path'],
-    'backup_path' => $data['backup_path'],
     'script_user' => $data['script_user'],
    // apache 
     'http_service_type' => 'apache',

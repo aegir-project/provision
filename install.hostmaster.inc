@@ -41,10 +41,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   drush_backend_invoke_args("provision-save", array($server), array(
     'context_type' => 'server',
    // files
-    'file_service_type' => 'local',
     'aegir_root' => $aegir_root,
-    'config_path' => $aegir_root . '/config',
-    'backup_path' => $aegir_root . '/backups',
     'script_user' => drush_get_option('script_user', 'aegir'),
    // apache 
     'http_service_type' => 'apache',
@@ -52,7 +49,6 @@ function drush_provision_hostmaster_install($site = NULL) {
    // mysql
     'db_service_type' => 'mysql',
     'master_db' => $data['master_db'],
-
   ));
   provision_backend_invoke($server, 'provision-verify');
 
