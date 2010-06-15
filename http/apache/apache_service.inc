@@ -25,6 +25,7 @@ class provisionService_http_apache extends provisionService_http {
    */
   function config_data() {
     return array(
+      'server' => $this->server,
       'apache_site_conf_path' => $this->server->apache_site_conf_path,
       'apache_platform_conf_path' => $this->server->apache_platform_conf_path,
       'apache_conf_path' => $this->server->apache_conf_path
@@ -82,10 +83,10 @@ class provisionService_http_apache extends provisionService_http {
     // This is required to be configurable, due to the fact that different
     // hosts might need to do this differently.
     if ($this->server->shell_exec($this->server->restart_cmd)) {
-      drush_log(dt('Apache has been restarted'));
+      drush_log(dt('Apache on %server has been restarted', array('%server' => $this->server->remote_host)));
     }
     else {
-      drush_log(dt('Web server could not be restarted. Changes might not be available until this has been done. (error: %msg)', array('%msg' => join("\n", drush_shell_exec_output()))), 'warning');
+      drush_log(dt('Web server %server could not be restarted. Changes might not be available until this has been done. (error: %msg)', array('%server' => $this->server->remote_host, '%msg' => join("\n", drush_shell_exec_output()))), 'warning');
     }
   }
 }
@@ -93,12 +94,12 @@ class provisionService_http_apache extends provisionService_http {
 class provisionConfig_apache extends provisionConfig {
   function write() {
     parent::write();
-    $this->owner->service('http')->sync($this->filename());
+    $this->data['server']->sync($this->filename());
   }
 
   function unlink() {
     parent::unlink();
-    $this->owner->service('http')->sync($this->filename());
+    $this->data['server']->sync($this->filename());
   }
 }
 
@@ -110,7 +111,7 @@ class provisionConfig_apache_server extends provisionConfig_apache {
   public $description = 'apache server configuration file';
 
   function filename() {
-    return $this->config_path . '/apache.conf';
+    return $this->data['server']->config_path . '/apache.conf';
   }
 
   function process() {

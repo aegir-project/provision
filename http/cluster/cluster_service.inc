@@ -20,7 +20,7 @@ class provisionService_http_cluster extends provisionService_http {
 
   function _each_server($method, $args = array()) {
     foreach ($this->server->cluster_web_servers as $server) {
-      call_user_func_array(array(d($server)->service('http'), $method), $args);
+      call_user_func_array(array(d($server)->service('http', $this->context), $method), $args);
     }
   }
 
