@@ -45,5 +45,13 @@ class provisionService_null extends provisionService {
   function __call($name, $args) {
     return false;
   }
+
+  /**
+   * Null services do not synch files to the remote server,
+   * because they have no associated config files.
+   */
+  function sync() {
+    return null;
+  }
 }
 
