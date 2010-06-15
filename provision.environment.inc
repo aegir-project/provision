@@ -331,7 +331,7 @@ class provisionServer extends provisionEnvironment {
    * Retrieve a service of a specific type from the environment.
    */
   function service($service, $name = null) {
-    $this->services[$service]->context = ($name) ? $name : $this->name;
+    $this->services[$service]->setContext(($name) ? $name : $this->name);
     return $this->services[$service];
   }
 

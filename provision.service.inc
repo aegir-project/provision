@@ -13,6 +13,10 @@ class provisionService extends provisionChainedState {
     $this->server = d($server);
   }
 
+  function setContext($name) {
+    $this->context = $name;
+  }
+
   function sync($path = NULL, $exclude_sites = FALSE) {
     return $this->server->sync($path, $exclude_sites);
   }
