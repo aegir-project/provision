@@ -138,7 +138,7 @@ class provisionService_dns extends provisionService {
    * This creates a zone, which mostly consists of adding the SOA record.
    */
   function create_zone($fqdn) {
-    $this->create_record('@', $this->soa_string($fqdn), 'SOA');
+    $this->edit_record('@', $this->soa_string($fqdn), 'SOA');
   }
 
   /**
@@ -149,9 +149,28 @@ class provisionService_dns extends provisionService {
   }
 
   /**
-   * This creates a record (RR) in a zonefile.
+   * This adds a (potentially) duplicate record (RR) in a zonefile
+   *
+   * This doesn't check if the record already exists, it just adds it
+   * to the end of the file.
    */
-  function create_record($name, $destination, $type = 'A', $pri = '') {
+  function add_record($zonename, $name, $destination, $type = 'A') {
+    return FALSE;
+  }
+
+  /**
+   * This creates or replaces a record (RR) in a zonefile.
+   */
+  function edit_record($zonename, $name, $destination, $type = 'A') {
+    return FALSE;
+  }
+
+  /**
+   * This removes a record matching the name and destination.
+   *
+   * If destination or type is null, they are disregarded in the pattern.
+   */
+  function delete_record($zonename, $name, $destination = null, $type = null) {
     return FALSE;
   }
 
@@ -166,7 +185,7 @@ class provisionService_dns extends provisionService {
     if (!$this->zone_exists($parts[0])) {
       $this->create_zone($parts[0]);
     }
-    $this->create_record($parts[1]);
+    $this->edit_record($parts[1]);
   }
 
   /**
