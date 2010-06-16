@@ -56,6 +56,13 @@ class provisionService_dns_bind extends provisionService_dns {
     $config->write();
   }
 
+  function create_zone($zone) {
+    if (!$this->zone_exists($zone)) {
+      $this->create_zonefile($zone, drush_get_option('zone_ttl', $this->server->dns_default_ttl));
+    }
+    parent::create_zone($zone);
+  }
+
 }
 
 // XXX: this is an almost extact copy of provisionConfig_apache, we should probably refactor
