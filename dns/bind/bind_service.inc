@@ -41,52 +41,79 @@ class provisionService_dns_bind extends provisionService_dns {
     }
   }
   
-  function create_zone_config() {
-    $config = new provisionConfig_bind_master($this->context, $this->config_data() + drush_get_context('zone'));
-    $config->write();
+  function create_zone($name) {
+    $zone = new provisionConfig_bind_zone($this->context, array('name' => $name, 'ttl' => drush_get_option('zone_ttl', $this->server->dns_default_ttl)));
+    $zone->add_line_if_not_exists($this->zone_declaration(), '/zone\s*"'. $name . '"/');
+    $zone->write();
+    parent::create_zone($name);
   }
 
-  function create_zone($zone) {
-    if (!$this->zone_exists($zone)) {
-      $this->create_zonefile($zone, drush_get_option('zone_ttl', $this->server->dns_default_ttl));
-      bind_add_line_if_not_exists($this->server->config_path . '/bind.conf', $this->zone_declaration($zone), '/zone\s*"'. $zone . '"/');
+  function add_record($zonename, $name, $destination, $type = 'A') {
+    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename, 'ttl' => drush_get_option('zone_ttl', $this->server->dns_default_ttl)));
+    if ($type == 'SOA') { // only one SOA per file
+      return $zone->add_line_if_not_exists($name . ' IN SOA ' . $destination, 'SOA');
+    } else {
+      return $zone->add_line($name . "\tIN\t" . $type . "\t" . $destination);
     }
-    parent::create_zone($zone);
   }
 
-  function zone_declaration($zone) {
-    return 'zone "' . $zone . '" { type master; file "' . $this->zone_master_path . '/' . $zone . '"; allow-query { any; }; };';
+  function edit_record($zonename, $name, $destination, $type = 'A') {
+    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename, 'ttl' => drush_get_option('zone_ttl', $this->server->dns_default_ttl)));
+    if ($type == 'SOA') { // only one SOA per file
+      return $zone->add_line_if_not_exists($name . ' IN SOA ' . $destination, 'SOA');
+    } else {
+      return $zone->replace_line($name . "\tIN\t" . $type . "\t" . $destination, "/^$name\s\s*IN\s\s*$type\s\s*");
+    }
   }
 
 }
 
 
-/**
- * add a line to a file if the file (or pattern) is not in the file
- * already
- *
- * This is bound to be called repeatedly so it needs to be fast.
- */
-function bind_add_line_if_not_exists($file, $line, $pattern = null) {
-  // XXX: we should do exponential backoff here to limit contention
-  flock($file);
-  $fd = fopen($file);
-  $line = trim($line);
-  if (is_null($pattern)) {
-    $pattern = '/' . $line '/';
-  }
-  $found = FALSE;
-  while ($l = fgets($fd)) {
-    if (preg_match($pattern, $l)) {
-      $found = TRUE;
-      break;
-    }
-  }
-  if (!$found) {
-    fseek($fd, SEEK_END);
-    fwrite($fd, $line . "\n");
-  }
-  fclose($fd);
-  return $found;
-}
 
+class provisionConfig_bind_zone extends provisionConfig {
+  public $template = 'zone.tpl.php';
+
+  function filename() {
+    return $this->server->zone_master_path . '/' . $this->name;
+  }
+
+  function exists() {
+    return provision_file()->exists($this->filename());
+  }
+
+  /**
+   * add a line to a file if the file (or pattern) is not in the file
+   * already
+   *
+   * This is bound to be called repeatedly so it needs to be fast.
+   */
+  function add_line_if_not_exists($line, $pattern = null) {
+    $file = $this->filename();
+    // XXX: we should do exponential backoff here to limit contention
+    flock($file);
+    $fd = fopen($file);
+    $line = trim($line);
+    if (is_null($pattern)) {
+      $pattern = '/' . $line '/';
+    }
+    $found = FALSE;
+    while ($l = fgets($fd)) {
+      if (preg_match($pattern, $l)) {
+        $found = TRUE;
+        break;
+      }
+    }
+    if (!$found) {
+      fseek($fd, SEEK_END);
+      fwrite($fd, $line . "\n");
+    }
+    fclose($fd);
+    return $found;
+  }
+
+  function zone_declaration() {
+    return 'zone "' . $this->data['name'] . '" { type master; file "' . $this->filename() . '"; allow-query { any; }; };';
+  }
+
+  
+}
