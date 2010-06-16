@@ -70,6 +70,23 @@ class provisionService_dns_bind extends provisionService_dns {
     }
   }
 
+  function delete_record($zonename, $name, $destination = null, $type = null) {
+    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
+    $pattern = "/^$name\s\s*IN\s\s*";
+    if (is_null($type)) {
+      $pattern .= "\w\w*";
+    } else {
+      $pattern .= $type;
+    }
+    $pattern .= "\s\s*";
+    if (!is_null($destination)) {
+      $pattern .= $destination;
+      $pattern .= '$';
+    }
+    $pattern .= '/';
+    return $zone->delete_line($pattern);
+  }
+
 }
 
 
