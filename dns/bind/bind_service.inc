@@ -26,18 +26,8 @@ class provisionService_dns_bind extends provisionService_dns {
     );
   }
 
-  function create_server_config() {
+  function verify() {
     provision_file()->create_dir($this->server->bind_conf_path, dt("Bind configuration"), 0700);
-    $this->sync($this->server->bind_conf_path);
-
-    $config = new provisionConfig_bind_server($this->context, $this->config_data());
-    $config->write();
-
-  }
-
-  function delete_server_config() {
-    $config = new provisionConfig_bind_server($this->context, $this->config_data());
-    $config->unlink();
   }
 
   function commit() {
@@ -98,19 +88,5 @@ function bind_add_line_if_not_exists($file, $line, $pattern = null) {
   }
   fclose($fd);
   return $found;
-}
-
-/**
- * Bind server-level configuration file
- *
- * This file needs to be included in the global bind configuration file, and Aegir will take it from there
- */
-class provisionConfig_bind_server extends provisionConfig {
-  public $template = 'server.tpl.php';
-  public $description = 'bind server configuration file';
-
-  function filename() {
-    return $this->data['server']->config_path . '/bind.conf';
-  }
 }
 
