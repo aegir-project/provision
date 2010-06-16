@@ -21,7 +21,7 @@ function drush_provision_drupal_provision_backup_validate($backup_file = NULL) {
    }
 
   // This is the actual drupal provisioning requirements. 
-  if (!is_dir(drush_get_option('backup_path'))) {
+  if (!is_dir(d()->platform->server->backup_path)) {
     drush_set_error('PROVISION_BACKUP_PATH_NOT_FOUND');
   }
 
