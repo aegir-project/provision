@@ -1,23 +1,23 @@
-<VirtualHost *:<?php print $site_port; ?>>
-    <?php if ($site_mail) : ?>
-      ServerAdmin <?php  print $site_mail; ?> 
+<VirtualHost *:<?php print $this->site_port; ?>>
+    <?php if ($this->site_mail) : ?>
+      ServerAdmin <?php  print $this->site_mail; ?> 
     <?php endif;?>
 
-    <?php if (is_array($aliases) && count($aliases)): ?>
-      ServerName <?php print array_pop($aliases); ?>
+    <?php if (is_array($this->aliases) && count($this->aliases)): ?>
+      ServerName <?php print array_pop($this->aliases); ?>
     
-      <?php if (count($aliases)): ?>
-        ServerAlias <?php print join(" ", $aliases); ?>
+      <?php if (count($this->aliases)): ?>
+        ServerAlias <?php print join(" ", $this->aliases); ?>
       <?php endif; ?>
     <?php else:
     # this should never happen and has the potential of creating an infinite redirection loop
      ?>
-      ServerName <?php print $uri ?>
+      ServerName <?php print $this->uri ?>
     <?php endif; ?>
 
 <?php if ($ssl_redirect): ?>
-    RedirectMatch permanent ^(.*) https://<?php print $uri ?>$1
+    RedirectMatch permanent ^(.*) https://<?php print $this->uri ?>$1
 <?php else: ?>
-    RedirectMatch permanent ^(.*) http://<?php print $uri ?>$1
+    RedirectMatch permanent ^(.*) http://<?php print $this->uri ?>$1
 <?php endif; ?>
 </VirtualHost>

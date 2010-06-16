@@ -16,8 +16,8 @@
 
   SetEnv db_host  <?php print urlencode($db_host); ?>
 
-<?php if (!$redirection && is_array($aliases)) :
-  foreach ($aliases as $alias_url) :
+<?php if (!$this->redirection && is_array($this->aliases)) :
+  foreach ($this->aliases as $alias_url) :
   if (trim($alias_url)) : ?>
   ServerAlias <?php print $alias_url; ?> 
 
@@ -36,6 +36,6 @@
 </VirtualHost>
 
 <?php
-if ($redirection) {
-  include('vhost_redirect.tpl.php');
+if ($this->redirection) {
+  require(dirname(__FILE__) . '/http/apache/vhost_redirect.tpl.php');
 }
