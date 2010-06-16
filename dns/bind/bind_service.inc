@@ -70,7 +70,16 @@ class provisionService_dns_bind extends provisionService_dns {
 
 }
 
+
+/**
+ * add a line to a file if the file (or pattern) is not in the file
+ * already
+ *
+ * This is bound to be called repeatedly so it needs to be fast.
+ */
 function bind_add_line_if_not_exists($file, $line, $pattern = null) {
+  // XXX: we should do exponential backoff here to limit contention
+  flock($file);
   $fd = fopen($file);
   $line = trim($line);
   if (is_null($pattern)) {
