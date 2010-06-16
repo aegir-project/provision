@@ -101,6 +101,13 @@ class provisionService_dns extends provisionService {
   }
 
   /**
+   * This returns the number of records in the zone.
+   */
+  function count_records($zone, $include = null, $exclude = null) {
+    return FALSE;
+  }
+
+  /**
    * Guess in which zone we should create the record
    *
    * This function will examine the existing zones to find to which
@@ -135,6 +142,13 @@ class provisionService_dns extends provisionService {
   }
 
   /**
+   * This completely drops a zone.
+   */
+  function delete_zone($fqdn) {
+    return FALSE;
+  }
+
+  /**
    * This creates a record (RR) in a zonefile.
    */
   function create_record($name, $destination, $type = 'A', $pri = '') {
@@ -149,7 +163,9 @@ class provisionService_dns extends provisionService {
    */
   function create_host($host) {
     $parts = $this->guess_zone($host);
-    $this->create_zone($parts[0]);
+    if (!$this->zone_exists($parts[0])) {
+      $this->create_zone($parts[0]);
+    }
     $this->create_record($parts[1]);
   }
 
@@ -161,7 +177,10 @@ class provisionService_dns extends provisionService {
   function delete_host($host) {
     $parts = $this->guess_zone($host);
     $this->delete_record($parts[1]);
-    $this->delete_zone($parts[0]);
+    if ($this->count_records(null, array('NS', 'SOA'))) {
+      $this->delete_zone($parts[0]);
+    }
+
   }
 
   /**
