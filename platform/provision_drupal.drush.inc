@@ -157,7 +157,7 @@ class provisionConfig_drupal_settings extends provisionConfig {
     }
 
     $this->data['extra_config'] = "# Extra configuration from modules:\n";
-    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_drupal_config', $this->data['uri'], $this->data));
+    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_drupal_config', d()->uri, $this->data));
 
     $this->group = $this->platform->server->web_group;
   }
