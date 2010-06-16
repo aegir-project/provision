@@ -61,13 +61,11 @@ function drush_provision_drupal_provision_install_rollback() {
   }
 }
 
-
 /**
  * Finish the installation, regenerate the caches on the site so that
  * any changes to things such as available modules/ themes can take affect.
  */
 function drush_provision_drupal_post_provision_install() {
-  drush_set_option('aliases', drush_get_option('aliases'), 'site');
   drush_set_option('installed', TRUE, 'site');
   _provision_drupal_rebuild_caches();
   drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');

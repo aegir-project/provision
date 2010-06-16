@@ -416,7 +416,6 @@ class provisionServer extends provisionEnvironment {
         }
       }
     }
-
   }
 }
 
@@ -461,6 +460,7 @@ class provisionSite extends provisionEnvironment {
       '--site_port' => 'site: port the site is hosted on; default 80',
       '--language' => 'site: site language; default en',
       '--aliases' => 'site: comma-separated URIs',
+      '--redirection' => 'site: boolean for whether --aliases should redirect; default false',
       '--client_email' => 'site: email for the site owner',
       '--profile' => 'site: Drupal profile to use; default default',
     );
@@ -487,6 +487,7 @@ class provisionSite extends provisionEnvironment {
     $this->setProperty('site_port', 80);
     $this->setProperty('client_email');
     $this->setProperty('aliases', array(), TRUE);
+    $this->setProperty('redirection', FALSE);
     $this->setProperty('db_server', '@server_localhost');
     $this->is_oid('db_server');
 

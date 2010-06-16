@@ -77,9 +77,8 @@ function drush_provision_drupal_pre_provision_deploy_rollback() {
 }
 
 function drush_provision_drupal_provision_deploy() {
-  _provision_drupal_maintain_aliases(d()->uri);
+  _provision_drupal_maintain_aliases();
 }
-
 
 function drush_provision_drupal_post_provision_deploy() {
   provision_prepare_environment();
@@ -92,7 +91,5 @@ function drush_provision_drupal_post_provision_deploy() {
     drush_include_engine('drupal', 'deploy');
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
     _provision_drupal_rebuild_caches();
-    drush_set_option('aliases', drush_get_option('aliases'), 'site'); 
-    drush_set_option('redirection', drush_get_option('redirection'), 'site');
   }
 }

@@ -82,7 +82,7 @@ function drush_provision_drupal_post_provision_migrate() {
   drush_set_option('installed', FALSE);
   // we remove the aliases even if redirection is enabled as a precaution
   // if redirection is enabled, keep silent about errors
-  _provision_drupal_delete_aliases(drush_get_option('aliases', array()), drush_get_option('redirection'));
+  _provision_drupal_delete_aliases(d()->aliases);
   _provision_recursive_delete(d()->site_path);
   d()->service('http')->sync(d()->site_path);
 }

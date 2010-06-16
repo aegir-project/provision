@@ -78,8 +78,6 @@ class provisionConfig_global_settings extends provisionConfig {
 function drush_provision_drupal_post_provision_verify() {
   if (d()->type === 'site') {
     _provision_drupal_rebuild_caches();
-    drush_set_option('aliases', drush_get_option('aliases'), 'site');
-    drush_set_option('redirection', drush_get_option('redirection'), 'site');
     drush_set_option('installed', TRUE, 'site');
   }
 }
