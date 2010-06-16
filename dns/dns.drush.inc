@@ -115,6 +115,32 @@ class provisionService_dns extends provisionService {
     }
   }
 
+  function soa_string($name) {
+    $string = $name . ". "; # the FQDN
+    $string .= drush_get_option('zone_hostmaster', 'hostmaster.'. $name . '.'); # the email
+    $string .= " ( ";
+    $string .= drush_get_option('zone_serial', $this->increment_serial()) . " ";
+    $string .= drush_get_option('zone_refresh', $this->server->dns_default_refresh) . " ";
+    $string .= drush_get_option('zone_retry', $this->server->dns_default_retry) . " ";
+    $string .= drush_get_option('zone_expire', $this->server->dns_default_expire) . " ";
+    $string .= drush_get_option('zone_negativettl', $this->server->dns_default_negativettl) . " ";
+    $string .= " ) ";
+  }
+
+  /**
+   * This creates a zone, which mostly consists of adding the SOA record.
+   */
+  function create_zone($fqdn) {
+    $this->create_record('@', $this->soa_string($fqdn), 'SOA');
+  }
+
+  /**
+   * This creates a record (RR) in a zonefile.
+   */
+  function create_record($name, $destination, $type = 'A', $pri = '') {
+    return FALSE;
+  }
+
   /** 
    * Create a host in DNS.
    *
