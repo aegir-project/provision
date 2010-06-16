@@ -14,7 +14,7 @@ class provisionService_dns_bind extends provisionService_dns {
 
   function init() {
     parent::init();
-    $this->server->bind_conf_path = $this->server->config_path . '/bind.d';
+    $this->server->bind_conf_path = $this->server->config_path . '/bind.d/';
     $this->server->bind_zone_master_path = $this->server->config_path . '/zones/master';
     $this->server->setProperty('bind_restart_cmd', _bind_default_restart_cmd());
   }
@@ -59,23 +59,36 @@ class provisionService_dns_bind extends provisionService_dns {
   function create_zone($zone) {
     if (!$this->zone_exists($zone)) {
       $this->create_zonefile($zone, drush_get_option('zone_ttl', $this->server->dns_default_ttl));
+      bind_add_line_if_not_exists($this->server->config_path . '/bind.conf', $this->zone_declaration($zone), '/zone\s*"'. $zone . '"/');
     }
     parent::create_zone($zone);
   }
 
+  function zone_declaration($zone) {
+    return 'zone "' . $zone . '" { type master; file "' . $this->zone_master_path . '/' . $zone . '"; allow-query { any; }; };';
+  }
+
 }
 
-// XXX: this is an almost extact copy of provisionConfig_apache, we should probably refactor
-class provisionConfig_bind extends provisionConfig {
-  function write() {
-    parent::write();
-    $this->data['server']->sync($this->filename());
+function bind_add_line_if_not_exists($file, $line, $pattern = null) {
+  $fd = fopen($file);
+  $line = trim($line);
+  if (is_null($pattern)) {
+    $pattern = '/' . $line '/';
   }
-
-  function unlink() {
-    parent::unlink();
-    $this->data['server']->sync($this->filename());
+  $found = FALSE;
+  while ($l = fgets($fd)) {
+    if (preg_match($pattern, $l)) {
+      $found = TRUE;
+      break;
+    }
   }
+  if (!$found) {
+    fseek($fd, SEEK_END);
+    fwrite($fd, $line . "\n");
+  }
+  fclose($fd);
+  return $found;
 }
 
 /**
@@ -83,7 +96,7 @@ class provisionConfig_bind extends provisionConfig {
  *
  * This file needs to be included in the global bind configuration file, and Aegir will take it from there
  */
-class provisionConfig_bind_server extends provisionConfig_bind {
+class provisionConfig_bind_server extends provisionConfig {
   public $template = 'server.tpl.php';
   public $description = 'bind server configuration file';
 
@@ -92,14 +105,3 @@ class provisionConfig_bind_server extends provisionConfig_bind {
   }
 }
 
-/**
- * Bind configuration snippet to include the master zonefiles
- */
-class provisionConfig_bind_master extends provisionConfig_bind {
-  public $template = 'master.tpl.php';
-  public $description = 'bind master configuration file include';
-
-  function filename() {
-    return $this->data['bind_conf_path'] . $this->fqdn;
-  }
-}
