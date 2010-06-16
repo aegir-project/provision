@@ -1,0 +1,6 @@
+To test this, drush provision-save @server_alias --dns_service_type=bind
+
+then to call stuff:
+
+d()->service('dns')->METHOD()
+
