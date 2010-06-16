@@ -40,7 +40,7 @@ class provisionService_dns_bind extends provisionService_dns {
     $config->unlink();
   }
 
-  function parse_configs() {
+  function commit() {
     // This is required to be configurable, due to the fact that different
     // hosts might need to do this differently.
     if ($this->server->shell_exec($this->server->bind_restart_cmd)) {
