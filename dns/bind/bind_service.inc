@@ -49,7 +49,7 @@ class provisionService_dns_bind extends provisionService_dns {
   }
 
   function add_record($zonename, $name, $destination, $type = 'A') {
-    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename, 'ttl' => drush_get_option('zone_ttl', $this->server->dns_default_ttl)));
+    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
     if ($type == 'SOA') { // only one SOA per file
       return $zone->add_line_if_not_exists($name . ' IN SOA ' . $destination, 'SOA');
     } else {
@@ -58,7 +58,7 @@ class provisionService_dns_bind extends provisionService_dns {
   }
 
   function edit_record($zonename, $name, $destination, $type = 'A') {
-    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename, 'ttl' => drush_get_option('zone_ttl', $this->server->dns_default_ttl)));
+    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
     if ($type == 'SOA') { // only one SOA per file
       return $zone->add_line_if_not_exists($name . ' IN SOA ' . $destination, 'SOA');
     } else {
