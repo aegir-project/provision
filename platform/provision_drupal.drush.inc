@@ -88,9 +88,8 @@ function provision_drupal_drush_exit() {
   if (preg_match("/^provision-/", $command[0])) {
     if (d()->type === 'site') {
       if (drush_get_option('installed')) {
-        // dont generate the drushrc.php on provision-save commands.
-        if (!preg_match("/^provision-save/", $command[0])) {
-          drush_set_option('site_id', drush_get_option('site_id'), 'site');
+        // Don't generate the drushrc.php on provision-save/delete commands.
+        if (!preg_match("/^provision-(save|delete)/", $command[0])) {
           provision_save_site_data();
         }
       }
