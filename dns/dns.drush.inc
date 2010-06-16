@@ -89,6 +89,32 @@ class provisionService_dns extends provisionService {
    return FALSE;
   }
 
+  /**
+   * Determine if a zone is defined on the nameserver.
+   *
+   * To be implemented by engines.
+   *
+   * @return if the zone exists
+   */
+  function zone_exists($zone) {
+    return FALSE;
+  }
+
+  /**
+   * Guess in which zone we should create the record
+   *
+   * This function will examine the existing zones to find to which
+   * this host belongs to.
+   */
+  function guess_zone($host) {
+    if (zone_exists($host)) {
+      return array($host, '@');
+    } else {
+      // TODO: examine subdomains
+      return array($host, '@');
+    }
+  }
+
   /** 
    * Create a host in DNS.
    *
@@ -96,7 +122,9 @@ class provisionService_dns extends provisionService {
    * zonefile, it's going to make its best guess doing the Right Thing.
    */
   function create_host($host) {
-    return FALSE;
+    $parts = $this->guess_zone($host);
+    $this->create_zone($parts[0]);
+    $this->create_record($parts[1]);
   }
 
   /**
@@ -105,7 +133,9 @@ class provisionService_dns extends provisionService {
    * Similar to create host, this will seek and destroy that host throughout zonefiles.
    */
   function delete_host($host) {
-    return FALSE;
+    $parts = $this->guess_zone($host);
+    $this->delete_record($parts[1]);
+    $this->delete_zone($parts[0]);
   }
 
   /**
