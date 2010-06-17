@@ -40,31 +40,11 @@ function drush_dns_provision_zone($action, $zone, $name = null, $destination = n
     $status = d()->service('dns')->delete_record($zone, $name, $destination, $type);
     break;
   }
-  if ($status) {
-    d()->service('dns')->commit($zone);
-  }
+  $status = $status && d()->service('dns')->commit($zone);
+  
+  return $status;
 }
 
-
-/**
- * Helper function to increment a zone's serial number.
- *
- * @param $serial
- *    A serial in YYYYMMDDnn format
- *
- * @return
- *    The serial, incremented based on current date and index
- */
-function _dns_increment_serial($serial) {
-  $date = substr($serial, 0, 8); # Get the YYYYMMDD part
-  $index = substr($serial, 8, 2); # Get the index part
-  $today = date('Ymd');
-  if ($date == $today) {
-    return $date . sprintf('%02d', $index+1);
-  } else {
-    return $today . '01';
-  }
-}
 
 function dns_provision_services() {
   return array('dns' => NULL);
@@ -152,6 +132,26 @@ class provisionService_dns extends provisionService {
     $string .= $this->server->dns_negativettl . " ";
     $string .= " ) ";
     return $string;
+  }
+
+  /**
+   * Helper function to increment a zone's serial number.
+   *
+   * @param $serial
+   *    A serial in YYYYMMDDnn format
+   *
+   * @return
+   *    The serial, incremented based on current date and index
+   */
+  function increment_serial($serial) {
+    $date = substr($serial, 0, 8); # Get the YYYYMMDD part
+    $index = substr($serial, 8, 2); # Get the index part
+    $today = date('Ymd');
+    if ($date == $today) {
+      return $date . sprintf('%02d', $index+1);
+    } else {
+      return $today . '01';
+    }
   }
 
   /**
