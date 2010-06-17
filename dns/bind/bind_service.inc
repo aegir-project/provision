@@ -18,8 +18,8 @@ class provisionService_dns_bind extends provisionService_dns {
 
   function init() {
     parent::init();
-    $this->server->bind_conf_path = $this->server->config_path . '/bind.d/';
-    $this->server->bind_zone_master_path = $this->server->config_path . '/zones/master';
+    $this->server->setProperty('bind_conf_path', $this->server->config_path . '/bind.d/');
+    $this->server->setProperty('bind_zone_master_path', $this->server->config_path . '/zones/master');
     $this->server->setProperty('bind_restart_cmd', _bind_default_restart_cmd());
   }
 
@@ -47,10 +47,13 @@ class provisionService_dns_bind extends provisionService_dns {
   
   function create_zone($zonename) {
     $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
-    if (!$zone->exists()) {
+    if (!$zone->exists() || drush_get_option('force')) {
+      drush_log("creating zone");
       $zone->add_line_if_not_exists($zone->zone_declaration(), '/zone\s*"'. $zonename . '"/');
       $zone->write();
       parent::create_zone($zonename);
+    } else {
+      drush_log("zone already exists");
     }
   }
 
@@ -73,7 +76,7 @@ class provisionService_dns_bind extends provisionService_dns {
   function edit_record($zonename, $name, $destination, $type = 'A') {
     $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
     if ($type == 'SOA') { // only one SOA per file
-      return $zone->add_line_if_not_exists($name . ' IN SOA ' . $destination, 'SOA');
+      return $zone->add_line_if_not_exists($name . ' IN SOA ' . $destination, '/\sIN\sSOA\s/');
     } else {
       return $zone->replace_line($name . "\tIN\t" . $type . "\t" . $destination, "/^$name\s\s*IN\s\s*$type\s\s*");
     }
@@ -113,11 +116,12 @@ class provisionConfig_bind_zone extends provisionConfig {
   public $template = 'zone.tpl.php';
 
   function filename() {
-    return $this->server->zone_master_path . '/' . $this->data['name'];
+    return $this->bind_zone_master_path . '/' . $this->data['name'];
   }
 
   function exists() {
-    return provision_file()->exists($this->filename());
+    drush_log("checking file: " . $this->filename());
+    return provision_file()->exists($this->filename())->status();
   }
 
   /**
@@ -136,8 +140,8 @@ class provisionConfig_bind_zone extends provisionConfig {
   function add_line_if_not_exists($line, $pattern = null) {
     $file = $this->filename();
     // XXX: we should do exponential backoff here to limit contention
-    flock($file);
-    $fd = fopen($file);
+    $fd = fopen($file, 'r+'); // read/write, beginning of file
+    flock($fd, LOCK_EX);
     $line = trim($line);
     if (is_null($pattern)) {
       $pattern = '/' . $line . '/';
