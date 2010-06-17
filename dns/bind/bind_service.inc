@@ -139,7 +139,7 @@ class provisionConfig_bind_zone extends provisionConfig {
     $file = $this->filename();
     $body = file_get_contents($file);
     $data = array();
-    if (preg_match('/\s\s*IN\s\s*SOA.*\((.*)\)/', $body, $matches)) {
+    if (preg_match('/^(?:@\s+)?IN\s+SOA\s+[\w.]+\s+[\w.]+\s+\(([^)]*)\)\s*$/ims', $body, $matches)) {
       $soa = trim($matches[1]);
       $SOA = preg_split('/\s\s*/', $soa);
       $i = 0;
