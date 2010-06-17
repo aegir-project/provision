@@ -11,7 +11,6 @@ class provisionConfig {
   public $data = array();
   public $owner = null;
   public $description = null;
-  protected $append = FALSE;
   protected $mode = NULL;
   protected $group = NULL;
 
@@ -110,7 +109,7 @@ class provisionConfig {
             ->fail('Could not change permissions of @path to @perm');
         }
 
-        provision_file()->file_put_contents($filename, $this->render_template($template, $this->data), $this->append ? FILE_APPEND : 0)
+        provision_file()->file_put_contents($filename, $this->render_template($template, $this->data))
           ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description), 'success');
 
         // Change the permissions of the file if needed
