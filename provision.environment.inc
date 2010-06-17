@@ -1,15 +1,20 @@
 <?php
 /**
- * Provision environment API
- *
- *
+ * @file Provision environment API
  */
 
 /**
- * Store and access environment objects by their alias name
+ * Store and access environment objects by alias name.
  *
+ * @param $name
+ *   A Drush alias name, including leading @.
+ * @param $_root_object
+ *   Internal use only, set default object returned by d().
+ *
+ * @return
+ *   provisionEnvironment object.
  */
-function & d($name = NULL, $root_object = FALSE) {
+function & d($name = NULL, $_root_object = FALSE) {
   static $instances = null;
   static $default_instance = '@self';
 
@@ -21,7 +26,7 @@ function & d($name = NULL, $root_object = FALSE) {
     return $instances[$default_instance];
   }
   else {
-    if ($root_object) {
+    if ($_root_object) {
       $default_instance = $name;
     }
 
