@@ -26,7 +26,8 @@ class provisionService_dns_bind extends provisionService_dns {
   function config_data() {
     return array(
       'bind_conf_path' => $this->server->bind_config_path,
-      'bind_zone_master_path' => $this->server->bind_zone_master_path
+      'bind_zone_master_path' => $this->server->bind_zone_master_path,
+      'bind_restart_cmd' => $this->server->bind_restart_cmd,
     );
   }
 
