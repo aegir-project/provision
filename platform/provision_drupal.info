@@ -1,8 +1,0 @@
-name = Provision: Drupal
-description = Allows for Drupal sites to be provisioned using the provisioning framework.
-package = Provision
-dependencies[] = drush
-dependencies[] = provision
-dependencies[] = cvs_deploy
-
-core = 6.x

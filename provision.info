@@ -1,6 +1,0 @@
-name = Provision
-description = Allows for the automated provisioning of hosted Drupal sites, via the command line
-package = Provision
-dependencies[] = drush
-
-core = 6.x

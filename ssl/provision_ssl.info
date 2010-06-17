@@ -1,6 +1,0 @@
-name = Provision: SSL
-description = Provides SSL support for the Apache webserver
-package = Provision
-dependencies[] = provision_apache
-
-core = 6.x
