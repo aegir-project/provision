@@ -1,5 +1,9 @@
 <?php
 
+function _bind_default_restart_cmd() {
+  return "/etc/init.d/named restart";
+}
+
 /**
  * Implementation of the DNS service through BIND9
  *
@@ -8,7 +12,7 @@
 class provisionService_dns_bind extends provisionService_dns {
   static function option_documentation() {
     return array_merge(parent::option_documentation(), array(
-      '--restart_cmd' => 'server with bind: shell command to restart the server; working default will be attepted',
+      '--bind_restart_cmd' => 'server with bind: shell command to restart the server; working default will be attepted',
     ));
   }
 
@@ -41,11 +45,11 @@ class provisionService_dns_bind extends provisionService_dns {
     }
   }
   
-  function create_zone($name) {
-    $zone = new provisionConfig_bind_zone($this->context, array('name' => $name, 'ttl' => drush_get_option('zone_ttl', $this->server->dns_default_ttl)));
-    $zone->add_line_if_not_exists($this->zone_declaration(), '/zone\s*"'. $name . '"/');
+  function create_zone($zonename) {
+    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
+    $zone->add_line_if_not_exists($zone->zone_declaration(), '/zone\s*"'. $zonename . '"/');
     $zone->write();
-    parent::create_zone($name);
+    parent::create_zone($zonename);
   }
 
   function add_record($zonename, $name, $destination, $type = 'A') {
@@ -74,7 +78,7 @@ class provisionConfig_bind_zone extends provisionConfig {
   public $template = 'zone.tpl.php';
 
   function filename() {
-    return $this->server->zone_master_path . '/' . $this->name;
+    return $this->server->zone_master_path . '/' . $this->data['name'];
   }
 
   function exists() {
@@ -94,7 +98,7 @@ class provisionConfig_bind_zone extends provisionConfig {
     $fd = fopen($file);
     $line = trim($line);
     if (is_null($pattern)) {
-      $pattern = '/' . $line '/';
+      $pattern = '/' . $line . '/';
     }
     $found = FALSE;
     while ($l = fgets($fd)) {

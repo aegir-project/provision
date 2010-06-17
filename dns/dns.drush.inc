@@ -73,12 +73,26 @@ class provisionService_dns extends provisionService {
   }
 
   function init() {
-
+    $this->zone_serial = $this->increment_serial();
+    $this->server->setProperty('dns_ttl');
+    $this->server->setProperty('dns_refresh');
+    $this->server->setProperty('dns_retry');
+    $this->server->setProperty('dns_expire');
+    $this->server->setProperty('dns_negativettl');
   }
 
 
   function verify() {
-    return $this->create_server_config();
+    switch (d($this->context)->type) {
+      case 'server' :
+        $this->create_server_config();
+        break;
+      case 'site' :
+        $this->create_host();
+        break;
+    }
+
+    $this->parse_configs();
   }
 
   function create_server_config() {
@@ -126,19 +140,20 @@ class provisionService_dns extends provisionService {
     $string = $name . ". "; # the FQDN
     $string .= drush_get_option('zone_hostmaster', 'hostmaster.'. $name . '.'); # the email
     $string .= " ( ";
-    $string .= drush_get_option('zone_serial', $this->increment_serial()) . " ";
-    $string .= drush_get_option('zone_refresh', $this->server->dns_default_refresh) . " ";
-    $string .= drush_get_option('zone_retry', $this->server->dns_default_retry) . " ";
-    $string .= drush_get_option('zone_expire', $this->server->dns_default_expire) . " ";
-    $string .= drush_get_option('zone_negativettl', $this->server->dns_default_negativettl) . " ";
+    $string .= $this->serial . " ";
+    $string .= $this->server->dns_refresh . " ";
+    $string .= $this->server->dns_retry . " ";
+    $string .= $this->server->dns_expire . " ";
+    $string .= $this->server->dns_negativettl . " ";
     $string .= " ) ";
+    return $string;
   }
 
   /**
    * This creates a zone, which mostly consists of adding the SOA record.
    */
-  function create_zone($fqdn) {
-    $this->edit_record('@', $this->soa_string($fqdn), 'SOA');
+  function create_zone($fqdn = null) {
+    $this->edit_record($fqdn, '@', $this->soa_string($fqdn), 'SOA');
   }
 
   /**
