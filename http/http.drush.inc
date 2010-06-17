@@ -99,6 +99,13 @@ class provisionService_http extends provisionService {
   }
 
   /**
+   * Support the ability to cloak the database credentials using environment variables.
+   */
+  function cloaked_db_creds() {
+    return FALSE;
+  }
+
+  /**
    * Return a list of servers that will need database access.
    */
   function grant_server_list() {
