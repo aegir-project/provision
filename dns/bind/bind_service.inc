@@ -33,6 +33,7 @@ class provisionService_dns_bind extends provisionService_dns {
 
   function verify() {
     provision_file()->create_dir($this->server->bind_conf_path, dt("Bind configuration"), 0700);
+    provision_file()->create_dir($this->server->bind_zone_master_path, dt("Bind zone files"), 0700);
   }
 
   function commit() {
