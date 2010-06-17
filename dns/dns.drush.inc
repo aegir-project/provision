@@ -151,7 +151,12 @@ class provisionService_dns extends provisionService {
       return $today . '00';
     } else {
       $index = substr($serial, 8, 2); # Get the index part
-      return $date . sprintf('%02d', $index+1);
+      if ($index >= 99) {
+        drush_set_error("serial number overflow");
+      } else {
+        $index++;
+      }
+      return $date . sprintf('%02d', $index);
     }
   }
 
