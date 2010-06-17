@@ -238,6 +238,10 @@ function drush_provision_verify() {
 
 function _provision_default_restart_cmd() {
   $command = '/usr/sbin/apachectl'; // A proper default for most of the world
+  
+  // Try to detect the nginx restart command first
+  $options[] = '/etc/init.d/nginx'; // nginx on debian
+
   foreach (explode(':', $_SERVER['PATH']) as $path) {
     $options[] = "$path/apache2ctl";
     $options[] = "$path/apachectl";
@@ -255,7 +259,12 @@ function _provision_default_restart_cmd() {
     }
   }
 
-  return "sudo $command graceful";
+  if(preg_match("/(nginx)/", $command)) {
+    return "sudo $command reload";
+  }
+  else {
+    return "sudo $command graceful";
+  }
 }
 
 function _provision_default_web_group() {

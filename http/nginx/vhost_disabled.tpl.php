@@ -1,20 +1,19 @@
-<VirtualHost *:80>
-    <?php if ($this->site_mail) : ?>
-      ServerAdmin <?php  print $this->site_mail; ?> 
-    <?php endif;?>
-    DocumentRoot <?php print $this->root; ?> 
-    
-    ServerName <?php print $this->uri; ?>
+server {
+  listen       80;
+  server_name  <?php print $this->uri; ?> <?php if (is_array($this->aliases)) : foreach ($this->aliases as $alias_url) : if (trim($alias_url)) : ?> <?php $alias_url = "." . $alias_url; ?> <?php print $alias_url; ?> <?php endif; endforeach; endif; ?>;
+  root         <?php print $this->root; ?>;
+  index        index.php index.html;
 
-    <?php if (is_array($this->aliases)) :
-     foreach ($this->aliases as $alias) : ?>
-       ServerAlias <?php print $alias; ?>
-     <?php
-       endforeach;
-     endif; ?>
+  location / {
+     root   /var/www/nginx-default;
+     index  index.html index.htm;
+     # rewrite ^/(.*)$  http://<?php print $this->uri ?>/$1 permanent;
+     rewrite ^/(.*)$  <?php print $this->platform->server->web_disable_url . '/' . $this->uri ?>? permanent;
+  }
 
-    RewriteEngine on
-    # the ? at the end is to remove any query string in the original url
-    RewriteRule ^(.*)$ <?php print $this->platform->server->web_disable_url . '/' . $this->uri ?>?
+  error_page   500 502 503 504  /50x.html;
+  location = /50x.html {
+     root   /var/www/nginx-default;
+  }
 
-</VirtualHost>
+}

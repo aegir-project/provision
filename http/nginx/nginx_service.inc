@@ -9,6 +9,7 @@ class provisionService_http_nginx extends provisionService_http {
   function init() {
     $this->server->nginx_conf_path = $this->server->config_path . '/nginx/nginx.d';
     $this->server->nginx_site_conf_path = $this->server->config_path . '/nginx/vhost.d';
+    $this->server->setProperty('restart_cmd', _provision_default_restart_cmd());
   }
 
 
@@ -57,10 +58,15 @@ class provisionService_http_nginx extends provisionService_http {
   }
 
   function parse_configs() {
-    return TRUE;
-    // apparently nginx doesnt need this.
+    // This is required to be configurable, due to the fact that different
+    // hosts might need to do this differently.
+    if ($this->server->shell_exec($this->server->restart_cmd)) {
+      drush_log(dt('Nginx on %server has been restarted', array('%server' => $this->server->remote_host)));
+    }
+    else {
+      drush_log(dt('Web server %server could not be restarted. Changes might not be available until this has been done. (error: %msg)', array('%server' => $this->server->remote_host, '%msg' => join("\n", drush_shell_exec_output()))), 'warning');
+    }
   }
-
 }
 
 
@@ -85,6 +91,7 @@ class provisionConfig_nginx_server extends provisionConfig_nginx {
   public $description = 'nginx server configuration file';
 
   function filename() {
+    dlm($this->data['server']);
     return $this->data['server']->config_path . '/nginx.conf';
   }
 
