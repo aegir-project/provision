@@ -25,10 +25,21 @@ class provisionConfig {
     if (is_null($this->template)) {
       throw(exception);
     }
+    $this->data = $this->parse();
     if (sizeof($data)) {
-      $this->data = $data;
+      $this->data = array_merge($this->data, $data);
     }
     $this->owner = d($owner);
+  }
+
+  /**
+   * Parse the existing config to load data
+   *
+   * This is called in the constructor, and should take care of
+   * opening the file and parsing it into the data array.
+   */
+  function parse() {
+    return TRUE;
   }
 
   /**

@@ -136,7 +136,7 @@ function provision_drupal_sync_site() {
  *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file() {
-  $config = new provisionConfig_drupal_settings(d()->name);
+  $config = new provisionConfig_drupal_settings(d()->name, drush_get_context('site'));
   $config->write();
   provision_drupal_sync_site();
 }
@@ -144,6 +144,7 @@ function _provision_drupal_create_settings_file() {
 class provisionConfig_drupal_settings extends provisionConfig {
   public $template = 'provision_drupal_settings.tpl.php';
   public $description = 'Drupal settings.php file';
+  public $creds = array();
   protected $mode = 0440;
 
   function filename() {
@@ -153,6 +154,11 @@ class provisionConfig_drupal_settings extends provisionConfig {
   function process() {
     if (drush_drupal_major_version() >= 7) {
       $this->data['db_type'] = ($this->data['db_type'] == 'mysqli') ? 'mysql' : $this->data['db_type'];
+    }
+    $cloaked = $this->owner->service('http')->cloaked_db_creds();
+
+    foreach (array('db_type', 'db_user', 'db_passwd', 'db_host', 'db_name') as $key) {
+      $this->creds[$key] = ($cloaked) ? "\$_SERVER[{$key}]" : urldecode($this->data[$key]);
     }
 
     $this->data['extra_config'] = "# Extra configuration from modules:\n";

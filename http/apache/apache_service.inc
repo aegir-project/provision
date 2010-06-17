@@ -20,6 +20,13 @@ class provisionService_http_apache extends provisionService_http {
   }
 
   /**
+   * Apache uses mod_env to cloak the database credentials in settings.php.
+   */
+  function cloaked_db_creds() {
+    return TRUE;
+  }
+
+  /**
    * Pass some extra paths to the config file classes, which specify the server relative paths
    * for use in the filename() methods.
    */

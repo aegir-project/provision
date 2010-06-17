@@ -36,15 +36,17 @@ function drush_provision_drupal_pre_provision_clone_rollback($new_url, $platform
  * Switch the clone directories around now that we have the new db installed
  */
 function drush_provision_drupal_provision_clone($new_url, $platform = null) {
+  drush_set_option('old_platform', d()->platform->name);
+
+  $options = d()->options;
+  $options['uri'] = ltrim($new_url, '@');
+  $options['platform'] = (isset($platform)) ? $platform : $options['platform'];
+  $options['aliases'] = array();
+  $options['redirection'] = 0;
+  
+  drush_backend_invoke_args('provision-save', array($new_url), $options);
   # note that we reset the aliases so they don't conflict with the original site
-  drush_backend_invoke('provision-deploy', array(
-    $new_url, 
-    drush_get_option('backup_file'), 
-    'root' => $platform, 
-    'aliases' => drush_get_option('aliases'),
-    'redirection' => drush_get_option('redirection'),
-    'web_host' => drush_get_option('web_host'), 
-    'profile' => drush_get_option('profile'), 
-    'db_host' => drush_get_option('db_host')
-  ));
+
+  provision_backend_invoke($new_url, 'provision-deploy', array(drush_get_option('backup_file')));
+
 }
