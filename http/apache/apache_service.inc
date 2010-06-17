@@ -4,7 +4,6 @@ class provisionService_http_apache extends provisionService_http {
   static function option_documentation() {
     return array_merge(parent::option_documentation(), array(
       '--restart_cmd' => 'server with apache: shell command to restart the server; working default will be attepted',
-      '--web_ports' => 'server with apache: array of ports to make available; default 80',
     ));
   }
 
@@ -16,7 +15,6 @@ class provisionService_http_apache extends provisionService_http {
 
     // Commands
     $this->server->setProperty('restart_cmd', _provision_default_restart_cmd());
-    $this->server->setProperty('web_ports', array(80));
   }
 
   /**

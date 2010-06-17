@@ -13,6 +13,7 @@ class provisionService_http extends provisionService {
       '--web_group' => 'server with http: OS group for permissions; working default will be attepted',
       '--web_disable_url' => 'server with http: URL disabled sites are redirected to; default {master_url}/hosting/disabled',
       '--web_maintenence_url' => 'server with http: URL maintenance sites are redirected to; default {master_url}/hosting/maintenance',
+      '--web_ports' => 'server with http: array of ports to make available; default 80',
     );
   }
 
@@ -25,6 +26,8 @@ class provisionService_http extends provisionService {
     else {
       $this->server->web_group = d('@server_localhost')->web_group;
     }
+
+    $this->server->setProperty('web_ports', array(80));
 
     // Redirection urls
     $this->server->setProperty('web_disable_url', $this->server->master_url .'/hosting/disabled');
