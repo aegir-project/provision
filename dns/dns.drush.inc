@@ -126,10 +126,10 @@ class provisionService_dns extends provisionService {
     $string .= drush_get_option('zone_hostmaster', 'hostmaster.'. $name . '.'); # the email
     $string .= " ( ";
     $string .= $this->serial . " ";
-    $string .= $this->server->dns_refresh . " ";
-    $string .= $this->server->dns_retry . " ";
-    $string .= $this->server->dns_expire . " ";
-    $string .= $this->server->dns_negativettl . " ";
+    $string .= $this->refresh . " ";
+    $string .= $this->retry . " ";
+    $string .= $this->expire . " ";
+    $string .= $this->negativettl . " ";
     $string .= " ) ";
     return $string;
   }

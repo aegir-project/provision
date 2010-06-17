@@ -51,8 +51,27 @@ class provisionService_dns_bind extends provisionService_dns {
     $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
     if (!$zone->exists() || drush_get_option('force')) {
       drush_log("creating zone");
-      $zone->add_line_if_not_exists($zone->zone_declaration(), '/zone\s*"'. $zonename . '"/');
+      //$zone->add_line_if_not_exists($zone->zone_declaration(), '/zone\s*"'. $zonename . '"/');
       $zone->write();
+
+      foreach (array('ttl', 'serial', 'refresh', 'retry', 'expire', 'negativettl') as $param) {
+        if (isset($zone->data[$param])) {
+          drush_log("got param $param from zone, value: " . $zone->data[$param]);
+          if ($param == 'serial') {
+            $this->$param = provisionService_dns::increment_serial($zone->data['serial']);
+          } else {
+            $this->$param = $zone->data[$param];
+          }
+        } else {
+          if ($param == 'serial') {
+            $this->$param = provisionService_dns::increment_serial();
+          } else {
+            $longparam = "dns_" . $param;
+            $this->$param = $this->server->$longparam;
+          }
+          drush_log("param $param missing from zone, using default: " . $this->$param);
+        }
+      }        
       parent::create_zone($zonename);
     } else {
       drush_log("zone already exists");
@@ -113,30 +132,26 @@ class provisionService_dns_bind extends provisionService_dns {
 
 }
 
-
 class provisionConfig_bind_zone extends provisionConfig {
   public $template = 'zone.tpl.php';
 
   function parse() {
-    $body = file_get_contents($this->filename());
+    $file = $this->filename();
+    $body = file_get_contents($file);
     $data = array();
-    if (preg_match('/^@?\s*IN\s*SOA\s*(\([^\)]*\))\s*$/', $body, $matches)) {
-      $SOA = preg_split('\s*', $matches[1]);
+    if (preg_match('/\s\s*IN\s\s*SOA.*\((.*)\)/', $body, $matches)) {
+      $soa = trim($matches[1]);
+      $SOA = preg_split('/\s\s*/', $soa);
       $i = 0;
       foreach (array('serial', 'refresh', 'retry', 'expire', 'negativettl') as $param) {
         $data[$param] = $SOA[$i++];
       }
-    } else {
-      drush_log("no SOA found, setting sane defaults");
-      $data['serial'] = provisionService_dns::increment_serial();
-      foreach (array('ttl', 'refresh', 'retry', 'expire', 'negativettl') as $param) {
-        $longparam = "dns_" . $param;
-        $data[$param] = $this->$longparam;
+      drush_log("parsed SOA from zonefile:");
+      foreach ($data as $key => $value) {
+        drush_log($key . ": " . $value);
       }
-    }
-    drush_log("parsed SOA from zonefile:");
-    foreach ($data as $key => $value) {
-      drush_log($key . ": " . $value);
+    } else {
+      drush_log("no SOA found in zonefile $file, body: ($body)");
     }
     return $data;
   }
@@ -180,7 +195,8 @@ class provisionConfig_bind_zone extends provisionConfig {
       }
     }
     if (!$found) {
-      fseek($fd, SEEK_END);
+      fseek($fd, 0, SEEK_END);
+      drush_log("pattern $pattern not found in file $file, adding at the end");
       fwrite($fd, $line . "\n");
     }
     fclose($fd);
