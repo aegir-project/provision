@@ -47,9 +47,18 @@ class provisionService_dns_bind extends provisionService_dns {
   
   function create_zone($zonename) {
     $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
-    $zone->add_line_if_not_exists($zone->zone_declaration(), '/zone\s*"'. $zonename . '"/');
-    $zone->write();
-    parent::create_zone($zonename);
+    if (!$zone->exists()) {
+      $zone->add_line_if_not_exists($zone->zone_declaration(), '/zone\s*"'. $zonename . '"/');
+      $zone->write();
+      parent::create_zone($zonename);
+    }
+  }
+
+  function delete_zone($zonename) {
+    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
+    if (!$zone->count_records(null, array('NS', 'SOA'))) {
+      $zone->delete_file();
+    }
   }
 
   function add_record($zonename, $name, $destination, $type = 'A') {
@@ -87,8 +96,17 @@ class provisionService_dns_bind extends provisionService_dns {
     return $zone->delete_line($pattern);
   }
 
-}
+  function zone_exists($zone) {
+    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
+    return $zone->exists();
+  }
 
+  function count_records($zone, $include = null, $exclude = null) {
+    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
+    return $zone->count_records($include, $exclude);
+  }
+
+}
 
 
 class provisionConfig_bind_zone extends provisionConfig {
@@ -100,6 +118,13 @@ class provisionConfig_bind_zone extends provisionConfig {
 
   function exists() {
     return provision_file()->exists($this->filename());
+  }
+
+  /**
+   * This returns the number of records in the zone.
+   */
+  function count_records($include = null, $exclude = null) {
+    return TRUE;
   }
 
   /**

@@ -21,7 +21,7 @@ function dns_drush_command() {
   return $items;
 }
 
-function drush_dns_provision_zone($action, $zone) {
+function drush_dns_provision_zone($action, $zone, $name = null, $destination = null, $type = null) {
   switch ($action) {
   case 'verify':
   case 'create':
@@ -31,12 +31,17 @@ function drush_dns_provision_zone($action, $zone) {
     $status = d()->service('dns')->delete_zone($zone);
     break;
   case 'rr-add':
+    $status = d()->service('dns')->add_record($zone, $name, $destination, $type);
+    break;
+  case 'rr-modify':
+    $status = d()->service('dns')->modify_record($zone, $name, $destination, $type);
+    break;
   case 'rr-delete':
-    drush_set_error("not implemented");
+    $status = d()->service('dns')->delete_record($zone, $name, $destination, $type);
     break;
   }
   if ($status) {
-    _bind_reload($zone->origin);
+    d()->service('dns')->commit($zone);
   }
 }
 
@@ -128,7 +133,7 @@ class provisionService_dns extends provisionService {
    * this host belongs to.
    */
   function guess_zone($host) {
-    if (zone_exists($host)) {
+    if ($this->zone_exists($host)) {
       return array($host, '@');
     } else {
       // TODO: examine subdomains
@@ -157,7 +162,7 @@ class provisionService_dns extends provisionService {
   }
 
   /**
-   * This completely drops a zone.
+   * This completely drops a zone, without any checks.
    */
   function delete_zone($fqdn) {
     return FALSE;
@@ -211,7 +216,7 @@ class provisionService_dns extends provisionService {
   function delete_host($host) {
     $parts = $this->guess_zone($host);
     $this->delete_record($parts[1]);
-    if ($this->count_records(null, array('NS', 'SOA'))) {
+    if ($this->count_records($parts[0], null, array('NS', 'SOA'))) {
       $this->delete_zone($parts[0]);
     }
 
