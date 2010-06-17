@@ -138,19 +138,20 @@ class provisionService_dns extends provisionService {
    * Helper function to increment a zone's serial number.
    *
    * @param $serial
-   *    A serial in YYYYMMDDnn format
+   *    A serial in YYYYMMDDnn format. If null, a new serial based on
+   *    the date will be generated.
    *
    * @return
    *    The serial, incremented based on current date and index
    */
-  function increment_serial($serial) {
+  function increment_serial($serial = null) {
     $date = substr($serial, 0, 8); # Get the YYYYMMDD part
-    $index = substr($serial, 8, 2); # Get the index part
     $today = date('Ymd');
-    if ($date == $today) {
-      return $date . sprintf('%02d', $index+1);
+    if (is_null($serial) || $date != $today) {
+      return $today . '00';
     } else {
-      return $today . '01';
+      $index = substr($serial, 8, 2); # Get the index part
+      return $date . sprintf('%02d', $index+1);
     }
   }
 
