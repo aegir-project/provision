@@ -238,7 +238,7 @@ class provisionServer extends provisionEnvironment {
     $options = array(
       '--remote_host' => 'server: host name; default localhost',
       '--script_user' => 'server: OS user name; default current user',
-      '--aegir_root' => 'server: Aegir root; default /var/aegir',
+      '--aegir_root' => 'server: Aegir root; default ' . getenv('HOME'),
       '--master_url' => 'server: Hostmaster URL',
     );
     foreach (drush_command_invoke_all('provision_services') as $service => $default) {
@@ -264,7 +264,7 @@ class provisionServer extends provisionEnvironment {
     $this->type = 'server';
     $this->setProperty('remote_host', 'localhost');
     if ($this->name == '@server_localhost') {
-      $this->setProperty('aegir_root', '/var/aegir');
+      $this->setProperty('aegir_root', getenv('HOME'));
       $this->setProperty('script_user', get_current_user());
     }
     else {
