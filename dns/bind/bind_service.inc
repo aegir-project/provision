@@ -121,16 +121,22 @@ class provisionConfig_bind_zone extends provisionConfig {
     $body = file_get_contents($this->filename());
     $data = array();
     if (preg_match('/^@?\s*IN\s*SOA\s*(\([^\)]*\))\s*$/', $body, $matches)) {
-      drush_log("found SOA: " . $matches[1]);
-      $data['SOA'] = $matches[1];
+      $SOA = preg_split('\s*', $matches[1]);
+      $i = 0;
+      foreach (array('serial', 'refresh', 'retry', 'expire', 'negativettl') as $param) {
+        $data[$param] = $SOA[$i++];
+      }
     } else {
       drush_log("no SOA found, setting sane defaults");
       $data['serial'] = provisionService_dns::increment_serial();
-      drush_log("serial: " . $data['serial']);
       foreach (array('ttl', 'refresh', 'retry', 'expire', 'negativettl') as $param) {
-        drush_log($param . ": " . $this->$param);
-        $data[$param] = $this->$param;
+        $longparam = "dns_" . $param;
+        $data[$param] = $this->$longparam;
       }
+    }
+    drush_log("parsed SOA from zonefile:");
+    foreach ($data as $key => $value) {
+      drush_log($key . ": " . $value);
     }
     return $data;
   }
