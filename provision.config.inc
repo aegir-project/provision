@@ -25,11 +25,11 @@ class provisionConfig {
     if (is_null($this->template)) {
       throw(exception);
     }
+    $this->owner = d($owner);
     $this->data = $this->parse();
     if (sizeof($data)) {
       $this->data = array_merge($this->data, $data);
     }
-    $this->owner = d($owner);
   }
 
   /**
