@@ -59,11 +59,11 @@ class provisionService_dns extends provisionService {
 
   function init() {
     $this->zone_serial = $this->increment_serial();
-    $this->server->setProperty('dns_ttl');
-    $this->server->setProperty('dns_refresh');
-    $this->server->setProperty('dns_retry');
-    $this->server->setProperty('dns_expire');
-    $this->server->setProperty('dns_negativettl');
+    $this->server->setProperty('dns_ttl', 86400); # 24h
+    $this->server->setProperty('dns_refresh', 21600); # 6h
+    $this->server->setProperty('dns_retry', 3600); # 1h
+    $this->server->setProperty('dns_expire', 604800); # 7d
+    $this->server->setProperty('dns_negativettl', 86400); # 24h
   }
 
 
