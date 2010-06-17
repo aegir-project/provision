@@ -37,15 +37,18 @@ function drush_provision_hostmaster_install($site = NULL) {
     $data['master_db'] = "$scheme://$user:$pass@$host";
   }
 
-  $server = '@server_localhost';
+  // TODO: support creation of an external db server
+  $server = '@server_master';
   drush_backend_invoke_args("provision-save", array($server), array(
     'context_type' => 'server',
-   // files
+    // files
+    'remote_host' => $site,
     'aegir_root' => $aegir_root,
-    'script_user' => drush_get_option('script_user', 'aegir'),
+    'script_user' => drush_get_option('script_user', get_current_user()),
    // apache 
     'http_service_type' => 'apache',
     'web_group' => drush_get_option('web_group', _provision_default_web_group()),
+    'master_url' => "http://" . $site . "/",
    // mysql
     'db_service_type' => 'mysql',
     'master_db' => $data['master_db'],
