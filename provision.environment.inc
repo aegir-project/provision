@@ -238,7 +238,7 @@ class provisionServer extends provisionEnvironment {
     $options = array(
       '--remote_host' => 'server: host name; default localhost',
       '--script_user' => 'server: OS user name; default current user',
-      '--aegir_root' => 'server: Aegir root; default /var/aegir',
+      '--aegir_root' => 'server: Aegir root; default ' . getenv('HOME'),
       '--master_url' => 'server: Hostmaster URL',
     );
     foreach (drush_command_invoke_all('provision_services') as $service => $default) {
@@ -263,13 +263,13 @@ class provisionServer extends provisionEnvironment {
 
     $this->type = 'server';
     $this->setProperty('remote_host', 'localhost');
-    if ($this->name == '@server_localhost') {
-      $this->setProperty('aegir_root', '/var/aegir');
+    if ($this->name == '@server_master') {
+      $this->setProperty('aegir_root', getenv('HOME'));
       $this->setProperty('script_user', get_current_user());
     }
     else {
-      $this->aegir_root = d('@server_localhost')->aegir_root;
-      $this->script_user = d('@server_localhost')->script_user;
+      $this->aegir_root = d('@server_master')->aegir_root;
+      $this->script_user = d('@server_master')->script_user;
     }
 
     $this->backup_path = $this->aegir_root . '/backups';
@@ -418,8 +418,8 @@ class provisionPlatform extends provisionEnvironment {
   static function option_documentation() {
     return array(
       '--root' => 'platform: path to a Drupal installation',
-      '--server' => 'drush backend server; default @server_localhost',
-      '--web_server' => 'web server hosting the platform; default @server_localhost',
+      '--server' => 'drush backend server; default @server_master',
+      '--web_server' => 'web server hosting the platform; default @server_master',
     );
   }
 
@@ -430,10 +430,10 @@ class provisionPlatform extends provisionEnvironment {
     $this->type = 'platform';
     $this->setProperty('root');
 
-    $this->setProperty('server', '@server_localhost');
+    $this->setProperty('server', '@server_master');
     $this->is_oid('server');
 
-    $this->setProperty('web_server', '@server_localhost');
+    $this->setProperty('web_server', '@server_master');
     $this->is_oid('web_server');
     $this->service_subscribe('http', $this->web_server->name);
   }
@@ -480,7 +480,7 @@ class provisionSite extends provisionEnvironment {
     $this->setProperty('client_email');
     $this->setProperty('aliases', array(), TRUE);
     $this->setProperty('redirection', FALSE);
-    $this->setProperty('db_server', '@server_localhost');
+    $this->setProperty('db_server', '@server_master');
     $this->is_oid('db_server');
 
     $this->service_subscribe('db', $this->db_server->name);

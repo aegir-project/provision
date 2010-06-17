@@ -20,11 +20,11 @@ class provisionService_http extends provisionService {
   function init() {
     parent::init();
     // System account
-    if ($this->server->name == '@server_localhost') {
+    if ($this->server->name == '@server_master') {
       $this->server->setProperty('web_group', _provision_default_web_group());
     }
     else {
-      $this->server->web_group = d('@server_localhost')->web_group;
+      $this->server->web_group = d('@server_master')->web_group;
     }
 
     $this->server->setProperty('web_ports', array(80));

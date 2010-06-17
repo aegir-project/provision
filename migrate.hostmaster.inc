@@ -17,7 +17,7 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
 
   $data = drush_get_merged_options();
   // add a server record :
-  $server = '@server_localhost';
+  $server = '@server_master';
   drush_backend_invoke_args("provision-save", array($server), array(
     'context_type' => 'server',
     'aegir_root' => dirname(rtrim($data['config_path'], '/')),

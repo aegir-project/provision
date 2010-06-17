@@ -6,7 +6,7 @@ require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
 
 class provisionService extends provisionChainedState {
-  protected $server = '@server_localhost';
+  protected $server = '@server_master';
   public $context;
 
   function __construct($server) {

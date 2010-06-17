@@ -11,7 +11,6 @@ class provisionConfig {
   public $data = array();
   public $owner = null;
   public $description = null;
-  protected $append = FALSE;
   protected $mode = NULL;
   protected $group = NULL;
 
@@ -25,10 +24,21 @@ class provisionConfig {
     if (is_null($this->template)) {
       throw(exception);
     }
+    $this->data = $this->parse();
     if (sizeof($data)) {
-      $this->data = $data;
+      $this->data = array_merge($this->data, $data);
     }
     $this->owner = d($owner);
+  }
+
+  /**
+   * Parse the existing config to load data
+   *
+   * This is called in the constructor, and should take care of
+   * opening the file and parsing it into the data array.
+   */
+  function parse() {
+    return array();
   }
 
   /**
@@ -99,7 +109,7 @@ class provisionConfig {
             ->fail('Could not change permissions of @path to @perm');
         }
 
-        provision_file()->file_put_contents($filename, $this->render_template($template, $this->data), $this->append ? FILE_APPEND : 0)
+        provision_file()->file_put_contents($filename, $this->render_template($template, $this->data))
           ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description), 'success');
 
         // Change the permissions of the file if needed

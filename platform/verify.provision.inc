@@ -25,7 +25,7 @@ function drush_provision_drupal_provision_verify() {
   if (d()->type === 'server') {
 
     provision_file()->create_dir(d()->config_path, dt('Provision configuration'), 0711);
-    if (d()->name == '@server_localhost') {
+    if (d()->name == '@server_master') {
       provision_file()->create_dir(d()->backup_path, dt('Backup'), 0700);
       provision_file()->create_dir(d()->include_path, dt('Provision PHP configuration'), 0711);
       if (!provision_file()->exists(d()->include_path . '/global.inc')->succeed('Global configuration file exists')->status()) {
