@@ -26,6 +26,19 @@ function drush_provision_drupal_provision_deploy_validate($backup_file = null) {
   if ($exists) {
     drush_set_option('backup_file', $backup_file);
   }
+
+  $exists = provision_file()->exists(d()->site_path)
+    ->succeed('Replacing the existing site at @path')
+    ->status();
+
+  if ($exists) {
+    drush_set_option('extract_path', d()->site_path . '.restore');
+  }
+  else {
+    drush_set_option('extract_path', d()->site_path);
+  }
+
+  drush_set_option('deploy_replace_site', $exists);
 }
 
 /**
@@ -33,11 +46,28 @@ function drush_provision_drupal_provision_deploy_validate($backup_file = null) {
  */
 function drush_provision_drupal_pre_provision_deploy($backup_file) {
   // the url is likely to have changed in the deployment
-  $extracted = provision_file()->extract($backup_file, d()->site_path) 
+  $extracted = provision_file()->extract($backup_file, drush_get_option('extract_path')) 
     ->succeed('Successfully extracted the contents of @path')
     ->fail('Failed to extract the contents of @path to @target', 'PROVISION_BACKUP_EXTRACTION_FAILED')
     ->status();
   if ($extracted) {
+    if (drush_get_option('deploy_replace_site', FALSE)) {
+      $old = d()->site_path . '.restore';
+      $new = d()->site_path;
+
+      $swapped = provision_file()->switch_paths($old, $new)
+        ->succeed('Swapping out the @path1 and @path2 directories was successful.')
+        ->fail('Swapping the @path1 and @path2 directories has failed.', 'DRUSH_PERM_ERROR')
+        ->status();
+      if ($swapped) {
+        drush_set_option('site_dirs_swapped', TRUE);
+        _provision_drupal_create_settings_file();
+      }
+      else {
+        return false;
+      }
+    }
+
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
     $site_packages = drush_get_option('packages', array(), 'site');
@@ -71,9 +101,29 @@ function drush_provision_drupal_pre_provision_deploy($backup_file) {
  * Remove the extracted site directory
  */
 function drush_provision_drupal_pre_provision_deploy_rollback() {
-  if ($site_root = drush_get_context('DRUSH_DRUPAL_SITE_ROOT')) {
-    _provision_recursive_delete($site_root);
+  if (drush_get_option('deploy_replace_site', FALSE)) {
+    if (drush_get_option('site_dirs_swapped', FALSE)) {
+
+      // swap the site directories back if necessary.
+      $old = d()->site_path . '.restore';
+      $new = d()->site_path;
+
+       provision_file()->switch_paths($old, $new)
+        ->succeed('Swapping out the @path1 and @path2 directories was successful.')
+        ->fail('Swapping the @path1 and @path2 directories has failed.', 'DRUSH_PERM_ERROR');
+
+       _provision_drupal_create_settings_file();
+       provision_save_site_data();
+    }
+
+
   }
+      
+
+  if (provision_file()->exists(drush_get_option('extract_path'))->status()) {
+    _provision_recursive_delete(drush_get_option('extract_path'));
+  }
+
 }
 
 function drush_provision_drupal_provision_deploy() {
@@ -81,7 +131,9 @@ function drush_provision_drupal_provision_deploy() {
 }
 
 function drush_provision_drupal_post_provision_deploy() {
+
   provision_prepare_environment();
+  _provision_drupal_create_directories();
   _provision_drupal_create_settings_file();
   provision_save_site_data();
   // call the drush updatedb command.
@@ -92,4 +144,11 @@ function drush_provision_drupal_post_provision_deploy() {
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
     _provision_drupal_rebuild_caches();
   }
+
+
+  // remove the restore directory 
+  if (!drush_get_error() && drush_get_option('deploy_replace_site', FALSE)) {
+    _provision_recursive_delete(drush_get_option('extract_path'));
+  }
+
 }
