@@ -117,6 +117,24 @@ class provisionService_dns_bind extends provisionService_dns {
 class provisionConfig_bind_zone extends provisionConfig {
   public $template = 'zone.tpl.php';
 
+  function parse() {
+    $body = file_get_contents($this->filename());
+    $data = array();
+    if (preg_match('/^@?\s*IN\s*SOA\s*(\([^\)]*\))\s*$/', $body, $matches)) {
+      drush_log("found SOA: " . $matches[1]);
+      $data['SOA'] = $matches[1];
+    } else {
+      drush_log("no SOA found, setting sane defaults");
+      $data['serial'] = provisionService_dns::increment_serial();
+      drush_log("serial: " . $data['serial']);
+      foreach (array('ttl', 'refresh', 'retry', 'expire', 'negativettl') as $param) {
+        drush_log($param . ": " . $this->$param);
+        $data[$param] = $this->$param;
+      }
+    }
+    return $data;
+  }
+
   function filename() {
     return $this->bind_zone_master_path . '/' . $this->data['name'];
   }
