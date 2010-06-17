@@ -26,10 +26,12 @@ class provisionConfig {
       throw(exception);
     }
     $this->owner = d($owner);
-    $this->data = $this->parse();
+    // we need to do this first so it's accessible to parse()
     if (sizeof($data)) {
-      $this->data = array_merge($this->data, $data);
+      $this->data = $data;
     }
+    $this->parsed_data = $this->parse();
+    $this->data = array_merge($this->parsed_data, $this->data);
   }
 
   /**
