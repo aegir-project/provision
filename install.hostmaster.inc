@@ -42,7 +42,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   drush_backend_invoke_args("provision-save", array($server), array(
     'context_type' => 'server',
     // files
-    'remote_host' => $site,
+    'remote_host' => php_uname('n'),
     'aegir_root' => $aegir_root,
     'script_user' => drush_get_option('script_user', get_current_user()),
    // apache 
