@@ -39,7 +39,7 @@ class provisionConfig {
    * opening the file and parsing it into the data array.
    */
   function parse() {
-    return TRUE;
+    return array();
   }
 
   /**
