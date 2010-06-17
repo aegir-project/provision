@@ -58,7 +58,6 @@ class provisionService_dns extends provisionService {
   }
 
   function init() {
-    $this->zone_serial = $this->increment_serial();
     $this->server->setProperty('dns_ttl', 86400); # 24h
     $this->server->setProperty('dns_refresh', 21600); # 6h
     $this->server->setProperty('dns_retry', 3600); # 1h
