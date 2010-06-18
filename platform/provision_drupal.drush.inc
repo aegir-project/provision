@@ -66,8 +66,8 @@ function provision_drupal_drush_exit() {
       }
     }
     elseif (d()->type === 'platform') {
-      // Generate a drushrc.php for the platform unless it's being deleted
-      if (!preg_match("/^provision-delete/", $command[0])) {
+      // Don't generate the drushrc.php on provision-save/delete commands.
+      if (!preg_match("/^provision-(save|delete)/", $command[0])) {
         provision_save_platform_data();
       }
     }
