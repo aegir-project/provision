@@ -441,6 +441,8 @@ class provisionPlatform extends provisionEnvironment {
     $this->setProperty('web_server', '@server_master');
     $this->is_oid('web_server');
     $this->service_subscribe('http', $this->web_server->name);
+
+    $this->setProperty('makefile', '');
   }
 
   function verify() {

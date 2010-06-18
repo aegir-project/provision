@@ -21,7 +21,7 @@ function drush_provision_drupal_provision_verify_validate() {
 /**
  * implementation of provision_verify
  */
-function drush_provision_drupal_provision_verify() {
+function drush_provision_drupal_pre_provision_verify() {
   if (d()->type === 'server') {
 
     provision_file()->create_dir(d()->config_path, dt('Provision configuration'), 0711);
@@ -42,6 +42,22 @@ function drush_provision_drupal_provision_verify() {
     }
   }
   elseif (d()->type === 'platform') {
+    // create a platform from a makefile, if it doesnt already exist and the makefile does.
+    if (!provision_file()->exists(d()->root)->status() && !empty(d()->makefile)) {
+      if (provision_file()->exists(d()->makefile)->status()) {
+        drush_log(dt("Platform path does not exists, fetching from drush makefile"));
+        drush_backend_invoke("make", array(d()->makefile, d()->root), array('root' => null, 'uri' => null));
+        if (!drush_get_error()) {
+          drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
+        }
+        else {
+          return drush_set_error("DRUSH_MAKE_FAILED", 
+            "Could not download platform using drush make. No platform present");
+        }
+      }
+
+    }
+
     provision_file()->writable(d()->root . '/sites')
       ->succeed('Drupal sites directory @path is writable by the provisioning script')
       ->fail('Drupal sites directory @path is not writable by the provisioning script', 'PROVISION_SITES_DIR_NOT_WRITABLE');
