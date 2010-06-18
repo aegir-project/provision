@@ -47,7 +47,7 @@ function drush_provision_drupal_pre_provision_verify() {
       if (provision_file()->exists(d()->makefile)->status()) {
         drush_log(dt("Platform path does not exists, fetching from drush makefile"));
         drush_backend_invoke("make", array(d()->makefile, d()->root), array('root' => null, 'uri' => null));
-        if (!drush_get_error()) {
+        if (drush_get_error()) {
           return drush_set_error("DRUSH_MAKE_FAILED", 
             "Could not download platform using drush make. No platform present");
         }

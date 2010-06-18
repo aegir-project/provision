@@ -51,7 +51,9 @@ function drush_provision_drupal_provision_install() {
   _provision_drupal_create_settings_file();
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
   provision_save_site_data();
-  provision_backend_invoke(d()->name, "provision-install-backend");
+  drush_include_engine('drupal', 'install');
+  
+  #provision_backend_invoke(d()->name, "provision-install-backend");
   drush_set_option('installed', TRUE, 'site');
   _provision_drupal_maintain_aliases();
 }
