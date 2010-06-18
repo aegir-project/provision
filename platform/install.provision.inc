@@ -32,6 +32,14 @@ function drush_provision_drupal_pre_provision_install() {
 }
 
 /**
+ * If the install went south, and the site is not PROVISION_SITE_INSTALLED, clean up behind ourselves
+ */
+function drush_provision_drupal_pre_provision_install_rollback() {
+  _provision_recursive_delete( d()->site_path );
+}
+
+
+/**
  * Install Drupal with the pre-configured settings, by calling an external script
  *
  * This is an external script so that php is running in it's own namespace, and
@@ -42,23 +50,10 @@ function drush_provision_drupal_provision_install() {
   provision_prepare_environment();
   _provision_drupal_create_settings_file();
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
-
-  drush_include_engine('drupal', 'install');
+  provision_save_site_data();
+  provision_backend_invoke(d()->name, "provision-install-backend");
   drush_set_option('installed', TRUE, 'site');
   _provision_drupal_maintain_aliases();
-}
-
-/**
- * If the install went south, and the site is not PROVISION_SITE_INSTALLED, clean up behind ourselves
- */
-function drush_provision_drupal_provision_install_rollback() {
-  if (d()->uri) {
-    if (!drush_get_option('installed', FALSE)) {
-      _provision_recursive_delete( d()->site_path );
-    }
-  } else {
-    drush_set_error('PROVISION_FRAMEWORK_ERROR', dt('no url defined in %function', array('%function' => __FUNCTION__)));
-  }
 }
 
 /**

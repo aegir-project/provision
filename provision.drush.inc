@@ -82,9 +82,14 @@ function provision_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
   $items['provision-install'] = array(
-    'arguments' => array('domain.com' => dt('The domain of the site to install.')),
     'description' => dt('Provision a new site using the provided data.'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
+  );
+
+  $items['provision-install-backend'] = array(
+    'description' => dt('Provision a new site using the provided data.'),
+    'hidden' => TRUE,
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_SITE
   );
 
   $items['provision-import'] = array(

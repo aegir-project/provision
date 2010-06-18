@@ -87,6 +87,14 @@ function _provision_drupal_site_exists() {
 }
 
 /**
+ * This command does the actual installation in it's own thread,
+ * so we can recover gracefully if things go really wrong.
+ */
+function drush_provision_drupal_provision_install_backend() {
+  drush_include_engine('drupal', 'install');
+}
+
+/**
  * Sync the current Drupal platform and, if applicable, site. Call after
  * finishing operations that affect the filesystem.
  */
