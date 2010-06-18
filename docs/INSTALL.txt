@@ -176,6 +176,14 @@ file.
 /etc/sudoers configuration::
   aegir ALL=NOPASSWD: /usr/sbin/apache2ctl
 
+Remote web servers
+------------------
+
+Any number of remote web servers may be configured. They need an aegir user and
+Apache configuration as above, with the same user name and directory paths. SSH
+public/private keys should be set up so hostmaster's Aegir user can access
+remote web Aegir users with no passwords.
+
 Database configuration
 ----------------------
 
@@ -189,6 +197,9 @@ SQL commands::
   BY 'XXXXXXXX' WITH GRANT OPTION;
 
 Change 'XXXXXXXX' with a real password.
+
+Any number of database servers may be used, replacing localhost with
+hostmaster's hostname.
 
 DNS Configuration
 -----------------

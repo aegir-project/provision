@@ -7,19 +7,59 @@
  */
 
 class provisionConfig {
+  /**
+   * Template file, a PHP file which will have access to $this and variables
+   * as defined in $data.
+   */
   public $template = null;
+
+  /**
+   * Associate array of variables to make available to the template.
+   */
   public $data = array();
+
+  /**
+   * A provisionEnvironment object thie configuration relates to.
+   *
+   * @var provisionEnvironment
+   */
   public $owner = null;
+
+  /**
+   * If set, replaces file name in log messages.
+   */
   public $description = null;
+
+  /**
+   * Octal Unix mode for permissons of the created file.
+   */
   protected $mode = NULL;
+
+  /**
+   * Unix group name for the created file.
+   */
   protected $group = NULL;
 
+  /**
+   * Forward $this->... to $this->owner->...
+   * object.
+   */
   function __get($name) {
     if (isset($this->owner)) {
       return $this->owner->$name;
     }
   }
-  
+
+  /**
+   * Constructor, overriding not recommended.
+   *
+   * @param $owner
+   *   An alias name for d(), the provisionEnvironment that this configuration
+   *   is relevant to.
+   * @param $data
+   *   An associative array to potentiall manipulate in process() and make
+   *   available as variables to the template.
+   */
   function __construct($owner, $data = array()) {
     if (is_null($this->template)) {
       throw(exception);
@@ -42,26 +82,26 @@ class provisionConfig {
   }
 
   /**
-   * process the data before writing it
+   * Process and add to $data before writing the configuration.
    *
-   * this is called right before the file is written
-   *
-   * this is a stub to be implemented by subclasses
+   * This is a stub to be implemented by subclasses.
    */
   function process() {
     return true;
   }
 
   /**
-   * the filename where the filename is read/written from/to
+   * The filename where the configuration is written.
    * 
-   * this is a stub to be implemented by subclasses
+   * This is a stub to be implemented by subclasses.
    */
   function filename() {
     return false;
   }
 
-
+  /**
+   * Load template from filename().
+   */
   private function load_template() {
     $reflect = new reflectionObject($this);
     $base_dir = dirname($reflect->getFilename());
@@ -76,7 +116,10 @@ class provisionConfig {
     return false;
   }
 
-
+  /**
+   * Render template, making variables available from $variables associative
+   * array.
+   */
   private function render_template($template, $variables) {
     drush_errors_off();
     extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
@@ -88,6 +131,16 @@ class provisionConfig {
     return $contents;                // Return the contents
   }
 
+  /**
+   * Write out this configuration.
+   *
+   * 1. Make sure parent directory exists and is writable.
+   * 2. Load template with load_template().
+   * 3. Process $data with process().
+   * 4. Make existing file writable if necessary and possible.
+   * 5. Render template with $this and $data and write out to filename().
+   * 6. If $mode and/or $group are set, apply them for the new file.
+   */
   function write() {
     $filename = $this->filename();
     // Make directory structure if it does not exist.
@@ -127,6 +180,9 @@ class provisionConfig {
     }
   }
 
+  /**
+   * Remove configuration file as specified by filename().
+   */
   function unlink() {
     provision_file()->unlink($this->filename())->status();
   }

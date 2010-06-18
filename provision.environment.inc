@@ -1,15 +1,20 @@
 <?php
 /**
- * Provision environment API
- *
- *
+ * @file Provision environment API
  */
 
 /**
- * Store and access environment objects by their alias name
+ * Store and access environment objects by alias name.
  *
+ * @param $name
+ *   A Drush alias name, including leading @.
+ * @param $_root_object
+ *   Internal use only, set default object returned by d().
+ *
+ * @return
+ *   provisionEnvironment object.
  */
-function & d($name = NULL, $root_object = FALSE) {
+function & d($name = NULL, $_root_object = FALSE) {
   static $instances = null;
   static $default_instance = '@self';
 
@@ -21,7 +26,7 @@ function & d($name = NULL, $root_object = FALSE) {
     return $instances[$default_instance];
   }
   else {
-    if ($root_object) {
+    if ($_root_object) {
       $default_instance = $name;
     }
 
@@ -39,9 +44,8 @@ function & d($name = NULL, $root_object = FALSE) {
 /**
  * Simple access layer for drush_sitealias_get_record.
  *
- * Everytime sitealiases are fetched a lot of processing happens,
- * but if the file doesnt exist yet there's a whole lot of unnecesary
- * stuff happening. 
+ * Everytime sitealiases are fetched a lot of processing happens, but if the
+ * file doesnt exist yet there's a whole lot of unnecesary stuff happening. 
  *
  * We cache the result locally here.
  */
@@ -56,7 +60,8 @@ function provision_sitealias_get_record($name) {
 }
 
 /**
- * Create a new environment object and cache it in the d() static cache function.
+ * Create a new environment object and cache it in the d() static cache
+ * function.
  */
 function provision_environment_factory($name) {
   $classes = array('server' => 'provisionServer', 'platform' => 'provisionPlatform', 'site' => 'provisionSite');
@@ -77,26 +82,42 @@ function provision_environment_factory($name) {
   return new $classname($name);
 }
 
-
 /**
  * Base environment class.
  *
  * Contains magic getter/setter functions
  */
 class provisionEnvironment {
+  /**
+   * Name for saving aliases and referencing.
+   */
   public $name = null;
+
+  /**
+   * 'server', 'platform', or 'site'.
+   */
   public $type = null;
 
-
+  /**
+   * Properties that will be persisted by provision-save. Access as object
+   * members, $envoronment->property_name. __get() and __set handle this. In
+   * init(), set defaults with setProperty().
+   */
   protected $properties = array();
+
+  /**
+   * Keeps track of properites that are names of provisionEnvironment objects.
+   * Set with is_oid().
+   */
+  protected $oid_map = array();
 
   protected $service_subs = array();
   protected $parent_key = null;
 
-  protected $oid_map = array();
-
   /**
-   * Retrieve value from $properties array if property does not exist in class proper.
+   * Retrieve value from $properties array if property does not exist in class
+   * proper. Properties that refer to provisionEnvironment objects will be run
+   * through d(), see is_oid().
    *
    * TODO: consider returning a reference to the value, so we can do things like:
    *       `$this->options['option'] = 'value'` and it will correctly set it in the
@@ -143,7 +164,8 @@ class provisionEnvironment {
   }
 
   /**
-   * Remove the value from the properties array if the property does not exist in the class proper.
+   * Remove the value from the properties array if the property does not exist
+   * in the class proper.
    */
   function __unset($name) {
     if (isset($this->properties[$name])) {
@@ -163,7 +185,7 @@ class provisionEnvironment {
   }
 
   /**
-   * Init stub function/
+   * Init stub function.
    */
   function init() {
     $this->setProperty('context_type', 'server');
@@ -208,9 +230,17 @@ class provisionEnvironment {
   /**
    * Return a service object for the specific service type.
    *
-   * This will return a specifically subscribed service object when 
-   * one has been registered with service_subscribe, otherwise it will
-   * return the value specified by the property specified by $this->parent_key.
+   * This will return a specifically subscribed service object when one has
+   * been registered with service_subscribe, otherwise it will return the value
+   * specified by the property specified by $this->parent_key.
+   *
+   * @param $service
+   *   Service type, such as 'http' or 'db'
+   * @param $name
+   *   Override service owner with a context name as accepted by d().
+   *
+   * @return
+   *   A provisionService object.
    */
   function service($service, $name = null) {
     if (isset($this->service_subs[$service])) {
@@ -223,6 +253,16 @@ class provisionEnvironment {
       return new provisionService_null($this->name);
     }
   }
+
+  /**
+   * Return environment-specific configuration options for help.
+   *
+   * @return
+   *   array('--option' => 'description')
+   */
+  static function option_documentation() {
+    return array();
+  }
 }
 
 /**
@@ -232,8 +272,13 @@ class provisionEnvironment {
  * objects for each of the available service types.
  */
 class provisionServer extends provisionEnvironment {
-
+  /**
+   * Associative array of services for this server.
+   *
+   * @see provisionService
+   */
   protected $services = array();
+
   static function option_documentation() {
     $options = array(
       '--remote_host' => 'server: host name; default localhost',
@@ -436,6 +481,8 @@ class provisionPlatform extends provisionEnvironment {
     $this->setProperty('web_server', '@server_master');
     $this->is_oid('web_server');
     $this->service_subscribe('http', $this->web_server->name);
+
+    $this->setProperty('makefile', '');
   }
 
   function verify() {

@@ -44,35 +44,6 @@ function provision_drupal_drush_engine_drupal() {
   return $engines;
 }
 
-/**
- * Initialize the platform / site
- *
- * This function is executed by drush_invoke, and is responsible
- * for populating the $data context array
- */
-function provision_drupal_drush_init() {
-  $command = drush_get_command();
-  $command = explode(" ", $command['command']);
-
-  if (preg_match("/^provision-/", $command[0])) {
-    _provision_context_init();
-  }
-}
-
-function _provision_context_init() {
-  static $is_run = false;
-
-  if ($is_run) {
-    return TRUE;
-  }
-
-  if ((d()->type === 'platform' || d()->type === 'site') && drush_bootstrap_validate(DRUSH_BOOTSTRAP_DRUPAL_ROOT)) { 
-    // i don't think i should be bootstrapping here yet ... but i have no choice yet.
-    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
-  }
-
-  $is_run = TRUE;
-}
 
 /**
  * Finalize the platform / site
@@ -95,8 +66,8 @@ function provision_drupal_drush_exit() {
       }
     }
     elseif (d()->type === 'platform') {
-      // Generate a drushrc.php for the platform unless it's being deleted
-      if (!preg_match("/^provision-delete/", $command[0])) {
+      // Don't generate the drushrc.php on provision-save/delete commands.
+      if (!preg_match("/^provision-(save|delete)/", $command[0])) {
         provision_save_platform_data();
       }
     }
@@ -113,6 +84,14 @@ function provision_drupal_drush_exit() {
  */
 function _provision_drupal_site_exists() {
   return file_exists(d()->site_path . '/settings.php');
+}
+
+/**
+ * This command does the actual installation in it's own thread,
+ * so we can recover gracefully if things go really wrong.
+ */
+function drush_provision_drupal_provision_install_backend() {
+  drush_include_engine('drupal', 'install');
 }
 
 /**

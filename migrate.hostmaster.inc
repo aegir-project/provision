@@ -3,18 +3,7 @@
 /**
  * @file manual site migrate system
  */
-
 function drush_provision_hostmaster_migrate_validate($site, $platform) {
-  // verify the target platform:
-  if (!is_dir($platform)) {
-    drush_print("The platform path you specified does not exist yet.");
-    drush_print("Downloading the hostmaster front end. (this might take a few minutes)");
-    drush_backend_invoke('make', array(dirname(__FILE__) . '/aegir.make', $platform));
-    if (drush_get_error()) {
-      drush_log("The hostmaster front end could not be downloaded, exiting.", "error");
-    }
-  }
-
   $data = drush_get_merged_options();
   // add a server record :
   $server = '@server_master';
@@ -30,8 +19,8 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
    // mysql
     'db_service_type' => 'mysql',
     'master_db' => $data['master_db'],
-
   ));
+
   provision_backend_invoke($server, 'provision-verify');
   drush_set_option('server_name', $server);
 
@@ -51,6 +40,7 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
     'server' => $server,
     'web_server' => $server,
     'root' => $platform,
+    'makefile' => dirname(__FILE__) . '/aegir.make',
   ));
   provision_backend_invoke($new_platform, 'provision-verify');
   drush_set_option('new_platform', $new_platform);
