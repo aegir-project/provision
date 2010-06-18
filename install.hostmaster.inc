@@ -19,8 +19,6 @@ function drush_provision_hostmaster_install($site = NULL) {
       drush_backend_invoke('dl', array('drush_make-' . drush_get_option('drush_make_version', '6.x-2.0-beta6'), 'destination' => $aegir_root . '/.drush/'));
     }
 
-    drush_print(dt("deploying hostmaster application"));
-    drush_backend_invoke('hostmaster-make', array($platform));
   }
 
   $data['master_db'] = drush_get_option('master_db');
@@ -65,6 +63,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'server' => $server,
     'web_server' => $server,
     'root' => $platform,
+    'makefile' => $aegir_root . '/.drush/provision/aegir.make',
   ));
   provision_backend_invoke($platform_name, 'provision-verify');
 
