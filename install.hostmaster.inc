@@ -70,6 +70,9 @@ function drush_provision_hostmaster_install($site = NULL) {
   if (!drush_get_option('client_email')) {
     $client_email = drush_prompt(dt("Admin user e-mail"), "webmaster@localhost");
   }
+  else {
+    $client_email = drush_get_option('client_email');
+  }
 
   $site_name = '@hostmaster';
   drush_backend_invoke_args("provision-save", array($site_name), array(
