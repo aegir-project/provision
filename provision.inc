@@ -247,7 +247,8 @@ function provision_backend_invoke($target, $command, $arguments = array(), $opti
 
 
 /**
- * A base class for the service and file handling classes that implements chaining of methods.
+ * A base class for the service and file handling classes that implements
+ * chaining of methods.
  */
 class provisionChainedState {
   protected $last_status;

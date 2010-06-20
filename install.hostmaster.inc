@@ -19,8 +19,6 @@ function drush_provision_hostmaster_install($site = NULL) {
       drush_backend_invoke('dl', array('drush_make-' . drush_get_option('drush_make_version', '6.x-2.0-beta6'), 'destination' => $aegir_root . '/.drush/'));
     }
 
-    drush_print(dt("deploying hostmaster application"));
-    drush_backend_invoke('hostmaster-make', array($platform));
   }
 
   $data['master_db'] = drush_get_option('master_db');
@@ -37,15 +35,18 @@ function drush_provision_hostmaster_install($site = NULL) {
     $data['master_db'] = "$scheme://$user:$pass@$host";
   }
 
-  $server = '@server_localhost';
+  // TODO: support creation of an external db server
+  $server = '@server_master';
   drush_backend_invoke_args("provision-save", array($server), array(
     'context_type' => 'server',
-   // files
+    // files
+    'remote_host' => php_uname('n'),
     'aegir_root' => $aegir_root,
-    'script_user' => drush_get_option('script_user', 'aegir'),
+    'script_user' => drush_get_option('script_user', get_current_user()),
    // apache 
     'http_service_type' => 'apache',
     'web_group' => drush_get_option('web_group', _provision_default_web_group()),
+    'master_url' => "http://" . $site . "/",
    // mysql
     'db_service_type' => 'mysql',
     'master_db' => $data['master_db'],
@@ -62,11 +63,15 @@ function drush_provision_hostmaster_install($site = NULL) {
     'server' => $server,
     'web_server' => $server,
     'root' => $platform,
+    'makefile' => $aegir_root . '/.drush/provision/aegir.make',
   ));
   provision_backend_invoke($platform_name, 'provision-verify');
 
   if (!drush_get_option('client_email')) {
     $client_email = drush_prompt(dt("Admin user e-mail"), "webmaster@localhost");
+  }
+  else {
+    $client_email = drush_get_option('client_email');
   }
 
   $site_name = '@hostmaster';

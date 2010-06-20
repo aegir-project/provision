@@ -21,11 +21,11 @@ function drush_provision_drupal_provision_verify_validate() {
 /**
  * implementation of provision_verify
  */
-function drush_provision_drupal_provision_verify() {
+function drush_provision_drupal_pre_provision_verify() {
   if (d()->type === 'server') {
 
     provision_file()->create_dir(d()->config_path, dt('Provision configuration'), 0711);
-    if (d()->name == '@server_localhost') {
+    if (d()->name == '@server_master') {
       provision_file()->create_dir(d()->backup_path, dt('Backup'), 0700);
       provision_file()->create_dir(d()->include_path, dt('Provision PHP configuration'), 0711);
       if (!provision_file()->exists(d()->include_path . '/global.inc')->succeed('Global configuration file exists')->status()) {
@@ -42,6 +42,20 @@ function drush_provision_drupal_provision_verify() {
     }
   }
   elseif (d()->type === 'platform') {
+    // create a platform from a makefile, if it doesnt already exist and the makefile does.
+    if (!provision_file()->exists(d()->root)->status() && !empty(d()->makefile)) {
+      if (provision_file()->exists(d()->makefile)->status()) {
+        drush_log(dt("Platform path does not exists, fetching from drush makefile"));
+        drush_backend_invoke("make", array(d()->makefile, d()->root), array('root' => null, 'uri' => null));
+        if (drush_get_error()) {
+          return drush_set_error("DRUSH_MAKE_FAILED", 
+            "Could not download platform using drush make. No platform present");
+        }
+      }
+
+    }
+
+    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
     provision_file()->writable(d()->root . '/sites')
       ->succeed('Drupal sites directory @path is writable by the provisioning script')
       ->fail('Drupal sites directory @path is not writable by the provisioning script', 'PROVISION_SITES_DIR_NOT_WRITABLE');
