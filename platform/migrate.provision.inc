@@ -14,7 +14,7 @@ function drush_provision_drupal_provision_migrate_validate($platform = null) {
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
-function drush_provision_drupal_pre_provision_migrate($platform = null) {
+function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = null) {
   /* Set offline mode to true and re-generate the settings.php. This will write a 
    * $conf['site_offline'] = 1; to the settings.php
    */
@@ -28,13 +28,21 @@ function drush_provision_drupal_pre_provision_migrate($platform = null) {
     // deploying over existing site.
     drush_set_option('deploy_replace_site', TRUE);
   }
+
+  // If we are renaming the site, pick this up early.
+  if (!is_null($new_uri) && ($new_uri != d()->uri)) {
+    drush_set_option('target_name', $new_uri);
+  }
+  else {
+    drush_set_option('target_name', d()->name);
+  }
 }
 
 /**
  * Remove the extracted site directory
  * Restore the vhost conf per the original platform
  */
-function drush_provision_drupal_pre_provision_migrate_rollback($platform) {
+function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_uri = null) {
   // Set site_offline to false and regenerate the config 
   drush_log(dt("Bringing site out of maintenance"));
   drush_set_option('site_offline', 0);
@@ -50,11 +58,24 @@ function drush_provision_drupal_pre_provision_migrate_rollback($platform) {
 /**
  * Switch the migrate directories around now that we have the new db installed
  */
-function drush_provision_drupal_provision_migrate($platform) {
-  drush_backend_invoke_args('provision-save', array(d()->name), array('platform' => $platform, 'root' => null, 'uri' => null));
-  provision_backend_invoke(d()->name, 'provision-deploy', array(drush_get_option('backup_file')));
+function drush_provision_drupal_provision_migrate($platform, $new_uri = null) {
+
+  $target = drush_get_option('target_name');
+
+  $options = array();
+
+  if (!is_null($new_uri) && ($new_uri != d()->uri)) {
+    $options = d()->options;
+    $options['uri'] = ltrim($new_uri, '@');
+    $options['name'] = $new_uri;
+  }
+  $options['platform'] = $platform;
+  $options['root'] = d($platform)->root;
+
+  drush_backend_invoke_args('provision-save', array($target), $options);
+  provision_backend_invoke($target, 'provision-deploy', array(drush_get_option('backup_file')));
   if (!drush_get_error()) {
-    provision_backend_invoke(d()->name, 'provision-verify');
+    provision_backend_invoke($target, 'provision-verify');
   }
 }
 
@@ -68,8 +89,8 @@ function drush_provision_drupal_provision_migrate_rollback($platform) {
 /**
  * Delete the old site directory and recreate the settings file
  */
-function drush_provision_drupal_post_provision_migrate() {
-  drush_set_option('installed', FALSE)
+function drush_provision_drupal_post_provision_migrate($platform, $new_uri = null) {
+  drush_set_option('installed', FALSE);
 
   if (!drush_get_option('deploy_replace_site', FALSE)) {
     // we remove the aliases even if redirection is enabled as a precaution
@@ -77,6 +98,14 @@ function drush_provision_drupal_post_provision_migrate() {
     _provision_drupal_delete_aliases(d()->aliases);
     _provision_recursive_delete(d()->site_path);
     d()->service('http')->sync(d()->site_path);
+  }
+
+
+
+  if (!is_null($new_uri) && ($new_uri != d()->uri)) {
+    // remove the existing alias 
+    $config = new provisionConfig_drushrc_alias(d()->name);
+    $config->unlink();
   }
 }
 
