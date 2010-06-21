@@ -44,7 +44,11 @@ function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
   $options['platform'] = (isset($platform)) ? $platform : $options['platform'];
   $options['aliases'] = array();
   $options['redirection'] = 0;
-  
+
+  if ($db_server = drush_get_option('new_db_server', FALSE)) {
+    $options['db_server'] = $db_server;
+  }
+
   drush_backend_invoke_args('provision-save', array($new_uri), $options);
   # note that we reset the aliases so they don't conflict with the original site
 
