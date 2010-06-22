@@ -53,6 +53,11 @@ function drush_provision_hostmaster_install($site = NULL) {
   ));
   provision_backend_invoke($server, 'provision-verify');
 
+  // exit if an error has occured. 
+  if (drush_get_error()) {
+    return false;
+  }
+
   if (drush_get_option('backend-only')) {
     return;
   }
@@ -67,8 +72,17 @@ function drush_provision_hostmaster_install($site = NULL) {
   ));
   provision_backend_invoke($platform_name, 'provision-verify');
 
+  // exit if an error has occured. 
+  if (drush_get_error()) {
+    return false;
+  }
+
+
   if (!drush_get_option('client_email')) {
     $client_email = drush_prompt(dt("Admin user e-mail"), "webmaster@localhost");
+  }
+  else {
+    $client_email = drush_get_option('client_email');
   }
 
   $site_name = '@hostmaster';
@@ -83,6 +97,12 @@ function drush_provision_hostmaster_install($site = NULL) {
   ));
   $data = provision_backend_invoke($site_name, 'provision-install');
   provision_backend_invoke($site_name, 'provision-verify');
+
+  // exit if an error has occured. 
+  if (drush_get_error()) {
+    return false;
+  }
+
 
   drush_print("Initializing the hosting system");
   provision_backend_invoke($site_name, 'hosting-setup');

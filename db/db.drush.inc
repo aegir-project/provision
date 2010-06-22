@@ -185,7 +185,7 @@ class provisionService_db extends provisionService {
   function generate_site_credentials() {
     $creds = array();
     // replace with service type 
-    $db_type = drush_get_option('db_type', 'mysql');
+    $db_type = drush_get_option('db_type', function_exists('mysqli_connect') ? 'mysqli' : 'mysql');
     // As of Drupal 7 there is no more mysqli type
     if (drush_drupal_major_version() >= 7) {
       $db_type = ($db_type == 'mysqli') ? 'mysql' : $db_type;
