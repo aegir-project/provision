@@ -54,37 +54,16 @@ class provisionService_db extends provisionService {
   }
 
   /**
-   * Find a viable database name, based on available information.
-   *
-   * This function exists solely to work past mysql's database name restrictions.
-   * As mysql also does not have the ability to rename databases, it is completely
-   * possible that sites will be running with derivative names on the same server,
-   * until the upgrade / restore process is completed.
-   *
-   * TODO: abstract this properly.
+   * Find a viable database name, based on the site's uri.
    */ 
   function suggest_db_name() {
-    if ($sid = drush_get_option('site_id')) {
-      $suggest_base = drush_get_option('aegir_db_prefix', 'site_') . $sid;
-    }
-    elseif ($name = drush_get_option('db_name')) {
-      // consider the verified database name if no site id was provided
-      //
-      // we strip out eventual _N suffixes before finding a new db name
-      // this is necessary because we may already have gone through this
-      // process (in a migration) and had a _N suffix added
-      $suggest_base = preg_replace('/_\d+$/', '', $name);
-    }
-    else {
-      // This is a last option, and not ideal: base the db name on the
-      // site name
-      //
-      // Provision only users will trigger this mostly.
-      $suggest_base = substr(str_replace(array('.', '-'), '' , ereg_replace('^www\.', '', drush_get_option('uri'))), 0, 14);
-    }
-    $suggest[] = $suggest_base;
+    $uri = d($this->context)->uri;
+
+    $suggest_base = str_replace(array('.', '-'), '' , ereg_replace('^www\.', '', $uri));
+
+    $suggest[] = substr($suggest_base, 0, 16);
     for ($i = 0; $i < 100; $i++) {
-      $suggest[] = $suggest_base .'_'. $i;
+      $suggest[] = sprintf("%s_%d", substr($suggest_base, 0, 16 - strlen( (string) $i) ), $i);
     }
 
     foreach ($suggest as $option) {
@@ -95,7 +74,6 @@ class provisionService_db extends provisionService {
 
     drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not find a free database names after 100 attempts"));
     return false;
-
   }
 
   /**
