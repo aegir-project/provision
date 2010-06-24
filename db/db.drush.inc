@@ -39,6 +39,7 @@ class provisionService_db extends provisionService {
   }
 
   function init() {
+    parent::init();
     $this->server->setProperty('master_db');
     $this->creds = array_map('urldecode', parse_url($this->server->master_db));
 
@@ -174,6 +175,7 @@ class provisionService_db extends provisionService {
     //TODO - this should not be here at all
     $creds['db_type'] = drush_set_option('db_type', $db_type, 'site');
     $creds['db_host'] = drush_set_option('db_host', $this->server->remote_host, 'site');
+    $creds['db_port'] = drush_set_option('db_port', $this->server->db_port, 'site');
     $creds['db_passwd'] = drush_set_option('db_passwd', provision_password(), 'site');
     $creds['db_name'] = drush_set_option('db_name', $this->suggest_db_name(), 'site');
     $creds['db_user'] = drush_set_option('db_user', $creds['db_name'], 'site');
@@ -184,7 +186,7 @@ class provisionService_db extends provisionService {
   function fetch_site_credentials() {
     $creds = array();
 
-    $keys = array('db_type', 'db_user', 'db_name', 'db_host', 'db_passwd');
+    $keys = array('db_type', 'db_port', 'db_user', 'db_name', 'db_host', 'db_passwd');
     foreach ($keys as $key) {
       $creds[$key] = drush_get_option($key, '', 'site');
     }
@@ -256,7 +258,7 @@ class provisionService_db_pdo extends provisionService_db {
 
   function init() {
     parent::init();
-    $this->dsn = sprintf("%s:host=%s", $this->PDO_type,  drush_is_local_host($this->creds['host']) ? 'localhost' : $this->creds['host']);
+    $this->dsn = sprintf("%s:host=%s", $this->PDO_type,  provision_is_local_host($this->creds['host']) ? 'localhost' : $this->creds['host']);
   }
 
   function connect() {

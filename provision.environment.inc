@@ -406,7 +406,7 @@ class provisionServer extends provisionEnvironment {
    *   out and error.
    */
   function shell_exec($command) {
-    if (drush_is_local_host($this->remote_host)) {
+    if (provision_is_local_host($this->remote_host)) {
       return drush_shell_exec(escapeshellcmd($command));
     }
     else {
@@ -423,7 +423,7 @@ class provisionServer extends provisionEnvironment {
    *   Exclude sites/*, except sites/*.
    */
   function sync($path = NULL, $exclude_sites = FALSE) {
-    if (!drush_is_local_host($this->remote_host)) {
+    if (!provision_is_local_host($this->remote_host)) {
       if (is_null($path)) {
         $path = $this->config_path;
       }
