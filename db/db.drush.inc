@@ -30,6 +30,8 @@ function db_drush_help($section) {
 
 
 class provisionService_db extends provisionService {
+  protected $service = 'db';
+
   static function option_documentation() {
     return array(
       '--master_db' => 'server with db: Master database connection info, {type}://{user}:{password}@{host}',

@@ -229,28 +229,6 @@ function drush_provision_verify() {
   d()->verify();
 }
 
-function _provision_default_restart_cmd() {
-  $command = '/usr/sbin/apachectl'; // A proper default for most of the world
-  foreach (explode(':', $_SERVER['PATH']) as $path) {
-    $options[] = "$path/apache2ctl";
-    $options[] = "$path/apachectl";
-  }
-  // Try to detect the apache restart command.
-  $options[] = '/usr/local/sbin/apachectl'; // freebsd
-  $options[] = '/usr/sbin/apache2ctl'; // debian + apache2
-  $options[] = '/usr/apache2/2.2/bin'; // Solaris
-  $options[] = $command;
-
-  foreach ($options as $test) {
-    if (is_executable($test)) {
-      $command = $test;
-      break;
-    }
-  }
-
-  return "sudo $command graceful";
-}
-
 function _provision_default_web_group() {
   $info = posix_getgrgid(posix_getgid());
   $common_groups = array(

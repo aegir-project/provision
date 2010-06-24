@@ -1,18 +1,12 @@
 # Aegir web server configuration file
 
-<?php if (is_array($server->web_ports)) :
-  foreach ($server->web_ports as $web_port) :?>
-  NameVirtualHost *:<?php print $web_port; ?>
+NameVirtualHost *:<?php print $web_port; ?>
 
-  <VirtualHost *:<?php print $web_port; ?>>
-    ServerName default
-    Redirect 404 /
-  </VirtualHost>
-  
-<?php
-endforeach;
-endif;
-?>
+<VirtualHost *:<?php print $web_port; ?>>
+  ServerName default
+  Redirect 404 /
+</VirtualHost>
+
 
 <IfModule !env_module>
   LoadModule env_module modules/mod_env.so

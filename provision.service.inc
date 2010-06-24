@@ -8,6 +8,34 @@ require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 class provisionService extends provisionChainedState {
   protected $server = '@server_master';
   public $context;
+  protected $service = null;
+
+  protected $has_restart_cmd = FALSE;
+  protected $has_port = FALSE;
+
+
+  // All services have the ability to have an associated restart command and listen port.
+  function init() {
+    if (!is_null($this->service)) {
+      if ($this->has_port) {
+        $this->server->setProperty($this->service . '_port', $this->default_port());
+      }
+      if ($this->has_restart_cmd) {
+        $this->server->setProperty($this->service . '_restart_cmd', $this->default_restart_cmd());
+      }
+    }
+    return TRUE;
+  }
+
+  function default_port() {
+    return false;
+  }
+
+  function default_restart_cmd() {
+    return false;
+  }
+
+
 
   function __construct($server) {
     $this->server = d($server);
@@ -22,10 +50,6 @@ class provisionService extends provisionChainedState {
   }
 
   function verify() {
-    return TRUE;
-  }
-
-  function init() {
     return TRUE;
   }
 

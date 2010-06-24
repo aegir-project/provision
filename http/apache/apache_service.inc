@@ -1,11 +1,28 @@
 <?php
 
 class provisionService_http_apache extends provisionService_http {
-  static function option_documentation() {
-    return array_merge(parent::option_documentation(), array(
-      '--restart_cmd' => 'server with apache: shell command to restart the server; working default will be attepted',
-      '--web_ports' => 'server with apache: array of ports to make available; default 80',
-    ));
+  protected $has_restart_cmd = TRUE;
+
+  function default_restart_cmd() {
+    $command = '/usr/sbin/apachectl'; // A proper default for most of the world
+    foreach (explode(':', $_SERVER['PATH']) as $path) {
+      $options[] = "$path/apache2ctl";
+      $options[] = "$path/apachectl";
+    }
+    // Try to detect the apache restart command.
+    $options[] = '/usr/local/sbin/apachectl'; // freebsd
+    $options[] = '/usr/sbin/apache2ctl'; // debian + apache2
+    $options[] = '/usr/apache2/2.2/bin'; // Solaris
+    $options[] = $command;
+
+    foreach ($options as $test) {
+      if (is_executable($test)) {
+        $command = $test;
+        break;
+      }
+    }
+
+    return "sudo $command graceful";
   }
 
   function init() {
@@ -13,10 +30,6 @@ class provisionService_http_apache extends provisionService_http {
     $this->server->apache_site_conf_path = $this->server->config_path . '/vhost.d';
     $this->server->apache_platform_conf_path = $this->server->config_path . '/platform.d';
     $this->server->apache_conf_path = $this->server->config_path . '/apache.d';
-
-    // Commands
-    $this->server->setProperty('restart_cmd', _provision_default_restart_cmd());
-    $this->server->setProperty('web_ports', array(80));
   }
 
   /**
@@ -33,6 +46,7 @@ class provisionService_http_apache extends provisionService_http {
   function config_data() {
     return array(
       'server' => $this->server,
+      'http_port' => $this->server->http_port,
       'apache_site_conf_path' => $this->server->apache_site_conf_path,
       'apache_platform_conf_path' => $this->server->apache_platform_conf_path,
       'apache_conf_path' => $this->server->apache_conf_path
@@ -89,7 +103,7 @@ class provisionService_http_apache extends provisionService_http {
   function parse_configs() {
     // This is required to be configurable, due to the fact that different
     // hosts might need to do this differently.
-    if ($this->server->shell_exec($this->server->restart_cmd)) {
+    if ($this->server->shell_exec($this->server->http_restart_cmd)) {
       drush_log(dt('Apache on %server has been restarted', array('%server' => $this->server->remote_host)));
     }
     else {
@@ -152,7 +166,7 @@ class provisionConfig_apache_site extends provisionConfig_apache {
   public $description = 'apache site configuration file';
 
   function filename() {
-    return $this->data['apache_site_conf_path'] . '/' . $this->uri . '_' . $this->site_port;
+    return $this->data['apache_site_conf_path'] . '/' . $this->uri . '_' . $this->data['http_port'];
   }
 
   function process() {
