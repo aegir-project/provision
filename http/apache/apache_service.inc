@@ -87,7 +87,7 @@ class provisionService_http_apache extends provisionService_http {
 
     $config = new provisionConfig_apache_server($this->context, $this->config_data());
     $config->write();
-
+    dlm($config->filename());
 
     // Create a symlink to the site specific apache config in the top level config directory of each server.
     // This way you can still include the same file across all servers.
@@ -166,7 +166,7 @@ class provisionConfig_apache_site extends provisionConfig_apache {
   public $description = 'apache site configuration file';
 
   function filename() {
-    return $this->data['apache_site_conf_path'] . '/' . $this->uri . '_' . $this->data['http_port'];
+    return $this->data['apache_site_conf_path'] . '/' . $this->uri;
   }
 
   function process() {

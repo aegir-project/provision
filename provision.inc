@@ -47,6 +47,21 @@ function provision_is_local_host($host) {
 }
 
 /**
+ * Retrieve a base_url for the currently active site.
+ *
+ * TODO: when we actually support HTTPS, do this correctly.
+ */
+function provision_get_base_url() {
+  $base_url = 'http://' . d()->uri;
+
+  $http_port = d()->web_server->http_port;
+  if (!is_null($http_port) && ($http_port != 80)) {
+    $base_url .= ':' . $http_port;
+  }
+  return $base_url;
+}
+
+/**
  * Save modified options to the drushrc.php file
  */
 function provision_save_server_data() {

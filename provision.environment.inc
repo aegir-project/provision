@@ -496,7 +496,6 @@ class provisionSite extends provisionEnvironment {
       '--platform' => 'site: the platform the site is run on',
       '--db_server' => 'site: the db server the site is run on',
       '--uri' => 'site: example.com URI, no http:// or trailing /',
-      '--site_port' => 'site: port the site is hosted on; default 80',
       '--language' => 'site: site language; default en',
       '--aliases' => 'site: comma-separated URIs',
       '--redirection' => 'site: boolean for whether --aliases should redirect; default false',
@@ -523,7 +522,6 @@ class provisionSite extends provisionEnvironment {
 
     $this->setProperty('site_enabled', true);
     $this->setProperty('language', 'en');
-    $this->setProperty('site_port', 80);
     $this->setProperty('client_email');
     $this->setProperty('aliases', array(), TRUE);
     $this->setProperty('redirection', FALSE);

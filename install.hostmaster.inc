@@ -92,7 +92,6 @@ function drush_provision_hostmaster_install($site = NULL) {
     'db_server' => $server,
     'uri' => $site,
     'client_email' => $client_email,
-    'site_port' => drush_get_option('web_port', 80),
     'profile' => 'hostmaster',
   ));
   $data = provision_backend_invoke($site_name, 'provision-install');

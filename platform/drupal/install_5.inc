@@ -4,25 +4,12 @@
  *    Rebuild all the caches
  */
 
-$GLOBALS['url'] = drush_get_option('uri');
-$GLOBALS['profile'] = drush_get_option('profile');
-$GLOBALS['install_locale'] = drush_get_option('language');
-$GLOBALS['client_email'] = drush_get_option('client_email');
+$GLOBALS['url'] = d()->uri;
+$GLOBALS['profile'] = d()->profile;
+$GLOBALS['install_locale'] = d()->language;
+$GLOBALS['client_email'] = d()->client_email;
+$GLOBALS['base_url'] = provision_get_base_url();
 
-// url generation code, should be factored out
-$proto = drush_get_option('ssl') ? 'https' : 'http';
-if (drush_get_option('site_port') == 80) {
-  if (drush_get_option('ssl')) {
-    $GLOBALS['base_url'] = $proto . '://' . $GLOBALS['url'] . ':80';
-  }
-}
-elseif (drush_get_option('site_port') == 443) {
-  if (!drush_get_option('ssl')) {
-    $GLOBALS['base_url'] = $proto . '://' . $GLOBALS['url'] . ':443';
-  }
-} else {
-  $GLOBALS['base_url'] = $proto . '://' . $GLOBALS['url'] . ':' . drush_get_option('site_port');
-}
 
 require_once 'includes/install.inc';
 
