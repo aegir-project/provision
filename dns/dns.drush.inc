@@ -9,6 +9,8 @@
  * tie into the right places in the site creation work flow.
  */
 
+include_once(dirname(__FILE__) . '/../provision.service.inc');
+
 /**
  * Implementation of hok_drush_command().
  */
