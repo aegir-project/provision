@@ -313,7 +313,7 @@ function _provision_drupal_get_cvs_versions($files) {
  */
 function _provision_drupal_maintain_aliases() {
   if (d()->type === 'site') {
-    _provision_drupal_delete_aliases(d()->aliases);
+    _provision_drupal_delete_aliases();
 
     if (!d()->redirection) {
       foreach(d()->aliases as $alias) {
@@ -331,13 +331,30 @@ function _provision_drupal_maintain_aliases() {
 /**
  * Delete a list of aliases
  */
-function _provision_drupal_delete_aliases($aliases) {
-  foreach ($aliases as $alias) {
-    if ($alias = trim($alias)) {
-      provision_file()->unlink(d()->root . '/sites/' . $alias)
-        ->succeed('Removed symlink for alias @path')
-        ->fail('Could not remove symlink for alias @path');
-      d()->service('http')->sync(d()->root . '/sites/' . $alias);
+function _provision_drupal_delete_aliases() {
+  $aliases = array();
+  if (d()->type === 'site') {
+    if ($dir = opendir(d()->root . "/sites")) {
+      while (FALSE !== ($subdir = readdir($dir))) {
+        // skip internal directory pointers
+        if ($subdir != '.' && $subdir != '..') {
+          $path = d()->root . '/sites/' . $subdir;
+          if (is_link($path)) {
+            if (d()->uri === readlink($path)) {
+              $aliases[] = $path;
+            }
+          }
+        }
+      }
+      closedir($dir);
+
+      foreach ($aliases as $alias) {
+        provision_file()->unlink($alias)
+          ->succeed('Removed symlink for alias @path')
+          ->fail('Could not remove symlink for alias @path');
+        d()->service('http')->sync($alias);
+      }
+
     }
   }
 }
