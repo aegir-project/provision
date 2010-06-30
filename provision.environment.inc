@@ -197,7 +197,10 @@ class provisionEnvironment {
    */
   function setProperty($field, $default = NULL, $array = FALSE) {
     if (isset($this->options[$field])) {
-      if ($array && !is_array($this->options[$field])) {
+      if ($this->options[$field] === 'null') {
+        $this->$field = $default;
+      }
+      elseif ($array && !is_array($this->options[$field])) {
         $this->$field = explode(',', $this->options[$field]);
       }
       else {
@@ -316,6 +319,8 @@ class provisionServer extends provisionEnvironment {
       $this->aegir_root = d('@server_master')->aegir_root;
       $this->script_user = d('@server_master')->script_user;
     }
+
+    $this->setProperty('ip_addresses', array(), true);
 
     $this->backup_path = $this->aegir_root . '/backups';
     $this->config_path = $this->aegir_root . '/config/' . ltrim($this->name, '@');
