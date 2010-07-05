@@ -43,7 +43,7 @@ function provision_is_local_host($host) {
   // your site alias.  Note that sometimes 'uname -n' does not return the
   // correct value.  To fix it, put the correct hostname in /etc/hostname
   // and then run 'hostname -F /etc/hostname'.
-  return ($host == 'localhost') || ($host == '127.0.0.1') || ($host == strtolower(php_uname('n')));
+  return ($host == 'localhost') || ($host == '127.0.0.1') || ($host == strtolower(php_uname('n'))) || ($host == strtolower(gethostbyaddr(gethostbyname(php_uname('n')))));
 }
 
 /**
