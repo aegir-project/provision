@@ -8,6 +8,29 @@ function http_provision_services() {
 }
 
 class provisionService_http extends provisionService {
+  public $service = 'http';
+
+  protected $has_port = TRUE;
+
+  function init() {
+    parent::init();
+    // System account
+    if ($this->server->name == '@server_master') {
+      $this->server->setProperty('web_group', _provision_default_web_group());
+    }
+    else {
+      $this->server->web_group = d('@server_master')->web_group;
+    }
+
+    // Redirection urls
+    $this->server->setProperty('web_disable_url', $this->server->master_url .'/hosting/disabled');
+    $this->server->setProperty('web_maintenence_url', $this->server->master_url .'/hosting/maintenance');
+  }
+
+  function default_port() {
+    return 80;
+  }
+
   static function option_documentation() {
     return array(
       '--web_group' => 'server with http: OS group for permissions; working default will be attepted',
@@ -16,20 +39,6 @@ class provisionService_http extends provisionService {
     );
   }
 
-  function init() {
-    parent::init();
-    // System account
-    if ($this->server->name == '@server_localhost') {
-      $this->server->setProperty('web_group', _provision_default_web_group());
-    }
-    else {
-      $this->server->web_group = d('@server_localhost')->web_group;
-    }
-
-    // Redirection urls
-    $this->server->setProperty('web_disable_url', $this->server->master_url .'/hosting/disabled');
-    $this->server->setProperty('web_maintenence_url', $this->server->master_url .'/hosting/maintenance');
-  }
 
   function verify() {
     switch (d()->type) {

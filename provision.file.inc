@@ -401,7 +401,7 @@ class provisionFileSystem extends provisionChainedState {
    *
    * @see file_put_contents()
    */
-  function file_put_contents($path, $data, $flags) {
+  function file_put_contents($path, $data, $flags = 0) {
     $this->_clear_state();
 
     $this->tokens = array('@path' => $path);

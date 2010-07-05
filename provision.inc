@@ -25,6 +25,41 @@ drush_errors_on();
  * values, that allow sites to be more easily moved between different provisioned platforms.
  */
 
+/**
+ * Make a determination whether or not the given
+ * host is local or not.
+ *
+ * We needed to fork this from drush core to handle the case sensitivity in host names.
+ *
+ * @param host
+ *   A hostname, 'localhost' or '127.0.0.1'.
+ * @return
+ *   True if the host is local.
+ */
+function provision_is_local_host($host) {
+  $host = strtolower($host);
+  // In order for this to work right, you must use 'localhost' or '127.0.0.1'
+  // or the machine returned by 'uname -n' for your 'remote-host' entry in
+  // your site alias.  Note that sometimes 'uname -n' does not return the
+  // correct value.  To fix it, put the correct hostname in /etc/hostname
+  // and then run 'hostname -F /etc/hostname'.
+  return ($host == 'localhost') || ($host == '127.0.0.1') || ($host == strtolower(php_uname('n')));
+}
+
+/**
+ * Retrieve a base_url for the currently active site.
+ *
+ * TODO: when we actually support HTTPS, do this correctly.
+ */
+function provision_get_base_url() {
+  $base_url = 'http://' . d()->uri;
+
+  $http_port = d()->web_server->http_port;
+  if (!is_null($http_port) && ($http_port != 80)) {
+    $base_url .= ':' . $http_port;
+  }
+  return $base_url;
+}
 
 /**
  * Save modified options to the drushrc.php file
@@ -247,7 +282,8 @@ function provision_backend_invoke($target, $command, $arguments = array(), $opti
 
 
 /**
- * A base class for the service and file handling classes that implements chaining of methods.
+ * A base class for the service and file handling classes that implements
+ * chaining of methods.
  */
 class provisionChainedState {
   protected $last_status;

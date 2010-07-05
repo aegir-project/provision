@@ -22,7 +22,11 @@ function drush_provision_drupal_post_provision_import() {
   if (d()->type === 'site') {
     d()->profile = drush_get_option('profile', 'default', 'site');
     d()->language = drush_get_option('language', 'en', 'site');
+    d()->aliases = drush_set_option('aliases', provision_drupal_find_aliases());
     d()->write_alias();
+
+    // set this in the site options too so it recurrs.
+    drush_set_option('aliases', drush_get_option('aliases'),  'site');
 
     provision_backend_invoke(d()->name, 'provision-verify');
   }

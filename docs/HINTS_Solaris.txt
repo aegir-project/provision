@@ -127,4 +127,4 @@ Content of dispatch.sh::
  export LD_LIBRARY_PATH
  export PATH
  
- php '/var/aegir/drush/drush.php' --php=/usr/local/bin/php hosting tasks --root='/var/aegir/hostmaster-HEAD' --uri='http://aegir.example.com'
+ php '/var/aegir/drush/drush.php' --php=/usr/local/bin/php '@hostmaster' hosting-dispatch

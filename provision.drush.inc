@@ -82,9 +82,14 @@ function provision_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
   $items['provision-install'] = array(
-    'arguments' => array('domain.com' => dt('The domain of the site to install.')),
     'description' => dt('Provision a new site using the provided data.'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
+  );
+
+  $items['provision-install-backend'] = array(
+    'description' => dt('Provision a new site using the provided data.'),
+    'hidden' => TRUE,
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_SITE
   );
 
   $items['provision-import'] = array(
@@ -176,14 +181,6 @@ function provision_drush_command() {
     ),
   );
 
-  $items['hostmaster-make'] = array(
-    'description' => dt('Build a platform containing the Hostmaster user interface for provision.'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
-    'arguments' => array(
-      '/path/to/platform' => dt('The path to create the platform in.')
-    ),
-  );
-
   $items['hostmaster-install'] = array(
     'description' => dt('Install and verify the Hostmaster frontend.'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
@@ -216,10 +213,6 @@ function provision_drush_command() {
   return $items;
 }
 
-function drush_provision_hostmaster_make($platform) {
-  drush_backend_invoke('make', array(dirname(__FILE__) . '/aegir.make', $platform));
-}
-
 function drush_provision_save($alias = null) {
   if (drush_get_option('delete', false)) {
     // remove an existing alias 
@@ -234,28 +227,6 @@ function drush_provision_save($alias = null) {
 
 function drush_provision_verify() {
   d()->verify();
-}
-
-function _provision_default_restart_cmd() {
-  $command = '/usr/sbin/apachectl'; // A proper default for most of the world
-  foreach (explode(':', $_SERVER['PATH']) as $path) {
-    $options[] = "$path/apache2ctl";
-    $options[] = "$path/apachectl";
-  }
-  // Try to detect the apache restart command.
-  $options[] = '/usr/local/sbin/apachectl'; // freebsd
-  $options[] = '/usr/sbin/apache2ctl'; // debian + apache2
-  $options[] = '/usr/apache2/2.2/bin'; // Solaris
-  $options[] = $command;
-
-  foreach ($options as $test) {
-    if (is_executable($test)) {
-      $command = $test;
-      break;
-    }
-  }
-
-  return "sudo $command graceful";
 }
 
 function _provision_default_web_group() {

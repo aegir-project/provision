@@ -1,15 +1,20 @@
 <?php
 /**
- * Provision environment API
- *
- *
+ * @file Provision environment API
  */
 
 /**
- * Store and access environment objects by their alias name
+ * Store and access environment objects by alias name.
  *
+ * @param $name
+ *   A Drush alias name, including leading @.
+ * @param $_root_object
+ *   Internal use only, set default object returned by d().
+ *
+ * @return
+ *   provisionEnvironment object.
  */
-function & d($name = NULL, $root_object = FALSE) {
+function & d($name = NULL, $_root_object = FALSE) {
   static $instances = null;
   static $default_instance = '@self';
 
@@ -21,7 +26,7 @@ function & d($name = NULL, $root_object = FALSE) {
     return $instances[$default_instance];
   }
   else {
-    if ($root_object) {
+    if ($_root_object) {
       $default_instance = $name;
     }
 
@@ -39,9 +44,8 @@ function & d($name = NULL, $root_object = FALSE) {
 /**
  * Simple access layer for drush_sitealias_get_record.
  *
- * Everytime sitealiases are fetched a lot of processing happens,
- * but if the file doesnt exist yet there's a whole lot of unnecesary
- * stuff happening. 
+ * Everytime sitealiases are fetched a lot of processing happens, but if the
+ * file doesnt exist yet there's a whole lot of unnecesary stuff happening. 
  *
  * We cache the result locally here.
  */
@@ -56,7 +60,8 @@ function provision_sitealias_get_record($name) {
 }
 
 /**
- * Create a new environment object and cache it in the d() static cache function.
+ * Create a new environment object and cache it in the d() static cache
+ * function.
  */
 function provision_environment_factory($name) {
   $classes = array('server' => 'provisionServer', 'platform' => 'provisionPlatform', 'site' => 'provisionSite');
@@ -77,26 +82,42 @@ function provision_environment_factory($name) {
   return new $classname($name);
 }
 
-
 /**
  * Base environment class.
  *
  * Contains magic getter/setter functions
  */
 class provisionEnvironment {
+  /**
+   * Name for saving aliases and referencing.
+   */
   public $name = null;
+
+  /**
+   * 'server', 'platform', or 'site'.
+   */
   public $type = null;
 
-
+  /**
+   * Properties that will be persisted by provision-save. Access as object
+   * members, $envoronment->property_name. __get() and __set handle this. In
+   * init(), set defaults with setProperty().
+   */
   protected $properties = array();
+
+  /**
+   * Keeps track of properites that are names of provisionEnvironment objects.
+   * Set with is_oid().
+   */
+  protected $oid_map = array();
 
   protected $service_subs = array();
   protected $parent_key = null;
 
-  protected $oid_map = array();
-
   /**
-   * Retrieve value from $properties array if property does not exist in class proper.
+   * Retrieve value from $properties array if property does not exist in class
+   * proper. Properties that refer to provisionEnvironment objects will be run
+   * through d(), see is_oid().
    *
    * TODO: consider returning a reference to the value, so we can do things like:
    *       `$this->options['option'] = 'value'` and it will correctly set it in the
@@ -143,7 +164,8 @@ class provisionEnvironment {
   }
 
   /**
-   * Remove the value from the properties array if the property does not exist in the class proper.
+   * Remove the value from the properties array if the property does not exist
+   * in the class proper.
    */
   function __unset($name) {
     if (isset($this->properties[$name])) {
@@ -163,7 +185,7 @@ class provisionEnvironment {
   }
 
   /**
-   * Init stub function/
+   * Init stub function.
    */
   function init() {
     $this->setProperty('context_type', 'server');
@@ -175,7 +197,10 @@ class provisionEnvironment {
    */
   function setProperty($field, $default = NULL, $array = FALSE) {
     if (isset($this->options[$field])) {
-      if ($array && !is_array($this->options[$field])) {
+      if ($this->options[$field] === 'null') {
+        $this->$field = $default;
+      }
+      elseif ($array && !is_array($this->options[$field])) {
         $this->$field = explode(',', $this->options[$field]);
       }
       else {
@@ -208,9 +233,17 @@ class provisionEnvironment {
   /**
    * Return a service object for the specific service type.
    *
-   * This will return a specifically subscribed service object when 
-   * one has been registered with service_subscribe, otherwise it will
-   * return the value specified by the property specified by $this->parent_key.
+   * This will return a specifically subscribed service object when one has
+   * been registered with service_subscribe, otherwise it will return the value
+   * specified by the property specified by $this->parent_key.
+   *
+   * @param $service
+   *   Service type, such as 'http' or 'db'
+   * @param $name
+   *   Override service owner with a context name as accepted by d().
+   *
+   * @return
+   *   A provisionService object.
    */
   function service($service, $name = null) {
     if (isset($this->service_subs[$service])) {
@@ -223,6 +256,16 @@ class provisionEnvironment {
       return new provisionService_null($this->name);
     }
   }
+
+  /**
+   * Return environment-specific configuration options for help.
+   *
+   * @return
+   *   array('--option' => 'description')
+   */
+  static function option_documentation() {
+    return array();
+  }
 }
 
 /**
@@ -232,8 +275,13 @@ class provisionEnvironment {
  * objects for each of the available service types.
  */
 class provisionServer extends provisionEnvironment {
-
+  /**
+   * Associative array of services for this server.
+   *
+   * @see provisionService
+   */
   protected $services = array();
+
   static function option_documentation() {
     $options = array(
       '--remote_host' => 'server: host name; default localhost',
@@ -263,14 +311,16 @@ class provisionServer extends provisionEnvironment {
 
     $this->type = 'server';
     $this->setProperty('remote_host', 'localhost');
-    if ($this->name == '@server_localhost') {
+    if ($this->name == '@server_master') {
       $this->setProperty('aegir_root', getenv('HOME'));
       $this->setProperty('script_user', get_current_user());
     }
     else {
-      $this->aegir_root = d('@server_localhost')->aegir_root;
-      $this->script_user = d('@server_localhost')->script_user;
+      $this->aegir_root = d('@server_master')->aegir_root;
+      $this->script_user = d('@server_master')->script_user;
     }
+
+    $this->setProperty('ip_addresses', array(), true);
 
     $this->backup_path = $this->aegir_root . '/backups';
     $this->config_path = $this->aegir_root . '/config/' . ltrim($this->name, '@');
@@ -361,7 +411,7 @@ class provisionServer extends provisionEnvironment {
    *   out and error.
    */
   function shell_exec($command) {
-    if (drush_is_local_host($this->remote_host)) {
+    if (provision_is_local_host($this->remote_host)) {
       return drush_shell_exec(escapeshellcmd($command));
     }
     else {
@@ -375,10 +425,10 @@ class provisionServer extends provisionEnvironment {
    * @param $path
    *   Full path to sync.
    * @param $exclude_sites
-   *   Exclude sites/*, except sites/*.
+   *   Exclude sites/*, except sites/all.
    */
   function sync($path = NULL, $exclude_sites = FALSE) {
-    if (!drush_is_local_host($this->remote_host)) {
+    if (!provision_is_local_host($this->remote_host)) {
       if (is_null($path)) {
         $path = $this->config_path;
       }
@@ -418,8 +468,8 @@ class provisionPlatform extends provisionEnvironment {
   static function option_documentation() {
     return array(
       '--root' => 'platform: path to a Drupal installation',
-      '--server' => 'drush backend server; default @server_localhost',
-      '--web_server' => 'web server hosting the platform; default @server_localhost',
+      '--server' => 'drush backend server; default @server_master',
+      '--web_server' => 'web server hosting the platform; default @server_master',
     );
   }
 
@@ -430,12 +480,14 @@ class provisionPlatform extends provisionEnvironment {
     $this->type = 'platform';
     $this->setProperty('root');
 
-    $this->setProperty('server', '@server_localhost');
+    $this->setProperty('server', '@server_master');
     $this->is_oid('server');
 
-    $this->setProperty('web_server', '@server_localhost');
+    $this->setProperty('web_server', '@server_master');
     $this->is_oid('web_server');
     $this->service_subscribe('http', $this->web_server->name);
+
+    $this->setProperty('makefile', '');
   }
 
   function verify() {
@@ -449,7 +501,6 @@ class provisionSite extends provisionEnvironment {
       '--platform' => 'site: the platform the site is run on',
       '--db_server' => 'site: the db server the site is run on',
       '--uri' => 'site: example.com URI, no http:// or trailing /',
-      '--site_port' => 'site: port the site is hosted on; default 80',
       '--language' => 'site: site language; default en',
       '--aliases' => 'site: comma-separated URIs',
       '--redirection' => 'site: boolean for whether --aliases should redirect; default false',
@@ -476,11 +527,10 @@ class provisionSite extends provisionEnvironment {
 
     $this->setProperty('site_enabled', true);
     $this->setProperty('language', 'en');
-    $this->setProperty('site_port', 80);
     $this->setProperty('client_email');
     $this->setProperty('aliases', array(), TRUE);
     $this->setProperty('redirection', FALSE);
-    $this->setProperty('db_server', '@server_localhost');
+    $this->setProperty('db_server', '@server_master');
     $this->is_oid('db_server');
 
     $this->service_subscribe('db', $this->db_server->name);

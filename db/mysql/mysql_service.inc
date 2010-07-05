@@ -7,6 +7,11 @@
 class provisionService_db_mysql extends provisionService_db_pdo {
    public $PDO_type = 'mysql';
 
+   protected $has_port = TRUE;
+
+   function default_port() {
+     return 3306;
+   }
 
   function database_exists($name) {
     $result = $this->query("SHOW DATABASES LIKE '%s'", $name);

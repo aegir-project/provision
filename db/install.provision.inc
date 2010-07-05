@@ -9,7 +9,5 @@ function drush_db_pre_provision_install() {
 }
 
 function drush_db_pre_provision_install_rollback() {
-  if (!_provision_drupal_site_installed()) {
-    d()->service('db')->destroy_site_database();
-  }
+  d()->service('db')->destroy_site_database();
 }
