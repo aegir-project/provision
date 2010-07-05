@@ -425,7 +425,7 @@ class provisionServer extends provisionEnvironment {
    * @param $path
    *   Full path to sync.
    * @param $exclude_sites
-   *   Exclude sites/*, except sites/*.
+   *   Exclude sites/*, except sites/all.
    */
   function sync($path = NULL, $exclude_sites = FALSE) {
     if (!provision_is_local_host($this->remote_host)) {
