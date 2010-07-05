@@ -124,12 +124,12 @@ class provisionService_dns_bind extends provisionService_dns {
     return $zone->delete_line($pattern);
   }
 
-  function zone_exists($zone) {
+  function zone_exists($zonename) {
     $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
     return $zone->exists();
   }
 
-  function count_records($zone, $include = null, $exclude = null) {
+  function count_records($zonename, $include = null, $exclude = null) {
     $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
     return $zone->count_records($include, $exclude);
   }
