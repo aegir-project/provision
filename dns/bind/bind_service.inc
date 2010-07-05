@@ -242,6 +242,19 @@ class provisionConfig_bind_zone extends provisionConfig {
     fclose($fd);    
   }
 
+  function delete_line($pattern) {
+    $file = $this->filename();
+    $fd = fopen($file, 'r+');
+    flock($fd, LOCK_EX);
+    $body = fread($fd, filesize($file));
+    $newbody = preg_replace($pattern, '', $body);
+    drush_log("pattern $pattern found and replaced with $replacement");
+    fseek($fd, 0);
+    fwrite($fd, $newbody);
+    ftruncate($fd, strlen($newbody));
+    fclose($fd);    
+  }
+
   function zone_declaration() {
     return 'zone "' . $this->data['name'] . '" { type master; file "' . $this->filename() . '"; allow-query { any; }; };';
   }
