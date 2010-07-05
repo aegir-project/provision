@@ -25,6 +25,12 @@ function dns_drush_command() {
 
 function drush_dns_provision_zone($action, $zone, $name = null, $type = null, $destination = null) {
   switch ($action) {
+  case 'create-host':
+    $status = d()->service('dns')->create_host($zone);
+    break;
+  case 'delete-host':
+    $status = d()->service('dns')->delete_host($zone);
+    break;
   case 'verify':
   case 'create':
     $status = d()->service('dns')->create_zone($zone);
@@ -114,12 +120,21 @@ class provisionService_dns extends provisionService {
    * this host belongs to.
    */
   function guess_zone($host) {
-    if ($this->zone_exists($host)) {
-      return array($host, '@');
-    } else {
-      // TODO: examine subdomains
-      return array($host, '@');
-    }
+    $parts = explode(".", $host);
+    $subdomain = array();
+    $tld = FALSE;
+    do {
+      $tld = join(".", $parts);
+      if (!$this->zone_exists($tld)) {
+        $scrap = array_shift($parts);
+        $subdomain[] = $scrap;
+        drush_log("zone $tld not found, ditching $scrap");
+        $tld = FALSE;
+      }
+    } while (!$tld || count($parts) < 1);
+    $subdomain = join(".", $subdomain);
+    drush_log("guess_zone guessed parts $tld, $subdomain");
+    return array($subdomain, $tld);
   }
 
   function soa_string($name) {
@@ -212,7 +227,7 @@ class provisionService_dns extends provisionService {
     if (!$this->zone_exists($parts[0])) {
       $this->create_zone($parts[0]);
     }
-    $this->edit_record($parts[1]);
+    $this->edit_record($parts[0], $parts[1], 'A', '1.2.3.4');
   }
 
   /**
@@ -222,7 +237,7 @@ class provisionService_dns extends provisionService {
    */
   function delete_host($host) {
     $parts = $this->guess_zone($host);
-    $this->delete_record($parts[1]);
+    $this->delete_record($parts[0], $parts[1], 'A');
     if ($this->count_records($parts[0], null, array('NS', 'SOA'))) {
       $this->delete_zone($parts[0]);
     }
