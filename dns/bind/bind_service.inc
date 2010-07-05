@@ -89,7 +89,7 @@ class provisionService_dns_bind extends provisionService_dns {
     }
   }
 
-  function add_record($zonename, $name, $destination, $type = 'A') {
+  function add_record($zonename, $name, $type, $destination) {
     $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
     if ($type == 'SOA') { // only one SOA per file
       return $zone->add_line_if_not_exists($name . ' IN SOA ' . $destination, '/(?:@\s+)?IN\s+SOA\s+/');
@@ -98,7 +98,7 @@ class provisionService_dns_bind extends provisionService_dns {
     }
   }
 
-  function edit_record($zonename, $name, $destination, $type = 'A') {
+  function edit_record($zonename, $name, $type, $destination) {
     $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
     $pattern = "/^\s*$name\s+IN\s+$type\s+.*$/im";
     if ($type == 'SOA') {
@@ -107,7 +107,7 @@ class provisionService_dns_bind extends provisionService_dns {
     return $zone->replace_or_add_line($name . "\tIN\t" . $type . "\t" . $destination, $pattern);
   }
 
-  function delete_record($zonename, $name, $destination = null, $type = null) {
+  function delete_record($zonename, $name, $type = null, $destination = null) {
     $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
     $pattern = "/^$name\s\s*IN\s\s*";
     if (is_null($type)) {

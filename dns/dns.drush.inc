@@ -23,7 +23,7 @@ function dns_drush_command() {
   return $items;
 }
 
-function drush_dns_provision_zone($action, $zone, $name = null, $destination = null, $type = null) {
+function drush_dns_provision_zone($action, $zone, $name = null, $type = null, $destination = null) {
   switch ($action) {
   case 'verify':
   case 'create':
@@ -33,13 +33,13 @@ function drush_dns_provision_zone($action, $zone, $name = null, $destination = n
     $status = d()->service('dns')->delete_zone($zone);
     break;
   case 'rr-add':
-    $status = d()->service('dns')->add_record($zone, $name, $destination, $type);
+    $status = d()->service('dns')->add_record($zone, $name, $type, $destination);
     break;
   case 'rr-modify':
-    $status = d()->service('dns')->modify_record($zone, $name, $destination, $type);
+    $status = d()->service('dns')->modify_record($zone, $name, $type, $destination);
     break;
   case 'rr-delete':
-    $status = d()->service('dns')->delete_record($zone, $name, $destination, $type);
+    $status = d()->service('dns')->delete_record($zone, $name, $type, $destination);
     break;
   }
   $status = $status && d()->service('dns')->commit($zone);
@@ -181,14 +181,14 @@ class provisionService_dns extends provisionService {
    * This doesn't check if the record already exists, it just adds it
    * to the end of the file.
    */
-  function add_record($zonename, $name, $destination, $type = 'A') {
+  function add_record($zonename, $name, $type, $destination) {
     return FALSE;
   }
 
   /**
    * This creates or replaces a record (RR) in a zonefile.
    */
-  function edit_record($zonename, $name, $destination, $type = 'A') {
+  function edit_record($zonename, $name, $type, $destination) {
     return FALSE;
   }
 
@@ -197,7 +197,7 @@ class provisionService_dns extends provisionService {
    *
    * If destination or type is null, they are disregarded in the pattern.
    */
-  function delete_record($zonename, $name, $destination = null, $type = null) {
+  function delete_record($zonename, $name, $type, $destination = null) {
     return FALSE;
   }
 

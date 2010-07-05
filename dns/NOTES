@@ -2,7 +2,7 @@ To test this:
 
 drush provision-save @server_localhost --dns_service_type=bind
 drush @server_localhost provision-zone create foobar.com
-drush @server_localhost provision-zone rr-add foobar.com www 1.2.3.4 A
+drush @server_localhost provision-zone rr-add foobar.com www A 1.2.3.4
 
 You should end up with a zonefile like:
 
