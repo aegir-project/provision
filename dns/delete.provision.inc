@@ -15,7 +15,13 @@
  * (ie: pull off the tld and second-level domain for the 'base' zone, and treat the rest as the 'name')
  */
 function drush_dns_provision_delete($url = NULL) {
-  if ($url) {
-#    dns_delete($url);
+  if (d()->type == 'site') {
+    d()->service('dns')->delete_host(d()->uri);
+  }
+}
+
+function drush_dns_post_provision_delete() {
+  if (d()->type == 'site') {
+    d()->service('dns')->commit();
   }
 }
