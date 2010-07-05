@@ -81,7 +81,9 @@ class provisionService_http_apache extends provisionService_http {
 
   function create_server_config() {
     provision_file()->create_dir($this->server->apache_site_conf_path, dt("Virtual host configuration"), 0700);
+    $this->sync($this->server->apache_site_conf_path, array('exclude' => $this->server->apache_site_conf_path . '/*')); // Make sure remote directory is created
     provision_file()->create_dir($this->server->apache_platform_conf_path, dt("Platforms configuration"), 0700);
+    $this->sync($this->server->apache_platform_conf_path, array('exclude' => $this->server->apache_platform_conf_path . '/*')); // Make sure remote directory is created
     provision_file()->create_dir($this->server->apache_conf_path , dt("Apache configuration"), 0700);
     $this->sync($this->server->apache_conf_path);
 
