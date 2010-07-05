@@ -118,6 +118,10 @@ class provisionService_dns extends provisionService {
    *
    * This function will examine the existing zones to find to which
    * this host belongs to.
+   *
+   * @param $host the name of the record to add (e.g. www.example.com)
+   *
+   * @returns array the record and zone name to add the record to (e.g. www and example.com)
    */
   function guess_zone($host) {
     $parts = explode(".", $host);
@@ -224,10 +228,24 @@ class provisionService_dns extends provisionService {
    */
   function create_host($host) {
     $parts = $this->guess_zone($host);
-    if (!$this->zone_exists($parts[0])) {
-      $this->create_zone($parts[0]);
+    $zone = $parts[1];
+    $sub = $parts[0];
+    if (!$this->zone_exists($zone)) {
+      $this->create_zone($zone);
     }
-    $this->edit_record($parts[0], $parts[1], 'A', '1.2.3.4');
+    $ips = d($site)->service('http')->server->ip_addresses;
+    if (!is_array($ips)) {
+      if (!$ips) {
+        drush_log(dt("no IP found for server, trying loopback"));
+        $ips = '127.0.0.1';
+      }
+      $this->edit_record($zone, $sub, 'A', $ips);
+    } else {
+      $this->delete_record($zone, $sub, 'A');
+      foreach ($ips as $ip) {
+        $this->add_record($zone, $sub, 'A', $ip);
+      }
+    }
   }
 
   /**
