@@ -424,24 +424,23 @@ class provisionServer extends provisionEnvironment {
    *
    * @param $path
    *   Full path to sync.
-   * @param $exclude_sites
-   *   Exclude sites/*, except sites/all.
+   * @param $additional_options
+   *   An array of options that overrides whatever was passed in on the command
+   *   line (like the 'process' context, but only for the scope of this one
+   *   call).
    */
-  function sync($path = NULL, $exclude_sites = FALSE) {
+  function sync($path = NULL, $additional_options = array()) {
     if (!provision_is_local_host($this->remote_host)) {
       if (is_null($path)) {
         $path = $this->config_path;
       }
 
       if (provision_file()->exists($path)->status()) {
-        $options = array(
+        $options = array_merge(array(
           'relative' => TRUE,
           'omit-dir-times' => TRUE,
           'delete' => TRUE,
-        );
-        if ($exclude_sites) {
-          $options['exclude-sites'] = TRUE;
-        }
+        ), $additional_options);
         if (drush_core_call_rsync(escapeshellarg($path), escapeshellarg($this->script_user . '@' . $this->remote_host . ':/'), $options, TRUE, FALSE)) {
           drush_log(dt('@path has been synced to remote server @remote_host.', array('@path' => $path, '@remote_host' => $this->remote_host)));
         }
