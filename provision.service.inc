@@ -45,8 +45,8 @@ class provisionService extends provisionChainedState {
     $this->context = $name;
   }
 
-  function sync($path = NULL, $exclude_sites = FALSE) {
-    return $this->server->sync($path, $exclude_sites);
+  function sync($path = NULL, $additional_options = array()) {
+    return $this->server->sync($path, $additional_options);
   }
 
   function verify() {
