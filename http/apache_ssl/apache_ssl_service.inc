@@ -11,10 +11,13 @@
 class provisionService_http_apache_ssl extends provisionService_http_apache {
   public $ssl_enabled = TRUE;
 
-  class create_server_config() {
+  function init() {
+    parent::init();
 
+    $this->configs['server'] = array();
+    $this->configs['server'][] = 'provisionConfig_apache_server_ssl';
+    $this->configs['site'][] = 'provisionConfig_apache_site_ssl';
   }
-
 }
 
 class provisionConfig_apache_server_ssl extends provisionConfig_apache_server {
@@ -27,6 +30,6 @@ class provisionConfig_apache_site_ssl extends provisionConfig_apache_site {
   public $description = 'apache ssl configuration file';
 
   function filename() {
-    $this->data['apache_site_conf_path'] . '/' . $this->uri . '_ssl';
+    $this->data['http_vhostd_path'] . '/' . $this->uri . '_ssl';
   }
 }

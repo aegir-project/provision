@@ -7,11 +7,38 @@ function http_provision_services() {
   return array('http' => NULL);
 }
 
+
+// Base http service class. 
 class provisionService_http extends provisionService {
   public $service = 'http';
-
-  protected $has_port = TRUE;
   protected $ssl_enabled = FALSE;
+}
+
+class provisionService_http_public extends provisionService_http {
+  protected $has_port = TRUE;
+   
+  function default_port() {
+    return 80;
+  }
+
+  function config_data($config = null, $class = null) {
+    $data = parent::config_data($config, $class);
+
+    $data['http_port'] = $this->server->http_port;
+
+    if (!is_null($this->application_name)) {
+      $data['http_confd_path'] = $this->server->http_confd_path;
+      $data['http_platformd_path'] = $this->server->http_platformd_path;
+      $data['http_vhostd_path'] = $this->server->http_vhostd_path;
+    }
+
+    // TODO: move away from drush_get_context entirely.
+    if ($config == 'site') {
+      $data = array_merge($data, drush_get_context_site('site'));
+    }
+
+    return $data;
+  }
 
   function init() {
     parent::init();
@@ -27,23 +54,15 @@ class provisionService_http extends provisionService {
     $this->server->setProperty('web_disable_url', $this->server->master_url .'/hosting/disabled');
     $this->server->setProperty('web_maintenence_url', $this->server->master_url .'/hosting/maintenance');
 
-    if ($this->ssl_enabled) {
-      $this->init_ssl();
+
+    if (!is_null($this->application_name)) {
+      $app_dir = "{$this->server->config_path}/{$this->application_name}";
+      $this->server->http_confd_path = "{$app_dir}/conf.d";
+      $this->server->http_platformd_path = "{$app_dir}/platform.d";
+      $this->server->http_vhostd_path = "{$app_dir}/vhost.d";
     }
   }
 
-  function init_ssl() {
-    $this->server->setProperty('http_ssl_port', 443);
-    $this->ssl_config_path = $this->server->aegir_root . '/config/ssl.d';
-  }
-
-  function default_port() {
-    return 80;
-  }
-
-  function default_ssl_port() {
-    return 443;
-  }
 
   static function option_documentation() {
     return array(
@@ -55,20 +74,24 @@ class provisionService_http extends provisionService {
 
 
   function verify() {
-    switch (d()->type) {
-      case 'server':
-        $this->create_server_config();
-        break;
+    if (d()->type === 'server') {
+      if (!is_null($this->application_name)) {
+        provision_file()->create_dir($this->server->http_confd_path, dt("Webserver custom configuration"), 0700);
+        $this->sync($this->server->http_confd_path);
 
-      case 'platform':
-        $this->create_platform_config();
-        break;
+        provision_file()->create_dir($this->server->http_platformd_path, dt("Webserver platform configuration"), 0700);
+        $this->sync($this->server->http_platformd_path, array(
+          'exclude' => $this->server->http_platformd_path . '/*',  // Make sure remote directory is created
+        )); 
 
-      case 'site':
-        $this->create_site_config();
-        break;
+        provision_file()->create_dir($this->server->http_vhostd_path , dt("Webserver virtual host configuration"), 0700);
+        $this->sync($this->server->http_vhostd_path, array(
+          'exclude' => $this->server->http_vhostd_path . '/*',  // Make sure remote directory is created
+        )); 
+      } 
     }
 
+    $this->create_config(d()->type);
     $this->parse_configs();
   }
 
@@ -76,48 +99,6 @@ class provisionService_http extends provisionService {
    * Ask the web server to check for and load configuration changes.
    */
   function parse_configs() {
-    return TRUE;
-  }
-
-  /**
-   * Generate a site specific configuration file
-   */
-  function create_site_config() {
-    return TRUE;
-  }
-
-  /**
-   * Remove an existing site configuration file.
-   */
-  function delete_site_config() {
-    return TRUE;
-  }
-
-  /**
-   * Add a new platform specific configuration file.
-   */
-  function create_platform_config() {
-    return TRUE;
-  }
-
-  /**
-   * Remove an existing platform configuration file.
-   */
-  function delete_platform_config() {
-    return TRUE;
-  }
-
-  /**
-   * Create a new server specific configuration file.
-   */
-  function create_server_config() {
-    return TRUE;
-  }
-
-  /**
-   * Remove an existing server specific configuration file
-   */
-  function delete_server_config() {
     return TRUE;
   }
 
