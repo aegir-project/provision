@@ -9,9 +9,7 @@ class provisionService_http_nginx extends provisionService_http {
   function init() {
     $this->server->nginx_conf_path = $this->server->config_path . '/nginx/nginx.d';
     $this->server->nginx_site_conf_path = $this->server->config_path . '/nginx/vhost.d';
-    $this->server->setProperty('restart_cmd', _provision_default_restart_cmd());
   }
-
 
   function config_data() {
      return array(
