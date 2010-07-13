@@ -62,20 +62,7 @@ class provisionService_example extends provisionService {
    * type of object the command is being run against.
    */
   function verify() {
-    switch (d()->type) {
-      case 'server':
-        $this->create_server_config();
-        break;
-
-      case 'platform':
-        $this->create_platform_config();
-        break;
-
-      case 'site':
-        $this->create_site_config();
-        break;
-    }
-
+    $this->create_config(d()->type);
     $this->parse_configs();
   }
 
