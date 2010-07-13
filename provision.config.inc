@@ -64,11 +64,14 @@ class provisionConfig {
     if (is_null($this->template)) {
       throw(exception);
     }
+
     $this->data = $this->parse();
     if (sizeof($data)) {
       $this->data = array_merge($this->data, $data);
     }
-    $this->owner = d($owner);
+
+    // Accept both a reference and an alias name for the owner.
+    $this->owner = is_object($owner) ? $owner : d($owner);
   }
 
   /**

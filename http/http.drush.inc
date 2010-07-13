@@ -74,7 +74,7 @@ class provisionService_http_public extends provisionService_http {
 
 
   function verify() {
-    if (d()->type === 'server') {
+    if ($this->context->type === 'server') {
       if (!is_null($this->application_name)) {
         provision_file()->create_dir($this->server->http_confd_path, dt("Webserver custom configuration"), 0700);
         $this->sync($this->server->http_confd_path);
@@ -91,7 +91,7 @@ class provisionService_http_public extends provisionService_http {
       } 
     }
 
-    $this->create_config(d()->type);
+    $this->create_config($this->context->type);
     $this->parse_configs();
   }
 
@@ -115,7 +115,7 @@ class provisionService_http_public extends provisionService_http {
   function grant_server_list() {
     return array(
       $this->server,
-      d($this->context)->platform->server,
+      $this->context->platform->server,
     );
   }
 

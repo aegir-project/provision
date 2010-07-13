@@ -18,6 +18,10 @@ function & d($name = NULL, $_root_object = FALSE) {
   static $instances = null;
   static $default_instance = '@self';
 
+  if (is_object($name)) {
+    return $name;
+  }
+
   if ($name == 'all') {
     return $instances;
   }

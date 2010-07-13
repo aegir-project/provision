@@ -112,11 +112,11 @@ class provisionService extends provisionChainedState {
   }
 
   function __construct($server) {
-    $this->server = d($server);
+    $this->server = is_object($server) ? $server : d($server);
   }
 
-  function setContext($name) {
-    $this->context = $name;
+  function setContext($context) {
+    $this->context = is_object($context) ? $context : d($context);
   }
 
   function sync($path = NULL, $additional_options = array()) {

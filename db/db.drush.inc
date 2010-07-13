@@ -60,13 +60,13 @@ class provisionService_db extends provisionService {
    * Find a viable database name, based on the site's uri.
    */ 
   function suggest_db_name() {
-    $uri = d($this->context)->uri;
+    $uri = $this->context->uri;
 
     $suggest_base = str_replace(array('.', '-'), '' , ereg_replace('^www\.', '', $uri));
 
     $suggest[] = substr($suggest_base, 0, 16);
     for ($i = 0; $i < 100; $i++) {
-      $suggest[] = sprintf("%s_%d", substr($suggest_base, 0, 16 - strlen( (string) $i) ), $i);
+      $suggest[] = sprintf("%s_%d", substr($suggest_base, 0, 15 - strlen( (string) $i) ), $i);
     }
 
     foreach ($suggest as $option) {
@@ -231,7 +231,7 @@ class provisionService_db extends provisionService {
    * access to the site database.
    */
   function grant_host_list() {
-    return array_unique(array_map(array($this, 'grant_host'), d($this->context)->service('http')->grant_server_list()));
+    return array_unique(array_map(array($this, 'grant_host'), $this->context->service('http')->grant_server_list()));
   }
 
   /**
