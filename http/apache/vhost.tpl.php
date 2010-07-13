@@ -16,6 +16,8 @@
 
   SetEnv db_host  <?php print urlencode($db_host); ?>
 
+  SetEnv db_port  <?php print urlencode($db_port); ?>
+
 <?php if (!$this->redirection && is_array($this->aliases)) :
   foreach ($this->aliases as $alias_url) :
   if (trim($alias_url)) : ?>

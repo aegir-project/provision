@@ -11,6 +11,7 @@ class provisionService_http extends provisionService {
   public $service = 'http';
 
   protected $has_port = TRUE;
+  protected $ssl_enabled = FALSE;
 
   function init() {
     parent::init();
@@ -25,10 +26,23 @@ class provisionService_http extends provisionService {
     // Redirection urls
     $this->server->setProperty('web_disable_url', $this->server->master_url .'/hosting/disabled');
     $this->server->setProperty('web_maintenence_url', $this->server->master_url .'/hosting/maintenance');
+
+    if ($this->ssl_enabled) {
+      $this->init_ssl();
+    }
+  }
+
+  function init_ssl() {
+    $this->server->setProperty('http_ssl_port', 443);
+    $this->ssl_config_path = $this->server->aegir_root . '/config/ssl.d';
   }
 
   function default_port() {
     return 80;
+  }
+
+  function default_ssl_port() {
+    return 443;
   }
 
   static function option_documentation() {
@@ -123,4 +137,5 @@ class provisionService_http extends provisionService {
       d($this->context)->platform->server,
     );
   }
+
 }
