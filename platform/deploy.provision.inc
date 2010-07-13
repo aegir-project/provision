@@ -61,14 +61,19 @@ function drush_provision_drupal_pre_provision_deploy($backup_file) {
         ->status();
       if ($swapped) {
         drush_set_option('site_dirs_swapped', TRUE);
-        _provision_drupal_create_settings_file();
       }
       else {
         return false;
       }
     }
 
+    // We have already created a new database. Save the info to the config files.
+    provision_prepare_environment();
+    provision_save_site_data();
+
+    // Load the newly created information, including re-loading the new db creds.
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
+    _provision_drupal_create_settings_file();
 
     $site_packages = drush_get_option('packages', array(), 'site');
     $profiles = array_keys($site_packages['profiles']);
@@ -115,27 +120,19 @@ function drush_provision_drupal_pre_provision_deploy_rollback() {
        _provision_drupal_create_settings_file();
        provision_save_site_data();
     }
-
-
   }
       
-
   if (provision_file()->exists(drush_get_option('extract_path'))->status()) {
     _provision_recursive_delete(drush_get_option('extract_path'));
   }
-
 }
 
 function drush_provision_drupal_provision_deploy() {
   _provision_drupal_maintain_aliases();
+  _provision_drupal_create_directories();
 }
 
 function drush_provision_drupal_post_provision_deploy() {
-
-  provision_prepare_environment();
-  _provision_drupal_create_directories();
-  _provision_drupal_create_settings_file();
-  provision_save_site_data();
   // call the drush updatedb command.
   provision_backend_invoke(d()->name, 'updatedb');
   // We should be able to fully load Drupal now.

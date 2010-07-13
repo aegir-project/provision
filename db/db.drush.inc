@@ -30,6 +30,8 @@ function db_drush_help($section) {
 
 
 class provisionService_db extends provisionService {
+  protected $service = 'db';
+
   static function option_documentation() {
     return array(
       '--master_db' => 'server with db: Master database connection info, {type}://{user}:{password}@{host}',
@@ -37,6 +39,7 @@ class provisionService_db extends provisionService {
   }
 
   function init() {
+    parent::init();
     $this->server->setProperty('master_db');
     $this->creds = array_map('urldecode', parse_url($this->server->master_db));
 
@@ -54,37 +57,16 @@ class provisionService_db extends provisionService {
   }
 
   /**
-   * Find a viable database name, based on available information.
-   *
-   * This function exists solely to work past mysql's database name restrictions.
-   * As mysql also does not have the ability to rename databases, it is completely
-   * possible that sites will be running with derivative names on the same server,
-   * until the upgrade / restore process is completed.
-   *
-   * TODO: abstract this properly.
+   * Find a viable database name, based on the site's uri.
    */ 
   function suggest_db_name() {
-    if ($sid = drush_get_option('site_id')) {
-      $suggest_base = drush_get_option('aegir_db_prefix', 'site_') . $sid;
-    }
-    elseif ($name = drush_get_option('db_name')) {
-      // consider the verified database name if no site id was provided
-      //
-      // we strip out eventual _N suffixes before finding a new db name
-      // this is necessary because we may already have gone through this
-      // process (in a migration) and had a _N suffix added
-      $suggest_base = preg_replace('/_\d+$/', '', $name);
-    }
-    else {
-      // This is a last option, and not ideal: base the db name on the
-      // site name
-      //
-      // Provision only users will trigger this mostly.
-      $suggest_base = substr(str_replace(array('.', '-'), '' , ereg_replace('^www\.', '', drush_get_option('uri'))), 0, 14);
-    }
-    $suggest[] = $suggest_base;
+    $uri = d($this->context)->uri;
+
+    $suggest_base = str_replace(array('.', '-'), '' , ereg_replace('^www\.', '', $uri));
+
+    $suggest[] = substr($suggest_base, 0, 16);
     for ($i = 0; $i < 100; $i++) {
-      $suggest[] = $suggest_base .'_'. $i;
+      $suggest[] = sprintf("%s_%d", substr($suggest_base, 0, 16 - strlen( (string) $i) ), $i);
     }
 
     foreach ($suggest as $option) {
@@ -95,7 +77,6 @@ class provisionService_db extends provisionService {
 
     drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not find a free database names after 100 attempts"));
     return false;
-
   }
 
   /**
@@ -194,6 +175,7 @@ class provisionService_db extends provisionService {
     //TODO - this should not be here at all
     $creds['db_type'] = drush_set_option('db_type', $db_type, 'site');
     $creds['db_host'] = drush_set_option('db_host', $this->server->remote_host, 'site');
+    $creds['db_port'] = drush_set_option('db_port', $this->server->db_port, 'site');
     $creds['db_passwd'] = drush_set_option('db_passwd', provision_password(), 'site');
     $creds['db_name'] = drush_set_option('db_name', $this->suggest_db_name(), 'site');
     $creds['db_user'] = drush_set_option('db_user', $creds['db_name'], 'site');
@@ -204,7 +186,7 @@ class provisionService_db extends provisionService {
   function fetch_site_credentials() {
     $creds = array();
 
-    $keys = array('db_type', 'db_user', 'db_name', 'db_host', 'db_passwd');
+    $keys = array('db_type', 'db_port', 'db_user', 'db_name', 'db_host', 'db_passwd');
     foreach ($keys as $key) {
       $creds[$key] = drush_get_option($key, '', 'site');
     }
@@ -276,7 +258,7 @@ class provisionService_db_pdo extends provisionService_db {
 
   function init() {
     parent::init();
-    $this->dsn = sprintf("%s:host=%s", $this->PDO_type,  drush_is_local_host($this->creds['host']) ? 'localhost' : $this->creds['host']);
+    $this->dsn = sprintf("%s:host=%s", $this->PDO_type,  provision_is_local_host($this->creds['host']) ? 'localhost' : $this->creds['host']);
   }
 
   function connect() {

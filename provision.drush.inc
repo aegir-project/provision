@@ -229,37 +229,6 @@ function drush_provision_verify() {
   d()->verify();
 }
 
-function _provision_default_restart_cmd() {
-  $command = '/usr/sbin/apachectl'; // A proper default for most of the world
-  
-  // Try to detect the nginx restart command first
-  $options[] = '/etc/init.d/nginx'; // nginx on debian
-
-  foreach (explode(':', $_SERVER['PATH']) as $path) {
-    $options[] = "$path/apache2ctl";
-    $options[] = "$path/apachectl";
-  }
-  // Try to detect the apache restart command.
-  $options[] = '/usr/local/sbin/apachectl'; // freebsd
-  $options[] = '/usr/sbin/apache2ctl'; // debian + apache2
-  $options[] = '/usr/apache2/2.2/bin'; // Solaris
-  $options[] = $command;
-
-  foreach ($options as $test) {
-    if (is_executable($test)) {
-      $command = $test;
-      break;
-    }
-  }
-
-  if(preg_match("/(nginx)/", $command)) {
-    return "sudo $command reload";
-  }
-  else {
-    return "sudo $command graceful";
-  }
-}
-
 function _provision_default_web_group() {
   $info = posix_getgrgid(posix_getgid());
   $common_groups = array(

@@ -39,6 +39,7 @@ function drush_provision_drupal_provision_restore($restore_file) {
   provision_backend_invoke(d()->name, 'provision-deploy', array(drush_get_option('restore_file')));
   if (!drush_get_error()) {
     provision_backend_invoke(d()->name, 'provision-verify');
+    drush_set_option('installed', false);
   }
 }
 

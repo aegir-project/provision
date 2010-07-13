@@ -4,14 +4,18 @@ function drush_db_provision_deploy_validate() {
   d()->service('db')->connect();
 }
 
-function drush_db_provision_deploy() {
+function drush_db_pre_provision_deploy() {
   d()->service('db')->create_site_database();
+}
+
+function drush_db_pre_provision_deploy_rollback() {
+  d()->service('db')->destroy_site_database();
+}
+
+function drush_db_provision_deploy() {
   d()->service('db')->import_site_database();
 }
 
-function drush_db_provision_deploy_rollback() {
-  d()->service('db')->destroy_site_database();
-}
 
 // Rollback doesn't apply here yet. Unless we trigger a deploy of the first dump
 // made. Which could go on infinitely if something is really long.

@@ -260,6 +260,10 @@ class provisionConfig_drushrc_server extends provisionConfig_drushrc {
 class provisionConfig_drushrc_platform extends provisionConfig_drushrc {
   protected $context_name = 'drupal';
   public $description = 'Platform Drush configuration file';
+
+  function filename() {
+    return $this->root . '/drushrc.php';
+  }
 }
 
 /**
@@ -269,5 +273,10 @@ class provisionConfig_drushrc_site extends provisionConfig_drushrc {
   protected $context_name = 'site';
   public $template = 'provision_drushrc_site.tpl.php';
   public $description = 'Site Drush configuration file';
+
+  function filename() {
+    return $this->site_path . '/drushrc.php';
+  }
+
 }
 

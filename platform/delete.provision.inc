@@ -21,7 +21,7 @@ function drush_provision_drupal_provision_delete() {
     _provision_recursive_delete(d()->site_path);
     // we remove the aliases even if redirection is enabled as a precaution
     // if redirection is enabled, keep silent about errors
-    _provision_drupal_delete_aliases(d()->aliases);
+    _provision_drupal_delete_aliases();
   }
   elseif (d()->type === 'platform') {
     if (provision_drupal_find_sites()) {

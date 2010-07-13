@@ -197,7 +197,10 @@ class provisionEnvironment {
    */
   function setProperty($field, $default = NULL, $array = FALSE) {
     if (isset($this->options[$field])) {
-      if ($array && !is_array($this->options[$field])) {
+      if ($this->options[$field] === 'null') {
+        $this->$field = $default;
+      }
+      elseif ($array && !is_array($this->options[$field])) {
         $this->$field = explode(',', $this->options[$field]);
       }
       else {
@@ -317,6 +320,8 @@ class provisionServer extends provisionEnvironment {
       $this->script_user = d('@server_master')->script_user;
     }
 
+    $this->setProperty('ip_addresses', array(), true);
+
     $this->backup_path = $this->aegir_root . '/backups';
     $this->config_path = $this->aegir_root . '/config/' . ltrim($this->name, '@');
     $this->include_path = $this->aegir_root . '/config/includes';
@@ -406,7 +411,7 @@ class provisionServer extends provisionEnvironment {
    *   out and error.
    */
   function shell_exec($command) {
-    if (drush_is_local_host($this->remote_host)) {
+    if (provision_is_local_host($this->remote_host)) {
       return drush_shell_exec(escapeshellcmd($command));
     }
     else {
@@ -419,24 +424,23 @@ class provisionServer extends provisionEnvironment {
    *
    * @param $path
    *   Full path to sync.
-   * @param $exclude_sites
-   *   Exclude sites/*, except sites/*.
+   * @param $additional_options
+   *   An array of options that overrides whatever was passed in on the command
+   *   line (like the 'process' context, but only for the scope of this one
+   *   call).
    */
-  function sync($path = NULL, $exclude_sites = FALSE) {
-    if (!drush_is_local_host($this->remote_host)) {
+  function sync($path = NULL, $additional_options = array()) {
+    if (!provision_is_local_host($this->remote_host)) {
       if (is_null($path)) {
         $path = $this->config_path;
       }
 
       if (provision_file()->exists($path)->status()) {
-        $options = array(
+        $options = array_merge(array(
           'relative' => TRUE,
           'omit-dir-times' => TRUE,
           'delete' => TRUE,
-        );
-        if ($exclude_sites) {
-          $options['exclude-sites'] = TRUE;
-        }
+        ), $additional_options);
         if (drush_core_call_rsync(escapeshellarg($path), escapeshellarg($this->script_user . '@' . $this->remote_host . ':/'), $options, TRUE, FALSE)) {
           drush_log(dt('@path has been synced to remote server @remote_host.', array('@path' => $path, '@remote_host' => $this->remote_host)));
         }
@@ -496,7 +500,6 @@ class provisionSite extends provisionEnvironment {
       '--platform' => 'site: the platform the site is run on',
       '--db_server' => 'site: the db server the site is run on',
       '--uri' => 'site: example.com URI, no http:// or trailing /',
-      '--site_port' => 'site: port the site is hosted on; default 80',
       '--language' => 'site: site language; default en',
       '--aliases' => 'site: comma-separated URIs',
       '--redirection' => 'site: boolean for whether --aliases should redirect; default false',
@@ -523,7 +526,6 @@ class provisionSite extends provisionEnvironment {
 
     $this->setProperty('site_enabled', true);
     $this->setProperty('language', 'en');
-    $this->setProperty('site_port', 80);
     $this->setProperty('client_email');
     $this->setProperty('aliases', array(), TRUE);
     $this->setProperty('redirection', FALSE);
