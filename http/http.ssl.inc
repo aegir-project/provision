@@ -83,8 +83,13 @@ class provisionService_http_ssl extends provisionService_http_public {
     return $certs;
   }
 
-        
-        
+  /**
+   * Generate a self-signed certificate for that key.
+   *
+   * Because we only generate certificates for sites we make
+   * some assumptions based on the uri, but this cert should
+   * REALLY be replaced by the admin as soon as possible.
+   */
   function generate_certificates($ssl_key) {
     $path = "{$this->server->ssld_path}/{$ssl_key}";
 
@@ -110,6 +115,20 @@ class provisionService_http_ssl extends provisionService_http_public {
     }
   }
 
+
+  /**
+   * Retrieve the status of a certificate on this server.
+   *
+   * This is primarily used to know when it's ok to remove the file.
+   */
+  static function certificate_in_use($ssl_key) {
+    // TODO - status checking
+    return true;
+  }
+
+  /**
+   * Verify server.
+   */
   function verify() {
     if ($this->context->type === 'server') {
       provision_file()->create_dir($this->server->ssld_path, dt("Central SSL certificate repository."), 0700);
@@ -128,24 +147,64 @@ class provisionService_http_ssl extends provisionService_http_public {
   }
 }
 
-
-
+/**
+ * Base class for SSL enabled virtual hosts.
+ *
+ * This class primarily abstracts the process of making sure the relevant keys
+ * are synched to the server when the config files that use them get created.
+ */
 class provisionConfig_http_ssl_site extends provisionConfig_http_site {
   public $template = 'vhost_ssl.tpl.php';
+  public $disabled_template = 'vhost_ssl_disabled.tpl.php';
 
+
+  function write() {
+    parent::write();
+
+    // Make sure the ssl.d directory in the server ssl.d exists. 
+    provision_file()->create_dir(dirname($this->data['ssl_cert']), 
+    dt("SSL Certificate directory for %key on %server", array(
+      '%key' => $this->ssl_key,
+      '%server' => $this->data['server']->remote_host,
+    )), 700);
+
+    // Copy the certificates to the server's ssl.d directory.
+    provision_file()->copy(
+      $this->data['ssl_cert_source'],
+      $this->data['ssl_cert']);
+    provision_file()->copy(
+      $this->data['ssl_cert_key_source'],
+      $this->data['ssl_cert_key']);
+
+    // Sync the key directory to the remote server.
+    $this->data['server']->sync(dirname($this->data['ssl_cert']));
+  }
+
+  /**
+   * Remove a stale certificate file from the server.
+   */
+  function unlink() {
+    parent::unlink();
+
+    $used = provisionService_http_ssl::certificate_in_use($this->data['ssl_key']);
+    if (!$used) {
+      // we can remove the certificate from the server ssl.d directory.
+      provision_file()->rmdir(dirname($this->data['ssl_cert']));
+      // remove the file from the remote server too.
+      $this->data['server']->sync(dirname($this->data['ssl_cert']));
+    }
+  }
 
   function __construct($owner, $data = array()) {
     parent::__construct($owner, $data);
   
     if (!$this->ssl_enabled || !$this->ssl_key) {
-      //throw new provisionException_continue("SSL has not been enabled for this site. SSL vhost not necessary"); 
+      throw new provisionException_continue("SSL has not been enabled for this site. SSL vhost not necessary"); 
     }
   }
 
   function filename() {
     $this->data['http_vhostd_path'] . '/' . $this->uri . '_ssl';
   }
-
 }
-
 

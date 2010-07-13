@@ -88,6 +88,8 @@ class provisionConfig_http_platform extends provisionConfig_http {
  */
 class provisionConfig_http_site extends provisionConfig_http {
   public $template = 'vhost.tpl.php';
+  // The template file to use when the site has been disabled.
+  public $disabled_template = 'vhost_disabled.tpl.php';
   public $description = 'virtual host configuration file';
 
 
@@ -103,7 +105,7 @@ class provisionConfig_http_site extends provisionConfig_http {
     }
 
     if (!$this->site_enabled) {
-      $this->template = 'vhost_disabled.tpl.php';
+      $this->template = $this->disabled_template;
     }
 
   }

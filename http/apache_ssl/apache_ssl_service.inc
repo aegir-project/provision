@@ -44,23 +44,22 @@ class provisionService_http_apache_ssl extends provisionService_http_ssl {
     parent::init();
 
     // Replace the server config with our own. See the class for more info.
-    $this->configs['server'][] = 'provisionConfig_apache_server_ssl';
+    $this->configs['server'][] = 'provisionConfig_apache_ssl_server';
 
     // Just re-use the standard platform config.
     $this->configs['platform'][] = 'provisionConfig_apache_platform';
 
     // We generate both an SSL and a non-SSL config file.
     $this->configs['site'][] = 'provisionConfig_apache_site';
-    $this->configs['site'][] = 'provisionConfig_apache_site_ssl';
+    $this->configs['site'][] = 'provisionConfig_apache_ssl_site';
   }
 
   /**
    * Restart apache to pick up the new config files.
    */ 
   function parse_configs() {
-    return $this->restart();
+    #return $this->restart();
   }
-
 }
 
 /**
@@ -72,9 +71,7 @@ class provisionService_http_apache_ssl extends provisionService_http_ssl {
  * This config is primarily reponsible for enabling the SSL relation settings,
  * so that individual sites can just enable them.
  */
-class provisionConfig_apache_server_ssl extends provisionConfig_http_server {
-  public $template = 'server_ssl.tpl.php';
-
+class provisionConfig_apache_ssl_server extends provisionConfig_http_ssl_server {
   // We use the same extra_config as the apache_server config class.
   function process() {
     parent::process();
@@ -90,5 +87,9 @@ class provisionConfig_apache_server_ssl extends provisionConfig_http_server {
  * and includes some extra directives.
  */
 class provisionConfig_apache_ssl_site extends provisionConfig_http_ssl_site {
-  public $description = 'apache ssl configuration file';
+  function process() {
+    parent::process();
+    $this->data['extra_config'] = "# Extra configuration from modules:\n";
+    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_vhost_config', $this->uri, $this->data));
+  }
 }

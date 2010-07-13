@@ -18,6 +18,14 @@
 
   SetEnv db_port  <?php print urlencode($db_port); ?>
 
+  # Enable SSL handling.
+   
+  SSLEngine on
+
+  SSLCertificateFile <?php print $ssl_cert; ?>
+
+  SSLCertificateKeyFile <?php print $ssl_cert_key; ?>
+
 <?php if (!$this->redirection && is_array($this->aliases)) :
   foreach ($this->aliases as $alias_url) :
   if (trim($alias_url)) : ?>
