@@ -37,6 +37,7 @@ class provisionService_http_ssl extends provisionService_http_public {
 
   function config_data($config = null, $class = null) {
     $data = parent::config_data($config, $class);
+    $data['http_ssl_port'] = $this->server->http_ssl_port;
 
     if ($config == 'site' && $this->context->ssl_enabled) {
       if ($ssl_key = $this->context->ssl_key) {
@@ -147,6 +148,16 @@ class provisionService_http_ssl extends provisionService_http_public {
   }
 }
 
+
+/**
+ * Base class for SSL enabled server level config.
+ */
+class provisionConfig_http_ssl_server extends provisionConfig_http_server {
+  public $template = 'server_ssl.tpl.php';
+  public $description = 'encryption enabled webserver configuration';
+}
+
+
 /**
  * Base class for SSL enabled virtual hosts.
  *
@@ -157,6 +168,7 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
   public $template = 'vhost_ssl.tpl.php';
   public $disabled_template = 'vhost_ssl_disabled.tpl.php';
 
+  public $description = 'encrypted virtual host configuration';
 
   function write() {
     parent::write();
@@ -199,7 +211,7 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
     parent::__construct($owner, $data);
   
     if (!$this->ssl_enabled || !$this->ssl_key) {
-      throw new provisionException_continue("SSL has not been enabled for this site. SSL vhost not necessary"); 
+      //throw new provisionException_continue("SSL has not been enabled for this site. SSL vhost not necessary"); 
     }
   }
 

@@ -1,4 +1,4 @@
-<?php foreach ($ip_addresses as $ip) : ?>
+<?php foreach ($server->ip_addresses as $ip) : ?>
   NameVirtualHost <?php print $ip . ":" . $http_ssl_port . "\n"; ?>
 <?php endforeach; ?>
 
@@ -6,4 +6,4 @@
   LoadModule ssl_module modules/mod_ssl.so
 </IfModule>
 
-<?php include_once(dirname(__FILE__) . '/../apache/server.tpl.php'); ?>
+<?php include('http/apache/server.tpl.php'); ?>

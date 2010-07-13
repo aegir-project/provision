@@ -9,7 +9,7 @@
 
 // Include the apache service implementation. 
 // Even though we don't extend it, we do make use of it's config classes.
-include_once(dirname(__FILE__) . '../apache/apache_service.inc');
+include_once(dirname(__FILE__) . '/../apache/apache_service.inc');
 
 
 /**

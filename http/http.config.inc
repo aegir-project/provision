@@ -49,8 +49,14 @@ class provisionConfig_http_server extends provisionConfig_http {
         escapeshellarg($this->data['server']->config_path . '/' . $file), 
         escapeshellarg($this->data['server']->aegir_root . '/config/' . $file)
       );
-
-      $this->data['server']->shell_exec($cmd);
+      
+      if ($this->data['server']->shell_exec($cmd)) {
+        drush_log(dt("Created symlink for %file on %server", array(
+          '%file' => $file,
+          '%server' => $this->data['server']->remote_host,
+        )));  
+       
+      };
     }
   }
 
