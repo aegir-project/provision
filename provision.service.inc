@@ -48,14 +48,20 @@ class provisionService extends provisionChainedState {
     if (isset($this->configs[$config])) {
       // We cast to array here to silently accept the non array version
       foreach ((array) $this->configs[$config] as $class) {
-        $config = new $class($this->context, $this->config_data($config));
-        $config->write();
+        try {
+          $config = new $class($this->context, $this->config_data($config));
+          $config->write();
+        }
+        catch (provisionException_continue $e) {
+          // The service or configuration class has signaled that the config file
+          // was uneccesary, and we should continue normally.
+        }
       }
     }
   }
 
   /**
-   * Delete a configurationf file.
+   * Delete a configuration file.
    * 
    * This method will fetch the class to instantiate from the internal
    * $this->configs control array.
@@ -64,8 +70,14 @@ class provisionService extends provisionChainedState {
     if (isset($this->configs[$config])) {
       // We cast to array here to silently accept the non array version
       foreach ((array) $this->configs[$config] as $class) {
-        $config = new $class($this->context, $this->config_data($config, $class));
-        $config->unlink();
+        try {
+          $config = new $class($this->context, $this->config_data($config, $class));
+          $config->unlink();
+        }
+        catch (provisionException_continue $e) {
+          // The service or configuration class has signaled that the config file
+          // was uneccesary, and we should continue normally.
+        }
       }
     }
   }
@@ -75,8 +87,13 @@ class provisionService extends provisionChainedState {
    */
   function config_data($config = null, $class = null) {
     $data = array();
-
+    // Always pass the server this service is running on to configs.
     $data['server'] = $this->server;
+
+    if (!is_null($this->application_name)) {
+      // This value may be useful to standardize paths in config files.
+      $data['application_name'] = $this->application_name;
+    }
     return $data;
   }
 

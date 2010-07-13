@@ -19,6 +19,12 @@ class provisionService_http_apache extends provisionService_http_public {
     $this->configs['site'][] = 'provisionConfig_apache_site';
   }
 
+  /**
+   * Guess at the likely value of the http_restart_cmd.
+   *
+   * This method is a static so that it can be re-used by the apache_ssl
+   * service, even though it does not inherit this class.
+   */
   public static function apache_restart_cmd() {
     $command = '/usr/sbin/apachectl'; // A proper default for most of the world
     foreach (explode(':', $_SERVER['PATH']) as $path) {
@@ -49,42 +55,12 @@ class provisionService_http_apache extends provisionService_http_public {
   }
 }
 
-class provisionConfig_apache extends provisionConfig {
-  function write() {
-    parent::write();
-    $this->data['server']->sync($this->filename());
-  }
-
-  function unlink() {
-    parent::unlink();
-    $this->data['server']->sync($this->filename());
-  }
-}
-
 /**
  * Apache server level configuration file class
  */
-class provisionConfig_apache_server extends provisionConfig_apache {
-  public $template = 'server.tpl.php';
-  public $description = 'apache server configuration file';
-
-  function write() {
-    parent::write();
-
-    // We link the apache.config file on the remote server to the right version.
-    $cmd = sprintf('ln -sf %s %s', 
-      escapeshellarg($this->data['server']->config_path . '/apache.conf'), 
-      escapeshellarg($this->data['server']->aegir_root . '/config/apache.conf')
-    );
-
-    $this->data['server']->shell_exec($cmd);
-  }
-
-  function filename() {
-    return $this->data['server']->config_path . '/apache.conf';
-  }
-
+class provisionConfig_apache_server extends provisionConfig_http_server {
   function process() {
+    parent::process();
     $this->data['extra_config'] = "# Extra configuration from modules:\n";
     $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_server_config', $this->data));
   }
@@ -93,15 +69,9 @@ class provisionConfig_apache_server extends provisionConfig_apache {
 /**
  * Apache platform level configuration file class
  */
-class provisionConfig_apache_platform extends provisionConfig_apache {
-  public $template = 'platform.tpl.php';
-  public $description = 'apache platform configuration file';
-
-  function filename() {
-    return $this->data['http_platformd_path'] . '/' . ltrim($this->owner->name, '@') . '.conf';
-  }
-
+class provisionConfig_apache_platform extends provisionConfig_http_platform {
   function process() {
+    parent::process();
     $this->data['extra_config'] = "# Extra configuration from modules:\n";
     $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_dir_config', $this->data));
   }
@@ -110,23 +80,9 @@ class provisionConfig_apache_platform extends provisionConfig_apache {
 /** 
  * Apache site level config class. Virtual host.
  */
-class provisionConfig_apache_site extends provisionConfig_apache {
-  public $template = 'vhost.tpl.php';
-  public $description = 'apache site configuration file';
-
-  function filename() {
-    return $this->data['http_vhostd_path'] . '/' . $this->uri;
-  }
-
+class provisionConfig_apache_site extends provisionConfig_http_site {
   function process() {
-    if ($this->aliases && !is_array($this->aliases)) {
-      $this->aliases = explode(",", $this->aliases);
-    }
-
-    if (!$this->site_enabled) {
-      $this->template = 'vhost_disabled.tpl.php';
-    }
-
+    parent::process();
     $this->data['extra_config'] = "# Extra configuration from modules:\n";
     $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_apache_vhost_config', $this->uri, $this->data));
   }

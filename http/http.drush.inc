@@ -2,7 +2,6 @@
 
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
-
 function http_provision_services() {
   return array('http' => NULL);
 }
@@ -14,6 +13,7 @@ class provisionService_http extends provisionService {
   protected $ssl_enabled = FALSE;
 }
 
+// Public http service , as in non-encrypted and listening on a port.
 class provisionService_http_public extends provisionService_http {
   protected $has_port = TRUE;
    
@@ -118,5 +118,8 @@ class provisionService_http_public extends provisionService_http {
       $this->context->platform->server,
     );
   }
-
 }
+
+
+include_once('http.config.inc');
+include_once('http.ssl.inc');

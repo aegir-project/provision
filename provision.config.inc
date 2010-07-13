@@ -280,6 +280,5 @@ class provisionConfig_drushrc_site extends provisionConfig_drushrc {
   function filename() {
     return $this->site_path . '/drushrc.php';
   }
-
 }
 
