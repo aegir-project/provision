@@ -75,7 +75,7 @@ class provisionService_dns extends provisionService {
 
 
   function verify() {
-    switch (d($this->context)->type) {
+    switch ($this->context->type) {
       case 'server' :
         $this->create_server_config();
         break;

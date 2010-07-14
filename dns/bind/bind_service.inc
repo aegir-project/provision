@@ -1,8 +1,5 @@
 <?php
 
-function _bind_default_restart_cmd() {
-  return "/etc/init.d/named restart";
-}
 
 /**
  * Implementation of the DNS service through BIND9
@@ -10,42 +7,43 @@ function _bind_default_restart_cmd() {
  * A lot of this is inspired by the Apache implementation of the HTTP service.
  */
 class provisionService_dns_bind extends provisionService_dns {
-  static function option_documentation() {
-    return array_merge(parent::option_documentation(), array(
-      '--bind_restart_cmd' => 'server with bind: shell command to restart the server; working default will be attepted',
-    ));
+  public $has_restart_command = TRUE;
+
+  
+  static function bind_default_restart_cmd() {
+    return "/etc/init.d/named restart";
+  }
+
+  function default_restart_cmd() {
+    return provisionService_dns_bind::bind_default_restart_cmd();
   }
 
   function init() {
     parent::init();
     $this->server->setProperty('bind_conf_path', $this->server->config_path . '/bind.conf');
     $this->server->setProperty('bind_zone_master_path', $this->server->config_path . '/zones/master');
-    $this->server->setProperty('bind_restart_cmd', _bind_default_restart_cmd());
   }
 
-  function config_data() {
-    return array(
-      'bind_conf_path' => $this->server->bind_config_path,
-      'bind_zone_master_path' => $this->server->bind_zone_master_path,
-      'bind_restart_cmd' => $this->server->bind_restart_cmd,
-    );
+  function config_data($config, $class) {
+    $data = parent::config_data($config, $class);
+    $data['bind_conf_path'] = $this->server->bind_config_path;
+    $data['bind_zone_master_path'] = $this->server->bind_zone_master_path;
   }
 
   function verify() {
-    provision_file()->create_dir($this->server->bind_zone_master_path, dt("Bind zone files"), 0700);
+    if ($this->context->type =='server') {
+      provision_file()->create_dir($this->server->bind_zone_master_path, dt("Bind zone files"), 0700);
+    }
   }
 
+  /**
+   * Restart the server to pick up the new configuration files.
+   */
   function commit() {
-    // This is required to be configurable, due to the fact that different
-    // hosts might need to do this differently.
-    if ($this->server->shell_exec($this->server->bind_restart_cmd)) {
-      drush_log(dt('Name server on %server has been restarted', array('%server' => $this->server->remote_host)));
-    }
-    else {
-      drush_log(dt('Name server %server could not be restarted. Changes might not be available until this has been done. (error: %msg)', array('%server' => $this->server->remote_host, '%msg' => join("\n", drush_shell_exec_output()))), 'warning');
-    }
+    // the restart_cmd stuff is part of the base server class now.
+    $this->restart();
   }
-  
+
   function create_zone($zonename) {
     $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
     if (!$zone->exists()) {
