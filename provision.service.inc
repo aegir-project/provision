@@ -49,10 +49,11 @@ class provisionService extends provisionChainedState {
       // We cast to array here to silently accept the non array version
       foreach ((array) $this->configs[$config] as $class) {
         try {
-          $config = new $class($this->context, $this->config_data($config));
-          $config->write();
+          $object = new $class($this->context, $this->config_data($config));
+          $object->write();
         }
         catch (provisionException_continue $e) {
+          drush_log($e->getMessage());
           // The service or configuration class has signaled that the config file
           // was uneccesary, and we should continue normally.
         }
@@ -71,10 +72,11 @@ class provisionService extends provisionChainedState {
       // We cast to array here to silently accept the non array version
       foreach ((array) $this->configs[$config] as $class) {
         try {
-          $config = new $class($this->context, $this->config_data($config, $class));
-          $config->unlink();
+          $object = new $class($this->context, $this->config_data($config, $class));
+          $object->unlink();
         }
         catch (provisionException_continue $e) {
+          drush_log($e->getMessage());
           // The service or configuration class has signaled that the config file
           // was uneccesary, and we should continue normally.
         }

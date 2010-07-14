@@ -23,18 +23,18 @@ class provisionService_http_public extends provisionService_http {
 
   function config_data($config = null, $class = null) {
     $data = parent::config_data($config, $class);
-
-    $data['http_port'] = $this->server->http_port;
-
     if (!is_null($this->application_name)) {
       $data['http_confd_path'] = $this->server->http_confd_path;
       $data['http_platformd_path'] = $this->server->http_platformd_path;
       $data['http_vhostd_path'] = $this->server->http_vhostd_path;
     }
 
+    $data['http_port'] = $this->server->http_port;
+
+
     // TODO: move away from drush_get_context entirely.
     if ($config == 'site') {
-      $data = array_merge($data, drush_get_context_site('site'));
+      $data = array_merge($data, drush_get_context('site'));
     }
 
     return $data;
@@ -92,6 +92,7 @@ class provisionService_http_public extends provisionService_http {
     }
 
     $this->create_config($this->context->type);
+
     $this->parse_configs();
   }
 

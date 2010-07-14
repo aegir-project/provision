@@ -81,9 +81,6 @@ class provisionConfig_global_settings extends provisionConfig {
   function filename() {
     return $this->include_path . '/global.inc';
   }
-
-  function process() {
-  }
 }
 
 /**

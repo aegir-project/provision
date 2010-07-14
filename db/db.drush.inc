@@ -46,13 +46,15 @@ class provisionService_db extends provisionService {
     return TRUE;
   }
 
-  function verify() { 
-    $this->connect();
-    if ($this->can_create_database()) {
-      drush_log(dt('Provision can create new databases.'), 'message');
-    }
-    else {
-      drush_set_error('PROVISION_CREATE_DB_FAILED');
+  function verify() {
+    if ($this->context->type == 'server') {
+      $this->connect();
+      if ($this->can_create_database()) {
+        drush_log(dt('Provision can create new databases.'), 'message');
+      }
+      else {
+        drush_set_error('PROVISION_CREATE_DB_FAILED');
+      }
     }
   }
 

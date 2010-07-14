@@ -23,7 +23,6 @@ include_once(dirname(__FILE__) . '/../apache/apache_service.inc');
 class provisionService_http_apache_ssl extends provisionService_http_ssl {
   // We share the application name with apache.
   protected $application_name = 'apache';
-
   protected $has_restart_cmd = TRUE;
   
   function default_restart_cmd() {
@@ -33,6 +32,10 @@ class provisionService_http_apache_ssl extends provisionService_http_ssl {
   } 
 
   public $ssl_enabled = TRUE;
+
+  function cloaked_db_creds() {
+    return TRUE;
+  }
 
   /**
    * Initialize the configuration files.

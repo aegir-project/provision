@@ -37,8 +37,8 @@ class provisionService_http_ssl extends provisionService_http_public {
 
   function config_data($config = null, $class = null) {
     $data = parent::config_data($config, $class);
-    $data['http_ssl_port'] = $this->server->http_ssl_port;
 
+    $data['http_ssl_port'] = $this->server->http_ssl_port;
     if ($config == 'site' && $this->context->ssl_enabled) {
       if ($ssl_key = $this->context->ssl_key) {
         // Retrieve the paths to the cert and key files.
@@ -50,7 +50,6 @@ class provisionService_http_ssl extends provisionService_http_public {
         $data['ip_address'] = $this->server->ip_addresses[0];
       }
     }
-
     return $data;
   }
 
@@ -211,7 +210,7 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
     parent::__construct($owner, $data);
   
     if (!$this->ssl_enabled || !$this->ssl_key) {
-      //throw new provisionException_continue("SSL has not been enabled for this site. SSL vhost not necessary"); 
+      throw new provisionException_continue("SSL has not been enabled for this site. SSL vhost not necessary"); 
     }
   }
 
