@@ -1,5 +1,6 @@
 <?php foreach ($server->ip_addresses as $ip) : ?>
   NameVirtualHost <?php print $ip . ":" . $http_ssl_port . "\n"; ?>
+  Listen <?php print $ip . ":" . $http_ssl_port . "\n"; ?>
 <?php endforeach; ?>
 
 <IfModule !ssl_module>
