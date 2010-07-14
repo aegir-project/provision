@@ -74,8 +74,6 @@ class provisionConfig_http_server extends provisionConfig_http {
 }
 
 
-
-
 /**
  * Base class for platform configuration files.
  */

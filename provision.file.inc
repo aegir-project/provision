@@ -20,6 +20,27 @@ function provision_file() {
 }
 
 class provisionFileSystem extends provisionChainedState {
+   /**
+   * Copy file from $source to $destination.
+   *
+   * @param $source
+   *   The path that you want copy.
+   * @param $destination
+   *   The destination path.
+   */
+  function copy($source, $destination) {
+    $this->_clear_state();
+
+    $this->tokens = array('@source' => $source, '@destination' => $destination);
+
+    $this->last_status = FALSE;
+
+    $this->last_status = copy($source, $destination);
+
+    return $this;
+  }
+
+
   /**
    * Determine if $path can be written to.
    *
@@ -268,6 +289,8 @@ class provisionFileSystem extends provisionChainedState {
 
     return $this;
   }
+
+
 
   /**
    * Extract gzip-compressed tar archive.

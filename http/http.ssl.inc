@@ -37,12 +37,12 @@ class provisionService_http_ssl extends provisionService_http_public {
 
   function config_data($config = null, $class = null) {
     $data = parent::config_data($config, $class);
-
     $data['http_ssl_port'] = $this->server->http_ssl_port;
     if ($config == 'site' && $this->context->ssl_enabled) {
       if ($ssl_key = $this->context->ssl_key) {
         // Retrieve the paths to the cert and key files.
         // they are generated if not found.
+
         $certs = $this->get_certificates($ssl_key);
         $data = array_merge($data, $certs);
 
@@ -50,6 +50,7 @@ class provisionService_http_ssl extends provisionService_http_public {
         $data['ip_address'] = $this->server->ip_addresses[0];
       }
     }
+
     return $data;
   }
 
@@ -66,7 +67,7 @@ class provisionService_http_ssl extends provisionService_http_public {
     $certs['ssl_cert_source'] = "{$source_path}/openssl.crt";
 
     foreach ($certs as $cert) {
-      $exists = provision_file()->exists($cert).status();
+      $exists = provision_file()->exists($cert)->status();
       if (!$exists) {
         // if any of the files don't exist, regenerate them.
         $this->generate_certificates($ssl_key);
@@ -79,7 +80,7 @@ class provisionService_http_ssl extends provisionService_http_public {
     $path = "{$this->server->http_ssld_path}/{$ssl_key}";
     $certs['ssl_cert_key'] = "{$path}/openssl.key";
     $certs['ssl_cert'] = "{$path}/openssl.crt";
-      
+
     return $certs;
   }
 
@@ -93,12 +94,12 @@ class provisionService_http_ssl extends provisionService_http_public {
   function generate_certificates($ssl_key) {
     $path = "{$this->server->ssld_path}/{$ssl_key}";
 
-    $created = provision_file()->create_dir($path,
+    provision_file()->create_dir($path,
       dt("SSL certificate directory for %ssl_key", array(
         '%ssl_key' => $ssl_key
-      )), 0700)->status();
+      )), 0700);
 
-    if ($created) {
+    if (provision_file()->exists($path)->status()) {
       $pass = 'pass';
 
       // generate a key
@@ -177,7 +178,7 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
     dt("SSL Certificate directory for %key on %server", array(
       '%key' => $this->ssl_key,
       '%server' => $this->data['server']->remote_host,
-    )), 700);
+    )), 0700);
 
     // Copy the certificates to the server's ssl.d directory.
     provision_file()->copy(
@@ -200,9 +201,9 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
     $used = provisionService_http_ssl::certificate_in_use($this->data['ssl_key']);
     if (!$used) {
       // we can remove the certificate from the server ssl.d directory.
-      provision_file()->rmdir(dirname($this->data['ssl_cert']));
+      #provision_file()->rmdir(dirname($this->data['ssl_cert']));
       // remove the file from the remote server too.
-      $this->data['server']->sync(dirname($this->data['ssl_cert']));
+      #$this->data['server']->sync(dirname($this->data['ssl_cert']));
     }
   }
 
@@ -215,7 +216,7 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
   }
 
   function filename() {
-    $this->data['http_vhostd_path'] . '/' . $this->uri . '_ssl';
+    return $this->data['http_vhostd_path'] . '/' . $this->uri . '_ssl';
   }
 }
 
