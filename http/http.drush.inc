@@ -32,6 +32,12 @@ class provisionService_http_public extends provisionService_http {
     $data['http_port'] = $this->server->http_port;
 
 
+    // We assign this generic catch all for standard http.
+    // The SSL based services will override this with the
+    // correct ip address.
+    $data['ip_address'] = '*';
+
+
     // TODO: move away from drush_get_context entirely.
     if ($config == 'site') {
       $data = array_merge($data, drush_get_context('site'));
