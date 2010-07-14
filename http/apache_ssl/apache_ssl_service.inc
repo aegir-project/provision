@@ -61,7 +61,7 @@ class provisionService_http_apache_ssl extends provisionService_http_ssl {
    * Restart apache to pick up the new config files.
    */ 
   function parse_configs() {
-    #return $this->restart();
+    return $this->restart();
   }
 }
 

@@ -538,6 +538,11 @@ class provisionSite extends provisionEnvironment {
 
     $this->service_subscribe('db', $this->db_server->name);
 
+
+    // TODO :: figure out how to put this into service classes.
+    $this->setProperty('ssl_enabled', 0);
+    $this->setProperty('ssl_key', null);
+
     // this can potentially be handled by a Drupal sub class
     $this->setProperty('profile', 'default');
   }
