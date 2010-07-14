@@ -53,7 +53,25 @@ class provisionService_http_ssl extends provisionService_http_public {
         $data = array_merge($data, $certs);
 
         // assign ip address based on ssl_key
-        $data['ip_address'] = $this->server->ip_addresses[0];
+        $ip = provisionService_http_ssl::get_certificate_ip($ssl_key, $this->server);
+
+        if (!$ip) {
+          drupal_set_error("SSL_IP_FAILURE", dt("There are no more IP addresses available on %server for the %ssl_key certificate.", array(
+            "%server" => $this->server->remote_host,
+            "%ssl_key" => $ssl_key,
+          )));
+        }
+        else {
+          $data['ip_address'] = $ip;
+
+          // We also leave a record of this IP in the site's drushrc.php
+          // This way we can pass the info back to the front end.
+          $context =& drush_get_context('site');
+          if (!is_array($context['site_ip_addresses'])) {
+            $context['site_ip_addresses'] = array();
+          }
+          $context['site_ip_addresses'][$this->server->name] = $ip;
+        }
       }
     }
 
@@ -122,15 +140,93 @@ class provisionService_http_ssl extends provisionService_http_public {
     }
   }
 
+  /**
+   * Assign the certificate it's own distinct IP address for this server.
+   *
+   * Each certificate needs a unique IP address on each server in order
+   * to be able to be encrypted.
+   * 
+   * This code uses the filesystem by touching a reciept file in the 
+   * server's ssl.d directory. 
+   */
+  static function get_certificate_ip($ssl_key, $server) {
+    $path = $server->http_ssld_path;
+
+    $pattern = "{$path}/{$ssl_key}__*.receipt";
+    $files = glob($pattern);
+    if (sizeof($files) == 1) {
+      $pattern = "/^{$ssl_key}__(.*)\.receipt$/";
+      preg_match($pattern, basename($files[0]), $matches);
+      if (in_array($matches[1], $server->ip_addresses)) {
+        // Return an existing match.
+        return $matches[1];
+      }
+
+      // This is a stale match, remove it.
+      // Any sites using it will either find a new
+      // IP on the next verify task, or fail.
+      unlink($files[0]);
+    }
+
+    // try to assign one
+    foreach ($server->ip_addresses as $ip) {
+      if (!provisionService_http_ssl::get_ip_certificate($ip)) {
+        touch("{$path}/{$ssl_key}__{$ip}.receipt");
+        return $ip;
+      }
+    }
+
+    return FALSE; // generate error
+  }
+
+
+  /**
+   * Remove the certificate's lock on the server's public IP.
+   *
+   * This function will delete the receipt file left behind by
+   * the get_certificate_ip script, allowing the IP to be used
+   * by other certificates.
+   */
+  static function free_certificate_ip($ssl_key, $server) {
+    $ip = provisionService_http_ssl::get_certificate_ip($ssl_key, $server);
+    $file = "{$server->http_ssld_path}/{$ssl_key}__{$ip}.receipt";
+    if (file_exists($file)) {
+      unlink($file);
+    }
+  }
+
 
   /**
    * Retrieve the status of a certificate on this server.
    *
    * This is primarily used to know when it's ok to remove the file.
+   * Each time a config file uses the key on the server, it touches 
+   * a 'receipt' file, and every time the site stops using it, 
+   * the receipt is removed.
+   *
+   * This function just checks if any of the files are still present.
    */
-  static function certificate_in_use($ssl_key) {
-    // TODO - status checking
-    return true;
+  static function certificate_in_use($ssl_key, $server) {
+    $pattern = $server->http_ssld_path . "/$ssl_key/*.receipt";
+    return sizeof(glob($pattern));
+  }
+
+
+  /**
+   * Check for an existing record for this IP address.
+   */
+  static function get_ip_certificate($ip, $server) {
+    $path = $server->http_ssld_path;
+
+    $pattern = "{$path}/*__{$ip}.receipt";
+    $files = glob($pattern);
+    if (sizeof($files) == 1) {
+      $pattern = "/^(.*)__{$ip}\.receipt$/";
+      preg_match($pattern, basename($files[0]), $matches);
+      return $matches[1];
+    }
+
+    return FALSE;
   }
 
   /**
@@ -179,23 +275,37 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
   function write() {
     parent::write();
 
-    // Make sure the ssl.d directory in the server ssl.d exists. 
-    provision_file()->create_dir(dirname($this->data['ssl_cert']), 
-    dt("SSL Certificate directory for %key on %server", array(
-      '%key' => $this->ssl_key,
-      '%server' => $this->data['server']->remote_host,
-    )), 0700);
+    $ip_addresses = drush_get_option('site_ip_addresses', array(), 'site');
+    if ($this->ssl_enabled && $this->ssl_key) {
+      $path = dirname($this->data['ssl_cert']);
+      // Make sure the ssl.d directory in the server ssl.d exists. 
+      provision_file()->create_dir($path, 
+      dt("SSL Certificate directory for %key on %server", array(
+        '%key' => $this->ssl_key,
+        '%server' => $this->data['server']->remote_host,
+      )), 0700);
 
-    // Copy the certificates to the server's ssl.d directory.
-    provision_file()->copy(
-      $this->data['ssl_cert_source'],
-      $this->data['ssl_cert']);
-    provision_file()->copy(
-      $this->data['ssl_cert_key_source'],
-      $this->data['ssl_cert_key']);
+      // Touch a file in the server's copy of this key, so that it knows the key is in use.
+      touch("{$path}/{$this->uri}.receipt");
 
-    // Sync the key directory to the remote server.
-    $this->data['server']->sync(dirname($this->data['ssl_cert']));
+      // Copy the certificates to the server's ssl.d directory.
+      provision_file()->copy(
+        $this->data['ssl_cert_source'],
+        $this->data['ssl_cert']);
+      provision_file()->copy(
+        $this->data['ssl_cert_key_source'],
+        $this->data['ssl_cert_key']);
+
+      // Sync the key directory to the remote server.
+      $this->data['server']->sync($path, array(
+       'exclude' => "{$path}/*.receipt",  // Don't need to synch the receipts
+     ));
+    }
+    elseif ($ip = $ip_addresses[$this->data['server']->name]) {
+      if ($ssl_key = provisionService_http_ssl::get_ip_certificate($ip, $this->data['server'])) {
+        $this->clear_certs($ssl_key);
+      }
+    }
   }
 
   /**
@@ -204,13 +314,53 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
   function unlink() {
     parent::unlink();
 
-    $used = provisionService_http_ssl::certificate_in_use($this->data['ssl_key']);
+    $ip_addresses = drush_get_option('site_ip_addresses', array(), 'site');
+
+    if ($this->ssl_enabled && $this->ssl_key) {
+      $path = dirname($this->data['ssl_cert']);
+
+      $this->clear_certs();
+
+    }
+    elseif ($ip = $ip_addresses[$this->data['server']->name]) {
+      if ($ssl_key = provisionService_http_ssl::get_ip_certificate($ip, $this->data['server'])) {
+        $this->clear_certs($ssl_key);
+      }
+    }
+
+  }
+  
+  /**
+   * Small utility function to stop code duplication.
+   */
+
+  private function clear_certs($ssl_key) {
+    $path = $this->data['server']->http_ssld_path . "/$ssl_key";
+
+    // Remove the file system reciept we left for this file
+    provision_file()->unlink("{$path}/{$this->uri}.receipt")->
+        succeed(dt("Deleted SSL Certificate association stub for %site on %server", array(
+          '%site' => $this->uri,
+          '%server' => $this->data['server']->remote_host)));
+
+
+    $ip_addresses = drush_get_option('site_ip_addresses', array(), 'site');
+    unset($ip_addresses[$this->data['server']->name]);
+    drush_set_option('site_ip_addresses', $ip_addresses, 'site');
+
+    $used = provisionService_http_ssl::certificate_in_use($this->ssl_key, $this->data['server']);
+
     if (!$used) {
       // we can remove the certificate from the server ssl.d directory.
-      #provision_file()->rmdir(dirname($this->data['ssl_cert']));
+      _provision_recursive_delete($path);
       // remove the file from the remote server too.
-      #$this->data['server']->sync(dirname($this->data['ssl_cert']));
+      $this->data['server']->sync($path);
+
+      // Most importantly, we remove the hold this cert had on the IP address.
+      provisionService_http_ssl::free_certificate_ip($this->ssl_key, $this->data['server']);
     }
   }
+
+
 }
 
