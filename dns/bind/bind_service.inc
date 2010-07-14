@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Implementation of the DNS service through BIND9
  *
