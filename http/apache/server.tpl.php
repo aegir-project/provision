@@ -1,8 +1,8 @@
 # Aegir web server configuration file
 
-NameVirtualHost *:<?php print $http_port; ?>
+NameVirtualHost <?php print $ip_address . ':' . $http_port; ?>
 
-<VirtualHost *:<?php print $http_port; ?>>
+<VirtualHost <?php print $ip_address . ':' . $http_port; ?>>
   ServerName default
   Redirect 404 /
 </VirtualHost>
@@ -17,13 +17,13 @@ NameVirtualHost *:<?php print $http_port; ?>
 </IfModule>
 
 # virtual hosts
-Include <?php print $apache_site_conf_path ?>
+Include <?php print $http_vhostd_path ?>
 
 # platforms
-Include <?php print $apache_platform_conf_path ?>
+Include <?php print $http_platformd_path ?>
 
 # other configuration, not touched by aegir
-Include <?php print $apache_conf_path ?>
+Include <?php print $http_confd_path ?>
 
 
 <?php print $extra_config; ?>

@@ -355,6 +355,24 @@ class provisionChainedState {
   }
 }
 
+// Base class for provision exceptions.
+class provisionException extends Exception {
+
+}
+
+/**
+ * Signal for parent to continue processing.
+ *
+ * The primary use for this class is for the config
+ * classes to be able to signal to it's caller, that
+ * the configuration file was not needed, and to
+ * continue on.
+ */
+class provisionException_continue extends provisionException {
+
+}
+
+
 include_once('provision.environment.inc');
 include_once('provision.service.inc');
 include_once('provision.file.inc');

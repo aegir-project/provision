@@ -8,11 +8,14 @@ require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 class provisionService extends provisionChainedState {
   protected $server = '@server_master';
   public $context;
+
   protected $service = null;
+  protected $application_name = null;
 
   protected $has_restart_cmd = FALSE;
   protected $has_port = FALSE;
 
+  protected $configs = array();
 
   // All services have the ability to have an associated restart command and listen port.
   function init() {
@@ -35,14 +38,104 @@ class provisionService extends provisionChainedState {
     return false;
   }
 
-
-
-  function __construct($server) {
-    $this->server = d($server);
+  /**
+   * Generate a configuration file.
+   *
+   * This method will fetch the class to instantiate from the internal
+   * $this->configs control array.
+   */
+  function create_config($config) {
+    if (isset($this->configs[$config])) {
+      // We cast to array here to silently accept the non array version
+      foreach ((array) $this->configs[$config] as $class) {
+        try {
+          $object = new $class($this->context, $this->config_data($config));
+          $object->write();
+        }
+        catch (provisionException_continue $e) {
+          drush_log($e->getMessage());
+          // The service or configuration class has signaled that the config file
+          // was uneccesary, and we should continue normally.
+        }
+      }
+    }
   }
 
-  function setContext($name) {
-    $this->context = $name;
+  /**
+   * Delete a configuration file.
+   * 
+   * This method will fetch the class to instantiate from the internal
+   * $this->configs control array.
+   */
+  function delete_config($config) {
+    if (isset($this->configs[$config])) {
+      // We cast to array here to silently accept the non array version
+      foreach ((array) $this->configs[$config] as $class) {
+        try {
+          $object = new $class($this->context, $this->config_data($config, $class));
+          $object->unlink();
+        }
+        catch (provisionException_continue $e) {
+          drush_log($e->getMessage());
+          // The service or configuration class has signaled that the config file
+          // was uneccesary, and we should continue normally.
+        }
+      }
+    }
+  }
+
+  /**
+   * Fetch extra information the service wants to pass to he config file classes.
+   */
+  function config_data($config = null, $class = null) {
+    $data = array();
+    // Always pass the server this service is running on to configs.
+    $data['server'] = $this->server;
+
+    if (!is_null($this->application_name)) {
+      // This value may be useful to standardize paths in config files.
+      $data['application_name'] = $this->application_name;
+    }
+    return $data;
+  }
+
+
+  /**
+   * Restart the service using the provided restart command.
+   */
+  function restart() {
+    // Only attempt to restart real services can have restart commands.
+    if (!is_null($this->service) && $this->has_restart_cmd) {
+      $service = (!is_null($this->application_name)) ? $this->application_name : $this->service;
+
+      // Only attempt to restart if the command has been filled in.
+      if ($cmd = $this->server->{"{$this->service}_restart_cmd"}) {
+        if ($this->server->shell_exec($cmd)) {
+          drush_log(dt('%service on %server has been restarted', array(
+            '%service' => $service,
+            '%server' => $this->server->remote_host))
+          );
+
+          return TRUE;
+        }
+        else {
+          drush_log(dt('%service on %server could not be restarted.'.
+            ' Changes might not be available until this has been done. (error: %msg)', array(
+            '%service' => $service,
+            '%server' => $this->server->remote_host, 
+            '%msg' => join("\n", drush_shell_exec_output()))), 'warning');
+        }
+      }
+    }
+    return FALSE;
+  }
+
+  function __construct($server) {
+    $this->server = is_object($server) ? $server : d($server);
+  }
+
+  function setContext($context) {
+    $this->context = is_object($context) ? $context : d($context);
   }
 
   function sync($path = NULL, $additional_options = array()) {

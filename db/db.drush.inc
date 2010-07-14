@@ -46,13 +46,15 @@ class provisionService_db extends provisionService {
     return TRUE;
   }
 
-  function verify() { 
-    $this->connect();
-    if ($this->can_create_database()) {
-      drush_log(dt('Provision can create new databases.'), 'message');
-    }
-    else {
-      drush_set_error('PROVISION_CREATE_DB_FAILED');
+  function verify() {
+    if ($this->context->type == 'server') {
+      $this->connect();
+      if ($this->can_create_database()) {
+        drush_log(dt('Provision can create new databases.'), 'message');
+      }
+      else {
+        drush_set_error('PROVISION_CREATE_DB_FAILED');
+      }
     }
   }
 
@@ -60,13 +62,13 @@ class provisionService_db extends provisionService {
    * Find a viable database name, based on the site's uri.
    */ 
   function suggest_db_name() {
-    $uri = d($this->context)->uri;
+    $uri = $this->context->uri;
 
     $suggest_base = str_replace(array('.', '-'), '' , ereg_replace('^www\.', '', $uri));
 
     $suggest[] = substr($suggest_base, 0, 16);
     for ($i = 0; $i < 100; $i++) {
-      $suggest[] = sprintf("%s_%d", substr($suggest_base, 0, 16 - strlen( (string) $i) ), $i);
+      $suggest[] = sprintf("%s_%d", substr($suggest_base, 0, 15 - strlen( (string) $i) ), $i);
     }
 
     foreach ($suggest as $option) {
@@ -231,7 +233,7 @@ class provisionService_db extends provisionService {
    * access to the site database.
    */
   function grant_host_list() {
-    return array_unique(array_map(array($this, 'grant_host'), d($this->context)->service('http')->grant_server_list()));
+    return array_unique(array_map(array($this, 'grant_host'), $this->context->service('http')->grant_server_list()));
   }
 
   /**

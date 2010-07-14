@@ -2,15 +2,56 @@
 
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
-
 function http_provision_services() {
   return array('http' => NULL);
 }
 
+
+// Base http service class. 
 class provisionService_http extends provisionService {
   public $service = 'http';
+  protected $ssl_enabled = FALSE;
+}
 
+// Public http service , as in non-encrypted and listening on a port.
+class provisionService_http_public extends provisionService_http {
   protected $has_port = TRUE;
+   
+  function default_port() {
+    return 80;
+  }
+
+  function config_data($config = null, $class = null) {
+    $data = parent::config_data($config, $class);
+    if (!is_null($this->application_name)) {
+      $data['http_confd_path'] = $this->server->http_confd_path;
+      $data['http_platformd_path'] = $this->server->http_platformd_path;
+      $data['http_vhostd_path'] = $this->server->http_vhostd_path;
+    }
+
+    $data['http_port'] = $this->server->http_port;
+
+
+    // We assign this generic catch all for standard http.
+    // The SSL based services will override this with the
+    // correct ip address.
+    if (sizeof($this->server->ip_addresses)) {
+      // Use the first IP address for all standard virtual hosts.
+      $data['ip_address'] = $this->server->ip_addresses[0];
+    }
+    else {
+      // If no external ip addresses are defined, we fall back on *:port
+      // There will be no SSL , so that's fine.
+      $data['ip_address'] = '*';
+    }
+
+    // TODO: move away from drush_get_context entirely.
+    if ($config == 'site') {
+      $data = array_merge($data, drush_get_context('site'));
+    }
+
+    return $data;
+  }
 
   function init() {
     parent::init();
@@ -26,11 +67,16 @@ class provisionService_http extends provisionService {
     // Redirection urls
     $this->server->setProperty('web_disable_url', $this->server->master_url .'/hosting/disabled');
     $this->server->setProperty('web_maintenence_url', $this->server->master_url .'/hosting/maintenance');
+
+
+    if (!is_null($this->application_name)) {
+      $app_dir = "{$this->server->config_path}/{$this->application_name}";
+      $this->server->http_confd_path = "{$app_dir}/conf.d";
+      $this->server->http_platformd_path = "{$app_dir}/platform.d";
+      $this->server->http_vhostd_path = "{$app_dir}/vhost.d";
+    }
   }
 
-  function default_port() {
-    return 80;
-  }
 
   static function option_documentation() {
     return array(
@@ -42,19 +88,24 @@ class provisionService_http extends provisionService {
 
 
   function verify() {
-    switch (d()->type) {
-      case 'server':
-        $this->create_server_config();
-        break;
+    if ($this->context->type === 'server') {
+      if (!is_null($this->application_name)) {
+        provision_file()->create_dir($this->server->http_confd_path, dt("Webserver custom configuration"), 0700);
+        $this->sync($this->server->http_confd_path);
 
-      case 'platform':
-        $this->create_platform_config();
-        break;
+        provision_file()->create_dir($this->server->http_platformd_path, dt("Webserver platform configuration"), 0700);
+        $this->sync($this->server->http_platformd_path, array(
+          'exclude' => $this->server->http_platformd_path . '/*',  // Make sure remote directory is created
+        )); 
 
-      case 'site':
-        $this->create_site_config();
-        break;
+        provision_file()->create_dir($this->server->http_vhostd_path , dt("Webserver virtual host configuration"), 0700);
+        $this->sync($this->server->http_vhostd_path, array(
+          'exclude' => $this->server->http_vhostd_path . '/*',  // Make sure remote directory is created
+        )); 
+      } 
     }
+
+    $this->create_config($this->context->type);
 
     $this->parse_configs();
   }
@@ -63,48 +114,6 @@ class provisionService_http extends provisionService {
    * Ask the web server to check for and load configuration changes.
    */
   function parse_configs() {
-    return TRUE;
-  }
-
-  /**
-   * Generate a site specific configuration file
-   */
-  function create_site_config() {
-    return TRUE;
-  }
-
-  /**
-   * Remove an existing site configuration file.
-   */
-  function delete_site_config() {
-    return TRUE;
-  }
-
-  /**
-   * Add a new platform specific configuration file.
-   */
-  function create_platform_config() {
-    return TRUE;
-  }
-
-  /**
-   * Remove an existing platform configuration file.
-   */
-  function delete_platform_config() {
-    return TRUE;
-  }
-
-  /**
-   * Create a new server specific configuration file.
-   */
-  function create_server_config() {
-    return TRUE;
-  }
-
-  /**
-   * Remove an existing server specific configuration file
-   */
-  function delete_server_config() {
     return TRUE;
   }
 
@@ -121,7 +130,11 @@ class provisionService_http extends provisionService {
   function grant_server_list() {
     return array(
       $this->server,
-      d($this->context)->platform->server,
+      $this->context->platform->server,
     );
   }
 }
+
+
+include_once('http.config.inc');
+include_once('http.ssl.inc');

@@ -18,6 +18,10 @@ function & d($name = NULL, $_root_object = FALSE) {
   static $instances = null;
   static $default_instance = '@self';
 
+  if (is_object($name)) {
+    return $name;
+  }
+
   if ($name == 'all') {
     return $instances;
   }
@@ -533,6 +537,11 @@ class provisionSite extends provisionEnvironment {
     $this->is_oid('db_server');
 
     $this->service_subscribe('db', $this->db_server->name);
+
+
+    // TODO :: figure out how to put this into service classes.
+    $this->setProperty('ssl_enabled', 0);
+    $this->setProperty('ssl_key', null);
 
     // this can potentially be handled by a Drupal sub class
     $this->setProperty('profile', 'default');

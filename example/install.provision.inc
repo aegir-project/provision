@@ -49,7 +49,7 @@ function drush_example_provision_install() {
      * the 'service' method with the service type you want
      * to call as it's only argument.
      */
-    d()->service('example')->create_site_config();
+    d()->service('example')->create_config('site');
   }
 }
 
@@ -64,7 +64,7 @@ function drush_example_provision_install() {
  * previous step.
  */
 function drush_example_provision_install_rollback() {
-  d()->service('example')->delete_site_config(); 
+  d()->service('example')->delete_config('site'); 
 }
 
 /**

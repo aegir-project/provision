@@ -28,27 +28,15 @@ class provisionService_http_cluster extends provisionService_http {
     $this->_each_server(__FUNCTION__);
   }
 
-  function create_site_config() {
-    $this->_each_server(__FUNCTION__);
+  function create_config($config) {
+    $this->each_server(__FUNCTION__, array($config));
   }
 
-  function delete_site_config() {
-    $this->_each_server(__FUNCTION__);
+  function delete_config($config) {
+    $this->each_server(__FUNCTION__, array($config));
   }
 
-  function create_platform_config() {
-    $this->_each_server(__FUNCTION__);
-  }
-
-  function delete_platform_config() {
-    $this->_each_server(__FUNCTION__);
-  }
-
-  function create_server_config() {
-    $this->_each_server(__FUNCTION__);
-  }
-
-  function delete_server_config() {
+  function restart() {
     $this->_each_server(__FUNCTION__);
   }
 
@@ -60,7 +48,7 @@ class provisionService_http_cluster extends provisionService_http {
   function grant_server_list() {
     return array_merge(
       array_map('d', $this->server->cluster_web_servers),
-      array(d($this->context)->platform->server)
+      array($this->context->platform->server)
     );
   }
 }

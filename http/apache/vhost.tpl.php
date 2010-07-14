@@ -1,4 +1,4 @@
-<VirtualHost *:<?php print $http_port; ?>>
+<VirtualHost <?php print $ip_address . ':' . $http_port; ?>>
 <?php if ($this->site_mail) : ?>
   ServerAdmin <?php  print $this->site_mail; ?> 
 <?php endif;?>
@@ -15,6 +15,8 @@
   SetEnv db_passwd  <?php print urlencode($db_passwd); ?>
 
   SetEnv db_host  <?php print urlencode($db_host); ?>
+
+  SetEnv db_port  <?php print urlencode($db_port); ?>
 
 <?php if (!$this->redirection && is_array($this->aliases)) :
   foreach ($this->aliases as $alias_url) :

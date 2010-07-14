@@ -1,7 +1,7 @@
 <?php
 
 function drush_http_post_provision_deploy() {
-  d()->service('http')->create_site_config();
+  d()->service('http')->create_config('site');
   d()->service('http')->parse_configs();
 }
 
@@ -9,7 +9,7 @@ function drush_http_post_provision_deploy() {
  * Delete the config file created.
  */
 function drush_http_post_provision_deploy_rollback() {
-  d()->service('http')->create_site_config();
+  d()->service('http')->create_config('site');
   d()->service('http')->parse_configs();
 }
 
