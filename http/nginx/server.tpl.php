@@ -3,21 +3,9 @@
 #######################################################
 ###  nginx.conf main
 #######################################################
-#
-pid                   /var/run/nginx.pid;
-user                  www-data www-data;
-worker_processes      4;
-worker_rlimit_nofile  8192;
 
-events {
-    worker_connections  4096;
-    use epoll;
-}
-
-http {
  ## MIME types
   include            /etc/nginx/fastcgi_params;
-  include            /etc/nginx/mime.types;
   default_type       application/octet-stream;
 
  ## Size Limits
@@ -74,13 +62,7 @@ http {
 
 server {
 
-<?php if (is_array($server->web_ports)) :
-  foreach ($server->web_ports as $web_port) :?>
-  listen <?php print $web_port; ?>;
-<?php
-endforeach;
-endif;
-?>
+  listen <?php print $http_port; ?>;
 
   server_name  _;
   
@@ -101,9 +83,8 @@ endif;
 #######################################################
 
 # virtual hosts
-include <?php print $nginx_site_conf_path ?>/*;
+include <?php print $http_vhostd_path ?>/*;
 
 # other configuration, not touched by aegir
-include <?php print $nginx_conf_path ?>/*;
+include <?php print $http_confd_path ?>/*;
 
-}
