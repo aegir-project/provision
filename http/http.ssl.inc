@@ -170,7 +170,7 @@ class provisionService_http_ssl extends provisionService_http_public {
 
     // try to assign one
     foreach ($server->ip_addresses as $ip) {
-      if (!provisionService_http_ssl::get_ip_certificate($ip)) {
+      if (!provisionService_http_ssl::get_ip_certificate($ip, $server)) {
         touch("{$path}/{$ssl_key}__{$ip}.receipt");
         return $ip;
       }
@@ -317,10 +317,7 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
     $ip_addresses = drush_get_option('site_ip_addresses', array(), 'site');
 
     if ($this->ssl_enabled && $this->ssl_key) {
-      $path = dirname($this->data['ssl_cert']);
-
-      $this->clear_certs();
-
+      $this->clear_certs($this->ssl_key);
     }
     elseif ($ip = $ip_addresses[$this->data['server']->name]) {
       if ($ssl_key = provisionService_http_ssl::get_ip_certificate($ip, $this->data['server'])) {
