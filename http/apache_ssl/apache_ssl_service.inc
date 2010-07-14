@@ -52,8 +52,6 @@ class provisionService_http_apache_ssl extends provisionService_http_ssl {
     // Just re-use the standard platform config.
     $this->configs['platform'][] = 'provisionConfig_apache_platform';
 
-    // We generate both an SSL and a non-SSL config file.
-    $this->configs['site'][] = 'provisionConfig_apache_site';
     $this->configs['site'][] = 'provisionConfig_apache_ssl_site';
   }
 

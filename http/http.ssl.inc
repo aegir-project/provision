@@ -206,17 +206,5 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
       #$this->data['server']->sync(dirname($this->data['ssl_cert']));
     }
   }
-
-  function __construct($owner, $data = array()) {
-    parent::__construct($owner, $data);
-  
-    if (!$this->ssl_enabled || !$this->ssl_key) {
-      throw new provisionException_continue("SSL has not been enabled for this site. SSL vhost not necessary"); 
-    }
-  }
-
-  function filename() {
-    return $this->data['http_vhostd_path'] . '/' . $this->uri . '_ssl';
-  }
 }
 

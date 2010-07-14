@@ -1,46 +1,52 @@
-<VirtualHost <?php print "{$ip_address}:{$http_ssl_port}"; ?>>
-<?php if ($this->site_mail) : ?>
-  ServerAdmin <?php  print $this->site_mail; ?> 
-<?php endif;?>
-  DocumentRoot <?php print $this->root; ?> 
-    
-  ServerName <?php print $this->uri; ?>
 
-  SetEnv db_type  <?php print urlencode($db_type); ?>
+<?php if ($this->ssl_enabled && $this->ssl_key) : ?>
 
-  SetEnv db_name  <?php print urlencode($db_name); ?>
+  <VirtualHost <?php print "{$ip_address}:{$http_ssl_port}"; ?>>
+  <?php if ($this->site_mail) : ?>
+    ServerAdmin <?php  print $this->site_mail; ?> 
+  <?php endif;?>
+    DocumentRoot <?php print $this->root; ?> 
+      
+    ServerName <?php print $this->uri; ?>
 
-  SetEnv db_user  <?php print urlencode($db_user); ?>
+    SetEnv db_type  <?php print urlencode($db_type); ?>
 
-  SetEnv db_passwd  <?php print urlencode($db_passwd); ?>
+    SetEnv db_name  <?php print urlencode($db_name); ?>
 
-  SetEnv db_host  <?php print urlencode($db_host); ?>
+    SetEnv db_user  <?php print urlencode($db_user); ?>
 
-  SetEnv db_port  <?php print urlencode($db_port); ?>
+    SetEnv db_passwd  <?php print urlencode($db_passwd); ?>
 
-  # Enable SSL handling.
-   
-  SSLEngine on
+    SetEnv db_host  <?php print urlencode($db_host); ?>
 
-  SSLCertificateFile <?php print $ssl_cert; ?>
+    SetEnv db_port  <?php print urlencode($db_port); ?>
 
-  SSLCertificateKeyFile <?php print $ssl_cert_key; ?>
+    # Enable SSL handling.
+     
+    SSLEngine on
 
-<?php if (!$this->redirection && is_array($this->aliases)) :
-  foreach ($this->aliases as $alias_url) :
-  if (trim($alias_url)) : ?>
-  ServerAlias <?php print $alias_url; ?> 
+    SSLCertificateFile <?php print $ssl_cert; ?>
 
-<?php
- endif;
- endforeach;
- endif; ?>
+    SSLCertificateKeyFile <?php print $ssl_cert_key; ?>
 
-<?php print $extra_config; ?>
+  <?php if (!$this->redirection && is_array($this->aliases)) :
+    foreach ($this->aliases as $alias_url) :
+    if (trim($alias_url)) : ?>
+    ServerAlias <?php print $alias_url; ?> 
 
-    # Error handler for Drupal > 4.6.7
-    <Directory "<?php print $this->site_path; ?>/files">
-      SetHandler This_is_a_Drupal_security_line_do_not_remove
-    </Directory>
+  <?php
+   endif;
+   endforeach;
+   endif; ?>
 
-</VirtualHost>
+  <?php print $extra_config; ?>
+
+      # Error handler for Drupal > 4.6.7
+      <Directory "<?php print $this->site_path; ?>/files">
+        SetHandler This_is_a_Drupal_security_line_do_not_remove
+      </Directory>
+
+  </VirtualHost>
+<?php endif; ?>
+
+<?php include('http/apache/vhost.tpl.php'); ?>
