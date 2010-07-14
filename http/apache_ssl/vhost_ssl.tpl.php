@@ -49,4 +49,35 @@
   </VirtualHost>
 <?php endif; ?>
 
-<?php include('http/apache/vhost.tpl.php'); ?>
+<?php 
+   if ($this->ssl_enabled != 2) :
+     // Generate the standard virtual host too.
+     include('http/apache/vhost.tpl.php');
+
+   else :
+     // Generate a virtual host that redirects all HTTP traffic to https.
+?>
+
+
+<VirtualHost <?php print $ip_address . ':' . $http_port; ?>>
+  <?php if ($this->site_mail) : ?>
+    ServerAdmin <?php  print $this->site_mail; ?> 
+  <?php endif;?>
+
+    ServerName <?php print $this->uri ?>
+
+  <?php if (is_array($this->aliases)) :
+    foreach ($this->aliases as $alias_url) :
+    if (trim($alias_url)) : ?>
+    ServerAlias <?php print $alias_url; ?> 
+
+  <?php
+   endif;
+   endforeach;
+   endif; ?>
+ 
+  RedirectMatch permanent ^(.*) <?php print $ssl_redirect_url ?>$1
+</VirtualHost>
+
+
+<?php endif; ?>
