@@ -124,19 +124,26 @@ class provisionService_dns extends provisionService {
    * @returns array the record and zone name to add the record to (e.g. www and example.com)
    */
   function guess_zone($host) {
+    $tld = $host;
     $parts = explode(".", $host);
     $subdomain = array();
-    $tld = FALSE;
-    do {
+    $found = FALSE;
+    drush_log("zone $tld, found: $found, parts: " . count($parts));
+    while (!$found && (count($parts) >= 2)) {
       $tld = join(".", $parts);
-      if (!$this->zone_exists($tld)) {
+      if ($this->zone_exists($tld)) {
+        $found = TRUE;
+      } else {
         $scrap = array_shift($parts);
         $subdomain[] = $scrap;
-        drush_log("zone $tld not found, ditching $scrap");
-        $tld = FALSE;
+        drush_log("zone $tld not found, ditching $scrap, count: " . count($parts));
+        $found = FALSE;
       }
-    } while (!$tld || count($parts) < 1);
+    }
     $subdomain = join(".", $subdomain);
+    if (!$subdomain) {
+      $subdomain = '@';
+    }
     drush_log("guess_zone guessed parts $tld, $subdomain");
     return array($subdomain, $tld);
   }
@@ -231,20 +238,22 @@ class provisionService_dns extends provisionService {
     $zone = $parts[1];
     $sub = $parts[0];
     if (!$this->zone_exists($zone)) {
+      drush_log("in create_host, zone not found");
       $this->create_zone($zone);
     }
     $ips = d($site)->service('http')->server->ip_addresses;
-    if (!is_array($ips)) {
-      if (!$ips) {
-        drush_log(dt("no IP found for server, trying loopback"));
-        $ips = '127.0.0.1';
-      }
-      $this->edit_record($zone, $sub, 'A', $ips);
-    } else {
+    if (!$ips && count($ips) < 1) {
+      drush_log(dt("no IP found for server, trying loopback"));
+      $ips = '127.0.0.1';
+    }
+    if (is_array($ips)) {
+      drush_log("a bunch of ips defined, deleting existing ones and readding: " . join(",", $ips));
       $this->delete_record($zone, $sub, 'A');
       foreach ($ips as $ip) {
         $this->add_record($zone, $sub, 'A', $ip);
       }
+    } else {
+      $this->edit_record($zone, $sub, 'A', $ips);
     }
   }
 
