@@ -184,7 +184,7 @@ class provisionService_dns extends provisionService {
    * This creates a zone, which mostly consists of adding the SOA record.
    */
   function create_zone($fqdn = null) {
-    $this->edit_record($fqdn, '@', $this->soa_string($fqdn), 'SOA');
+    $this->edit_record($fqdn, '@', 'SOA', $this->soa_string($fqdn));
   }
 
   /**
