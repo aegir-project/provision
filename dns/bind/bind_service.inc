@@ -96,6 +96,7 @@ class provisionService_dns_bind extends provisionService_dns {
   }
 
   function edit_record($zonename, $name, $type, $destination) {
+    drush_log("edit: $zonename, $name, $type, $destination");
     $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
     $pattern = "/^\s*$name\s+IN\s+$type\s+.*$/im";
     if ($type == 'SOA') {
@@ -197,7 +198,7 @@ class provisionConfig_bind_zone extends provisionConfig {
     }
     if (!$found) {
       fseek($fd, 0, SEEK_END);
-      drush_log("pattern $pattern not found in file $file, adding at the end");
+      drush_log("pattern $pattern not found in file $file, adding at the end: $line");
       fwrite($fd, $line . "\n");
     }
     fclose($fd);
@@ -222,12 +223,15 @@ class provisionConfig_bind_zone extends provisionConfig {
 
   function replace_or_add_line($replacement, $pattern) {
     $file = $this->filename();
-    $fd = fopen($file, 'r+');
+    if (!($fd = fopen($file, 'a+'))) {
+      drush_log("warning: cannot open $file");
+    }
+
     flock($fd, LOCK_EX);
     $body = fread($fd, filesize($file));
     $newbody = preg_replace($pattern, $replacement, $body);
     if ($body === $newbody) {
-      drush_log("pattern $pattern not found in $file, adding at the end");
+      drush_log("pattern $pattern not found in $file, adding at the end: $replacement");
       fseek($fd, 0, SEEK_END);
       fwrite($fd, $replacement . "\n");
     } else {
