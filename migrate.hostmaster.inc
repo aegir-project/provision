@@ -43,7 +43,8 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
     return false;
   }
 
-
+  // dereference relative paths and symlinks
+  $platform = realpath($plaform);
   $new_platform = '@platform_' . preg_replace("/[!\W]/", "", basename(rtrim($platform, '/')));
   drush_backend_invoke_args("provision-save", array($new_platform), array(
     'context_type' => 'platform',
