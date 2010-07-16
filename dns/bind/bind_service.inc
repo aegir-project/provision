@@ -27,6 +27,7 @@ class provisionService_dns_bind extends provisionService_dns {
     $data = parent::config_data($config, $class);
     $data['bind_conf_path'] = $this->server->bind_config_path;
     $data['bind_zone_master_path'] = $this->server->bind_zone_master_path;
+    return $data;
   }
 
   function verify() {
