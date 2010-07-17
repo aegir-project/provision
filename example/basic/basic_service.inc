@@ -25,19 +25,19 @@ class provisionService_example_basic extends provisionService_example {
   */
 
  /**
-  *   this service needs to have a port specified for it.
+  *   This service needs to have a port specified for it.
   */
   public $has_port = TRUE;
 
  /**
-  *   the default value for the port input.
+  *   The default value for the port input.
   */
   function default_port() {
     return 12345;
   }
 
  /**
-  *   this service needs to be restarted with a shell command.
+  *   This service needs to be restarted with a shell command.
   */
   public $has_restart_cmd = TRUE;
 
@@ -84,7 +84,7 @@ class provisionService_example_basic extends provisionService_example {
      * Non configurable values.
      *
      * If you want to generate values for use in your code or templates,
-     * but don't want them to be overriden you would use the following format.
+     * but don't want them to be overridden you would use the following format.
      *
      *   $this->server->example_config_path = $this->server->config_path . '/example.d'
      *
@@ -150,12 +150,11 @@ class provisionConfig_example extends provisionConfig {
    * Where the file generated will end up.
    *
    * It is extremely important that this path is only made up of information
-   * relative to this class, and not use drush_get_option or the d() accessor.
+   * relative to this class, and does not use drush_get_option or the d() accessor.
    */
   function filename() {
     return $this->example_config_path . '/example.conf';
   }
-
 
 
   /**
