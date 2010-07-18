@@ -1,6 +1,11 @@
 # Aegir web server configuration file
 
-NameVirtualHost <?php print $ip_address . ':' . $http_port; ?>
+<?php foreach ($server->ip_addresses as $ip) : ?>
+  Listen <?php print $ip . ':' . $http_port; ?>
+
+  NameVirtualHost <?php print $ip . ':' . $http_port; ?>
+
+<?php endforeach; ?>
 
 <VirtualHost <?php print $ip_address . ':' . $http_port; ?>>
   ServerName default

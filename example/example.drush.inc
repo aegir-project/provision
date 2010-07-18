@@ -3,7 +3,7 @@
 
 /**
  * @file
- *   An example of the provision service api.
+ *   An example of the provision service API.
  *
  *  Declares a new service type and a basic implementation of it.
  *  It matches the same service definition in the hosting front end.
@@ -28,8 +28,6 @@ function example_provision_services() {
   return array('example' => NULL);
 }
 
-
-
 /**
  * The service type base class.
  *
@@ -51,7 +49,7 @@ class provisionService_example extends provisionService {
      * We do not need to use this in our example.
      *
      * You would extend this if you needed to save values
-     * for all possible implementation of this service type.
+     * for all possible implementations of this service type.
      */
   }
 
@@ -65,7 +63,6 @@ class provisionService_example extends provisionService {
     $this->create_config(d()->type);
     $this->parse_configs();
   }
-
 
   /**
    * PUBLIC API!
@@ -125,7 +122,4 @@ class provisionService_example extends provisionService {
   function delete_server_config() {
     return TRUE;
   }
-
-
-
 }
