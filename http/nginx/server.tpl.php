@@ -1,18 +1,19 @@
-# Aegir web server configuration file
+# Aegir web server main configuration file
 
 #######################################################
 ###  nginx.conf main
 #######################################################
 
- ## MIME types
-  include            /etc/nginx/fastcgi_params;
+ ## MIME types & FastCGI params
+  include            /etc/nginx/fastcgi_params.conf;
+  include            /etc/nginx/mime.types;
   default_type       application/octet-stream;
 
  ## Size Limits
-  client_body_buffer_size         1k;
+  client_body_buffer_size        64k;
   client_header_buffer_size       1k;
-  client_max_body_size           10m;
-  large_client_header_buffers   3 3k;
+  client_max_body_size           25m;
+  large_client_header_buffers  4 32k;
   connection_pool_size           256;
   request_pool_size               4k;
   server_names_hash_bucket_size  128;
@@ -25,7 +26,7 @@
 
  ## General Options
   ignore_invalid_headers          on;
-  limit_zone gulag $binary_remote_addr 1m;
+  limit_zone gulag $binary_remote_addr 10m;
   recursive_error_pages           on;
   sendfile                        on;
 
@@ -45,13 +46,16 @@
   gzip_proxied      any;
   gzip_disable      "MSIE [1-6]\.";
 
+ ## Upload Progress
+  upload_progress uploads 1m;
+
  ## Log Format
   log_format        main '"$remote_addr" $host [$time_local] '
                          '"$request" $status $body_bytes_sent '
                          '$request_length $bytes_sent "$http_referer" '
                          '"$http_user_agent" $request_time "$gzip_ratio"';
 
-  client_body_temp_path      /var/cache/nginx/client_body_temp 1 2;
+  client_body_temp_path /var/cache/nginx/client_body_temp 1 2;
   access_log                   /var/log/nginx/access.log main;
   error_log                     /var/log/nginx/error.log crit;
       
@@ -61,8 +65,8 @@
 #######################################################
 
 server {
-
-  listen <?php print $http_port; ?>;
+  limit_conn   gulag 10; # like mod_evasive - this allows max 10 simultaneous connections from one IP address
+  listen       <?php print $ip_address . ':' . $http_port; ?>;
 
   server_name  _;
   
@@ -84,7 +88,4 @@ server {
 
 # virtual hosts
 include <?php print $http_vhostd_path ?>/*;
-
-# other configuration, not touched by aegir
-include <?php print $http_confd_path ?>/*;
 
