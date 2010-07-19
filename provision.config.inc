@@ -268,7 +268,11 @@ class provisionConfig {
     flock($fd, LOCK_EX);
     $body = fread($fd, filesize($file));
     $newbody = preg_replace($pattern, '', $body);
-    drush_log("pattern $pattern found and replaced with $replacement");
+    if ($newbody != $body) {
+      drush_log("pattern $pattern found and replaced with $replacement");
+    } else {
+      drush_log("couldn't find line $pattern", 'warning');
+    }
     fseek($fd, 0);
     fwrite($fd, $newbody);
     ftruncate($fd, strlen($newbody));
