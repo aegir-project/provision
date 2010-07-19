@@ -154,6 +154,23 @@ function _provision_file_check_location($source, $directory = '') {
 
 
 /**
+ * Find the username of the current running procses
+ *
+ * This will return the username of the current running user (as seen
+ * from posix_geteuid()) and should be used instead of
+ * get_current_user() (which looks at the file owner instead).
+ *
+ * @see get_current_user()
+ * @see posix_geteuid()
+ *
+ * @return
+ *   String. The username.
+ */
+function provision_current_user() {
+  return provision_posix_username(posix_geteuid());
+}
+
+/**
  * Check whether a user is a member of a group.
  *
  * @param user
