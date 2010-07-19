@@ -238,10 +238,18 @@ function _provision_find_profiles() {
     $profile->filename = $file;
 
     _provision_cvs_deploy($profile);
+
+    $profile->info = array();
+
+    $info_file = "./profiles/$name/$name.info";
+    if (file_exists($info_file)) {
+      $profile->info = provision_parse_info_file($info_file);
+    }
+
     require_once($profile->filename);
     $func = $profile->name . "_profile_details";
     if (function_exists($func)) {
-      $profile->info =  $func();
+      $profile->info = array_merge($profile->info, $func());
     }
 
     $languages['en'] = 1;
