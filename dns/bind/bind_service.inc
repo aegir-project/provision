@@ -110,18 +110,19 @@ class provisionService_dns_bind extends provisionService_dns {
 
   function delete_record($zonename, $name, $type = null, $destination = null) {
     $zone = $this->zone_singleton($zonename);
-    $pattern = "/^$name\s\s*IN\s\s*";
+    $pattern = "/^$name\s+IN\s+";
     if (is_null($type)) {
-      $pattern .= "\w\w*";
+      $pattern .= "\w+";
     } else {
       $pattern .= $type;
     }
-    $pattern .= "\s\s*";
-    if (!is_null($destination)) {
+    $pattern .= "\s+";
+    if (is_null($destination)) {
+      $pattern .= '.*';
+    } else {
       $pattern .= $destination;
-      $pattern .= '$';
     }
-    $pattern .= '/';
+    $pattern .= '$/im';
     return $zone->delete_line($pattern);
   }
 
