@@ -49,10 +49,10 @@ class provisionService_http_nginx_ssl extends provisionService_http_ssl {
 
   function verify() {
     if ($this->context->type === 'server') {
-       provision_file()->copy(dirname(__FILE__) . '/nginx_include.conf', $this->server->include_path . '/nginx_include.conf');
-       $this->sync($this->server->include_path . '/nginx_include.conf');
-       provision_file()->copy(dirname(__FILE__) . '/fastcgi_params.conf', $this->server->include_path . '/fastcgi_params.conf');
-       $this->sync($this->server->include_path . '/fastcgi_params.conf');
+       provision_file()->copy(dirname(__FILE__) . '/nginx_advanced_include.conf', $this->server->include_path . '/nginx_advanced_include.conf');
+       $this->sync($this->server->include_path . '/nginx_advanced_include.conf');
+       provision_file()->copy(dirname(__FILE__) . '/nginx_simple_include.conf', $this->server->include_path . '/nginx_simple_include.conf');
+       $this->sync($this->server->include_path . '/nginx_simple_include.conf');
     }
     // Call the parent at the end. it will restart the server when it finishes.
     parent::verify();
