@@ -233,9 +233,16 @@ class provisionService_dns extends provisionService {
    * Create a host in DNS.
    *
    * This can do a lot of things, create a zonefile, add a record to a
-   * zonefile, it's going to make its best guess doing the Right Thing.
+   * zonefile, it's going to make its best guess doing the Right
+   * Thing.
+   *
+   * @arg $host string the hostname to create. If null, we look in the
+   * current context (should be a site) for a URI.
    */
-  function create_host($host) {
+  function create_host($host = null) {
+    if (is_null($host)) {
+      $host = $this->context->uri;
+    }
     $parts = $this->guess_zone($host);
     $zone = $parts[1];
     $sub = $parts[0];
@@ -263,8 +270,14 @@ class provisionService_dns extends provisionService {
    * Delete a host from DNS
    *
    * Similar to create host, this will seek and destroy that host throughout zonefiles.
+   *
+   * @arg $host string the hostname to create. If null, we look in the
+   * current context (should be a site) for a URI.
    */
-  function delete_host($host) {
+  function delete_host($host = null) {
+    if (is_null($host)) {
+      $host = $this->context->uri;
+    }
     $parts = $this->guess_zone($host);
     $this->delete_record($parts[0], $parts[1], 'A');
     if ($this->count_records($parts[0], null, array('NS', 'SOA'))) {

@@ -9,13 +9,13 @@
 
 function drush_dns_pre_provision_install() {
   if (d()->type == 'site') {
-    d()->service('dns')->create_host(d()->uri);
+    d()->service('dns')->create_host();
   }
 }
 
 function drush_dns_pre_provision_install_rollback() {
   if (d()->type == 'site') {
-    d()->service('dns')->delete_host(d()->uri);
+    d()->service('dns')->delete_host();
   }
 }
 
