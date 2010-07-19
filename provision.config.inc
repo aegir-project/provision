@@ -67,7 +67,6 @@ class provisionConfig {
 
     // Accept both a reference and an alias name for the owner.
     $this->owner = is_object($owner) ? $owner : d($owner);
-    $this->data = $this->parse();
 
     if (sizeof($data)) {
       $this->data = $data;
