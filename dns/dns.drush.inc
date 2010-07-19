@@ -131,7 +131,7 @@ class provisionService_dns extends provisionService {
     $subdomain = array();
     $found = FALSE;
     drush_log("zone $tld, found: $found, parts: " . count($parts));
-    while (!$found && (count($parts) >= 2)) {
+    while (!$found && (count($parts) > 2)) {
       $tld = join(".", $parts);
       if ($this->zone_exists($tld)) {
         $found = TRUE;
@@ -142,6 +142,8 @@ class provisionService_dns extends provisionService {
         $found = FALSE;
       }
     }
+    // this is necessary if we hit the limit of two subdomains
+    $tld = join(".", $parts);
     $subdomain = join(".", $subdomain);
     if (!$subdomain) {
       $subdomain = '@';
