@@ -122,7 +122,7 @@ class provisionService_dns_bind extends provisionService_dns {
     } else {
       $pattern .= $destination;
     }
-    $pattern .= '$/im';
+    $pattern .= "\n\$/im";
     return $zone->delete_line($pattern);
   }
 
