@@ -191,6 +191,90 @@ class provisionConfig {
   function unlink() {
     provision_file()->unlink($this->filename())->status();
   }
+
+
+  /**
+   * add a line to a file if the file (or pattern) is not in the file
+   * already
+   *
+   * This is bound to be called repeatedly so it needs to be fast.
+   */
+  function add_line_if_not_exists($line, $pattern = null) {
+    $file = $this->filename();
+    // XXX: we should do exponential backoff here to limit contention
+    $fd = fopen($file, 'r+'); // read/write, beginning of file
+    flock($fd, LOCK_EX);
+    $line = trim($line);
+    if (is_null($pattern)) {
+      $pattern = '/' . $line . '/';
+    }
+    $found = FALSE;
+    while ($l = fgets($fd)) {
+      if (preg_match($pattern, $l)) {
+        $found = TRUE;
+        break;
+      }
+    }
+    if (!$found) {
+      fseek($fd, 0, SEEK_END);
+      drush_log("pattern $pattern not found in file $file, adding at the end: $line");
+      fwrite($fd, $line . "\n");
+    }
+    fclose($fd);
+    return $found;
+  }
+
+  /**
+   * add a line to a file if the file (or pattern) is not in the file
+   * already
+   *
+   * This is bound to be called repeatedly so it needs to be fast.
+   */
+  function add_line($line) {
+    $file = $this->filename();
+    // XXX: we should do exponential backoff here to limit contention
+    $fd = fopen($file, 'a'); // read/write, beginning of file
+    flock($fd, LOCK_EX);
+    $line = trim($line);
+    fwrite($fd, $line . "\n");
+    fclose($fd);
+  }
+
+  function replace_or_add_line($replacement, $pattern) {
+    $file = $this->filename();
+    if (!($fd = fopen($file, 'a+'))) {
+      drush_log("warning: cannot open $file");
+    }
+
+    flock($fd, LOCK_EX);
+    $body = fread($fd, filesize($file));
+    $newbody = preg_replace($pattern, $replacement, $body);
+    if ($body === $newbody) {
+      drush_log("pattern $pattern not found in $file, adding at the end: $replacement");
+      fseek($fd, 0, SEEK_END);
+      fwrite($fd, $replacement . "\n");
+    } else {
+      drush_log("pattern $pattern found and replaced with $replacement");
+      fseek($fd, 0);
+      fwrite($fd, $newbody);
+      ftruncate($fd, strlen($newbody));
+    }
+    fclose($fd);    
+  }
+
+  function delete_line($pattern) {
+    $file = $this->filename();
+    $fd = fopen($file, 'r+');
+    flock($fd, LOCK_EX);
+    $body = fread($fd, filesize($file));
+    $newbody = preg_replace($pattern, '', $body);
+    drush_log("pattern $pattern found and replaced with $replacement");
+    fseek($fd, 0);
+    fwrite($fd, $newbody);
+    ftruncate($fd, strlen($newbody));
+    fclose($fd);    
+  }
+  
 }
 
 /**
