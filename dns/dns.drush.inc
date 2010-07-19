@@ -59,6 +59,8 @@ function dns_provision_services() {
 }
 
 class provisionService_dns extends provisionService {
+  public $service = 'dns';
+
   static function option_documentation() {
     return array(
       

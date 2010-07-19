@@ -6,8 +6,8 @@
  * A lot of this is inspired by the Apache implementation of the HTTP service.
  */
 class provisionService_dns_bind extends provisionService_dns {
-  public $has_restart_command = TRUE;
-
+  protected $application_name = 'bind';
+  protected $has_restart_command = TRUE;
   
   static function bind_default_restart_cmd() {
     return "/etc/init.d/named restart";
