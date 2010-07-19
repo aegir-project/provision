@@ -101,6 +101,32 @@ class provisionConfig_http_site extends provisionConfig_http {
     return $this->data['http_vhostd_path'] . '/' . $this->uri;
   }
 
+  function write() {
+    parent::write();
+
+    // We also leave a record of this IP in the site's drushrc.php
+    // This way we can pass the info back to the front end.
+    $ip_addresses = drush_get_option('site_ip_addresses', array(), 'site');
+
+    if ($this->data['ip_address'] != '*') {
+      $ip_addresses[$this->data['server']->name] = $this->data['ip_address'];
+    }
+    elseif (isset($context['site_ip_addresses'][$this->data['server']->name])) {
+      unset($ip_addresses[$this->data['server']->name]);
+    }
+    drush_set_option('site_ip_addresses', $ip_addresses, 'site');
+  }
+
+  function unlink() {
+    parent::unlink();
+
+    // We also remove the record of this IP in the site's drushrc.php
+    // This way we can pass the info back to the front end.
+    $ip_addresses = drush_get_option('site_ip_addresses', array(), 'site');
+    unset($ip_addresses[$this->data['server']->name]);
+    drush_set_option('site_ip_addresses', $ip_addresses, 'site');
+  }
+
   function process() {
     parent::process();
 

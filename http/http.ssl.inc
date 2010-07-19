@@ -64,13 +64,6 @@ class provisionService_http_ssl extends provisionService_http_public {
         else {
           $data['ip_address'] = $ip;
 
-          // We also leave a record of this IP in the site's drushrc.php
-          // This way we can pass the info back to the front end.
-          $context =& drush_get_context('site');
-          if (!is_array($context['site_ip_addresses'])) {
-            $context['site_ip_addresses'] = array();
-          }
-          $context['site_ip_addresses'][$this->server->name] = $ip;
         }
       }
     }
@@ -339,11 +332,6 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
         succeed(dt("Deleted SSL Certificate association stub for %site on %server", array(
           '%site' => $this->uri,
           '%server' => $this->data['server']->remote_host)));
-
-
-    $ip_addresses = drush_get_option('site_ip_addresses', array(), 'site');
-    unset($ip_addresses[$this->data['server']->name]);
-    drush_set_option('site_ip_addresses', $ip_addresses, 'site');
 
     $used = provisionService_http_ssl::certificate_in_use($this->ssl_key, $this->data['server']);
 
