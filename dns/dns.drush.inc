@@ -280,9 +280,9 @@ class provisionService_dns extends provisionService {
       $host = $this->context->uri;
     }
     $parts = $this->guess_zone($host);
-    $this->delete_record($parts[0], $parts[1], 'A');
-    if ($this->count_records($parts[0], null, array('NS', 'SOA'))) {
-      $this->delete_zone($parts[0]);
+    $this->delete_record($parts[1], $parts[0], 'A');
+    if ($this->count_records($parts[1], null, array('NS', 'SOA'))) {
+      $this->delete_zone($parts[1]);
     }
 
   }
