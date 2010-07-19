@@ -130,7 +130,6 @@ class provisionService_dns extends provisionService {
     $parts = explode(".", $host);
     $subdomain = array();
     $found = FALSE;
-    drush_log("zone $tld, found: $found, parts: " . count($parts));
     while (!$found && (count($parts) > 2)) {
       $tld = join(".", $parts);
       if ($this->zone_exists($tld)) {
@@ -249,7 +248,7 @@ class provisionService_dns extends provisionService {
     $zone = $parts[1];
     $sub = $parts[0];
     if (!$this->zone_exists($zone)) {
-      drush_log("in create_host, zone not found");
+      drush_log("in create_host, zone $zone not found");
       $this->create_zone($zone);
     }
     $ips = d($site)->service('http')->server->ip_addresses;
