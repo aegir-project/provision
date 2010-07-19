@@ -8,6 +8,7 @@
 class provisionService_dns_bind extends provisionService_dns {
   protected $application_name = 'bind';
   protected $has_restart_command = TRUE;
+  private $zone_cache = array();
   
   static function bind_default_restart_cmd() {
     return "/etc/init.d/named restart";
@@ -46,7 +47,7 @@ class provisionService_dns_bind extends provisionService_dns {
   }
 
   function create_zone($zonename) {
-    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
+    $zone = $this->zone_singleton($zonename);
     if (!$zone->exists()) {
       drush_log("creating zone");
       //$zone->add_line_if_not_exists($zone->zone_declaration(), '/zone\s*"'. $zonename . '"/');
@@ -82,14 +83,14 @@ class provisionService_dns_bind extends provisionService_dns {
   }
 
   function delete_zone($zonename) {
-    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
+    $zone = $this->zone_singleton($zonename);
     if (!$zone->count_records(null, array('NS', 'SOA'))) {
       $zone->delete_file();
     }
   }
 
   function add_record($zonename, $name, $type, $destination) {
-    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
+    $zone = $this->zone_singleton($zonename);
     if ($type == 'SOA') { // only one SOA per file
       return $zone->add_line_if_not_exists($name . ' IN SOA ' . $destination, '/(?:@\s+)?IN\s+SOA\s+/');
     } else {
@@ -99,7 +100,7 @@ class provisionService_dns_bind extends provisionService_dns {
 
   function edit_record($zonename, $name, $type, $destination) {
     drush_log("edit: $zonename, $name, $type, $destination");
-    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
+    $zone = $this->zone_singleton($zonename);
     $pattern = "/^\s*$name\s+IN\s+$type\s+.*$/im";
     if ($type == 'SOA') {
       $pattern = "/^(?:@\s+)?IN\s+SOA\s+[\w.]+\s+[\w.]+\s+\(([^)]*)\)\s*$/ims";
@@ -108,7 +109,7 @@ class provisionService_dns_bind extends provisionService_dns {
   }
 
   function delete_record($zonename, $name, $type = null, $destination = null) {
-    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
+    $zone = $this->zone_singleton($zonename);
     $pattern = "/^$name\s\s*IN\s\s*";
     if (is_null($type)) {
       $pattern .= "\w\w*";
@@ -125,13 +126,20 @@ class provisionService_dns_bind extends provisionService_dns {
   }
 
   function zone_exists($zonename) {
-    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
+    $zone = $this->zone_singleton($zonename);
     return $zone->exists();
   }
 
   function count_records($zonename, $include = null, $exclude = null) {
-    $zone = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
+    $zone = $this->zone_singleton($zonename);
     return $zone->count_records($include, $exclude);
+  }
+
+  public function &zone_singleton($zonename) {
+    if (!$this->zone_cache[$zonename]) {
+      $this->zone_cache[$zonename] = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
+    }
+    return $this->zone_cache[$zonename];
   }
 
 }
