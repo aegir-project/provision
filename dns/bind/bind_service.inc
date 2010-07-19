@@ -137,6 +137,10 @@ class provisionService_dns_bind extends provisionService_dns {
 
   public function &zone_singleton($zonename) {
     if (!$this->zone_cache[$zonename]) {
+      if ($this->context->type == 'site') {
+        $this->context = '@server_master';
+        drush_log("overriding server context");
+      }
       $this->zone_cache[$zonename] = new provisionConfig_bind_zone($this->context, array('name' => $zonename));
     }
     return $this->zone_cache[$zonename];
