@@ -19,9 +19,9 @@ class provisionConfig {
   public $data = array();
 
   /**
-   * A provisionEnvironment object thie configuration relates to.
+   * A provisionContext object thie configuration relates to.
    *
-   * @var provisionEnvironment
+   * @var provisionContext
    */
   public $owner = null;
 
@@ -54,7 +54,7 @@ class provisionConfig {
    * Constructor, overriding not recommended.
    *
    * @param $owner
-   *   An alias name for d(), the provisionEnvironment that this configuration
+   *   An alias name for d(), the provisionContext that this configuration
    *   is relevant to.
    * @param $data
    *   An associative array to potentiall manipulate in process() and make

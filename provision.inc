@@ -373,7 +373,10 @@ class provisionException_continue extends provisionException {
 }
 
 
-include_once('provision.environment.inc');
+include_once('provision.context.inc');
+include_once('provision.context.server.inc');
+include_once('provision.context.platform.inc');
+include_once('provision.context.site.inc');
 include_once('provision.service.inc');
 include_once('provision.file.inc');
 include_once('provision.config.inc');

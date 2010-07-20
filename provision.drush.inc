@@ -78,7 +78,7 @@ function provision_drush_command() {
     'options' => array_merge(array(
       '--context_type' => 'server, platform, or site; default server',
       '--delete' => 'Remove the alias.',
-    ), provisionEnvironment_server::option_documentation(), provisionEnvironment_platform::option_documentation(), provisionEnvironment_site::option_documentation()),
+    ), provisionContext_server::option_documentation(), provisionContext_platform::option_documentation(), provisionContext_site::option_documentation()),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
   $items['provision-install'] = array(
