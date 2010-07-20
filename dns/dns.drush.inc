@@ -151,19 +151,6 @@ class provisionService_dns extends provisionService {
     return array($subdomain, $tld);
   }
 
-  function soa_string($name) {
-    $string = $name . ". "; # the FQDN
-    $string .= drush_get_option('zone_hostmaster', 'hostmaster.'. $name . '.'); # the email
-    $string .= " ( ";
-    $string .= $this->serial . " ";
-    $string .= $this->refresh . " ";
-    $string .= $this->retry . " ";
-    $string .= $this->expire . " ";
-    $string .= $this->negativettl . " ";
-    $string .= " ) ";
-    return $string;
-  }
-
   /**
    * Helper function to increment a zone's serial number.
    *
@@ -194,7 +181,7 @@ class provisionService_dns extends provisionService {
    * This creates a zone, which mostly consists of adding the SOA record.
    */
   function create_zone($fqdn = null) {
-    $this->edit_record($fqdn, '@', 'SOA', $this->soa_string($fqdn));
+    $this->edit_record($fqdn, '@', 'SOA');
   }
 
   /**

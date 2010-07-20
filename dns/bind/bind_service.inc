@@ -51,35 +51,8 @@ class provisionService_dns_bind extends provisionService_dns {
     if (!$zone->exists()) {
       drush_log("creating zone");
       //$zone->add_line_if_not_exists($zone->zone_declaration(), '/zone\s*"'. $zonename . '"/');
-      $zone->write();
-
-    } else {
-      drush_log("zone already exists");
     }
-    $this->load_from_zone($zone);
-    parent::create_zone($zonename);
-  }
-
-  function load_from_zone($zone) {
-    // load parameters from zone
-    foreach (array('ttl', 'serial', 'refresh', 'retry', 'expire', 'negativettl') as $param) {
-      if (isset($zone->data[$param])) {
-        drush_log("got param $param from zone, value: " . $zone->data[$param]);
-        if ($param == 'serial') {
-          $this->$param = provisionService_dns::increment_serial($zone->data['serial']);
-        } else {
-          $this->$param = $zone->data[$param];
-        }
-      } else {
-        if ($param == 'serial') {
-          $this->$param = provisionService_dns::increment_serial();
-        } else {
-          $longparam = "dns_" . $param;
-          $this->$param = $this->server->$longparam;
-        }
-        drush_log("param $param missing from zone, using default: " . $this->$param);
-      }
-    }        
+    return parent::create_zone($zonename);
   }
 
   function delete_zone($zonename) {
@@ -90,40 +63,53 @@ class provisionService_dns_bind extends provisionService_dns {
   }
 
   function add_record($zonename, $name, $type, $destination) {
+    drush_log("add: $zonename, $name, $type, $destination");
+    
     $zone = $this->zone_singleton($zonename);
     if ($type == 'SOA') { // only one SOA per file
-      return $zone->add_line_if_not_exists($name . ' IN SOA ' . $destination, '/(?:@\s+)?IN\s+SOA\s+/');
+      foreach ($zone->records as $record) {
+        if ($record['type'] == 'SOA') {
+          $record['destination'] = $destination;
+        }
+      }
     } else {
-      return $zone->add_line($name . "\tIN\t" . $type . "\t" . $destination);
+      $zone->records[] = array('name' => $name, 'type' => $type, 'destination' => $destination);
     }
+    return $zone->write();
   }
 
-  function edit_record($zonename, $name, $type, $destination) {
+  function edit_record($zonename, $name, $type, $destination = NULL) {
     drush_log("edit: $zonename, $name, $type, $destination");
     $zone = $this->zone_singleton($zonename);
-    $pattern = "/^\s*$name\s+IN\s+$type\s+.*$/im";
-    if ($type == 'SOA') {
-      $pattern = "/^(?:@\s+)?IN\s+SOA\s+[\w.]+\s+[\w.]+\s+\(([^)]*)\)\s*$/ims";
+    $found = FALSE;
+    foreach ($zone->records as $key => $record) {
+      if ($record['name'] == $name && $record['type'] == $type) {
+        if ($found) {
+          unset($zone->records[$key]);
+        } else {
+          $record['destination'] = $destination;
+          $found = TRUE;
+        }
+      }
     }
-    return $zone->replace_or_add_line($name . "\tIN\t" . $type . "\t" . $destination, $pattern);
+    if (!$found) {
+      $this->add_record($zonename, $name, $type, $destination);
+    }
+    return $zone->write();
   }
 
   function delete_record($zonename, $name, $type = null, $destination = null) {
     $zone = $this->zone_singleton($zonename);
-    $pattern = "/^$name\s+IN\s+";
-    if (is_null($type)) {
-      $pattern .= "\w+";
-    } else {
-      $pattern .= $type;
+
+    foreach ($this->records as $key => $record) {
+      if ($record['name'] == $name) {
+        if ( ( is_null($type) || $record['type'] == $type) 
+             && ( is_null($destination) || $record['destination'] == $destination) ) {
+          unset($zone->records[$key]);
+        }
+      }
     }
-    $pattern .= "\s+";
-    if (is_null($destination)) {
-      $pattern .= '.*';
-    } else {
-      $pattern .= $destination;
-    }
-    $pattern .= "\n\$/im";
-    return $zone->delete_line($pattern);
+    return $zone->write();
   }
 
   function zone_exists($zonename) {
@@ -151,26 +137,39 @@ class provisionService_dns_bind extends provisionService_dns {
 
 class provisionConfig_bind_zone extends provisionConfig {
   public $template = 'zone.tpl.php';
+  public $records = array();
 
   function parse() {
     $file = $this->filename();
     $body = file_get_contents($file);
-    $data = array();
-    if (preg_match('/^(?:@\s+)?IN\s+SOA\s+[\w.]+\s+[\w.]+\s+\(([^)]*)\)\s*$/ims', $body, $matches)) {
-      $soa = trim($matches[1]);
-      $SOA = preg_split('/\s\s*/', $soa);
-      $i = 0;
-      foreach (array('serial', 'refresh', 'retry', 'expire', 'negativettl') as $param) {
-        $data[$param] = $SOA[$i++];
-      }
-      drush_log("parsed SOA from zonefile:");
-      foreach ($data as $key => $value) {
-        drush_log($key . ": " . $value);
-      }
-    } else {
-      drush_log("no SOA found in zonefile $file, body: ($body)");
+    if ($body === FALSE) {
+      drush_log("no zonefile fonud in " . $file);;
+      return array();
     }
-    return $data;
+    $matches = array();
+    if ($this->record_count = preg_match_all('/^((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.?)*|@)?\s*IN\s+(\w+)\s+(.*)\s*$/im', $body, $matches, PREG_SET_ORDER)) {
+      drush_log(dt("parsed zonefile %file, found %count records", array('%file' => $file, '%count' => $this->record_count)));
+    } else {
+      drush_log(dt("could not parse existing zonefile %file", array('%file' => $file)));
+    }
+    $SOA = FALSE;
+    foreach ($matches as $match) {
+      $name = trim($match[1]);
+      $type = strtoupper(trim($match[2]));
+      $destination = trim($match[3]);
+      switch ($type) {
+      case 'SOA':
+        $SOA = TRUE;
+      default:
+        drush_log("found record: $name:$type:$destination");
+        $this->records[] = array('name' => $name, 'type' => $type, 'destination' => $destination);
+        break;
+      }
+    }
+    if (!$SOA) {
+      drush_log("no SOA found in zonefile $file, body: ($body)", "warning");
+    }
+    return $this->records;
   }
 
   function filename() {
@@ -178,7 +177,10 @@ class provisionConfig_bind_zone extends provisionConfig {
   }
 
   function exists() {
-    drush_log("checking file: " . $this->filename());
+    if (!$this->filename()) {
+      drush_log("filename null??");
+      return FALSE;
+    }
     return provision_file()->exists($this->filename())->status();
   }
 
@@ -189,6 +191,72 @@ class provisionConfig_bind_zone extends provisionConfig {
     return TRUE;
   }
 
+  static function parse_soa_data($destination) {
+    if (preg_match('/([\w.]+)\s+([\w.]+)\s+\(([^)]*)\)/', $destination, $matches)) {
+      drush_log(dt('parsed correctly SOA record "%data"', array("%data" => $matches[3])));
+    } else {
+      drush_log(dt('irregular SOA record: %data', array('%data' => $destination)));
+      return FALSE;
+    }
+    $soa_data = array('name' => $matches[1], 'email' => $matches[2]);
+    $SOA = preg_split('/\s\s*/', trim($matches[3]));
+    $i = 0;
+    foreach (array('serial', 'refresh', 'retry', 'expire', 'negativettl') as $param) {
+      $soa_data[$param] = $SOA[$i++];
+    }
+        
+    foreach ($soa_data as $key => $value) {
+      drush_log($key . ": " . $value);
+    }
+    return $soa_data;
+  }
+
+  function gen_soa_data($soa_data = null) {
+    if (empty($soa_data['name'])) {
+      $soa_data['name'] = $this->data['name'];
+    }
+    if (empty($soa_data['email'])) {
+      $soa_data['email'] = drush_get_option('zone_hostmaster', 'hostmaster.'. $this->data['name'] . '.');
+    }
+    $destination = $soa_data['name'] . " "; // FQDN
+    $destination .= $soa_data['email']; // email
+    $destination .= ' ( ';
+    $new_serial = provisionService_dns::increment_serial($soa_data['serial']);
+    drush_log(dt("incremented serial from %old to %new", array("%old" => $soa_data['serial'], "%new" => $new_serial)));
+    $destination .= $new_serial;
+    foreach (array('refresh', 'retry', 'expire', 'negativettl') as $param) {
+      if (isset($soa_data[$param])) {
+        $destination .= $soa_data[$param] . ' ';
+      } else {
+        $destination .= $this->data['server']->$param;
+      }
+    }
+    $destination .= ")";
+    return $destination;
+  }
+
+  function write() {
+    foreach ($this->records as &$record) {
+      if ($record['type'] == 'SOA') {
+        $record['destination'] = $this->gen_soa_data($this->parse_soa_data($record['destination']));
+        drush_log("changed SOA to " . $record['destination']);
+        $SOA = TRUE;
+      }
+    }
+    if (!$SOA) {
+      array_unshift($this->records, array('name' => '@', 'type' => 'SOA', 'destination' => $this->gen_soa_data()));
+    }
+    $zonefile = fopen($this->filename() . ".tmp", "a");
+    flock($zonefile, LOCK_EX);
+    foreach($this->records as $record) {
+      fwrite($zonefile, $record['name'] . "\tIN\t" . $record['type'] . "\t" . $record['destination'] . "\n");
+    }
+    fflush($zonefile);
+    // XXX: test config here before renaming, rollback on errors
+    rename($this->filename() . ".tmp", $this->filename());
+    fclose($zonefile); // this also releases the lock
+    drush_log(dt("wrote zonefile %file", array("%file" => $this->filename())));
+  }
 }
 
 class provisionConfig_bind_master_zone {
