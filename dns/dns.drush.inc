@@ -62,6 +62,8 @@ function dns_provision_services() {
 
 class provisionService_dns extends provisionService {
   public $service = 'dns';
+  public $slave = null;
+
 }
 
 class provisionService_dns_basic extends provisionService_dns {
@@ -74,6 +76,9 @@ class provisionService_dns_basic extends provisionService_dns {
   function init() {
     parent::init();
 
+    // Path for storing data store config files.
+    $this->server->dns_data_path = $this->server->aegir_root . '/dns.d';
+
     if (!is_null($this->application_name)) {
       $app_dir = "{$this->server->config_path}/{$this->application_name}";
       $this->server->dns_zoned_path = "{$app_dir}/zone.d";
@@ -83,6 +88,8 @@ class provisionService_dns_basic extends provisionService_dns {
 
   function verify() {
     if ($this->context->type === 'server') {
+      provision_file()->create_dir($this->server->dns_data_path, dt("DNS data store"), 0700);
+
       if (!is_null($this->application_name)) {
         provision_file()->create_dir($this->server->dns_zoned_path, dt("DNS zone configuration"), 0755);
         $this->sync($this->server->dns_zoned_path, array(
@@ -94,6 +101,8 @@ class provisionService_dns_basic extends provisionService_dns {
           'exclude' => $this->server->dns_hostd_path . '/*',  // Make sure remote directory is created
         ));
 
+        # TODO: create a slave zone path too.
+
         $this->create_config('server');
       } 
     }
@@ -103,6 +112,7 @@ class provisionService_dns_basic extends provisionService_dns {
   function config_data($config = null, $class = null) {
     $data = parent::config_data($config, $class);
     if (!is_null($this->application_name)) {
+      $data['dns_data_path_path'] = $this->server->dns_zoned_path;
       $data['dns_zoned_path'] = $this->server->dns_zoned_path;
       $data['dns_hostd_path'] = $this->server->dns_hostd_path;
     }
@@ -126,26 +136,15 @@ class provisionService_dns_complex extends provisionService_dns_basic {
     $this->server->setProperty('dns_negativettl', 86400); # 24h
   }
 
-
   function verify() {
     switch ($this->context->type) {
-      case 'server' :
-        $this->create_server_config();
-        break;
       case 'site' :
         $this->create_host();
         break;
     }
 
-    $this->parse_configs();
-  }
-
-  function create_server_config() {
-    return FALSE;
-  }
-
-  function delete_server_config() {
-   return FALSE;
+    // This will restart the server if needed.
+    parent::verify();
   }
 
   /**
@@ -322,7 +321,6 @@ class provisionService_dns_complex extends provisionService_dns_basic {
     if ($this->count_records($parts[1], null, array('NS', 'SOA'))) {
       $this->delete_zone($parts[1]);
     }
-
   }
 
   /**

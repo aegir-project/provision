@@ -41,6 +41,16 @@ class provisionConfig {
   protected $group = NULL;
 
   /**
+   * An optional data store class to instantiate for this config.
+   */
+  protected $data_store_class = NULL;
+
+  /**
+   * The data store.
+   */
+  protected $store = NULL;
+
+  /**
    * Forward $this->... to $this->owner->...
    * object.
    */
@@ -71,8 +81,15 @@ class provisionConfig {
     if (sizeof($data)) {
       $this->data = $data;
     }
-    $this->parsed_data = $this->parse();
-    $this->data = array_merge($this->parsed_data, $this->data);
+    //$this->parsed_data = $this->parse();
+    //$this->data = array_merge($this->parsed_data, $this->data);
+
+    
+    if (!is_null($this->data_store_class) && class_exists($this->data_store_class)) {
+      $class = $this->data_store_class;
+      $this->store = new $class($owner, $data);
+    }
+
   }
 
   /**
@@ -107,16 +124,29 @@ class provisionConfig {
    * Load template from filename().
    */
   private function load_template() {
+    $class_name = get_class($this);
+
     $reflect = new reflectionObject($this);
-    $base_dir = dirname($reflect->getFilename());
 
     if (isset($this->template)) {
-      $file = $base_dir . '/' . $this->template;
-      drush_log("Template loaded: $file");
-      if (file_exists($file) && is_readable($file)) {
-        return file_get_contents($file);
+      while ($class_name) {
+        // Iterate through the config file's parent classes until we
+        // find the template file to use.
+        $reflect = new reflectionClass($class_name);
+        $base_dir = dirname($reflect->getFilename());
+
+        $file = $base_dir . '/' . $this->template;
+
+        if (file_exists($file) && is_readable($file)) {
+          drush_log("Template loaded: $file");
+          return file_get_contents($file);
+        }
+
+        $class_name = get_parent_class($class_name);
       }
-    }
+
+    } 
+
     return false;
   }
 
@@ -166,8 +196,7 @@ class provisionConfig {
             ->fail('Could not change permissions of @path to @perm');
         }
 
-        provision_file()->file_put_contents($filename, $this->render_template($template, $this->data))
-          ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description), 'success');
+        $this->file_put_contents($filename, $this->render_template($template, $this->data));
 
         // Change the permissions of the file if needed
         if (!is_null($this->mode)) {
@@ -182,6 +211,12 @@ class provisionConfig {
         }
       }
     }
+  }
+
+  // allow overriding w.r.t locking
+  function file_put_contents($filename, $text) {
+    provision_file()->file_put_contents($filename, $text)
+      ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description), 'success');
   }
 
   /**
@@ -371,3 +406,81 @@ class provisionConfig_drushrc_site extends provisionConfig_drushrc {
   }
 }
 
+
+class provisionConfig_data_store extends provisionConfig {
+  public $template = 'data_store.tpl.php';
+  public $key = 'record';
+
+  private $locked = FALSE;
+  protected $fp = null;
+
+  public $records = array();
+  protected $loaded_records = array();
+
+  protected $mode = 0400;
+
+
+  function __construct($owner, $data = array()) {
+    parent::__construct($owner, $data);
+
+    $this->init_records = $data;
+    $this->load_data();
+  }
+
+  function __destruct() {
+    // release the file lock if we have it.
+    $this->close();
+  }
+
+  function open() {
+    if (!$this->fp) {
+      $this->fp = fopen($this->filename(), "w");
+    }
+  }
+
+  function lock() {
+    if (!$this->locked) {
+      $this->open();
+      flock($this->fp, LOCK_EX);
+
+      // Do one last load before setting our locked status.
+      $this->load_data();
+      $this->locked = TRUE;
+    }
+  }
+
+  function file_put_contents($filename, $text) {
+    $this->lock();
+    fwrite($this->fp, $text);
+    fflush($this->fp);
+    $this->close();
+  }
+
+  function unlock() {
+    if ($this->locked && $this->fp) {
+      flock($this->fp, LOCK_UN);
+      $this->locked = FALSE;
+    }
+  }
+
+  function close() {
+    if ($this->fp) {
+      fclose($this->fp);
+    }
+  }
+
+  function load_data() {
+    if (!$this->locked) {
+      // Once we have the lock we dont need to worry about it changing
+      // from under us.
+      if (file_exists($this->filename()) && is_readable($this->filename())) {
+        include($this->filename());
+        $this->loaded_records = ${$this->key};
+      }
+    }
+  }
+
+  function process() {
+    $this->data['records'] = array_merge($this->loaded_records, $this->records);
+  }
+}

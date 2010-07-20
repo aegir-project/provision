@@ -4,5 +4,3 @@
   print "\n\$options['$key'] = ". var_export(${$key}, TRUE) .';';
 }
 ?>
-
-

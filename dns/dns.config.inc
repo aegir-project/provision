@@ -17,12 +17,23 @@ class provisionConfig_dns extends provisionConfig {
   }
 }
 
+
+// The data store for the server configuration
+// contains a list of zones we manage.
+class provisionConfig_dns_server_store extends provisionConfig_data_store {
+  function filename() {
+    return $this->data['server']->dns_data_path . '/zones.master.inc';
+  }
+}
+
 /**
  * Base config class for the server level config.
  */
 class provisionConfig_dns_server extends provisionConfig_dns {
   public $template = 'server.tpl.php';
   public $description = 'Server-wide DNS configuration';
+
+  public $data_store_class = 'provisionConfig_dns_server_store';
 
   function filename() {
     if (isset($this->data['application_name'])) {
@@ -36,7 +47,6 @@ class provisionConfig_dns_server extends provisionConfig_dns {
 
   function write() {
     parent::write();
-
     if (isset($this->data['application_name'])) {
       $file = $this->data['application_name'] . '.conf';
       // We link the app_name.conf file on the remote server to the right version.
@@ -73,6 +83,13 @@ class provisionConfig_dns_host extends provisionConfig_dns {
 
   function filename() {
     return "{$this->data['server']->dns_hostd_path}/{$this->uri}.hosts";
+  }
+}
+
+
+class provisionConfig_dns_zone_store extends provisionConfig_data_store {
+  function filename() {
+    return $this->data['server']->dns_data_path;
   }
 
 }

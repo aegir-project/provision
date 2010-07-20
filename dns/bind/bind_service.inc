@@ -7,6 +7,7 @@
  */
 class provisionService_dns_bind extends provisionService_dns_complex {
   protected $application_name = 'bind';
+
   protected $has_restart_command = TRUE;
   private $zone_cache = array();
   
@@ -16,34 +17,11 @@ class provisionService_dns_bind extends provisionService_dns_complex {
 
   function default_restart_cmd() {
     return provisionService_dns_bind::bind_default_restart_cmd();
-    function write() {
-    parent::write();
-    $this->data['server']->sync($this->filename());
   }
-
-  function unlink() {
-    parent::unlink();
-    $this->data['server']->sync($this->filename());
-  }}
 
   function init() {
     parent::init();
-    $this->server->setProperty('bind_conf_path', $this->server->config_path . '/bind.conf');
-    $this->server->setProperty('bind_zone_master_path', $this->server->config_path . '/zones/master');
-    $this->configs['server'][] = 'provisionConfig_bind_master_zone';
-  }
-
-  function config_data($config, $class) {
-    $data = parent::config_data($config, $class);
-    $data['bind_conf_path'] = $this->server->bind_config_path;
-    $data['bind_zone_master_path'] = $this->server->bind_zone_master_path;
-    return $data;
-  }
-
-  function verify() {
-    if ($this->context->type =='server') {
-      provision_file()->create_dir($this->server->bind_zone_master_path, dt("Bind zone files"), 0700);
-    }
+    $this->configs['server'][] = 'provisionConfig_bind_server';
   }
 
   /**
@@ -59,6 +37,7 @@ class provisionService_dns_bind extends provisionService_dns_complex {
     if (!$zone->exists()) {
       drush_log("creating zone");
       //$zone->add_line_if_not_exists($zone->zone_declaration(), '/zone\s*"'. $zonename . '"/');
+      $zone->store->records[$zonename] = array('name' => $zonename);
     }
     return parent::create_zone($zonename);
   }
@@ -183,7 +162,7 @@ class provisionConfig_bind_zone extends provisionConfig {
   }
 
   function filename() {
-    return $this->bind_zone_master_path . '/' . $this->data['name'];
+    return $this->dns_zoned_path . '/' . $this->data['name'];
   }
 
   function exists() {
@@ -275,13 +254,8 @@ class provisionConfig_bind_zone extends provisionConfig {
   }
 }
 
-class provisionConfig_bind_master_zone {
-  function filename() {
-    return $this->bind_conf_path;
-  }
-
+class provisionConfig_bind_server extends provisionConfig_dns_server {
   function zone_declaration() {
     return 'zone "' . $this->data['name'] . '" { type master; file "' . $this->bind_zone_master_path . '/' . $this->data['name'] . '"; allow-query { any; }; };';
   }
-
 }
