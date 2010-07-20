@@ -15,7 +15,7 @@ server {
    ssl_ciphers                 ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
    ssl_prefer_server_ciphers   on;
 <?php 
-    if ($server->nginx_has_new_version || $server->nginx_has_upload_progress) {
+    if ($this->$server->nginx_has_new_version || $this->$server->nginx_has_upload_progress) {
       print '   include      ' . $server->include_path . '/nginx_advanced_include.conf';
     }
     else {
