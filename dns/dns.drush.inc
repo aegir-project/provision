@@ -84,12 +84,12 @@ class provisionService_dns_basic extends provisionService_dns {
   function verify() {
     if ($this->context->type === 'server') {
       if (!is_null($this->application_name)) {
-        provision_file()->create_dir($this->server->dns_zoned_path, dt("DNS zone configuration"), 0700);
+        provision_file()->create_dir($this->server->dns_zoned_path, dt("DNS zone configuration"), 0755);
         $this->sync($this->server->dns_zoned_path, array(
           'exclude' => $this->server->dns_zoned_path . '/*',  // Make sure remote directory is created
         )); 
 
-        provision_file()->create_dir($this->server->dns_hostd_path , dt("DNS host configuration"), 0700);
+        provision_file()->create_dir($this->server->dns_hostd_path , dt("DNS host configuration"), 0755);
         $this->sync($this->server->dns_hostd_path, array(
           'exclude' => $this->server->dns_hostd_path . '/*',  // Make sure remote directory is created
         ));

@@ -13,7 +13,10 @@ class provisionService_dns_dnsmasq extends provisionService_dns_basic {
     $this->configs['server'][] = 'provisionConfig_dnsmasq_server';
     $this->configs['zone'][] = 'provisionConfig_dnsmasq_zone';
     $this->configs['host'][] = 'provisionConfig_dnsmasq_host';
+  }
 
+  function parse_configs() {
+    $this->restart();
   }
 }
 

@@ -5,6 +5,7 @@
  * Base config class for all dns config files.
  */
 class provisionConfig_dns extends provisionConfig {
+  public $mode = 0777;
   function write() {
     parent::write();
     $this->data['server']->sync($this->filename());
