@@ -58,16 +58,67 @@ function dns_provision_services() {
   return array('dns' => NULL);
 }
 
+
+
 class provisionService_dns extends provisionService {
   public $service = 'dns';
+}
 
-  static function option_documentation() {
-    return array(
-      
-    );
+class provisionService_dns_basic extends provisionService_dns {
+
+
+  function parse_configs() {
+    return null;
   }
 
   function init() {
+    parent::init();
+
+    if (!is_null($this->application_name)) {
+      $app_dir = "{$this->server->config_path}/{$this->application_name}";
+      $this->server->dns_zoned_path = "{$app_dir}/zone.d";
+      $this->server->dns_hostd_path = "{$app_dir}/host.d";
+    }
+  }
+
+  function verify() {
+    if ($this->context->type === 'server') {
+      if (!is_null($this->application_name)) {
+        provision_file()->create_dir($this->server->dns_zoned_path, dt("DNS zone configuration"), 0700);
+        $this->sync($this->server->dns_zoned_path, array(
+          'exclude' => $this->server->dns_zoned_path . '/*',  // Make sure remote directory is created
+        )); 
+
+        provision_file()->create_dir($this->server->dns_hostd_path , dt("DNS host configuration"), 0700);
+        $this->sync($this->server->dns_hostd_path, array(
+          'exclude' => $this->server->dns_hostd_path . '/*',  // Make sure remote directory is created
+        ));
+
+        $this->create_config('server');
+      } 
+    }
+
+  }
+
+  function config_data($config = null, $class = null) {
+    $data = parent::config_data($config, $class);
+    if (!is_null($this->application_name)) {
+      $data['dns_zoned_path'] = $this->server->dns_zoned_path;
+      $data['dns_hostd_path'] = $this->server->dns_hostd_path;
+    }
+
+    if ($config == 'host') {
+      $data['site_ip_addresses'] = drush_get_option('site_ip_addresses', array(), 'site');
+    }
+
+    return $data;
+  }
+}
+
+class provisionService_dns_complex extends provisionService_dns_basic {
+
+  function init() {
+    parent::init();
     $this->server->setProperty('dns_ttl', 86400); # 24h
     $this->server->setProperty('dns_refresh', 21600); # 6h
     $this->server->setProperty('dns_retry', 3600); # 1h
@@ -285,3 +336,5 @@ class provisionService_dns extends provisionService {
     return FALSE;
   }
 }
+
+include_once('dns.config.inc');

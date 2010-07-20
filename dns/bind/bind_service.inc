@@ -5,7 +5,7 @@
  *
  * A lot of this is inspired by the Apache implementation of the HTTP service.
  */
-class provisionService_dns_bind extends provisionService_dns {
+class provisionService_dns_bind extends provisionService_dns_complex {
   protected $application_name = 'bind';
   protected $has_restart_command = TRUE;
   private $zone_cache = array();
@@ -16,7 +16,15 @@ class provisionService_dns_bind extends provisionService_dns {
 
   function default_restart_cmd() {
     return provisionService_dns_bind::bind_default_restart_cmd();
+    function write() {
+    parent::write();
+    $this->data['server']->sync($this->filename());
   }
+
+  function unlink() {
+    parent::unlink();
+    $this->data['server']->sync($this->filename());
+  }}
 
   function init() {
     parent::init();

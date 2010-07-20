@@ -8,19 +8,12 @@
  **/
 
 function drush_dns_pre_provision_install() {
-  if (d()->type == 'site') {
-    d()->service('dns')->create_host();
-  }
+  d()->service('dns')->create_config('zone');
 }
 
-function drush_dns_pre_provision_install_rollback() {
-  if (d()->type == 'site') {
-    d()->service('dns')->delete_host();
-  }
-}
 
 function drush_dns_post_provision_install() {
-  if (d()->type == 'site') {
-    d()->service('dns')->commit();
-  }
+  // we create this post-install because we need the ip's to be assigned already.
+  d()->service('dns')->create_config('host');
+  d()->service('dns')->parse_configs();
 }

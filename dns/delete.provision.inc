@@ -16,12 +16,13 @@
  */
 function drush_dns_provision_delete($url = NULL) {
   if (d()->type == 'site') {
-    d()->service('dns')->delete_host(d()->uri);
+    d()->service('dns')->delete_config('zone');
+    d()->service('dns')->delete_config('host');
   }
 }
 
 function drush_dns_post_provision_delete() {
   if (d()->type == 'site') {
-    d()->service('dns')->commit();
+    d()->service('dns')->parse_configs();
   }
 }
