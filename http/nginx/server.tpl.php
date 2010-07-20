@@ -57,11 +57,10 @@
   gzip_proxied      any;
   gzip_disable      "MSIE [1-6]\.";
 <?php 
-$this->server->shell_exec('nginx -V');
-if (preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match)) {
+if ($server->nginx_has_gzip) {
    print '  gzip_static       on\;';
 }
-if (preg_match("/(nginx-upload-progress-module)/", implode('', drush_shell_exec_output()), $match)) {
+if ($server->nginx_has_upload_progress) {
    print '  upload_progress uploads 1m\;';
 }
 ?>

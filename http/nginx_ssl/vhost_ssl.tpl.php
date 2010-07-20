@@ -15,11 +15,7 @@ server {
    ssl_ciphers                 ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
    ssl_prefer_server_ciphers   on;
 <?php 
-    $this->server->shell_exec('nginx -V');
-    if (preg_match("/nginx\/0\.8\./", implode('', drush_shell_exec_output()), $match)) {
-      print '   include      ' . $server->include_path . '/nginx_advanced_include.conf';
-    }
-    elseif (preg_match("/(nginx-upload-progress-module)/", implode('', drush_shell_exec_output()), $match)) {
+    if ($server->nginx_has_new_version || $server->nginx_has_upload_progress) {
       print '   include      ' . $server->include_path . '/nginx_advanced_include.conf';
     }
     else {
