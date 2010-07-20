@@ -17,6 +17,8 @@ class provisionService extends provisionChainedState {
 
   protected $configs = array();
 
+  protected $config_cache = array();
+
   // All services have the ability to have an associated restart command and listen port.
   function init() {
     if (!is_null($this->service)) {
@@ -38,9 +40,15 @@ class provisionService extends provisionChainedState {
     return false;
   }
 
-  function get_config($config) {
-    foreach ((array) $this->configs[$config] as $class) {
-      return new $class($this->context, $this->config_data($config));
+  function &config_load($config, $data = array()) {
+    if (!isset($this->config_cache[$this->context->name][$config])) {
+      foreach ((array) $this->configs[$config] as $class) {
+        $this->config_cache[$this->context->name][$config] = new $class($this->context, array_merge($this->config_data($config), $data));
+      }
+    }
+
+    if (isset($this->config_cache[$this->context->name][$config])) {
+      return $this->config_cache[$this->context->name][$config];
     }
     return false;
   }
@@ -53,17 +61,14 @@ class provisionService extends provisionChainedState {
    */
   function create_config($config) {
     if (isset($this->configs[$config])) {
-      // We cast to array here to silently accept the non array version
-      foreach ((array) $this->configs[$config] as $class) {
-        try {
-          $object = new $class($this->context, $this->config_data($config));
-          $object->write();
-        }
-        catch (provisionException_continue $e) {
-          drush_log($e->getMessage());
-          // The service or configuration class has signaled that the config file
-          // was uneccesary, and we should continue normally.
-        }
+      try {
+        $object =& $this->config_load($config);
+        $object->write();
+      }
+      catch (provisionException_continue $e) {
+        drush_log($e->getMessage());
+        // The service or configuration class has signaled that the config file
+        // was uneccesary, and we should continue normally.
       }
     }
   }
@@ -76,17 +81,15 @@ class provisionService extends provisionChainedState {
    */
   function delete_config($config) {
     if (isset($this->configs[$config])) {
-      // We cast to array here to silently accept the non array version
-      foreach ((array) $this->configs[$config] as $class) {
-        try {
-          $object = new $class($this->context, $this->config_data($config, $class));
-          $object->unlink();
-        }
-        catch (provisionException_continue $e) {
-          drush_log($e->getMessage());
-          // The service or configuration class has signaled that the config file
-          // was uneccesary, and we should continue normally.
-        }
+      try {
+
+        $object =& $this->config_load($config);
+        $object->unlink();
+      }
+      catch (provisionException_continue $e) {
+        drush_log($e->getMessage());
+        // The service or configuration class has signaled that the config file
+        // was uneccesary, and we should continue normally.
       }
     }
   }

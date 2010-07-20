@@ -72,12 +72,30 @@ class provisionConfig_dns_server extends provisionConfig_dns {
   }
 }
 
+class provisionConfig_dns_zone_store extends provisionConfig_data_store {
+  function filename() {
+    return "{$this->data['server']->dns_data_path}/{$this->data['name']}.zone.inc";
+  }
+}
+
 class provisionConfig_dns_zone extends provisionConfig_dns {
   public $template = 'zone.tpl.php';
   public $description = 'Zone-wide DNS configuration';
 
+  public $data_store_class = 'provisionConfig_dns_zone_store';
+
   function filename() {
-    return "{$this->data['server']->dns_zoned_path}/{$this->uri}.zone";
+    return "{$this->data['server']->dns_zoned_path}/{$this->data['name']}.zone";
+  }
+
+  function write() {
+    // lock the store until we are done generating our config.
+    $this->store->lock();
+
+    parent::write();
+
+    $this->store->write();
+    $this->store->close();
   }
 
 }
@@ -93,9 +111,3 @@ class provisionConfig_dns_host extends provisionConfig_dns {
 }
 
 
-class provisionConfig_dns_zone_store extends provisionConfig_data_store {
-  function filename() {
-    return $this->data['server']->dns_data_path;
-  }
-
-}

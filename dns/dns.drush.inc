@@ -32,16 +32,11 @@ function drush_dns_provision_zone($action, $zone, $name = null, $type = null, $d
     $status = d()->service('dns')->delete_host($zone);
     break;
   case 'verify':
-    case 'create':
-      $config =  d()->service('dns')->get_config('server');
-      $config->store->records[$zone] = $zone;
-      $config->write();
-##    $status = d()->service('dns')->create_zone($zone);
+  case 'create':
+    $status = d()->service('dns')->create_zone($zone);
     break;
   case 'delete':
-    $config =  d()->service('dns')->get_config('server');
-    $config->store->records[$zone] = FALSE;
-    $config->write();
+    $status = d()->service('dns')->delete_zone($zone);
     break;
   case 'rr-add':
     $status = d()->service('dns')->add_record($zone, $name, $type, $destination);
@@ -128,6 +123,30 @@ class provisionService_dns_basic extends provisionService_dns {
 
     return $data;
   }
+
+  /**
+   * This creates a zone, which mostly consists of adding the SOA record.
+   */
+   function create_zone($zone) {
+     $config = $this->config_load('server');
+     $config->store->records[$zone] = $zone;
+     $config->write();
+
+     $config = $this->config_load('zone', array('name' => $zone));
+     $config->store->records['SOA'] = $zone;
+     $config->write();
+  }
+
+  /**
+   * This completely drops a zone, without any checks.
+   */
+  function delete_zone($zone) {
+    $config =  d()->service('dns')->config_load('server');
+    $config->store->records[$zone] = FALSE;
+    $config->write();
+  }
+
+
 }
 
 class provisionService_dns_complex extends provisionService_dns_basic {
@@ -230,20 +249,6 @@ class provisionService_dns_complex extends provisionService_dns_basic {
       }
       return $date . sprintf('%02d', $index);
     }
-  }
-
-  /**
-   * This creates a zone, which mostly consists of adding the SOA record.
-   */
-  function create_zone($fqdn = null) {
-    $this->edit_record($fqdn, '@', 'SOA');
-  }
-
-  /**
-   * This completely drops a zone, without any checks.
-   */
-  function delete_zone($fqdn) {
-    return FALSE;
   }
 
   /**
