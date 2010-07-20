@@ -39,7 +39,9 @@ function & d($name = NULL, $_root_object = FALSE) {
     }
     else {
       $instances[$name] = provision_environment_factory($name);
-      $instances[$name]->init();
+      $instances[$name]->method_invoke('init');
+      $instances[$name]->type_invoke('init');
+
       return $instances[$name];
     }
   }
@@ -178,7 +180,63 @@ class provisionEnvironment {
     elseif (property_exists($this, $name)) {
       unset($this->$name);
     }
+  }
 
+  /**
+   * Implement the __call magic method.
+   *
+   * This implementation is really simple. It simply return null if the
+   * method doesn't exist.
+   *
+   * This is used so that we can create methods for drush commands, and
+   * can fail safely.
+   */
+  function __call($name, $args) {
+    $this->method_invoke($name, $args);
+
+    return false;
+  }
+
+  /**
+   * Execute a method on the object and all of it's associated
+   * services.
+   */
+  function method_invoke($func, $args = array()) {
+    if (method_exists($this, $func)) {
+      call_user_func_array(array($this, $func), $args);
+    }
+    // Services will be invoked regardless of the existence of a 
+    // implementation in the environment class.
+    $this->services_invoke($func, $args);
+  }
+  /**
+   * Execute the method for the current object type.
+   *
+   * This function is used to avoid having to conditionally
+   * check the context objects type to execute the correct code.
+   *
+   * This will generate a function call like : $method_$type,
+   * ie: $this->init_server().
+   *
+   * Additionally it will dispatch this function call to
+   * all the currently enabled services.
+   */
+  function type_invoke($name, $args = array()) {
+    $this->method_invoke("{$name}_{$this->type}");
+  }
+
+  /**
+   * Allow a server to plug into a drush command that has been called.
+   *
+   * This method provides a general case for extending drush commands.
+   * This allows the developer to not have to conditionally check the
+   * context object type in all his methods, and reduces the need
+   * to define drush_hook_$command methods for a lot of cases.
+   * 
+   * This will generate a function call like : $method_$type_cmd.
+   */
+  function command_invoke($command, $args = array()) {
+    $this->method_invoke("{$command}_{$this->type}_cmd");
   }
 
   /**
@@ -192,7 +250,18 @@ class provisionEnvironment {
    * Init stub function.
    */
   function init() {
+    dlm(__CLASS__);
     $this->setProperty('context_type', 'server');
+
+    // Set up subscriptions for the available services.
+    $service_list = drush_command_invoke_all('provision_services');
+    foreach ($service_list as $service => $default) {
+      $class = "provisionService_{$service}";
+      $func = "subcribe_{$this->type}";
+      if (method_exists($class, $func)) {
+        call_user_func(array($class, $func), $this);
+      }
+    }
     return true;
   }
 
@@ -259,6 +328,48 @@ class provisionEnvironment {
     else {
       return new provisionService_null($this->name);
     }
+  }
+
+  /**
+   * Call method $callback on each of the environment's service objects.
+   *
+   * @param $callback
+   *   A provisionService method.
+   * @return
+   *   An array of return values from method implementations.
+   */
+  function services_invoke($callback) {
+    // fetch the merged list of services.
+    // These may be on different servers entirely.
+    $services = $this->get_services();
+    foreach (array_keys($services) as $service) {
+      $results[$service] = $this->service($service)->$callback();
+    }
+    return $results;
+  }
+
+  /**
+   * Return the merged list of services and the associated servers supplying them.
+   *
+   * This function will check with the parent_key to retrieve any service subscription
+   * it may have, and will add any additional subscriptions.
+   *
+   * Once the call chain reaches the @server_master object, it will provide the fallbacks
+   * if no subscriptions were available.
+   */
+  function get_services() {
+    $services = array();
+    if (!is_null($this->parent_key)) {
+      $services = $this->{$this->parent_key}->get_services();
+    }
+
+    if (sizeof($this->service_subs)) {
+      foreach ($this->service_subs as $service => $server) {
+        $services[$service] = $server;
+      }
+    }
+
+    return $services;
   }
 
   /**
@@ -387,21 +498,19 @@ class provisionServer extends provisionEnvironment {
   }
 
   /**
-   * Call method $callback on each of the environment's service objects.
-   *
-   * @param $callback
-   *   A provisionService method.
-   * @return
-   *   An array of return values from method implementations.
+   * Retrieve a list of service objects associated with this server.
    */
-  function services_invoke($callback) {
-    foreach (array_keys($this->services) as $service) {
-      $this->service($service)->$callback();
+  function get_services() {
+    $services = array();
+    foreach ($this->services as $service => $object) {
+      $services[$service] = $this->name;
     }
+    return $services;
   }
 
+
   function verify() {
-    $this->services_invoke('verify');
+    $this->type_invoke('verify');
   }
 
   /**
@@ -523,10 +632,6 @@ class provisionPlatform extends provisionEnvironment {
     $this->setProperty('server', '@server_master');
     $this->is_oid('server');
 
-    $this->setProperty('web_server', '@server_master');
-    $this->is_oid('web_server');
-    $this->service_subscribe('http', $this->web_server->name);
-
     $this->setProperty('makefile', '');
   }
 
@@ -570,11 +675,6 @@ class provisionSite extends provisionEnvironment {
     $this->setProperty('client_email');
     $this->setProperty('aliases', array(), TRUE);
     $this->setProperty('redirection', FALSE);
-    $this->setProperty('db_server', '@server_master');
-    $this->is_oid('db_server');
-
-    $this->service_subscribe('db', $this->db_server->name);
-
 
     // TODO :: figure out how to put this into service classes.
     $this->setProperty('ssl_enabled', 0);
@@ -582,10 +682,5 @@ class provisionSite extends provisionEnvironment {
 
     // this can potentially be handled by a Drupal sub class
     $this->setProperty('profile', 'default');
-  }
-
-  function verify() {
-    $this->service('db')->verify();
-    $this->service('http')->verify();
   }
 }

@@ -220,13 +220,15 @@ function drush_provision_save($alias = null) {
     $config->unlink();
   }
   else {
+    // trigger additional logic that should happen only on save.
+    d($alias)->type_invoke('save');
     // create or update the record
     d($alias)->write_alias();
   }
 }
 
 function drush_provision_verify() {
-  d()->verify();
+  d()->command_invoke('verify');
 }
 
 function _provision_default_web_group() {

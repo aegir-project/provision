@@ -32,6 +32,15 @@ function db_drush_help($section) {
 class provisionService_db extends provisionService {
   protected $service = 'db';
 
+  /**
+   * Register the db handler for sites, based on the db_server option.
+   */
+  static function subscribe_site($context) {
+    $context->setProperty('db_server', '@server_master');
+    $context->is_oid('db_server');
+    $context->service_subscribe('db', $context->db_server->name);
+  }
+
   static function option_documentation() {
     return array(
       '--master_db' => 'server with db: Master database connection info, {type}://{user}:{password}@{host}',

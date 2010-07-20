@@ -17,6 +17,25 @@ class provisionService extends provisionChainedState {
 
   protected $configs = array();
 
+
+  /**
+   * Implement the __call magic method.
+   *
+   * This implementation is really simple. It simply return null if the
+   * method doesn't exist.
+   *
+   * This is used so that we can create methods for drush commands, and
+   * can fail safely.
+   */
+  function __call($name, $args) {
+    if (method_exists($this, $name)) {
+      return call_user_func_array(array($this, $name), $args);
+    }
+
+    return false;
+  }
+
+
   // All services have the ability to have an associated restart command and listen port.
   function init() {
     if (!is_null($this->service)) {
