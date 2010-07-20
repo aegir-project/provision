@@ -72,6 +72,7 @@ class provisionService_dns_bind extends provisionService_dns {
           $record['destination'] = $destination;
         }
       }
+      drush_log(dt("not adding a duplicate SOA record, just changing destination"), 'warning');
     } else {
       $zone->records[] = array('name' => $name, 'type' => $type, 'destination' => $destination);
     }
@@ -225,10 +226,11 @@ class provisionConfig_bind_zone extends provisionConfig {
     drush_log(dt("incremented serial from %old to %new", array("%old" => $soa_data['serial'], "%new" => $new_serial)));
     $destination .= $new_serial;
     foreach (array('refresh', 'retry', 'expire', 'negativettl') as $param) {
-      if (isset($soa_data[$param])) {
-        $destination .= $soa_data[$param] . ' ';
-      } else {
+      if (empty($soa_data[$param])) {
+        drush_log("defaulting to server default " . $this->server);
         $destination .= $this->data['server']->$param;
+      } else {
+        $destination .= $soa_data[$param] . ' ';
       }
     }
     $destination .= ")";
@@ -236,11 +238,15 @@ class provisionConfig_bind_zone extends provisionConfig {
   }
 
   function write() {
-    foreach ($this->records as &$record) {
+    foreach ($this->records as $key => $record) {
       if ($record['type'] == 'SOA') {
-        $record['destination'] = $this->gen_soa_data($this->parse_soa_data($record['destination']));
-        drush_log("changed SOA to " . $record['destination']);
-        $SOA = TRUE;
+        if ($SOA) {
+          drush_log(dt("removing duplicate SOA record %data", array('%data' => var_export($this->records[$key], true))), 'warning');
+          unset($this->records[$key]);
+        } else {
+          $this->records[$key]['destination'] = $this->gen_soa_data($this->parse_soa_data($record['destination']));
+          $SOA = TRUE;
+        }
       }
     }
     if (!$SOA) {
@@ -249,7 +255,8 @@ class provisionConfig_bind_zone extends provisionConfig {
     $zonefile = fopen($this->filename() . ".tmp", "a");
     flock($zonefile, LOCK_EX);
     foreach($this->records as $record) {
-      fwrite($zonefile, $record['name'] . "\tIN\t" . $record['type'] . "\t" . $record['destination'] . "\n");
+      $str = $record['name'] . "\tIN\t" . $record['type'] . "\t" . $record['destination'] . "\n";
+      fwrite($zonefile, $str);
     }
     fflush($zonefile);
     // XXX: test config here before renaming, rollback on errors
