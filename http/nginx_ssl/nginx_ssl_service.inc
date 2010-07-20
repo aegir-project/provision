@@ -54,9 +54,9 @@ class provisionService_http_nginx_ssl extends provisionService_http_ssl {
     if ($command['command'] == 'provision-save') {
       // Check if some nginx features are supported and save them for later.
       $this->server->shell_exec('nginx -V');
-      $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match);
-      $this->server->nginx_has_upload_progress = preg_match("/(nginx-upload-progress-module)/", implode('', drush_shell_exec_output()), $match);
-      $this->server->nginx_has_new_version = preg_match("/(nginx\/0\.8\.)/", implode('', drush_shell_exec_output()), $match);
+      $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', trim(drush_shell_exec_output())), $match);
+      $this->server->nginx_has_upload_progress = preg_match("/(nginx-upload-progress-module)/", implode('', trim(drush_shell_exec_output())), $match);
+      $this->server->nginx_has_new_version = preg_match("/(nginx\/0\.8\.)/", implode('', trim(drush_shell_exec_output())), $match);
     }
 
   }
