@@ -152,23 +152,6 @@ function _provision_file_check_location($source, $directory = '') {
   return $source;
 }
 
-/**
- * Wrapper around drush_shell_exec to provide sprintf functionality with some more safety.
- *
- * @TODO: fix this so we can get error codes and the return values. drush_shell_exec is too
- *        limited
- */
-function provision_shell_exec() {
-  $args = func_get_args();
-  
-  //do not change the command itself, just the parameters.
-  for ($x = 1; $x < sizeof($args); $x++) {
-    $args[$x] = escapeshellcmd($args[$x]);
-  }
-  $command = call_user_func_array('sprintf', $args);
-  drush_log($command); 
-  return drush_shell_exec($command);
-}
 
 /**
  * Check whether a user is a member of a group.
