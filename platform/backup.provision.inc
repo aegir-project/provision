@@ -64,7 +64,7 @@ function drush_provision_drupal_provision_backup() {
   } else {
     $command = "tar cpf %s .";
   }
-  $result = provision_shell_exec($command,  $backup_file);
+  $result = drush_shell_exec($command,  $backup_file);
   chdir($olddir);
 
   if (!$result && !drush_get_option('force', false)) {

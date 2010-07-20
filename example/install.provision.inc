@@ -17,8 +17,8 @@
  * In our basic implementation we do not have an implementation
  * of this API method, because it wasn't necessary.
  *
- * If the service implementationd doesn't define this method, 
- * or no implementation has been selected, nothing will happen.
+ * If the service implemented doesn't define this method, or
+ * no implementation has been selected, nothing will happen.
  */
 function drush_example_provision_install() {
   /**
@@ -47,7 +47,7 @@ function drush_example_provision_install() {
      *
      * To call the correct methods, you just need to use the
      * the 'service' method with the service type you want
-     * to call as it's only argument.
+     * to call as its only argument.
      */
     d()->service('example')->create_config('site');
   }
@@ -71,7 +71,7 @@ function drush_example_provision_install_rollback() {
  * Implementation of drush_hook_post_provision_install.
  *
  * We can now perform such operations as restarting the server,
- * by calling the public api of the service we have created.
+ * by calling the public API of the service we have created.
  */
 function drush_example_post_provision_install() {
   d()->service('example')->parse_configs();
