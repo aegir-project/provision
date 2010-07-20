@@ -57,10 +57,10 @@
   gzip_proxied      any;
   gzip_disable      "MSIE [1-6]\.";
 <?php 
-if ($this->$server->nginx_has_gzip) {
+if ($server->nginx_has_gzip) {
    print '  gzip_static       on\;';
 }
-if ($this->$server->nginx_has_upload_progress) {
+if ($server->nginx_has_upload_progress) {
    print '  upload_progress uploads 1m\;';
 }
 ?>

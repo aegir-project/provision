@@ -5,7 +5,7 @@ server {
    root         <?php print $this->root; ?>;
    index        index.php index.html;
 <?php 
-    if ($this->$server->nginx_has_new_version || $this->$server->nginx_has_upload_progress) {
+    if ($server->nginx_has_new_version || $server->nginx_has_upload_progress) {
       print '   include      ' . $server->include_path . '/nginx_advanced_include.conf';
     }
     else {
