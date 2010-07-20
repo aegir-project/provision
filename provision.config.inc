@@ -23,7 +23,7 @@ class provisionConfig {
    *
    * @var provisionContext
    */
-  public $owner = null;
+  public $context = null;
 
   /**
    * If set, replaces file name in log messages.
@@ -41,26 +41,26 @@ class provisionConfig {
   protected $group = NULL;
 
   /**
-   * Forward $this->... to $this->owner->...
+   * Forward $this->... to $this->context->...
    * object.
    */
   function __get($name) {
-    if (isset($this->owner)) {
-      return $this->owner->$name;
+    if (isset($this->context)) {
+      return $this->context->$name;
     }
   }
 
   /**
    * Constructor, overriding not recommended.
    *
-   * @param $owner
+   * @param $context
    *   An alias name for d(), the provisionContext that this configuration
    *   is relevant to.
    * @param $data
    *   An associative array to potentiall manipulate in process() and make
    *   available as variables to the template.
    */
-  function __construct($owner, $data = array()) {
+  function __construct($context, $data = array()) {
     if (is_null($this->template)) {
       throw(exception);
     }
@@ -70,8 +70,8 @@ class provisionConfig {
       $this->data = array_merge($this->data, $data);
     }
 
-    // Accept both a reference and an alias name for the owner.
-    $this->owner = is_object($owner) ? $owner : d($owner);
+    // Accept both a reference and an alias name for the context.
+    $this->context = is_object($context) ? $context : d($context);
   }
 
   /**
@@ -176,8 +176,8 @@ class provisionConfig {
         }
         if (!is_null($this->group)) {
           provision_file()->chgrp($filename, $this->group)
-            ->succeed('Change group ownership of @path to @gid')
-            ->fail('Could not change group ownership of @path to @gid');
+            ->succeed('Change group contextship of @path to @gid')
+            ->fail('Could not change group contextship of @path to @gid');
         }
       }
     }
@@ -207,8 +207,8 @@ class provisionConfig_drushrc extends provisionConfig {
     return _drush_config_file($this->context_name);
   }
 
-  function __construct($owner, $data = array()) {
-    parent::__construct($owner, $data);
+  function __construct($context, $data = array()) {
+    parent::__construct($context, $data);
     $this->load_data();
   }
 
@@ -236,10 +236,10 @@ class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
    * @param $options
    *   Array of string option names to save.
    */
-  function __construct($owner, $data = array()) {
-    parent::__construct($owner, $data);
+  function __construct($context, $data = array()) {
+    parent::__construct($context, $data);
     $this->data = array(
-      'aliasname' => ltrim($owner, '@'),
+      'aliasname' => ltrim($context, '@'),
       'options' => $data,
     );
   }
