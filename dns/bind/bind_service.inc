@@ -102,10 +102,11 @@ class provisionService_dns_bind extends provisionService_dns {
   function delete_record($zonename, $name, $type = null, $destination = null) {
     $zone = $this->zone_singleton($zonename);
 
-    foreach ($this->records as $key => $record) {
+    drush_log("del: $zonename, $name, $type, $destination");
+    foreach ($zone->records as $key => $record) {
       if ($record['name'] == $name) {
-        if ( ( is_null($type) || $record['type'] == $type) 
-             && ( is_null($destination) || $record['destination'] == $destination) ) {
+        if ( ( is_null($type) || strtoupper($record['type']) == strtoupper($type)) 
+             && ( is_null($destination) || strtoupper($record['destination']) == strtoupper($destination)) ) {
           unset($zone->records[$key]);
         }
       }
