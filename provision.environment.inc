@@ -70,7 +70,7 @@ function provision_sitealias_get_record($name) {
  * function.
  */
 function provision_environment_factory($name) {
-  $classes = array('server' => 'provisionServer', 'platform' => 'provisionPlatform', 'site' => 'provisionSite');
+  $classes = array('server', 'platform', 'site');
 
   $type = 'server';
 
@@ -83,7 +83,7 @@ function provision_environment_factory($name) {
   elseif (isset($options['context_type'])) {
     $type = $options['context_type'];
   }
-  $classname = $classes[$type];
+  $classname = "provisionEnvironment_{$type}";
 
   return new $classname($name);
 }
@@ -250,8 +250,9 @@ class provisionEnvironment {
    * Init stub function.
    */
   function init() {
-    dlm(__CLASS__);
-    $this->setProperty('context_type', 'server');
+    preg_match("/^provisionEnvironment_(.*)$/", get_class($this), $matches);
+    $this->type = $matches[1];
+    $this->setProperty('context_type', $this->type);
 
     // Set up subscriptions for the available services.
     $service_list = drush_command_invoke_all('provision_services');
@@ -389,7 +390,7 @@ class provisionEnvironment {
  * This class bootstraps the Service API by generating server
  * objects for each of the available service types.
  */
-class provisionServer extends provisionEnvironment {
+class provisionEnvironment_server extends provisionEnvironment {
   /**
    * Associative array of services for this server.
    *
@@ -424,7 +425,6 @@ class provisionServer extends provisionEnvironment {
   function init() {
     parent::init();
 
-    $this->type = 'server';
     $this->setProperty('remote_host', 'localhost');
     if ($this->name == '@server_master') {
       $this->setProperty('aegir_root', getenv('HOME'));
@@ -613,7 +613,9 @@ class provisionServer extends provisionEnvironment {
 /**
  * Class for the platform environment.
  */
-class provisionPlatform extends provisionEnvironment {
+class provisionEnvironment_platform extends provisionEnvironment {
+  public $parent_key = 'server';
+
   static function option_documentation() {
     return array(
       '--root' => 'platform: path to a Drupal installation',
@@ -626,7 +628,6 @@ class provisionPlatform extends provisionEnvironment {
     $this->parent_key = 'server';
 
     parent::init();
-    $this->type = 'platform';
     $this->setProperty('root');
 
     $this->setProperty('server', '@server_master');
@@ -640,7 +641,9 @@ class provisionPlatform extends provisionEnvironment {
   }
 }
 
-class provisionSite extends provisionEnvironment {
+class provisionEnvironment_site extends provisionEnvironment {
+  public $parent_key = 'platform';
+
   static function option_documentation() {
     return array(
       '--platform' => 'site: the platform the site is run on',
