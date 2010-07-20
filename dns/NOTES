@@ -13,19 +13,26 @@ $TTL
 @       IN      SOA     foobar.com. hostmaster.foobar.com. ( 2010061700 21600 3600 604800 86400  ) 
 www     IN      A       1.2.3.4
 
+this command:
+
+provision-zone create-host www.foobar.com 
+
+should another similar record to the same zonefile.
+
+Bugs:
+
+ 1. since the rewrite of the parser, some fields in the SOA are
+ missing (retry, refresh, etc) because we lack the context from the
+ server (switching to create_config() shoudl fix that)
+
 Caveats:
 
  1. only targeting bind right now
- 2. the global $TTL is broken
- 3. no way to regenerate the whole file: we edit the file piece by
- piece (which has the advantage of not requiring backend storage)
 
 Todo:
 
- 1. we're not hooked into site tasks properly (yet)
- 2. we need slave configurations to be shipped
- 3. we need to hook the zones into the bind configuration
- 4. we don't have NS records, we should rely on the master/slave
- servers defined in the backend for that
- 5. we don't have a notion of "IP" for sites yet, nor any notion of
- "defauult IP", we need to hook into the server stuff for that
+ 1. we need slave configuration
+ 2. for this we need to define the services (ie. the slaves too) in
+ the frontend and add NS records when the zonefile is created
+ 3. we need to hook the zones into the bind configuration (see the
+ commented line in create_zone())
