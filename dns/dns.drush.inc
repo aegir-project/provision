@@ -32,11 +32,16 @@ function drush_dns_provision_zone($action, $zone, $name = null, $type = null, $d
     $status = d()->service('dns')->delete_host($zone);
     break;
   case 'verify':
-  case 'create':
-    $status = d()->service('dns')->create_zone($zone);
+    case 'create':
+      $config =  d()->service('dns')->get_config('server');
+      $config->store->records[$zone] = $zone;
+      $config->write();
+##    $status = d()->service('dns')->create_zone($zone);
     break;
   case 'delete':
-    $status = d()->service('dns')->delete_zone($zone);
+    $config =  d()->service('dns')->get_config('server');
+    $config->store->records[$zone] = FALSE;
+    $config->write();
     break;
   case 'rr-add':
     $status = d()->service('dns')->add_record($zone, $name, $type, $destination);
@@ -77,7 +82,7 @@ class provisionService_dns_basic extends provisionService_dns {
     parent::init();
 
     // Path for storing data store config files.
-    $this->server->dns_data_path = $this->server->aegir_root . '/dns.d';
+    $this->server->dns_data_path = $this->server->aegir_root . '/config/dns.d';
 
     if (!is_null($this->application_name)) {
       $app_dir = "{$this->server->config_path}/{$this->application_name}";

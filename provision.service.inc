@@ -38,6 +38,13 @@ class provisionService extends provisionChainedState {
     return false;
   }
 
+  function get_config($config) {
+    foreach ((array) $this->configs[$config] as $class) {
+      return new $class($this->context, $this->config_data($config));
+    }
+    return false;
+  }
+
   /**
    * Generate a configuration file.
    *

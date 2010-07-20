@@ -46,7 +46,13 @@ class provisionConfig_dns_server extends provisionConfig_dns {
   }
 
   function write() {
+    // lock the store until we are done generating our config.
+    $this->store->lock();
+
     parent::write();
+
+    $this->store->write();
+    $this->store->close();
     if (isset($this->data['application_name'])) {
       $file = $this->data['application_name'] . '.conf';
       // We link the app_name.conf file on the remote server to the right version.

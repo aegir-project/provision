@@ -48,7 +48,7 @@ class provisionConfig {
   /**
    * The data store.
    */
-  protected $store = NULL;
+  public $store = NULL;
 
   /**
    * Forward $this->... to $this->owner->...
@@ -88,6 +88,7 @@ class provisionConfig {
     if (!is_null($this->data_store_class) && class_exists($this->data_store_class)) {
       $class = $this->data_store_class;
       $this->store = new $class($owner, $data);
+
     }
 
   }
@@ -108,6 +109,9 @@ class provisionConfig {
    * This is a stub to be implemented by subclasses.
    */
   function process() {
+    if (is_object($this->store)) {
+      $this->data['records'] = array_filter(array_merge($this->store->loaded_records, $this->store->records));
+    }
     return true;
   }
 
@@ -415,15 +419,14 @@ class provisionConfig_data_store extends provisionConfig {
   protected $fp = null;
 
   public $records = array();
-  protected $loaded_records = array();
+  public $loaded_records = array();
 
-  protected $mode = 0400;
+  protected $mode = 0700;
 
 
   function __construct($owner, $data = array()) {
     parent::__construct($owner, $data);
 
-    $this->init_records = $data;
     $this->load_data();
   }
 
@@ -433,8 +436,8 @@ class provisionConfig_data_store extends provisionConfig {
   }
 
   function open() {
-    if (!$this->fp) {
-      $this->fp = fopen($this->filename(), "w");
+    if (!is_resource($this->fp)) {
+      $this->fp = fopen($this->filename(), "w+");
     }
   }
 
@@ -453,18 +456,17 @@ class provisionConfig_data_store extends provisionConfig {
     $this->lock();
     fwrite($this->fp, $text);
     fflush($this->fp);
-    $this->close();
   }
 
   function unlock() {
-    if ($this->locked && $this->fp) {
+    if ($this->locked && is_resource($this->fp)) {
       flock($this->fp, LOCK_UN);
       $this->locked = FALSE;
     }
   }
 
   function close() {
-    if ($this->fp) {
+    if (is_resource($this->fp)) {
       fclose($this->fp);
     }
   }
@@ -475,12 +477,15 @@ class provisionConfig_data_store extends provisionConfig {
       // from under us.
       if (file_exists($this->filename()) && is_readable($this->filename())) {
         include($this->filename());
-        $this->loaded_records = ${$this->key};
+        $data_key = $this->key;
+        if (isset(${$data_key}) && is_array(${$data_key})) {
+          $this->loaded_records = ${$data_key};
+        }
       }
     }
   }
 
   function process() {
-    $this->data['records'] = array_merge($this->loaded_records, $this->records);
+    $this->data['records'] = array_filter(array_merge($this->loaded_records, $this->records));
   }
 }

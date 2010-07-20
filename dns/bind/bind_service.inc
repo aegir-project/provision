@@ -256,6 +256,5 @@ class provisionConfig_bind_zone extends provisionConfig {
 
 class provisionConfig_bind_server extends provisionConfig_dns_server {
   function zone_declaration() {
-    return 'zone "' . $this->data['name'] . '" { type master; file "' . $this->bind_zone_master_path . '/' . $this->data['name'] . '"; allow-query { any; }; };';
   }
 }
