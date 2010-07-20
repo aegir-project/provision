@@ -41,24 +41,9 @@ class provisionService_http_nginx_ssl extends provisionService_http_ssl {
    */
   function init() {
     parent::init();
-
     // Replace the server config with our own. See the class for more info.
     $this->configs['server'][] = 'provisionConfig_nginx_ssl_server';
     $this->configs['site'][] = 'provisionConfig_nginx_ssl_site';
-
-    /**
-     * TODO: This is ugly, we need a different hook for save commands probably.
-     */
-    $command = drush_get_command();
-
-    if ($command['command'] == 'provision-save') {
-      // Check if some nginx features are supported and save them for later.
-      $this->server->shell_exec('nginx -V');
-      $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', trim(drush_shell_exec_output())), $match);
-      $this->server->nginx_has_upload_progress = preg_match("/(nginx-upload-progress-module)/", implode('', trim(drush_shell_exec_output())), $match);
-      $this->server->nginx_has_new_version = preg_match("/(nginx\/0\.8\.)/", implode('', trim(drush_shell_exec_output())), $match);
-    }
-
   }
 
   function verify() {
