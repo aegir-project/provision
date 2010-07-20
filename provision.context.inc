@@ -194,23 +194,22 @@ class provisionContext {
    * can fail safely.
    */
   function __call($name, $args) {
-    $this->method_invoke($name, $args);
-
-    return false;
+    return $this->method_invoke($name, $args);
   }
 
   /**
    * Execute a method on the object and all of it's associated
    * services.
    */
-  function method_invoke($func, $args = array()) {
-    if (method_exists($this, $func)) {
-      call_user_func_array(array($this, $func), $args);
-    }
+  function method_invoke($func, $args = array(), $services = TRUE) {
+    provision::method_invoke($this, $func, $args);
     // Services will be invoked regardless of the existence of a 
     // implementation in the context class.
-    $this->services_invoke($func, $args);
+    if ($services) {
+      $this->services_invoke($func, $args);
+    }
   }
+
   /**
    * Execute the method for the current object type.
    *
@@ -255,6 +254,16 @@ class provisionContext {
     preg_match("/^provisionContext_(.*)$/", get_class($this), $matches);
     $this->type = $matches[1];
     $this->setProperty('context_type', $this->type);
+
+    // Set up the parent of this context object.
+    if (!is_null($this->parent_key)) {
+      $this->setProperty($this->parent_key);
+      $this->is_oid($this->parent_key);
+    }
+
+    // $this->server is always @server_master
+    $this->server = '@server_master';
+    $this->is_oid('server');
 
     // Set up subscriptions for the available services.
     $service_list = drush_command_invoke_all('provision_services');
@@ -346,7 +355,7 @@ class provisionContext {
     // These may be on different servers entirely.
     $services = $this->get_services();
     foreach (array_keys($services) as $service) {
-      $results[$service] = $this->service($service)->$callback();
+      $results[$service] = provision::method_invoke($this->service($service), $callback, $args);
     }
     return $results;
   }

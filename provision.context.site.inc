@@ -21,18 +21,11 @@ class provisionContext_site extends provisionContext {
     );
   }
 
-  function init() {
-    $this->parent_key = 'platform';
-
-    parent::init();
-    $this->type = 'site';
-    
-    $this->setProperty('platform');
-    $this->is_oid('platform');
-
-    // we need to set the alias root to the platform root, otherwise drush will cause problems.
-    $this->root = $this->platform->root;
+  function init_site() {
     $this->setProperty('uri');
+
+     // we need to set the alias root to the platform root, otherwise drush will cause problems.
+    $this->root = $this->platform->root;
 
     // set this because this path is accessed a lot in the code, especially in config files.
     $this->site_path = $this->root . '/sites/' . $this->uri;
@@ -42,10 +35,6 @@ class provisionContext_site extends provisionContext {
     $this->setProperty('client_email');
     $this->setProperty('aliases', array(), TRUE);
     $this->setProperty('redirection', FALSE);
-
-    // TODO :: figure out how to put this into service classes.
-    $this->setProperty('ssl_enabled', 0);
-    $this->setProperty('ssl_key', null);
 
     // this can potentially be handled by a Drupal sub class
     $this->setProperty('profile', 'default');

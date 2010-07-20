@@ -27,17 +27,17 @@ class provisionService extends provisionChainedState {
    * This is used so that we can create methods for drush commands, and
    * can fail safely.
    */
-  function __call($name, $args) {
-    if (method_exists($this, $name)) {
-      return call_user_func_array(array($this, $name), $args);
-    }
-
-    return false;
+  function __call($name, $args = array()) {
+    return provision::method_invoke($this, $name, $args);
   }
 
 
-  // All services have the ability to have an associated restart command and listen port.
   function init() {
+
+  }
+
+  // All services have the ability to have an associated restart command and listen port.
+  function init_server() {
     if (!is_null($this->service)) {
       if ($this->has_port) {
         $this->server->setProperty($this->service . '_port', $this->default_port());
@@ -48,6 +48,15 @@ class provisionService extends provisionChainedState {
     }
     return TRUE;
   }
+
+  function init_platform() {
+
+  }
+
+  function init_site() {
+
+  }
+
 
   function default_port() {
     return false;

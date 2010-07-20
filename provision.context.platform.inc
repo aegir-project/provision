@@ -20,13 +20,8 @@ class provisionContext_platform extends provisionContext {
     );
   }
 
-  function init() {
-    parent::init();
+  function init_platform() {
     $this->setProperty('root');
-
-    $this->setProperty('server', '@server_master');
-    $this->is_oid('server');
-
     $this->setProperty('makefile', '');
   }
 }

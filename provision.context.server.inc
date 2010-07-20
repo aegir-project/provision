@@ -43,8 +43,7 @@ class provisionContext_server extends provisionContext {
     return $options;
   }
 
-  function init() {
-    parent::init();
+  function init_server() {
 
     $this->setProperty('remote_host', 'localhost');
     if ($this->name == '@server_master') {
@@ -100,7 +99,6 @@ class provisionContext_server extends provisionContext {
         drush_log("Loading $type driver for the $service service");
         include_once($file);
         $object = new $className($this->name);
-        $object->init();
         $this->services[$service] = $object;
         $this->setProperty($type_option, $type);
       }

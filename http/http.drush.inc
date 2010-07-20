@@ -79,8 +79,8 @@ class provisionService_http_public extends provisionService_http {
     return $data;
   }
 
-  function init() {
-    parent::init();
+  function init_server() {
+    parent::init_server();
     // System account
     if ($this->server->name == '@server_master') {
       $this->server->setProperty('web_group', _provision_default_web_group());
