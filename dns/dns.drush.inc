@@ -84,6 +84,12 @@ class provisionService_dns_basic extends provisionService_dns {
       $this->server->dns_zoned_path = "{$app_dir}/zone.d";
       $this->server->dns_hostd_path = "{$app_dir}/host.d";
     }
+
+    $this->server->setProperty('dns_ttl', 86400); # 24h
+    $this->server->setProperty('dns_refresh', 21600); # 6h
+    $this->server->setProperty('dns_retry', 3600); # 1h
+    $this->server->setProperty('dns_expire', 604800); # 7d
+    $this->server->setProperty('dns_negativettl', 86400); # 24h
   }
 
   function verify() {
@@ -128,22 +134,18 @@ class provisionService_dns_basic extends provisionService_dns {
    * This creates a zone, which mostly consists of adding the SOA record.
    */
    function create_zone($zone) {
-     $config = $this->config_load('server');
-     $config->store->records[$zone] = $zone;
-     $config->write();
+     $this->config('server')->record_set($zone, $zone)->write();
 
-     $config = $this->config_load('zone', array('name' => $zone));
-     $config->store->records['SOA'] = $zone;
-     $config->write();
+     $this->config('zone')->record_set('soa', array(
+       'name' => $this->server->remote_host,     
+     ))->write();
   }
 
   /**
    * This completely drops a zone, without any checks.
    */
   function delete_zone($zone) {
-    $config =  d()->service('dns')->config_load('server');
-    $config->store->records[$zone] = FALSE;
-    $config->write();
+    $this->config('server')->record_del($zone)->write();
   }
 
 
@@ -151,27 +153,7 @@ class provisionService_dns_basic extends provisionService_dns {
 
 class provisionService_dns_complex extends provisionService_dns_basic {
 
-  function init() {
-    parent::init();
-    $this->server->setProperty('dns_ttl', 86400); # 24h
-    $this->server->setProperty('dns_refresh', 21600); # 6h
-    $this->server->setProperty('dns_retry', 3600); # 1h
-    $this->server->setProperty('dns_expire', 604800); # 7d
-    $this->server->setProperty('dns_negativettl', 86400); # 24h
-  }
-
-  function verify() {
-    switch ($this->context->type) {
-      case 'site' :
-        $this->create_host();
-        break;
-    }
-
-    // This will restart the server if needed.
-    parent::verify();
-  }
-
-  /**
+   /**
    * Determine if a zone is defined on the nameserver.
    *
    * To be implemented by engines.

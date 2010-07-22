@@ -18,6 +18,8 @@ class provisionService extends provisionChainedState {
   protected $configs = array();
 
   protected $config_cache = array();
+  
+  private $_config = null;
 
   // All services have the ability to have an associated restart command and listen port.
   function init() {
@@ -40,7 +42,9 @@ class provisionService extends provisionChainedState {
     return false;
   }
 
-  function &config_load($config, $data = array()) {
+  function config($config, $data = array()) {
+    $this->_config = null;
+
     if (!isset($this->config_cache[$this->context->name][$config])) {
       foreach ((array) $this->configs[$config] as $class) {
         $this->config_cache[$this->context->name][$config] = new $class($this->context, array_merge($this->config_data($config), $data));
@@ -48,9 +52,27 @@ class provisionService extends provisionChainedState {
     }
 
     if (isset($this->config_cache[$this->context->name][$config])) {
-      return $this->config_cache[$this->context->name][$config];
+      $this->_config = $this->config_cache[$this->context->name][$config];
     }
-    return false;
+    return $this;
+  }
+
+  function record_set($arg1, $arg2 = null) {
+    if (is_object($this->_config)) {
+      if (is_object($this->_config->store)) {
+        if (is_array($arg1)) {
+          $this->_config->store->records = array_merge($this->_config->store->records, $arg1);
+        }
+        elseif (!is_numeric($arg1)) {
+          $this->_config->store->records[$arg1] = $arg2;
+        }
+      }
+    }
+    return $this;
+  }
+
+  function record_del($record) {
+    return $this->record_set($record, null);
   }
 
   /**
@@ -59,18 +81,8 @@ class provisionService extends provisionChainedState {
    * This method will fetch the class to instantiate from the internal
    * $this->configs control array.
    */
-  function create_config($config) {
-    if (isset($this->configs[$config])) {
-      try {
-        $object =& $this->config_load($config);
-        $object->write();
-      }
-      catch (provisionException_continue $e) {
-        drush_log($e->getMessage());
-        // The service or configuration class has signaled that the config file
-        // was uneccesary, and we should continue normally.
-      }
-    }
+  function create_config($config, $data = array()) {
+    $this->config($config, $data)->write();
   }
 
   /**
@@ -80,18 +92,7 @@ class provisionService extends provisionChainedState {
    * $this->configs control array.
    */
   function delete_config($config) {
-    if (isset($this->configs[$config])) {
-      try {
-
-        $object =& $this->config_load($config);
-        $object->unlink();
-      }
-      catch (provisionException_continue $e) {
-        drush_log($e->getMessage());
-        // The service or configuration class has signaled that the config file
-        // was uneccesary, and we should continue normally.
-      }
-    }
+    $this->config($config, $data)->unlink();
   }
 
   /**

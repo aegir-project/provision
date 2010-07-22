@@ -81,26 +81,13 @@ class provisionConfig {
     if (sizeof($data)) {
       $this->data = $data;
     }
-    //$this->parsed_data = $this->parse();
-    //$this->data = array_merge($this->parsed_data, $this->data);
 
     
     if (!is_null($this->data_store_class) && class_exists($this->data_store_class)) {
       $class = $this->data_store_class;
       $this->store = new $class($owner, $data);
-
     }
 
-  }
-
-  /**
-   * Parse the existing config to load data
-   *
-   * This is called in the constructor, and should take care of
-   * opening the file and parsing it into the data array.
-   */
-  function parse() {
-    return array();
   }
 
   /**
@@ -148,7 +135,6 @@ class provisionConfig {
 
         $class_name = get_parent_class($class_name);
       }
-
     } 
 
     return false;
@@ -227,7 +213,7 @@ class provisionConfig {
    * Remove configuration file as specified by filename().
    */
   function unlink() {
-    provision_file()->unlink($this->filename())->status();
+    return provision_file()->unlink($this->filename())->status();
   }
   
 }
