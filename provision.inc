@@ -152,22 +152,22 @@ function _provision_file_check_location($source, $directory = '') {
   return $source;
 }
 
+
 /**
- * Wrapper around drush_shell_exec to provide sprintf functionality with some more safety.
+ * Find the username of the current running procses
  *
- * @TODO: fix this so we can get error codes and the return values. drush_shell_exec is too
- *        limited
+ * This will return the username of the current running user (as seen
+ * from posix_geteuid()) and should be used instead of
+ * get_current_user() (which looks at the file owner instead).
+ *
+ * @see get_current_user()
+ * @see posix_geteuid()
+ *
+ * @return
+ *   String. The username.
  */
-function provision_shell_exec() {
-  $args = func_get_args();
-  
-  //do not change the command itself, just the parameters.
-  for ($x = 1; $x < sizeof($args); $x++) {
-    $args[$x] = escapeshellcmd($args[$x]);
-  }
-  $command = call_user_func_array('sprintf', $args);
-  drush_log($command); 
-  return drush_shell_exec($command);
+function provision_current_user() {
+  return provision_posix_username(posix_geteuid());
 }
 
 /**

@@ -229,13 +229,13 @@ class provisionFileSystem extends provisionChainedState {
 
     $func = ($recursive) ? array($this, '_chgrp_recursive') : 'chgrp';
     if ($group = provision_posix_groupname($gid)) {
-      if (provision_user_in_group(get_current_user(), $gid)) {
+      if (provision_user_in_group(provision_current_user(), $gid)) {
         if (!call_user_func($func, $path, $group)) {
           $this->tokens['@reason'] = dt("chgrp to @group failed on @path", array('@group' => $group, '@path' => $path));
         }
       }
       else {
-        $this->tokens['@reason'] = dt("@user is not in @group group", array("@user" => get_current_user(), "@group" => $group));
+        $this->tokens['@reason'] = dt("@user is not in @group group", array("@user" => provision_current_user(), "@group" => $group));
       }
     }
     elseif (!@call_user_func($func, $path, $gid)) { # try to change the group anyways
@@ -316,7 +316,7 @@ class provisionFileSystem extends provisionChainedState {
         // same here: some do not support -z
         $command = 'gunzip -c %s | tar pxf -';
         drush_log(dt('Running: %command in %target', array('%command' => sprintf($command, $path), '%target' => $target)));
-        $result = provision_shell_exec($command, $path);
+        $result = drush_shell_exec($command, $path);
         chdir($oldcwd);
 
         if ($result && is_writeable(dirname($target)) && is_readable(dirname($target)) && is_dir($target)) {
@@ -394,7 +394,7 @@ class provisionFileSystem extends provisionChainedState {
     }
 
     if ($exists) {
-      $this->chown($path, get_current_user())
+      $this->chown($path, provision_current_user())
         ->succeed($name . ' ownership of @path has been changed to @uid.')
         ->fail($name . ' ownership of @path could not be changed to @uid.', 'DRUSH_PERM_ERROR');
 

@@ -317,7 +317,7 @@ class provisionServer extends provisionEnvironment {
     $this->setProperty('remote_host', 'localhost');
     if ($this->name == '@server_master') {
       $this->setProperty('aegir_root', getenv('HOME'));
-      $this->setProperty('script_user', get_current_user());
+      $this->setProperty('script_user', provision_current_user());
     }
     else {
       $this->aegir_root = d('@server_master')->aegir_root;
