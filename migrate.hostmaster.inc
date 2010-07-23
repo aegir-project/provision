@@ -11,8 +11,8 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
     'context_type' => 'server',
     'aegir_root' => dirname(rtrim($data['config_path'], '/')),
     'script_user' => $data['script_user'],
-   // apache 
-    'http_service_type' => 'apache',
+   // apache or nginx or..
+    'http_service_type' => drush_get_option('http_service_type', 'apache', 'options'),
     'web_group' => $data['web_group'],
     'master_url' => $data['master_url'],
     'restart_cmd' => $data['restart_cmd'],

@@ -44,7 +44,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'aegir_root' => $aegir_root,
     'script_user' => drush_get_option('script_user', provision_current_user()),
    // apache or nginx or..
-    'http_service_type' => drush_get_option('http_service_type', 'apache', 'options'),    
+    'http_service_type' => drush_get_option('http_service_type', 'apache', 'options'),
     'web_group' => drush_get_option('web_group', _provision_default_web_group()),
     'master_url' => "http://" . $site . "/",
    // mysql
