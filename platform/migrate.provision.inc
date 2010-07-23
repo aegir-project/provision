@@ -50,7 +50,7 @@ function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_u
   $success =  provision_file()->unlink(drush_get_option('backup_file'))
     ->succeed('Removed unused migration site package')
     ->fail('Could not remove unused migration site package');
-  d()->service('http')->create_site_config();
+  d()->service('http')->create_config('site');
   d()->service('http')->parse_configs();
 
 }
