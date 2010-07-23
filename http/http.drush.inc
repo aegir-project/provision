@@ -11,6 +11,15 @@ function http_provision_services() {
 class provisionService_http extends provisionService {
   public $service = 'http';
   protected $ssl_enabled = FALSE;
+
+
+  /**
+   * Support the ability to cloak the database credentials using environment variables.
+   */
+  function cloaked_db_creds() {
+    return FALSE;
+  }
+
 }
 
 // Public http service , as in non-encrypted and listening on a port.
@@ -115,13 +124,6 @@ class provisionService_http_public extends provisionService_http {
    */
   function parse_configs() {
     return TRUE;
-  }
-
-  /**
-   * Support the ability to cloak the database credentials using environment variables.
-   */
-  function cloaked_db_creds() {
-    return FALSE;
   }
 
   /**
