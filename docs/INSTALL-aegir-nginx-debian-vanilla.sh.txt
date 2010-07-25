@@ -198,9 +198,13 @@ cp -af /var/xdrago/etc /opt/
 cp -f /opt/etc/init.d/* /etc/init.d/
 cp -af /var/xdrago/cron/crontabs/root /var/spool/cron/crontabs/
 perl -p -i -e "s/(>127.0.0.1<)/\>127.0.0.1,$SERVERIP\</g" /opt/etc/php-fpm.conf
-perl -p -i -e "s/(root)/$ADMEMAIL/g" /etc/apticron/apticron.conf
+echo $ADMEMAIL > /tmp/.email.txt
+perl -p -i -e "s/(\@)/\\\@/g" /tmp/.email.txt
+APTEMAILA=`cat /tmp/.email.txt`
+APTEMAIL=`echo -n $APTEMAILA | tr -d "\n"`
+perl -p -i -e "s/(root)/$APTEMAIL/g" /etc/apticron/apticron.conf
+rm -f /tmp/.email.txt
 sh /usr/sbin/apticron &&
-
 
 
 
