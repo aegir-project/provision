@@ -555,10 +555,21 @@ echo "[client]" >> /root/.my.cnf
 echo "user=root" >> /root/.my.cnf
 echo "password=$PASWD" >> /root/.my.cnf
 chmod 0600 /root/.my.cnf
+
+
+
+###--------------------###
+msg "`date` INFO: Fix for access to global.inc for www-data user issue"
+echo "..."
+sleep 5
+chmod 755 /var/aegir/config/includes
+chmod 755 /var/aegir/config
 service cron restart
 msg "`date` INFO: MariaDB setup completed"
 msg "`date` INFO: ALL DONE!"
 exit 0
+
+
 
 ###----------------------------------------###
 ###
