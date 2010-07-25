@@ -87,21 +87,28 @@ fi
 THISHOSTA=`hostname`
 THISHOSTB=`echo -n $THISHOSTA | tr -d "\n"`
 echo " "
-msg "You need to specify the public IP address of your server and your e-mail"
-msg "in the top config section of this script."
 echo " "
-msg "Your server has to have already working FQDN hostname matching your IP address."
-msg "This means you _have to_ configure the dns for your server IP/hostname _before_"
-msg "trying to use this install script. Reverse dns is _not_ required."
-echo " "
-msg "Your hostname appears to be $THISHOSTB - are you sure it's a valid FQDN hostname?"
-msg "Are you sure your FQDN hostname matches your IP address: $SERVERIP?"
-echo " "
-msg "If above requirements are not met, your Aegir automated install _will fail_,"
-msg "since the script will not check if your IP/hostname is valid or not."
-echo " "
-msg "If you have closed outgoing SMTP port, uncomment first two lines in section:"
-msg "'Do we need a SMTP relay'."
+msg "Checkpoint: "
+cat <<EOF
+
+  * You need to specify the public IP address of your server and your e-mail
+    in the top config section of this script.
+   
+  * Your server has to have already working FQDN hostname matching your IP address.
+    This means you _have to_ configure the dns for your server IP/hostname _before_
+    trying to use this install script. Reverse dns is _not_ required.
+   
+  * Your hostname appears to be $THISHOSTB - are you sure it's a valid FQDN hostname?
+  
+  * Are you sure your FQDN hostname matches your IP address: $SERVERIP?
+  
+  * If above requirements are not met, your Aegir automated install _will fail_,
+    since the script will not check if your IP/hostname is valid or not.
+    
+  * If you have closed outgoing SMTP port, uncomment first two lines in section:
+    'Do we need a SMTP relay'.
+    
+EOF
 echo " "
 if prompt_yes_no "Do you want to proceed with the install?" ; then
   true
