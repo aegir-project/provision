@@ -64,14 +64,14 @@ class provisionService_db extends provisionService {
   function suggest_db_name() {
     $uri = $this->context->uri;
 
-    $suggest_base = str_replace(array('.', '-'), '' , ereg_replace('^www\.', '', $uri));
+    $suggest_base = substr(str_replace(array('.', '-'), '' , ereg_replace('^www\.', '', $uri)), 0, 16);
 
-    $suggest[] = substr($suggest_base, 0, 16);
-    for ($i = 0; $i < 100; $i++) {
-      $suggest[] = sprintf("%s_%d", substr($suggest_base, 0, 15 - strlen( (string) $i) ), $i);
+    if (!$this->database_exists($suggest_base)) {
+      return $suggest_base;
     }
 
-    foreach ($suggest as $option) {
+    for ($i = 0; $i < 100; $i++) {
+      $option = sprintf("%s_%d", substr($suggest_base, 0, 15 - strlen( (string) $i) ), $i);
       if (!$this->database_exists($option)) {
         return $option;
       }
