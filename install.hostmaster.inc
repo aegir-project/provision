@@ -21,26 +21,17 @@ function drush_provision_hostmaster_install($site = NULL) {
 
   }
 
-  $data['master_db'] = drush_get_option('master_db');
-
-  if (!$data['master_db']) {
-    drush_print(dt("No database configuration provided, asking for one interactively"));
-    $scheme = drush_prompt(dt("Database type"), "mysql");
-    $host = drush_prompt(dt("Database server"), "localhost");
-    $user = drush_prompt(dt("Database user"), "root");
-    system('stty -echo');
-    $pass = drush_prompt(dt("Database password"));
-    system('stty echo');
-    print "\n"; # add a cr since the user's didn't echo
-    $data['master_db'] = "$scheme://$user:$pass@$host";
-  }
+  $aegir_host = drush_get_option('aegir_host', php_name('n'), 'options');
+  $aegir_db_pass = drush_get_option('aegir_db_pass', 'pass', 'options');
+  $aegir_db_user = drush_get_option('aegir_db_user', 'aegir_root', 'options');
+  $data['master_db'] = sprintf("mysql://%s:%s@%s",$aegir_user, $aegir_pass, $aegir_host);
 
   // TODO: support creation of an external db server
   $server = '@server_master';
   drush_backend_invoke_args("provision-save", array($server), array(
     'context_type' => 'server',
     // files
-    'remote_host' => php_uname('n'),
+    'remote_host' => $aegir_host,
     'aegir_root' => $aegir_root,
     'script_user' => drush_get_option('script_user', provision_current_user()),
    // apache or nginx or..

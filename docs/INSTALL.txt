@@ -120,6 +120,34 @@ Shell commands::
 The following details what configuration needs to be performed on the server
 before going ahead with the install.
 
+
+DNS Configuration
+-----------------
+
+Aegir requires that the hostname returned by the `hostname` and `uname -n`
+shell commands, resolves to the IP address for this server.
+
+Shell commands as root::
+  AEGIR_HOST=`uname -n`
+  resolveip $AEGIR_HOST
+
+If the command returns your IP address, you are all set. If it returns
+an error you will need to edit your ``/etc/hosts`` file.
+
+First line of this file looks like:
+
+``127.0.0.1  localhost``
+
+Simply add all domains you want to this line. e.g:
+
+``127.0.0.1  localhost $AEGIR_HOST $AEGIR_DOMAIN other1 other2``
+
+If you only intend to use Aegir on a single server, it is acceptable for
+the resolved IP address to be the '127.0.0.1' loopback address. 
+
+If you intend to manage multiple servers using Aegir, you will need to
+make sure that the IP address is the public IP of this server.
+
 Aegir user
 ----------
 
@@ -132,9 +160,6 @@ safe as can be, and especially to make sure that the web server does not have
 the ability to modify the code of the site, the configured system account
 needs to be a member of the web server group, in order to be able to correctly
 set the file permissions.
-
-More detailed instructions on this topic will be given later in the web
-installation wizard.
 
 This document assumes the Aegir user is ``aegir``, its home directory is
 ``/var/aegir`` and the webserver group is ``www-data``. You can choose another
@@ -169,8 +194,7 @@ Shell commands as root::
  a2enmod rewrite
  ln -s /var/aegir/config/apache.conf /etc/apache2/conf.d/aegir.conf
 
-The aegir user needs to have sudo access. The wizard will explain how to
-do this, but you can already just add the relevant line to your sudoers
+The aegir user needs to have sudo access. Add the relevant line to your sudoers
 file.
 
 /etc/sudoers configuration::
@@ -187,34 +211,26 @@ remote web Aegir users with no passwords.
 Database configuration
 ----------------------
 
-The installer will prompt you for a MySQL superuser. This user is 
-required to create databases and users for new sites. 
-Create that user before running the install script using the following command.
+If you are only running a single server instance of Aegir, the default mysql
+configuration will be sufficient for your needs, and you won't need to modify
+your configuration file.
 
-SQL commands::
+If you are going to be managing multiple servers, you will need to adjust your
+mysql configuration file to modify the ``bind-address`` setting and change
+it to correctly represent your public ip address.
 
-  GRANT ALL PRIVILEGES ON *.* TO 'aegir_root'@'localhost' IDENTIFIED \
-  BY 'XXXXXXXX' WITH GRANT OPTION;
+/etc/mysql/my.conf configuration line to change::
+  bind-address	= 127.0.0.1
 
-Change 'XXXXXXXX' with a real password.
+Wether you are running multiple servers or not, you should take this opportunity
+to restart mysql, to clear any caches.
 
-Any number of database servers may be used, replacing localhost with
-hostmaster's hostname.
+Shell command as root::
+  /etc/init.d/mysql restart
 
-DNS Configuration
------------------
-
-Configuring DNS is up to you. Currently Aegir does nothing with DNS. 
-
-As a help trick, if you are installing Aegir locally to try and test it, you
-can do local DNS by adding entries to file ``/etc/hosts``. First line of this
-file looks like:
-
-``127.0.0.1  localhost your-machine-name``
-
-Simply add all domains you want to this line. e.g:
-
-``127.0.0.1  localhost your-machine-name $AEGIR_DOMAIN other1 other2``
+The installer will prompt you for your MySQL root user password. It will
+not store this information, but instead use it to generate a new super
+user account for the aegir system.
 
 3. Run the install script
 =========================
