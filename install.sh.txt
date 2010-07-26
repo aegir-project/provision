@@ -81,7 +81,7 @@ fi
 
 _RESOLVEIP=`resolveip $AEGIR_HOST 2> /dev/null`
 
-if [ -z $_RESOLVEIP ] ; then
+if [ -z "$_RESOLVEIP" ] ; then
   msg "This server does not have a hostname that resolves to an IP address"
   exit 1
 else
@@ -113,7 +113,7 @@ else
 fi
 
 AEGIR_DB_USER=aegir_root
-AEGIR_DB_PASS=`echo $RANDOM:`date`:`hostname` | md5`
+AEGIR_DB_PASS=`echo $RANDOM:`date`:`hostname` | openssl md5`
 
 msg "Aegir will now generate a mysql super user password for you: "
 cat <<EOF
