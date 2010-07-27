@@ -92,6 +92,9 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     if (preg_match("/Access denied for user 'intntnllyInvalid'@'([^']*)'/", implode('', drush_shell_exec_output()), $match)) {
       return $match[1];
     }
+    elseif (preg_match("/Host '([^']*)' is not allowed to connect to/", implode('', drush_shell_exec_output()), $match)) {
+      return $match[1];
+    }
     else {
       return drush_set_error('PROVISION_DB_CONNECT_FAIL', dt('Dummy connection failed to fail: %msg', array('%msg' => join("\n", drush_shell_exec_output()))));
     }
