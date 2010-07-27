@@ -91,12 +91,12 @@ fi
 
 _MYSQLTEST=`mysql -h$AEGIR_HOST_IP  -uINVALIDLOGIN  -pINVALIDPASS 2>&1 >/dev/null | cat`
 
-if [ -z `echo $_MYSQLTEST | grep -q "ERROR 2003"` ] ; then
-  msg "MySQL is not configured to listen on $AEGIR_HOST_IP."
-  exit 1
-else
+if [ -z `echo $_MYSQLTEST | grep -q "ERROR \(2003\|1130\)"` ] ; then
   msg  "MySQL is listening on $AEGIR_HOST_IP."
   true
+else
+  msg "MySQL is not configured to listen on $AEGIR_HOST_IP."
+  exit 1
 fi
 
 msg "This script makes the following assumptions: "
@@ -113,7 +113,7 @@ else
 fi
 
 AEGIR_DB_USER=aegir_root
-AEGIR_DB_PASS=`echo $RANDOM:`date`:`hostname` | openssl md5`
+AEGIR_DB_PASS=`echo $RANDOM:\`date\`:$AEGIR_HOST | openssl md5`
 
 msg "Aegir will now generate a mysql super user password for you: "
 cat <<EOF
