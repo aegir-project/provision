@@ -260,7 +260,7 @@ class provisionService_db_pdo extends provisionService_db {
 
   function init() {
     parent::init();
-    $this->dsn = sprintf("%s:host=%s", $this->PDO_type,  provision_is_local_host($this->creds['host']) ? 'localhost' : $this->creds['host']);
+    $this->dsn = sprintf("%s:host=%s", $this->PDO_type,  $this->creds['host']);
   }
 
   function connect() {
