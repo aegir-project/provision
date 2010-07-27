@@ -124,7 +124,7 @@ cat <<EOF
 You will be asked to enter your mysql root user password now :
 EOF
 
-/usr/bin/mysql -h$AEGIR_HOST -uroot -p mysql<<EOFMYSQL
+/usr/bin/mysql -uroot -p mysql<<EOFMYSQL
 GRANT ALL PRIVILEGES ON *.* TO '$AEGIR_DB_USER'@'$AEGIR_HOST' IDENTIFIED BY '$AEGIR_DB_PASS' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON *.* TO '$AEGIR_DB_USER'@'$AEGIR_HOST_IP' IDENTIFIED BY '$AEGIR_DB_PASS' WITH GRANT OPTION;
 EOFMYSQL
