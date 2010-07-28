@@ -27,12 +27,13 @@ class provisionService_http_cluster extends provisionService_http {
    */
   function _each_server($method, $args = array()) {
     // Return True by default.
-    $result = TRUE;
+    $ret = TRUE;
     foreach ($this->server->cluster_web_servers as $server) {
       // If any methods return false, return false for the whole operation.
-      $result = $result && call_user_func_array(array(d($server)->service('http', $this->context), $method), $args);
+      $result = call_user_func_array(array(d($server)->service('http', $this->context), $method), $args);
+      $ret = $ret && $result;
     }
-    return $result;
+    return $ret;
   }
 
   function parse_configs() {
