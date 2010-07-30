@@ -20,6 +20,14 @@ class provisionService_http extends provisionService {
     return FALSE;
   }
 
+
+  function verify() {
+    parent::verify();
+
+    $this->create_config($this->context->type);
+    $this->parse_configs();
+  }
+
 }
 
 // Public http service , as in non-encrypted and listening on a port.
@@ -114,9 +122,7 @@ class provisionService_http_public extends provisionService_http {
       } 
     }
 
-    $this->create_config($this->context->type);
-
-    $this->parse_configs();
+    parent::verify();
   }
 
   /**
