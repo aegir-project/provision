@@ -208,22 +208,22 @@ Apache configuration as above, with the same user name and directory paths. SSH
 public/private keys should be set up so hostmaster's Aegir user can access
 remote web Aegir users with no passwords.
 
+They will also need a login shell, which can be modified using the `chsh` command.
+
+Shell command as root::
+  chsh -s /sbin/sh aegir
+
 Database configuration
 ----------------------
 
-If you are only running a single server instance of Aegir, the default mysql
-configuration will be sufficient for your needs, and you won't need to modify
-your configuration file.
+To make sure that the Aegir backend, and all the possible web servers can
+reach your database server, you need to configure mysql to listen on all
+the public IP addresses available to it.
 
-If you are going to be managing multiple servers, you will need to adjust your
-mysql configuration file to modify the ``bind-address`` setting and change
-it to correctly represent your public ip address.
-
-/etc/mysql/my.conf configuration line to change::
+/etc/mysql/my.conf configuration line to comment out::
   bind-address	= 127.0.0.1
 
-Wether you are running multiple servers or not, you should take this opportunity
-to restart mysql, to clear any caches.
+Now you need to restart mysql, to clear any caches.
 
 Shell command as root::
   /etc/init.d/mysql restart
@@ -231,6 +231,13 @@ Shell command as root::
 The installer will prompt you for your MySQL root user password. It will
 not store this information, but instead use it to generate a new super
 user account for the aegir system.
+
+Even though MySQL is now listening on all IP's, it will not allow invalid users
+to connect to the databases, without the correct user accounts configured.
+
+If you are concerned about MySQL being accessible in this way, you can also
+configure your firewall to only allow incoming connections from certain addresses.
+This is outside the scope of this document however.
 
 3. Run the install script
 =========================
@@ -251,7 +258,6 @@ the official release.). You can modify which version to install by editing the
 AEGIR_VERSION variable in the script.
 
 Shell commands::
-
  su -s /bin/sh aegir -c "sh install.sh.txt aegir.example.com"
 
 Note you must run this as root or prefix with sudo.

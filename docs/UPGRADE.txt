@@ -150,7 +150,67 @@ simply be run again when a new security release of Drupal is made available.
 Version-specific upgrade notes
 ==============================
 
-0.4 - multi server support
+0.4 - DNS Configuration
+-----------------------
+
+Aegir requires that the hostname returned by the `hostname` and `uname -n`
+shell commands, resolves to the IP address for this server.
+
+Shell commands as root::
+  AEGIR_HOST=`uname -n`
+  resolveip $AEGIR_HOST
+
+If the command returns your IP address, you are all set. If it returns
+an error you will need to edit your ``/etc/hosts`` file.
+
+First line of this file looks like:
+
+``127.0.0.1  localhost``
+
+Simply add all domains you want to this line. e.g:
+
+``127.0.0.1  localhost $AEGIR_HOST $AEGIR_DOMAIN other1 other2``
+
+If you only intend to use Aegir on a single server, it is acceptable for
+the resolved IP address to be the '127.0.0.1' loopback address. 
+
+If you intend to manage multiple servers using Aegir, you will need to
+make sure that the IP address is the public IP of this server.
+
+0.4 - Database configuration
+----------------------------
+
+To make sure that the Aegir backend, and all the possible web servers can
+reach your database server, you need to configure mysql to listen on all
+the public IP addresses available to it.
+
+/etc/mysql/my.conf configuration line to comment out::
+  bind-address	= 127.0.0.1
+
+Now you need to restart mysql, to clear any caches.
+
+Shell command as root::
+  /etc/init.d/mysql restart
+
+Because you have already installed Aegir when it was using the generic grants,
+you will need to create new grants using the public IP address and hostname
+of this server.
+
+Shell command ::
+  mysql -uroot -p mysql
+
+You need to generate the following grants using the hostname returned by the
+`uname -n` command, and the IP address that the `resolveip` command returns
+for that hostname.
+
+You need to re-use the pasword you had for the account before.
+
+Mysql grants ::
+  GRANT ALL ON *.* to 'aegir_root'@$AEGIR_HOST IDENTIFIED BY 'xxxx' WITH GRANT OPTION;
+  GRANT ALL ON *.* to 'aegir_root'@$AEGIR_IP IDENTIFIED BY 'xxxx' WITH GRANT OPTION;
+
+
+0.4 - Apache configuration
 --------------------------
 
 This release introduces multi-server support and required reorganizing
