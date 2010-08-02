@@ -40,5 +40,5 @@
 
 <?php
 if ($this->redirection) {
-  require(dirname(__FILE__) . '/vhost_redirect.tpl.php');
+//  require(dirname(__FILE__) . '/vhost_redirect.tpl.php');
 }
