@@ -2,6 +2,7 @@
 <?php if ($this->site_mail) : ?>
   ServerAdmin <?php  print $this->site_mail; ?> 
 <?php endif;?>
+
   DocumentRoot <?php print $this->root; ?> 
     
   ServerName <?php print $this->uri; ?>
