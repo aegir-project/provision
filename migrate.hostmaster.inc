@@ -10,6 +10,7 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
   drush_backend_invoke_args("provision-save", array($server), array(
     'context_type' => 'server',
     'aegir_root' => dirname(rtrim($data['config_path'], '/')),
+    'remote_host' => php_uname('n'),
     'script_user' => $data['script_user'],
    // apache or nginx or..
     'http_service_type' => drush_get_option('http_service_type', 'apache', 'options'),
