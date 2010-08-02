@@ -39,8 +39,8 @@ Shell commands::
   export AEGIR_DOMAIN=aegir.example.com 
   export DRUPAL_DIR=/var/aegir/hostmaster-$AEGIR_VERSION
   export OLD_DRUPAL_DIR=/var/aegir/hostmaster-0.4-alpha6
-  export DRUSH_VERSION=All-versions-3.0
-  export DRUSH_MAKE_VERSION=6.x-2.0-beta6
+  export DRUSH_VERSION=6.x-3.1
+  export DRUSH_MAKE_VERSION=6.x-2.0-beta8
 
 This document also assumes drush is installed properly and we use an
 environment variable to simplify the documentation again.
