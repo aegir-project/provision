@@ -18,10 +18,22 @@ class provisionService_http_cluster extends provisionService_http {
     }
   }
 
+  /**
+   * Run a method on each server in the cluster.
+   *
+   * This function does a logical AND on the return status of each of the
+   * methods, and returns TRUE only if they all returned something that
+   * can be interpreted as TRUE.
+   */
   function _each_server($method, $args = array()) {
+    // Return True by default.
+    $ret = TRUE;
     foreach ($this->server->cluster_web_servers as $server) {
-      call_user_func_array(array(d($server)->service('http', $this->context), $method), $args);
+      // If any methods return false, return false for the whole operation.
+      $result = call_user_func_array(array(d($server)->service('http', $this->context), $method), $args);
+      $ret = $ret && $result;
     }
+    return $ret;
   }
 
   function parse_configs() {
@@ -29,15 +41,25 @@ class provisionService_http_cluster extends provisionService_http {
   }
 
   function create_config($config) {
-    $this->each_server(__FUNCTION__, array($config));
+    $this->_each_server(__FUNCTION__, array($config));
   }
 
   function delete_config($config) {
-    $this->each_server(__FUNCTION__, array($config));
+    $this->_each_server(__FUNCTION__, array($config));
   }
 
   function restart() {
     $this->_each_server(__FUNCTION__);
+  }
+
+  /**
+   * Support the ability to cloak database credentials using environment variables.
+   *
+   * The cluster supports this functionality only if ALL the servers it maintains 
+   * supports this functionality.
+   */
+  function cloaked_db_creds() {
+    return $this->_each_server(__FUNCTION__);
   }
 
   function sync() {

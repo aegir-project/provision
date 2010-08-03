@@ -10,9 +10,10 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
   drush_backend_invoke_args("provision-save", array($server), array(
     'context_type' => 'server',
     'aegir_root' => dirname(rtrim($data['config_path'], '/')),
+    'remote_host' => php_uname('n'),
     'script_user' => $data['script_user'],
-   // apache 
-    'http_service_type' => 'apache',
+   // apache or nginx or..
+    'http_service_type' => drush_get_option('http_service_type', 'apache', 'options'),
     'web_group' => $data['web_group'],
     'master_url' => $data['master_url'],
     'restart_cmd' => $data['restart_cmd'],
@@ -43,8 +44,6 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
     return false;
   }
 
-  // dereference relative paths and symlinks
-  $platform = realpath($plaform);
   $new_platform = '@platform_' . preg_replace("/[!\W]/", "", basename(rtrim($platform, '/')));
   drush_backend_invoke_args("provision-save", array($new_platform), array(
     'context_type' => 'platform',

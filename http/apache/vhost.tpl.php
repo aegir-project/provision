@@ -2,6 +2,7 @@
 <?php if ($this->site_mail) : ?>
   ServerAdmin <?php  print $this->site_mail; ?> 
 <?php endif;?>
+
   DocumentRoot <?php print $this->root; ?> 
     
   ServerName <?php print $this->uri; ?>
@@ -39,5 +40,5 @@
 
 <?php
 if ($this->redirection) {
-  require(dirname(__FILE__) . '/http/apache/vhost_redirect.tpl.php');
+//  require(dirname(__FILE__) . '/vhost_redirect.tpl.php');
 }

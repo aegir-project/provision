@@ -11,6 +11,23 @@ function http_provision_services() {
 class provisionService_http extends provisionService {
   public $service = 'http';
   protected $ssl_enabled = FALSE;
+
+
+  /**
+   * Support the ability to cloak the database credentials using environment variables.
+   */
+  function cloaked_db_creds() {
+    return FALSE;
+  }
+
+
+  function verify() {
+    parent::verify();
+
+    $this->create_config($this->context->type);
+    $this->parse_configs();
+  }
+
 }
 
 // Public http service , as in non-encrypted and listening on a port.
@@ -63,6 +80,7 @@ class provisionService_http_public extends provisionService_http {
       $this->server->web_group = d('@server_master')->web_group;
     }
 
+
     // Redirection urls
     $this->server->setProperty('web_disable_url', $this->server->master_url .'/hosting/disabled');
     $this->server->setProperty('web_maintenence_url', $this->server->master_url .'/hosting/maintenance');
@@ -104,9 +122,7 @@ class provisionService_http_public extends provisionService_http {
       } 
     }
 
-    $this->create_config($this->context->type);
-
-    $this->parse_configs();
+    parent::verify();
   }
 
   /**
@@ -114,13 +130,6 @@ class provisionService_http_public extends provisionService_http {
    */
   function parse_configs() {
     return TRUE;
-  }
-
-  /**
-   * Support the ability to cloak the database credentials using environment variables.
-   */
-  function cloaked_db_creds() {
-    return FALSE;
   }
 
   /**

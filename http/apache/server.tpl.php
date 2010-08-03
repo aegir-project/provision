@@ -1,8 +1,6 @@
 # Aegir web server configuration file
 
 <?php foreach ($server->ip_addresses as $ip) : ?>
-  Listen <?php print $ip . ':' . $http_port; ?>
-
   NameVirtualHost <?php print $ip . ':' . $http_port; ?>
 
 <?php endforeach; ?>

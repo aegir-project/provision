@@ -58,28 +58,25 @@ Shell commands::
 The last two lines can also be (better) accomplished using the
 mysql_secure_installation script.
 
-MySQL commands::
- # Replace 'aegir_password' with the chosen password for 'aegir' mysql account
- CREATE DATABASE aegir;
- GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, \
-   CREATE TEMPORARY TABLES, LOCK TABLES ON aegir.* TO \
-   'aegir'@'localhost' IDENTIFIED BY 'aegir_password';
- # Create a mysql super user (with GRANT OPTION)
- # Replace 'aegir_root_password' with a new password
- GRANT ALL PRIVILEGES ON *.* TO 'aegir_root'@'localhost' \
-   IDENTIFIED BY 'aegir_root_password' WITH GRANT OPTION;
-
-You may need to edit your local hosts file to get the aegir domain to work if you 
-have not already added a DNS record for this. On OS X:
-
-http://decoding.wordpress.com/2009/04/06/how-to-edit-the-hosts-file-in-mac-os-x-leopard/
-
 The aegir user needs to have sudo access. The wizard will explain how to
 do this, but you can already just add the relevant line to your sudoers
 file.
 
 /etc/sudoers configuration::
   aegir ALL=NOPASSWD: /usr/sbin/apachectl
+
+
+The default sudo configuration in CentOS requires sudo to run in a real
+TTY which will make verify and install tasks failed with the message:
+
+ "Web server could not be restarted. Changes might not be available
+ until this has been done"
+
+For sudo to behave properly, you should also comment out the following line
+in your /etc/sudoers file:
+
+Defaults    requiretty
+
 
 3. Run the install script
 =========================
@@ -138,14 +135,3 @@ Shell commands::
 
 See http://drupal.org/node/632308 if you have more information about
 this issue.
-
-The default sudo configuration in CentOS requires sudo to run in a real
-TTY which will make verify and install tasks failed with the message:
-
- "Web server could not be restarted. Changes might not be available
- until this has been done"
-
-For sudo to behave properly, you should comment out the following line
-in your /etc/sudoers file:
-
-Defaults    requiretty

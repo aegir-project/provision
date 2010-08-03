@@ -13,7 +13,7 @@
     'database' => "<?php print $this->creds['db_name']; ?>",
     'username' => "<?php print $this->creds['db_user']; ?>",
     'password' => "<?php print $this->creds['db_passwd']; ?>",
-    'host' => <?php print $this->creds['db_host']; ?>,
+    'host' => "<?php print $this->creds['db_host']; ?>",
   );
   $db_url = "<?php print strtr("%db_type://%db_user:%db_passwd@%db_host/%db_name", array(
     '%db_type' => $this->creds['db_type'],
