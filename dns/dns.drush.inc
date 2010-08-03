@@ -136,7 +136,8 @@ class provisionService_dns_basic extends provisionService_dns {
    function create_zone($zone) {
      $this->config('server')->record_set($zone, $zone)->write();
 
-     $this->config('zone')->record_set('soa', array(
+     $this->config('zone', $zone)->
+       record_set('soa', array(
        'name' => $this->server->remote_host,     
      ))->write();
   }

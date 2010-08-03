@@ -1,1 +1,1 @@
-addn-hosts=<?php print "{$dns_hostd_path}/{$this->uri}.hosts"; ?>
+addn-hosts=<?php print "{$dns_hostd_path}/{$name}.hosts"; ?>

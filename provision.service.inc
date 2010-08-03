@@ -44,6 +44,10 @@ class provisionService extends provisionChainedState {
 
   function config($config, $data = array()) {
     $this->_config = null;
+    
+    if (!is_array($data) && is_string($data)) {
+      $data = array('name' => $data);
+    }
 
     if (!isset($this->config_cache[$this->context->name][$config])) {
       foreach ((array) $this->configs[$config] as $class) {
@@ -54,6 +58,21 @@ class provisionService extends provisionChainedState {
     if (isset($this->config_cache[$this->context->name][$config])) {
       $this->_config = $this->config_cache[$this->context->name][$config];
     }
+    return $this;
+  }
+
+  function unlink() {
+    if (is_object($this->_config)) {
+      $this->_config->unlink();
+    }
+    return $this;
+  }
+
+  function write() {
+    if (is_object($this->_config)) {
+      $this->_config->write();
+    }
+
     return $this;
   }
 
