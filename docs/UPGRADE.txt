@@ -35,10 +35,10 @@ you are reading this document.
 
 Shell commands::
 
-  export AEGIR_VERSION=HEAD
+  export AEGIR_VERSION=0.4-alpha9
   export AEGIR_DOMAIN=aegir.example.com 
   export DRUPAL_DIR=/var/aegir/hostmaster-$AEGIR_VERSION
-  export OLD_DRUPAL_DIR=/var/aegir/hostmaster-0.4-alpha6
+  export OLD_DRUPAL_DIR=/var/aegir/hostmaster-0.4-alpha8
   export DRUSH_VERSION=6.x-3.1
   export DRUSH_MAKE_VERSION=6.x-2.0-beta8
 
