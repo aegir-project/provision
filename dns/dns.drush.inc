@@ -39,6 +39,11 @@ function drush_dns_provision_zone($action, $zone, $name = null, $type = null, $d
     $status = d()->service('dns')->delete_zone($zone);
     break;
   case 'rr-add':
+    d()->service('dns')->config('zone', $zone)->record_set("host:$host", array(
+      'sub' => $sub,
+      'A' => $ips,
+      'host' => $host,
+    ));
     $status = d()->service('dns')->add_record($zone, $name, $type, $destination);
     break;
   case 'rr-modify':
@@ -145,7 +150,7 @@ class provisionService_dns_basic extends provisionService_dns {
   function config_data($config = null, $class = null) {
     $data = parent::config_data($config, $class);
     if (!is_null($this->application_name)) {
-      $data['dns_data_path_path'] = $this->server->dns_zoned_path;
+      $data['dns_data_path'] = $this->server->dns_zoned_path;
       $data['dns_zoned_path'] = $this->server->dns_zoned_path;
       $data['dns_hostd_path'] = $this->server->dns_hostd_path;
     }
