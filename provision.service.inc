@@ -17,8 +17,8 @@ class provisionService extends provisionChainedState {
 
   protected $configs = array();
 
-  protected $config_cache = array();
   
+  protected $config_cache = array();
   private $_config = null;
 
   // All services have the ability to have an associated restart command and listen port.
@@ -42,6 +42,15 @@ class provisionService extends provisionChainedState {
     return false;
   }
 
+  /**
+   * Set the currently active configuration object.
+   *
+   * @param $config
+   *   String: Name of config file. The key to the $this->configs array.
+   * @param $data
+   *   Any optional information to be made available to templates. If a string, it will be
+   *   turned into an array with the 'name' property the value of the string.
+   */
   function config($config, $data = array()) {
     $this->_config = null;
     
@@ -62,6 +71,9 @@ class provisionService extends provisionChainedState {
     return $this;
   }
 
+  /**
+   * Unlink the currently active config file.
+   */
   function unlink() {
     if (is_object($this->_config)) {
       $this->_config->unlink();
@@ -70,6 +82,9 @@ class provisionService extends provisionChainedState {
     return $this;
   }
 
+  /**
+   * Write the currently active config file.
+   */
   function write() {
     if (is_object($this->_config)) {
       $this->_config->write();
@@ -78,6 +93,9 @@ class provisionService extends provisionChainedState {
     return $this;
   }
 
+  /**
+   * Set a record on the data store of the currently active config file (if applicable).
+   */
   function record_set($arg1, $arg2 = null) {
     if (is_object($this->_config)) {
       if (is_object($this->_config->store)) {
@@ -92,10 +110,16 @@ class provisionService extends provisionChainedState {
     return $this;
   }
 
+  /**
+   * Delete a record from the data store of the currently active config file (if applicable).
+   */
   function record_del($record) {
     return $this->record_set($record, null);
   }
 
+  /**
+   * Check if a record exists in the data store of the currently active config file (if applicable).
+   */
   function record_exists($record) {
     if (is_object($this->_config)) {
       if (is_object($this->_config->store)) {
@@ -105,6 +129,9 @@ class provisionService extends provisionChainedState {
     return FALSE;
   }
 
+  /**
+   * Fetch record(s) from the data store of the currently active config file (if applicable).
+   */
   function record_get($key = null, $default = null) {
     if (is_object($this->_config)) {
       if (is_object($this->_config->store)) {
@@ -193,10 +220,16 @@ class provisionService extends provisionChainedState {
     $this->server = is_object($server) ? $server : d($server);
   }
 
+  /**
+   * Set the currently active context of the service.
+   */
   function setContext($context) {
     $this->context = is_object($context) ? $context : d($context);
   }
 
+  /**
+   * Sync filesystem changes to the server hosting this service.
+   */
   function sync($path = NULL, $additional_options = array()) {
     return $this->server->sync($path, $additional_options);
   }
@@ -216,6 +249,13 @@ class provisionService extends provisionChainedState {
   }
 }
 
+/**
+ * Null service class.
+ *
+ * Not all services are necessary or turned on.
+ * This class ensures that not having a specific service
+ * doesnt result in catastrophic failure.
+ */
 class provisionService_null extends provisionService {
 
   function __get($name) {
