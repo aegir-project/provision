@@ -240,7 +240,7 @@ class provisionService_dns_basic extends provisionService_dns {
     $sub = $parts[0];
 
 
-    $ips = variable_get('site_ip_addresses', array(), 'site');
+    $ips = drush_get_option('site_ip_addresses', array(), 'site');
 
     if (!$ips && count($ips) < 1) {
       drush_log(dt("no IP found for server, trying loopback"));

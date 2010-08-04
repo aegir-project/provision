@@ -92,7 +92,7 @@ class provisionConfig_dns_zone extends provisionConfig_dns {
     parent::process();
     $records = $this->store->merged_records();
 
-    $this->data['dns_email'] = str_replace('@', '', $this->server->admin_email);
+    $this->data['dns_email'] = str_replace('@', '.', $this->data['server']->admin_email);
 
     // increment the serial.
     $this->store->records['serial'] = $this->data['serial'] = provisionService_dns::increment_serial($records['serial']);
@@ -122,9 +122,7 @@ class provisionConfig_dns_host extends provisionConfig_dns {
   public $description = 'Host-wide DNS configuration';
 
   function filename() {
-    $ret = "{$this->data['server']->dns_hostd_path}/{$this->uri}.hosts";
-    dlm($ret);
-    return $ret;
+    return "{$this->data['server']->dns_hostd_path}/{$this->uri}.hosts";
   }
 }
 

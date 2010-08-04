@@ -331,6 +331,7 @@ class provisionServer extends provisionEnvironment {
     $this->include_path = $this->aegir_root . '/config/includes';
 
     $this->setProperty('master_url');
+    $this->setProperty('admin_email', 'admin@' . $this->remote_host);
     $this->load_services();
   }
 
