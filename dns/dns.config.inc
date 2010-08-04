@@ -88,6 +88,20 @@ class provisionConfig_dns_zone extends provisionConfig_dns {
     return "{$this->data['server']->dns_zoned_path}/{$this->data['name']}.zone";
   }
 
+  function process() {
+    parent::process();
+    $records = $this->store->merged_records();
+
+    foreach ($records as $key => $record) {
+      if (preg_match('/^host:/', $key)) {
+        $this->data['hosts'][$record['host']] = $record;
+      }
+      else {
+        $this->data[$key] = $record;
+      }
+    }
+  }
+
   function write() {
     // lock the store until we are done generating our config.
     $this->store->lock();
@@ -106,7 +120,9 @@ class provisionConfig_dns_host extends provisionConfig_dns {
   public $description = 'Host-wide DNS configuration';
 
   function filename() {
-    return "{$this->data['server']->dns_hostd_path}/{$this->uri}.hosts";
+    $ret = "{$this->data['server']->dns_hostd_path}/{$this->uri}.hosts";
+    dlm($ret);
+    return $ret;
   }
 }
 

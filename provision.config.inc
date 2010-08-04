@@ -384,6 +384,10 @@ class provisionConfig_data_store extends provisionConfig {
     }
   }
 
+  function merged_records() {
+    return array_merge($this->loaded_records, $this->records);
+  }
+
   function process() {
     $this->data['records'] = array_filter(array_merge($this->loaded_records, $this->records));
   }

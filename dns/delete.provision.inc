@@ -7,22 +7,9 @@
  *   Provision hooks for the delete command
  **/
 
-/**
- * Implementation of hook_provision_delete()
- *
- * delete the RR for this site at least, but possibly also the zone itself?
- * need to lookup the zid for the base zone of this site, and then call dns_rr with the zid and site 'name'
- * (ie: pull off the tld and second-level domain for the 'base' zone, and treat the rest as the 'name')
- */
-function drush_dns_provision_delete($url = NULL) {
-  if (d()->type == 'site') {
-    d()->service('dns')->delete_config('zone');
-    d()->service('dns')->delete_config('host');
-  }
-}
-
 function drush_dns_post_provision_delete() {
   if (d()->type == 'site') {
+    d()->service('dns')->delete_host();
     d()->service('dns')->parse_configs();
   }
 }

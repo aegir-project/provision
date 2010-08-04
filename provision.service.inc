@@ -58,6 +58,7 @@ class provisionService extends provisionChainedState {
     if (isset($this->config_cache[$this->context->name][$config])) {
       $this->_config = $this->config_cache[$this->context->name][$config];
     }
+
     return $this;
   }
 
@@ -65,6 +66,7 @@ class provisionService extends provisionChainedState {
     if (is_object($this->_config)) {
       $this->_config->unlink();
     }
+
     return $this;
   }
 
@@ -94,6 +96,33 @@ class provisionService extends provisionChainedState {
     return $this->record_set($record, null);
   }
 
+  function record_exists($record) {
+    if (is_object($this->_config)) {
+      if (is_object($this->_config->store)) {
+        return array_key_exists($record, $this->_config->store->merged_records());
+      }
+    }
+    return FALSE;
+  }
+
+  function record_get($key = null, $default = null) {
+    if (is_object($this->_config)) {
+      if (is_object($this->_config->store)) {
+        $records = $this->_config->store->merged_records();
+
+        if (is_null($key)) {
+          return $records;
+        }
+
+        if (isset($records[$key])) {
+          return $records[$key];
+        }
+      }
+    }
+    return $default;
+  }
+
+
   /**
    * Generate a configuration file.
    *
@@ -110,7 +139,7 @@ class provisionService extends provisionChainedState {
    * This method will fetch the class to instantiate from the internal
    * $this->configs control array.
    */
-  function delete_config($config) {
+  function delete_config($config, $data = array()) {
     $this->config($config, $data)->unlink();
   }
 

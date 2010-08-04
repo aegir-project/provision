@@ -92,6 +92,32 @@ class provisionService_dns_basic extends provisionService_dns {
     $this->server->setProperty('dns_negativettl', 86400); # 24h
   }
 
+  /**
+   * Helper function to increment a zone's serial number.
+   *
+   * @param $serial
+   *    A serial in YYYYMMDDnn format. If null, a new serial based on
+   *    the date will be generated.
+   *
+   * @return
+   *    The serial, incremented based on current date and index
+   */
+  function increment_serial($serial = null) {
+    $date = substr($serial, 0, 8); # Get the YYYYMMDD part
+    $today = date('Ymd');
+    if (is_null($serial) || $date != $today) {
+      return $today . '00';
+    } else {
+      $index = substr($serial, 8, 2); # Get the index part
+      if ($index >= 99) {
+        drush_set_error("serial number overflow");
+      } else {
+        $index++;
+      }
+      return $date . sprintf('%02d', $index);
+    }
+  }
+
   function verify() {
     if ($this->context->type === 'server') {
       provision_file()->create_dir($this->server->dns_data_path, dt("DNS data store"), 0700);
@@ -130,47 +156,6 @@ class provisionService_dns_basic extends provisionService_dns {
     return $data;
   }
 
-  /**
-   * This creates a zone, which mostly consists of adding the SOA record.
-   */
-   function create_zone($zone) {
-     $this->config('server')->record_set($zone, $zone)->write();
-
-     $this->config('zone', $zone)->
-       record_set('soa', array(
-       'name' => $this->server->remote_host,     
-     ))->write();
-  }
-
-  /**
-   * This completely drops a zone, without any checks.
-   */
-  function delete_zone($zone) {
-    $this->config('server')->record_del($zone)->write();
-  }
-
-
-}
-
-class provisionService_dns_complex extends provisionService_dns_basic {
-
-   /**
-   * Determine if a zone is defined on the nameserver.
-   *
-   * To be implemented by engines.
-   *
-   * @return if the zone exists
-   */
-  function zone_exists($zone) {
-    return FALSE;
-  }
-
-  /**
-   * This returns the number of records in the zone.
-   */
-  function count_records($zone, $include = null, $exclude = null) {
-    return FALSE;
-  }
 
   /**
    * Guess in which zone we should create the record
@@ -184,19 +169,21 @@ class provisionService_dns_complex extends provisionService_dns_basic {
    */
   function guess_zone($host) {
     $tld = $host;
+    $zones = $this->config('server')->record_get();
+
     $parts = explode(".", $host);
     $subdomain = array();
     $found = FALSE;
     while (!$found && (count($parts) > 2)) {
       $tld = join(".", $parts);
-      if ($this->zone_exists($tld)) {
+      if (isset($zones[$tld])) {
         $found = TRUE;
       } else {
         $scrap = array_shift($parts);
         $subdomain[] = $scrap;
         drush_log("zone $tld not found, ditching $scrap, count: " . count($parts));
         $found = FALSE;
-      }
+      } 
     }
     // this is necessary if we hit the limit of two subdomains
     $tld = join(".", $parts);
@@ -209,30 +196,116 @@ class provisionService_dns_complex extends provisionService_dns_basic {
   }
 
   /**
-   * Helper function to increment a zone's serial number.
-   *
-   * @param $serial
-   *    A serial in YYYYMMDDnn format. If null, a new serial based on
-   *    the date will be generated.
-   *
-   * @return
-   *    The serial, incremented based on current date and index
+   * This creates a zone, which mostly consists of adding the SOA record.
    */
-  function increment_serial($serial = null) {
-    $date = substr($serial, 0, 8); # Get the YYYYMMDD part
-    $today = date('Ymd');
-    if (is_null($serial) || $date != $today) {
-      return $today . '00';
-    } else {
-      $index = substr($serial, 8, 2); # Get the index part
-      if ($index >= 99) {
-        drush_set_error("serial number overflow");
-      } else {
-        $index++;
-      }
-      return $date . sprintf('%02d', $index);
+  function create_zone($zone = null) {
+    if (is_null($zone) && $this->context->type == 'site') {
+      $guess = $this->guess_zone($this->context->uri);
+      $zone = $guess[1];
     }
+
+    if (!$zone) {
+      return drush_set_error('DRUSH_DNS_NO_ZONE', "Could not determine the zone to create");
+    }
+
+    $this->config('server')->record_set($zone, $zone)->write();
+
+    $soa = $this->config('zone', $zone)->record_get('soa');
+
+    $soa['ttl']  = $this->server->dns_ttl;
+    $soa['name']  = $this->server->remote_host;
+    $soa['serial'] = $this->increment_serial($soa['serial']);
+    $soa['refresh'] = $this->server->dns_refresh;
+    $soa['retry'] = $this->server->dns_retry;
+    $soa['expire'] = $this->server->dns_expire;
+    $soa['minimum'] = $this->server->dns_negativettl;
+    $this->config('zone', $zone)->record_set('soa', $soa)->write();
   }
+
+  /**
+   * This completely drops a zone, without any checks.
+   */
+  function delete_zone($zone) {
+    $this->config('server')->record_del($zone)->write();
+  }
+
+    /** 
+   * Create a host in DNS.
+   *
+   * This can do a lot of things, create a zonefile, add a record to a
+   * zonefile, it's going to make its best guess doing the Right
+   * Thing.
+   *
+   * @arg $host string the hostname to create. If null, we look in the
+   * current context (should be a site) for a URI.
+   */
+  function create_host($host = null) {
+    if (is_null($host)) {
+      $host = $this->context->uri;
+    }
+
+    $parts = $this->guess_zone($host);
+    $zone = $parts[1];
+    $sub = $parts[0];
+
+
+    $ips = $this->context->site_ip_addresses;
+
+    if (!$ips && count($ips) < 1) {
+      drush_log(dt("no IP found for server, trying loopback"));
+      $ips = array('127.0.0.1');
+    }
+
+    if (is_array($ips)) {
+      $this->config('zone', $zone)->record_set("host:$host", array(
+        'sub' => $sub,
+        'A' => $ips,
+        'host' => $host,
+      ));
+    }
+
+    $this->create_zone($zone);
+    $this->create_config('host');
+
+  }
+
+
+  /**
+   * Delete a host from DNS
+   *
+   * Similar to create host, this will seek and destroy that host throughout zonefiles.
+   *
+   * @arg $host string the hostname to create. If null, we look in the
+   * current context (should be a site) for a URI.
+   */
+  function delete_host($host = null) {
+    if (is_null($host)) {
+      $host = $this->context->uri;
+    }
+    $parts = $this->guess_zone($host);
+    $zone = $parts[1];
+    $sub = $parts[0];
+
+
+    // remove the records from the zone store
+    $this->config('zone', $zone)->
+      record_del("host:$host");
+
+    $this->create_zone($zone);
+    $this->delete_config('host');
+  }
+
+}
+
+class provisionService_dns_complex extends provisionService_dns_basic {
+  /**
+   * This returns the number of records in the zone.
+   */
+  function count_records($zone, $include = null, $exclude = null) {
+    return FALSE;
+  }
+
+
 
   /**
    * This adds a (potentially) duplicate record (RR) in a zonefile
@@ -260,61 +333,9 @@ class provisionService_dns_complex extends provisionService_dns_basic {
     return FALSE;
   }
 
-  /** 
-   * Create a host in DNS.
-   *
-   * This can do a lot of things, create a zonefile, add a record to a
-   * zonefile, it's going to make its best guess doing the Right
-   * Thing.
-   *
-   * @arg $host string the hostname to create. If null, we look in the
-   * current context (should be a site) for a URI.
-   */
-  function create_host($host = null) {
-    if (is_null($host)) {
-      $host = $this->context->uri;
-    }
-    $parts = $this->guess_zone($host);
-    $zone = $parts[1];
-    $sub = $parts[0];
-    if (!$this->zone_exists($zone)) {
-      drush_log("in create_host, zone $zone not found");
-      $this->create_zone($zone);
-    }
-    $ips = d($site)->service('http')->server->ip_addresses;
-    if (!$ips && count($ips) < 1) {
-      drush_log(dt("no IP found for server, trying loopback"));
-      $ips = '127.0.0.1';
-    }
-    if (is_array($ips)) {
-      drush_log("a bunch of ips defined, deleting existing ones and readding: " . join(",", $ips));
-      $this->delete_record($zone, $sub, 'A');
-      foreach ($ips as $ip) {
-        $this->add_record($zone, $sub, 'A', $ip);
-      }
-    } else {
-      $this->edit_record($zone, $sub, 'A', $ips);
-    }
-  }
 
-  /**
-   * Delete a host from DNS
-   *
-   * Similar to create host, this will seek and destroy that host throughout zonefiles.
-   *
-   * @arg $host string the hostname to create. If null, we look in the
-   * current context (should be a site) for a URI.
-   */
-  function delete_host($host = null) {
-    if (is_null($host)) {
-      $host = $this->context->uri;
-    }
-    $parts = $this->guess_zone($host);
-    $this->delete_record($parts[1], $parts[0], 'A');
-    if ($this->count_records($parts[1], null, array('NS', 'SOA'))) {
-      $this->delete_zone($parts[1]);
-    }
-  }
+
+
 
   /**
    * Commit changes to the DNS server
