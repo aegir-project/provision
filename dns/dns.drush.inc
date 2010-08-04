@@ -11,9 +11,9 @@
 
 include_once(dirname(__FILE__) . '/../provision.service.inc');
 
+
 /**
  * Implementation of hok_drush_command().
- */
 function dns_drush_command() {
   $items['provision-zone'] = array(
     'arguments' => array('operation' => dt('The operation to perform on a zone (verify, delete, rr-add, rr-delete)')),
@@ -53,6 +53,7 @@ function drush_dns_provision_zone($action, $zone, $name = null, $type = null, $d
   return $status;
 }
 
+ */
 
 function dns_provision_services() {
   return array('dns' => NULL);
@@ -64,6 +65,31 @@ class provisionService_dns extends provisionService {
   public $service = 'dns';
   public $slave = null;
 
+  /**
+   * Helper function to increment a zone's serial number.
+   *
+   * @param $serial
+   *    A serial in YYYYMMDDnn format. If null, a new serial based on
+   *    the date will be generated.
+   *
+   * @return
+   *    The serial, incremented based on current date and index
+   */
+  function increment_serial($serial = null) {
+    $date = substr($serial, 0, 8); # Get the YYYYMMDD part
+    $today = date('Ymd');
+    if (is_null($serial) || $date != $today) {
+      return $today . '00';
+    } else {
+      $index = substr($serial, 8, 2); # Get the index part
+      if ($index >= 99) {
+        drush_set_error("serial number overflow");
+      } else {
+        $index++;
+      }
+      return $date . sprintf('%02d', $index);
+    }
+  }
 }
 
 class provisionService_dns_basic extends provisionService_dns {
@@ -92,31 +118,6 @@ class provisionService_dns_basic extends provisionService_dns {
     $this->server->setProperty('dns_negativettl', 86400); # 24h
   }
 
-  /**
-   * Helper function to increment a zone's serial number.
-   *
-   * @param $serial
-   *    A serial in YYYYMMDDnn format. If null, a new serial based on
-   *    the date will be generated.
-   *
-   * @return
-   *    The serial, incremented based on current date and index
-   */
-  function increment_serial($serial = null) {
-    $date = substr($serial, 0, 8); # Get the YYYYMMDD part
-    $today = date('Ymd');
-    if (is_null($serial) || $date != $today) {
-      return $today . '00';
-    } else {
-      $index = substr($serial, 8, 2); # Get the index part
-      if ($index >= 99) {
-        drush_set_error("serial number overflow");
-      } else {
-        $index++;
-      }
-      return $date . sprintf('%02d', $index);
-    }
-  }
 
   function verify() {
     if ($this->context->type === 'server') {
@@ -188,9 +189,7 @@ class provisionService_dns_basic extends provisionService_dns {
     // this is necessary if we hit the limit of two subdomains
     $tld = join(".", $parts);
     $subdomain = join(".", $subdomain);
-    if (!$subdomain) {
-      $subdomain = '@';
-    }
+
     drush_log("guess_zone guessed parts $tld, $subdomain");
     return array($subdomain, $tld);
   }
@@ -210,15 +209,7 @@ class provisionService_dns_basic extends provisionService_dns {
 
     $this->config('server')->record_set($zone, $zone)->write();
 
-    $soa = $this->config('zone', $zone)->record_get('soa');
-
-    $soa['ttl']  = $this->server->dns_ttl;
-    $soa['name']  = $this->server->remote_host;
     $soa['serial'] = $this->increment_serial($soa['serial']);
-    $soa['refresh'] = $this->server->dns_refresh;
-    $soa['retry'] = $this->server->dns_retry;
-    $soa['expire'] = $this->server->dns_expire;
-    $soa['minimum'] = $this->server->dns_negativettl;
     $this->config('zone', $zone)->record_set('soa', $soa)->write();
   }
 
@@ -249,7 +240,7 @@ class provisionService_dns_basic extends provisionService_dns {
     $sub = $parts[0];
 
 
-    $ips = $this->context->site_ip_addresses;
+    $ips = variable_get('site_ip_addresses', array(), 'site');
 
     if (!$ips && count($ips) < 1) {
       drush_log(dt("no IP found for server, trying loopback"));
@@ -257,13 +248,18 @@ class provisionService_dns_basic extends provisionService_dns {
     }
 
     if (is_array($ips)) {
-      $this->config('zone', $zone)->record_set("host:$host", array(
-        'sub' => $sub,
-        'A' => $ips,
-        'host' => $host,
-      ));
+      if ($sub) {
+        $this->config('zone', $zone)->record_set("host:$host", array(
+          'sub' => $sub,
+          'A' => $ips,
+          'host' => $host,
+        ));
+      }
+      else {
+        $this->config('zone', $zone)->record_set("A", $ips);
+      }
     }
-
+ 
     $this->create_zone($zone);
     $this->create_config('host');
 

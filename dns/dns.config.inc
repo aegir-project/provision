@@ -92,12 +92,14 @@ class provisionConfig_dns_zone extends provisionConfig_dns {
     parent::process();
     $records = $this->store->merged_records();
 
+    $this->data['dns_email'] = str_replace('@', '', $this->server->admin_email);
+
+    // increment the serial.
+    $this->store->records['serial'] = $this->data['serial'] = provisionService_dns::increment_serial($records['serial']);
+
     foreach ($records as $key => $record) {
       if (preg_match('/^host:/', $key)) {
         $this->data['hosts'][$record['host']] = $record;
-      }
-      else {
-        $this->data[$key] = $record;
       }
     }
   }
