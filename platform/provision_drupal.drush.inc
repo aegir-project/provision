@@ -101,7 +101,7 @@ function drush_provision_drupal_provision_install_backend() {
 function provision_drupal_sync_site() {
   d()->service('http')->sync(d()->root, array('exclude-sites' => TRUE));
   if (d()->type === 'site') {
-    d()->service('http')->sync(d()->site_path);
+    d()->service('http')->sync(d()->site_path, array('no-delete' => TRUE));
   }
 }
 
