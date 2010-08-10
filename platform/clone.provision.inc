@@ -52,7 +52,7 @@ function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
   drush_backend_invoke_args('provision-save', array($new_uri), $options);
   # note that we reset the aliases so they don't conflict with the original site
 
-  provision_backend_invoke($new_uri, 'provision-deploy', array(drush_get_option('backup_file')));
+  provision_backend_invoke($new_uri, 'provision-deploy', array(drush_get_option('backup_file')), array('old_uri' => d()->uri));
 
   if (!drush_get_error()) {
     provision_backend_invoke($new_uri, 'provision-verify');

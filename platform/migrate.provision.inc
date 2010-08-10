@@ -77,7 +77,7 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = null) {
   }
 
   drush_backend_invoke_args('provision-save', array($target), $options);
-  provision_backend_invoke($target, 'provision-deploy', array(drush_get_option('backup_file')));
+  provision_backend_invoke($target, 'provision-deploy', array(drush_get_option('backup_file')), array('old_uri' => d()->uri));
   if (!drush_get_error()) {
     provision_backend_invoke($target, 'provision-verify');
   }

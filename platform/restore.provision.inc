@@ -36,7 +36,7 @@ function drush_provision_drupal_pre_provision_restore_rollback($restore_file) {
  */
 function drush_provision_drupal_provision_restore($restore_file) {
 
-  provision_backend_invoke(d()->name, 'provision-deploy', array(drush_get_option('restore_file')));
+  provision_backend_invoke(d()->name, 'provision-deploy', array(drush_get_option('restore_file')), array('old_uri' => d()->uri));
   if (!drush_get_error()) {
     provision_backend_invoke(d()->name, 'provision-verify');
     drush_set_option('installed', false);
