@@ -168,6 +168,7 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     "sites/$url/private/files"   => 02770,
     "sites/$url/private/temp"    => 02770,
   );
+
   $chown = array();
   $chgrp = array();
   // special case: platform. do not handle files dir
