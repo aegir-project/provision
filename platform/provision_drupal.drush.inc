@@ -185,6 +185,18 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     $chgrp["sites/$url/private/temp"]   = d()->platform->server->web_group;
   }
 
+  // These paths should not have recursive operations performed on them.
+  $not_recursive = array(
+    "sites/$url",
+    "sites/$url/files",
+    "sites/$url/files/tmp",
+    "sites/$url/files/images",
+    "sites/$url/files/pictures",
+    "sites/$url/private",
+    "sites/$url/private/files",
+    "sites/$url/private/temp"
+  );
+
   foreach ($mkdir as $path => $perm) {
     if (!is_dir($path)) {
       provision_file()->mkdir($path) 
@@ -192,17 +204,17 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
         ->fail('Could not create <code>@path</code>', 'DRUSH_PERM_ERROR');
     }
 
-    provision_file()->chmod($path, $perm, TRUE)
+    provision_file()->chmod($path, $perm, !in_array($path, $not_recursive))
       ->succeed('Changed permissions of <code>@path</code> to @perm')
       ->fail('Could not change permissions <code>@path</code> to @perm');
   }
   foreach ($chown as $path => $owner) {
-    provision_file()->chown($path, $owner, TRUE)
+    provision_file()->chown($path, $owner, !in_array($path, $not_recursive))
       ->succeed('Changed ownership of <code>@path</code> to @uid')
       ->fail('Could not change ownership <code>@path</code>', 'DRUSH_PERM_ERROR');
   }
   foreach ($chgrp as $path => $group) {
-    provision_file()->chgrp($path, $group, TRUE)
+    provision_file()->chgrp($path, $group, !in_array($path, $not_recursive))
       ->succeed('Changed group ownership of <code>@path</code> to @gid')
       ->fail('Could not change group ownership <code>@path</code> to @gid');
   }
