@@ -37,7 +37,7 @@ Shell commands::
 
   export AEGIR_VERSION=HEAD
   export DRUPAL_DIR=/var/aegir/hostmaster-$AEGIR_VERSION
-  export DRUSH_VERSION=6.x-3.2
+  export DRUSH_VERSION=6.x-3.3
   export DRUSH_MAKE_VERSION=6.x-2.0-beta8
   export AEGIR_DOMAIN=aegir.example.com
   export OLD_DRUPAL_DIR=/var/aegir/hostmaster-0.4-alpha9
