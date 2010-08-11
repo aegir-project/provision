@@ -49,10 +49,8 @@ function drush_provision_drupal_provision_install() {
  // Requires at least the database settings to complete.
   provision_prepare_environment();
   _provision_drupal_create_settings_file();
-
-  provision_save_site_data();
-
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
+  provision_save_site_data();
 
   // call a backend task to do the actual installation.
   $result = provision_backend_invoke(d()->name, "provision-install-backend");
