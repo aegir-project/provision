@@ -234,6 +234,10 @@ class provisionService extends provisionChainedState {
     return $this->server->sync($path, $additional_options);
   }
 
+  function fetch($path = NULL) {
+    return $this->server->fetch($path);
+  }
+
   function verify() {
     return TRUE;
   }

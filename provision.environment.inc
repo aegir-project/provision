@@ -444,8 +444,15 @@ class provisionServer extends provisionEnvironment {
         $options = array_merge(array(
           'relative' => TRUE,
           'omit-dir-times' => TRUE,
-          'delete' => TRUE,
         ), $additional_options);
+
+        // We need to do this due to how drush creates the rsync command.
+        // If the option is present at all , even if false or null, it will
+        // add it to the command.
+        if (!isset($additional_options['no-delete'])) {
+          $options['delete'] = TRUE;
+        }
+
         if (drush_core_call_rsync(escapeshellarg($path), escapeshellarg($this->script_user . '@' . $this->remote_host . ':/'), $options, TRUE, FALSE)) {
           drush_log(dt('@path has been synced to remote server @remote_host.', array('@path' => $path, '@remote_host' => $this->remote_host)));
         }
@@ -459,6 +466,36 @@ class provisionServer extends provisionEnvironment {
         }
         else {
           drush_set_error('PROVISION_FILE_SYNC_FAILED', dt('@path could not be removed from remote server @remote_host. Changes might not be available until this has been done. (error: %msg)', array('@path' => $path, '@remote_host' => $this->remote_host, '%msg' => join("\n", drush_shell_exec_output()))));
+        }
+      }
+    }
+  }
+
+  /**
+   * If necessary, fetch file from a remote server.
+   *
+   * @param $path
+   *   Full path to fetch.
+   */
+  function fetch($path) {
+    if (!provision_is_local_host($this->remote_host)) {
+      if (provision_file()->exists($path)->status()) {
+        $options = array(
+          'omit-dir-times' => TRUE,
+        );
+        if (drush_core_call_rsync(escapeshellarg($this->script_user . '@' . $this->remote_host . ':/') . $path, $path, $options, TRUE, FALSE)) {
+          drush_log(dt('@path has been fetched from remote server @remote_host.', array(
+            '@path' => $path, 
+            '@remote_host' => $this->remote_host))
+          );
+        }
+        else {
+          drush_set_error('PROVISION_FILE_SYNC_FAILED', dt('@path could not be fetched from remote server @remote_host.' .
+            ' Changes might not be available until this has been done. (error: %msg)', array(
+              '@path' => $path, 
+              '@remote_host' => $this->remote_host, 
+              '%msg' => join("\n", drush_shell_exec_output())))
+          );
         }
       }
     }

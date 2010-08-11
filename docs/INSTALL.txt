@@ -211,7 +211,7 @@ remote web Aegir users with no passwords.
 They will also need a login shell, which can be modified using the `chsh` command.
 
 Shell command as root::
-  chsh -s /sbin/sh aegir
+  chsh -s /bin/sh aegir
 
 Database configuration
 ----------------------

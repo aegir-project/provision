@@ -55,8 +55,14 @@ function drush_provision_drupal_provision_backup() {
   $backup_file = drush_get_option('backup_file');
   // Adds the site directory into the backup file
   drush_log(dt("Adding sites directory to !backup_file", array('!backup_file' => $backup_file)), 'backup');
+
+
+  // synch all filesystem changes back from the remote server.
+  d()->service('http')->fetch(d()->site_path . '/files/');
+
   $olddir = getcwd();
   // we need to do this because some retarded implementations of tar (e.g. SunOS) don't support -C
+
   chdir(d()->site_path);
   if (substr($backup_file, -2) == 'gz') {
     // same as above: some do not support -z
