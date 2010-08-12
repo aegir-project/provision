@@ -16,7 +16,7 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
     
 
     drush_set_option('site_name', '@hostmaster');
-    drush_set_option('old_platform', d('@hostmaster')->platform);
+    drush_set_option('old_platform', d('@hostmaster')->platform->name);
 
     $new_platform = '@platform_' . preg_replace("/[!\W]/", "", basename(rtrim($platform, '/')));
     drush_backend_invoke_args("provision-save", array($new_platform), array(
