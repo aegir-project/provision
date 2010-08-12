@@ -43,8 +43,8 @@ class provisionService_http_apache_ssl extends provisionService_http_ssl {
    * These config classes are a mix of the SSL and Non-SSL apache
    * classes. In some cases they extend the Apache classes too.
    */
-  function init() {
-    parent::init();
+  function init_server() {
+    parent::init_server();
 
     // Replace the server config with our own. See the class for more info.
     $this->configs['server'][] = 'provisionConfig_apache_ssl_server';
