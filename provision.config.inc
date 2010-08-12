@@ -176,8 +176,8 @@ class provisionConfig {
         }
         if (!is_null($this->group)) {
           provision_file()->chgrp($filename, $this->group)
-            ->succeed('Change group contextship of @path to @gid')
-            ->fail('Could not change group contextship of @path to @gid');
+            ->succeed('Change group ownership of @path to @gid')
+            ->fail('Could not change group ownership of @path to @gid');
         }
       }
     }
