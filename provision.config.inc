@@ -19,9 +19,9 @@ class provisionConfig {
   public $data = array();
 
   /**
-   * A provisionEnvironment object thie configuration relates to.
+   * A provisionContext object thie configuration relates to.
    *
-   * @var provisionEnvironment
+   * @var provisionContext
    */
   public $context = null;
 
@@ -64,7 +64,7 @@ class provisionConfig {
    * Constructor, overriding not recommended.
    *
    * @param $context
-   *   An alias name for d(), the provisionEnvironment that this configuration
+   *   An alias name for d(), the provisionContext that this configuration
    *   is relevant to.
    * @param $data
    *   An associative array to potentiall manipulate in process() and make
@@ -81,7 +81,6 @@ class provisionConfig {
     if (sizeof($data)) {
       $this->data = $data;
     }
-
     
     if (!is_null($this->data_store_class) && class_exists($this->data_store_class)) {
       $class = $this->data_store_class;

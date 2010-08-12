@@ -372,8 +372,31 @@ class provisionException_continue extends provisionException {
 
 }
 
+/**
+ * Provision class.
+ *
+ * This is just a container for some useful static methods.
+ */
+class provision {
+  /**
+   * The actual body of the method_invoke function.
+   * 
+   * This is a static method so it can be re-used by some other classes
+   * that aren't contexts. (notably services and configs).
+   */
+  static function method_invoke($object, $func, $args = array()) {
+    if (method_exists($object, $func)) {
+      return call_user_func_array(array($object, $func), $args);
+    }
+  }
+}
 
-include_once('provision.environment.inc');
+
+
+include_once('provision.context.inc');
+include_once('provision.context.server.inc');
+include_once('provision.context.platform.inc');
+include_once('provision.context.site.inc');
 include_once('provision.service.inc');
 include_once('provision.file.inc');
 include_once('provision.config.inc');

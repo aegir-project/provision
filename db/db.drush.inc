@@ -32,29 +32,36 @@ function db_drush_help($section) {
 class provisionService_db extends provisionService {
   protected $service = 'db';
 
+  /**
+   * Register the db handler for sites, based on the db_server option.
+   */
+  static function subscribe_site($context) {
+    $context->setProperty('db_server', '@server_master');
+    $context->is_oid('db_server');
+    $context->service_subscribe('db', $context->db_server->name);
+  }
+
   static function option_documentation() {
     return array(
       '--master_db' => 'server with db: Master database connection info, {type}://{user}:{password}@{host}',
     );
   }
 
-  function init() {
-    parent::init();
+  function init_server() {
+    parent::init_server();
     $this->server->setProperty('master_db');
     $this->creds = array_map('urldecode', parse_url($this->server->master_db));
 
     return TRUE;
   }
 
-  function verify() {
-    if ($this->context->type == 'server') {
-      $this->connect();
-      if ($this->can_create_database()) {
-        drush_log(dt('Provision can create new databases.'), 'message');
-      }
-      else {
-        drush_set_error('PROVISION_CREATE_DB_FAILED');
-      }
+  function verify_server_cmd() {
+    $this->connect();
+    if ($this->can_create_database()) {
+      drush_log(dt('Provision can create new databases.'), 'message');
+    }
+    else {
+      drush_set_error('PROVISION_CREATE_DB_FAILED');
     }
   }
 
@@ -258,8 +265,8 @@ class provisionService_db_pdo extends provisionService_db {
   protected $creds;
   private $dsn;
 
-  function init() {
-    parent::init();
+  function init_server() {
+    parent::init_server();
     $this->dsn = sprintf("%s:host=%s", $this->PDO_type,  $this->creds['host']);
   }
 

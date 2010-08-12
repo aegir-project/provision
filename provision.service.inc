@@ -21,8 +21,27 @@ class provisionService extends provisionChainedState {
   protected $config_cache = array();
   private $_config = null;
 
-  // All services have the ability to have an associated restart command and listen port.
+
+  /**
+   * Implement the __call magic method.
+   *
+   * This implementation is really simple. It simply return null if the
+   * method doesn't exist.
+   *
+   * This is used so that we can create methods for drush commands, and
+   * can fail safely.
+   */
+  function __call($name, $args = array()) {
+    return provision::method_invoke($this, $name, $args);
+  }
+
+
   function init() {
+
+  }
+
+  // All services have the ability to have an associated restart command and listen port.
+  function init_server() {
     if (!is_null($this->service)) {
       if ($this->has_port) {
         $this->server->setProperty($this->service . '_port', $this->default_port());
@@ -33,6 +52,15 @@ class provisionService extends provisionChainedState {
     }
     return TRUE;
   }
+
+  function init_platform() {
+
+  }
+
+  function init_site() {
+
+  }
+
 
   function default_port() {
     return false;

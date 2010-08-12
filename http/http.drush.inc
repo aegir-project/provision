@@ -28,6 +28,15 @@ class provisionService_http extends provisionService {
     $this->parse_configs();
   }
 
+  /**
+   * Register the http handler for platforms, based on the web_server option.
+   */
+  static function subscribe_platform($context) {
+    $context->setProperty('web_server', '@server_master');
+    $context->is_oid('web_server');
+    $context->service_subscribe('http', $context->web_server->name);
+  }
+
 }
 
 // Public http service , as in non-encrypted and listening on a port.
@@ -70,8 +79,8 @@ class provisionService_http_public extends provisionService_http {
     return $data;
   }
 
-  function init() {
-    parent::init();
+  function init_server() {
+    parent::init_server();
     // System account
     if ($this->server->name == '@server_master') {
       $this->server->setProperty('web_group', _provision_default_web_group());
@@ -104,25 +113,34 @@ class provisionService_http_public extends provisionService_http {
   }
 
 
-  function verify() {
-    if ($this->context->type === 'server') {
-      if (!is_null($this->application_name)) {
-        provision_file()->create_dir($this->server->http_confd_path, dt("Webserver custom configuration"), 0700);
-        $this->sync($this->server->http_confd_path);
+  function verify_server_cmd() {
+    if (!is_null($this->application_name)) {
+      provision_file()->create_dir($this->server->http_confd_path, dt("Webserver custom configuration"), 0700);
+      $this->sync($this->server->http_confd_path);
 
-        provision_file()->create_dir($this->server->http_platformd_path, dt("Webserver platform configuration"), 0700);
-        $this->sync($this->server->http_platformd_path, array(
-          'exclude' => $this->server->http_platformd_path . '/*',  // Make sure remote directory is created
-        )); 
+      provision_file()->create_dir($this->server->http_platformd_path, dt("Webserver platform configuration"), 0700);
+      $this->sync($this->server->http_platformd_path, array(
+        'exclude' => $this->server->http_platformd_path . '/*',  // Make sure remote directory is created
+      )); 
 
-        provision_file()->create_dir($this->server->http_vhostd_path , dt("Webserver virtual host configuration"), 0700);
-        $this->sync($this->server->http_vhostd_path, array(
-          'exclude' => $this->server->http_vhostd_path . '/*',  // Make sure remote directory is created
-        )); 
-      } 
-    }
+      provision_file()->create_dir($this->server->http_vhostd_path , dt("Webserver virtual host configuration"), 0700);
+      $this->sync($this->server->http_vhostd_path, array(
+        'exclude' => $this->server->http_vhostd_path . '/*',  // Make sure remote directory is created
+      )); 
+    } 
 
-    parent::verify();
+    $this->create_config($this->context->type);
+    $this->parse_configs();
+  }
+
+  function verify_site_cmd() {
+    $this->create_config($this->context->type);
+    $this->parse_configs();
+  }
+
+  function verify_platform_cmd() {
+    $this->create_config($this->context->type);
+    $this->parse_configs();
   }
 
   /**
