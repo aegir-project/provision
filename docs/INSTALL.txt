@@ -220,7 +220,7 @@ To make sure that the Aegir backend, and all the possible web servers can
 reach your database server, you need to configure mysql to listen on all
 the public IP addresses available to it.
 
-/etc/mysql/my.conf configuration line to comment out::
+/etc/mysql/my.cnf configuration line to comment out::
   bind-address	= 127.0.0.1
 
 Now you need to restart mysql, to clear any caches.
