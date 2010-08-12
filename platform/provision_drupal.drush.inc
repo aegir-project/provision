@@ -134,7 +134,7 @@ class provisionConfig_drupal_settings extends provisionConfig {
     if (drush_drupal_major_version() >= 7) {
       $this->data['db_type'] = ($this->data['db_type'] == 'mysqli') ? 'mysql' : $this->data['db_type'];
     }
-    $cloaked = $this->owner->service('http')->cloaked_db_creds();
+    $cloaked = $this->context->service('http')->cloaked_db_creds();
 
     foreach (array('db_type', 'db_user', 'db_passwd', 'db_host', 'db_name') as $key) {
       $this->creds[$key] = ($cloaked) ? "\$_SERVER[{$key}]" : urldecode($this->data[$key]);

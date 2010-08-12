@@ -23,7 +23,7 @@ class provisionConfig {
    *
    * @var provisionEnvironment
    */
-  public $owner = null;
+  public $context = null;
 
   /**
    * If set, replaces file name in log messages.
@@ -51,32 +51,32 @@ class provisionConfig {
   public $store = NULL;
 
   /**
-   * Forward $this->... to $this->owner->...
+   * Forward $this->... to $this->context->...
    * object.
    */
   function __get($name) {
-    if (isset($this->owner)) {
-      return $this->owner->$name;
+    if (isset($this->context)) {
+      return $this->context->$name;
     }
   }
 
   /**
    * Constructor, overriding not recommended.
    *
-   * @param $owner
+   * @param $context
    *   An alias name for d(), the provisionEnvironment that this configuration
    *   is relevant to.
    * @param $data
    *   An associative array to potentiall manipulate in process() and make
    *   available as variables to the template.
    */
-  function __construct($owner, $data = array()) {
+  function __construct($context, $data = array()) {
     if (is_null($this->template)) {
       throw(exception);
     }
 
-    // Accept both a reference and an alias name for the owner.
-    $this->owner = is_object($owner) ? $owner : d($owner);
+    // Accept both a reference and an alias name for the context.
+    $this->context = is_object($context) ? $context : d($context);
 
     if (sizeof($data)) {
       $this->data = $data;
@@ -85,7 +85,7 @@ class provisionConfig {
     
     if (!is_null($this->data_store_class) && class_exists($this->data_store_class)) {
       $class = $this->data_store_class;
-      $this->store = new $class($owner, $data);
+      $this->store = new $class($context, $data);
     }
 
   }
@@ -234,8 +234,8 @@ class provisionConfig_drushrc extends provisionConfig {
     return _drush_config_file($this->context_name);
   }
 
-  function __construct($owner, $data = array()) {
-    parent::__construct($owner, $data);
+  function __construct($context, $data = array()) {
+    parent::__construct($context, $data);
     $this->load_data();
   }
 
@@ -263,10 +263,10 @@ class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
    * @param $options
    *   Array of string option names to save.
    */
-  function __construct($owner, $data = array()) {
-    parent::__construct($owner, $data);
+  function __construct($context, $data = array()) {
+    parent::__construct($context, $data);
     $this->data = array(
-      'aliasname' => ltrim($owner, '@'),
+      'aliasname' => ltrim($context, '@'),
       'options' => $data,
     );
   }
@@ -333,8 +333,8 @@ class provisionConfig_data_store extends provisionConfig {
   protected $mode = 0700;
 
 
-  function __construct($owner, $data = array()) {
-    parent::__construct($owner, $data);
+  function __construct($context, $data = array()) {
+    parent::__construct($context, $data);
 
     $this->load_data();
   }
