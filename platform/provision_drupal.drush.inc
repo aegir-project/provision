@@ -393,7 +393,7 @@ function _provision_drupal_delete_aliases() {
   }
 }
 
-require_once('cvs_deploy.inc');
+require_once(dirname(__FILE__) . '/cvs_deploy.inc');
 
 function provision_find_packages() {
   // Load the version specific include files.

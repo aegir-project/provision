@@ -21,12 +21,21 @@ class provisionService_http extends provisionService {
   }
 
 
-  function verify() {
-    parent::verify();
-
+  function verify_server_cmd() {
     $this->create_config($this->context->type);
     $this->parse_configs();
   }
+
+  function verify_platform_cmd() {
+    $this->create_config($this->context->type);
+    $this->parse_configs();
+  }
+
+  function verify_site_cmd() {
+    $this->create_config($this->context->type);
+    $this->parse_configs();
+  }
+
 
   /**
    * Register the http handler for platforms, based on the web_server option.
@@ -129,18 +138,7 @@ class provisionService_http_public extends provisionService_http {
       )); 
     } 
 
-    $this->create_config($this->context->type);
-    $this->parse_configs();
-  }
-
-  function verify_site_cmd() {
-    $this->create_config($this->context->type);
-    $this->parse_configs();
-  }
-
-  function verify_platform_cmd() {
-    $this->create_config($this->context->type);
-    $this->parse_configs();
+    parent::verify_server_cmd();
   }
 
   /**
