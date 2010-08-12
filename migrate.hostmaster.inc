@@ -13,7 +13,6 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
   if (file_exists($alias_file)) {
     provision_backend_invoke('@server_master', 'provision-verify');
     provision_backend_invoke('@hostmaster', 'provision-verify');
-    
 
     drush_set_option('site_name', '@hostmaster');
     drush_set_option('old_platform', d('@hostmaster')->platform->name);
