@@ -95,9 +95,6 @@ class provisionService_dns extends provisionService {
       return $date . sprintf('%02d', $index);
     }
   }
-}
-
-class provisionService_dns_basic extends provisionService_dns {
 
 
   function parse_configs() {
@@ -296,56 +293,5 @@ class provisionService_dns_basic extends provisionService_dns {
 
 }
 
-class provisionService_dns_complex extends provisionService_dns_basic {
-  /**
-   * This returns the number of records in the zone.
-   */
-  function count_records($zone, $include = null, $exclude = null) {
-    return FALSE;
-  }
-
-
-
-  /**
-   * This adds a (potentially) duplicate record (RR) in a zonefile
-   *
-   * This doesn't check if the record already exists, it just adds it
-   * to the end of the file.
-   */
-  function add_record($zonename, $name, $type, $destination) {
-    return FALSE;
-  }
-
-  /**
-   * This creates or replaces a record (RR) in a zonefile.
-   */
-  function edit_record($zonename, $name, $type, $destination) {
-    return FALSE;
-  }
-
-  /**
-   * This removes a record matching the name and destination.
-   *
-   * If destination or type is null, they are disregarded in the pattern.
-   */
-  function delete_record($zonename, $name, $type, $destination = null) {
-    return FALSE;
-  }
-
-
-
-
-
-  /**
-   * Commit changes to the DNS server
-   *
-   * This may involve restarting the server.
-   *
-   * @arg $host only reload a single zone. if null, reload all zones
-   */
-  function commit($zone = null) {
-    return FALSE;
-  }
-}
 
 include_once('dns.config.inc');

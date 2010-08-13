@@ -5,7 +5,7 @@
  *
  * A lot of this is inspired by the Apache implementation of the HTTP service.
  */
-class provisionService_dns_bind extends provisionService_dns_complex {
+class provisionService_dns_bind extends provisionService_dns {
   protected $application_name = 'bind';
 
   protected $has_restart_command = TRUE;

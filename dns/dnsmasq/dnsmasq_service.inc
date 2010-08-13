@@ -1,6 +1,6 @@
 <?php
 
-class provisionService_dns_dnsmasq extends provisionService_dns_basic {
+class provisionService_dns_dnsmasq extends provisionService_dns {
   protected $application_name = 'dnsmasq';
   protected $has_restart_command = TRUE;
 
