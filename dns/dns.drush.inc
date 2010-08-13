@@ -120,6 +120,16 @@ class provisionService_dns extends provisionService {
     $this->server->setProperty('dns_negativettl', 86400); # 24h
   }
 
+  function init_site() {
+    parent::init_site();
+
+    $this->context->setProperty('dns_zone', null);
+    if (is_null($this->context->dns_zone)) {
+      $this->context->dns_zone = $this->guess_zone($this->context->uri);
+    }
+
+    $this->context->dns_zone_subdomain = trim(str_replace($this->context->dns_zone, '', $this->context->uri), '.');
+  }
 
   function verify_server_cmd() {
     provision_file()->create_dir($this->server->dns_data_path, dt("DNS data store"), 0700);
@@ -158,52 +168,69 @@ class provisionService_dns extends provisionService {
   }
 
 
-  /**
-   * Guess in which zone we should create the record
-   *
-   * This function will examine the existing zones to find to which
-   * this host belongs to.
-   *
-   * @param $host the name of the record to add (e.g. www.example.com)
-   *
-   * @returns array the record and zone name to add the record to (e.g. www and example.com)
-   */
-  function guess_zone($host) {
-    $tld = $host;
-    $zones = $this->config('server')->record_get();
+/**
+ * Guess in which zone we should create the record
+ *
+ * This function will examine the existing zones to find to which
+ * this host belongs to.
+ *
+ * @param $host the name of the record to add (e.g. www.example.com)
+ *
+ * @returns array the record and zone name to add the record to (e.g. www and example.com)
+ */
+  function guess_zone($host, $return = 'tld') {
+    static $zone_cache;
 
-    $parts = explode(".", $host);
-    $subdomain = array();
-    $found = FALSE;
-    while (!$found && (count($parts) > 2)) {
+    if (!isset($zone_cache[$host])) {
+      $tld = $host;
+      $zones = $this->config('server')->record_get();
+
+      $parts = explode(".", $host);
+      $subdomain = array();
+      $found = FALSE;
+      while (!$found && (count($parts) > 2)) {
+        $tld = join(".", $parts);
+        if (isset($zones[$tld])) {
+          $found = TRUE;
+        } else {
+          $scrap = array_shift($parts);
+          $subdomain[] = $scrap;
+          drush_log("zone $tld not found, ditching $scrap, count: " . count($parts));
+          $found = FALSE;
+        } 
+      }
+
+      // this is necessary if we hit the limit of two subdomains
       $tld = join(".", $parts);
-      if (isset($zones[$tld])) {
-        $found = TRUE;
-      } else {
-        $scrap = array_shift($parts);
-        $subdomain[] = $scrap;
-        drush_log("zone $tld not found, ditching $scrap, count: " . count($parts));
-        $found = FALSE;
-      } 
+      $subdomain = join(".", $subdomain);
+
+      $zone_cache[$host] = array('tld' => $tld, 'subdomain' => $subdomain);
     }
-    // this is necessary if we hit the limit of two subdomains
-    $tld = join(".", $parts);
-    $subdomain = join(".", $subdomain);
+    else {
+      $tld = $zone_cache[$host]['tld'];
+      $subdomain = $zone_cache[$host]['subdomain'];
+    }
+
 
     drush_log("guess_zone guessed parts $tld, $subdomain");
-    return array($subdomain, $tld);
+
+    if ($return == 'subdomain') {
+      return $subdomain;
+    }
+
+    return $tld;
   }
 
   /**
    * This creates a zone, which mostly consists of adding the SOA record.
    */
   function create_zone($zone = null) {
-    if (is_null($zone) && $this->context->type == 'site') {
-      $guess = $this->guess_zone($this->context->uri);
-      $zone = $guess[1];
+    if (is_null($zone) && ($this->context->type == 'site')) {
+      $host = $this->context->uri;
+      $zone = $this->context->dns_zone;
+      $sub = $this->context->dns_zone_subdomain;
     }
-
-    if (!$zone) {
+    elseif (is_null($zone)) {
       return drush_set_error('DRUSH_DNS_NO_ZONE', "Could not determine the zone to create");
     }
 
@@ -231,14 +258,18 @@ class provisionService_dns extends provisionService {
    * current context (should be a site) for a URI.
    */
   function create_host($host = null) {
-    if (is_null($host)) {
+    if (!is_null($host)) {
+      $zone = $this->guess_zone($host);
+      $sub = $this->guess_zone($host, 'subdomain');
+    } 
+    elseif ($this->context->type == 'site') {
       $host = $this->context->uri;
+      $zone = $this->context->dns_zone;
+      $sub = $this->context->dns_zone_subdomain;
     }
-
-    $parts = $this->guess_zone($host);
-    $zone = $parts[1];
-    $sub = $parts[0];
-
+    else {
+      return drush_set_error('DRUSH_DNS_NO_ZONE', "Could not determine the zone to create");
+    }
 
     $ips = drush_get_option('site_ip_addresses', array(), 'site');
 
@@ -275,13 +306,18 @@ class provisionService_dns extends provisionService {
    * current context (should be a site) for a URI.
    */
   function delete_host($host = null) {
-    if (is_null($host)) {
+    if (!is_null($host)) {
+      $zone = $this->guess_zone($host);
+      $sub = $this->guess_zone($host, 'subdomain');
+    } 
+    elseif ($this->context->type == 'site') {
       $host = $this->context->uri;
+      $zone = $this->context->dns_zone;
+      $sub = $this->context->dns_zone_subdomain;
     }
-    $parts = $this->guess_zone($host);
-    $zone = $parts[1];
-    $sub = $parts[0];
-
+    else {
+      return drush_set_error('DRUSH_DNS_NO_ZONE', "Could not determine the zone to create");
+    }
 
     // remove the records from the zone store
     $this->config('zone', $zone)->
