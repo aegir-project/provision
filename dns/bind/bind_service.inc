@@ -19,8 +19,8 @@ class provisionService_dns_bind extends provisionService_dns_complex {
     return provisionService_dns_bind::bind_default_restart_cmd();
   }
 
-  function init() {
-    parent::init();
+  function init_server() {
+    parent::init_server();
     $this->configs['server'][] = 'provisionConfig_bind_server';
     $this->configs['zone'][] = 'provisionConfig_bind_zone';
   }

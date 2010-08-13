@@ -104,8 +104,8 @@ class provisionService_dns_basic extends provisionService_dns {
     return null;
   }
 
-  function init() {
-    parent::init();
+  function init_server() {
+    parent::init_server();
 
     // Path for storing data store config files.
     $this->server->dns_data_path = $this->server->aegir_root . '/config/dns.d';
@@ -124,26 +124,24 @@ class provisionService_dns_basic extends provisionService_dns {
   }
 
 
-  function verify() {
-    if ($this->context->type === 'server') {
-      provision_file()->create_dir($this->server->dns_data_path, dt("DNS data store"), 0700);
+  function verify_server_cmd() {
+    provision_file()->create_dir($this->server->dns_data_path, dt("DNS data store"), 0700);
 
-      if (!is_null($this->application_name)) {
-        provision_file()->create_dir($this->server->dns_zoned_path, dt("DNS zone configuration"), 0755);
-        $this->sync($this->server->dns_zoned_path, array(
-          'exclude' => $this->server->dns_zoned_path . '/*',  // Make sure remote directory is created
-        )); 
+    if (!is_null($this->application_name)) {
+      provision_file()->create_dir($this->server->dns_zoned_path, dt("DNS zone configuration"), 0755);
+      $this->sync($this->server->dns_zoned_path, array(
+        'exclude' => $this->server->dns_zoned_path . '/*',  // Make sure remote directory is created
+      )); 
 
-        provision_file()->create_dir($this->server->dns_hostd_path , dt("DNS host configuration"), 0755);
-        $this->sync($this->server->dns_hostd_path, array(
-          'exclude' => $this->server->dns_hostd_path . '/*',  // Make sure remote directory is created
-        ));
+      provision_file()->create_dir($this->server->dns_hostd_path , dt("DNS host configuration"), 0755);
+      $this->sync($this->server->dns_hostd_path, array(
+        'exclude' => $this->server->dns_hostd_path . '/*',  // Make sure remote directory is created
+      ));
 
-        # TODO: create a slave zone path too.
+      # TODO: create a slave zone path too.
 
-        $this->create_config('server');
-      } 
-    }
+      $this->create_config('server');
+    } 
 
   }
 
