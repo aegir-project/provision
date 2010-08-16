@@ -154,7 +154,12 @@ class provisionConfig_drupal_settings extends provisionConfig {
  */
 function _provision_drupal_create_directories($url = NULL, $profile = NULL) {  
   if (is_null($url)) {
-    $url = drush_get_option('uri');
+    if (d()->type == 'site') {
+      $url = d()->uri;
+    }
+    else {
+      $url = 'all';
+    }
   }
   # those directories will be created and their modes changed
   $mkdir = array(
@@ -163,10 +168,6 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     "sites/$url/themes"          => 02775,
     "sites/$url/modules"         => 02775,  
     "sites/$url/libraries"       => 02775, # http://drupal.org/node/496240
-    // d7 support
-    "sites/$url/private"         => 0755,
-    "sites/$url/private/files"   => 02770,
-    "sites/$url/private/temp"    => 02770,
   );
 
   $chown = array();
@@ -174,15 +175,33 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
   // special case: platform. do not handle files dir
   if ($url != 'all') {
     $mkdir["sites/$url/files"]          = 02770;
+    $chown["sites/$url/files"]          = d('@server_master')->script_user;
+    $chgrp["sites/$url/files"]          = d('@server_master')->web_group;
+
     $mkdir["sites/$url/files/tmp"]      = 02770;
+    $chown["sites/$url/files/tmp"]      = d('@server_master')->script_user;
+    $chgrp["sites/$url/files/tmp"]      = d('@server_master')->web_group;
+
     $mkdir["sites/$url/files/images"]   = 02770;
+    $chown["sites/$url/files/images"]   = d('@server_master')->script_user;
+    $chgrp["sites/$url/files/images"]   = d('@server_master')->web_group;
+
     $mkdir["sites/$url/files/pictures"] = 02770;
-    # the owner/group of those directories will be changed recursively
-    $chown["sites/$url/files"]          = d()->platform->server->script_user;
-    $chgrp["sites/$url/files"]          = d()->platform->server->web_group;
-    $chown["sites/$url/private"]        = d()->platform->server->script_user;
-    $chgrp["sites/$url/private/files"]  = d()->platform->server->web_group;
-    $chgrp["sites/$url/private/temp"]   = d()->platform->server->web_group;
+    $chown["sites/$url/files/pictures"] = d('@server_master')->script_user;
+    $chgrp["sites/$url/files/pictures"] = d('@server_master')->web_group;
+
+    // d7 support
+    $mkdir["sites/$url/private"]        = 02770;
+    $chown["sites/$url/private"]        = d('@server_master')->script_user;
+    $chgrp["sites/$url/private"]        = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/private/files"]  = 02770;
+    $chown["sites/$url/private/files"]  = d('@server_master')->script_user;
+    $chgrp["sites/$url/private/files"]  = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/private/temp"]   = 02770;
+    $chown["sites/$url/private/temp"]   = d('@server_master')->script_user;
+    $chgrp["sites/$url/private/temp"]   = d('@server_master')->web_group;
   }
 
   // These paths should not have recursive operations performed on them.
