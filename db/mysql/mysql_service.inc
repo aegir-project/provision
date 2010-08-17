@@ -88,7 +88,12 @@ class provisionService_db_mysql extends provisionService_db_pdo {
   }
   
   function grant_host(provisionServer $server) {
-    $server->shell_exec('mysql -u intntnllyInvalid -h ' . escapeshellarg($this->server->remote_host));
+    $command = sprintf('mysql -u intntnllyInvalid -h %s -P %s',
+      escapeshellarg($this->server->remote_host),
+      escapeshellarg($this->server->db_port));
+
+
+    $server->shell_exec($command);
     if (preg_match("/Access denied for user 'intntnllyInvalid'@'([^']*)'/", implode('', drush_shell_exec_output()), $match)) {
       return $match[1];
     }
@@ -125,7 +130,8 @@ class provisionService_db_mysql extends provisionService_db_pdo {
 host=%s
 user=%s
 password=%s
-', $db_host, $db_user, $db_passwd);
+port=%s
+', $db_host, $db_user, $db_passwd, $this->server->db_port);
 
    $stdin_spec = (!is_null($dump_file)) ? array("file", $dump_file, "r") : array("pipe", "r");
 

@@ -14,12 +14,14 @@
     'username' => "<?php print $this->creds['db_user']; ?>",
     'password' => "<?php print $this->creds['db_passwd']; ?>",
     'host' => "<?php print $this->creds['db_host']; ?>",
+    'port' => "<?php print $this->creds['db_port']; ?>",
   );
-  $db_url['default'] = "<?php print strtr("%db_type://%db_user:%db_passwd@%db_host/%db_name", array(
+  $db_url['default'] = "<?php print strtr("%db_type://%db_user:%db_passwd@%db_host:%db_port/%db_name", array(
     '%db_type' => $this->creds['db_type'],
     '%db_user' => $this->creds['db_user'], 
     '%db_passwd' => $this->creds['db_passwd'],
     '%db_host' => $this->creds['db_host'], 
+    '%db_port' => $this->creds['db_port'], 
     '%db_name' => $this->creds['db_name'])); ?>";
 
 

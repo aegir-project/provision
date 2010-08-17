@@ -136,7 +136,7 @@ class provisionConfig_drupal_settings extends provisionConfig {
     }
     $cloaked = $this->owner->service('http')->cloaked_db_creds();
 
-    foreach (array('db_type', 'db_user', 'db_passwd', 'db_host', 'db_name') as $key) {
+    foreach (array('db_type', 'db_user', 'db_passwd', 'db_host', 'db_name', 'db_port') as $key) {
       $this->creds[$key] = ($cloaked) ? "\$_SERVER[{$key}]" : urldecode($this->data[$key]);
     }
 
@@ -609,7 +609,7 @@ function provision_parse_info_file($filename) {
  * potentially of other sites' settings.php in a multisite set-up.
  */
 function provision_prepare_environment() {
-  $fields = array('db_type', 'db_host', 'db_user', 'db_passwd', 'db_name');
+  $fields = array('db_type', 'db_host', 'db_user', 'db_passwd', 'db_name', 'db_port');
   foreach ($fields as $key) {
     $_SERVER[$key] = drush_get_option($key, null, 'site');
   }
