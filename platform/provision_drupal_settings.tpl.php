@@ -56,7 +56,6 @@
   $conf['install_profile'] = '<?php print $this->profile ?>';
   $conf['file_directory_path'] = 'sites/<?php print $this->uri ?>/files';
   $conf['file_directory_temp'] = 'sites/<?php print $this->uri ?>/files/tmp';
-  $conf['file_downloads'] = 1;
   $conf['cache'] = 1;
   $conf['clean_url'] = 1;
 
