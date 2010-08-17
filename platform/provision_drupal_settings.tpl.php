@@ -15,7 +15,7 @@
     'password' => "<?php print $this->creds['db_passwd']; ?>",
     'host' => "<?php print $this->creds['db_host']; ?>",
   );
-  $db_url = "<?php print strtr("%db_type://%db_user:%db_passwd@%db_host/%db_name", array(
+  $db_url['default'] = "<?php print strtr("%db_type://%db_user:%db_passwd@%db_host/%db_name", array(
     '%db_type' => $this->creds['db_type'],
     '%db_user' => $this->creds['db_user'], 
     '%db_passwd' => $this->creds['db_passwd'],
@@ -79,6 +79,11 @@
     if (count(explode('.', $domain)) > 2) {
       @ini_set('session.cookie_domain', $domain);
     }
+  }
+
+  # Additional site configuration settings.
+  if (file_exists('<?php print $this->site_path  ?>/local.settings.inc')) {
+    include_once('<?php print $this->site_path  ?>/local.settings.inc');
   }
 
   # Additional host wide configuration settings. Useful for safely specifying configuration settings.
