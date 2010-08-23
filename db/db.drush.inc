@@ -268,6 +268,10 @@ class provisionService_db_pdo extends provisionService_db {
   function init_server() {
     parent::init_server();
     $this->dsn = sprintf("%s:host=%s", $this->PDO_type,  $this->creds['host']);
+
+    if ($this->has_port) {
+      $this->dsn = "{$this->dsn};port={$this->server->db_port}";
+    }
   }
 
   function connect() {

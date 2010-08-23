@@ -14,12 +14,14 @@
     'username' => "<?php print $this->creds['db_user']; ?>",
     'password' => "<?php print $this->creds['db_passwd']; ?>",
     'host' => "<?php print $this->creds['db_host']; ?>",
+    'port' => "<?php print $this->creds['db_port']; ?>",
   );
-  $db_url = "<?php print strtr("%db_type://%db_user:%db_passwd@%db_host/%db_name", array(
+  $db_url['default'] = "<?php print strtr("%db_type://%db_user:%db_passwd@%db_host:%db_port/%db_name", array(
     '%db_type' => $this->creds['db_type'],
     '%db_user' => $this->creds['db_user'], 
     '%db_passwd' => $this->creds['db_passwd'],
     '%db_host' => $this->creds['db_host'], 
+    '%db_port' => $this->creds['db_port'], 
     '%db_name' => $this->creds['db_name'])); ?>";
 
 
@@ -56,7 +58,6 @@
   $conf['install_profile'] = '<?php print $this->profile ?>';
   $conf['file_directory_path'] = 'sites/<?php print $this->uri ?>/files';
   $conf['file_directory_temp'] = 'sites/<?php print $this->uri ?>/files/tmp';
-  $conf['file_downloads'] = 1;
   $conf['cache'] = 1;
   $conf['clean_url'] = 1;
 
@@ -80,6 +81,11 @@
     if (count(explode('.', $domain)) > 2) {
       @ini_set('session.cookie_domain', $domain);
     }
+  }
+
+  # Additional site configuration settings.
+  if (file_exists('<?php print $this->site_path  ?>/local.settings.php')) {
+    include_once('<?php print $this->site_path  ?>/local.settings.php');
   }
 
   # Additional host wide configuration settings. Useful for safely specifying configuration settings.

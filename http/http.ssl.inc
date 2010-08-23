@@ -340,7 +340,7 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
           '%site' => $this->uri,
           '%server' => $this->data['server']->remote_host)));
 
-    $used = provisionService_http_ssl::certificate_in_use($this->ssl_key, $this->data['server']);
+    $used = provisionService_http_ssl::certificate_in_use($ssl_key, $this->data['server']);
 
     if (!$used) {
       // we can remove the certificate from the server ssl.d directory.
@@ -349,7 +349,7 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
       $this->data['server']->sync($path);
 
       // Most importantly, we remove the hold this cert had on the IP address.
-      provisionService_http_ssl::free_certificate_ip($this->ssl_key, $this->data['server']);
+      provisionService_http_ssl::free_certificate_ip($ssl_key, $this->data['server']);
     }
   }
 
