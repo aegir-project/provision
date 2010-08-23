@@ -153,6 +153,7 @@ class provisionConfig {
         ->fail('Could not create directory @path.');
     }
 
+    $status = FALSE;
     if ($filename && is_writeable(dirname($filename))) {
       // manipulate data before passing to template.
       $this->process();
@@ -165,8 +166,9 @@ class provisionConfig {
             ->fail('Could not change permissions of @path to @perm');
         }
 
-        provision_file()->file_put_contents($filename, $this->render_template($template, $this->data))
-          ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description), 'success');
+        $status = provision_file()->file_put_contents($filename, $this->render_template($template, $this->data))
+          ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description), 'success')
+          ->fail('Could not generate ' . (empty($this->description) ? $filename : $this->description))->status();
 
         // Change the permissions of the file if needed
         if (!is_null($this->mode)) {
@@ -181,6 +183,7 @@ class provisionConfig {
         }
       }
     }
+    return $status;
   }
 
   /**
