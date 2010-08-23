@@ -45,6 +45,10 @@ function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
   $options['aliases'] = array();
   $options['redirection'] = 0;
 
+  if ($profile = drush_get_option('profile', FALSE)) {
+    $options['profile'] = $profile;
+  }
+
   if ($db_server = drush_get_option('new_db_server', FALSE)) {
     $options['db_server'] = $db_server;
   }

@@ -72,6 +72,10 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = null) {
   $options['platform'] = $platform;
   $options['root'] = d($platform)->root;
 
+  if ($profile = drush_get_option('profile', FALSE)) {
+    $options['profile'] = $profile;
+  }
+
   if ($db_server = drush_get_option('new_db_server', FALSE)) {
     $options['db_server'] = $db_server;
   }
