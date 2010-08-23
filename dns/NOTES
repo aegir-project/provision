@@ -24,10 +24,28 @@ Bugs:
  1. since the rewrite of the parser, some fields in the SOA are
  missing (retry, refresh, etc) because we lack the context from the
  server (switching to create_config() shoudl fix that)
+ 2. there's a duplicate serial in PHP storage (patched?)
+ 3. the internal data structure is confusing and not efficient. here's
+ a proposed change:
+
+$zonefile = array('www' => array('a' => array('1.2.3.3', '1.2.3.4')),
+                  '@' => array('SOA' => array('hostmaster' => 'localhost', 'email' => 'admin.localhost', 'serial' => '2010082301', 'refresh' => 21600 3600 604800 86400 )'),
+                              'A' => array('1.2.3.3'),
+                              'MX' => array('mail.localhost'),
+                              'NS' => array('localhost', 'ns2.localhost'),
+                              )
+                 );
+  (patched, needs testing and verification)
+ 4. removing the last record in a zonefile doesn't remove the zone
+ 5. removing records doesn't work either
+ 6. we increment the serial in two places, it seems
 
 Caveats:
 
- 1. only targeting bind right now
+ 1. there's duplicate storage altogether: we could parse zonefiles and
+ use that as storage, not PHP files, but that would make switching
+ engines more difficult and would require writing parsers for all
+ engines.
 
 Todo:
 

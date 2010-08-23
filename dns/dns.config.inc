@@ -95,13 +95,9 @@ class provisionConfig_dns_zone extends provisionConfig_dns {
     $this->data['dns_email'] = str_replace('@', '.', $this->data['server']->admin_email);
 
     // increment the serial.
-    $this->store->records['serial'] = $this->data['serial'] = provisionService_dns::increment_serial($records['serial']);
+    $this->store->records['@']['SOA']['serial'] = $records['serial'] = provisionService_dns::increment_serial($records['@']['SOA']['serial']);
 
-    foreach ($records as $key => $record) {
-      if (preg_match('/^host:/', $key)) {
-        $this->data['hosts'][$record['host']] = $record;
-      }
-    }
+    $this->data['records'] = $records;
   }
 
   function write() {

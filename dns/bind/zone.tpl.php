@@ -4,29 +4,39 @@
 $TTL <?php print $server->dns_ttl; ?>
 
 <?php
-print("@     IN     SOA  $server->remote_host $dns_email 
-			      $serial ; serial
+print("@     IN     SOA  $server->remote_host $dns_email (
+			      " . $records['@']['SOA']['serial'] . " ; serial
 			      $server->dns_refresh; refresh
 			      $server->dns_retry ; retry
 			      $server->dns_expire ; expire
 			      $server->dns_negativettl ; minimum
           )\n");
-?>
 
+print "@\tIN\tNS\t" . $server->remote_host . " ; primary DNS\n";
 
-       IN  NS    <?php print $server->remote_host ?>. ; primary DNS 
-       IN  NS     ns2.example.com. ; secondary DNS
-       IN  MX  10 <?php print $server->remote_host ?>. ; external mail provider
-; non server domain hosts
-<?php
-
-foreach ($records['A'] as $ip) {
-  print "   IN  A     {$ip}\n";
+foreach ($server->dns_slaves as $slave) {
+  print "@\tIN\tNS\t$slave ; slave DNS\n";
 }
 
+foreach ($records['@'] as $type => $destinations) {
+  if ($type != 'SOA' && $type != 'NS') {
+    foreach ($destinations as $destination) {
+        print "@\tIN\t$type\t$destination\n";
+    }
+  }
+}
+
+foreach ($records as $name => $record) {
+  if ($name != '@') {
+    foreach ($record as $type => $destinations) {
+      foreach ($destinations as $destination) {
+        print "$name\tIN\t$type\t$destination\n";
+      }
+    }
+  }
+}
 foreach ($hosts as $host => $info) {
   foreach ($info['A'] as $ip) {
     print "{$info['sub']}   IN  A     {$ip}\n";
   }
 }
-?>

@@ -14,6 +14,7 @@ include_once(dirname(__FILE__) . '/../provision.service.inc');
 
 /**
  * Implementation of hok_drush_command().
+ */
 function dns_drush_command() {
   $items['provision-zone'] = array(
     'arguments' => array('operation' => dt('The operation to perform on a zone (verify, delete, rr-add, rr-delete)')),
@@ -39,26 +40,20 @@ function drush_dns_provision_zone($action, $zone, $name = null, $type = null, $d
     $status = d()->service('dns')->delete_zone($zone);
     break;
   case 'rr-add':
-    d()->service('dns')->config('zone', $zone)->record_set("host:$host", array(
-      'sub' => $sub,
-      'A' => $ips,
-      'host' => $host,
-    ));
-    $status = d()->service('dns')->add_record($zone, $name, $type, $destination);
+    $record = d()->service('dns')->config('zone', $zone)->record_get($name);
+    $record[$type] = array_merge($record[$type], array($destination));
+    d()->service('dns')->config('zone', $zone)->record_set($name, $record)->write();
     break;
   case 'rr-modify':
-    $status = d()->service('dns')->modify_record($zone, $name, $type, $destination);
+    d()->service('dns')->config('zone', $zone)->record_set($name, array($type => array($destination)))->write();
     break;
   case 'rr-delete':
-    $status = d()->service('dns')->delete_record($zone, $name, $type, $destination);
     break;
   }
   $status = $status && d()->service('dns')->commit($zone);
   
   return $status;
 }
-
- */
 
 function dns_provision_services() {
   return array('dns' => NULL);
@@ -236,8 +231,7 @@ class provisionService_dns extends provisionService {
 
     $this->config('server')->record_set($zone, $zone)->write();
 
-    $soa['serial'] = $this->increment_serial($soa['serial']);
-    $this->config('zone', $zone)->record_set('soa', $soa)->write();
+    $this->config('zone', $zone)->record_set('serial', $this->increment_serial())->write();
   }
 
   /**
@@ -278,19 +272,17 @@ class provisionService_dns extends provisionService {
       $ips = array('127.0.0.1');
     }
 
-    if (is_array($ips)) {
-      if ($sub) {
-        $this->config('zone', $zone)->record_set("host:$host", array(
-          'sub' => $sub,
-          'A' => $ips,
-          'host' => $host,
-        ));
-      }
-      else {
-        $this->config('zone', $zone)->record_set("A", $ips);
-      }
+    // XXX: kill me?
+    if (!is_array($ips)) {
+      $ips = array($ips); // backward compatibility?
     }
- 
+
+    if (empty($sub)) {
+      $sub = '@';
+    }
+    drush_log("zone: $zone, sub: $sub");
+    $this->config('zone', $zone)->record_set($sub, array('A' => $ips));
+    
     $this->create_zone($zone);
     $this->create_config('host');
   }
@@ -320,9 +312,11 @@ class provisionService_dns extends provisionService {
 
     // remove the records from the zone store
     $this->config('zone', $zone)->
-      record_del("host:$host");
+      record_set($host, array('A' => null));
 
-    $this->create_zone($zone);
+    // XXX: need to guess the number of records left now and remove only if
+    // there are no more records
+    //$this->delete_zone($zone);
     $this->delete_config('host');
   }
 

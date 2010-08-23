@@ -131,7 +131,17 @@ class provisionService extends provisionChainedState {
           $this->_config->store->records = array_merge($this->_config->store->records, $arg1);
         }
         elseif (!is_numeric($arg1)) {
-          $this->_config->store->records[$arg1] = $arg2;
+          if (is_array($arg2)) {
+            if (!is_array($this->_config->store->loaded_records[$arg1])) {
+              $this->_config->store->loaded_records[$arg1] = array();
+            }
+            if (!is_array($this->_config->store->records[$arg1])) {
+              $this->_config->store->records[$arg1] = array();
+            }
+            $this->_config->store->records[$arg1] = array_merge($this->_config->store->loaded_records[$arg1], $this->_config->store->records[$arg1], $arg2);
+          } else {
+            $this->_config->store->records[$arg1] = $arg2;
+          }
         }
       }
     }
