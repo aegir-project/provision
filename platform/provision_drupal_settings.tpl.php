@@ -26,6 +26,8 @@
 
 
   $profile = "<?php print $this->profile ?>";
+  $install_profile = "<?php print $this->profile ?>";
+
   /**
   * PHP settings:
   *
