@@ -25,7 +25,6 @@ foreach ($records['A'] as $ip) {
 }
 
 foreach ($hosts as $host => $info) {
-  print ";$host\n";
   foreach ($info['A'] as $ip) {
     print "{$info['sub']}   IN  A     {$ip}\n";
   }
