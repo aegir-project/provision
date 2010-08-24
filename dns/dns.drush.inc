@@ -239,8 +239,6 @@ class provisionService_dns extends provisionService {
     }
 
     $this->config('server')->record_set($zone, $zone)->write();
-
-    $this->config('zone', $zone)->record_set('serial', $this->increment_serial())->write();
   }
 
   /**

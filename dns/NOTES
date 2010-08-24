@@ -24,8 +24,7 @@ Bugs:
  1. since the rewrite of the parser, some fields in the SOA are
  missing (retry, refresh, etc) because we lack the context from the
  server (switching to create_config() shoudl fix that)
- 2. there's a duplicate serial in PHP storage (patched?)
- 3. the internal data structure is confusing and not efficient. here's
+ 2. the internal data structure is confusing and not efficient. here's
  a proposed change:
 
 $zonefile = array('www' => array('a' => array('1.2.3.3', '1.2.3.4')),
@@ -37,8 +36,6 @@ $zonefile = array('www' => array('a' => array('1.2.3.3', '1.2.3.4')),
                  );
   (patched, needs testing and verification)
  4. removing the last record in a zonefile doesn't remove the zone
- 5. removing records doesn't work either
- 6. we increment the serial in two places, it seems
 
 Caveats:
 
