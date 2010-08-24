@@ -48,6 +48,11 @@ function drush_dns_provision_zone($action, $zone, $name = null, $type = null, $d
     d()->service('dns')->config('zone', $zone)->record_set($name, array($type => array($destination)))->write();
     break;
   case 'rr-delete':
+    if ($type) {
+      d()->service('dns')->config('zone', $zone)->record_set($name, array($type => NULL))->write();
+    } else {
+      d()->service('dns')->config('zone', $zone)->record_set($name, NULL)->write();
+    }
     break;
   }
   $status = $status && d()->service('dns')->commit($zone);
