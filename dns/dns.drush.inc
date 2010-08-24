@@ -215,7 +215,11 @@ class provisionService_dns extends provisionService {
     drush_log("guess_zone guessed parts $tld, $subdomain");
 
     if ($return == 'subdomain') {
-      return $subdomain;
+      if (empty($subdomain)) {
+        return '@';
+      } else {
+        return $subdomain;
+      }
     }
 
     return $tld;
@@ -282,10 +286,6 @@ class provisionService_dns extends provisionService {
       $ips = array($ips); // backward compatibility?
     }
 
-    if (empty($sub)) {
-      $sub = '@';
-    }
-    drush_log("zone: $zone, sub: $sub");
     $this->config('zone', $zone)->record_set($sub, array('A' => $ips));
     
     $this->create_zone($zone);
@@ -317,7 +317,7 @@ class provisionService_dns extends provisionService {
 
     // remove the records from the zone store
     $this->config('zone', $zone)->
-      record_set($host, array('A' => null));
+      record_set($sub, array('A' => null))->write();
 
     // XXX: need to guess the number of records left now and remove only if
     // there are no more records
