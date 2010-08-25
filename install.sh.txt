@@ -72,7 +72,7 @@ AEGIR_HOME="$HOME"
 AEGIR_HOST=`uname -n`
 DRUSH="$AEGIR_HOME/drush/drush.php"
 
-msg "Aegir automated install script"
+msg "Aegir $AEGIR_VERSION automated install script"
 
 if [ `whoami` = "root" ] ; then
   msg "This script should be ran as a non-root user"

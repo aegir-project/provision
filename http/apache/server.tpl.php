@@ -1,11 +1,9 @@
 # Aegir web server configuration file
 
-<?php foreach ($server->ip_addresses as $ip) : ?>
-  NameVirtualHost <?php print $ip . ':' . $http_port; ?>
+NameVirtualHost *:<?php print $http_port; ?>
 
-<?php endforeach; ?>
 
-<VirtualHost <?php print $ip_address . ':' . $http_port; ?>>
+<VirtualHost *:<?php print $http_port; ?>>
   ServerName default
   Redirect 404 /
 </VirtualHost>
