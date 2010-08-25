@@ -249,7 +249,7 @@ preparing the backend and frontend install for you. That script needs to be run
 as the aegir user created above.  This file is available in Provision or can be 
 downloaded through the web at:
 
-http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD
+http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha12
 
 By default, the install script will install the "correct" version of Aegir
 (ie. if it was downloaded through git, it will install the version from the
