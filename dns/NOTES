@@ -19,24 +19,6 @@ provision-zone create-host www.foobar.com
 
 should another similar record to the same zonefile.
 
-Bugs:
-
- 1. since the rewrite of the parser, some fields in the SOA are
- missing (retry, refresh, etc) because we lack the context from the
- server (switching to create_config() shoudl fix that)
- 2. the internal data structure is confusing and not efficient. here's
- a proposed change:
-
-$zonefile = array('www' => array('a' => array('1.2.3.3', '1.2.3.4')),
-                  '@' => array('SOA' => array('hostmaster' => 'localhost', 'email' => 'admin.localhost', 'serial' => '2010082301', 'refresh' => 21600 3600 604800 86400 )'),
-                              'A' => array('1.2.3.3'),
-                              'MX' => array('mail.localhost'),
-                              'NS' => array('localhost', 'ns2.localhost'),
-                              )
-                 );
-  (patched, needs testing and verification)
- 4. removing the last record in a zonefile doesn't remove the zone
-
 Caveats:
 
  1. there's duplicate storage altogether: we could parse zonefiles and
@@ -48,8 +30,4 @@ Todo:
 
  1. we need slave configuration (ie. modify the slaves configuration
  so that they sync with the master, so just act on create_zone())
- 2. for this we need to define the services (ie. the slaves too) in
- the frontend and add NS records when the zonefile is created
- 3. we need to hook the zones into the bind configuration (see the
- commented line in create_zone())
- 4. we need to reload bind when that is done
+ 2. we need to reload bind when changes are done, ideally only once per zone

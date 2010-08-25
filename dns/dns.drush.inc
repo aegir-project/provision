@@ -245,7 +245,7 @@ class provisionService_dns extends provisionService {
    * This completely drops a zone, without any checks.
    */
   function delete_zone($zone) {
-    $this->config('server')->record_del($zone)->write();
+    $this->config('zone', $zone)->unlink();
   }
 
     /** 
@@ -316,11 +316,6 @@ class provisionService_dns extends provisionService {
     // remove the records from the zone store
     $this->config('zone', $zone)->
       record_set($sub, array('A' => null))->write();
-
-    // XXX: need to guess the number of records left now and remove only if
-    // there are no more records
-    //$this->delete_zone($zone);
-    $this->delete_config('host');
   }
 
 }
