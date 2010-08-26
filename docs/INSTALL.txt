@@ -232,12 +232,14 @@ Remote web servers
 Any number of remote web servers may be configured. They need an aegir user and
 Apache configuration as above, with the same user name and directory paths. SSH
 public/private keys should be set up so hostmaster's Aegir user can access
-remote web Aegir users with no passwords.
+remote web Aegir users with no passwords. The above apache configuration needs
+to be performed to.
 
 They will also need a login shell, which can be modified using the ``chsh`` command.
 
 Shell command as root::
   chsh -s /bin/sh aegir
+  apt-get install rsync apache2 php5 php5-cli php5-mysql
 
 Database configuration
 ----------------------
