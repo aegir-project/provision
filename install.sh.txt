@@ -102,7 +102,7 @@ fi
 msg "This script makes the following assumptions: "
 cat <<EOF
  * you have read INSTALL.txt and prepared the platform accordingly
- * you are running as your "aegir" user
+ * you are executing this script as your "aegir" user
 EOF
 
 if prompt_yes_no "Do you want to proceed with the install?" ; then

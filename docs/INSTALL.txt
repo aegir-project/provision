@@ -247,9 +247,10 @@ This section deals with the actual installation of Aegir.
 There is an install script that takes care of installing the right packages and 
 preparing the backend and frontend install for you. That script needs to be run 
 as the aegir user created above.  This file is available in Provision or can be 
-downloaded through the web at:
+downloaded through the web with this command:
 
-http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD
+Shell commands::
+ wget -O install.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD'
 
 By default, the install script will install the "correct" version of Aegir
 (ie. if it was downloaded through git, it will install the version from the
@@ -260,7 +261,7 @@ AEGIR_VERSION variable in the script.
 Shell commands::
  su -s /bin/sh aegir -c "sh install.sh.txt aegir.example.com"
 
-Note you must run this as root or prefix with sudo.
+Note you must run the above command as root or prefix with sudo.
 
 Be sure to change 'aegir.example.com' to match the URI of your site.
 
