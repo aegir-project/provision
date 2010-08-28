@@ -28,6 +28,9 @@ function drush_provision_drupal_post_provision_import() {
     // set this in the site options too so it recurrs.
     drush_set_option('aliases', drush_get_option('aliases'),  'site');
 
+    // generate the drushrc
+    provision_save_site_data();
+
     provision_backend_invoke(d()->name, 'provision-verify');
   }
 }
