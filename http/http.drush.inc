@@ -83,7 +83,7 @@ class provisionService_http_public extends provisionService_http {
 
     // Redirection urls
     $this->server->setProperty('web_disable_url', $this->server->master_url .'/hosting/disabled');
-    $this->server->setProperty('web_maintenence_url', $this->server->master_url .'/hosting/maintenance');
+    $this->server->setProperty('web_maintenance_url', $this->server->master_url .'/hosting/maintenance');
 
 
     if (!is_null($this->application_name)) {
@@ -97,9 +97,9 @@ class provisionService_http_public extends provisionService_http {
 
   static function option_documentation() {
     return array(
-      '--web_group' => 'server with http: OS group for permissions; working default will be attepted',
+      '--web_group' => 'server with http: OS group for permissions; working default will be attempted',
       '--web_disable_url' => 'server with http: URL disabled sites are redirected to; default {master_url}/hosting/disabled',
-      '--web_maintenence_url' => 'server with http: URL maintenance sites are redirected to; default {master_url}/hosting/maintenance',
+      '--web_maintenance_url' => 'server with http: URL maintenance sites are redirected to; default {master_url}/hosting/maintenance',
     );
   }
 
