@@ -37,7 +37,7 @@ function drush_provision_hostmaster_install($site = NULL) {
    // apache or nginx or..
     'http_service_type' => drush_get_option('http_service_type', 'apache', 'options'),
     'web_group' => drush_get_option('web_group', _provision_default_web_group()),
-    'master_url' => "http://" . $site . "/",
+    'master_url' => "http://" . $site,
    // mysql
     'db_service_type' => 'mysql',
     'master_db' => $data['master_db'],
