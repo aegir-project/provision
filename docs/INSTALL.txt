@@ -11,10 +11,10 @@ Aegir Drupal provisionning system.
 ------------------------------------------------------------------------------
 
 Aegir installation seems difficult at first, but once you get around it, it's
-fairly simple. It's 3 basic steps:
+fairly simple. It's 3 basic steps::
 
  1. Install requirements
- 2. Configure system requirements, which include:
+ 2. Configure system requirements, which include::
     * create a Aegir user
     * configure Apache, MySQL, DNS, etc
  3. Run the install script.
@@ -134,11 +134,11 @@ Shell commands as root::
 If the command returns your IP address, you are all set. If it returns
 an error you will need to edit your ``/etc/hosts`` file.
 
-First line of this file looks like:
+First line of this file looks like::
 
 ``127.0.0.1  localhost``
 
-Simply add all domains you want to this line. e.g:
+Simply add all domains you want to this line. e.g::
 
 ``127.0.0.1  localhost $AEGIR_HOST $AEGIR_DOMAIN other1 other2``
 
@@ -247,7 +247,7 @@ This section deals with the actual installation of Aegir.
 There is an install script that takes care of installing the right packages and 
 preparing the backend and frontend install for you. That script needs to be run 
 as the aegir user created above.  This file is available in Provision or can be 
-downloaded through the web with this command:
+downloaded through the web with this command::
 
 Shell commands::
  wget -O install.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD'

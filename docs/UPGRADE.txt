@@ -51,7 +51,7 @@ Shell commands::
 
 As of the 0.4-alpha3 release, 'unzip' is a required dependency on your server
 in order to successfully extract the jquery.ui library that is part of some UI
-improvements. On Debian, this means:
+improvements. On Debian, this means::
 
 Shell commands::
 
@@ -59,7 +59,7 @@ Shell commands::
 
 If you intend on upgrading your system to the bleeding edge version of the
 code from our git repositories, you will need the git program installed.  On
-Debian, this means:
+Debian, this means::
 
 Shell commands::
 
@@ -163,11 +163,11 @@ Shell commands as root::
 If the command returns your IP address, you are all set. If it returns
 an error you will need to edit your ``/etc/hosts`` file.
 
-First line of this file looks like:
+First line of this file looks like::
 
 ``127.0.0.1  localhost``
 
-Simply add all domains you want to this line. e.g:
+Simply add all domains you want to this line. e.g::
 
 ``127.0.0.1  localhost $AEGIR_HOST $AEGIR_DOMAIN other1 other2``
 
@@ -184,7 +184,7 @@ To make sure that the Aegir backend, and all the possible web servers can
 reach your database server, you need to configure mysql to listen on all
 the public IP addresses available to it.
 
-/etc/mysql/my.conf configuration line to comment out::
+/etc/mysql/my.cnf configuration line to comment out::
   bind-address	= 127.0.0.1
 
 Now you need to restart mysql, to clear any caches.
@@ -224,15 +224,15 @@ After you have completed the migration process as outlined above,
 you will need to change the line you added to either the httpd.conf file 
 or /etc/apache2/conf.d/aegir file during installation.
 
-Open your httpd.conf file and modify :
+Open your httpd.conf file and modify::
 
   Include /var/aegir/config/vhost.d
 
-To read :
+To read ::
 
   Include /var/aegir/config/apache.conf
 
-You will also need to create the following directories :
+You will also need to create the following directories ::
 
   /var/aegir/config/platform.d
   /var/aegir/config/apache.d
