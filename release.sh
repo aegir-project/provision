@@ -75,23 +75,23 @@ fi
 
 git pull
 echo changing makefile to download tarball
-sed -i -e '/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
-  -e '/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://files.aegirproject.org/hostmaster-'$version'.tgz"#' \
-  -e '/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[directory_name] = "hostmaster"/' aegir.make && git add aegir.make
+sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
+  -e'/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://files.aegirproject.org/hostmaster-'$version'.tgz"#' \
+  -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[directory_name] = "hostmaster"/' aegir.make && git add aegir.make && rm aegir.make.tmp
 
 echo changing INSTALL.txt to point to tagged install.sh
-sed -i "/http:\/\/git.aegirproject.org\/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD/s/HEAD/provision-$version/" docs/INSTALL.txt && git add docs/INSTALL.txt
+sed -i'.tmp' -e"/http:\/\/git.aegirproject.org\/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD/s/HEAD/provision-$version/" docs/INSTALL.txt && git add docs/INSTALL.txt && rm docs/INSTALL.txt.tmp
 
 echo changing UPGRADE.txt to point to release tags
-sed -i -e "s/export AEGIR_VERSION=HEAD/export AEGIR_VERSION=$version/" docs/UPGRADE.txt
+sed -i'.tmp' -e"s/export AEGIR_VERSION=HEAD/export AEGIR_VERSION=$version/" docs/UPGRADE.txt
 
 if ! [ -z "$old_version" ]; then
     sed -i -e "/export OLD_DRUPAL_DIR=/s#hostmaster-.*#hostmaster-$old_version#" docs/UPGRADE.txt
 fi
-git add docs/UPGRADE.txt
+git add docs/UPGRADE.txt && rm docs/UPGRADE.txt.tmp
 
 echo changing install.sh.txt version
-sed -i -e "s/AEGIR_VERSION=.*$/AEGIR_VERSION=\"$version\"/" install.sh.txt && git add install.sh.txt
+sed -i'.tmp' -e"s/AEGIR_VERSION=.*$/AEGIR_VERSION=\"$version\"/" install.sh.txt && git add install.sh.txt && rm install.sh.txt.tmp
 
 echo resulting changes to be committed:
 git diff --cached | cat
