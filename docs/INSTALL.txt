@@ -250,7 +250,7 @@ as the aegir user created above.  This file is available in Provision or can be
 downloaded through the web with this command::
 
 Shell commands::
- wget -O install.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha13'
+ wget -O install.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD'
 
 By default, the install script will install the "correct" version of Aegir
 (ie. if it was downloaded through git, it will install the version from the
