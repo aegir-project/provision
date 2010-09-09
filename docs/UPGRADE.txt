@@ -36,34 +36,19 @@ you are reading this document.
 Shell commands::
 
   export AEGIR_VERSION=HEAD
-  export DRUPAL_DIR=/var/aegir/hostmaster-$AEGIR_VERSION
+  export AEGIR_DIR=/var/aegir
+  export DRUPAL_DIR=$AEGIR_DIR/hostmaster-$AEGIR_VERSION
   export DRUSH_VERSION=6.x-3.3
   export DRUSH_MAKE_VERSION=6.x-2.0-beta8
   export AEGIR_DOMAIN=aegir.example.com
-  export OLD_DRUPAL_DIR=/var/aegir/hostmaster-0.4-alpha9
+  export OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-alpha9
 
 This document also assumes drush is installed properly and we use an
 environment variable to simplify the documentation again.
 
 Shell commands::
 
-  export DRUSH='php /var/aegir/drush/drush.php'
-
-As of the 0.4-alpha3 release, 'unzip' is a required dependency on your server
-in order to successfully extract the jquery.ui library that is part of some UI
-improvements. On Debian, this means::
-
-Shell commands::
-
- apt-get install unzip
-
-If you intend on upgrading your system to the bleeding edge version of the
-code from our git repositories, you will need the git program installed.  On
-Debian, this means::
-
-Shell commands::
-
- apt-get install git-core
+  export DRUSH="php $AEGIR_DIR/drush/drush.php"
 
 Generic upgrade instructions
 ============================
@@ -71,7 +56,9 @@ Generic upgrade instructions
 We aim to create a generic upgrade process that will be consistent across
 versions. This section describes this process. However, there are
 version-specific upgrade instructions that may be more relevant to your
-installation in the next section.
+installation in the next section. You should check the version-specific
+instructions to ensure you have covered off the requirements necessary for
+successfully completing these version-generic steps.
 
 Upgrading the backend
 ---------------------
@@ -96,12 +83,12 @@ frontend.
 
 Shell commands::
 
-  cd /var/aegir
+  cd $AEGIR_DIR
   mv drush drush.bak
   wget http://ftp.drupal.org/files/projects/drush-$DRUSH_VERSION.tar.gz 
   gunzip -c drush-$DRUSH_VERSION.tar.gz | tar -xf -
   rm drush-$DRUSH_VERSION.tar.gz
-  cd /var/aegir/.drush
+  cd $HOME/.drush
   mv provision ../provision.bak
   wget http://files.aegirproject.org/provision-$AEGIR_VERSION.tgz
   gunzip -c provision-$AEGIR_VERSION.tgz | tar -xf -
@@ -116,7 +103,7 @@ drush_make with the latest recommended release.
 
 Shell commands::
 
-  $DRUSH dl drush_make-$DRUSH_MAKE_VERSION --destination='/var/aegir/.drush'
+  $DRUSH dl drush_make-$DRUSH_MAKE_VERSION --destination="$HOME/.drush"
 
 Upgrading the frontend
 ----------------------
@@ -150,6 +137,17 @@ simply be run again when a new security release of Drupal is made available.
 Version-specific upgrade notes
 ==============================
 
+Bleeding-edge HEAD dependency
+-----------------------------
+
+If you intend on upgrading your system to the bleeding edge version of the
+code from our git repositories, you will need the git program installed.  On
+Debian, this means::
+
+Shell commands::
+
+ apt-get install git-core
+
 0.4 - DNS Configuration
 -----------------------
 
@@ -176,6 +174,18 @@ the resolved IP address to be the '127.0.0.1' loopback address.
 
 If you intend to manage multiple servers using Aegir, you will need to
 make sure that the IP address is the public IP of this server.
+
+
+0.4 - unzip dependency
+----------------------
+
+As of the 0.4-alpha3 release, 'unzip' is a required dependency on your server
+in order to successfully extract the jquery.ui library that is part of some UI
+improvements. On Debian, this means::
+
+Shell commands::
+
+ apt-get install unzip
 
 0.4 - Database configuration
 ----------------------------
