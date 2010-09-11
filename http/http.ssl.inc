@@ -56,7 +56,7 @@ class provisionService_http_ssl extends provisionService_http_public {
         $ip = provisionService_http_ssl::get_certificate_ip($ssl_key, $this->server);
 
         if (!$ip) {
-          drupal_set_error("SSL_IP_FAILURE", dt("There are no more IP addresses available on %server for the %ssl_key certificate.", array(
+          drush_set_error("SSL_IP_FAILURE", dt("There are no more IP addresses available on %server for the %ssl_key certificate.", array(
             "%server" => $this->server->remote_host,
             "%ssl_key" => $ssl_key,
           )));
