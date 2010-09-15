@@ -24,17 +24,21 @@ function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = null
   drush_invoke('provision-backup');
 
   drush_set_option('old_platform', d()->platform->name);
-  if (d()->platform->name == $platform) {
-    // deploying over existing site.
-    drush_set_option('deploy_replace_site', TRUE);
-  }
 
   // If we are renaming the site, pick this up early.
   if (!is_null($new_uri) && ($new_uri != d()->uri)) {
     drush_set_option('target_name', $new_uri);
   }
   else {
+    // the site url stays the same
     drush_set_option('target_name', d()->name);
+
+    // The platform stays the same
+    if (d()->platform->name == $platform) {
+      drush_log('Replacing the existing site on the same platform');
+      // deploying over existing site.
+      drush_set_option('deploy_replace_site', TRUE);
+    }
   }
 }
 
@@ -64,6 +68,8 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = null) {
 
   $options = array();
 
+  $options['uri'] = d()->uri;
+
   if (!is_null($new_uri) && ($new_uri != d()->uri)) {
     $options = d()->options;
     $options['uri'] = ltrim($new_uri, '@');
@@ -80,9 +86,12 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = null) {
     $options['db_server'] = $db_server;
   }
 
+  drush_set_option('new_site_path', "{$options['root']}/sites/{$options['uri']}");
+
   drush_backend_invoke_args('provision-save', array($target), $options);
   provision_backend_invoke($target, 'provision-deploy', array(drush_get_option('backup_file')), array('old_uri' => d()->uri));
   if (!drush_get_error()) {
+    drush_set_option('provision_save_config', false);
     provision_backend_invoke($target, 'provision-verify');
   }
 }
@@ -115,6 +124,8 @@ function drush_provision_drupal_post_provision_migrate($platform, $new_uri = nul
     $config = new provisionConfig_drushrc_alias(d()->name);
     $config->unlink();
   }
-}
 
+  // Load the config file of the newly migrated site and return it to hosting.
+  provision_reload_config('site', drush_get_option('new_site_path', d()->site_path) . '/drushrc.php');
+}
 
