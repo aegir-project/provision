@@ -31,7 +31,12 @@ function drush_provision_drupal_post_provision_import() {
     // generate the drushrc
     provision_save_site_data();
 
+    // Do not automatically save the drushrc at the end of the command.
+    drush_set_option('provision_save_config', false);
+
     provision_backend_invoke(d()->name, 'provision-verify');
+
+    provision_reload_config('site');
   }
 }
 
