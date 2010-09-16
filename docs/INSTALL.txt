@@ -287,7 +287,10 @@ should look something like this::
  /var/aegir/hostmaster-0.x/profiles/hostmaster/modules/modalframe/
  /var/aegir/hostmaster-0.x/profiles/hostmaster/themes/eldir/
  /var/aegir/hostmaster-0.x/sites/aegir.example.com/
- /var/aegir/config/vhost.d/
+ /var/aegir/config/server_master/apache.conf
+ /var/aegir/config/server_master/apache/conf.d/
+ /var/aegir/config/server_master/apache/vhost.d/
+ /var/aegir/config/server_master/apache/platform.d/
  /var/aegir/backups/
  /var/aegir/drush/drush.php
  /var/aegir/.drush/drush_make/
