@@ -16,7 +16,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   if (!drush_get_option('backend-only')) {
 
     if (!function_exists('drush_make_drush_command')) {
-      drush_backend_invoke('dl', array('drush_make-' . drush_get_option('drush_make_version', '6.x-2.0-beta8'), 'destination' => $aegir_root . '/.drush/'));
+      drush_backend_invoke('dl', array('drush_make-' . drush_get_option('drush_make_version', '6.x-2.0-beta9'), 'destination' => $aegir_root . '/.drush/'));
     }
 
   }
