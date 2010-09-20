@@ -86,7 +86,7 @@ echo changing UPGRADE.txt to point to release tags
 sed -i'.tmp' -e"s/export AEGIR_VERSION=HEAD/export AEGIR_VERSION=$version/" docs/UPGRADE.txt
 
 if ! [ -z "$old_version" ]; then
-    sed -i -e "/export OLD_DRUPAL_DIR=/s#hostmaster-.*#hostmaster-$old_version#" docs/UPGRADE.txt
+    sed -i.tmp -e"/export OLD_DRUPAL_DIR=/s#hostmaster-.*#hostmaster-$old_version#" docs/UPGRADE.txt
 fi
 git add docs/UPGRADE.txt && rm docs/UPGRADE.txt.tmp
 
