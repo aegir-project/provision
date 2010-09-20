@@ -11,8 +11,8 @@ drush_log(t('Cleared all caches'));
 node_types_rebuild();
 drush_log(t('Rebuild node type cache'));
 
-system_rebuild_module_data();
-drush_log(t('Rebuild module cache'));
+registry_rebuild();
+drush_log(t('Rebuild code registry'));
 
 system_rebuild_theme_data();
 drush_log(t('Rebuild theme cache'));
