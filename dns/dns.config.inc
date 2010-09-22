@@ -172,9 +172,12 @@ class provisionConfig_dns_zone extends provisionConfig_dns {
    * test to see if the 
    */
   function is_empty() {
-    $records = $this->config('zone', $zone)->merge_records();
+    $records = $this->store->merged_records();
     // if there is any record that is not SOA or NS, this is
     // considered empty
+    if (empty($records)) {
+      return TRUE;
+    }
     foreach ($records as $name => $record) {
       if ($name != '@') {
         return FALSE;
