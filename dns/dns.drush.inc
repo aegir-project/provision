@@ -237,11 +237,16 @@ class provisionService_dns extends provisionService {
       $zone = $this->context->dns_zone;
       $sub = $this->context->dns_zone_subdomain;
     }
-    elseif (is_null($zone)) {
+    if (empty($zone)) {
       return drush_set_error('DRUSH_DNS_NO_ZONE', "Could not determine the zone to create");
     }
 
+    drush_log(dt("creating zone %zone", array("%zone" => $zone)));
+    $this->config('zone', $zone)->write();
+
+    drush_log(dt("recording zone in server configuration"));
     $this->config('server')->record_set($zone, $zone)->write();
+
   }
 
   /**
