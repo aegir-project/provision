@@ -116,6 +116,7 @@ class provisionService_dns extends provisionService {
       $this->server->dns_hostd_path = "{$app_dir}/host.d";
     }
 
+    $this->server->setProperty('dns_default_mx', null); # XXX: until we get full zone management
     $this->server->setProperty('dns_ttl', 86400); # 24h
     $this->server->setProperty('dns_refresh', 21600); # 6h
     $this->server->setProperty('dns_retry', 3600); # 1h

@@ -12,6 +12,13 @@ print("@     IN     SOA  $server->remote_host $dns_email (
 			      $server->dns_negativettl ; minimum
           )\n");
 
+if (!empty($server->dns_default_mx)) {
+  if ($server->dns_default_mx[strlen($server->dns_default_mx)-1] != '.') {
+    $server->dns_default_mx .= '.';
+  }
+  print "@\tIN\tMX\t10\t" . $server->dns_default_mx . "\n";
+}
+
 print "@\tIN\tNS\t" . $server->remote_host . " ; primary DNS\n";
 
 foreach ($server->dns_slaves as $slave) {
