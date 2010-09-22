@@ -1,4 +1,6 @@
 core = 6.x
+api = 2
+
 projects[] = "drupal"
 
 projects[hostmaster][type] = "profile"

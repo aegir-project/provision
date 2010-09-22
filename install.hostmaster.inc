@@ -16,7 +16,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   if (!drush_get_option('backend-only')) {
 
     if (!function_exists('drush_make_drush_command')) {
-      drush_backend_invoke('dl', array('drush_make-' . drush_get_option('drush_make_version', '6.x-2.0-beta8'), 'destination' => $aegir_root . '/.drush/'));
+      drush_backend_invoke('dl', array('drush_make-' . drush_get_option('drush_make_version', '6.x-2.0-beta9'), 'destination' => $aegir_root . '/.drush/'));
     }
 
   }
@@ -37,7 +37,7 @@ function drush_provision_hostmaster_install($site = NULL) {
    // apache or nginx or..
     'http_service_type' => drush_get_option('http_service_type', 'apache', 'options'),
     'web_group' => drush_get_option('web_group', _provision_default_web_group()),
-    'master_url' => "http://" . $site . "/",
+    'master_url' => "http://" . $site,
    // mysql
     'db_service_type' => 'mysql',
     'master_db' => $data['master_db'],

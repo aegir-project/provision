@@ -56,7 +56,7 @@ function provision_drupal_drush_exit() {
   $command = drush_get_command();
   $command = explode(" ", $command['command']);
 
-  if (preg_match("/^provision-/", $command[0])) {
+  if (preg_match("/^provision-/", $command[0]) && drush_get_option('provision_save_config', TRUE)) {
     if (d()->type === 'site') {
       if (drush_get_option('installed')) {
         // Don't generate the drushrc.php on provision-save/delete commands.
@@ -617,5 +617,28 @@ function provision_prepare_environment() {
   // As of Drupal 7 there is no more mysqli type
   if (drush_drupal_major_version() >= 7) {
     $_SERVER['db_type'] = ($_SERVER['db_type'] == 'mysqli') ? 'mysql' : $_SERVER['db_type'];
+  }
+}
+
+
+/**
+ * Reload drushrc files (if available) from several possible locations.
+ *
+ * Because the base drush_load_config method only uses an include_once, 
+ * we run into issues when provision commands call other commands that
+ * modify these config files.
+ *
+ * For the changes to become available, and more importantly passed to the
+ * front end, we need to call this function after calling provision commands.
+ */
+function provision_reload_config($context, $file = null) {
+  $file = ($file) ? $file : _drush_config_file($context);
+  if (file_exists($file)) {
+    drush_log("Reloading $context drushrc.php from $file");
+    include($file);
+    if (sizeof($options)) {
+      $options = array_merge(drush_get_context($context, array()), $options);
+      drush_set_context($context, $options);
+    }
   }
 }

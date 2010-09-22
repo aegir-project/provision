@@ -1,4 +1,4 @@
-<VirtualHost <?php print $ip_address . ':' . $http_port; ?>>
+<VirtualHost *:<?php print $http_port; ?>>
     <?php if ($this->site_mail) : ?>
       ServerAdmin <?php  print $this->site_mail; ?> 
     <?php endif;?>

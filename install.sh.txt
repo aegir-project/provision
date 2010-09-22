@@ -102,7 +102,7 @@ fi
 msg "This script makes the following assumptions: "
 cat <<EOF
  * you have read INSTALL.txt and prepared the platform accordingly
- * you are running as your "aegir" user
+ * you are executing this script as your "aegir" user
 EOF
 
 if prompt_yes_no "Do you want to proceed with the install?" ; then
@@ -124,7 +124,7 @@ cat <<EOF
 You will be asked to enter your mysql root user password now :
 EOF
 
-/usr/bin/mysql -uroot -p mysql<<EOFMYSQL
+mysql -uroot -p mysql<<EOFMYSQL
 GRANT ALL PRIVILEGES ON *.* TO '$AEGIR_DB_USER'@'$AEGIR_HOST' IDENTIFIED BY '$AEGIR_DB_PASS' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON *.* TO '$AEGIR_DB_USER'@'$AEGIR_HOST_IP' IDENTIFIED BY '$AEGIR_DB_PASS' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON *.* TO '$AEGIR_DB_USER'@'localhost' IDENTIFIED BY '$AEGIR_DB_PASS' WITH GRANT OPTION;
@@ -148,7 +148,7 @@ else
 fi
 
 if $DRUSH help > /dev/null ; then
-  msg "Drush seems to be functionning properly"
+  msg "Drush seems to be functioning properly"
 else
   msg "Drush is broken ($DRUSH help failed)"
   exit 1

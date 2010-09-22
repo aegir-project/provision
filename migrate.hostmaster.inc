@@ -8,6 +8,13 @@ function drush_provision_hostmaster_migrate_validate($site, $platform) {
 
   $alias_file = drush_server_home() . '/.drush/server_master.alias.drushrc.php';
 
+  if (!file_exists($platform)) {
+    $dir = realpath(dirname($platform));
+    if (file_exists($dir)) {
+      $platform = $dir . '/' . basename($platform);
+      drush_log("changed relative platform path to absolute");
+    }
+  }
 
   // If the alias file exists, it means we are migrating from a post alpha9 release.
   if (file_exists($alias_file)) {

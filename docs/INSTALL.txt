@@ -11,10 +11,10 @@ Aegir Drupal provisionning system.
 ------------------------------------------------------------------------------
 
 Aegir installation seems difficult at first, but once you get around it, it's
-fairly simple. It's 3 basic steps:
+fairly simple. It's 3 basic steps::
 
  1. Install requirements
- 2. Configure system requirements, which include:
+ 2. Configure system requirements, which include::
     * create a Aegir user
     * configure Apache, MySQL, DNS, etc
  3. Run the install script.
@@ -134,11 +134,11 @@ Shell commands as root::
 If the command returns your IP address, you are all set. If it returns
 an error you will need to edit your ``/etc/hosts`` file.
 
-First line of this file looks like:
+First line of this file looks like::
 
 ``127.0.0.1  localhost``
 
-Simply add all domains you want to this line. e.g:
+Simply add all domains you want to this line. e.g::
 
 ``127.0.0.1  localhost $AEGIR_HOST $AEGIR_DOMAIN other1 other2``
 
@@ -247,9 +247,10 @@ This section deals with the actual installation of Aegir.
 There is an install script that takes care of installing the right packages and 
 preparing the backend and frontend install for you. That script needs to be run 
 as the aegir user created above.  This file is available in Provision or can be 
-downloaded through the web at:
+downloaded through the web with this command::
 
-http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD
+Shell commands::
+ wget -O install.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD'
 
 By default, the install script will install the "correct" version of Aegir
 (ie. if it was downloaded through git, it will install the version from the
@@ -260,7 +261,7 @@ AEGIR_VERSION variable in the script.
 Shell commands::
  su -s /bin/sh aegir -c "sh install.sh.txt aegir.example.com"
 
-Note you must run this as root or prefix with sudo.
+Note you must run the above command as root or prefix with sudo.
 
 Be sure to change 'aegir.example.com' to match the URI of your site.
 
@@ -286,7 +287,10 @@ should look something like this::
  /var/aegir/hostmaster-0.x/profiles/hostmaster/modules/modalframe/
  /var/aegir/hostmaster-0.x/profiles/hostmaster/themes/eldir/
  /var/aegir/hostmaster-0.x/sites/aegir.example.com/
- /var/aegir/config/vhost.d/
+ /var/aegir/config/server_master/apache.conf
+ /var/aegir/config/server_master/apache/conf.d/
+ /var/aegir/config/server_master/apache/vhost.d/
+ /var/aegir/config/server_master/apache/platform.d/
  /var/aegir/backups/
  /var/aegir/drush/drush.php
  /var/aegir/.drush/drush_make/
