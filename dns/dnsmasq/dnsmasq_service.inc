@@ -2,7 +2,7 @@
 
 class provisionService_dns_dnsmasq extends provisionService_dns {
   protected $application_name = 'dnsmasq';
-  protected $has_restart_command = TRUE;
+  protected $has_restart_cmd = TRUE;
 
   function default_restart_cmd() {
     return 'sudo /etc/init.d/dnsmasq restart';

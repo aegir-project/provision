@@ -8,7 +8,7 @@
 class provisionService_dns_bind extends provisionService_dns {
   protected $application_name = 'bind';
 
-  protected $has_restart_command = TRUE;
+  protected $has_restart_cmd = TRUE;
   private $zone_cache = array();
   
   static function bind_default_restart_cmd() {
