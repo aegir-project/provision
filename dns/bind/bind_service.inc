@@ -12,7 +12,7 @@ class provisionService_dns_bind extends provisionService_dns {
   private $zone_cache = array();
   
   static function bind_default_restart_cmd() {
-    return "/etc/init.d/named restart";
+    return "rndc reload";
   }
 
   function default_restart_cmd() {
