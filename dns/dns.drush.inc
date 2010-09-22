@@ -81,9 +81,12 @@ class provisionService_dns extends provisionService {
    *    The serial, incremented based on current date and index
    */
   function increment_serial($serial = null) {
-    $date = substr($serial, 0, 8); # Get the YYYYMMDD part
     $today = date('Ymd');
-    if (is_null($serial) || $date != $today) {
+    if (is_null($serial)) {
+      return $today . '00';
+    }
+    $date = substr($serial, 0, 8); # Get the YYYYMMDD part
+    if ($date != $today) {
       return $today . '00';
     } else {
       $index = substr($serial, 8, 2); # Get the index part
