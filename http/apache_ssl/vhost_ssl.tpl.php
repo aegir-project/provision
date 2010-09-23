@@ -35,15 +35,14 @@ if (sizeof($this->aliases)) {
   print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
 
   if ($this->redirection) {
-    print "\n RewriteEngine on";
+    print " RewriteEngine on\n";
 
-    print "\n RewriteCond %{HTTP_HOST} " .
-      implode(" [OR]\n RewriteCond %{HTTP_HOST} ", $this->aliases) . " [NC]\n";
+    // Redirect all aliases to the main https url.
+    print " RewriteCond %{HTTP_HOST} !^{$this->uri}$ [NC]\n";
     print " RewriteRule ^/*(.*)$ https://{$this->uri}/$1 [L,R=301]\n";
   }
 }
 ?>
-
 
   <?php print $extra_config; ?>
 

@@ -25,24 +25,20 @@ if (sizeof($this->aliases)) {
   print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
 
   if ($this->redirection || $ssl_redirection) {
-    print "\n RewriteEngine on";
-
-    if ($ssl_redirection) {
-      // The URL we want to direct to can't be this virtual host,
-      // so we redirect the ServerName too.
-      print "\n RewriteCond %{HTTP_HOST} {$this->uri} [OR]";
-    }
-
-    print "\n RewriteCond %{HTTP_HOST} " .
-      implode(" [OR]\n RewriteCond %{HTTP_HOST} ", $this->aliases) . " [NC]\n";
+    print " RewriteEngine on\n";
 
     if ($ssl_redirection && !$this->redirection) {
-      // When we are redirecting for SSL, but not in place of aliases,
-      // redirect to the same HTTP host on SSL.
+      // redirect aliases in non-ssl to the same alias on ssl.
       print " RewriteRule ^/*(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]\n";
     }
-    else {
-      print " RewriteRule ^/*(.*)$ {$redirect_url}/$1 [L,R=301]\n";
+    elseif ($ssl_redirection && $this->redirection) {
+      // redirect all aliases + main uri to the main https uri.
+      print " RewriteRule ^/*(.*)$ https://{$this->uri}/$1 [L,R=301]\n";
+    }
+    elseif (!$ssl_redirection && $this->redirection) {
+      // Redirect all aliases to the main http url.
+      print " RewriteCond %{HTTP_HOST} !^{$this->uri}$ [NC]\n";
+      print " RewriteRule ^/*(.*)$ http://{$this->uri}/$1 [L,R=301]\n";
     }
   }
 }
