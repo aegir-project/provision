@@ -134,6 +134,8 @@ class provisionConfig_http_site extends provisionConfig_http {
       $this->aliases = explode(",", $this->aliases);
     }
 
+    $this->aliases = array_filter($this->aliases, 'trim');
+
     if (!$this->site_enabled) {
       $this->template = $this->disabled_template;
     }

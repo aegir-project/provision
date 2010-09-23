@@ -38,13 +38,14 @@ class provisionService_http_ssl extends provisionService_http_public {
   function config_data($config = null, $class = null) {
     $data = parent::config_data($config, $class);
     $data['http_ssl_port'] = $this->server->http_ssl_port;
-    $data['ssl_redirect_url'] = "https://{$this->context->uri}";
-
-    if ($data['http_ssl_port'] != $this->default_ssl_port()) {
-      $data['ssl_redirect_url'] .= ":{$data['http_ssl_port']}";
-    }
 
     if ($config == 'site' && $this->context->ssl_enabled) {
+      
+      if ($this->context->ssl_enabled == 2) {
+        $data['ssl_redirection'] = TRUE;
+        $data['redirect_url'] = "https://{$this->context->uri}";
+      }
+
       if ($ssl_key = $this->context->ssl_key) {
         // Retrieve the paths to the cert and key files.
         // they are generated if not found.

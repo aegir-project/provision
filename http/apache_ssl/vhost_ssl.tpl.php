@@ -30,15 +30,20 @@
 
     SSLCertificateKeyFile <?php print $ssl_cert_key; ?>
 
-  <?php if (!$this->redirection && is_array($this->aliases)) :
-    foreach ($this->aliases as $alias_url) :
-    if (trim($alias_url)) : ?>
-    ServerAlias <?php print $alias_url; ?> 
+<?php 
+if (sizeof($this->aliases)) {
+  print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
 
-  <?php
-   endif;
-   endforeach;
-   endif; ?>
+  if ($this->redirection) {
+    print "\n RewriteEngine on";
+
+    print "\n RewriteCond %{HTTP_HOST} " .
+      implode(" [OR]\n RewriteCond %{HTTP_HOST} ", $this->aliases) . " [NC]\n";
+    print " RewriteRule ^/*(.*)$ https://{$this->uri}/$1 [L,R=301]\n";
+  }
+}
+?>
+
 
   <?php print $extra_config; ?>
 
@@ -51,34 +56,6 @@
 <?php endif; ?>
 
 <?php 
-   if ($this->ssl_enabled != 2) :
-     // Generate the standard virtual host too.
-     include('http/apache/vhost.tpl.php');
-
-   else :
-     // Generate a virtual host that redirects all HTTP traffic to https.
+  include('http/apache/vhost.tpl.php');
 ?>
 
-
-<VirtualHost *:<?php print $http_port; ?>>
-  <?php if ($this->site_mail) : ?>
-    ServerAdmin <?php  print $this->site_mail; ?> 
-  <?php endif;?>
-
-    ServerName <?php print $this->uri ?>
-
-  <?php if (is_array($this->aliases)) :
-    foreach ($this->aliases as $alias_url) :
-    if (trim($alias_url)) : ?>
-    ServerAlias <?php print $alias_url; ?> 
-
-  <?php
-   endif;
-   endforeach;
-   endif; ?>
- 
-  RedirectMatch permanent ^(.*) <?php print $ssl_redirect_url ?>$1
-</VirtualHost>
-
-
-<?php endif; ?>

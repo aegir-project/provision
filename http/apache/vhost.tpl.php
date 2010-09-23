@@ -19,15 +19,35 @@
 
   SetEnv db_port  <?php print urlencode($db_port); ?>
 
-<?php if (!$this->redirection && is_array($this->aliases)) :
-  foreach ($this->aliases as $alias_url) :
-  if (trim($alias_url)) : ?>
-  ServerAlias <?php print $alias_url; ?> 
 
-<?php
- endif;
- endforeach;
- endif; ?>
+<?php 
+if (sizeof($this->aliases)) {
+  print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
+
+  if ($this->redirection || $ssl_redirection) {
+    print "\n RewriteEngine on";
+
+    if ($ssl_redirection) {
+      // The URL we want to direct to can't be this virtual host,
+      // so we redirect the ServerName too.
+      print "\n RewriteCond %{HTTP_HOST} {$this->uri} [OR]";
+    }
+
+    print "\n RewriteCond %{HTTP_HOST} " .
+      implode(" [OR]\n RewriteCond %{HTTP_HOST} ", $this->aliases) . " [NC]\n";
+
+    if ($ssl_redirection && !$this->redirection) {
+      // When we are redirecting for SSL, but not in place of aliases,
+      // redirect to the same HTTP host on SSL.
+      print " RewriteRule ^/*(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]\n";
+    }
+    else {
+      print " RewriteRule ^/*(.*)$ {$redirect_url}/$1 [L,R=301]\n";
+    }
+  }
+}
+?>
+
 
 <?php print $extra_config; ?>
 
@@ -38,7 +58,3 @@
 
 </VirtualHost>
 
-<?php
-if ($this->redirection) {
-//  require(dirname(__FILE__) . '/vhost_redirect.tpl.php');
-}
