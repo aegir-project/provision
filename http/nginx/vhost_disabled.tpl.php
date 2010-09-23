@@ -1,6 +1,6 @@
 server {
   listen       <?php print $ip_address . ':' . $http_port; ?>;
-  server_name  <?php print $this->uri; ?><?php if (is_array($this->aliases)) : foreach ($this->aliases as $alias_url) : if (trim($alias_url)) : ?> <?php print $alias_url; ?><?php endif; endforeach; endif; ?>;
+  server_name  <?php print $this->uri . ' ' . implode(' ', $this->aliases); ?>;
   root         <?php print $this->root; ?>;
   index        index.php index.html;
   location / {

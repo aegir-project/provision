@@ -27,13 +27,15 @@
 
  ## Size Limits
   client_body_buffer_size        64k;
-  client_header_buffer_size       1k;
-  client_max_body_size           25m;
-  large_client_header_buffers  4 32k;
+  client_header_buffer_size      32k;
+  client_max_body_size           50m;
+  large_client_header_buffers 32 32k;
   connection_pool_size           256;
   request_pool_size               4k;
   server_names_hash_bucket_size  128;
-
+  types_hash_max_size           8192;
+  types_hash_bucket_size         128;  
+  
  ## Timeouts 
   client_body_timeout             60;
   client_header_timeout           60;
@@ -47,6 +49,10 @@
  ## TCP options  
   tcp_nopush  on;
 
+ ## SSL performance
+  ssl_session_cache   shared:SSL:10m;
+  ssl_session_timeout            10m;
+    
  ## Compression
   gzip_buffers      16 8k;
   gzip_comp_level   9;

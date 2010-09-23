@@ -2,49 +2,38 @@
 <?php if ($this->ssl_enabled && $this->ssl_key) : ?>
 
 server {
+<?php 
+   print "   include      " . $server->include_path . "/fastcgi_ssl_params.conf;\n";
+?>
    limit_conn   gulag 10; # like mod_evasive - this allows max 10 simultaneous connections from one IP address
    listen       <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
-   server_name  <?php print $this->uri; ?> <?php if (!$this->redirection && is_array($this->aliases)) : foreach ($this->aliases as $alias_url) : if (trim($alias_url)) : ?> <?php $alias_url = "." . $alias_url; ?> <?php print $alias_url; ?> <?php endif; endforeach; endif; ?>;
+   server_name  <?php print $this->uri . ' ' . implode(' ', $this->aliases); ?>;
    root         <?php print $this->root; ?>;
    index        index.php index.html;
    ssl                         on;
    ssl_certificate             <?php print $ssl_cert; ?>;
    ssl_certificate_key         <?php print $ssl_cert_key; ?>;
-   ssl_session_timeout         5m;
    ssl_protocols               SSLv2 SSLv3 TLSv1;
    ssl_ciphers                 ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
    ssl_prefer_server_ciphers   on;
-<?php 
+   keepalive_timeout           70;
+<?php
+    if ($this->redirection) {
+      // Redirect all aliases to the main https url.
+      print "\n   if (\$host !~ ^({$this->uri})$ ) {\n       rewrite ^/(.*)$  https://{$this->uri}/$1 permanent;\n   }\n";
+    }
     if ($server->nginx_has_new_version || $server->nginx_has_upload_progress) {
-      print '   include      ' . $server->include_path . '/nginx_advanced_include.conf';
+      print "   include      " . $server->include_path . "/nginx_advanced_include.conf;\n";
     }
     else {
-      print '   include      ' . $server->include_path . '/nginx_simple_include.conf';
+      print "   include      " . $server->include_path . "/nginx_simple_include.conf;\n";
     }
-?>;
+?>
 }
 
 <?php endif; ?>
 
 <?php 
-   if ($this->ssl_enabled != 2) :
-     // Generate the standard virtual host too.
-     include('http/nginx/vhost.tpl.php');
-
-   else :
-     // Generate a virtual host that redirects all HTTP traffic to https.
+   // Generate the standard virtual host too.
+   include('http/nginx/vhost.tpl.php');
 ?>
-
-server {
-  listen       <?php print $ip_address . ':' . $http_port; ?>;
-  server_name  <?php print $this->uri; ?> <?php if (!$this->redirection && is_array($this->aliases)) : foreach ($this->aliases as $alias_url) : if (trim($alias_url)) : ?> <?php $alias_url = "." . $alias_url; ?> <?php print $alias_url; ?> <?php endif; endforeach; endif; ?>;
-  root         <?php print $this->root; ?>;
-  index        index.php index.html;
-  location / {
-     root   /var/www/nginx-default;
-     index  index.html index.htm;
-     rewrite ^/(.*)$  <?php print $ssl_redirect_url ?>/$1 permanent;
-  }
-}
-
-<?php endif; ?>
