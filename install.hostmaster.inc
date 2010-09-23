@@ -24,7 +24,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   $aegir_host = drush_get_option('aegir_host', php_uname('n'), 'options');
   $aegir_db_pass = drush_get_option('aegir_db_pass', 'pass', 'options');
   $aegir_db_user = drush_get_option('aegir_db_user', 'aegir_root', 'options');
-  $data['master_db'] = sprintf("mysql://%s:%s@%s",$aegir_db_user, $aegir_db_pass, $aegir_host);
+  $master_db = sprintf("mysql://%s:%s@%s",$aegir_db_user, $aegir_db_pass, $aegir_host);
 
   // TODO: support creation of an external db server
   $server = '@server_master';
@@ -40,7 +40,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'master_url' => "http://" . $site,
    // mysql
     'db_service_type' => 'mysql',
-    'master_db' => $data['master_db'],
+    'master_db' => $master_db,
   ));
   provision_backend_invoke($server, 'provision-verify');
 
