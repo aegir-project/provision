@@ -67,4 +67,3 @@ Todo
 ====
 
  1. the association between slaves and master doesn't exist in the frontend yet
- 2. NS records are not managed properly (they should be deduced from master/slave relationships)
