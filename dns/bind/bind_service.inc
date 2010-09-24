@@ -26,7 +26,8 @@ class provisionService_dns_bind extends provisionService_dns {
   }
 
   function parse_configs() {
-    $this->restart();
+    $status = $this->restart();
+    return $status && parent::parse_configs();
   }
 }
 

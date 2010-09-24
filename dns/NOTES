@@ -5,7 +5,8 @@ mixes todos, test procedures and install procedures.
 Master server configuration
 ===========================
 
-First, install bind, allow aegir to sudo rndc reload.
+First, install bind, allow aegir to sudo rndc reload. Make sure the bind user
+can read hostmaster files (adduser bind hostmaster).
 
 Then add the DNS service in the frontend. This should trigger a server
 verification and configure the DNS service in the backend. Creating a site
@@ -62,12 +63,8 @@ Caveats
  engines more difficult and would require writing parsers for all
  engines.
 
-Bugs
-====
-
- 1. bind is not restarted on slaves
-
 Todo
 ====
 
  1. the association between slaves and master doesn't exist in the frontend yet
+ 2. NS records are not managed properly (they should be deduced from master/slave relationships)

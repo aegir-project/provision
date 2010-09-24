@@ -58,7 +58,8 @@ function drush_dns_provision_zone($action, $zone, $name = null, $type = null, $d
     $status = drush_set_error('DRUSH_WRONG_ARGUMENT', dt("wrong argument provided to provision-zone"));
     break;
   }
-  $status = $status && d()->service('dns')->commit($zone);
+  // XXX: we shouldn't reload zones unless we have actually done changes, but return values of the above functions are always FALSE
+  d()->service('dns')->parse_configs();
   
   return $status;
 }
@@ -104,7 +105,7 @@ class provisionService_dns extends provisionService {
 
 
   function parse_configs() {
-    return null;
+    return $this->_each_server("parse_configs");
   }
 
   function init_server() {
@@ -271,24 +272,32 @@ class provisionService_dns extends provisionService {
     }
 
     drush_log(dt("creating zone %zone", array("%zone" => $zone)));
-    $this->config('zone', $zone)->write();
+    $status = $this->config('zone', $zone)->write();
 
-    drush_log(dt("recording zone in server configuration"));
-    $this->config('server')->record_set($zone, $zone)->write();
+    if ($status) {
+      drush_log(dt("recording zone in server configuration"));
+      $status = $this->config('server')->record_set($zone, $zone)->write();
+    }
 
-    drush_log(dt("creating zone configuration on slaves"));
-    $this->_each_server("create_zone", array($this->context->ip_addresses, $zone));
+    if ($status) {
+      drush_log(dt("creating zone configuration on slaves"));
+      $status = $this->_each_server("create_zone", array($this->context->ip_addresses, $zone));
+    }
+    return $status;
   }
 
   /**
    * This completely drops a zone, without any checks.
    */
   function delete_zone($zone) {
-    $this->config('zone', $zone)->unlink();
-    $this->config('server')->record_del($zone, $zone)->write();
+    $status = $this->config('zone', $zone)->unlink();
+    $status = $status && $this->config('server')->record_del($zone, $zone)->write();
 
-    drush_log(dt("deleting zone configuration from slaves"));
-    $this->_each_server("delete_zone", $zone);
+    if ($status) {
+      drush_log(dt("deleting zone configuration from slaves"));
+      $status = $this->_each_server("delete_zone", $zone);
+    }
+    return $status;
   }
 
     /** 
