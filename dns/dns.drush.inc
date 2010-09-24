@@ -54,6 +54,9 @@ function drush_dns_provision_zone($action, $zone, $name = null, $type = null, $d
       d()->service('dns')->config('zone', $zone)->record_set($name, NULL)->write();
     }
     break;
+  default:
+    $status = drush_set_error('DRUSH_WRONG_ARGUMENT', dt("wrong argument provided to provision-zone"));
+    break;
   }
   $status = $status && d()->service('dns')->commit($zone);
   
