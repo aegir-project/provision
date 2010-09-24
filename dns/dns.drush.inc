@@ -42,16 +42,16 @@ function drush_dns_provision_zone($action, $zone, $name = null, $type = null, $d
   case 'rr-add':
     $record = d()->service('dns')->config('zone', $zone)->record_get($name);
     $record[$type] = array_merge($record[$type], array($destination));
-    d()->service('dns')->config('zone', $zone)->record_set($name, $record)->write();
+    $status = d()->service('dns')->config('zone', $zone)->record_set($name, $record)->write();
     break;
   case 'rr-modify':
-    d()->service('dns')->config('zone', $zone)->record_set($name, array($type => array($destination)))->write();
+    $status = d()->service('dns')->config('zone', $zone)->record_set($name, array($type => array($destination)))->write();
     break;
   case 'rr-delete':
     if ($type) {
-      d()->service('dns')->config('zone', $zone)->record_set($name, array($type => NULL))->write();
+      $status = d()->service('dns')->config('zone', $zone)->record_set($name, array($type => NULL))->write();
     } else {
-      d()->service('dns')->config('zone', $zone)->record_set($name, NULL)->write();
+      $status = d()->service('dns')->config('zone', $zone)->record_set($name, NULL)->write();
     }
     break;
   default:
