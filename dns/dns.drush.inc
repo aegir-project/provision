@@ -282,6 +282,7 @@ class provisionService_dns extends provisionService {
    */
   function delete_zone($zone) {
     $this->config('zone', $zone)->unlink();
+    $this->config('server')->record_del($zone, $zone)->write();
 
     // kick zone deletion on slaves
     $this->_each_server("delete_zone", $zone);
