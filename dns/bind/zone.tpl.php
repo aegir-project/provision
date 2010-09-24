@@ -20,9 +20,13 @@ if (!empty($server->dns_default_mx)) {
 }
 
 print "@\tIN\tNS\t" . $server->remote_host . " ; primary DNS\n";
-
-foreach ($server->dns_slaves as $slave) {
-  print "@\tIN\tNS\t$slave ; slave DNS\n";
+if (is_array($server->slave_servers_names)) {
+  foreach ($server->slave_servers_names as $slave) {
+    if ($slave[strlen($slave)-1] != '.') {
+      $slave .= '.';
+    }
+    print "@\tIN\tNS\t" . $slave . " ; slave DNS\n";
+  }
 }
 
 foreach ($records['@'] as $type => $destinations) {

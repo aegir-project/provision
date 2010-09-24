@@ -32,6 +32,18 @@ class provisionService_dns_bind extends provisionService_dns {
 }
 
 class provisionConfig_bind_zone extends provisionConfig_dns_zone {
+
+  /**
+   * this renders the slave servers names (as their alias is stored)
+   */
+  function process() {
+    parent::process();
+    $slaves = array();
+    foreach ($this->server->slave_servers as $slave) {
+      $slaves[] = d($slave)->remote_host;
+    }
+    $this->data['server']->slave_servers_names = $slaves;
+  }
 }
 
 class provisionConfig_bind_server extends provisionConfig_dns_server {
