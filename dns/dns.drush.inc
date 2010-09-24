@@ -276,7 +276,7 @@ class provisionService_dns extends provisionService {
     drush_log(dt("recording zone in server configuration"));
     $this->config('server')->record_set($zone, $zone)->write();
 
-    // kick zone creation on the slaves
+    drush_log(dt("creating zone configuration on slaves"));
     $this->_each_server("create_zone", $zone);
   }
 
@@ -287,7 +287,7 @@ class provisionService_dns extends provisionService {
     $this->config('zone', $zone)->unlink();
     $this->config('server')->record_del($zone, $zone)->write();
 
-    // kick zone deletion on slaves
+    drush_log(dt("deleting zone configuration from slaves"));
     $this->_each_server("delete_zone", $zone);
   }
 
