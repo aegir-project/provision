@@ -277,7 +277,7 @@ class provisionService_dns extends provisionService {
     $this->config('server')->record_set($zone, $zone)->write();
 
     drush_log(dt("creating zone configuration on slaves"));
-    $this->_each_server("create_zone", $zone);
+    $this->_each_server("create_zone", array($this->context->ip_addresses, $zone));
   }
 
   /**
