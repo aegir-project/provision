@@ -116,6 +116,7 @@ class provisionService_dns extends provisionService {
       $this->server->dns_hostd_path = "{$app_dir}/host.d";
     }
 
+    $this->server->setProperty('slave_servers', array());
     $this->server->setProperty('dns_default_mx', null); # XXX: until we get full zone management
     $this->server->setProperty('dns_ttl', 86400); # 24h
     $this->server->setProperty('dns_refresh', 21600); # 6h
@@ -133,6 +134,30 @@ class provisionService_dns extends provisionService {
     }
 
     $this->context->dns_zone_subdomain = trim(str_replace($this->context->dns_zone, '', $this->context->uri), '.');
+  }
+
+  /**
+   * Run a method on each slave server
+   *
+   * This function does a logical AND on the return status of each of the
+   * methods, and returns TRUE only if they all returned something that
+   * can be interpreted as TRUE.
+   *
+   * @todo this is a duplicate of the cluster function of the same name, they
+   * need to be merged, but then the cluster_web_server parameter need to be
+   * renamed...
+   *
+   * @see provisionService_http_cluster::_each_server()
+   */
+  function _each_server($method, $args = array()) {
+    // Return True by default.
+    $ret = TRUE;
+    foreach ($this->server->slave_servers as $server) {
+      // If any methods return false, return false for the whole operation.
+      $result = call_user_func_array(array(d($server)->service($this->service, $this->context), $method), $args);
+      $ret = $ret && $result;
+    }
+    return $ret;
   }
 
   function verify_server_cmd() {
@@ -248,6 +273,8 @@ class provisionService_dns extends provisionService {
     drush_log(dt("recording zone in server configuration"));
     $this->config('server')->record_set($zone, $zone)->write();
 
+    // kick zone creation on the slaves
+    $this->_each_server("create_zone", $zone);
   }
 
   /**
@@ -255,6 +282,9 @@ class provisionService_dns extends provisionService {
    */
   function delete_zone($zone) {
     $this->config('zone', $zone)->unlink();
+
+    // kick zone deletion on slaves
+    $this->_each_server("delete_zone", $zone);
   }
 
     /** 
