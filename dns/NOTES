@@ -30,4 +30,12 @@ Todo:
 
  1. we need slave configuration (ie. modify the slaves configuration
  so that they sync with the master, so just act on create_zone())
- 2. we need to reload bind when changes are done, ideally only once per zone
+
+ Update: the above code is there, but doesn't work for some reason. When I run
+ a zone creation, i end up with:
+
+creating zone configuration on slaves [0.21 sec, 7.39 MB]                                                      [notice]
+Undefined variable: results provision.context.inc:362 [0.22 sec, 7.4 MB]                                       [notice]
+
+ Dumping the d($server) structure shows that the slave server doesn't load
+ properly: it loads as a provisionService_null object, instead of a DNS object.
