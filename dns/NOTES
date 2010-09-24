@@ -70,5 +70,4 @@ Bugs
 Todo
 ====
 
- 1. the bind_slave service doesn't exist in the frontend yet
- 2. the association between slaves and master doesn't exist in the frontend yet
+ 1. the association between slaves and master doesn't exist in the frontend yet
