@@ -19,7 +19,11 @@ if (!empty($server->dns_default_mx)) {
   print "@\tIN\tMX\t10\t" . $server->dns_default_mx . "\n";
 }
 
+if ($server->remote_host[strlen($server->remote_host)-1] != '.') {
+  $server->remote_host .= '.';
+}
 print "@\tIN\tNS\t" . $server->remote_host . " ; primary DNS\n";
+
 if (is_array($server->slave_servers_names)) {
   foreach ($server->slave_servers_names as $slave) {
     if ($slave[strlen($slave)-1] != '.') {
