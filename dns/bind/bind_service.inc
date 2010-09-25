@@ -39,6 +39,9 @@ class provisionConfig_bind_zone extends provisionConfig_dns_zone {
   function process() {
     parent::process();
     $slaves = array();
+    if (!is_array($this->server->slave_servers)) {
+      $this->server->slave_servers = array($this->server->slave_servers);
+    }
     foreach ($this->server->slave_servers as $slave) {
       $slaves[] = d($slave)->remote_host;
     }
