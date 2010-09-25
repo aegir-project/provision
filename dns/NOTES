@@ -61,9 +61,7 @@ Caveats
  1. there's duplicate storage altogether: we could parse zonefiles and
  use that as storage, not PHP files, but that would make switching
  engines more difficult and would require writing parsers for all
- engines.
-
-Todo
-====
-
- 1. the association between slaves and master doesn't exist in the frontend yet
+ engines. such a parser was originally written for bind but was dropped
+ in one of the numerous rewrites of the DNS code.
+ 2. changing the master/slave relationship doesn't change the zonefiles
+ unless every zonefile is verified again.
