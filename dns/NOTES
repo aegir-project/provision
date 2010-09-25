@@ -65,3 +65,8 @@ Caveats
  in one of the numerous rewrites of the DNS code.
  2. changing the master/slave relationship doesn't change the zonefiles
  unless every zonefile is verified again.
+
+Todo and bugs
+=============
+
+Those should be reported in the regular trackers from now on.
