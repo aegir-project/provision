@@ -82,7 +82,7 @@ class provisionConfig_http_platform extends provisionConfig_http {
   public $description = 'platform configuration file';
 
   function filename() {
-    return $this->data['http_platformd_path'] . '/' . ltrim($this->owner->name, '@') . '.conf';
+    return $this->data['http_platformd_path'] . '/' . ltrim($this->context->name, '@') . '.conf';
   }
 }
 

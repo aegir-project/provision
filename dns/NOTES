@@ -1,0 +1,72 @@
+Here is a list of pointers on how to setup DNS in aegir. It's still very crude
+and needs a lot of love. It may also not be the right place for this as it
+mixes todos, test procedures and install procedures. 
+
+Master server configuration
+===========================
+
+First, install bind, allow aegir to sudo rndc reload. Make sure the bind user
+can read hostmaster files (adduser bind hostmaster).
+
+Then add the DNS service in the frontend. This should trigger a server
+verification and configure the DNS service in the backend. Creating a site
+should then create a zone and a record and reload bind.
+
+If you're having trouble with this, you can try to test the backend.
+
+Testing the backend
+-------------------
+
+drush provision-save @server_master --dns_service_type=bind
+drush @server_master provision-zone create foobar.com
+drush @server_master provision-zone rr-add foobar.com www A 1.2.3.4
+
+You should end up with a zonefile like:
+
+; Bind zonefile
+; File managed by Aegir
+; Changes here may be lost by user configurations, tread carefully
+$TTL 
+@       IN      SOA     foobar.com. hostmaster.foobar.com. ( 2010061700 21600 3600 604800 86400  ) 
+www     IN      A       1.2.3.4
+
+With this command:
+
+provision-zone create-host www.foobar.com 
+
+should another similar record to the same zonefile.
+
+Slave server configuration
+==========================
+
+A slave server requires the following steps:
+
+ 1. install bind, sudo, rsync on the server
+ 2. create an aegir user on the server the usual way (including SSH key exchange)
+ 3. create the server in the frontend with the bind_slave service
+ 4. configure the master server to use those slaves:
+
+  drush provision-save @server_master --slave_servers=@server_slaveservername
+
+Then running the tests describe in the master configuration should create a
+config file in /var/aegir/config/bind_slave.conf that you need to include in
+your bind configuration. The config file should look something like this:
+
+zone "foobar.com" { type slave; file "/var/hostmaster/config/server_ns4koumbitnet/bind_slave/zone.d/foobar.com.zone"; masters { 1.2.3.4; }; allow-query { any; }; };
+
+
+Caveats
+=======
+
+ 1. there's duplicate storage altogether: we could parse zonefiles and
+ use that as storage, not PHP files, but that would make switching
+ engines more difficult and would require writing parsers for all
+ engines. such a parser was originally written for bind but was dropped
+ in one of the numerous rewrites of the DNS code.
+ 2. changing the master/slave relationship doesn't change the zonefiles
+ unless every zonefile is verified again.
+
+Todo and bugs
+=============
+
+Those should be reported in the regular trackers from now on.

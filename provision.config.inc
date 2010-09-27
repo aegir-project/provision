@@ -19,11 +19,11 @@ class provisionConfig {
   public $data = array();
 
   /**
-   * A provisionEnvironment object thie configuration relates to.
+   * A provisionContext object thie configuration relates to.
    *
-   * @var provisionEnvironment
+   * @var provisionContext
    */
-  public $owner = null;
+  public $context = null;
 
   /**
    * If set, replaces file name in log messages.
@@ -41,47 +41,52 @@ class provisionConfig {
   protected $group = NULL;
 
   /**
-   * Forward $this->... to $this->owner->...
+   * An optional data store class to instantiate for this config.
+   */
+  protected $data_store_class = NULL;
+
+  /**
+   * The data store.
+   */
+  public $store = NULL;
+
+  /**
+   * Forward $this->... to $this->context->...
    * object.
    */
   function __get($name) {
-    if (isset($this->owner)) {
-      return $this->owner->$name;
+    if (isset($this->context)) {
+      return $this->context->$name;
     }
   }
 
   /**
    * Constructor, overriding not recommended.
    *
-   * @param $owner
-   *   An alias name for d(), the provisionEnvironment that this configuration
+   * @param $context
+   *   An alias name for d(), the provisionContext that this configuration
    *   is relevant to.
    * @param $data
    *   An associative array to potentiall manipulate in process() and make
    *   available as variables to the template.
    */
-  function __construct($owner, $data = array()) {
+  function __construct($context, $data = array()) {
     if (is_null($this->template)) {
       throw(exception);
     }
 
-    $this->data = $this->parse();
+    // Accept both a reference and an alias name for the context.
+    $this->context = is_object($context) ? $context : d($context);
+
     if (sizeof($data)) {
-      $this->data = array_merge($this->data, $data);
+      $this->data = $data;
+    }
+    
+    if (!is_null($this->data_store_class) && class_exists($this->data_store_class)) {
+      $class = $this->data_store_class;
+      $this->store = new $class($context, $data);
     }
 
-    // Accept both a reference and an alias name for the owner.
-    $this->owner = is_object($owner) ? $owner : d($owner);
-  }
-
-  /**
-   * Parse the existing config to load data
-   *
-   * This is called in the constructor, and should take care of
-   * opening the file and parsing it into the data array.
-   */
-  function parse() {
-    return array();
   }
 
   /**
@@ -90,6 +95,9 @@ class provisionConfig {
    * This is a stub to be implemented by subclasses.
    */
   function process() {
+    if (is_object($this->store)) {
+      $this->data['records'] = array_filter(array_merge($this->store->loaded_records, $this->store->records));
+    }
     return true;
   }
 
@@ -106,16 +114,28 @@ class provisionConfig {
    * Load template from filename().
    */
   private function load_template() {
+    $class_name = get_class($this);
+
     $reflect = new reflectionObject($this);
-    $base_dir = dirname($reflect->getFilename());
 
     if (isset($this->template)) {
-      $file = $base_dir . '/' . $this->template;
-      drush_log("Template loaded: $file");
-      if (file_exists($file) && is_readable($file)) {
-        return file_get_contents($file);
+      while ($class_name) {
+        // Iterate through the config file's parent classes until we
+        // find the template file to use.
+        $reflect = new reflectionClass($class_name);
+        $base_dir = dirname($reflect->getFilename());
+
+        $file = $base_dir . '/' . $this->template;
+
+        if (file_exists($file) && is_readable($file)) {
+          drush_log("Template loaded: $file");
+          return file_get_contents($file);
+        }
+
+        $class_name = get_parent_class($class_name);
       }
-    }
+    } 
+
     return false;
   }
 
@@ -186,12 +206,19 @@ class provisionConfig {
     return $status;
   }
 
+  // allow overriding w.r.t locking
+  function file_put_contents($filename, $text) {
+    provision_file()->file_put_contents($filename, $text)
+      ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description), 'success');
+  }
+
   /**
    * Remove configuration file as specified by filename().
    */
   function unlink() {
-    provision_file()->unlink($this->filename())->status();
+    return provision_file()->unlink($this->filename())->status();
   }
+  
 }
 
 /**
@@ -210,8 +237,8 @@ class provisionConfig_drushrc extends provisionConfig {
     return _drush_config_file($this->context_name);
   }
 
-  function __construct($owner, $data = array()) {
-    parent::__construct($owner, $data);
+  function __construct($context, $data = array()) {
+    parent::__construct($context, $data);
     $this->load_data();
   }
 
@@ -239,10 +266,10 @@ class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
    * @param $options
    *   Array of string option names to save.
    */
-  function __construct($owner, $data = array()) {
-    parent::__construct($owner, $data);
+  function __construct($context, $data = array()) {
+    parent::__construct($context, $data);
     $this->data = array(
-      'aliasname' => ltrim($owner, '@'),
+      'aliasname' => ltrim($context, '@'),
       'options' => $data,
     );
   }
@@ -285,3 +312,130 @@ class provisionConfig_drushrc_site extends provisionConfig_drushrc {
   }
 }
 
+/**
+ * Base class for data storage.
+ *
+ * This class provides a file locking mechanism for configuration
+ * files that may be susceptible to race conditions.
+ *
+ * The records loaded from the config and the records set in this
+ * instance are kept in separate arrays.
+ *
+ * When we lock the file, we load the latest stored info.
+ */
+class provisionConfig_data_store extends provisionConfig {
+  public $template = 'data_store.tpl.php';
+  public $key = 'record';
+
+  private $locked = FALSE;
+  protected $fp = null;
+
+  public $records = array();
+  public $loaded_records = array();
+
+  protected $mode = 0700;
+
+
+  function __construct($context, $data = array()) {
+    parent::__construct($context, $data);
+
+    $this->load_data();
+  }
+
+  /**
+   * Ensure the file pointer is closed and the lock released upon destruction.
+   */
+  function __destruct() {
+    // release the file lock if we have it.
+    $this->close();
+  }
+
+  /**
+   * Open the file.
+   */
+  function open() {
+    if (!is_resource($this->fp)) {
+      $this->fp = fopen($this->filename(), "w+");
+    }
+  }
+
+  /**
+   * Lock the file from other writes.
+   *
+   * After the file has been locked, we reload the data from the file
+   * so that any changes we make will not override previous changes.
+   */
+  function lock() {
+    if (!$this->locked) {
+      $this->open();
+      flock($this->fp, LOCK_EX);
+
+      // Do one last load before setting our locked status.
+      $this->load_data();
+      $this->locked = TRUE;
+    }
+  }
+
+  /**
+   * Put the contents in the locked file.
+   *
+   * We call the lock method here to insure we have the lock.
+   */
+  function file_put_contents($filename, $text) {
+    $this->lock();
+    fwrite($this->fp, $text);
+    fflush($this->fp);
+  }
+
+  /**
+   * Release the write log on the data store file.
+   */
+  function unlock() {
+    if ($this->locked && is_resource($this->fp)) {
+      flock($this->fp, LOCK_UN);
+      $this->locked = FALSE;
+    }
+  }
+
+  /**
+   * Close the file pointer and release the lock (if applicable).
+   */
+  function close() {
+    if (is_resource($this->fp)) {
+      fclose($this->fp);
+    }
+  }
+
+  /**
+   * Load the data from the data store into our loaded_records property.
+   */
+  function load_data() {
+    if (!$this->locked) {
+      // Once we have the lock we dont need to worry about it changing
+      // from under us.
+      if (file_exists($this->filename()) && is_readable($this->filename())) {
+        include($this->filename());
+        $data_key = $this->key;
+        if (isset(${$data_key}) && is_array(${$data_key})) {
+          $this->loaded_records = ${$data_key};
+        }
+      }
+    }
+  }
+
+  /**
+   * Return the merged contents of the records from the data store , and the values set by us.
+   *
+   * This is basically the data that would be written to the file if we were to write it right now.
+   */
+  function merged_records() {
+    return array_merge($this->loaded_records, $this->records);
+  }
+
+  /**
+   * Expose the merged records to the template file.
+   */
+  function process() {
+    $this->data['records'] = array_filter(array_merge($this->loaded_records, $this->records));
+  }
+}

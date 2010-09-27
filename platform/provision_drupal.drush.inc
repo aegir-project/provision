@@ -134,7 +134,7 @@ class provisionConfig_drupal_settings extends provisionConfig {
     if (drush_drupal_major_version() >= 7) {
       $this->data['db_type'] = ($this->data['db_type'] == 'mysqli') ? 'mysql' : $this->data['db_type'];
     }
-    $cloaked = $this->owner->service('http')->cloaked_db_creds();
+    $cloaked = $this->context->service('http')->cloaked_db_creds();
 
     foreach (array('db_type', 'db_user', 'db_passwd', 'db_host', 'db_name', 'db_port') as $key) {
       $this->creds[$key] = ($cloaked) ? "\$_SERVER[{$key}]" : urldecode($this->data[$key]);
@@ -412,7 +412,7 @@ function _provision_drupal_delete_aliases() {
   }
 }
 
-require_once('cvs_deploy.inc');
+require_once(dirname(__FILE__) . '/cvs_deploy.inc');
 
 function provision_find_packages() {
   // Load the version specific include files.

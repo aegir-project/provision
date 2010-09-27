@@ -78,7 +78,7 @@ function provision_drush_command() {
     'options' => array_merge(array(
       '--context_type' => 'server, platform, or site; default server',
       '--delete' => 'Remove the alias.',
-    ), provisionServer::option_documentation(), provisionPlatform::option_documentation(), provisionSite::option_documentation()),
+    ), provisionContext_server::option_documentation(), provisionContext_platform::option_documentation(), provisionContext_site::option_documentation()),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
   $items['provision-install'] = array(
@@ -220,13 +220,15 @@ function drush_provision_save($alias = null) {
     $config->unlink();
   }
   else {
+    // trigger additional logic that should happen only on save.
+    d($alias)->type_invoke('save');
     // create or update the record
     d($alias)->write_alias();
   }
 }
 
 function drush_provision_verify() {
-  d()->verify();
+  d()->command_invoke('verify');
 }
 
 function _provision_default_web_group() {

@@ -1,0 +1,6 @@
+name = Provision: DNS
+description = Provides provisioning requirements for DNS servers
+package = Provision
+dependencies[] = provision
+
+core = 6.x

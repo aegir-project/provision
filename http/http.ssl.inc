@@ -18,8 +18,8 @@ class provisionService_http_ssl extends provisionService_http_public {
     return 443;
   }
 
-  function init() {
-    parent::init();
+  function init_server() {
+    parent::init_server();
 
     // SSL Port.
     $this->server->setProperty('http_ssl_port', $this->default_ssl_port());
@@ -32,6 +32,13 @@ class provisionService_http_ssl extends provisionService_http_public {
     // SSL certificate store for this server.
     // This server's certificates will be stored here.
     $this->server->http_ssld_path = "{$this->server->config_path}/ssl.d";
+  }
+
+  function init_site() {
+    parent::init_site();
+
+    $this->context->setProperty('ssl_enabled', 0);
+    $this->context->setProperty('ssl_key', null);
   }
 
 
