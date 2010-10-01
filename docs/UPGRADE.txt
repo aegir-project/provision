@@ -175,6 +175,11 @@ the resolved IP address to be the '127.0.0.1' loopback address.
 If you intend to manage multiple servers using Aegir, you will need to
 make sure that the IP address is the public IP of this server.
 
+Finally, set an $AEGIR_IP environment variable for use in the Database
+configuration step below.
+
+Shell commands as root::
+  AEGIR_IP=`resolveip $AEGIR_HOST`
 
 0.4 - unzip dependency
 ----------------------
