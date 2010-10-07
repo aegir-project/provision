@@ -103,6 +103,7 @@ server {
 #######################################################
 
 # virtual hosts
-include <?php print $http_confd_path ?>/*;
+include <?php print $http_pred_path ?>/*;
 include <?php print $http_platformd_path ?>/*;
 include <?php print $http_vhostd_path ?>/*;
+include <?php print $http_postd_path ?>/*;
