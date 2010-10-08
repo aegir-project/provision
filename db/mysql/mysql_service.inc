@@ -113,6 +113,12 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     $cmd = sprintf('mysqldump --defaults-file=/dev/fd/3 -r%s/database.sql %s', escapeshellcmd(d()->site_path), escapeshellcmd(drush_get_option('db_name'))); 
     $success = $this->safe_shell_exec($cmd, drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
 
+    if (drush_get_context('DRUSH_VERBOSE') || !$success) {
+      foreach ($output as $line) {
+        drush_print($line);
+      }
+    }
+
     if (!$success && !drush_get_option('force', false)) {
       drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not generate database backup from mysqldump. (error: %msg)', array('%msg' => $this->safe_shell_exec_output)));
     }
