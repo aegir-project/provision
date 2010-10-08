@@ -383,7 +383,6 @@ class provisionFileSystem extends provisionChainedState {
   function create_dir($path, $name, $perms) {
     $exists = $this->exists($path)
       ->succeed($name . ' path @path exists.')
-      ->fail($name . ' path @path does not exist.')
       ->status();
 
     if (!$exists) {
