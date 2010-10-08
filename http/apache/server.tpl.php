@@ -17,6 +17,10 @@ NameVirtualHost *:<?php print $http_port; ?>
   LoadModule rewrite_module modules/mod_rewrite.so
 </IfModule>
 
+# other configuration, not touched by aegir
+# this allows you to override aegir configuration, as it is included before
+Include <?php print $http_pred_path ?>
+
 # virtual hosts
 Include <?php print $http_vhostd_path ?>
 
@@ -24,7 +28,7 @@ Include <?php print $http_vhostd_path ?>
 Include <?php print $http_platformd_path ?>
 
 # other configuration, not touched by aegir
-Include <?php print $http_confd_path ?>
-
+# this allows to have default (for example during migrations) that are eventually overriden by aegir
+Include <?php print $http_postd_path ?>
 
 <?php print $extra_config; ?>

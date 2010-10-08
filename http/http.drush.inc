@@ -59,7 +59,8 @@ class provisionService_http_public extends provisionService_http {
   function config_data($config = null, $class = null) {
     $data = parent::config_data($config, $class);
     if (!is_null($this->application_name)) {
-      $data['http_confd_path'] = $this->server->http_confd_path;
+      $data['http_pred_path'] = $this->server->http_pred_path;
+      $data['http_postd_path'] = $this->server->http_postd_path;
       $data['http_platformd_path'] = $this->server->http_platformd_path;
       $data['http_vhostd_path'] = $this->server->http_vhostd_path;
     }
@@ -109,7 +110,8 @@ class provisionService_http_public extends provisionService_http {
 
     if (!is_null($this->application_name)) {
       $app_dir = "{$this->server->config_path}/{$this->application_name}";
-      $this->server->http_confd_path = "{$app_dir}/conf.d";
+      $this->server->http_pred_path = "{$app_dir}/pre.d";
+      $this->server->http_postd_path = "{$app_dir}/post.d";
       $this->server->http_platformd_path = "{$app_dir}/platform.d";
       $this->server->http_vhostd_path = "{$app_dir}/vhost.d";
     }
@@ -127,8 +129,10 @@ class provisionService_http_public extends provisionService_http {
 
   function verify_server_cmd() {
     if (!is_null($this->application_name)) {
-      provision_file()->create_dir($this->server->http_confd_path, dt("Webserver custom configuration"), 0700);
-      $this->sync($this->server->http_confd_path);
+      provision_file()->create_dir($this->server->http_pred_path, dt("Webserver custom pre-configuration"), 0700);
+      $this->sync($this->server->http_pred_path);
+      provision_file()->create_dir($this->server->http_postd_path, dt("Webserver custom post-configuration"), 0700);
+      $this->sync($this->server->http_postd_path);
 
       provision_file()->create_dir($this->server->http_platformd_path, dt("Webserver platform configuration"), 0700);
       $this->sync($this->server->http_platformd_path, array(
