@@ -67,7 +67,7 @@ class provisionConfig {
    *   An alias name for d(), the provisionContext that this configuration
    *   is relevant to.
    * @param $data
-   *   An associative array to potentiall manipulate in process() and make
+   *   An associative array to potentially manipulate in process() and make
    *   available as variables to the template.
    */
   function __construct($context, $data = array()) {
