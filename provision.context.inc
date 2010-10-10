@@ -351,6 +351,7 @@ class provisionContext {
    *   An array of return values from method implementations.
    */
   function services_invoke($callback, $args = array()) {
+    $results = array();
     // fetch the merged list of services.
     // These may be on different servers entirely.
     $services = $this->get_services();
