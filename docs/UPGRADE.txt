@@ -254,10 +254,5 @@ Nginx. Example, in Apache::
 
  mv /var/aegir/config/server_master/apache/{conf.d,post.d}
 
-You will also need to create the following directories ::
-
-  /var/aegir/config/platform.d
-  /var/aegir/config/apache.d
-
 Now log into Aegir, and verify the hostmaster platform. This will generate
 the correct apache.conf file and restart apache.
