@@ -248,6 +248,12 @@ To read ::
 
   Include /var/aegir/config/apache.conf
 
+If you are upgrading from 0.4 releases between alpha8 and alpha14, you will
+need to rename your conf.d directory to post.d in Apache and pre.d in
+Nginx. Example, in Apache::
+
+ mv /var/aegir/config/server_master/apache/{conf.d,post.d}
+
 You will also need to create the following directories ::
 
   /var/aegir/config/platform.d
