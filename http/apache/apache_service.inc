@@ -12,8 +12,8 @@ class provisionService_http_apache extends provisionService_http_public {
     return TRUE;
   }
 
-  function init() {
-    parent::init();
+  function init_server() {
+    parent::init_server();
     $this->configs['server'][] = 'provisionConfig_apache_server';
     $this->configs['platform'][] = 'provisionConfig_apache_platform';
     $this->configs['site'][] = 'provisionConfig_apache_site';

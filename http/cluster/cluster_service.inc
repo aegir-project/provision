@@ -7,7 +7,7 @@ class provisionService_http_cluster extends provisionService_http {
     );
   }
 
-  function init() {
+  function init_server() {
     $this->server->setProperty('cluster_web_servers', array(), TRUE);
   }
 

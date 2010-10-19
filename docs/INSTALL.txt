@@ -250,7 +250,7 @@ as the aegir user created above.  This file is available in Provision or can be
 downloaded through the web with this command::
 
 Shell commands::
- wget -O install.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha14'
+ wget -O install.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD'
 
 By default, the install script will install the "correct" version of Aegir
 (ie. if it was downloaded through git, it will install the version from the
@@ -265,10 +265,11 @@ Note you must run the above command as root or prefix with sudo.
 
 Be sure to change 'aegir.example.com' to match the URI of your site.
 
-You can append '--client_email=you@example.com' if you wish to receive the 
-traditional Drupal 'Welcome' e-mail upon completion of the installation.
-This e-mail address will also be used as the default e-mail address of the 
-first user and client in Aegir, but can be changed later.
+You can append '--client_email=you@example.com' to keep from being prompted for
+an e-mail address during install. The traditional Drupal 'Welcome' e-mail will
+be sent to this e-mail address upon completion of the installation. This e-mail
+address will also be used as the default e-mail address of the first user and
+client in Aegir, but can be changed later.
 
 Checkpoint / Finished!
 -----------

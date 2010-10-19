@@ -17,8 +17,31 @@ class provisionService extends provisionChainedState {
 
   protected $configs = array();
 
-  // All services have the ability to have an associated restart command and listen port.
+  
+  protected $config_cache = array();
+  private $_config = null;
+
+
+  /**
+   * Implement the __call magic method.
+   *
+   * This implementation is really simple. It simply return null if the
+   * method doesn't exist.
+   *
+   * This is used so that we can create methods for drush commands, and
+   * can fail safely.
+   */
+  function __call($name, $args = array()) {
+    return provision::method_invoke($this, $name, $args);
+  }
+
+
   function init() {
+
+  }
+
+  // All services have the ability to have an associated restart command and listen port.
+  function init_server() {
     if (!is_null($this->service)) {
       if ($this->has_port) {
         $this->server->setProperty($this->service . '_port', $this->default_port());
@@ -30,6 +53,15 @@ class provisionService extends provisionChainedState {
     return TRUE;
   }
 
+  function init_platform() {
+
+  }
+
+  function init_site() {
+
+  }
+
+
   function default_port() {
     return false;
   }
@@ -39,26 +71,131 @@ class provisionService extends provisionChainedState {
   }
 
   /**
+   * Set the currently active configuration object.
+   *
+   * @param $config
+   *   String: Name of config file. The key to the $this->configs array.
+   * @param $data
+   *   Any optional information to be made available to templates. If a string, it will be
+   *   turned into an array with the 'name' property the value of the string.
+   */
+  function config($config, $data = array()) {
+    $this->_config = null;
+    
+    if (!is_array($data) && is_string($data)) {
+      $data = array('name' => $data);
+    }
+
+    if (!isset($this->config_cache[$this->context->name][$config])) {
+      foreach ((array) $this->configs[$config] as $class) {
+        $this->config_cache[$this->context->name][$config] = new $class($this->context, array_merge($this->config_data($config), $data));
+      }
+    }
+
+    if (isset($this->config_cache[$this->context->name][$config])) {
+      $this->_config = $this->config_cache[$this->context->name][$config];
+    }
+
+    return $this;
+  }
+
+  /**
+   * Unlink the currently active config file.
+   */
+  function unlink() {
+    if (is_object($this->_config)) {
+      $this->_config->unlink();
+    }
+
+    return $this;
+  }
+
+  /**
+   * Write the currently active config file.
+   */
+  function write() {
+    if (is_object($this->_config)) {
+      $this->_config->write();
+    }
+
+    return $this;
+  }
+
+  /**
+   * Set a record on the data store of the currently active config file (if applicable).
+   */
+  function record_set($arg1, $arg2 = null) {
+    if (is_object($this->_config)) {
+      if (is_object($this->_config->store)) {
+        if (is_array($arg1)) {
+          $this->_config->store->records = array_merge($this->_config->store->records, $arg1);
+        }
+        elseif (!is_numeric($arg1)) {
+          if (is_array($arg2)) {
+            if (!is_array($this->_config->store->loaded_records[$arg1])) {
+              $this->_config->store->loaded_records[$arg1] = array();
+            }
+            if (!is_array($this->_config->store->records[$arg1])) {
+              $this->_config->store->records[$arg1] = array();
+            }
+            $this->_config->store->records[$arg1] = array_merge($this->_config->store->loaded_records[$arg1], $this->_config->store->records[$arg1], $arg2);
+          } else {
+            $this->_config->store->records[$arg1] = $arg2;
+          }
+        }
+      }
+    }
+    return $this;
+  }
+
+  /**
+   * Delete a record from the data store of the currently active config file (if applicable).
+   */
+  function record_del($record) {
+    return $this->record_set($record, null);
+  }
+
+  /**
+   * Check if a record exists in the data store of the currently active config file (if applicable).
+   */
+  function record_exists($record) {
+    if (is_object($this->_config)) {
+      if (is_object($this->_config->store)) {
+        return array_key_exists($record, $this->_config->store->merged_records());
+      }
+    }
+    return FALSE;
+  }
+
+  /**
+   * Fetch record(s) from the data store of the currently active config file (if applicable).
+   */
+  function record_get($key = null, $default = null) {
+    if (is_object($this->_config)) {
+      if (is_object($this->_config->store)) {
+        $records = $this->_config->store->merged_records();
+
+        if (is_null($key)) {
+          return $records;
+        }
+
+        if (isset($records[$key])) {
+          return $records[$key];
+        }
+      }
+    }
+    return $default;
+  }
+
+
+  /**
    * Generate a configuration file.
    *
    * This method will fetch the class to instantiate from the internal
    * $this->configs control array.
    */
-  function create_config($config) {
-    if (isset($this->configs[$config])) {
-      // We cast to array here to silently accept the non array version
-      foreach ((array) $this->configs[$config] as $class) {
-        try {
-          $object = new $class($this->context, $this->config_data($config));
-          $object->write();
-        }
-        catch (provisionException_continue $e) {
-          drush_log($e->getMessage());
-          // The service or configuration class has signaled that the config file
-          // was uneccesary, and we should continue normally.
-        }
-      }
-    }
+  function create_config($config, $data = array()) {
+    $this->config($config, $data)->write();
   }
 
   /**
@@ -67,21 +204,8 @@ class provisionService extends provisionChainedState {
    * This method will fetch the class to instantiate from the internal
    * $this->configs control array.
    */
-  function delete_config($config) {
-    if (isset($this->configs[$config])) {
-      // We cast to array here to silently accept the non array version
-      foreach ((array) $this->configs[$config] as $class) {
-        try {
-          $object = new $class($this->context, $this->config_data($config, $class));
-          $object->unlink();
-        }
-        catch (provisionException_continue $e) {
-          drush_log($e->getMessage());
-          // The service or configuration class has signaled that the config file
-          // was uneccesary, and we should continue normally.
-        }
-      }
-    }
+  function delete_config($config, $data = array()) {
+    $this->config($config, $data)->unlink();
   }
 
   /**
@@ -134,10 +258,16 @@ class provisionService extends provisionChainedState {
     $this->server = is_object($server) ? $server : d($server);
   }
 
+  /**
+   * Set the currently active context of the service.
+   */
   function setContext($context) {
     $this->context = is_object($context) ? $context : d($context);
   }
 
+  /**
+   * Sync filesystem changes to the server hosting this service.
+   */
   function sync($path = NULL, $additional_options = array()) {
     return $this->server->sync($path, $additional_options);
   }
@@ -161,6 +291,13 @@ class provisionService extends provisionChainedState {
   }
 }
 
+/**
+ * Null service class.
+ *
+ * Not all services are necessary or turned on.
+ * This class ensures that not having a specific service
+ * doesnt result in catastrophic failure.
+ */
 class provisionService_null extends provisionService {
 
   function __get($name) {

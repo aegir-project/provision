@@ -35,13 +35,13 @@ you are reading this document.
 
 Shell commands::
 
-  export AEGIR_VERSION=0.4-alpha14
+  export AEGIR_VERSION=HEAD
   export AEGIR_DIR=/var/aegir
   export DRUPAL_DIR=$AEGIR_DIR/hostmaster-$AEGIR_VERSION
   export DRUSH_VERSION=6.x-3.3
   export DRUSH_MAKE_VERSION=6.x-2.0-beta9
   export AEGIR_DOMAIN=aegir.example.com
-  export OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-alpha13
+  export OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-alpha9
 
 This document also assumes drush is installed properly and we use an
 environment variable to simplify the documentation again.
@@ -175,6 +175,11 @@ the resolved IP address to be the '127.0.0.1' loopback address.
 If you intend to manage multiple servers using Aegir, you will need to
 make sure that the IP address is the public IP of this server.
 
+Finally, set an $AEGIR_IP environment variable for use in the Database
+configuration step below.
+
+Shell commands as root::
+  AEGIR_IP=`resolveip $AEGIR_HOST`
 
 0.4 - unzip dependency
 ----------------------
@@ -215,9 +220,10 @@ for that hostname.
 
 You need to re-use the pasword you had for the account before.
 
-Mysql grants ::
-  GRANT ALL ON *.* to 'aegir_root'@$AEGIR_HOST IDENTIFIED BY 'xxxx' WITH GRANT OPTION;
-  GRANT ALL ON *.* to 'aegir_root'@$AEGIR_IP IDENTIFIED BY 'xxxx' WITH GRANT OPTION;
+Shell commands::
+
+  mysql -u root -p -e "GRANT ALL ON *.* to 'aegir_root'@$AEGIR_HOST IDENTIFIED BY 'xxxx' WITH GRANT OPTION;"
+  mysql -u root -p -e "GRANT ALL ON *.* to 'aegir_root'@$AEGIR_IP IDENTIFIED BY 'xxxx' WITH GRANT OPTION;"
 
 
 0.4 - Apache configuration
@@ -242,10 +248,11 @@ To read ::
 
   Include /var/aegir/config/apache.conf
 
-You will also need to create the following directories ::
+If you are upgrading from 0.4 releases between alpha8 and alpha14, you will
+need to rename your conf.d directory to post.d in Apache and pre.d in
+Nginx. Example, in Apache::
 
-  /var/aegir/config/platform.d
-  /var/aegir/config/apache.d
+ mv /var/aegir/config/server_master/apache/{conf.d,post.d}
 
 Now log into Aegir, and verify the hostmaster platform. This will generate
 the correct apache.conf file and restart apache.
