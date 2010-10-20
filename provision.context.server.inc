@@ -171,6 +171,7 @@ class provisionContext_server extends provisionContext {
       if (provision_file()->exists($path)->status()) {
         $options = array_merge(array(
           'relative' => TRUE,
+          'keep-dirlinks' => TRUE,
           'omit-dir-times' => TRUE,
           'delete' => TRUE,
         ), $additional_options);
