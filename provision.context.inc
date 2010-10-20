@@ -269,7 +269,7 @@ class provisionContext {
     $service_list = drush_command_invoke_all('provision_services');
     foreach ($service_list as $service => $default) {
       $class = "provisionService_{$service}";
-      $func = "subcribe_{$this->type}";
+      $func = "subscribe_{$this->type}";
       if (method_exists($class, $func)) {
         call_user_func(array($class, $func), $this);
       }
