@@ -23,23 +23,23 @@
 <?php 
 if (sizeof($this->aliases)) {
   print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
+}
+ 
+if ($this->redirection || $ssl_redirection) {
+  print " RewriteEngine on\n";
 
-  if ($this->redirection || $ssl_redirection) {
-    print " RewriteEngine on\n";
-
-    if ($ssl_redirection && !$this->redirection) {
-      // redirect aliases in non-ssl to the same alias on ssl.
-      print " RewriteRule ^/*(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]\n";
-    }
-    elseif ($ssl_redirection && $this->redirection) {
-      // redirect all aliases + main uri to the main https uri.
-      print " RewriteRule ^/*(.*)$ https://{$this->uri}/$1 [L,R=301]\n";
-    }
-    elseif (!$ssl_redirection && $this->redirection) {
-      // Redirect all aliases to the main http url.
-      print " RewriteCond %{HTTP_HOST} !^{$this->uri}$ [NC]\n";
-      print " RewriteRule ^/*(.*)$ http://{$this->uri}/$1 [L,R=301]\n";
-    }
+  if ($ssl_redirection && !$this->redirection) {
+    // redirect aliases in non-ssl to the same alias on ssl.
+    print " RewriteRule ^/*(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]\n";
+  }
+  elseif ($ssl_redirection && $this->redirection) {
+    // redirect all aliases + main uri to the main https uri.
+    print " RewriteRule ^/*(.*)$ https://{$this->uri}/$1 [L,R=301]\n";
+  }
+  elseif (!$ssl_redirection && $this->redirection) {
+    // Redirect all aliases to the main http url.
+    print " RewriteCond %{HTTP_HOST} !^{$this->uri}$ [NC]\n";
+    print " RewriteRule ^/*(.*)$ http://{$this->uri}/$1 [L,R=301]\n";
   }
 }
 ?>
