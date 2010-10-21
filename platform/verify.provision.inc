@@ -24,6 +24,8 @@ function drush_provision_drupal_provision_verify_validate() {
 function drush_provision_drupal_pre_provision_verify() {
   if (d()->type === 'server') {
 
+    $config_root = dirname(d()->config_path);
+    provision_file()->create_dir($config_root, dt('Provision configuration root'), 0711);
     provision_file()->create_dir(d()->config_path, dt('Provision configuration'), 0711);
     if (d()->name == '@server_master') {
       provision_file()->create_dir(d()->backup_path, dt('Backup'), 0700);
