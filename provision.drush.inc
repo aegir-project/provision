@@ -171,6 +171,12 @@ function provision_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
   
+  $items['provision-export'] = array(
+    'arguments' => array('domain.com' => dt('The domain of the site to export.')),
+    'optional arguments' => array('backup-file' => dt('The file to save the export to. This will be a gzipped tarball.')),
+    'description' => dt('Generate an exported tarball of the site for use by non-aegir hosts.'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
+  );
 
   $items['hostmaster-migrate'] = array(
     'description' => dt('Migrate an instance of the Hostmaster front end to a new platform'),
