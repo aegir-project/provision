@@ -170,6 +170,8 @@ class provisionContext_server extends provisionContext {
 
       if (provision_file()->exists($path)->status()) {
         $options = array_merge(array(
+          'relative' => TRUE,
+          'keep-dirlinks' => TRUE,
           'omit-dir-times' => TRUE,
           'delete' => TRUE,
         ), $additional_options);
@@ -182,9 +184,7 @@ class provisionContext_server extends provisionContext {
           $options['delete'] = TRUE;
         }
 
-	// XXX: we assume the same directory prefix on remote
-	$dir = dirname($path);
-        if (drush_core_call_rsync(escapeshellarg($path), escapeshellarg($this->script_user . '@' . $this->remote_host . ':' . $dir), $options, TRUE, FALSE)) {
+        if (drush_core_call_rsync(escapeshellarg($path), escapeshellarg($this->script_user . '@' . $this->remote_host . ':/'), $options, TRUE, FALSE)) {
           drush_log(dt('@path has been synced to remote server @remote_host.', array('@path' => $path, '@remote_host' => $this->remote_host)));
         }
         else {
