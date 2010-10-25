@@ -34,8 +34,8 @@ considered the canonical source of information.
 
 Also note that those instructions setup a complete Aegir system. If you want
 to only setup a new server, it should be sufficient to install requirement
-(step 1) and configure them (step 2). You will just need the -b flag to
-avoid installing the frontend on the server.
+(step 1) and configure them (step 2). You will just need the --backend-only flag
+to avoid installing the frontend on the server.
 
 1. Install software requirements
 ================================
