@@ -211,7 +211,7 @@ function install_main() {
     }
   }
 
-  if ($missing_requirement) {
+  if (isset($missing_requirement)) {
     return drush_set_error('PROVISION_INSTALL_MISSING_REQUIREMENTS');
   }
 
