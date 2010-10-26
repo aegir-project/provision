@@ -48,7 +48,6 @@ class provisionService_dns_bind_slave extends provisionService_dns {
    * @arg $zone string the zonefile name to create
    *
    * @see provisionService_dns::create_zone()
-   */
   function create_zone($master, $zone = null) {
     if (is_null($zone) && ($this->context->type == 'site')) {
       $host = $this->context->uri;
@@ -62,9 +61,20 @@ class provisionService_dns_bind_slave extends provisionService_dns {
     drush_log(dt("recording zone in slave configuration"));
     $this->config('server')->record_set($zone, $master)->write();
   }
-
+   */
 }
 
 class provisionConfig_bind_slave extends provisionConfig_dns_server {
   public $template = 'slave.tpl.php';
+
+  function process() {
+    parent::process();
+    if ($this->context->type == 'server') {
+     $ips = $this->context->ip_addresses;
+    }
+    else {
+     $ips = $this->context->server->ip_addresses;
+    }
+    $this->data['master_ip_list'] = implode(';', $ips);
+  }
 }
