@@ -68,12 +68,9 @@ function drush_provision_hostmaster_install($site = NULL) {
     return false;
   }
 
-
-  if (!drush_get_option('client_email')) {
-    $client_email = drush_prompt(dt("Admin user e-mail"), "webmaster@localhost");
-  }
-  else {
-    $client_email = drush_get_option('client_email');
+  while (!filter_var(drush_get_option('client_email'), FILTER_VALIDATE_EMAIL)) {
+   $client_email = drush_prompt(dt("Admin user e-mail"), "you@example.com");
+   drush_set_option('client_email', $client_email);
   }
 
   $site_name = '@hostmaster';
@@ -82,7 +79,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'platform' => $platform_name,
     'db_server' => $server,
     'uri' => $site,
-    'client_email' => $client_email,
+    'client_email' => drush_get_option('client_email'),
     'profile' => 'hostmaster',
   ));
   $data = provision_backend_invoke($site_name, 'provision-install');
