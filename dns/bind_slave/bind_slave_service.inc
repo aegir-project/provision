@@ -7,7 +7,7 @@
  * the cluster HTTP service.
  */
 class provisionService_dns_bind_slave extends provisionService_dns {
-  protected $application_name = 'bind_slave';
+  protected $application_name = 'bind';
 
   protected $has_restart_cmd = TRUE;
   
