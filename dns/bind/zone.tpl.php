@@ -5,7 +5,7 @@ $TTL <?php print $server->dns_ttl; ?>
 
 <?php
 print("@     IN     SOA  $server->remote_host $dns_email (
-			      " . $records['@']['SOA']['serial'] . " ; serial
+			      " . $records['serial'] . " ; serial
 			      $server->dns_refresh; refresh
 			      $server->dns_retry ; retry
 			      $server->dns_expire ; expire
