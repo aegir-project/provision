@@ -9,6 +9,17 @@ Aegir Upgrade Instructions
 This document describes briefly how to upgrade an existing Aegir installation
 -----------------------------------------------------------------------------
 
+The document is laid out in the following sections::
+
+- Conventions and tips
+- Upgrade script
+- Setting environment variables
+- Generic upgrade instructions
+  - Upgrading the backend
+  - Upgrading the frontend
+- Version-specific upgrade notes (read these before running anything else!)
+
+
 Conventions and tips
 ====================
 
@@ -24,7 +35,41 @@ To become aegir user you can issue this command::
 Note that /bin/sh is an example. You may wish to instead use the shell of your
 choice, i.e /bin/bash
 
-Additionally to make following instructions generic and not dependant on a
+
+Upgrade script
+==============
+
+This document remains the canonical source of information regarding upgrading 
+your Aegir installation.
+
+However, an upgrade script exists in the Provision repository that tries to 
+automate much of the process below. 
+
+It is imperative that you read the Version-specific upgrade notes located at 
+the bottom of this document before attempting to run the upgrade.sh script,
+as the script will assume you have your system set up appropriately to
+handle the upgrade process.
+
+You can download the upgrade.sh script with this command::
+
+Shell commands::
+ wget -O upgrade.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=upgrade.sh.txt;hb=HEAD'
+
+Run the upgrade script with this command::
+
+Shell commands::
+ su -s /bin/sh aegir -c "sh upgrade.sh.txt aegir.example.com"
+
+Remember to replace aegir.example.com with the domain of your Aegir installation.
+
+If you run this script (after satisfying the requirements of the Version-specific 
+upgrade notes at the bottom of this document), you may skip the rest of this
+document.
+
+Setting environment variables
+=============================
+
+To make following instructions generic and not dependant on a
 concrete Drupal or Aegir version, we will use shell environment
 variables. Since 0.4, the hostmaster platform is prepended with 'hostmaster'
 so as not to clash with any other Drupal platforms. If you are upgrading from

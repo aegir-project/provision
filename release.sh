@@ -83,6 +83,9 @@ sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
 echo changing INSTALL.txt to point to tagged install.sh
 sed -i'.tmp' -e"/http:\/\/git.aegirproject.org\/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD/s/HEAD/provision-$version/" docs/INSTALL.txt && git add docs/INSTALL.txt && rm docs/INSTALL.txt.tmp
 
+echo changing UPGRADE.txt to point to tagged upgrade.sh
+sed -i'.tmp' -e"/http:\/\/git.aegirproject.org\/?p=provision.git;a=blob_plain;f=upgrade.sh.txt;hb=HEAD/s/HEAD/provision-$version/" docs/UPGRADE.txt && git add docs/UPGRADE.txt && rm docs/UPGRADE.txt.tmp
+
 echo changing UPGRADE.txt to point to release tags
 sed -i'.tmp' -e"s/export AEGIR_VERSION=HEAD/export AEGIR_VERSION=$version/" docs/UPGRADE.txt
 
