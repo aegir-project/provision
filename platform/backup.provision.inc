@@ -61,7 +61,8 @@ function drush_provision_drupal_provision_backup() {
   d()->service('http')->fetch(d()->site_path . '/files/');
 
   // Check if we are currently cloaking credentials
-  $cloaked = drush_get_option('provision_db_cloaking', TRUE);
+  $cloaked = d()->service('http')->cloaked_db_creds();
+  $cloaked = drush_get_option('provision_db_cloaking', $cloaked);
 
   if ($cloaked) {
     drush_set_option('cloaking_off_temp', TRUE);
