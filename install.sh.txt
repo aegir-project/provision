@@ -113,7 +113,7 @@ else
 fi
 
 AEGIR_DB_USER=aegir_root
-AEGIR_DB_PASS=`echo $RANDOM:\`date\`:$AEGIR_HOST | openssl md5`
+AEGIR_DB_PASS=`echo $RANDOM:\`date\`:$AEGIR_HOST | openssl md5 | sed -e 's/(stdin)= //;'`
 
 msg "Aegir will now generate a mysql super user password for you: "
 cat <<EOF
