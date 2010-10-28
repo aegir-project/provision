@@ -90,7 +90,7 @@ email". Additional messages will show that site has been removed because of
 this problem. To remedy the situation simply install an MTA like sendmail,
 postfix, or exim and do the minimal configuration.
 
-Other utilities: sudo, git and unzip
+Other utilities: sudo, rsync, git and unzip
 ------------------------------
 
 Aegir installs itself via a drush_make file that downloads via git if you want
@@ -100,7 +100,7 @@ will need to install it on the server.
 
 The jQueryUI library is used in the Aegir UI, unzip is required to extract it.
 Sudo is required to allow the aegir user the limited privilege to restart the
-webserver when required.
+webserver when required.  Rsync is used to sync files to remote servers.
 
 Summary
 -------
@@ -110,8 +110,8 @@ can install all those packages using the following.
 
 Shell commands::
 
- apt-get install apache2 php5 php5-cli php5-mysql mysql-server postfix
- apt-get install sudo git-core unzip
+ apt-get install apache2 php5 php5-cli php5-gd php5-mysql mysql-server \
+   postfix sudo rsync git-core unzip
 
 
 2. Configure system requirements
@@ -174,6 +174,27 @@ Shell commands::
  adduser aegir www-data    #make aegir a user of group www-data
 
 
+PHP Configuration
+-----------------
+
+Some complex installation profiles or distributions require a PHP memory limit 
+that is higher than the default. To avoid common errors when installing sites on
+some distributions, the PHP command line tool should be configured to use 192Mb 
+of RAM.
+
+Change the memory_limit directive in /etc/php5/cli/php.ini to read::
+
+ memory_limit = 192M      ; Maximum amount of memory a script may consume (192MB)
+ 
+Most modern Drupal sites require around 96M or even 128M of RAM for certain
+operations. This is far more than what is provided by the default PHP configuration.
+
+Change the memory_limit directive in /etc/php5/apache2/php.ini to read::
+
+ memory_limit = 128M      ; Maximum amount of memory a script may consume (128MB)
+
+
+
 Apache configuration
 --------------------
 
@@ -194,6 +215,11 @@ Shell commands as root::
  a2enmod rewrite
  ln -s /var/aegir/config/apache.conf /etc/apache2/conf.d/aegir.conf
 
+**Do not reload/restart Apache if prompted to after running these commands, 
+it will fail.**
+The installer script creates the configuration file referenced by the newly 
+created symlink.
+
 The aegir user needs to have sudo access. Add the relevant line to your sudoers
 file.
 
@@ -208,7 +234,7 @@ Apache configuration as above, with the same user name and directory paths. SSH
 public/private keys should be set up so hostmaster's Aegir user can access
 remote web Aegir users with no passwords.
 
-They will also need a login shell, which can be modified using the `chsh` command.
+They will also need a login shell, which can be modified using the ``chsh`` command.
 
 Shell command as root::
   chsh -s /bin/sh aegir
@@ -250,7 +276,7 @@ as the aegir user created above.  This file is available in Provision or can be
 downloaded through the web with this command::
 
 Shell commands::
- wget -O install.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD'
+ wget -O install.sh 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD'
 
 By default, the install script will install the "correct" version of Aegir
 (ie. if it was downloaded through git, it will install the version from the
@@ -259,7 +285,7 @@ the official release.). You can modify which version to install by editing the
 AEGIR_VERSION variable in the script.
 
 Shell commands::
- su -s /bin/sh aegir -c "sh install.sh.txt aegir.example.com"
+ su -s /bin/sh aegir -c "sh install.sh aegir.example.com"
 
 Note you must run the above command as root or prefix with sudo.
 
