@@ -38,24 +38,8 @@ Drush make version: !drush_make
          '!drush_make' => drush_get_option('drush_make_version', '6.x-2.0-beta9'),
          )));
 
-  $go = FALSE;
-  while (!$go) {
-    $yesno = trim(strtolower(drush_prompt(dt('Do you really want to proceed with the install'), 'Y/n', TRUE)));
-
-    switch ($yesno) {
-    case 'no':
-    case 'n':
-      return drush_set_error(dt('Installation aborted by user'));
-      break;
-    case 'yes':
-    case 'y':
-    case 'y/n':
-      $go = TRUE;
-      break;
-    default:
-      drush_print(dt('Please answer "yes" or "no"'));
-      break;
-    }
+  if (!drush_confirm(dt('Do you really want to proceed with the install'))) {
+    return drush_set_error('PROVISION_CANCEL_INSTALL', dt('Installation aborted by user'));
   }
   return TRUE;
 }
