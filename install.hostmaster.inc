@@ -26,21 +26,39 @@ We are making the following assumptions:
 
 We have guessed the following:
 
-FQDN: !fqdn
+Aegir frontend URL: !site
+Master server: !fqdn
 Aegir root: !home
 Aegir user: !user
 Web group: !web
+Web server: !web_server
+Aegir DB user: !db_user
+Aegir DB password: !db_pass
 Drush make version: !drush_make
-', array('!fqdn' => provision_fqdn(),
-         '!home' => drush_server_home(),
-         '!user' => provision_current_user(),
-         '!web' => _provision_default_web_group(),
+Aegir version: !version
+Aegir platform path: !root
+', array('!site' => $site,
+         '!fqdn' => drush_get_option('aegir_host', provision_fqdn()),
+         '!home' => $aegir_root = drush_get_option('aegir_root', drush_server_home()),
+         '!user' => drush_get_option('script_user', provision_current_user()),
+         '!web' => drush_get_option('web_group', _provision_default_web_group()),
+         '!web_server' => drush_get_option('http_service_type', 'apache', 'options'),
+         '!db_user' => drush_get_option('aegir_db_user', 'root', 'options'),
+         '!db_pass' => is_null(drush_get_option('aegir_db_pass', NULL)) ? '<prompted>' : '<previously set>',
          '!drush_make' => drush_get_option('drush_make_version', '6.x-2.0-beta9'),
+         '!version' => $version = drush_get_option('version', 'HEAD'),
+         '!root' => drush_get_option(array('r', 'root'), $aegir_root . '/' . 'hostmaster-' . $version),
          )));
 
   if (!drush_confirm(dt('Do you really want to proceed with the install'))) {
     return drush_set_error('PROVISION_CANCEL_INSTALL', dt('Installation aborted by user'));
   }
+
+  while (!filter_var(drush_get_option('client_email'), FILTER_VALIDATE_EMAIL)) {
+   $client_email = drush_prompt(dt("Admin user e-mail"), "you@example.com");
+   drush_set_option('client_email', $client_email);
+  }
+
   return TRUE;
 }
 
@@ -113,11 +131,6 @@ function drush_provision_hostmaster_install($site = NULL) {
   // exit if an error has occured. 
   if (drush_get_error()) {
     return false;
-  }
-
-  while (!filter_var(drush_get_option('client_email'), FILTER_VALIDATE_EMAIL)) {
-   $client_email = drush_prompt(dt("Admin user e-mail"), "you@example.com");
-   drush_set_option('client_email', $client_email);
   }
 
   $site_name = '@hostmaster';
