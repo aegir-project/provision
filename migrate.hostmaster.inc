@@ -66,7 +66,7 @@ We are making the following assumptions:
       'server' => '@server_master',
       'web_server' => '@server_master',
       'root' => $platform,
-      'makefile' => dirname(__FILE__) . '/aegir.make',
+      'makefile' => drush_get_option('makefile', dirname(__FILE__) . '/aegir.make'),
     ));
     provision_backend_invoke($new_platform, 'provision-verify');
     drush_set_option('new_platform', $new_platform);
@@ -122,7 +122,7 @@ We are making the following assumptions:
       'server' => $server,
       'web_server' => $server,
       'root' => $platform,
-      'makefile' => dirname(__FILE__) . '/aegir.make',
+      'makefile' => drush_get_option('makefile', dirname(__FILE__) . '/aegir.make'),
     ));
     provision_backend_invoke($new_platform, 'provision-verify');
     drush_set_option('new_platform', $new_platform);
