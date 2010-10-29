@@ -270,7 +270,12 @@ This is outside the scope of this document however.
 3. Run the install script
 =========================
 
-This section deals with the actual installation of Aegir.
+This section deals with the actual installation of Aegir. You can
+install aegir in one of two ways: one assumes you have already
+downloaded drush and provision, while the other will do that for you.
+
+3.1 Installing aegir with only the install.sh script
+----------------------------------------------------
 
 There is an install script that takes care of installing the right packages and 
 preparing the backend and frontend install for you. That script needs to be run 
@@ -287,11 +292,34 @@ the official release.). You can modify which version to install by editing the
 AEGIR_VERSION variable in the script.
 
 Shell commands::
- su -s /bin/sh aegir -c "sh install.sh aegir.example.com"
+ su -s /bin/sh aegir -c "sh install.sh"
 
 Note you must run the above command as root or prefix with sudo.
 
-Be sure to change 'aegir.example.com' to match the URI of your site.
+You will be prompted for the information necessary to complete the
+installation.
+
+Once you have run install.sh once, drush and provision should be
+installed and you can use the more powerful hostmaster-install command
+to retry the install if it failed the first time.
+
+3.2 Installing aegir with drush and provision installed
+-------------------------------------------------------
+
+If you have already downloaded drush and provision, you can just install
+provision in the commands directory of Drush (either ~aegir/.drush or
+/usr/share/drush/commands), if that's not already done. Once provision
+is properly installed, you can install all other aegir components using
+the hostmaster-install command.
+
+Shell commands::
+
+ drush hostmaster-install
+
+You will be prompted for the required information if not provided on the
+commandline. See the inline help for the available options::
+
+ drush help hostmaster-install
 
 You can append '--client_email=you@example.com' to keep from being prompted for
 an e-mail address during install. The traditional Drupal 'Welcome' e-mail will
