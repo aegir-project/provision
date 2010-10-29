@@ -300,7 +300,7 @@ address will also be used as the default e-mail address of the first user and
 client in Aegir, but can be changed later.
 
 Checkpoint / Finished!
------------
+----------------------
 
 At this point, you have checked out all the code and setup your basic Drupal
 system (Drupal core, hosting, hostmaster and eldir) that will be the Aegir
