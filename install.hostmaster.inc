@@ -85,7 +85,7 @@ The following settings will be used:
          '!web' => drush_get_option('web_group'),
          '!web_server' => drush_get_option('http_service_type'),
          '!db_user' => drush_get_option('aegir_db_user'),
-         '!db_pass' => is_null(drush_get_option('aegir_db_pass'), NULL, 'process') ? '<previously set>' : '<prompted>',
+         '!db_pass' => is_null(drush_get_option('aegir_db_pass', NULL, 'process')) ? '<previously set>' : '<prompted>',
          '!drush_make' => drush_get_option('drush_make_version'),
          '!version' => drush_get_option('version'),
          '!root' => drush_get_option(array('r', 'root')),
