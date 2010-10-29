@@ -233,7 +233,7 @@ Any number of remote web servers may be configured. They need an aegir user and
 Apache configuration as above, with the same user name and directory paths. SSH
 public/private keys should be set up so hostmaster's Aegir user can access
 remote web Aegir users with no passwords. The above apache configuration needs
-to be performed to.
+to be performed too.
 
 They will also need a login shell, which can be modified using the ``chsh`` command.
 
@@ -256,9 +256,9 @@ Now you need to restart mysql, to clear any caches.
 Shell command as root::
   /etc/init.d/mysql restart
 
-The installer will prompt you for your MySQL root user password. It will
-not store this information, but instead use it to generate a new super
-user account for the aegir system.
+The installer will prompt you for your MySQL root user password. The root
+user will be used to make administrative tasks such as creating new databases,
+and granting and revoking access to those databases for sites.
 
 Even though MySQL is now listening on all IP's, it will not allow invalid users
 to connect to the databases, without the correct user accounts configured.
