@@ -135,9 +135,6 @@ We are making the following assumptions:
 
 
 function drush_provision_pre_hostmaster_migrate($site, $platform) {
-  if (!drush_confirm("This command will replace your crontab entry. continue?")) {
-    return drush_set_error('PROVISION_CANCEL_MIGRATE', 'Cancelling');
-  }
   // wipe out cron entry
   exec('crontab -r');
 
