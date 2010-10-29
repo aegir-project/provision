@@ -48,14 +48,17 @@ We are making the following assumptions:
 
 function drush_provision_hostmaster_install($site = NULL) {
   if (!$site) {
-    $site = drush_prompt(dt("Aegir domain name"), "aegir.example.com");
+    $site = drush_prompt(dt("Aegir domain name"), provision_fqdn());
   }
 
   $version = drush_get_option('version', 'HEAD');
   $aegir_root = drush_get_option('aegir_root', drush_server_home());
   $platform = drush_get_option(array('r', 'root'), $aegir_root . '/' . 'hostmaster-' . $version);
 
-  $aegir_host = drush_get_option('aegir_host', php_uname('n'), 'options');
+  $aegir_host = drush_get_option('aegir_host', NULL, 'options');
+  if (is_null($aegir_host)) {
+    $aegir_host = drush_prompt(dt("Master server FQDN"), provision_fqdn());
+  }
   $aegir_db_user = drush_get_option('aegir_db_user', 'root', 'options');
   $aegir_db_pass = drush_get_option('aegir_db_pass', NULL, 'options');
   if (!$aegir_db_pass) {
