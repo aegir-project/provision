@@ -7,7 +7,7 @@
 function drush_provision_hostmaster_install_validate($site = NULL) {
   $version = drush_get_option('version', 'HEAD');
   drush_print("Aegir $version automated install script");
-  drush_print("=======================================");
+  drush_print("==============================================================================");
 
   drush_print('
 This script will operate the following changes in your system:
@@ -58,7 +58,11 @@ function drush_provision_hostmaster_install($site = NULL) {
   $aegir_db_user = drush_get_option('aegir_db_user', 'root', 'options');
   $aegir_db_pass = drush_get_option('aegir_db_pass', NULL, 'options');
   if (!$aegir_db_pass) {
+    # XXX: may not be portable everywhere?
+    system('stty -echo');
     $aegir_db_pass = drush_prompt(dt('MySQL privileged user ("!root") password', array('!root' => $aegir_db_user)));
+    system('stty echo');
+    print "\n"; # add a newline since the user's didn't print
   }
   
   $master_db = sprintf("mysql://%s:%s@%s",$aegir_db_user, $aegir_db_pass, $aegir_host);
