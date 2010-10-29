@@ -157,7 +157,6 @@ releases to the latest applicable versions.
 Once you have upgraded the backend, and you have installed drush_make you will
 need to run the hostmaster migrate command.
 
-
 Shell commands::
 
   cd $OLD_DRUPAL_DIR
@@ -174,6 +173,11 @@ will be halted as it is necessary for the task queue to be processed.
 
 The command above will fetch the latest stable Drupal release, so it can
 simply be run again when a new security release of Drupal is made available.
+
+If you have customized your Aegir installation and are maintaining your own
+makefile, you can use the --makefile flag so the platform is created with
+another makefile than the default. Be warned that this may create problems if
+the makefile doesn't include the right Aegir modules.
 
 Version-specific upgrade notes
 ==============================
