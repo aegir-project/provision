@@ -13,14 +13,6 @@ function drush_provision_hostmaster_install($site = NULL) {
   $aegir_root = drush_get_option('aegir_root', drush_server_home());
   $platform = drush_get_option(array('r', 'root'), $aegir_root . '/' . 'hostmaster-' . $version);
 
-  if (!drush_get_option('backend-only')) {
-
-    if (!function_exists('drush_make_drush_command')) {
-      drush_backend_invoke('dl', array('drush_make-' . drush_get_option('drush_make_version', '6.x-2.0-beta9'), 'destination' => $aegir_root . '/.drush/'));
-    }
-
-  }
-
   $aegir_host = drush_get_option('aegir_host', php_uname('n'), 'options');
   $aegir_db_pass = drush_get_option('aegir_db_pass', 'pass', 'options');
   $aegir_db_user = drush_get_option('aegir_db_user', 'aegir_root', 'options');
@@ -51,6 +43,10 @@ function drush_provision_hostmaster_install($site = NULL) {
 
   if (drush_get_option('backend-only')) {
     return;
+  }
+
+  if (!function_exists('drush_make_drush_command')) {
+    drush_backend_invoke('dl', array('drush_make-' . drush_get_option('drush_make_version', '6.x-2.0-beta9'), 'destination' => $aegir_root . '/.drush/'));
   }
 
   $platform_name = '@platform_hostmaster';
