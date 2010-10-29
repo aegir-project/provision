@@ -9,7 +9,7 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   drush_print("Aegir $version automated install script");
   drush_print("==============================================================================");
 
-  drush_print('
+  drush_print(dt('
 This script will operate the following changes in your system:
 
 1. Create server-level configuration directories
@@ -21,8 +21,22 @@ This script will operate the following changes in your system:
 We are making the following assumptions:
  * you have read INSTALL.txt and prepared the platform accordingly
  * you have your MySQL root credentials on hand
+ * the FQDN of this machine is valid and resolves
  * you are executing this script as your "aegir" user
-');
+
+We have guessed the following:
+
+FQDN: !fqdn
+Aegir root: !home
+Aegir user: !user
+Web group: !web
+Drush make version: !drush_make
+', array('!fqdn' => provision_fqdn(),
+         '!home' => drush_server_home(),
+         '!user' => provision_current_user(),
+         '!web' => _provision_default_web_group(),
+         '!drush_make' => drush_get_option('drush_make_version', '6.x-2.0-beta9'),
+         )));
 
   $go = FALSE;
   while (!$go) {
