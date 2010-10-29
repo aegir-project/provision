@@ -17,7 +17,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   $aegir_db_user = drush_get_option('aegir_db_user', 'root', 'options');
   $aegir_db_pass = drush_get_option('aegir_db_pass', NULL, 'options');
   if (!$aegir_db_pass) {
-    $aegir_db_pass = drush_prompt(dt('MySQL privileged user password ("!root")', array('!root' => $aegir_db_user)));
+    $aegir_db_pass = drush_prompt(dt('MySQL privileged user ("!root") password', array('!root' => $aegir_db_user)));
   }
   
   $master_db = sprintf("mysql://%s:%s@%s",$aegir_db_user, $aegir_db_pass, $aegir_host);
