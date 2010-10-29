@@ -4,6 +4,47 @@
  * @file install the hostmaster system
  */
 
+function drush_provision_hostmaster_install_validate($site = NULL) {
+  $version = drush_get_option('version', 'HEAD');
+  drush_print("Aegir $version automated install script");
+  drush_print("=======================================");
+
+  drush_print('
+This script will operate the following changes in your system:
+
+1. Create server-level configuration directories
+2. Download drush_make
+3. Create the Hostmaster frontend platform
+4. Install the frontend site
+5. Setup the dispatcher (a user cron job)
+
+We are making the following assumptions:
+ * you have read INSTALL.txt and prepared the platform accordingly
+ * you are executing this script as your "aegir" user
+');
+
+  $go = FALSE;
+  while (!$go) {
+    $yesno = trim(strtolower(drush_prompt(dt('Do you really want to proceed with the install'), 'Y/n', TRUE)));
+
+    switch ($yesno) {
+    case 'no':
+    case 'n':
+      return drush_set_error(dt('Installation aborted by user'));
+      break;
+    case 'yes':
+    case 'y':
+    case 'y/n':
+      $go = TRUE;
+      break;
+    default:
+      drush_print(dt('Please answer "yes" or "no"'));
+      break;
+    }
+  }
+  return TRUE;
+}
+
 function drush_provision_hostmaster_install($site = NULL) {
   if (!$site) {
     $site = drush_prompt(dt("Aegir domain name"), "aegir.example.com");
