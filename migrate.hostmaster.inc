@@ -20,24 +20,8 @@ We are making the following assumptions:
  * you are executing this script as your "aegir" user
 ');
 
-  $go = FALSE;
-  while (!$go) {
-    $yesno = trim(strtolower(drush_prompt(dt('Do you really want to proceed with the upgrade'), 'Y/n', TRUE)));
-
-    switch ($yesno) {
-    case 'no':
-    case 'n':
-      return drush_set_error(dt('Upgrade aborted by user'));
-      break;
-    case 'yes':
-    case 'y':
-    case 'y/n':
-      $go = TRUE;
-      break;
-    default:
-      drush_print(dt('Please answer "yes" or "no"'));
-      break;
-    }
+  if (!drush_confirm("Do you really want to proceed with the upgrade?")) {
+    return drush_set_error('PROVISION_CANCEL_MIGRATE', 'Upgrade canceled by user');
   }
 
   $data = drush_get_merged_options();
