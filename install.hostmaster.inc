@@ -105,14 +105,14 @@ function drush_provision_hostmaster_install($site = NULL) {
   $aegir_db_user = drush_get_option('aegir_db_user');
   $aegir_db_pass = drush_get_option('aegir_db_pass');
   
-  $master_db = sprintf("mysql://%s:%s@%s",$aegir_db_user, $aegir_db_pass, $aegir_host);
+  $master_db = sprintf("mysql://%s:%s@%s",$aegir_db_user, $aegir_db_pass, drush_get_option('aegir_host'));
 
   // TODO: support creation of an external db server
   $server = '@server_master';
   drush_backend_invoke_args("provision-save", array($server), array(
     'context_type' => 'server',
     // files
-    'remote_host' => $aegir_host,
+    'remote_host' => drush_get_option('aegir_host'),
     'aegir_root' => $aegir_root,
     'script_user' => drush_get_option('script_user'),
    // apache or nginx or..
