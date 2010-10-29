@@ -9,15 +9,15 @@ Aegir Upgrade Instructions
 This document describes briefly how to upgrade an existing Aegir installation
 -----------------------------------------------------------------------------
 
-The document is laid out in the following sections::
+The document is laid out in the following sections:
 
-- Conventions and tips
-- Upgrade script
-- Setting environment variables
-- Generic upgrade instructions
-  - Upgrading the backend
-  - Upgrading the frontend
-- Version-specific upgrade notes (read these before running anything else!)
+* Conventions and tips
+* Upgrade script
+* Setting environment variables
+* Generic upgrade instructions
+ * Upgrading the backend
+ * Upgrading the frontend
+* Version-specific upgrade notes (read these before running anything else!)
 
 
 Conventions and tips
