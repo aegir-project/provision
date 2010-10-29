@@ -16,6 +16,7 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   drush_set_default('http_service_type', 'apache');
   drush_set_default('drush_make_version', '6.x-2.0-beta9');
   $aegir_db_user = drush_set_default('aegir_db_user', 'root');
+  drush_set_default('makefile', $aegir_root . '/.drush/provision/aegir.make');
 
   drush_print("Aegir $version automated install script");
   drush_print("==============================================================================");
@@ -75,6 +76,7 @@ The following settings will be used:
  Drush make version: !drush_make
  Aegir version: !version
  Aegir platform path: !root
+ Aegir makefile: !makefile
  Client email: !email
 ', array('!site' => $site,
          '!fqdn' => drush_get_option('aegir_host'),
@@ -87,6 +89,7 @@ The following settings will be used:
          '!drush_make' => drush_get_option('drush_make_version'),
          '!version' => drush_get_option('version'),
          '!root' => drush_get_option(array('r', 'root')),
+         '!makefile' => drush_get_option('makefile'),
          '!email' => drush_get_option('client_email'),
          )));
 
@@ -144,7 +147,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'server' => $server,
     'web_server' => $server,
     'root' => $platform,
-    'makefile' => $aegir_root . '/.drush/provision/aegir.make',
+    'makefile' => drush_get_option('makefile'),
   ));
   provision_backend_invoke($platform_name, 'provision-verify');
 
