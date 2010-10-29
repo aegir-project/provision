@@ -14,8 +14,12 @@ function drush_provision_hostmaster_install($site = NULL) {
   $platform = drush_get_option(array('r', 'root'), $aegir_root . '/' . 'hostmaster-' . $version);
 
   $aegir_host = drush_get_option('aegir_host', php_uname('n'), 'options');
-  $aegir_db_pass = drush_get_option('aegir_db_pass', 'pass', 'options');
-  $aegir_db_user = drush_get_option('aegir_db_user', 'aegir_root', 'options');
+  $aegir_db_user = drush_get_option('aegir_db_user', 'root', 'options');
+  $aegir_db_pass = drush_get_option('aegir_db_pass', NULL, 'options');
+  if (!$aegir_db_pass) {
+    $aegir_db_pass = drush_prompt(dt('MySQL privileged user password ("!root")', array('!root' => $aegir_db_user)));
+  }
+  
   $master_db = sprintf("mysql://%s:%s@%s",$aegir_db_user, $aegir_db_pass, $aegir_host);
 
   // TODO: support creation of an external db server
