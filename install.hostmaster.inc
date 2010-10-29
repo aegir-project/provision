@@ -20,6 +20,7 @@ This script will operate the following changes in your system:
 
 We are making the following assumptions:
  * you have read INSTALL.txt and prepared the platform accordingly
+ * you have your MySQL root credentials on hand
  * you are executing this script as your "aegir" user
 ');
 
