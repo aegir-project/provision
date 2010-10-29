@@ -4,6 +4,42 @@
  * @file manual site migrate system
  */
 function drush_provision_hostmaster_migrate_validate($site, $platform) {
+  // XXX: this doesn't actually document the pre alpha9 upgrade path
+  drush_print('
+This command will operate the following changes in your system:
+
+1. verify the server and the hostmaster site (provision-verify)
+2. verify the new platform (which will download it if missing)
+3. stop the Aegir frontend (hostmaster-pause)
+4. remove the cronjob (crontab -r)
+5. attempt a migration to the new platform (provision-migrate)
+6. start the Aegir frontend again (hostmaster-resume)
+
+We are making the following assumptions:
+ * you have read UPGRADE.txt
+ * you are executing this script as your "aegir" user
+');
+
+  $go = FALSE;
+  while (!$go) {
+    $yesno = trim(strtolower(drush_prompt(dt('Do you really want to proceed with the upgrade'), 'Y/n', TRUE)));
+
+    switch ($yesno) {
+    case 'no':
+    case 'n':
+      return drush_set_error(dt('Upgrade aborted by user'));
+      break;
+    case 'yes':
+    case 'y':
+    case 'y/n':
+      $go = TRUE;
+      break;
+    default:
+      drush_print(dt('Please answer "yes" or "no"'));
+      break;
+    }
+  }
+
   $data = drush_get_merged_options();
 
   $alias_file = drush_server_home() . '/.drush/server_master.alias.drushrc.php';
