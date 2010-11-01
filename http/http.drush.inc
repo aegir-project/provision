@@ -104,8 +104,8 @@ class provisionService_http_public extends provisionService_http {
 
 
     // Redirection urls
-    $this->server->setProperty('web_disable_url', $this->server->master_url .'/hosting/disabled');
-    $this->server->setProperty('web_maintenance_url', $this->server->master_url .'/hosting/maintenance');
+    $this->server->web_disable_url = $this->server->master_url .'/hosting/disabled';
+    $this->server->web_maintenance_url = $this->server->master_url .'/hosting/maintenance';
 
 
     if (!is_null($this->application_name)) {
