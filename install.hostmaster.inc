@@ -29,6 +29,7 @@ Don't worry: you will get to review those settings after the final install");
   if (!$site) {
     $site = drush_prompt(dt("Aegir domain name"), provision_fqdn());
   }
+  drush_set_option('site', $site);
 
   $aegir_host = drush_get_option('aegir_host', NULL, 'options');
   if (is_null($aegir_host)) {
@@ -102,6 +103,7 @@ The following settings will be used:
 
 function drush_provision_hostmaster_install($site = NULL) {
   $version = drush_get_option('version');
+  $site = drush_get_option('site', provision_fqdn());
   $aegir_root = drush_get_option('aegir_root');
   $platform = drush_get_option(array('r', 'root'));
 
