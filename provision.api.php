@@ -30,7 +30,7 @@ function drush_hook_provision_services() {
  * @param $uri
  *   URI for the site.
  * @param $data
- *   Associatiave array of data from provisionConfig_drupal_settings::data.
+ *   Associative array of data from provisionConfig_drupal_settings::data.
  *
  * @return
  *   Lines to add to the site's settings.php file.
@@ -47,7 +47,7 @@ function drush_hook_provision_drupal_config($uri, $data) {
  * To use templating, return an include statement for the template.
  *
  * @param $data
- *   Associatiave array of data from provisionConfig_apache_server::data.
+ *   Associative array of data from provisionConfig_apache_server::data.
  *
  * @return
  *   Lines to add to the configuration file.
@@ -63,7 +63,7 @@ function drush_hook_provision_apache_server_config($data) {
  * To use templating, return an include statement for the template.
  *
  * @param $data
- *   Associatiave array of data from provisionConfig_apache_platform::data.
+ *   Associative array of data from provisionConfig_apache_platform::data.
  *
  * @return
  *   Lines to add to the configuration file.
@@ -81,7 +81,7 @@ function drush_hook_provision_apache_dir_config($data) {
  * @param $uri
  *   URI for the site.
  * @param $data
- *   Associatiave array of data from provisionConfig_apache_site::data.
+ *   Associative array of data from provisionConfig_apache_site::data.
  *
  * @return
  *   Lines to add to the configuration file.
