@@ -321,11 +321,16 @@ commandline. See the inline help for the available options::
 
  drush help hostmaster-install
 
-You can append '--client_email=you@example.com' to keep from being prompted for
-an e-mail address during install. The traditional Drupal 'Welcome' e-mail will
-be sent to this e-mail address upon completion of the installation. This e-mail
-address will also be used as the default e-mail address of the first user and
-client in Aegir, but can be changed later.
+It is imperative that you provide a valid FQDN to the installer. This is used
+for database GRANTs. Remote web servers depend on the FQDN being resolvable 
+in order to connect back to your Aegir master server if it is used as your 
+database server for managed sites.
+
+Upon completion of the installation, the traditional Drupal 'Welcome' e-mail 
+will be sent to the e-mail address specified by --client_email=(your e-mail) 
+or if not provided as a command line switch, the address prompted by the 
+installer process. This e-mail address will also be used as the default e-mail 
+address of the first user and client in Aegir, but can be changed later.
 
 Checkpoint / Finished!
 ----------------------
