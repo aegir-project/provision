@@ -52,6 +52,9 @@ handle the upgrade process.
 
 You can download and run the upgrade.sh script with the following.
 
+Make sure you download it to somewhere that the aegir user can access in order
+to execute it.
+
 Shell commands::
  wget -O upgrade.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=upgrade.sh.txt;hb=HEAD'
  su -s /bin/sh aegir -c "sh upgrade.sh.txt aegir.example.com"
