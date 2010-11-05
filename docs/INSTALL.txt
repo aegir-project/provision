@@ -78,7 +78,7 @@ Database server
 
 You will require a database server, obviously. Aegir currently only supports
 MySQL. It is preferable to use a dedicated server since Aegir will create
-database users and will require a privileged user.
+database users and will requires the use of the mysql 'root' user.
 
 Mail transfer agent
 -------------------
