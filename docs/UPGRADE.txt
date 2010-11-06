@@ -271,8 +271,8 @@ You need to re-use the pasword you had for the account before.
 
 Shell commands::
 
-  mysql -u root -p -e "GRANT ALL ON *.* to 'aegir_root'@$AEGIR_HOST IDENTIFIED BY 'xxxx' WITH GRANT OPTION;"
-  mysql -u root -p -e "GRANT ALL ON *.* to 'aegir_root'@$AEGIR_IP IDENTIFIED BY 'xxxx' WITH GRANT OPTION;"
+  mysql -u root -p -e "GRANT ALL ON *.* to 'aegir_root'@'$AEGIR_HOST' IDENTIFIED BY 'xxxx' WITH GRANT OPTION;"
+  mysql -u root -p -e "GRANT ALL ON *.* to 'aegir_root'@'$AEGIR_IP' IDENTIFIED BY 'xxxx' WITH GRANT OPTION;"
 
 
 0.4 - Apache configuration
