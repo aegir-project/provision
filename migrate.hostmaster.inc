@@ -14,6 +14,7 @@ This command will operate the following changes in your system:
 4. remove the cronjob (crontab -r)
 5. attempt a migration to the new platform (provision-migrate)
 6. start the Aegir frontend again (hostmaster-resume)
+7. replace the crontab.
 
 We are making the following assumptions:
  * you have read UPGRADE.txt
