@@ -315,7 +315,7 @@ the hostmaster-install command.
 
 Shell commands::
 
- drush hostmaster-install
+ drush hostmaster-install --version=HEAD
 
 You will be prompted for the required information if not provided on the
 commandline. See the inline help for the available options::

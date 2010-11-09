@@ -7,7 +7,7 @@
 function drush_provision_hostmaster_install_validate($site = NULL) {
   // set defaults for this whole script
   // those are settings that are not prompted to the user but still overridable
-  $version = drush_set_default('version', 'HEAD');
+  $version = drush_set_default('version', drush_get_option('version', 'HEAD'));
   $aegir_root = drush_set_default('aegir_root', drush_server_home());
   drush_set_default('root', $aegir_root . '/' . 'hostmaster-' . $version);
   drush_set_default('r', drush_get_option('root'));
