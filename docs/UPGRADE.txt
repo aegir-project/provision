@@ -285,8 +285,7 @@ and a single apache.conf. The vhost.d directory is for virtual hosts,
 platform.d is for platform-specific configuration and apache.conf is the
 server-wide configuration file.
 
-After you have completed the migration process as outlined above, 
-you will need to change the line you added to either the httpd.conf file 
+You will need to change the line you added to either the httpd.conf file 
 or /etc/apache2/conf.d/aegir file during installation.
 
 Open your httpd.conf file and modify::
