@@ -51,6 +51,8 @@ The level of access required to be able to configure this system is very far
 beyond what is commonly available to users with shared hosting.  Commands are
 assumed to be run as root user.
 
+A standard umask of 022 is assumed. This is the default on most systems.
+
 Web server
 ----------
 

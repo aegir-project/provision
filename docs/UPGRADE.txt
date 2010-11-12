@@ -35,6 +35,7 @@ To become aegir user you can issue this command::
 Note that /bin/sh is an example. You may wish to instead use the shell of your
 choice, i.e /bin/bash
 
+A standard umask of 022 is assumed. This is the default on most systems.
 
 Upgrade script
 ==============
