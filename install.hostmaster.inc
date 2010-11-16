@@ -15,7 +15,8 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   drush_set_default('web_group', _provision_default_web_group());
   drush_set_default('http_service_type', 'apache');
   drush_set_default('drush_make_version', '6.x-2.0-beta9');
-  $aegir_db_user = drush_set_default('aegir_db_user', 'root');
+  drush_set_default('aegir_db_user', 'root');
+  $aegir_db_user = drush_get_option('aegir_db_user');
   drush_set_default('makefile', $aegir_root . '/.drush/provision/aegir.make');
 
   drush_print("Aegir $version automated install script");
