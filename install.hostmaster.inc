@@ -66,7 +66,7 @@ We are making the following assumptions:
 
 The following settings will be used:
  Aegir frontend URL: !site
- Master server: !fqdn
+ Master server FQDN: !fqdn
  Aegir root: !home
  Aegir user: !user
  Web group: !web
