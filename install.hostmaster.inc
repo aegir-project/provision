@@ -36,6 +36,7 @@ Don't worry: you will get to review those settings after the final install");
     $aegir_host = drush_prompt(dt("Master server FQDN"), provision_fqdn());
   }
   drush_set_option('aegir_host', $aegir_host);
+  drush_set_default('aegir_db_host', $aegir_host);
 
   if (is_null(drush_get_option('aegir_db_pass', NULL))) {
     // XXX: may not be portable everywhere?
@@ -71,6 +72,7 @@ The following settings will be used:
  Aegir user: !user
  Web group: !web
  Web server: !web_server
+ Aegir DB host: !db_host
  Aegir DB user: !db_user
  Aegir DB password: !db_pass
  Drush make version: !drush_make
@@ -84,6 +86,7 @@ The following settings will be used:
          '!user' => drush_get_option('script_user'),
          '!web' => drush_get_option('web_group'),
          '!web_server' => drush_get_option('http_service_type'),
+         '!db_host' => drush_get_option('aegir_db_host'),
          '!db_user' => drush_get_option('aegir_db_user'),
          '!db_pass' => is_null(drush_get_option('aegir_db_pass', NULL, 'process')) ? '<previously set>' : '<prompted>',
          '!drush_make' => drush_get_option('drush_make_version'),
@@ -109,11 +112,8 @@ function drush_provision_hostmaster_install($site = NULL) {
   $aegir_db_user = drush_get_option('aegir_db_user');
   $aegir_db_pass = drush_get_option('aegir_db_pass');
   
-  $master_db = sprintf("mysql://%s:%s@%s",$aegir_db_user, $aegir_db_pass, drush_get_option('aegir_host'));
-
-  // TODO: support creation of an external db server
   $server = '@server_master';
-  drush_backend_invoke_args("provision-save", array($server), array(
+  $master_context = array(
     'context_type' => 'server',
     // files
     'remote_host' => drush_get_option('aegir_host'),
@@ -123,10 +123,24 @@ function drush_provision_hostmaster_install($site = NULL) {
     'http_service_type' => drush_get_option('http_service_type'),
     'web_group' => drush_get_option('web_group'),
     'master_url' => "http://" . $site,
-   // mysql
-    'db_service_type' => 'mysql',
-    'master_db' => $master_db,
-  ));
+  );
+
+  $master_db = sprintf("mysql://%s:%s@%s",$aegir_db_user, $aegir_db_pass, drush_get_option('aegir_db_host'));
+  if (drush_get_option('aegir_host') == drush_get_option('aegir_db_host')) {
+    $master_context['db_service_type'] = 'mysql';
+    $master_context['master_db'] = $master_db;
+    $dbserver = $server;
+  } else {
+    $dbserver = '@server_' . drush_get_option('aegir_db_host');
+    $dbserver_context = array(
+      'context_type' => 'server',
+      'db_service_type' => 'mysql',
+      'master_db' => $master_db,
+    );
+    drush_backend_invoke_args("provision-save", array($dbserver), $dbserver_context);
+    provision_backend_invoke($dbserver, 'provision-verify');
+  }
+  drush_backend_invoke_args("provision-save", array($server), $master_context);
   provision_backend_invoke($server, 'provision-verify');
 
   // exit if an error has occured. 
@@ -161,7 +175,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   drush_backend_invoke_args("provision-save", array($site_name), array(
     'context_type' => 'site',
     'platform' => $platform_name,
-    'db_server' => $server,
+    'db_server' => $dbserver,
     'uri' => $site,
     'client_email' => drush_get_option('client_email'),
     'profile' => 'hostmaster',
