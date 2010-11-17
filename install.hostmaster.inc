@@ -151,7 +151,12 @@ function drush_provision_hostmaster_install($site = NULL) {
     'root' => $platform,
     'makefile' => drush_get_option('makefile'),
   ));
-  provision_backend_invoke($platform_name, 'provision-verify');
+  // propagate working-copy args downward
+  $options = array();
+  if (drush_get_option('working-copy')) {
+    $options['working-copy'] = 1;
+  }
+  provision_backend_invoke($platform_name, 'provision-verify', array(), $options);
 
   // exit if an error has occured. 
   if (drush_get_error()) {
