@@ -133,6 +133,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   } else {
     $dbserver = '@server_' . drush_get_option('aegir_db_host');
     $dbserver_context = array(
+      'remote_host' => drush_get_option('aegir_db_host'),
       'context_type' => 'server',
       'db_service_type' => 'mysql',
       'master_db' => $master_db,
@@ -164,7 +165,12 @@ function drush_provision_hostmaster_install($site = NULL) {
     'root' => $platform,
     'makefile' => drush_get_option('makefile'),
   ));
-  provision_backend_invoke($platform_name, 'provision-verify');
+  // propagate working-copy args downward
+  $options = array();
+  if (drush_get_option('working-copy')) {
+    $options['working-copy'] = 1;
+  }
+  provision_backend_invoke($platform_name, 'provision-verify', array(), $options);
 
   // exit if an error has occured. 
   if (drush_get_error()) {
