@@ -27,7 +27,7 @@ Don't worry: you will get to review those settings after the final install");
   }
   // now we prompt the user for settings if not provided or not sane
   if (!$site) {
-    $site = drush_prompt(dt("Aegir domain name"), provision_fqdn());
+    $site = drush_prompt(dt("Aegir frontend URL"), provision_fqdn());
   }
   drush_set_option('site', $site);
 
