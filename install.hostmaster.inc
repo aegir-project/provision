@@ -22,7 +22,7 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   drush_print("==============================================================================");
 
   if (!$site || !drush_get_option('aegir_host', NULL) || !drush_get_option('aegir_db_pass', NULL) || filter_var(drush_get_option('client_email'), FILTER_VALIDATE_EMAIL)) {
-    drush_print("Some settings have not been guessed and will now be prompted.
+    drush_print("Some settings have not been provided and will now be prompted.
 Don't worry: you will get to review those settings after the final install");
   }
   // now we prompt the user for settings if not provided or not sane
