@@ -43,8 +43,13 @@ Don't worry: you will get to review those settings after the final install");
     print "\n"; // add a newline since the user's didn't print    
   }
 
+  if ($aegir_host == 'localhost') {
+    $default_email = 'webmaster@example.com';
+  } else {
+    $default_email = 'webmaster@' . $aegir_host;
+  }
   while (!filter_var(drush_get_option('client_email'), FILTER_VALIDATE_EMAIL)) {
-   $client_email = drush_prompt(dt("Admin user e-mail"), "you@example.com");
+   $client_email = drush_prompt(dt("Admin user e-mail"), $default_email);
    drush_set_option('client_email', $client_email);
   }
 
