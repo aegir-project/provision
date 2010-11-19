@@ -31,11 +31,8 @@ Don't worry: you will get to review those settings after the final install");
   }
   drush_set_option('site', $site);
 
-  $aegir_host = drush_get_option('aegir_host', NULL, 'options');
-  if (is_null($aegir_host)) {
-    $aegir_host = drush_prompt(dt("Master server FQDN"), provision_fqdn());
-  }
-  drush_set_option('aegir_host', $aegir_host);
+  drush_set_default('aegir_host', $site);
+  $aegir_host = drush_get_option('aegir_host');
   drush_set_default('aegir_db_host', $aegir_host);
 
   if (is_null(drush_get_option('aegir_db_pass', NULL))) {
