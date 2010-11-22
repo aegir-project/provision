@@ -27,7 +27,7 @@
 # 3. delegate the rest of the install to hostmaster-install
 ########################################################################
 # basic variables, change before release
-AEGIR_VERSION="HEAD"
+AEGIR_VERSION="0.4-beta1"
 DRUSH_VERSION=6.x-3.3
 
 # when adding a variable here, add it to the display below

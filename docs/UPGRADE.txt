@@ -57,7 +57,7 @@ Make sure you download it to somewhere that the aegir user can access in order
 to execute it.
 
 Shell commands::
- wget -O upgrade.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=upgrade.sh.txt;hb=HEAD'
+ wget -O upgrade.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=upgrade.sh.txt;hb=provision-0.4-beta1'
  su -s /bin/sh aegir -c "sh upgrade.sh.txt aegir.example.com"
 
 Remember to replace aegir.example.com with the domain of your Aegir installation.
@@ -80,13 +80,13 @@ you are reading this document.
 
 Shell commands::
 
-  export AEGIR_VERSION=HEAD
+  export AEGIR_VERSION=0.4-beta1
   export AEGIR_DIR=/var/aegir
   export DRUPAL_DIR=$AEGIR_DIR/hostmaster-$AEGIR_VERSION
   export DRUSH_VERSION=6.x-3.3
   export DRUSH_MAKE_VERSION=6.x-2.0-beta9
   export AEGIR_DOMAIN=aegir.example.com
-  export OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-alpha9
+  export OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-alpha15
 
 This document also assumes drush is installed properly and we use an
 environment variable to simplify the documentation again.
