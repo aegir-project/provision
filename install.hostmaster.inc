@@ -33,8 +33,7 @@ Don't worry: you will get to review those settings after the final install");
   drush_set_option('site', $site);
 
   drush_set_default('aegir_host', provision_fqdn());
-  $aegir_host = drush_get_option('aegir_host');
-  drush_set_default('aegir_db_host', $aegir_host);
+  drush_set_default('aegir_db_host', 'localhost');
 
   if (is_null(drush_get_option('aegir_db_pass', NULL))) {
     // XXX: may not be portable everywhere?
@@ -44,10 +43,10 @@ Don't worry: you will get to review those settings after the final install");
     print "\n"; // add a newline since the user's didn't print    
   }
 
-  if ($aegir_host == 'localhost') {
+  if (drush_get_option('aegir_host') == 'localhost') {
     $default_email = 'webmaster@example.com';
   } else {
-    $default_email = 'webmaster@' . $aegir_host;
+    $default_email = 'webmaster@' . drush_get_option('aegir_host');
   }
   while (!filter_var(drush_get_option('client_email'), FILTER_VALIDATE_EMAIL)) {
    $client_email = drush_prompt(dt("Admin user e-mail"), $default_email);
