@@ -32,7 +32,7 @@ Don't worry: you will get to review those settings after the final install");
   }
   drush_set_option('site', $site);
 
-  drush_set_default('aegir_host', $site);
+  drush_set_default('aegir_host', provision_fqdn());
   $aegir_host = drush_get_option('aegir_host');
   drush_set_default('aegir_db_host', $aegir_host);
 
