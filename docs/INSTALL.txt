@@ -286,7 +286,7 @@ aegir user can access in order to execute it.  This file is available in
 Provision or can be downloaded through the web with this command::
 
 Shell commands::
- wget -O install.sh 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-beta1'
+ wget -O install.sh 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD'
 
 By default, the install script will install the "correct" version of Aegir
 (ie. if it was downloaded through git, it will install the version from the
@@ -317,7 +317,7 @@ the hostmaster-install command.
 
 Shell commands::
 
- drush hostmaster-install --version=0.4-beta1
+ drush hostmaster-install --version=HEAD
 
 You will be prompted for the required information if not provided on the
 commandline. See the inline help for the available options::
