@@ -33,9 +33,10 @@ install: build
 	dh_prep
 	dh_installdirs
 
-	cp -r $(CURDIR)/db_server $(CURDIR)/platform $(CURDIR)/provision.* $(CURDIR)/web_server $(CURDIR)/debian/aegir-provision/usr/share/drush/commands/provision/
+	cp -r $(CURDIR)/db/  $(CURDIR)/dns/  $(CURDIR)/http/ $(CURDIR)/aegir.make $(CURDIR)/platform/ $(CURDIR)/*.inc $(CURDIR)/*.php $(CURDIR)/debian/aegir-provision/usr/share/drush/commands/provision/
+    cp -r README.txt $(CURDIR)/docs $(CURDIR)/debian/aegir-provision/usr/share/doc/aegir-provision
+    cp -r $(CURDIR)/examples $(CURDIR)/debian/aegir-provision/usr/share/doc/aegir-provision/examples
 	cp $(CURDIR)/debian/aegir-provision.lintian $(CURDIR)/debian/aegir-provision/usr/share/lintian/overrides/aegir-provision
-	cp $(CURDIR)/debian/apache.conf $(CURDIR)/debian/aegir-provision/etc/aegir/apache.conf
 
 # Build architecture-dependent files here.
 binary-arch: build install
