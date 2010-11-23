@@ -29,7 +29,7 @@ case "$1" in
             echo >&2 "not removing aegir system account because deluser command was not found"
         fi
 
-        for conffile in /etc/sudoers.d/aegir /etc/drush/drushrc.php /etc/aegir/drushrc.php; do
+        for conffile in /etc/sudoers.d/aegir; do
             ucf --purge $conffile
             rm -f $conffile
         done
