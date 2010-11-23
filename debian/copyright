@@ -5,11 +5,11 @@ It was downloaded from <url://drupal.org/project/provision>
 
 Upstream Authors:
 
-    Adrian Rossouw, Antoine Beaupré
+    Adrian Rossouw, Antoine Beaupré, Miguel Jacq
 
 Copyright:
 
-    Copyright (C) 2008-2009 Adrian Rossouw, Antoine Beaupré
+    Copyright (C) 2008-2010 Adrian Rossouw, Antoine Beaupré, Miguel Jacq
 
 License:
 
@@ -43,5 +43,5 @@ Affero General Public License (AGPL) version 3."
 On Debian systems, the complete text of the GNU General
 Public License can be found in `/usr/share/common-licenses/GPL'.
 
-The Debian packaging is (C) 2009, Antoine Beaupré <anarcat@koumbit.org> and
+The Debian packaging is (C) 2009-2010, Antoine Beaupré <anarcat@koumbit.org> and
 is licensed under the GPL, see above.
