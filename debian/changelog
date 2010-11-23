@@ -1,9 +1,12 @@
-aegir-provision (0.3-3) UNRELEASED; urgency=low
+aegir-provision (0.4~beta1-1) UNRELEASED; urgency=low
 
   * clarify GPL2+ copyright of drupal.org material
   * make a standard git-based release process in debian/rules
-  * properly escape meta-characters when generating the drushrc.php file (Closes: #548084).
-  * set proper permissions on drushrc.php (Closes: #548085).
+  * do not generate a drushrc.php, things are all different now
+  * do not install apache config and reload apache until we use
+    hostmaster-install
+  * install straight to /var/aegir again
+  * follow upstream beta1
 
  --
 
