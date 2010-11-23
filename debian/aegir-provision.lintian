@@ -1,1 +1,1 @@
-aegir-provision: non-standard-dir-in-var var/backups/
+aegir-provision: non-standard-dir-in-var var/aegir/
