@@ -1,20 +1,8 @@
 Here are the parts missing from this package:
 
- 1. create the aegir user (done)
- 2. setup sudo (mostly done: need to warn the user if #includedir not
+ 1. setup sudo (mostly done: need to warn the user if #includedir not
     set)
- 3. setup the file infrastructure (done)
- 4. hook into the apache config: (done)
-   Include /var/aegir/config/vhost.d
- 5. create a database superuser:
-   GRANT ALL PRIVILEGES ON *.* TO 'username_here'@'%' IDENTIFIED BY 'mypassword' WITH GRANT OPTION;
-   this needs to be done with db-common thingy
- 6. those settings need to be written to the system-wide drushrc:
-   * mysql creds
-   * config and backup paths (done)
-   * apache restart commands (done)
-   * user and group settings (done)
- 7. find a proper place for the documentation below.
-
-Some of that code is already available in install.sh.txt in hostmaster
-HEAD.
+ 2. comply with the FHS
+ 3. prompt the user for the DB credentials (db-common?)
+ 4. install hostmaster itself
+ 5. hook into the apache config and restart apache
