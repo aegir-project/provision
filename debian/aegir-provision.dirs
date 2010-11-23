@@ -1,0 +1,6 @@
+usr/share/drush/commands/provision
+var/lib/aegir
+etc/aegir/vhost.d
+var/backups/aegir
+usr/share/lintian/overrides
+etc/drush

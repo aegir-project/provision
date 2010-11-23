@@ -1,0 +1,21 @@
+aegir-provision for Debian
+--------------------------
+
+This is part of the Aegir suite. This package takes care of installing
+the provision file in the proper location so it's seen by Drush and sets
+up some directories and the aegir user. See the INSTALL.txt in the
+hostmaster project for install instructions:
+
+http://drupal.org/project/hostmaster
+
+The directories, under Debian, are:
+
+ Platforms and Aegir home: /var/lib/aegir
+ Backups: /var/backups/aegir
+ Configs: /etc/aegir
+
+All those directories should be owned by the webserver user. You will
+need to enter those paths in the install wizard when setting up the
+platforms and frontend.
+
+ -- Antoine Beaupré <anarcat@koumbit.org>, Fri, 12 Jun 2009 17:11:14 -0400

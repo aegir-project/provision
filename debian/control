@@ -1,0 +1,27 @@
+Source: aegir-provision
+Section: admin
+Priority: optional
+Maintainer: Antoine Beaupré <anarcat@koumbit.org>
+DM-Upload-Allowed: yes
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.3
+Homepage: http://drupal.org/project/provision
+Vcs-git: git://git.koumbit.net/drupal/modules/provision
+Vcs-browser: http://git.koumbit.net/?p=drupal/modules/provision
+
+Package: aegir-provision
+Architecture: all
+Depends: drush (>= 2.0), php5-mysql, mysql-client, sudo (>= 1.7.2p1-1), postfix | mail-transport-agent, apache2 | apache, adduser, ucf
+Description: backend of the Aegir hosting system
+ Provision is a component of the Aegir hosting system.
+ .
+ Ægir is a new set of contributed modules for Drupal that aims to
+ solve the problem of managing a large number of Drupal sites. It does
+ this by providing you with a simple Drupal based hosting front end
+ for your entire network of sites. To deploy a new site you simply
+ have to create a new Site node. To backup or upgrade sites, you
+ simply manage your site nodes as you would any other node.
+ .
+ The provision component of this system provides the back end used for
+ system level tasks such as creating configuration files and managing
+ databases and backup files.

@@ -1,0 +1,62 @@
+aegir-provision (0.3-3) UNRELEASED; urgency=low
+
+  * clarify GPL2+ copyright of drupal.org material
+  * make a standard git-based release process in debian/rules
+  * properly escape meta-characters when generating the drushrc.php file (Closes: #548084).
+  * set proper permissions on drushrc.php (Closes: #548085).
+
+ --
+
+aegir-provision (0.3-2) unstable; urgency=low
+
+  * install sudoers file in /etc/sudoers.d, and the drushrc using ucf so
+    that local changes are preserved
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 09 Sep 2009 16:07:37 +0200
+
+aegir-provision (0.3-1) unstable; urgency=low
+
+  * new upstream version (0.3)
+  * update to latest standards (no changes)
+  * make DM-Upload-Allowed
+  * make the aegir user part of the www-data group, as recommended by the
+    upstream INSTALL.txt file (in the hostmaster package)
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Sun, 30 Aug 2009 16:27:17 -0400
+
+aegir-provision (0.3~rc2-1) unstable; urgency=low
+
+  * new upstream version (0.3-rc2)
+  * fix typos in changelog
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 29 Jul 2009 18:34:30 -0400
+
+aegir-provision (0.2-4) unstable; urgency=low
+
+  * add DM-Upload-Allowed field since I'm now a Debian Maintainer
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Tue, 14 Jul 2009 21:08:05 -0400
+
+aegir-provision (0.2-3) unstable; urgency=low
+
+  * remove parts of the post* scripts that were violating section 10.7.4
+    of the Debian policy, namely the edition of /etc/sudoers and
+    /etc/drush/drushrc.php.
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Sun, 14 Jun 2009 20:52:54 -0400
+
+aegir-provision (0.2-2) unstable; urgency=low
+
+  * configure apache properly
+  * configure backup and config paths properly
+  * setup users and groups, fix ownership
+  * setup sudoers line
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 12 Jun 2009 17:57:38 -0400
+
+aegir-provision (0.2-1) unstable; urgency=low
+
+  * Initial release (Closes: #532923)
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 12 Jun 2009 13:30:16 -0400
+

@@ -1,0 +1,94 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+
+	touch configure-stamp
+
+build: build-stamp
+
+build-stamp: configure-stamp  
+	dh_testdir
+	touch $@
+
+clean: 
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+	dh_clean 
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+
+	cp -r $(CURDIR)/db_server $(CURDIR)/platform $(CURDIR)/provision.* $(CURDIR)/web_server $(CURDIR)/debian/aegir-provision/usr/share/drush/commands/provision/
+	cp $(CURDIR)/debian/aegir-provision.lintian $(CURDIR)/debian/aegir-provision/usr/share/lintian/overrides/aegir-provision
+	cp $(CURDIR)/debian/apache.conf $(CURDIR)/debian/aegir-provision/etc/aegir/apache.conf
+
+# Build architecture-dependent files here.
+binary-arch: build install
+# We have nothing to do by default.
+
+# Build architecture-independent files here.
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs 
+	dh_installdocs
+	dh_installexamples
+#	dh_install
+#	dh_installmenu
+#	dh_installdebconf	
+#	dh_installlogrotate
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+#	dh_python
+#	dh_installinit
+#	dh_installcron
+#	dh_installinfo
+	dh_installman
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+#	dh_perl
+#	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure
+
+release: git-buildpackage
+
+MAJOR=$(shell sed -ne 's/^[^(]*(\([^)]*\)).*/\1/;1p' debian/changelog)
+REV=$(shell env LANG=C git show --pretty=format:%h | head -1)
+VERSION="${MAJOR}~git${REV}"
+export VERSION
+export MAJOR
+DRUPAL_VERSION=$(shell sed -ne 's/^[^(]*(\([^)-]*\).*).*/\1/;s/\./-/;1p' debian/changelog )
+
+build-snapshot:
+	@echo "building a package based on the current snapshot (${VERSION})"
+	svn update || true
+	svn export . ../alternc-${VERSION}
+	cd ../alternc-${VERSION} && sed -i -e '1s/)/~svn${REV})/' debian/changelog && debuild
+
+git-buildpackage:
+	git-buildpackage --git-debian-branch=debian --git-upstream-tag=DRUPAL-6--${DRUPAL_VERSION}
