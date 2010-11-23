@@ -12,6 +12,7 @@ Vcs-browser: http://git.koumbit.net/?p=drupal/modules/provision
 Package: aegir-provision
 Architecture: all
 Depends: drush (>= 2.0), php5-mysql, mysql-client, sudo (>= 1.7.2p1-1), postfix | mail-transport-agent, apache2 | apache, adduser, ucf
+Recommends: mysql-server
 Description: backend of the Aegir hosting system
  Provision is a component of the Aegir hosting system.
  .
