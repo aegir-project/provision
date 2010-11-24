@@ -1,5 +1,6 @@
 aegir-provision (0.4~beta1-1) unstable; urgency=low
 
+  * major overhaul of this package for the new upstream release
   * clarify GPL2+ copyright of drupal.org material
   * make a standard git-based release process in debian/rules
   * do not generate a drushrc.php, things are all different now
@@ -7,7 +8,6 @@ aegir-provision (0.4~beta1-1) unstable; urgency=low
     hostmaster-install
   * install the frontend using hostmaster-install
   * install straight to /var/aegir again
-  * follow upstream beta1
 
  -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 24 Nov 2010 00:31:17 -0500
 
