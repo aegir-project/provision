@@ -71,6 +71,8 @@ case "$1" in
         TEMPFILE=`tempfile`
         su aegir -c 'drush @hostmaster status' >> $TEMPFILE || true
         if grep -q 'Drupal bootstrap.*Successful' $TEMPFILE; then
+            db_fset aegir/db_password "seen" "true" || true
+
             # there's already an install
             SITE=`grep URI $TEMPFILE | sed -e 's/^.*://'`
             OLD_PLATFORM=`grep 'Drupal root' $TEMPFILE | sed -e 's/^.*://'`
@@ -85,6 +87,7 @@ case "$1" in
                 su aegir -c "drush hostmaster-migrate '$SITE' '$NEW_PLATFORM'"
             fi
         else
+            db_fset aegir/db_password "seen" "false" || true
             db_get "aegir/site"
             if [ ! -z "$RET" ]; then
                 SITE="$RET"
@@ -102,7 +105,6 @@ case "$1" in
                 MAKEFILE="--makefile='$RET'"
             fi
             db_reset aegir/db_password || true
-            db_fset aegir/db_password "seen" "false" || true
             db_go
             db_stop
             
@@ -113,7 +115,6 @@ case "$1" in
             su aegir -c "drush hostmaster-install --yes --version='$VERSION' --aegir_db_host='$AEGIR_DB_HOST' --aegir_db_user='$AEGIR_DB_USER' --aegir_db_pass='$AEGIR_DB_PASS' --client_email='$EMAIL' $MAKEFILE $SITE"
             ln -sf $VARLIB/config/apache.conf /etc/apache2/conf.d/aegir.conf
             apache2ctl graceful
-            db_fset aegir/db_password "seen" "true" || true
         fi
         rm -f $TEMPFILE
     ;;
