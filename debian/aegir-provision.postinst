@@ -75,7 +75,7 @@ case "$1" in
 
             # there's already an install
             SITE=`grep URI $TEMPFILE | sed -e 's/^.*://'`
-            OLD_PLATFORM=`grep 'Drupal root' $TEMPFILE | sed -e 's/^.*://'`
+            OLD_PLATFORM=`grep 'Drupal root' $TEMPFILE | sed -e 's/^.*:[[:space:]]*//;s/[[:space:]]*$//'`
             NEW_PLATFORM="$VARLIB/hostmaster-$VERSION"
             if [ -d "$NEW_PLATFORM" ]; then
                 # this is not an upgrade, do nothing
