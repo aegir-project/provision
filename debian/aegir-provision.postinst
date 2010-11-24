@@ -76,6 +76,10 @@ case "$1" in
         fi
         db_stop
 
+        if [ -d $VARLIB/.drush/provision ]; then
+            echo "existing provision in $VARLIB/.drush/provision detected, move away and try again"
+            exit 1
+        fi
         su aegir -c "drush hostmaster-install --aegir_db_host='$AEGIR_DB_HOST' --client_email='$EMAIL' $MAKEFILE $SITE"
     ;;
 

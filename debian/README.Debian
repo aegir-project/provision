@@ -12,4 +12,4 @@ Aegir is installed under /var/aegir. I haven't gone through the trouble
 of separating the directories to follow the FHS, as Aegir doesn't
 support this well yet.
 
- -- Antoine Beaupré <anarcat@koumbit.org>, Tue, 23 Nov 2010 17:11:14 -0400
+ -- Antoine Beaupré <anarcat@koumbit.org>, Wed, 24 Nov 2010 01:10:50 -0500
