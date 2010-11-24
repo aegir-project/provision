@@ -54,6 +54,7 @@ case "$1" in
         ucf --debconf-ok $TEMPFILE /etc/sudoers.d/aegir
         rm -f $TEMPFILE
         ucfr aegir-provision /etc/sudoers.d/aegir
+        chmod 440 /etc/sudoers.d/aegir
 
         # fix permissions on installed directories
         chown aegir:aegir "$VARLIB"
