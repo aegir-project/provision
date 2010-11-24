@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 # postinst script for provision
 #
 # see: dh_installdeb(1)
