@@ -12,4 +12,13 @@ Aegir is installed under /var/aegir. I haven't gone through the trouble
 of separating the directories to follow the FHS, as Aegir doesn't
 support this well yet.
 
- -- Antoine Beaupré <anarcat@koumbit.org>, Wed, 24 Nov 2010 01:10:50 -0500
+To migrate to this package, you need to first remove
+/var/aegir/.drush/provision (this package will stop processing if it
+finds it), then install the package, which should find the necessary
+aliases and goods to do its own hostmaster-migrate. This procedure
+will only work from 0.4-alpha9 and above:
+
+  rm -rf /var/aegir/.drush/provision
+  apt-get install aegir-provision
+
+ -- Antoine Beaupré <anarcat@koumbit.org>, Wed, 24 Nov 2010 02:40:34 -0500
