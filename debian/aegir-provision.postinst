@@ -87,7 +87,11 @@ case "$1" in
             echo "existing provision in $VARLIB/.drush/provision detected, move away and try again"
             exit 1
         fi
-        su aegir -c "drush hostmaster-install --yes --aegir_db_host='$AEGIR_DB_HOST' --aegir_db_user='$AEGIR_DB_USER' --aegir_db_pass='$AEGIR_DB_PASS' --client_email='$EMAIL' $MAKEFILE $SITE"
+        # fetch the version number from the makefile. the line we're looking for looks like this
+        # projects[hostmaster][download][url] = "http://files.aegirproject.org/hostmaster-0.4-beta1.tgz"
+        # this obviously doesn't work for git releases
+        VERSION=`sed -ne '/hostmaster..download..url/{s/^.*hostmaster-//;s/.tgz"//;p}' /usr/share/drush/commands/provision/aegir.make`
+        su aegir -c "drush hostmaster-install --yes --version='$VERSION' --aegir_db_host='$AEGIR_DB_HOST' --aegir_db_user='$AEGIR_DB_USER' --aegir_db_pass='$AEGIR_DB_PASS' --client_email='$EMAIL' $MAKEFILE $SITE"
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
