@@ -59,6 +59,21 @@ case "$1" in
             chmod 0700 $dir
         done
 
+        db_get "aegir/site"
+        if [ ! -z "$RET" ]; then
+            SITE="$RET"
+        fi
+        db_get "aegir/db_host"
+        AEGIR_DB_HOST="$RET"
+        db_get "aegir/email"
+        EMAIL="$RET"
+        db_get "aegir/makefile"
+        if [ ! -z "$RET" ]; then
+            MAKEFILE="--makefile='$RET'"
+        fi
+        db_stop
+
+        su aegir -c "drush hostmaster-install --aegir_db_host='$AEGIR_DB_HOST' --client_email='$EMAIL' $MAKEFILE $SITE"
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
