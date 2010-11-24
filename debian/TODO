@@ -5,10 +5,8 @@ Critical stuff
 
 This shouldn't be used or published until this is fixed.
 
- * don't try to install over existing sites
- * (ie. support upgrades)
+ * support upgrades (code is there, needs to be tested)
  * don't show the mysql root password on the commandline
- * don't prompt for the mysql root if already installed
 
 Nice to have stuff
 ==================
