@@ -95,6 +95,7 @@ case "$1" in
         su aegir -c "drush hostmaster-install --yes --version='$VERSION' --aegir_db_host='$AEGIR_DB_HOST' --aegir_db_user='$AEGIR_DB_USER' --aegir_db_pass='$AEGIR_DB_PASS' --client_email='$EMAIL' $MAKEFILE $SITE"
         ln -s $VARLIB/config/apache.conf /etc/apache2/conf.d/aegir.conf
         apache2ctl graceful
+        db_fset aegir/db_password "seen" "true" || true
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
