@@ -34,8 +34,8 @@ install: build
 	dh_installdirs
 
 	cp -r $(CURDIR)/db/  $(CURDIR)/dns/  $(CURDIR)/http/ $(CURDIR)/aegir.make $(CURDIR)/platform/ $(CURDIR)/*.inc $(CURDIR)/*.php $(CURDIR)/debian/aegir-provision/usr/share/drush/commands/provision/
-    cp -r README.txt $(CURDIR)/docs $(CURDIR)/debian/aegir-provision/usr/share/doc/aegir-provision
-    cp -r $(CURDIR)/examples $(CURDIR)/debian/aegir-provision/usr/share/doc/aegir-provision/examples
+	cp -r README.txt $(CURDIR)/docs $(CURDIR)/debian/aegir-provision/usr/share/doc/aegir-provision
+	cp -r $(CURDIR)/examples $(CURDIR)/debian/aegir-provision/usr/share/doc/aegir-provision/examples
 	cp $(CURDIR)/debian/aegir-provision.lintian $(CURDIR)/debian/aegir-provision/usr/share/lintian/overrides/aegir-provision
 
 # Build architecture-dependent files here.
@@ -83,7 +83,10 @@ REV=$(shell env LANG=C git show --pretty=format:%h | head -1)
 VERSION="${MAJOR}~git${REV}"
 export VERSION
 export MAJOR
-DRUPAL_VERSION=$(shell sed -ne 's/^[^(]*(\([^)-]*\).*).*/\1/;s/\./-/;1p' debian/changelog )
+DRUPAL_VERSION=$(shell sed -ne 's/^[^(]*(\([^)-]*\).*).*/\1/;s/~/-/;1p' debian/changelog )
+
+show-version:
+	@echo ${DRUPAL_VERSION}
 
 build-snapshot:
 	@echo "building a package based on the current snapshot (${VERSION})"
@@ -92,4 +95,4 @@ build-snapshot:
 	cd ../alternc-${VERSION} && sed -i -e '1s/)/~svn${REV})/' debian/changelog && debuild
 
 git-buildpackage:
-	git-buildpackage --git-debian-branch=debian --git-upstream-tag=DRUPAL-6--${DRUPAL_VERSION}
+	git-buildpackage --git-debian-branch=debian --git-upstream-tag=provision-${DRUPAL_VERSION}
