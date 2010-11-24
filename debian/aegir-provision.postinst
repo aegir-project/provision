@@ -51,7 +51,7 @@ case "$1" in
             cp /usr/share/doc/aegir-provision/examples/examples.sudoers $TEMPFILE
         fi
         
-        ucf $TEMPFILE /etc/sudoers.d/aegir
+        ucf --debconf-ok $TEMPFILE /etc/sudoers.d/aegir
         rm -f $TEMPFILE
         ucfr aegir-provision /etc/sudoers.d/aegir
 
