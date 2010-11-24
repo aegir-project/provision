@@ -84,7 +84,7 @@ case "$1" in
             else
                 # this is an upgrade
                 cd "$OLD_PLATFORM"
-                su aegir -c "drush hostmaster-migrate '$SITE' '$NEW_PLATFORM'"
+                su aegir -c "drush hostmaster-migrate --yes '$SITE' '$NEW_PLATFORM'"
             fi
         else
             db_fset aegir/db_password "seen" "false" || true
