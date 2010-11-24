@@ -13,6 +13,17 @@ Default: localhost
 Description: Database server hostname:
  This is the hostname at which the database server is available.
 
+Template:aegir/db_user
+Type: string
+Default: root
+Description: Database server user:
+ This should be a root MySQL user.
+
+Template:aegir/db_password
+Type: password
+Description: Database server password:
+ The password for the root MySQL user.
+
 Template:aegir/email
 Type: string
 Description: Main client email:
