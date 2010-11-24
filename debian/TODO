@@ -6,11 +6,20 @@ Critical stuff
 This shouldn't be used or published until this is fixed.
 
  * don't show the mysql root password on the commandline
+   this can be done by making hostmaster-install respect existing
+   contexts or by passing the password through a third file
+   descriptors, like we do for mysql
 
 Nice to have stuff
 ==================
 
+ * destroy a platform after upgrading it (make sure it's empty!)
+ * deal with /var/aegir after purge?
  * warn the user if #includedir not set in sudo
  * comply with the FHS
  * use a minimal rules file:
    /usr/share/doc/debhelper/examples/rules.tiny
+ * do not duplicate code with Drupal (so that we're policy compliant,
+   probably impossible)
+ * review and respect the webapps policies:
+   http://webapps-common.alioth.debian.org/draft/html/
