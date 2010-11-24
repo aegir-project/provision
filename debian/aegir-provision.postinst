@@ -63,39 +63,59 @@ case "$1" in
             chmod 0700 $dir
         done
 
-        db_get "aegir/site"
-        if [ ! -z "$RET" ]; then
-            SITE="$RET"
-        fi
-        db_get "aegir/db_host"
-        AEGIR_DB_HOST="$RET"
-        db_get "aegir/db_user"
-        AEGIR_DB_USER="$RET"
-        db_get "aegir/db_password"
-        AEGIR_DB_PASS="$RET"
-        db_get "aegir/email"
-        EMAIL="$RET"
-        db_get "aegir/makefile"
-        if [ ! -z "$RET" ]; then
-            MAKEFILE="--makefile='$RET'"
-        fi
-        db_reset aegir/db_password || true
-        db_fset aegir/db_password "seen" "false" || true
-        db_go
-        db_stop
-
-        if [ -d $VARLIB/.drush/provision ]; then
-            echo "existing provision in $VARLIB/.drush/provision detected, move away and try again"
-            exit 1
-        fi
         # fetch the version number from the makefile. the line we're looking for looks like this
         # projects[hostmaster][download][url] = "http://files.aegirproject.org/hostmaster-0.4-beta1.tgz"
         # this obviously doesn't work for git releases
         VERSION=`sed -ne '/hostmaster..download..url/{s/^.*hostmaster-//;s/.tgz"//;p}' /usr/share/drush/commands/provision/aegir.make`
-        su aegir -c "drush hostmaster-install --yes --version='$VERSION' --aegir_db_host='$AEGIR_DB_HOST' --aegir_db_user='$AEGIR_DB_USER' --aegir_db_pass='$AEGIR_DB_PASS' --client_email='$EMAIL' $MAKEFILE $SITE"
-        ln -sf $VARLIB/config/apache.conf /etc/apache2/conf.d/aegir.conf
-        apache2ctl graceful
-        db_fset aegir/db_password "seen" "true" || true
+
+        TEMPFILE=`tempfile`
+        su aegir -c 'drush @hostmaster status' >> $TEMPFILE || true
+        if grep -q 'Drupal bootstrap.*Successful' $TEMPFILE; then
+            # there's already an install
+            SITE=`grep URI $TEMPFILE | sed -e 's/^.*://'`
+            OLD_PLATFORM=`grep 'Drupal root' $TEMPFILE | sed -e 's/^.*://'`
+            NEW_PLATFORM="$VARLIB/hostmaster-$VERSION"
+            if [ -d "$NEW_PLATFORM" ]; then
+                # this is not an upgrade, do nothing
+                db_stop
+                echo "this is not an upgrade, just updated the backend"
+            else
+                # this is an upgrade
+                cd "$OLD_PLATFORM"
+                su aegir -c "drush hostmaster-migrate '$SITE' '$NEW_PLATFORM'"
+            fi
+        else
+            db_get "aegir/site"
+            if [ ! -z "$RET" ]; then
+                SITE="$RET"
+            fi
+            db_get "aegir/db_host"
+            AEGIR_DB_HOST="$RET"
+            db_get "aegir/db_user"
+            AEGIR_DB_USER="$RET"
+            db_get "aegir/db_password"
+            AEGIR_DB_PASS="$RET"
+            db_get "aegir/email"
+            EMAIL="$RET"
+            db_get "aegir/makefile"
+            if [ ! -z "$RET" ]; then
+                MAKEFILE="--makefile='$RET'"
+            fi
+            db_reset aegir/db_password || true
+            db_fset aegir/db_password "seen" "false" || true
+            db_go
+            db_stop
+            
+            if [ -d $VARLIB/.drush/provision ]; then
+                echo "existing provision in $VARLIB/.drush/provision detected, move away and try again"
+                exit 1
+            fi
+            su aegir -c "drush hostmaster-install --yes --version='$VERSION' --aegir_db_host='$AEGIR_DB_HOST' --aegir_db_user='$AEGIR_DB_USER' --aegir_db_pass='$AEGIR_DB_PASS' --client_email='$EMAIL' $MAKEFILE $SITE"
+            ln -sf $VARLIB/config/apache.conf /etc/apache2/conf.d/aegir.conf
+            apache2ctl graceful
+            db_fset aegir/db_password "seen" "true" || true
+        fi
+        rm -f $TEMPFILE
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
