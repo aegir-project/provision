@@ -1,10 +1,19 @@
-Here are the parts missing from this package:
+Here are the parts missing in this package.
 
- 1. setup sudo (mostly done: need to warn the user if #includedir not
-    set)
- 2. comply with the FHS
- 3. prompt the user for the DB credentials (db-common?)
- 4. install hostmaster itself
- 5. hook into the apache config and restart apache
- 6. use a minimal rules file:
-    /usr/share/doc/debhelper/examples/rules.tiny
+Critical stuff
+==============
+
+This shouldn't be used or published until this is fixed.
+
+ * don't try to install over existing sites
+ * (ie. support upgrades)
+ * don't show the mysql root password on the commandline
+ * don't prompt for the mysql root if already installed
+
+Nice to have stuff
+==================
+
+ * warn the user if #includedir not set in sudo
+ * comply with the FHS
+ * use a minimal rules file:
+   /usr/share/doc/debhelper/examples/rules.tiny
