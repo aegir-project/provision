@@ -5,7 +5,6 @@ Critical stuff
 
 This shouldn't be used or published until this is fixed.
 
- * support upgrades (code is there, needs to be tested)
  * don't show the mysql root password on the commandline
 
 Nice to have stuff
