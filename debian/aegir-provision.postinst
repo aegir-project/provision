@@ -87,7 +87,7 @@ case "$1" in
             echo "existing provision in $VARLIB/.drush/provision detected, move away and try again"
             exit 1
         fi
-        su aegir -c "drush hostmaster-install --aegir_db_host='$AEGIR_DB_HOST' --aegir_db_user='$AEGIR_DB_USER' --aegir_db_pass='$AEGIR_DB_PASS' --client_email='$EMAIL' $MAKEFILE $SITE"
+        su aegir -c "drush hostmaster-install --yes --aegir_db_host='$AEGIR_DB_HOST' --aegir_db_user='$AEGIR_DB_USER' --aegir_db_pass='$AEGIR_DB_PASS' --client_email='$EMAIL' $MAKEFILE $SITE"
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
