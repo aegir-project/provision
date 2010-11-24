@@ -6,3 +6,5 @@ Here are the parts missing from this package:
  3. prompt the user for the DB credentials (db-common?)
  4. install hostmaster itself
  5. hook into the apache config and restart apache
+ 6. use a minimal rules file:
+    /usr/share/doc/debhelper/examples/rules.tiny
