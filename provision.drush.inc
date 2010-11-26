@@ -208,6 +208,11 @@ function provision_drush_command() {
       'example.com' => dt('The url of the site being migrated.')),
   );
 
+  $items['backend-parse'] = array(
+    'description' => dt('Parse the output of --backend commands to a human readable form'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+  );
+
   return $items;
 }
 
