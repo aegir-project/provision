@@ -71,16 +71,15 @@ case "$1" in
         TEMPFILE=`tempfile`
         su aegir -c 'drush @hostmaster status' >> $TEMPFILE || true
         if grep -q 'Drupal bootstrap.*Successful' $TEMPFILE; then
-            # there's already an install
+            db_stop
+            echo "Aegir frontend (@hostmaster) site detected"
             SITE=`grep URI $TEMPFILE | sed -e 's/^.*://'`
             OLD_PLATFORM=`grep 'Drupal root' $TEMPFILE | sed -e 's/^.*:[[:space:]]*//;s/[[:space:]]*$//'`
             NEW_PLATFORM="$VARLIB/hostmaster-$VERSION"
             if [ -d "$NEW_PLATFORM" ]; then
-                # this is not an upgrade, do nothing
-                db_stop
-                echo "this is not an upgrade, just updated the backend"
+                echo "it seems to be the same version as the one we're trying to install, not upgrading"
             else
-                # this is an upgrade
+                echo "upgrading the frontend from $OLD_PLATFORM to $NEW_PLATFORM"
                 cd "$OLD_PLATFORM"
                 su aegir -c "drush hostmaster-migrate --yes '$SITE' '$NEW_PLATFORM'"
             fi
