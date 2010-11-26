@@ -71,8 +71,6 @@ case "$1" in
         TEMPFILE=`tempfile`
         su aegir -c 'drush @hostmaster status' >> $TEMPFILE || true
         if grep -q 'Drupal bootstrap.*Successful' $TEMPFILE; then
-            db_fset aegir/db_password "seen" "true" || true
-
             # there's already an install
             SITE=`grep URI $TEMPFILE | sed -e 's/^.*://'`
             OLD_PLATFORM=`grep 'Drupal root' $TEMPFILE | sed -e 's/^.*:[[:space:]]*//;s/[[:space:]]*$//'`
@@ -87,7 +85,6 @@ case "$1" in
                 su aegir -c "drush hostmaster-migrate --yes '$SITE' '$NEW_PLATFORM'"
             fi
         else
-            db_fset aegir/db_password "seen" "false" || true
             db_get "aegir/site"
             if [ ! -z "$RET" ]; then
                 SITE="$RET"
@@ -105,6 +102,8 @@ case "$1" in
                 MAKEFILE="--makefile='$RET'"
             fi
             db_reset aegir/db_password || true
+            db_fset aegir/db_password "seen" "true" || true
+
             db_go
             db_stop
             
@@ -112,6 +111,7 @@ case "$1" in
                 echo "existing provision in $VARLIB/.drush/provision detected, move away and try again"
                 exit 1
             fi
+            echo "installing the Aegir frontend (Drupal with the hostmaster profile), please wait..."
             # pass data through JSON 
             su aegir -c "drush hostmaster-install --backend $MAKEFILE $SITE | drush backend-parse" <<EOF
 { "yes": 1,
