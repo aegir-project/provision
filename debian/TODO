@@ -5,10 +5,7 @@ Critical stuff
 
 This shouldn't be used or published until this is fixed.
 
- * don't show the mysql root password on the commandline
-   this can be done by making hostmaster-install respect existing
-   contexts or by passing the password through a third file
-   descriptors, like we do for mysql
+ * (nil)
 
 Nice to have stuff
 ==================
