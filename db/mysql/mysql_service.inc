@@ -124,6 +124,13 @@ class provisionService_db_mysql extends provisionService_db_pdo {
    * We go through all this trouble to hide the password from the commandline,
    * it's the most secure way (apart from writing a temporary file, which would
    * create conflicts in parallel runs)
+   *
+   * XXX: this needs to be refactored so it:
+   *  - works even if /dev/fd/3 doesn't exit
+   *  - has a meaningful name (we're talking about reading and writing
+   * dumps here, really, or at least call mysql and mysqldump, not
+   * just any command)
+   *  - can be pushed upstream to drush (http://drupal.org/node/671906)
    */
   function safe_shell_exec($cmd, $db_host, $db_user, $db_passwd, $dump_file = null) {
    $mycnf = sprintf('[client]
