@@ -35,7 +35,6 @@
  *   unlock  - Unlock a platform so that sites can be provisioned on it.
  *
  *   login_reset - Generate a one-time login reset URL.
- *   rename  - Change the url of a site. This requires moving of files, and numerous other issues.
  */
 
 // Do not allow the program to be run as the root user. ever
@@ -177,7 +176,8 @@ function provision_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
     'arguments' => array(
       'example.com' => dt('The name of the site to migrate'),
-      '/path/to/platform' => dt('The platform to migrate the site to.')
+      '/path/to/platform' => dt('The platform to migrate the site to.'),
+      '--makefile' => dt('The optional makefile to use instead of aegir.')
     ),
   );
 
@@ -201,13 +201,6 @@ function provision_drush_command() {
     'description' => dt('Complete the migration of the site to a new platform.'),
     'arguments' => array(
       'example.com' => dt('The url of the site being migrated.')),
-  );
-
-  $items['provision-rename'] = array(
-    'description' => 'Rename a site.',
-    'arguments' => array('domain.com' => dt('The domain to rename. Any outstanding updates will be run.'),
-      'new.domain.com' => dt('The new domain name to use.')),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
   return $items;

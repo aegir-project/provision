@@ -60,6 +60,20 @@ function drush_provision_drupal_provision_backup() {
   // synch all filesystem changes back from the remote server.
   d()->service('http')->fetch(d()->site_path . '/files/');
 
+  // Check if we are currently cloaking credentials
+  $cloaked = d()->service('http')->cloaked_db_creds();
+  $cloaked = drush_get_option('provision_db_cloaking', $cloaked);
+
+  if ($cloaked) {
+    drush_set_option('cloaking_off_temp', TRUE);
+    // Disable the cloaking of credentials temporarily
+    drush_log(dt("Temporarily uncloaking database credentials for backup"));
+    drush_set_option('provision_db_cloaking', FALSE);
+
+    // Write the uncloaked credentials to the settings.php
+    _provision_drupal_create_settings_file();
+  }
+
   $olddir = getcwd();
   // we need to do this because some retarded implementations of tar (e.g. SunOS) don't support -C
 
@@ -74,6 +88,12 @@ function drush_provision_drupal_provision_backup() {
   }
   $result = drush_shell_exec($command,  $backup_file);
   chdir($olddir);
+
+  if (drush_get_option('cloaking_off_temp', FALSE)) {
+    drush_log(dt("Re-cloaking database credentials after backup"));
+    drush_set_option('provision_db_cloaking', TRUE);
+    _provision_drupal_create_settings_file();
+  }
 
   if (!$result && !drush_get_option('force', false)) {
     drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not back up sites directory for drupal"));

@@ -281,7 +281,7 @@ class provisionService_dns extends provisionService {
 
     if ($status) {
       drush_log(dt("creating zone configuration on slaves"));
-      $status = $this->_each_server("create_zone", array($this->context->ip_addresses, $zone));
+      $status = $this->_each_server("create_zone", $zone);
     }
     return $status;
   }

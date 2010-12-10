@@ -9,6 +9,17 @@ Aegir Upgrade Instructions
 This document describes briefly how to upgrade an existing Aegir installation
 -----------------------------------------------------------------------------
 
+The document is laid out in the following sections:
+
+* Conventions and tips
+* Upgrade script
+* Setting environment variables
+* Generic upgrade instructions
+ * Upgrading the backend
+ * Upgrading the frontend
+* Version-specific upgrade notes (read these before running anything else!)
+
+
 Conventions and tips
 ====================
 
@@ -24,7 +35,37 @@ To become aegir user you can issue this command::
 Note that /bin/sh is an example. You may wish to instead use the shell of your
 choice, i.e /bin/bash
 
-Additionally to make following instructions generic and not dependant on a
+
+Upgrade script
+==============
+
+This document remains the canonical source of information regarding upgrading 
+your Aegir installation.
+
+However, an upgrade script exists in the Provision repository that tries to 
+automate much of the process below. 
+
+It is imperative that you read the Version-specific upgrade notes located at 
+the bottom of this document before attempting to run the upgrade.sh script,
+as the script will assume you have your system set up appropriately to
+handle the upgrade process.
+
+You can download and run the upgrade.sh script with the following.
+
+Shell commands::
+ wget -O upgrade.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=upgrade.sh.txt;hb=HEAD'
+ su -s /bin/sh aegir -c "sh upgrade.sh.txt aegir.example.com"
+
+Remember to replace aegir.example.com with the domain of your Aegir installation.
+
+If you run this script (after satisfying the requirements of the Version-specific 
+upgrade notes at the bottom of this document), you may skip the rest of this
+document.
+
+Setting environment variables
+=============================
+
+To make following instructions generic and not dependant on a
 concrete Drupal or Aegir version, we will use shell environment
 variables. Since 0.4, the hostmaster platform is prepended with 'hostmaster'
 so as not to clash with any other Drupal platforms. If you are upgrading from
@@ -142,7 +183,7 @@ Bleeding-edge HEAD dependency
 
 If you intend on upgrading your system to the bleeding edge version of the
 code from our git repositories, you will need the git program installed.  On
-Debian, this means::
+Debian, this means:
 
 Shell commands::
 
@@ -163,11 +204,12 @@ an error you will need to edit your ``/etc/hosts`` file.
 
 First line of this file looks like::
 
-``127.0.0.1  localhost``
+ 127.0.0.1  localhost
 
 Simply add all domains you want to this line. e.g::
 
-``127.0.0.1  localhost $AEGIR_HOST $AEGIR_DOMAIN other1 other2``
+
+ 127.0.0.1  localhost $AEGIR_HOST $AEGIR_DOMAIN other1 other2
 
 If you only intend to use Aegir on a single server, it is acceptable for
 the resolved IP address to be the '127.0.0.1' loopback address. 
@@ -186,7 +228,7 @@ Shell commands as root::
 
 As of the 0.4-alpha3 release, 'unzip' is a required dependency on your server
 in order to successfully extract the jquery.ui library that is part of some UI
-improvements. On Debian, this means::
+improvements. On Debian, this means:
 
 Shell commands::
 

@@ -13,14 +13,6 @@ function drush_provision_hostmaster_install($site = NULL) {
   $aegir_root = drush_get_option('aegir_root', drush_server_home());
   $platform = drush_get_option(array('r', 'root'), $aegir_root . '/' . 'hostmaster-' . $version);
 
-  if (!drush_get_option('backend-only')) {
-
-    if (!function_exists('drush_make_drush_command')) {
-      drush_backend_invoke('dl', array('drush_make-' . drush_get_option('drush_make_version', '6.x-2.0-beta9'), 'destination' => $aegir_root . '/.drush/'));
-    }
-
-  }
-
   $aegir_host = drush_get_option('aegir_host', php_uname('n'), 'options');
   $aegir_db_pass = drush_get_option('aegir_db_pass', 'pass', 'options');
   $aegir_db_user = drush_get_option('aegir_db_user', 'aegir_root', 'options');
@@ -53,6 +45,10 @@ function drush_provision_hostmaster_install($site = NULL) {
     return;
   }
 
+  if (!function_exists('drush_make_drush_command')) {
+    drush_backend_invoke('dl', array('drush_make-' . drush_get_option('drush_make_version', '6.x-2.0-beta9'), 'destination' => $aegir_root . '/.drush/'));
+  }
+
   $platform_name = '@platform_hostmaster';
   drush_backend_invoke_args("provision-save", array($platform_name), array(
     'context_type' => 'platform',
@@ -68,12 +64,9 @@ function drush_provision_hostmaster_install($site = NULL) {
     return false;
   }
 
-
-  if (!drush_get_option('client_email')) {
-    $client_email = drush_prompt(dt("Admin user e-mail"), "webmaster@localhost");
-  }
-  else {
-    $client_email = drush_get_option('client_email');
+  while (!filter_var(drush_get_option('client_email'), FILTER_VALIDATE_EMAIL)) {
+   $client_email = drush_prompt(dt("Admin user e-mail"), "you@example.com");
+   drush_set_option('client_email', $client_email);
   }
 
   $site_name = '@hostmaster';
@@ -82,7 +75,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'platform' => $platform_name,
     'db_server' => $server,
     'uri' => $site,
-    'client_email' => $client_email,
+    'client_email' => drush_get_option('client_email'),
     'profile' => 'hostmaster',
   ));
   $data = provision_backend_invoke($site_name, 'provision-install');
@@ -94,7 +87,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   }
 
 
-  drush_print("Initializing the hosting system");
+  drush_print(dt("Initializing the hosting system"));
   provision_backend_invoke($site_name, 'hosting-setup');
 
   drush_print(dt("Aegir is now installed. You can visit it at @link", array('@link' => $data['context']['login_link'])));

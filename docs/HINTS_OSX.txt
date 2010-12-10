@@ -136,7 +136,6 @@ Next configure Apache to include the Aegir config.
 
 Shell Commands::
  echo "Include /var/aegir/config/apache.conf" >> /opt/local/apache2/conf/httpd.conf
- /opt/local/apache2/bin/apachectl restart
 
 Configuring your MySQL database and user accounts is the same as in
 the INSTALL.txt file. But you probably want to add the path to its

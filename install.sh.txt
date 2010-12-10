@@ -5,29 +5,27 @@
 ########################################################################
 # Aegir quick install script
 #
-# This script takes care of deploying all the required PHP scripts for
-# the frontend to run properly. It should be ran as the Aegir user.
+# This script is just a wrapper to the hostmaster-install command, which
+# is part of the provision module. It is designed to be quickly
+# downloaded and ran as the Aegir user (created as per the INSTALL.txt)
+# and bootstrap aegir by downloading drush and provision.
+#
+# The real work happens in PHP, within the hostmaster-install command.
 #
 # It should keep to strict POSIX shell syntax to ensure maximum
-# portability. The aim here is to ease the burden on porters but also
-# allow people using various platforms to zip through the install
-# quicker.
+# portability. The aim here is to ease the burden allow people using
+# various platforms to zip through the install quicker.
 #
-# This script also *DOES NOT CHECK* if the requirements have been met.
-# It's up to the admin to follow the proper install instructions or use
-# the packages provided by their platform.
+# This script also *DOES NOT CHECK* if the requirements specified in
+# INSTALL.txt have been met.  It's up to the admin to follow the proper
+# install instructions or use the packages provided by their platform.
 ########################################################################
 # This script takes the following steps:
 #
-# 1. parse commandline
-# 2. prompt for confirmation
-# 3. creates a basic directory structure in $AEGIR_HOME
-# 4. downloads drush in $AEGIR_HOME
-# 5. downloads drush_make in $AEGIR_HOME/.drush
-# 6. downloads provision in $AEGIR_HOME/.drush
-# 7. deploys hostmaster in $AEGIR_HOME using drush
-# 8. creates an apache config file in $AEGIR_HOME/config/vhost.d
-#
+# 1. prompt for confirmation
+# 2. downloads drush in $AEGIR_HOME
+# 3. downloads provision in $AEGIR_HOME/.drush
+# 4. delegate the rest of the install to hostmaster-install
 ########################################################################
 # basic variables, change before release
 AEGIR_VERSION="HEAD"
@@ -113,7 +111,7 @@ else
 fi
 
 AEGIR_DB_USER=aegir_root
-AEGIR_DB_PASS=`echo $RANDOM:\`date\`:$AEGIR_HOST | openssl md5`
+AEGIR_DB_PASS=`echo $RANDOM:\`date\`:$AEGIR_HOST | openssl md5 | sed -e 's/(stdin)= //;'`
 
 msg "Aegir will now generate a mysql super user password for you: "
 cat <<EOF
