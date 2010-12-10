@@ -171,37 +171,29 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     "sites/$url/libraries"       => 02775, # http://drupal.org/node/496240
   );
 
-  $chown = array();
   $chgrp = array();
   // special case: platform. do not handle files dir
   if ($url != 'all') {
     $mkdir["sites/$url/files"]          = 02770;
-    $chown["sites/$url/files"]          = d('@server_master')->script_user;
     $chgrp["sites/$url/files"]          = d('@server_master')->web_group;
 
     $mkdir["sites/$url/files/tmp"]      = 02770;
-    $chown["sites/$url/files/tmp"]      = d('@server_master')->script_user;
     $chgrp["sites/$url/files/tmp"]      = d('@server_master')->web_group;
 
     $mkdir["sites/$url/files/images"]   = 02770;
-    $chown["sites/$url/files/images"]   = d('@server_master')->script_user;
     $chgrp["sites/$url/files/images"]   = d('@server_master')->web_group;
 
     $mkdir["sites/$url/files/pictures"] = 02770;
-    $chown["sites/$url/files/pictures"] = d('@server_master')->script_user;
     $chgrp["sites/$url/files/pictures"] = d('@server_master')->web_group;
 
     // d7 support
     $mkdir["sites/$url/private"]        = 02770;
-    $chown["sites/$url/private"]        = d('@server_master')->script_user;
     $chgrp["sites/$url/private"]        = d('@server_master')->web_group;
 
     $mkdir["sites/$url/private/files"]  = 02770;
-    $chown["sites/$url/private/files"]  = d('@server_master')->script_user;
     $chgrp["sites/$url/private/files"]  = d('@server_master')->web_group;
 
     $mkdir["sites/$url/private/temp"]   = 02770;
-    $chown["sites/$url/private/temp"]   = d('@server_master')->script_user;
     $chgrp["sites/$url/private/temp"]   = d('@server_master')->web_group;
   }
 
@@ -227,11 +219,6 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     provision_file()->chmod($path, $perm, !in_array($path, $not_recursive))
       ->succeed('Changed permissions of <code>@path</code> to @perm')
       ->fail('Could not change permissions <code>@path</code> to @perm');
-  }
-  foreach ($chown as $path => $owner) {
-    provision_file()->chown($path, $owner, !in_array($path, $not_recursive))
-      ->succeed('Changed ownership of <code>@path</code> to @uid')
-      ->fail('Could not change ownership <code>@path</code>', 'DRUSH_PERM_ERROR');
   }
   foreach ($chgrp as $path => $group) {
     provision_file()->chgrp($path, $group, !in_array($path, $not_recursive))
