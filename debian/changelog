@@ -1,3 +1,13 @@
+aegir-provision (0.4~beta2-1) unstable; urgency=low
+
+  * fix minor issues found during testing:
+    * do not depend on a specific sudo version, instead warn the user on
+      problems
+    * don't operate on non-existent directories
+  * new upstream release
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Mon, 20 Dec 2010 15:32:33 -0500
+
 aegir-provision (0.4~beta1-1) unstable; urgency=low
 
   * major overhaul of this package for the new upstream release
