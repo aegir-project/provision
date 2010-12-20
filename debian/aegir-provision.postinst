@@ -77,7 +77,7 @@ case "$1" in
             SITE=`grep URI $TEMPFILE | sed -e 's/^.*://'`
             OLD_PLATFORM=`grep 'Drupal root' $TEMPFILE | sed -e 's/^.*:[[:space:]]*//;s/[[:space:]]*$//'`
             NEW_PLATFORM="$VARLIB/hostmaster-$VERSION"
-            if [ -d "$NEW_PLATFORM" ]; then
+            if [ -d "$NEW_PLATFORM" ] && [ "$OLD_PLATFORM" = "$NEW_PLATFORM" ]; then
                 echo "it seems to be the same version as the one we're trying to install, not upgrading"
             else
                 echo "upgrading the frontend from $OLD_PLATFORM to $NEW_PLATFORM"
