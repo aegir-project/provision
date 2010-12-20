@@ -14,6 +14,8 @@ class provisionService_db_mysql extends provisionService_db_pdo {
    }
 
   function database_exists($name) {
+    // An underscore in a LIKE clause is a single character wildcard, escape it.
+    $name = str_replace('_', '\_', $name);
     $result = $this->query("SHOW DATABASES LIKE '%s'", $name);
     if ($result) {
       return $result->fetchColumn(0);

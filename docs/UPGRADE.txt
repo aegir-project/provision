@@ -51,13 +51,19 @@ the bottom of this document before attempting to run the upgrade.sh script,
 as the script will assume you have your system set up appropriately to
 handle the upgrade process.
 
-You can download and run the upgrade.sh script with the following.
+You can download the upgrade.sh script with the following command.
 
 Make sure you download it to somewhere that the aegir user can access in order
 to execute it.
 
 Shell commands::
- wget -O upgrade.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=upgrade.sh.txt;hb=provision-0.4-beta1'
+ wget -O upgrade.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=upgrade.sh.txt;hb=HEAD'
+
+You may need to edit the script to set any variables that are different from the
+defaults. Pay particular attention to the OLD_DRUPAL_DIR variable, as you may be
+upgrading from a different release to the default here.
+
+Shell commands::
  su -s /bin/sh aegir -c "sh upgrade.sh.txt aegir.example.com"
 
 Remember to replace aegir.example.com with the domain of your Aegir installation.
@@ -80,13 +86,13 @@ you are reading this document.
 
 Shell commands::
 
-  export AEGIR_VERSION=0.4-beta1
+  export AEGIR_VERSION=HEAD
   export AEGIR_DIR=/var/aegir
   export DRUPAL_DIR=$AEGIR_DIR/hostmaster-$AEGIR_VERSION
   export DRUSH_VERSION=6.x-3.3
   export DRUSH_MAKE_VERSION=6.x-2.0-beta9
   export AEGIR_DOMAIN=aegir.example.com
-  export OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-alpha15
+  export OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-alpha9
 
 This document also assumes drush is installed properly and we use an
 environment variable to simplify the documentation again.
@@ -229,7 +235,7 @@ Finally, set an $AEGIR_IP environment variable for use in the Database
 configuration step below.
 
 Shell commands as root::
-  AEGIR_IP=`resolveip $AEGIR_HOST`
+  AEGIR_IP=`resolveip $AEGIR_HOST | awk {'print $6'}`
 
 0.4 - unzip dependency
 ----------------------
