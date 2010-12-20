@@ -11,7 +11,7 @@
 ########################################################################
 
 # basic variables, change before running
-AEGIR_VERSION=HEAD
+AEGIR_VERSION=`sed -n '/^version/{s/^.*= //;p}' provision.info`
 AEGIR_DOMAIN=aegir.example.com
 
 AEGIR_DIR=/var/aegir

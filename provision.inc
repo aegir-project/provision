@@ -298,6 +298,13 @@ function provision_backend_invoke($target, $command, $arguments = array(), $opti
   return drush_backend_invoke_args('@' . ltrim($target, '@') . ' ' . $command, $arguments, $options + array('root' => null, 'uri' => null), $mode);
 }
 
+/**
+ * parse the .ini file to get the aegir version
+ */
+function provision_version() {
+  $ini = parse_ini_file(dirname(__FILE__) . '/provision.info');
+  return $ini['version'];
+}
 
 /**
  * A base class for the service and file handling classes that implements
