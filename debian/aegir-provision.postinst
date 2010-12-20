@@ -58,10 +58,6 @@ case "$1" in
 
         # fix permissions on installed directories
         chown aegir:aegir "$VARLIB"
-        for dir in "$VARLIB"/backups "$VARLIB"/config ; do
-            chown aegir:aegir $dir
-            chmod 0700 $dir
-        done
 
         # fetch the version number from the makefile. the line we're looking for looks like this
         # projects[hostmaster][download][url] = "http://files.aegirproject.org/hostmaster-0.4-beta1.tgz"
