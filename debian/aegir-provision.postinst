@@ -51,10 +51,15 @@ case "$1" in
             cp /usr/share/doc/aegir-provision/examples/examples.sudoers $TEMPFILE
         fi
         
-        ucf --debconf-ok $TEMPFILE /etc/sudoers.d/aegir
-        rm -f $TEMPFILE
-        ucfr aegir-provision /etc/sudoers.d/aegir
-        chmod 440 /etc/sudoers.d/aegir
+        if [ -d /etc/sudoers.d ]; then
+            ucf --debconf-ok $TEMPFILE /etc/sudoers.d/aegir
+            rm -f $TEMPFILE
+            ucfr aegir-provision /etc/sudoers.d/aegir
+            chmod 440 /etc/sudoers.d/aegir
+        else
+            echo "running an older version of sudo"
+            echo "you'll need to copy the content of /etc/sudoers.d/aegir into /etc/sudoersi for aegir to run properly"
+        fi
 
         # fix permissions on installed directories
         chown aegir:aegir "$VARLIB"
