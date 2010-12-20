@@ -5,8 +5,9 @@ aegir-provision (0.4~beta2-1) unstable; urgency=low
       problems
     * don't operate on non-existent directories
   * new upstream release
+  * Switch to dpkg-source 3.0 (quilt) format
 
- -- Antoine Beaupré <anarcat@koumbit.org>  Mon, 20 Dec 2010 15:32:33 -0500
+ -- Antoine Beaupré <anarcat@koumbit.org>  Mon, 20 Dec 2010 15:35:56 -0500
 
 aegir-provision (0.4~beta1-1) unstable; urgency=low
 
