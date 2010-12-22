@@ -11,7 +11,7 @@
 ########################################################################
 
 # basic variables, change before running
-AEGIR_VERSION="0.4-beta2"
+AEGIR_VERSION=HEAD
 AEGIR_DOMAIN=aegir.example.com
 
 AEGIR_DIR=/var/aegir
