@@ -11,14 +11,14 @@
 ########################################################################
 
 # basic variables, change before running
-AEGIR_VERSION=`sed -n '/^version/{s/^.*=//;p}' provision.info`
+AEGIR_VERSION=HEAD
 AEGIR_DOMAIN=aegir.example.com
 
 AEGIR_DIR=/var/aegir
 DRUPAL_DIR=$AEGIR_DIR/hostmaster-$AEGIR_VERSION
 DRUSH_VERSION=6.x-3.3
 DRUSH_MAKE_VERSION=6.x-2.0-beta9
-OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-alpha14
+OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-beta1
 DRUSH_DIR=$AEGIR_DIR/drush
 DRUSH="php $DRUSH_DIR/drush.php"
 BACKUP_DIR=$AEGIR_DIR/pre-upgrade-`date '+%F-%H%M'`

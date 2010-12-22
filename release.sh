@@ -98,6 +98,12 @@ if ! [ -z "$old_version" ]; then
 fi
 git add docs/UPGRADE.txt && rm docs/UPGRADE.txt.tmp
 
+echo changing install.sh.txt version
+sed -i'.tmp' -e"s/AEGIR_VERSION=.*$/AEGIR_VERSION=\"$version\"/" install.sh.txt && git add install.sh.txt && rm install.sh.txt.tmp
+
+echo changing upgrade.sh.txt version
+sed -i'.tmp' -e"s/AEGIR_VERSION=.*$/AEGIR_VERSION=\"$version\"/" upgrade.sh.txt && git add upgrade.sh.txt && rm upgrade.sh.txt.tmp
+
 echo resulting changes to be committed:
 git diff --cached | cat
 
