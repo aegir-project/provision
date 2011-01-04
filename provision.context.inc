@@ -77,7 +77,7 @@ function provision_context_factory($name) {
   $type = 'server';
 
   $record = provision_sitealias_get_record($name);
-  $options = array_merge(drush_get_context('stdin'), drush_get_context('options'), drush_get_context('cli'));
+  $options = array_merge(drush_get_context('stdin'), drush_get_context('options'));
 
   if (isset($record['context_type'])) {
     $type = $record['context_type'];
@@ -133,7 +133,7 @@ class provisionContext {
    */
   function __get($name) {
     if ($name == 'options') {
-      return array_merge(provision_sitealias_get_record($this->name), array_filter(drush_get_context('stdin')), array_filter(drush_get_context('options')), array_filte
+      return array_merge(provision_sitealias_get_record($this->name), array_filter(drush_get_context('stdin')), array_filter(drush_get_context('options')));
     }
     if (array_key_exists($name, $this->properties)) {
       if (isset($this->oid_map[$name]) && !empty($this->properties[$name])) {
