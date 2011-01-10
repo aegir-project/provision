@@ -29,7 +29,7 @@
 
 # guess the aegir version based on the info file
 AEGIR_VERSION=HEAD
-DRUSH_VERSION=6.x-3.3
+DRUSH_VERSION=7.x-4.0
 
 ########################################################################
 # functions
