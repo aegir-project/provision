@@ -87,19 +87,19 @@ you are reading this document.
 Shell commands::
 
   export AEGIR_VERSION=HEAD
-  export AEGIR_DIR=/var/aegir
-  export DRUPAL_DIR=$AEGIR_DIR/hostmaster-$AEGIR_VERSION
-  export DRUSH_VERSION=6.x-3.3
-  export DRUSH_MAKE_VERSION=6.x-2.0-beta9
+  export AEGIR_HOME="$HOME"
+  export DRUPAL_DIR=$AEGIR_HOME/hostmaster-$AEGIR_VERSION
+  export DRUSH_VERSION=7.x-4.0
+  export DRUSH_MAKE_VERSION=6.x-2.0-beta10
   export AEGIR_DOMAIN=aegir.example.com
-  export OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-alpha9
+  export OLD_DRUPAL_DIR=$AEGIR_HOME/hostmaster-0.4-beta2
 
 This document also assumes drush is installed properly and we use an
 environment variable to simplify the documentation again.
 
 Shell commands::
 
-  export DRUSH="php $AEGIR_DIR/drush/drush.php"
+  export DRUSH="php $AEGIR_HOME/drush/drush.php"
 
 Generic upgrade instructions
 ============================
@@ -134,7 +134,7 @@ frontend.
 
 Shell commands::
 
-  cd $AEGIR_DIR
+  cd $AEGIR_HOME
   mv drush drush.bak
   wget http://ftp.drupal.org/files/projects/drush-$DRUSH_VERSION.tar.gz 
   gunzip -c drush-$DRUSH_VERSION.tar.gz | tar -xf -
