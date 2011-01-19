@@ -170,6 +170,11 @@ function provision_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
   
+  $items['provision-backup_delete'] = array(
+    'description' => 'Delete a backup file.',
+    'arguments' => array('backup-file' => dt('The backup file to delete. This will be a gzipped tarball.')),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
+  );
 
   $items['hostmaster-migrate'] = array(
     'description' => dt('Migrate an instance of the Hostmaster front end to a new platform'),
@@ -201,6 +206,11 @@ function provision_drush_command() {
     'description' => dt('Complete the migration of the site to a new platform.'),
     'arguments' => array(
       'example.com' => dt('The url of the site being migrated.')),
+  );
+
+  $items['backend-parse'] = array(
+    'description' => dt('Parse the output of --backend commands to a human readable form'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
 
   return $items;

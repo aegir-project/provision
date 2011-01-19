@@ -62,7 +62,11 @@ The first two commands below are optional but recommended.
 Shell commands::
  sudo port selfupdate
  sudo port upgrade outdated
- sudo port install apache2 mysql5-server git-core unzip php52 +mysql5
+ sudo port install apache2 mysql5-server git-core unzip php52 php5-posix \
+   php5-gd php5-apc +mysql5
+
+php5-apc is optional, but highly recommended as it will significantly increase
+PHP performance.
 
 Watch the output of the last port command carefully, as there are
 usually some boring tasks for you to perform once the install is
@@ -76,7 +80,13 @@ Next we'll create the aegir user and add it to the _www group. This
 part is very different on Mac OS X than Linux or most other
 Unices. Must be a NeXTism. The command we will use he is "dscl", which
 is a short for Directory Service Command Line. In OSX 10.3 and
-earlier, that command is "nicl" (short for Net Info Command Line).
+earlier, that command is "nicl" (short for Net Info Command Line). It is also
+possible to create the user using the "Workgroup Manager" utility included with
+OS X Server. To obtain Workgroup Manager for the OS X Client, download the
+"Server Admin Tools" from Apple. For example, for Mac OS X 10.6, the admin tools
+can be found at:
+
+http://support.apple.com/downloads/Server_Admin_Tools_10_6
 
 Shell commands::
  sudo dscl . -create /Users/aegir NFSHomeDirectory /var/aegir

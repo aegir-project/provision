@@ -14,30 +14,15 @@ This command will operate the following changes in your system:
 4. remove the cronjob (crontab -r)
 5. attempt a migration to the new platform (provision-migrate)
 6. start the Aegir frontend again (hostmaster-resume)
+7. replace the crontab.
 
 We are making the following assumptions:
  * you have read UPGRADE.txt
  * you are executing this script as your "aegir" user
 ');
 
-  $go = FALSE;
-  while (!$go) {
-    $yesno = trim(strtolower(drush_prompt(dt('Do you really want to proceed with the upgrade'), 'Y/n', TRUE)));
-
-    switch ($yesno) {
-    case 'no':
-    case 'n':
-      return drush_set_error(dt('Upgrade aborted by user'));
-      break;
-    case 'yes':
-    case 'y':
-    case 'y/n':
-      $go = TRUE;
-      break;
-    default:
-      drush_print(dt('Please answer "yes" or "no"'));
-      break;
-    }
+  if (!drush_confirm("Do you really want to proceed with the upgrade?")) {
+    return drush_set_error('PROVISION_CANCEL_MIGRATE', 'Upgrade canceled by user');
   }
 
   $data = drush_get_merged_options();
@@ -151,9 +136,6 @@ We are making the following assumptions:
 
 
 function drush_provision_pre_hostmaster_migrate($site, $platform) {
-  if (!drush_confirm("This command will replace your crontab entry. continue?")) {
-    return drush_set_error('PROVISION_CANCEL_MIGRATE', 'Cancelling');
-  }
   // wipe out cron entry
   exec('crontab -r');
 

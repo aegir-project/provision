@@ -11,14 +11,14 @@
 ########################################################################
 
 # basic variables, change before running
-AEGIR_VERSION=HEAD
+AEGIR_VERSION="0.4-beta2"
 AEGIR_DOMAIN=aegir.example.com
 
 AEGIR_DIR=/var/aegir
 DRUPAL_DIR=$AEGIR_DIR/hostmaster-$AEGIR_VERSION
 DRUSH_VERSION=6.x-3.3
 DRUSH_MAKE_VERSION=6.x-2.0-beta9
-OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-alpha14
+OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-beta1
 DRUSH_DIR=$AEGIR_DIR/drush
 DRUSH="php $DRUSH_DIR/drush.php"
 BACKUP_DIR=$AEGIR_DIR/pre-upgrade-`date '+%F-%H%M'`
@@ -120,17 +120,11 @@ else
   rm provision-$AEGIR_VERSION.tgz
 fi
 
-# fetch new version of drush_make
-if [ `$DRUSH make --version | grep "$DRUSH_MAKE_VERSION" ` ] ; then
-  msg "Correct version of Drush Make already seems to be installed."
-else
-  cd $HOME/.drush
-  if [ -d "drush_make" ] ; then
-    msg "Moving existing drush_make into $BACKUP_DIR"
-    mv drush_make $BACKUP_DIR
-  fi
-  $DRUSH dl drush_make-$DRUSH_MAKE_VERSION --destination="$HOME/.drush"
+if [ -d "drush_make" ] ; then
+  msg "Moving existing drush_make into $BACKUP_DIR"
+  mv drush_make $BACKUP_DIR
 fi
+$DRUSH dl drush_make-$DRUSH_MAKE_VERSION --destination="$HOME/.drush"
 
 cd $OLD_DRUPAL_DIR
 $DRUSH hostmaster-migrate $AEGIR_DOMAIN $DRUPAL_DIR

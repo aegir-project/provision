@@ -43,7 +43,25 @@ function provision_is_local_host($host) {
   // your site alias.  Note that sometimes 'uname -n' does not return the
   // correct value.  To fix it, put the correct hostname in /etc/hostname
   // and then run 'hostname -F /etc/hostname'.
-  return ($host == 'localhost') || ($host == '127.0.0.1') || ($host == strtolower(php_uname('n'))) || ($host == strtolower(gethostbyaddr(gethostbyname(php_uname('n')))));
+  return ($host == 'localhost') || 
+    ($host == '127.0.0.1') ||
+    (gethostbyname($host) == '127.0.0.1') ||
+    (gethostbyname($host) == '127.0.1.1') || // common setting on
+                                             // ubuntu and friends
+    ($host == strtolower(php_uname('n'))) ||
+    ($host == provision_fqdn());
+}
+
+/**
+ * return the FQDN of the machine or provided host
+ *
+ * this replicates hostname -f, which is not portable
+ */
+function provision_fqdn($host = null) {
+  if (is_null($host)) {
+    $host = php_uname('n');
+  }
+  return strtolower(gethostbyaddr(gethostbyname($host)));
 }
 
 /**
@@ -280,6 +298,13 @@ function provision_backend_invoke($target, $command, $arguments = array(), $opti
   return drush_backend_invoke_args('@' . ltrim($target, '@') . ' ' . $command, $arguments, $options + array('root' => null, 'uri' => null), $mode);
 }
 
+/**
+ * parse the .ini file to get the aegir version
+ */
+function provision_version() {
+  $ini = parse_ini_file(dirname(__FILE__) . '/provision.info');
+  return $ini['version'];
+}
 
 /**
  * A base class for the service and file handling classes that implements

@@ -14,6 +14,8 @@ class provisionService_db_mysql extends provisionService_db_pdo {
    }
 
   function database_exists($name) {
+    // An underscore in a LIKE clause is a single character wildcard, escape it.
+    $name = str_replace('_', '\_', $name);
     $result = $this->query("SHOW DATABASES LIKE '%s'", $name);
     if ($result) {
       return $result->fetchColumn(0);
@@ -88,7 +90,7 @@ class provisionService_db_mysql extends provisionService_db_pdo {
   }
   
   function grant_host(provisionContext_server $server) {
-    $command = sprintf('mysql -u intntnllyInvalid -h %s -P %s',
+    $command = sprintf('mysql -u intntnllyInvalid -h %s -P %s -e ""',
       escapeshellarg($this->server->remote_host),
       escapeshellarg($this->server->db_port));
 
@@ -124,6 +126,13 @@ class provisionService_db_mysql extends provisionService_db_pdo {
    * We go through all this trouble to hide the password from the commandline,
    * it's the most secure way (apart from writing a temporary file, which would
    * create conflicts in parallel runs)
+   *
+   * XXX: this needs to be refactored so it:
+   *  - works even if /dev/fd/3 doesn't exit
+   *  - has a meaningful name (we're talking about reading and writing
+   * dumps here, really, or at least call mysql and mysqldump, not
+   * just any command)
+   *  - can be pushed upstream to drush (http://drupal.org/node/671906)
    */
   function safe_shell_exec($cmd, $db_host, $db_user, $db_passwd, $dump_file = null) {
    $mycnf = sprintf('[client]
@@ -141,6 +150,7 @@ port=%s
      2 => array("pipe", "w"),  // stderr is a file to write to
      3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials
    );
+   $pipes = array();
    $process = proc_open($cmd, $descriptorspec, $pipes);
    $this->safe_shell_exec_output = '';
    if (is_resource($process)) {
