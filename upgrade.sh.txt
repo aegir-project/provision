@@ -75,8 +75,8 @@ cat <<EOF
 The Aegir version to upgrade to is $AEGIR_VERSION
 The Aegir home dir is $AEGIR_HOME
 The new hostmaster platform will be $DRUPAL_DIR
-The version of Drush is $DRUSH_VERSION
-The version of Drush Make is $DRUSH_MAKE_VERSION
+The version of Drush will be $DRUSH_VERSION
+The version of Drush Make will be $DRUSH_MAKE_VERSION
 Your Aegir domain is $AEGIR_DOMAIN
 Your old hostmaster platform was $OLD_DRUPAL_DIR
 The Drush command is "$DRUSH"
