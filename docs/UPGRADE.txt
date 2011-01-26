@@ -89,7 +89,7 @@ Shell commands::
   export AEGIR_VERSION=HEAD
   export AEGIR_HOME="$HOME"
   export DRUPAL_DIR=$AEGIR_HOME/hostmaster-$AEGIR_VERSION
-  export DRUSH_VERSION=7.x-4.0
+  export DRUSH_VERSION=6.x-3.3
   export DRUSH_MAKE_VERSION=6.x-2.0-beta10
   export AEGIR_DOMAIN=aegir.example.com
   export OLD_DRUPAL_DIR=$AEGIR_HOME/hostmaster-0.4-beta2
