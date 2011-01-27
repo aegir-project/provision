@@ -25,26 +25,48 @@
   fastcgi_param  REDIRECT_STATUS    200;
   fastcgi_index  index.php;
 
+ ## Default index files
+  index         index.php index.html;
+ 
  ## Size Limits
   client_body_buffer_size        64k;
   client_header_buffer_size      32k;
-  client_max_body_size           50m;
+  client_max_body_size          100m;
   large_client_header_buffers 32 32k;
   connection_pool_size           256;
   request_pool_size               4k;
-  server_names_hash_bucket_size  128;
+  server_names_hash_bucket_size  512;
+  server_names_hash_max_size    8192;
   types_hash_max_size           8192;
-  types_hash_bucket_size         128;  
+  types_hash_bucket_size         512;
+  fastcgi_buffer_size           128k;
+  fastcgi_buffers             256 4k;
+  fastcgi_busy_buffers_size     256k;
+  fastcgi_temp_file_write_size  256k;
   
  ## Timeouts 
   client_body_timeout             60;
   client_header_timeout           60;
   send_timeout                    60;
+  lingering_time                  30;
+  lingering_timeout                5;
+  fastcgi_connect_timeout         60;
+  fastcgi_send_timeout           300;
+  fastcgi_read_timeout           300;
 
+ ## FastCGI Caching
+  fastcgi_cache_path /var/lib/nginx/speed
+                     levels=2:2:2
+                     keys_zone=speed:50m
+                     inactive=8h
+                     max_size=1g;
+  
  ## General Options
   ignore_invalid_headers          on;
   limit_zone gulag $binary_remote_addr 10m;
   recursive_error_pages           on;
+  reset_timedout_connection       on;
+  fastcgi_intercept_errors        on;
 
  ## TCP options  
   tcp_nopush  on;
@@ -62,12 +84,14 @@
   gzip_vary         on;
   gzip_proxied      any;
   gzip_disable      "MSIE [1-6]\.";
-<?php 
-if ($server->nginx_has_gzip) {
-   print '  gzip_static       on\;';
+<?php
+$nginx_has_gzip = drush_get_option('nginx_has_gzip');
+if ($nginx_has_gzip) {
+   print "  gzip_static       on;\n";
 }
-if ($server->nginx_has_upload_progress) {
-   print '  upload_progress uploads 1m\;';
+$nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
+if ($nginx_has_upload_progress) {
+   print "  upload_progress uploads 1m;\n";
 }
 ?>
 
