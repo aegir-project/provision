@@ -83,10 +83,10 @@
     
  ## Compression
   gzip_buffers      16 8k;
-  gzip_comp_level   9;
+  gzip_comp_level   5;
   gzip_http_version 1.1;
   gzip_min_length   10;
-  gzip_types        text/plain text/css image/png image/gif image/jpeg application/x-javascript text/xml application/xml application/xml+rss text/javascript image/x-icon;
+  gzip_types        text/plain text/css application/x-javascript text/xml application/xml application/xml+rss text/javascript;
   gzip_vary         on;
   gzip_proxied      any;
   gzip_disable      "MSIE [1-6]\.";
