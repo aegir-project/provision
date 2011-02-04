@@ -54,6 +54,12 @@
   fastcgi_send_timeout           300;
   fastcgi_read_timeout           300;
 
+ ## Open File Performance
+  open_file_cache max=8000 inactive=30s; 
+  open_file_cache_valid          60s; 
+  open_file_cache_min_uses         3;
+  open_file_cache_errors          on;
+ 
  ## FastCGI Caching
   fastcgi_cache_path /var/lib/nginx/speed
                      levels=2:2:2
