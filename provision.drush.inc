@@ -223,10 +223,15 @@ function drush_provision_save($alias = null) {
     $config->unlink();
   }
   else {
+
+    // rename @self and save.
+    d()->name = $alias;
+
     // trigger additional logic that should happen only on save.
-    d($alias)->type_invoke('save');
+    d()->type_invoke('save');
+
     // create or update the record
-    d($alias)->write_alias();
+    d()->write_alias();
   }
 }
 
