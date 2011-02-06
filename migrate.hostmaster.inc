@@ -64,13 +64,14 @@ We are making the following assumptions:
 
     // add a server record :
     $server = '@server_master';
+    $context = drush_get_context('cli') ? 'cli' : 'options';
     drush_backend_invoke_args("provision-save", array($server), array(
       'context_type' => 'server',
       'aegir_root' => dirname(rtrim($data['config_path'], '/')),
       'remote_host' => php_uname('n'),
       'script_user' => $data['script_user'],
      // apache or nginx or..
-      'http_service_type' => drush_get_option('http_service_type', 'apache', 'options'),
+      'http_service_type' => drush_get_option('http_service_type', 'apache', $context),
       'web_group' => $data['web_group'],
       'master_url' => $data['master_url'],
       'restart_cmd' => $data['restart_cmd'],

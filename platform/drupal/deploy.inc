@@ -2,7 +2,8 @@
 // $Id$
 
 $new_url = d()->uri;
-$old_url = drush_get_option('old_uri', $new_url, 'options');
+$context = drush_get_context('cli') ? 'cli' : 'options';
+$old_url = drush_get_option('old_uri', $new_url, $context);
 
 /**
  * @file
