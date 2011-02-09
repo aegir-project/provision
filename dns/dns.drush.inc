@@ -41,6 +41,9 @@ function drush_dns_provision_zone($action, $zone, $name = null, $type = null, $d
     break;
   case 'rr-add':
     $record = d()->service('dns')->config('zone', $zone)->record_get($name);
+    if (!is_array($record[$type])) {
+      $record[$type] = array();
+    }
     $record[$type] = array_merge($record[$type], array($destination));
     $status = d()->service('dns')->config('zone', $zone)->record_set($name, $record)->write();
     break;
