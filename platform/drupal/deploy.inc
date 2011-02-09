@@ -2,6 +2,10 @@
 // $Id$
 
 $new_url = d()->uri;
+/**
+ * @deprecated in drush3 it's 'options', in drush 4 it's 'cli', drop
+ * 'options' when we drop drush3 support
+ */
 $context = drush_get_context('cli') ? 'cli' : 'options';
 $old_url = drush_get_option('old_uri', $new_url, $context);
 
