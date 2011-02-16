@@ -101,6 +101,7 @@ function drush_provision_drupal_provision_install_backend() {
 function provision_drupal_sync_site() {
   d()->service('http')->sync(d()->root, array('exclude-sites' => TRUE));
   if (d()->type === 'site') {
+    // Sync all filesystem changes to the remote server.
     d()->service('http')->sync(d()->site_path, array('no-delete' => TRUE));
   }
 }
@@ -174,17 +175,32 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
   $chgrp = array();
   // special case: platform. do not handle files dir
   if ($url != 'all') {
-    $mkdir["sites/$url/files"]          = 02770;
-    $chgrp["sites/$url/files"]          = d('@server_master')->web_group;
+    $mkdir["sites/$url/files"]            = 02770;
+    $chgrp["sites/$url/files"]            = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/tmp"]      = 02770;
-    $chgrp["sites/$url/files/tmp"]      = d('@server_master')->web_group;
+    $mkdir["sites/$url/files/tmp"]        = 02770;
+    $chgrp["sites/$url/files/tmp"]        = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/images"]   = 02770;
-    $chgrp["sites/$url/files/images"]   = d('@server_master')->web_group;
+    $mkdir["sites/$url/files/images"]     = 02770;
+    $chgrp["sites/$url/files/images"]     = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/pictures"] = 02770;
-    $chgrp["sites/$url/files/pictures"] = d('@server_master')->web_group;
+    $mkdir["sites/$url/files/pictures"]   = 02770;
+    $chgrp["sites/$url/files/pictures"]   = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/files/css"]        = 02770;
+    $chgrp["sites/$url/files/css"]        = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/files/js"]         = 02770;
+    $chgrp["sites/$url/files/js"]         = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/files/ctools"]     = 02770;
+    $chgrp["sites/$url/files/ctools"]     = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/files/imagecache"] = 02770;
+    $chgrp["sites/$url/files/imagecache"] = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/files/locations"]  = 02770;
+    $chgrp["sites/$url/files/locations"]  = d('@server_master')->web_group;
 
     $mkdir["sites/$url/files/css"] = 02770;
     $chown["sites/$url/files/css"] = d('@server_master')->script_user;
@@ -207,14 +223,14 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     $chgrp["sites/$url/files/locations"] = d('@server_master')->web_group;
 
     // d7 support
-    $mkdir["sites/$url/private"]        = 02770;
-    $chgrp["sites/$url/private"]        = d('@server_master')->web_group;
+    $mkdir["sites/$url/private"]          = 02770;
+    $chgrp["sites/$url/private"]          = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/private/files"]  = 02770;
-    $chgrp["sites/$url/private/files"]  = d('@server_master')->web_group;
+    $mkdir["sites/$url/private/files"]    = 02770;
+    $chgrp["sites/$url/private/files"]    = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/private/temp"]   = 02770;
-    $chgrp["sites/$url/private/temp"]   = d('@server_master')->web_group;
+    $mkdir["sites/$url/private/temp"]     = 02770;
+    $chgrp["sites/$url/private/temp"]     = d('@server_master')->web_group;
   }
 
   // These paths should not have recursive operations performed on them.
