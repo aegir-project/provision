@@ -220,6 +220,11 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     "sites/$url/files/tmp",
     "sites/$url/files/images",
     "sites/$url/files/pictures",
+    "sites/$url/files/css",
+    "sites/$url/files/js",
+    "sites/$url/files/ctools",
+    "sites/$url/files/imagecache",
+    "sites/$url/files/locations",
     "sites/$url/private",
     "sites/$url/private/files",
     "sites/$url/private/temp"
