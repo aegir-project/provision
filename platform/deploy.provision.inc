@@ -145,6 +145,8 @@ function drush_provision_drupal_post_provision_deploy() {
     drush_include_engine('drupal', 'deploy');
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
     _provision_drupal_rebuild_caches();
+  } else {
+    drush_log("could not bootstrap drupal after updatedb");
   }
 
 
