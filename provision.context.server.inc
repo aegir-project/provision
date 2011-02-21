@@ -173,14 +173,13 @@ class provisionContext_server extends provisionContext {
           'relative' => TRUE,
           'keep-dirlinks' => TRUE,
           'omit-dir-times' => TRUE,
-          'delete' => TRUE,
         ), $additional_options);
 
 
         // We need to do this due to how drush creates the rsync command.
         // If the option is present at all , even if false or null, it will
         // add it to the command.
-        if (!isset($additional_options['no-delete'])) {
+        if (!isset($additional_options['no-delete']) || $additional_options['no-delete'] == FALSE ) {
           $options['delete'] = TRUE;
         }
 

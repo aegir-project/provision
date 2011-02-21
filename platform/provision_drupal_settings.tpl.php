@@ -60,7 +60,6 @@
   $conf['install_profile'] = '<?php print $this->profile ?>';
   $conf['file_directory_path'] = 'sites/<?php print $this->uri ?>/files';
   $conf['file_directory_temp'] = 'sites/<?php print $this->uri ?>/files/tmp';
-  $conf['cache'] = 1;
   $conf['clean_url'] = 1;
 
   <?php if (!$this->site_enabled) : ?>
@@ -85,12 +84,12 @@
     }
   }
 
-  # Additional site configuration settings.
-  if (file_exists('<?php print $this->site_path  ?>/local.settings.php')) {
-    include_once('<?php print $this->site_path  ?>/local.settings.php');
-  }
-
   # Additional host wide configuration settings. Useful for safely specifying configuration settings.
   if (file_exists('<?php print $this->platform->server->include_path  ?>/global.inc')) {
     include_once('<?php print $this->platform->server->include_path  ?>/global.inc');
+  }
+
+  # Additional site configuration settings.
+  if (file_exists('<?php print $this->site_path  ?>/local.settings.php')) {
+    include_once('<?php print $this->site_path  ?>/local.settings.php');
   }

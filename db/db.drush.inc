@@ -71,7 +71,7 @@ class provisionService_db extends provisionService {
   function suggest_db_name() {
     $uri = $this->context->uri;
 
-    $suggest_base = substr(str_replace(array('.', '-'), '' , ereg_replace('^www\.', '', $uri)), 0, 16);
+    $suggest_base = substr(str_replace(array('.', '-'), '' , preg_replace('/^www\./', '', $uri)), 0, 16);
 
     if (!$this->database_exists($suggest_base)) {
       return $suggest_base;
@@ -91,8 +91,10 @@ class provisionService_db extends provisionService {
   /**
    * Generate a new mysql database and user account for the specified credentials
    */
-  function create_site_database() {
-    $creds = $this->generate_site_credentials();
+  function create_site_database($creds = array()) {
+    if (!sizeof($creds)) {
+      $creds = $this->generate_site_credentials();
+    }
     extract($creds);
     
     if (!$this->can_create_database()) {
@@ -150,12 +152,14 @@ class provisionService_db extends provisionService {
   }
 
 
-  function import_site_database($dump_file = null) {
+  function import_site_database($dump_file = null, $creds = array()) {
     if (is_null($dump_file)) {
       $dump_file = d()->site_path . '/database.sql';
     }
 
-    $creds = $this->fetch_site_credentials();
+    if (!sizeof($creds)) {
+      $creds = $this->fetch_site_credentials();
+    }
 
     $exists = provision_file()->exists($dump_file)
       ->succeed('Found database dump at @path.')

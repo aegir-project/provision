@@ -46,6 +46,13 @@ function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
   $options['aliases'] = array();
   $options['redirection'] = 0;
 
+  // XXX: right now we just drop SSL configuration when cloning, because
+  // we do not check if the site name change is compatible with the
+  // certificate. This can be removed when we a) check for wildcard
+  // certs and b) allow the user to change the cert from the UI.
+  $options['ssl_enabled'] = 0;
+  unset($options['ssl_key']);
+
   if ($profile = drush_get_option('profile', FALSE)) {
     $options['profile'] = $profile;
   }

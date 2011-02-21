@@ -11,17 +11,17 @@
 ########################################################################
 
 # basic variables, change before running
-AEGIR_VERSION=HEAD
+AEGIR_VERSION="0.4-rc1"
 AEGIR_DOMAIN=aegir.example.com
 
-AEGIR_DIR=/var/aegir
-DRUPAL_DIR=$AEGIR_DIR/hostmaster-$AEGIR_VERSION
+AEGIR_HOME="$HOME"
+DRUPAL_DIR=$AEGIR_HOME/hostmaster-$AEGIR_VERSION
 DRUSH_VERSION=6.x-3.3
-DRUSH_MAKE_VERSION=6.x-2.0-beta9
-OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-alpha14
-DRUSH_DIR=$AEGIR_DIR/drush
+DRUSH_MAKE_VERSION=6.x-2.0-beta11
+OLD_DRUPAL_DIR=$AEGIR_HOME/hostmaster-0.4-beta2
+DRUSH_DIR=$AEGIR_HOME/drush
 DRUSH="php $DRUSH_DIR/drush.php"
-BACKUP_DIR=$AEGIR_DIR/pre-upgrade-`date '+%F-%H%M'`
+BACKUP_DIR=$AEGIR_HOME/pre-upgrade-`date '+%F-%H%M'`
 
 ########################################################################
 # functions
@@ -73,10 +73,10 @@ cat <<EOF
  * that the following settings are correct
 
 The Aegir version to upgrade to is $AEGIR_VERSION
-The Aegir home dir is $AEGIR_DIR
+The Aegir home dir is $AEGIR_HOME
 The new hostmaster platform will be $DRUPAL_DIR
-The version of Drush is $DRUSH_VERSION
-The version of Drush Make is $DRUSH_MAKE_VERSION
+The version of Drush will be $DRUSH_VERSION
+The version of Drush Make will be $DRUSH_MAKE_VERSION
 Your Aegir domain is $AEGIR_DOMAIN
 Your old hostmaster platform was $OLD_DRUPAL_DIR
 The Drush command is "$DRUSH"
@@ -98,7 +98,7 @@ if [ -d $DRUSH_DIR ]; then
   mv $DRUSH_DIR $BACKUP_DIR
 fi
 
-cd $AEGIR_DIR
+cd $AEGIR_HOME
 wget http://ftp.drupal.org/files/projects/drush-$DRUSH_VERSION.tar.gz 
 gunzip -c drush-$DRUSH_VERSION.tar.gz | tar -xf -
 rm drush-$DRUSH_VERSION.tar.gz
@@ -120,17 +120,11 @@ else
   rm provision-$AEGIR_VERSION.tgz
 fi
 
-# fetch new version of drush_make
-if [ `$DRUSH make --version | grep "$DRUSH_MAKE_VERSION" ` ] ; then
-  msg "Correct version of Drush Make already seems to be installed."
-else
-  cd $HOME/.drush
-  if [ -d "drush_make" ] ; then
-    msg "Moving existing drush_make into $BACKUP_DIR"
-    mv drush_make $BACKUP_DIR
-  fi
-  $DRUSH dl drush_make-$DRUSH_MAKE_VERSION --destination="$HOME/.drush"
+if [ -d "drush_make" ] ; then
+  msg "Moving existing drush_make into $BACKUP_DIR"
+  mv drush_make $BACKUP_DIR
 fi
+$DRUSH dl drush_make-$DRUSH_MAKE_VERSION --destination="$HOME/.drush"
 
 cd $OLD_DRUPAL_DIR
 $DRUSH hostmaster-migrate $AEGIR_DOMAIN $DRUPAL_DIR

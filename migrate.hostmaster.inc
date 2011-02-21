@@ -14,30 +14,15 @@ This command will operate the following changes in your system:
 4. remove the cronjob (crontab -r)
 5. attempt a migration to the new platform (provision-migrate)
 6. start the Aegir frontend again (hostmaster-resume)
+7. replace the crontab.
 
 We are making the following assumptions:
  * you have read UPGRADE.txt
  * you are executing this script as your "aegir" user
 ');
 
-  $go = FALSE;
-  while (!$go) {
-    $yesno = trim(strtolower(drush_prompt(dt('Do you really want to proceed with the upgrade'), 'Y/n', TRUE)));
-
-    switch ($yesno) {
-    case 'no':
-    case 'n':
-      return drush_set_error(dt('Upgrade aborted by user'));
-      break;
-    case 'yes':
-    case 'y':
-    case 'y/n':
-      $go = TRUE;
-      break;
-    default:
-      drush_print(dt('Please answer "yes" or "no"'));
-      break;
-    }
+  if (!drush_confirm("Do you really want to proceed with the upgrade?")) {
+    return drush_set_error('PROVISION_CANCEL_MIGRATE', 'Upgrade canceled by user');
   }
 
   $data = drush_get_merged_options();
@@ -79,13 +64,18 @@ We are making the following assumptions:
 
     // add a server record :
     $server = '@server_master';
+    /**
+     * @deprecated in drush3 it's 'options', in drush 4 it's 'cli', drop
+     * 'options' when we drop drush3 support
+     */
+    $context = drush_get_context('cli') ? 'cli' : 'options';
     drush_backend_invoke_args("provision-save", array($server), array(
       'context_type' => 'server',
       'aegir_root' => dirname(rtrim($data['config_path'], '/')),
       'remote_host' => php_uname('n'),
       'script_user' => $data['script_user'],
      // apache or nginx or..
-      'http_service_type' => drush_get_option('http_service_type', 'apache', 'options'),
+      'http_service_type' => drush_get_option('http_service_type', 'apache', $context),
       'web_group' => $data['web_group'],
       'master_url' => $data['master_url'],
       'restart_cmd' => $data['restart_cmd'],
@@ -151,9 +141,6 @@ We are making the following assumptions:
 
 
 function drush_provision_pre_hostmaster_migrate($site, $platform) {
-  if (!drush_confirm("This command will replace your crontab entry. continue?")) {
-    return drush_set_error('PROVISION_CANCEL_MIGRATE', 'Cancelling');
-  }
   // wipe out cron entry
   exec('crontab -r');
 

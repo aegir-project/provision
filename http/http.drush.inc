@@ -104,8 +104,8 @@ class provisionService_http_public extends provisionService_http {
 
 
     // Redirection urls
-    $this->server->setProperty('web_disable_url', $this->server->master_url .'/hosting/disabled');
-    $this->server->setProperty('web_maintenance_url', $this->server->master_url .'/hosting/maintenance');
+    $this->server->web_disable_url = rtrim($this->server->master_url, '/') .'/hosting/disabled';
+    $this->server->web_maintenance_url = rtrim($this->server->master_url, '/') .'/hosting/maintenance';
 
 
     if (!is_null($this->application_name)) {
@@ -114,6 +114,7 @@ class provisionService_http_public extends provisionService_http {
       $this->server->http_postd_path = "{$app_dir}/post.d";
       $this->server->http_platformd_path = "{$app_dir}/platform.d";
       $this->server->http_vhostd_path = "{$app_dir}/vhost.d";
+      $this->server->http_platforms_path = "{$this->server->aegir_root}/platforms";
     }
   }
 
@@ -142,7 +143,12 @@ class provisionService_http_public extends provisionService_http {
       provision_file()->create_dir($this->server->http_vhostd_path , dt("Webserver virtual host configuration"), 0700);
       $this->sync($this->server->http_vhostd_path, array(
         'exclude' => $this->server->http_vhostd_path . '/*',  // Make sure remote directory is created
-      )); 
+      ));
+
+      provision_file()->create_dir($this->server->http_platforms_path, dt("Platforms"), 0755);
+      $this->sync($this->server->http_platforms_path, array(
+        'exclude' => $this->server->http_platforms_path . '/*',  // Make sure remote directory is created
+      ));
     } 
 
     parent::verify_server_cmd();

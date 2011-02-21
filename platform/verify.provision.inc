@@ -46,8 +46,13 @@ function drush_provision_drupal_pre_provision_verify() {
   elseif (d()->type === 'platform') {
     // create a platform from a makefile, if it doesnt already exist and the makefile does.
     if (!provision_file()->exists(d()->root)->status() && !empty(d()->makefile)) {
-      drush_log(dt("Platform path does not exists, fetching from drush makefile"));
-      drush_backend_invoke("make", array(d()->makefile, d()->root), array('root' => null, 'uri' => null));
+      drush_log(dt("Platform path does not exist, fetching from drush makefile"));
+      $options = array('root' => null, 'uri' => null);
+      // propagate working-copy args downward
+      if (drush_get_option('working-copy')) {
+        $options['working-copy'] = 1;
+      }
+      drush_backend_invoke("make", array(d()->makefile, d()->root), $options);
       if (drush_get_error()) {
         return drush_set_error("DRUSH_MAKE_FAILED", 
           "Could not download platform using drush make. No platform present");
