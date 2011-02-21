@@ -87,6 +87,11 @@ function drush_provision_drupal_provision_backup() {
     $command = "tar cpf %s .";
   }
   $result = drush_shell_exec($command,  $backup_file);
+
+  // Get the size of the backup
+  $size = filesize($backup_file);
+  drush_set_option('backup_file_size', $size);
+
   chdir($olddir);
 
   if (drush_get_option('cloaking_off_temp', FALSE)) {

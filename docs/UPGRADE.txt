@@ -57,7 +57,7 @@ Make sure you download it to somewhere that the aegir user can access in order
 to execute it.
 
 Shell commands::
- wget -O upgrade.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=upgrade.sh.txt;hb=provision-0.4-beta2'
+ wget -O upgrade.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=upgrade.sh.txt;hb=provision-0.4-rc1'
 
 You may need to edit the script to set any variables that are different from the
 defaults. Pay particular attention to the OLD_DRUPAL_DIR variable, as you may be
@@ -86,20 +86,20 @@ you are reading this document.
 
 Shell commands::
 
-  export AEGIR_VERSION=0.4-beta2
-  export AEGIR_DIR=/var/aegir
-  export DRUPAL_DIR=$AEGIR_DIR/hostmaster-$AEGIR_VERSION
+  export AEGIR_VERSION=0.4-rc1
+  export AEGIR_HOME="$HOME"
+  export DRUPAL_DIR=$AEGIR_HOME/hostmaster-$AEGIR_VERSION
   export DRUSH_VERSION=6.x-3.3
-  export DRUSH_MAKE_VERSION=6.x-2.0-beta9
+  export DRUSH_MAKE_VERSION=6.x-2.0-beta11
   export AEGIR_DOMAIN=aegir.example.com
-  export OLD_DRUPAL_DIR=$AEGIR_DIR/hostmaster-0.4-beta1
+  export OLD_DRUPAL_DIR=$AEGIR_HOME/hostmaster-0.4-beta2
 
 This document also assumes drush is installed properly and we use an
 environment variable to simplify the documentation again.
 
 Shell commands::
 
-  export DRUSH="php $AEGIR_DIR/drush/drush.php"
+  export DRUSH="php $AEGIR_HOME/drush/drush.php"
 
 Generic upgrade instructions
 ============================
@@ -134,7 +134,7 @@ frontend.
 
 Shell commands::
 
-  cd $AEGIR_DIR
+  cd $AEGIR_HOME
   mv drush drush.bak
   wget http://ftp.drupal.org/files/projects/drush-$DRUSH_VERSION.tar.gz 
   gunzip -c drush-$DRUSH_VERSION.tar.gz | tar -xf -

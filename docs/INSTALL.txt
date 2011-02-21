@@ -16,7 +16,7 @@ fairly simple. It's 3 basic steps::
  1. Install requirements
  2. Configure system requirements, which include::
     * create a Aegir user
-    * configure Apache, MySQL, DNS, etc
+    * configure Apache (or Nginx with PHP-FPM), MySQL, DNS, etc
  3. Run the install script.
 
 Those steps are detailed below. The following instructions provide example
@@ -32,10 +32,11 @@ bullet-point summary of the steps required for the installation. In case of
 conflict between INSTALL.txt and other documentation, INSTALL.txt should be
 considered the canonical source of information.
 
-Also note that those instructions setup a complete Aegir system. If you want
-to only setup a new server, it should be sufficient to install requirement
-(step 1) and configure them (step 2). You will just need the --backend-only flag
-to avoid installing the frontend on the server.
+Also note that these instructions setup a complete Aegir system. If you want
+to only setup a new remote web/db server, it should be sufficient to install
+requirements (step 1), configure them (step 2) and follow the Remote server 
+how-to which you can find at http://community.aegirproject.org/node/30.
+
 
 1. Install software requirements
 ================================
@@ -53,6 +54,7 @@ assumed to be run as root user.
 
 A standard umask of 022 is assumed. This is the default on most systems.
 
+
 Web server
 ----------
 
@@ -61,6 +63,15 @@ work with Apache 2 but we should be compatible with the 1.x series. You will
 need root access to that server and the server must be reserved for
 Aegir. Sharing the server with other control panels such as Cpanel, Plesk or
 AlternC will very likely create problems and is not supported.
+
+Aegir also supports Nginx web server, but requires at least version 0.7.27 or
+newer. Since Nginx doesn't provide php-cgi or php-fpm (recommended) modules,
+you will need to install and run php-fpm server separately. You can find
+useful examples and tips in the third party Barracuda installer available
+at http://gitorious.org/aegir/barracuda-octopus. Note: this third party
+installer is not supported by the core Aegir developers, but you can find
+helpful community support at http://community.aegirproject.org.
+
 
 PHP 5.2
 -------
@@ -75,12 +86,15 @@ load. As a result, we suggest using PHP 5.2 for the time-being.
 
 See http://drupal.org/node/360605 (amongst other issues) for details.
 
+
 Database server
 ---------------
 
 You will require a database server, obviously. Aegir currently only supports
-MySQL. It is preferable to use a dedicated server since Aegir will create
-database users and will requires the use of the mysql 'root' user.
+MySQL and MariaDB. It is preferable to use a dedicated (not shared-hosting)
+server since Aegir will create database users and will require the use of the 
+MySQL 'root' user.
+
 
 Mail transfer agent
 -------------------
@@ -91,6 +105,7 @@ an MTA, the site installation will fail with message like "could not send
 email". Additional messages will show that site has been removed because of
 this problem. To remedy the situation simply install an MTA like sendmail,
 postfix, or exim and do the minimal configuration.
+
 
 Other utilities: sudo, rsync, git and unzip
 ------------------------------
@@ -104,13 +119,14 @@ The jQueryUI library is used in the Aegir UI, unzip is required to extract it.
 Sudo is required to allow the aegir user the limited privilege to restart the
 webserver when required.  Rsync is used to sync files to remote servers.
 
+
 Summary
 -------
 
 This may vary according to your platform, but under a Debian derivative, you
 can install all those packages using the following.
 
-Shell commands::
+Shell commands as root::
 
  apt-get install apache2 php5 php5-cli php5-gd php5-mysql mysql-server \
    postfix sudo rsync git-core unzip
@@ -150,6 +166,7 @@ the resolved IP address to be the '127.0.0.1' loopback address.
 If you intend to manage multiple servers using Aegir, you will need to
 make sure that the IP address is the public IP of this server.
 
+
 Aegir user
 ----------
 
@@ -170,7 +187,7 @@ username if desired.
 In addition we will create a directory layout for Aegir configuration and
 backups.
 
-Shell commands::
+Shell commands as root::
 
  adduser --system --group --home /var/aegir aegir
  adduser aegir www-data    #make aegir a user of group www-data
@@ -194,7 +211,6 @@ operations. This is far more than what is provided by the default PHP configurat
 Change the memory_limit directive in /etc/php5/apache2/php.ini to read::
 
  memory_limit = 128M      ; Maximum amount of memory a script may consume (128MB)
-
 
 
 Apache configuration
@@ -228,20 +244,46 @@ file.
 /etc/sudoers configuration::
   aegir ALL=NOPASSWD: /usr/sbin/apache2ctl
 
+
+Nginx configuration
+--------------------
+
+Aegir assumes standard Nginx configuration is available on the server, and
+generates its own configuration files. The way we enable this is by
+symlinking a single file which contains all the configuration necessary.
+In Debian-based systems, you should symlink this file inside
+``/etc/nginx/conf.d`` that will be parsed on startup.
+
+Shell command as root::
+
+ ln -s /var/aegir/config/nginx.conf /etc/nginx/conf.d/aegir.conf
+
+**Do not reload/restart Nginx after running these commands, it will fail.**
+The installer script creates the configuration file referenced by the newly 
+created symlink.
+
+The aegir user needs to have sudo access. Add the relevant line to your sudoers
+file.
+
+/etc/sudoers configuration::
+  aegir ALL=NOPASSWD: /etc/init.d/nginx
+
+
 Remote web servers
 ------------------
 
 Any number of remote web servers may be configured. They need an aegir user and
 Apache configuration as above, with the same user name and directory paths. SSH
 public/private keys should be set up so hostmaster's Aegir user can access
-remote web Aegir users with no passwords. The above apache configuration needs
+remote web Aegir users with no passwords. The above Apache configuration needs
 to be performed too.
 
 They will also need a login shell, which can be modified using the ``chsh`` command.
 
-Shell command as root::
+Shell commands as root::
   chsh -s /bin/sh aegir
   apt-get install rsync apache2 php5 php5-cli php5-mysql
+
 
 Database configuration
 ----------------------
@@ -269,12 +311,14 @@ If you are concerned about MySQL being accessible in this way, you can also
 configure your firewall to only allow incoming connections from certain addresses.
 This is outside the scope of this document however.
 
+
 3. Run the install script
 =========================
 
 This section deals with the actual installation of Aegir. You can
 install aegir in one of two ways: one assumes you have already
 downloaded drush and provision, while the other will do that for you.
+
 
 3.1 Installing aegir with only the install.sh script
 ----------------------------------------------------
@@ -285,8 +329,8 @@ as the aegir user created above, so it needs to be placed somewhere that the
 aegir user can access in order to execute it.  This file is available in 
 Provision or can be downloaded through the web with this command::
 
-Shell commands::
- wget -O install.sh 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-beta2'
+Shell command::
+ wget -O install.sh 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-rc1'
 
 By default, the install script will install the "correct" version of Aegir
 (ie. if it was downloaded through git, it will install the version from the
@@ -294,8 +338,11 @@ git master branch. If you downloaded an official release, it should install
 the official release.). You can modify which version to install by editing the
 AEGIR_VERSION variable in the script.
 
-Shell commands::
+Shell command for Apache version::
  su -s /bin/sh aegir -c "sh install.sh"
+
+Shell command for Nginx version::
+ su -s /bin/sh aegir -c "sh install.sh --http_service_type=nginx"
 
 Note you must run the above command as root or prefix with sudo.
 
@@ -306,6 +353,7 @@ Once you have run install.sh once, drush and provision should be
 installed and you can use the more powerful hostmaster-install command
 to retry the install if it failed the first time.
 
+
 3.2 Installing aegir with drush and provision installed
 -------------------------------------------------------
 
@@ -315,7 +363,7 @@ provision in the commands directory of Drush (either ~aegir/.drush or
 is properly installed, you can install all other aegir components using
 the hostmaster-install command.
 
-Shell commands::
+Shell command::
 
  drush hostmaster-install --version=HEAD
 
@@ -334,6 +382,7 @@ will be sent to the e-mail address specified by --client_email=(your e-mail)
 or if not provided as a command line switch, the address prompted by the 
 installer process. This e-mail address will also be used as the default e-mail 
 address of the first user and client in Aegir, but can be changed later.
+
 
 Checkpoint / Finished!
 ----------------------

@@ -72,7 +72,7 @@ function provision_fqdn($host = null) {
 function provision_get_base_url() {
   $base_url = 'http://' . d()->uri;
 
-  $http_port = d()->web_server->http_port;
+  $http_port = d()->server->http_port;
   if (!is_null($http_port) && ($http_port != 80)) {
     $base_url .= ':' . $http_port;
   }
