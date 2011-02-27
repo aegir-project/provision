@@ -1,9 +1,11 @@
 core = 6.x
 api = 2
 
-projects[drupal][type] = "core"
+projects[pressflow][type] = "core"
+projects[pressflow][download][type] = "bzr"
+projects[pressflow][download][url] = "lp:pressflow/6.x"
 
 projects[hostmaster][type] = "profile"
 projects[hostmaster][download][type] = "git"
-projects[hostmaster][download][url] = "http://git.drupal.org/project/hostmaster.git"
+projects[hostmaster][download][url] = "MAKEFILE_REPO_GIT_URL/hostmaster.git"
 projects[hostmaster][download][branch] = "master"
