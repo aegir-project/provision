@@ -81,6 +81,7 @@
     // first. For hosts such as 'localhost', we don't set a cookie domain.
     if (count(explode('.', $domain)) > 2) {
       @ini_set('session.cookie_domain', $domain);
+      $cookie_domain = $domain;
     }
   }
 
