@@ -28,7 +28,7 @@ function drush_provision_drupal_pre_provision_verify() {
     provision_file()->create_dir($config_root, dt('Provision configuration root'), 0711);
     provision_file()->create_dir(d()->config_path, dt('Provision configuration'), 0711);
     if (d()->name == '@server_master') {
-      provision_file()->create_dir(d()->backup_path, dt('Backup'), 0700);
+      provision_file()->create_dir(d()->backup_path, dt('Backup'), 0750);
       provision_file()->create_dir(d()->include_path, dt('Provision PHP configuration'), 0711);
       if (!provision_file()->exists(d()->include_path . '/global.inc')->succeed('Global configuration file exists')->status()) {
         // Create an empty global.inc so the include doesn't fail with
