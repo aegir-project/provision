@@ -19,7 +19,7 @@ function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = null
    * $conf['site_offline'] = 1; to the settings.php
    */
   drush_log(dt("Putting site under maintenance"));
-  drush_set_option('site_offline', 1);
+  d()->site_enabled = false;
   _provision_drupal_create_settings_file();
   drush_invoke('provision-backup');
 
@@ -49,7 +49,7 @@ function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = null
 function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_uri = null) {
   // Set site_offline to false and regenerate the config 
   drush_log(dt("Bringing site out of maintenance"));
-  drush_set_option('site_offline', 0);
+  d()->site_enabled = true;
   _provision_drupal_create_settings_file();
   $success =  provision_file()->unlink(drush_get_option('backup_file'))
     ->succeed('Removed unused migration site package')
@@ -91,6 +91,8 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = null) {
   drush_backend_invoke_args('provision-save', array($target), $options);
   provision_backend_invoke($target, 'provision-deploy', array(drush_get_option('backup_file')), array('old_uri' => d()->uri));
   if (!drush_get_error()) {
+    drush_log(dt("Bringing site out of maintenance"));
+    d()->site_enabled = true;
     drush_set_option('provision_save_config', false);
     provision_backend_invoke($target, 'provision-verify');
   }
