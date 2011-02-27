@@ -330,7 +330,7 @@ aegir user can access in order to execute it.  This file is available in
 Provision or can be downloaded through the web with this command::
 
 Shell command::
- wget -O install.sh 'http://git.drupal.org/?p=project/provision.git;a=blob_plain;f=install.sh.txt;hb=HEAD'
+ wget -O install.sh 'http://git.drupalcode.org/project/provision.git/blob_plain/HEAD:/install.sh.txt'
 
 By default, the install script will install the "correct" version of Aegir
 (ie. if it was downloaded through git, it will install the version from the
