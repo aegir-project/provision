@@ -52,7 +52,9 @@ function drush_provision_drupal_pre_provision_verify() {
       if (drush_get_option('working-copy')) {
         $options['working-copy'] = 1;
       }
-      drush_backend_invoke("make", array(d()->makefile, d()->root), $options);
+      $options[] = d()->makefile;
+      $options[] = d()->root;
+      drush_backend_invoke("make", $options);
       if (drush_get_error()) {
         return drush_set_error("DRUSH_MAKE_FAILED", 
           "Could not download platform using drush make. No platform present");
