@@ -57,7 +57,7 @@ Make sure you download it to somewhere that the aegir user can access in order
 to execute it.
 
 Shell commands::
- wget -O upgrade.sh.txt 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=upgrade.sh.txt;hb=provision-0.4-rc1'
+ wget -O upgrade.sh.txt 'http://git.drupalcode.org/project/provision.git/blob_plain/provision-0.4:/upgrade.sh.txt'
 
 You may need to edit the script to set any variables that are different from the
 defaults. Pay particular attention to the OLD_DRUPAL_DIR variable, as you may be
@@ -141,7 +141,7 @@ Shell commands::
   rm drush-$DRUSH_VERSION.tar.gz
   cd $HOME/.drush
   mv provision ../provision.bak
-  wget http://files.aegirproject.org/provision-$AEGIR_VERSION.tgz
+  wget http://ftp.drupal.org/files/projects/provision-$AEGIR_VERSION.tar.gz
   gunzip -c provision-$AEGIR_VERSION.tgz | tar -xf -
   rm provision-$AEGIR_VERSION.tgz
 

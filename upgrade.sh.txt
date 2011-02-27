@@ -113,11 +113,11 @@ if [ -d "provision" ] ; then
 fi
 
 if [ "$AEGIR_VERSION" = "HEAD" ]; then
-  git clone git://git.aegirproject.org/provision $HOME/.drush/provision
+  git clone http://git.drupal.org/project/provision.git $HOME/.drush/provision
 else
-  wget http://files.aegirproject.org/provision-$AEGIR_VERSION.tgz
-  gunzip -c provision-$AEGIR_VERSION.tgz | tar -xf -
-  rm provision-$AEGIR_VERSION.tgz
+  wget http://ftp.drupal.org/files/projects/provision-$AEGIR_VERSION.tar.gz
+  gunzip -c provision-$AEGIR_VERSION.tar.gz | tar -xf -
+  rm provision-$AEGIR_VERSION.tar.gz
 fi
 
 if [ -d "drush_make" ] ; then
