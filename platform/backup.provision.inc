@@ -30,7 +30,7 @@ function drush_provision_drupal_provision_backup_validate($backup_file = NULL) {
       drush_set_error('PROVISION_BACKUP_ALREADY_EXISTS', dt('Back up file @path already exists.', array('@path' => $backup_file)));
     }
     else {
-      drush_log(dt('Backing site up to @path.', array('@path' => $backup_file)), 'message');
+      drush_log(dt('Backing site up to @path.', array('@path' => $backup_file)), 'ok');
       drush_set_option('backup_file', $backup_file);
     }
   }
