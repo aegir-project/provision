@@ -20,12 +20,42 @@ drush_log(
   dt('Changed paths from sites/@old_url to sites/@new_url',
   array('@old_url' => $old_url, '@new_url' => $new_url)));
 
-db_query("UPDATE {files} SET filepath=replace(filepath, 'sites/%s', 'sites/%s')", $old_url, $new_url);
-db_query("UPDATE {users} SET picture = replace(picture, 'sites/%s', 'sites/%s')", $old_url, $new_url);
-db_query("UPDATE {files} SET filepath=replace(filepath, 'sites/default', 'sites/%s')", $new_url);
-db_query("UPDATE {users} SET picture = replace(picture, 'sites/default', 'sites/%s')", $new_url);
+/*
+ *  Update paths for sites migrated
+ *  from standalone to the multisite install.
+ */
+db_query("UPDATE {files}       SET filepath   = REPLACE(filepath,   'sites/default', 'sites/%s')", $new_url);
+db_query("UPDATE {users}       SET picture    = REPLACE(picture,    'sites/default', 'sites/%s')", $new_url);
+db_query("UPDATE {boxes}       SET body       = REPLACE(body,       'sites/default', 'sites/%s')", $new_url);
+db_query("UPDATE {menu_links}  SET link_title = REPLACE(link_title, 'sites/default', 'sites/%s')", $new_url);
+db_query("UPDATE {menu_router} SET file       = REPLACE(file,       'sites/default', 'sites/%s')", $new_url);
+db_query("UPDATE {node_revisions} SET body    = REPLACE(body,       'sites/default', 'sites/%s')", $new_url);
+db_query("UPDATE {node_revisions} SET teaser  = REPLACE(teaser,     'sites/default', 'sites/%s')", $new_url);
+db_query("UPDATE {system}      SET filename   = REPLACE(filename,   'sites/default', 'sites/%s')", $new_url);
+
+/*
+ *  Update paths for sites cloned/migrated/renamed
+ *  in the multisite install.
+ */
+db_query("UPDATE {files}       SET filepath   = REPLACE(filepath,   'sites/%s', 'sites/%s')", $old_url, $new_url);
+db_query("UPDATE {users}       SET picture    = REPLACE(picture,    'sites/%s', 'sites/%s')", $old_url, $new_url);
+db_query("UPDATE {boxes}       SET body       = REPLACE(body,       'sites/%s', 'sites/%s')", $old_url, $new_url);
+db_query("UPDATE {menu_links}  SET link_title = REPLACE(link_title, 'sites/%s', 'sites/%s')", $old_url, $new_url);
+db_query("UPDATE {menu_router} SET file       = REPLACE(file,       'sites/%s', 'sites/%s')", $old_url, $new_url);
+db_query("UPDATE {node_revisions} SET body    = REPLACE(body,       '://%s',    '://%s')",    $old_url, $new_url);
+db_query("UPDATE {node_revisions} SET body    = REPLACE(body,       'sites/%s', 'sites/%s')", $old_url, $new_url);
+db_query("UPDATE {node_revisions} SET teaser  = REPLACE(teaser,     '://%s',    '://%s')",    $old_url, $new_url);
+db_query("UPDATE {node_revisions} SET teaser  = REPLACE(teaser,     'sites/%s', 'sites/%s')", $old_url, $new_url);
+db_query("UPDATE {system}      SET filename   = REPLACE(filename,   'sites/%s', 'sites/%s')", $old_url, $new_url);
+
 variable_set('file_directory_path', "sites/$new_url/files");
 variable_set('file_directory_temp', "sites/$new_url/files/tmp");
+
+// XML sitemap base url change.
+if ($var = variable_get('xmlsitemap_base_url', FALSE)) {
+  $var = str_replace($old_url, $new_url, $var);
+  variable_set('xmlsitemap_base_url', $var);
+}
 
 // Global theme settings paths.
 if ($var = variable_get('theme_settings', FALSE)) {
