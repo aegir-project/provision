@@ -202,6 +202,9 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     $mkdir["sites/$url/files/locations"]  = 02770;
     $chgrp["sites/$url/files/locations"]  = d('@server_master')->web_group;
 
+    $mkdir["sites/$url/files/xmlsitemap"] = 02770;
+    $chgrp["sites/$url/files/xmlsitemap"] = d('@server_master')->web_group;
+
     // d7 support
     $mkdir["sites/$url/private"]          = 02770;
     $chgrp["sites/$url/private"]          = d('@server_master')->web_group;
@@ -211,6 +214,9 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
 
     $mkdir["sites/$url/private/temp"]     = 02770;
     $chgrp["sites/$url/private/temp"]     = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/files/styles"]     = 02770;
+    $chgrp["sites/$url/files/styles"]     = d('@server_master')->web_group;
   }
 
   // These paths should not have recursive operations performed on them.
@@ -225,9 +231,11 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     "sites/$url/files/ctools",
     "sites/$url/files/imagecache",
     "sites/$url/files/locations",
+    "sites/$url/files/xmlsitemap",
     "sites/$url/private",
     "sites/$url/private/files",
-    "sites/$url/private/temp"
+    "sites/$url/private/temp",
+    "sites/$url/files/styles"
   );
 
   foreach ($mkdir as $path => $perm) {
