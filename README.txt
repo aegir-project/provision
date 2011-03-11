@@ -1,10 +1,14 @@
 The Aegir system
 ================
 
-This is the backend of the Aegir hosting system. 
+The Aegir hosting system allows developers and site administrators to
+automate many of the common tasks associated with deploying and
+managing large websites. Aegir makes it easy to install, upgrade,
+deploy, and backup an entire network of Drupal sites.
 
-The front end and back end are designed to be run separately, and each
-front end will also be able to drive multiple back ends.
+This is the backend of the Aegir hosting system. The front end and
+back end are designed to be run separately, and each front end will
+also be able to drive multiple back ends.
 
 The most up to date information regarding the project and its goals
 can be found on the Aegir website and the community portal:
@@ -12,17 +16,19 @@ can be found on the Aegir website and the community portal:
    http://aegirproject.org
    http://community.aegirproject.org
 
-To install Aegir, you should follow the INSTALL.txt document in docs/.
-The HINTS_<arch>.txt files can be useful if you have a specific
-architecture, as out of the box, the examples for INSTALL.txt are for
-Debian systems.
+To install Aegir, you should follow the instructions at:
 
-To upgrade Aegir, follow the UPGRADE.txt document in docs/.
+   http://community.aegirproject.org/installing
+   
+To upgrade Aegir, follow the instructions at:
 
-The core of the documentation in docs/ should be sufficient to get you
-started. If you have further questions or are having trouble with Aegir,
-head for the documentation:
+   http://community.aegirproject.org/upgrading
 
-   http://community.aegirproject.org/notebook
+If you have further questions or are having trouble with Aegir,
+check out additional documentation at:
 
-Other documentation for developers is also available in docs/.
+   http://community.aegirproject.org/handbook
+
+Other documentation for developers is also available at:
+
+   http://community.aegirproject.org/developing
