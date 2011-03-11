@@ -339,32 +339,6 @@ function provision_drupal_find_sites() {
   return $sites;
 }
 
-/**
- * Retrieve a list of aliases for the curent site.
- */
-function provision_drupal_find_aliases() {
-  $aliases = array();
-  if (d()->type === 'site') {
-    if ($dir = opendir(d()->root . "/sites")) {
-      while (FALSE !== ($subdir = readdir($dir))) {
-        // skip internal directory pointers
-        if ($subdir != '.' && $subdir != '..') {
-          $path = d()->root . '/sites/' . $subdir;
-          if (is_link($path)) {
-            if (d()->uri === readlink($path)) {
-              $aliases[] = $subdir;
-            }
-          }
-        }
-      }
-      closedir($dir);
-    }
-  }
-
-  return $aliases;
-}
-
-
 function _provision_drupal_get_cvs_versions($files) {
   foreach ($files as $modulename => $file) {
       $project = array();
@@ -382,21 +356,89 @@ function _provision_drupal_get_cvs_versions($files) {
   return $files;
 }
 
+class provisionConfig_drupal_alias_store extends provisionConfig_data_store {
+  public $template = 'provision_drupal_sites.tpl.php';
+  public $description = 'Drupal sites.php file';
+  public $key = 'sites';
+  protected $mode = 0644;
+
+  function filename() {
+    return $this->root . '/sites/sites.php';
+  }
+  
+  function maintain() {
+    $this->delete();
+    if (!$this->redirection) {
+      foreach ($this->aliases as $alias) {
+        $this->records[$alias] = $this->uri;
+      }
+    }
+  }
+  
+  function delete() {
+    foreach ($this->find() as $alias) {
+      unset($this->records[$alias]);
+      unset($this->loaded_records[$alias]);
+    }
+  }
+  
+  function find() {
+    return array_keys($this->merged_records(), $this->uri);
+  }
+}
+
+/**
+ * Retrieve a list of aliases for the curent site.
+ */
+function provision_drupal_find_aliases() {
+  $aliases = array();
+  if (d()->type === 'site') {
+    if (drush_drupal_major_version() >= 7) {
+      $config = new provisionConfig_drupal_alias_store(d()->name);
+      $aliases = $config->find();
+    } else {
+      if ($dir = opendir(d()->root . "/sites")) {
+        while (FALSE !== ($subdir = readdir($dir))) {
+          // skip internal directory pointers
+          if ($subdir != '.' && $subdir != '..') {
+            $path = d()->root . '/sites/' . $subdir;
+            if (is_link($path)) {
+              if (d()->uri === readlink($path)) {
+                $aliases[] = $subdir;
+              }
+            }
+          }
+        }
+        closedir($dir);
+      }
+    }
+  }
+
+  return $aliases;
+}
+
 /**
  * Create and remove symlinks for each of the possible domain aliases of an
  * existing site.
  */
 function _provision_drupal_maintain_aliases() {
   if (d()->type === 'site') {
-    _provision_drupal_delete_aliases();
+    if (drush_drupal_major_version() >= 7) {
+      $config = new provisionConfig_drupal_alias_store(d()->name);
+      $config->maintain();
+      $config->write();
+      d()->service('http')->sync($config->filename());
+    } else {
+      _provision_drupal_delete_aliases();
 
-    if (!d()->redirection) {
-      foreach(d()->aliases as $alias) {
-        if ($alias = trim($alias)) {
-          provision_file()->symlink(d()->uri, d()->root . '/sites/' . $alias)
-            ->succeed('Created symlink for alias @target')
-            ->fail('Could not create symlink for alias @target');
-          d()->service('http')->sync(d()->root . '/sites/' . $alias);
+      if (!d()->redirection) {
+        foreach(d()->aliases as $alias) {
+          if ($alias = trim($alias)) {
+            provision_file()->symlink(d()->uri, d()->root . '/sites/' . $alias)
+              ->succeed('Created symlink for alias @target')
+              ->fail('Could not create symlink for alias @target');
+            d()->service('http')->sync(d()->root . '/sites/' . $alias);
+          }
         }
       }
     }
@@ -409,14 +451,21 @@ function _provision_drupal_maintain_aliases() {
 function _provision_drupal_delete_aliases() {
 
   if (d()->type === 'site') {
-    $aliases = provision_drupal_find_aliases();
+    if (drush_drupal_major_version() >= 7) {
+        $config = new provisionConfig_drupal_alias_store(d()->name);
+        $config->delete();
+        $config->write();
+        d()->service('http')->sync($config->filename());
+    } else {
+      $aliases = provision_drupal_find_aliases();
 
-    foreach ($aliases as $alias) {
-      $path = d()->root . '/sites/' . $alias;
-      provision_file()->unlink($path)
-        ->succeed('Removed symlink for alias @path')
-        ->fail('Could not remove symlink for alias @path');
-      d()->service('http')->sync($path);
+      foreach ($aliases as $alias) {
+        $path = d()->root . '/sites/' . $alias;
+        provision_file()->unlink($path)
+          ->succeed('Removed symlink for alias @path')
+          ->fail('Could not remove symlink for alias @path');
+        d()->service('http')->sync($path);
+      }
     }
   }
 }
