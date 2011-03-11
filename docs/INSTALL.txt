@@ -330,7 +330,7 @@ aegir user can access in order to execute it.  This file is available in
 Provision or can be downloaded through the web with this command::
 
 Shell command::
- wget -O install.sh 'http://git.drupalcode.org/project/provision.git/blob_plain/provision-0.4:/install.sh.txt'
+ wget -O install.sh 'http://git.drupalcode.org/project/provision.git/blob_plain/6.x-1.x:/install.sh.txt'
 
 By default, the install script will install the "correct" version of Aegir
 (ie. if it was downloaded through git, it will install the version from the
@@ -365,7 +365,7 @@ the hostmaster-install command.
 
 Shell command::
 
- drush hostmaster-install --version=HEAD
+ drush hostmaster-install --version=0.4-rc1
 
 You will be prompted for the required information if not provided on the
 commandline. See the inline help for the available options::

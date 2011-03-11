@@ -57,7 +57,7 @@ Make sure you download it to somewhere that the aegir user can access in order
 to execute it.
 
 Shell commands::
- wget -O upgrade.sh.txt 'http://git.drupalcode.org/project/provision.git/blob_plain/provision-0.4:/upgrade.sh.txt'
+ wget -O upgrade.sh.txt 'http://git.drupalcode.org/project/provision.git/blob_plain/6.x-1.x:/upgrade.sh.txt'
 
 You may need to edit the script to set any variables that are different from the
 defaults. Pay particular attention to the OLD_DRUPAL_DIR variable, as you may be

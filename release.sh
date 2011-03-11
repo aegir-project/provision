@@ -81,14 +81,14 @@ sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
   -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[directory_name] = "hostmaster"/' aegir.make && git add aegir.make && rm aegir.make.tmp
 
 echo changing INSTALL.txt to point to tagged install.sh
-sed -i'.tmp' -e"/http:\/\/git.drupalcode.org\/project\/provision.git\/blob_plain\/provision-0.4:\/install.sh.txt/s/provision-0.4/provision-$version/" docs/INSTALL.txt && git add docs/INSTALL.txt && rm docs/INSTALL.txt.tmp
+sed -i'.tmp' -e"/http:\/\/git.drupalcode.org\/project\/provision.git\/blob_plain\/6.x-1.x:\/install.sh.txt/s/provision-0.4/provision-$version/" docs/INSTALL.txt && git add docs/INSTALL.txt && rm docs/INSTALL.txt.tmp
 
 echo changing hostmaster-install version
 sed -i'.tmp' -e"s/version *=.*$/version=$version/" provision.info
 git add provision.info && rm provision.info.tmp
 
 echo changing UPGRADE.txt to point to tagged upgrade.sh
-sed -i'.tmp' -e"/http:\/\/git.drupalcode.org\/project\/provision.git\/blob_plain\/provision-0.4:\/upgrade.sh.txt/s/provision-0.4/provision-$version/" docs/UPGRADE.txt && git add docs/UPGRADE.txt && rm docs/UPGRADE.txt.tmp
+sed -i'.tmp' -e"/http:\/\/git.drupalcode.org\/project\/provision.git\/blob_plain\/6.x-1.x:\/upgrade.sh.txt/s/provision-0.4/provision-$version/" docs/UPGRADE.txt && git add docs/UPGRADE.txt && rm docs/UPGRADE.txt.tmp
 
 echo changing UPGRADE.txt to point to release tags
 sed -i'.tmp' -e"s/export AEGIR_VERSION=HEAD/export AEGIR_VERSION=$version/" docs/UPGRADE.txt
