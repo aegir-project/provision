@@ -138,9 +138,6 @@ function drush_provision_drupal_provision_deploy() {
 }
 
 function drush_provision_drupal_post_provision_deploy() {
-  // flush caches before running updatedb
-  // this is because some modules require
-  _provision_drupal_rebuild_caches();
   // call the drush updatedb command.
   provision_backend_invoke(d()->name, 'updatedb');
   // We should be able to fully load Drupal now.
