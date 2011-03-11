@@ -92,8 +92,8 @@ fi
 
 commitmsg=`git commit -m"change version information for release $version"`
 echo $commitmsg
-commitid=`echo $commitmsg | sed 's/^\[[a-z]* \([a-z0-9]*\)\].*$/\1/'`
-git tag -a provision-$version
+commitid=`echo $commitmsg | sed 's/^\[[^ ]* \([a-z0-9]*\)\].*$/\1/'`
+git tag -a $version
 
 echo reverting tree to HEAD versions
 git revert $commitid
