@@ -23,13 +23,12 @@ prompt_yes_no() {
 }
 
 version=$1
-old_version=$2
 
 if [ $# -lt 1 -o "$version" = "-h" ]; then
     cat <<EOF 
 not enough arguments
 
-Usage: $0 <new_version> [ <old_version> ]
+Usage: $0 <new_version>
 EOF
     exit 1
 fi
@@ -43,26 +42,20 @@ official release. If you are not one of those people, you probably
 shouldn't be running this.
 
 This script is going to modify the configs and documentation to
-release $version from release $old_version.
+release $version.
 EOF
-
-if [ -z "$old_version" ]; then
-    echo "warning: no old version specified, UPGRADE.txt will be partly updated"
-fi
 
 cat <<EOF
 
 The following operations will be done:
  1. change the makefile to download tarball
- 2. change the INSTALL.txt to point to tagged install.sh
- 3. change the UPGRADE.txt to point to release tags
- 4. change the install.sh.txt version
- 5. change the upgrade.sh.txt version
- 6. display the resulting diff
- 7. commit those changes to git
- 8. lay down the tag (prompting you for a changelog)
- 9. revert the commit
- 10. (optionally) push those changes
+ 2. change the install.sh.txt version
+ 3. change the upgrade.sh.txt version
+ 4. display the resulting diff
+ 5. commit those changes to git
+ 6. lay down the tag (prompting you for a changelog)
+ 7. revert the commit
+ 8. (optionally) push those changes
 
 The operation can be aborted before step 6 and 9. Don't forget that as
 long as changes are not pushed upstream, this can all be reverted (see
@@ -80,23 +73,9 @@ sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
   -e'/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://ftp.drupal.org/files/projects/hostmaster-'$version'.tgz"#' \
   -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[directory_name] = "hostmaster"/' aegir.make && git add aegir.make && rm aegir.make.tmp
 
-echo changing INSTALL.txt to point to tagged install.sh
-sed -i'.tmp' -e"/http:\/\/git.drupalcode.org\/project\/provision.git\/blob_plain\/6.x-1.x:\/install.sh.txt/s/provision-0.4/provision-$version/" docs/INSTALL.txt && git add docs/INSTALL.txt && rm docs/INSTALL.txt.tmp
-
 echo changing hostmaster-install version
 sed -i'.tmp' -e"s/version *=.*$/version=$version/" provision.info
 git add provision.info && rm provision.info.tmp
-
-echo changing UPGRADE.txt to point to tagged upgrade.sh
-sed -i'.tmp' -e"/http:\/\/git.drupalcode.org\/project\/provision.git\/blob_plain\/6.x-1.x:\/upgrade.sh.txt/s/provision-0.4/provision-$version/" docs/UPGRADE.txt && git add docs/UPGRADE.txt && rm docs/UPGRADE.txt.tmp
-
-echo changing UPGRADE.txt to point to release tags
-sed -i'.tmp' -e"s/export AEGIR_VERSION=HEAD/export AEGIR_VERSION=$version/" docs/UPGRADE.txt
-
-if ! [ -z "$old_version" ]; then
-    sed -i.tmp -e"/export OLD_DRUPAL_DIR=/s#hostmaster-.*#hostmaster-$old_version#" docs/UPGRADE.txt
-fi
-git add docs/UPGRADE.txt && rm docs/UPGRADE.txt.tmp
 
 echo changing install.sh.txt version
 sed -i'.tmp' -e"s/AEGIR_VERSION=.*$/AEGIR_VERSION=\"$version\"/" install.sh.txt && git add install.sh.txt && rm install.sh.txt.tmp
@@ -115,7 +94,7 @@ else
     exit 1
 fi
 
-commitmsg=`git commit -m"change version information for release $version, from $old_version"`
+commitmsg=`git commit -m"change version information for release $version"`
 echo $commitmsg
 commitid=`echo $commitmsg | sed 's/^\[[a-z]* \([a-z0-9]*\)\].*$/\1/'`
 git tag -a provision-$version
