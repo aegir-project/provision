@@ -27,7 +27,7 @@ To upgrade Aegir, follow the instructions at:
 If you have further questions or are having trouble with Aegir,
 check out additional documentation at:
 
-   http://community.aegirproject.org/notebook
+   http://community.aegirproject.org/handbook
 
 Other documentation for developers is also available at:
 
