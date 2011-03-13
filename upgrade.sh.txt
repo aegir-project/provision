@@ -11,14 +11,14 @@
 ########################################################################
 
 # basic variables, change before running
-AEGIR_VERSION="0.4-rc1"
+AEGIR_VERSION="6-.x-1.0-rc2"
 AEGIR_DOMAIN=aegir.example.com
 
 AEGIR_HOME="$HOME"
 DRUPAL_DIR=$AEGIR_HOME/hostmaster-$AEGIR_VERSION
 DRUSH_VERSION=6.x-3.3
 DRUSH_MAKE_VERSION=6.x-2.1
-OLD_DRUPAL_DIR=$AEGIR_HOME/hostmaster-0.4-beta2
+OLD_DRUPAL_DIR=$AEGIR_HOME/hostmaster-0.4-rc1
 DRUSH_DIR=$AEGIR_HOME/drush
 DRUSH="php $DRUSH_DIR/drush.php"
 BACKUP_DIR=$AEGIR_HOME/pre-upgrade-`date '+%F-%H%M'`
