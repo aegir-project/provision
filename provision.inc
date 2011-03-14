@@ -253,6 +253,15 @@ function provision_posix_groupname($group) {
   return $group;
 }
 
+/**
+ * Generate a random alphanumeric password.
+ *
+ * This is a copy of Drupal core's user_password() function. We keep it
+ * here in case we need this and don't have a bootstrapped Drupal
+ * around.
+ *
+ * @see user_password()
+ */
 function provision_password($length = 10) {
   // This variable contains the list of allowable characters for the
   // password. Note that the number 0 and the letter 'O' have been
