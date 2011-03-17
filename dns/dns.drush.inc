@@ -171,7 +171,7 @@ class provisionService_dns extends provisionService {
     provision_file()->create_dir($this->server->dns_data_path, dt("DNS data store"), 0700);
 
     if (!is_null($this->application_name)) {
-      provision_file()->create_dir($this->server->dns_zoned_path, dt("DNS zone configuration"), 0775);
+      provision_file()->create_dir($this->server->dns_zoned_path, dt("DNS zone configuration"), 0755);
       $this->sync($this->server->dns_zoned_path, array(
         'exclude' => $this->server->dns_zoned_path . '/*',  // Make sure remote directory is created
       )); 
