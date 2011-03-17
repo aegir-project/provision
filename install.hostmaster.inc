@@ -82,7 +82,7 @@ The following settings will be used:
  Aegir version: !version
  Aegir platform path: !root
  Aegir makefile: !makefile
- Client email: !email
+ Admin email: !email
 ', array('!site' => $site,
          '!fqdn' => drush_get_option('aegir_host'),
          '!home' => drush_get_option('aegir_root'),

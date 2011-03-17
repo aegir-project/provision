@@ -7,7 +7,6 @@
 $GLOBALS['url'] = d()->uri;
 $GLOBALS['profile'] = d()->profile;
 $GLOBALS['install_locale'] = d()->language;
-$GLOBALS['client_email'] = d()->client_email;
 $GLOBALS['base_url'] = provision_get_base_url();
 
 
@@ -45,7 +44,6 @@ function install_verify_settings() {
 }
 
 function install_create_admin_user($client_email = NULL) {
-  global $client_email;
   if (!$client_email) {
     $client_email = 'webmaster@localhost';
   }
@@ -129,7 +127,7 @@ function install_main() {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
 
   // This must go after drupal_bootstrap(), which unsets globals!
-  global $profile, $install_locale, $client_email, $conf, $url;
+  global $profile, $install_locale, $conf, $url;
 
   require_once './modules/system/system.install';
   require_once './includes/file.inc';
@@ -353,6 +351,7 @@ function install_main() {
   cache_clear_all();
   variable_set('install_profile', $profile);
 
+  $client_email = drush_get_option('client_email');
   $account = install_create_admin_user($url, $client_email);
   if ($client_email) {
     install_send_welcome_mail($url, $account, $profile, $install_locale, $client_email);

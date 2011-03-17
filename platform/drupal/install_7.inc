@@ -7,7 +7,6 @@
 $GLOBALS['url'] = d()->uri;
 $GLOBALS['profile'] = d()->profile;
 $GLOBALS['install_locale'] = d()->language;
-$GLOBALS['client_email'] = d()->client_email;
 $GLOBALS['base_url'] = provision_get_base_url();
 
 define('MAINTENANCE_MODE', 'install');
@@ -90,7 +89,9 @@ function install_mail($key, &$message, $params) {
 
 
 function install_main() {
-  global $profile, $install_locale, $client_email, $conf, $url, $base_url;
+  global $profile, $install_locale, $conf, $url, $base_url;
+
+  $client_email = drush_get_option('client_email');
 
   require_once DRUPAL_ROOT . '/includes/install.core.inc';
 
