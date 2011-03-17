@@ -186,7 +186,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'platform' => $platform_name,
     'db_server' => $dbserver,
     'uri' => $site,
-    'client_email' => drush_get_option('client_email'),
+    'client_name' => drush_get_option('client_name'),
     'profile' => 'hostmaster',
   ));
   $data = provision_backend_invoke($site_name, 'provision-install');
