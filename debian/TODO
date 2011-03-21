@@ -10,9 +10,8 @@ This shouldn't be used or published until this is fixed.
 Nice to have stuff
 ==================
 
- * destroy a platform after upgrading it (make sure it's empty!)
+ * make a separate package for hostmaster that installs the frontend
  * deal with /var/aegir after purge?
- * warn the user if #includedir not set in sudo
  * comply with the FHS
  * use a minimal rules file:
    /usr/share/doc/debhelper/examples/rules.tiny
