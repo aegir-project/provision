@@ -10,7 +10,7 @@ version=3
 # <Webpage URL> <string match>
 #http://www.example.com/downloads.php drush-(.*)\.tar\.gz
 
-http://files.aegirproject.org/provision-([0-9].*)\.tar\.gz
+http://ftp.drupal.org/files/projects/provision-6.x-(.*)\.tar\.gz
 # Uncomment to examine a Webserver directory
 #http://www.example.com/pub/drush-(.*)\.tar\.gz
 
