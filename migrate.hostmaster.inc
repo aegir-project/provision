@@ -64,13 +64,18 @@ We are making the following assumptions:
 
     // add a server record :
     $server = '@server_master';
+    /**
+     * @deprecated in drush3 it's 'options', in drush 4 it's 'cli', drop
+     * 'options' when we drop drush3 support
+     */
+    $context = drush_get_context('cli') ? 'cli' : 'options';
     drush_backend_invoke_args("provision-save", array($server), array(
       'context_type' => 'server',
       'aegir_root' => dirname(rtrim($data['config_path'], '/')),
       'remote_host' => php_uname('n'),
       'script_user' => $data['script_user'],
      // apache or nginx or..
-      'http_service_type' => drush_get_option('http_service_type', 'apache', 'options'),
+      'http_service_type' => drush_get_option('http_service_type', 'apache', $context),
       'web_group' => $data['web_group'],
       'master_url' => $data['master_url'],
       'restart_cmd' => $data['restart_cmd'],
@@ -141,6 +146,8 @@ function drush_provision_pre_hostmaster_migrate($site, $platform) {
 
   // we can't rely on the park command to exist in pre-0.4 alpha 2 releases
   provision_backend_invoke(drush_get_option('site_name'), 'hostmaster-pause');
+  // we can't rely on update.php to run that because it will run too late. this can be removed in 0.5 and above
+  provision_backend_invoke(drush_get_option('site_name'), 'sqlq', array("UPDATE {system} SET weight = 0 WHERE type='module' AND name='hosting';"));
 }
 
 function drush_provision_hostmaster_migrate($site, $platform) {

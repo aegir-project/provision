@@ -28,7 +28,7 @@
 ########################################################################
 
 # guess the aegir version based on the info file
-AEGIR_VERSION="0.4-beta2"
+AEGIR_VERSION="6.x-1.0-rc2"
 DRUSH_VERSION=6.x-3.3
 
 ########################################################################
@@ -80,12 +80,12 @@ else
   msg "Installing provision backend in $AEGIR_HOME/.drush"
   mkdir -p $AEGIR_HOME/.drush
   if [ "$AEGIR_VERSION" = "HEAD" ]; then
-    git clone git://git.aegirproject.org/provision $AEGIR_HOME/.drush/provision
+    git clone http://git.drupal.org/project/provision.git $AEGIR_HOME/.drush/provision
   else
     cd $AEGIR_HOME/.drush
-    wget http://files.aegirproject.org/provision-$AEGIR_VERSION.tgz
-    gunzip -c provision-$AEGIR_VERSION.tgz | tar -xf -
-    rm provision-$AEGIR_VERSION.tgz
+    wget http://ftp.drupal.org/files/projects/provision-$AEGIR_VERSION.tar.gz
+    gunzip -c provision-$AEGIR_VERSION.tar.gz | tar -xf -
+    rm provision-$AEGIR_VERSION.tar.gz
   fi
 fi
 

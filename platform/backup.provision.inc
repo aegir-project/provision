@@ -30,7 +30,7 @@ function drush_provision_drupal_provision_backup_validate($backup_file = NULL) {
       drush_set_error('PROVISION_BACKUP_ALREADY_EXISTS', dt('Back up file @path already exists.', array('@path' => $backup_file)));
     }
     else {
-      drush_log(dt('Backing site up to @path.', array('@path' => $backup_file)), 'message');
+      drush_log(dt('Backing site up to @path.', array('@path' => $backup_file)), 'ok');
       drush_set_option('backup_file', $backup_file);
     }
   }
@@ -59,6 +59,11 @@ function drush_provision_drupal_provision_backup() {
 
   // synch all filesystem changes back from the remote server.
   d()->service('http')->fetch(d()->site_path . '/files/');
+  d()->service('http')->fetch(d()->site_path . '/private/');
+  d()->service('http')->fetch(d()->site_path . '/modules/');
+  d()->service('http')->fetch(d()->site_path . '/themes/');
+  d()->service('http')->fetch(d()->site_path . '/libraries/');
+  d()->service('http')->fetch(d()->site_path . '/local.settings.php');
 
   // Check if we are currently cloaking credentials
   $cloaked = d()->service('http')->cloaked_db_creds();
@@ -87,6 +92,11 @@ function drush_provision_drupal_provision_backup() {
     $command = "tar cpf %s .";
   }
   $result = drush_shell_exec($command,  $backup_file);
+
+  // Get the size of the backup
+  $size = filesize($backup_file);
+  drush_set_option('backup_file_size', $size);
+
   chdir($olddir);
 
   if (drush_get_option('cloaking_off_temp', FALSE)) {

@@ -145,6 +145,14 @@ function drush_provision_drupal_post_provision_deploy() {
     drush_include_engine('drupal', 'deploy');
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
     _provision_drupal_rebuild_caches();
+
+    // rebuild the node access tables only if necessary
+    if (node_access_needs_rebuild()) {
+      node_access_rebuild();
+      drush_log(t('Rebuild node access table'));
+    }
+  } else {
+    drush_log("could not bootstrap drupal after updatedb");
   }
 
 

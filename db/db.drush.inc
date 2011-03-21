@@ -71,7 +71,7 @@ class provisionService_db extends provisionService {
   function suggest_db_name() {
     $uri = $this->context->uri;
 
-    $suggest_base = substr(str_replace(array('.', '-'), '' , ereg_replace('^www\.', '', $uri)), 0, 16);
+    $suggest_base = substr(str_replace(array('.', '-'), '' , preg_replace('/^www\./', '', $uri)), 0, 16);
 
     if (!$this->database_exists($suggest_base)) {
       return $suggest_base;

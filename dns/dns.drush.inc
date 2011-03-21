@@ -41,6 +41,9 @@ function drush_dns_provision_zone($action, $zone, $name = null, $type = null, $d
     break;
   case 'rr-add':
     $record = d()->service('dns')->config('zone', $zone)->record_get($name);
+    if (!is_array($record[$type])) {
+      $record[$type] = array();
+    }
     $record[$type] = array_merge($record[$type], array($destination));
     $status = d()->service('dns')->config('zone', $zone)->record_set($name, $record)->write();
     break;
@@ -281,7 +284,7 @@ class provisionService_dns extends provisionService {
 
     if ($status) {
       drush_log(dt("creating zone configuration on slaves"));
-      $status = $this->_each_server("create_zone", $zone);
+      $status = $this->_each_server("create_zone", array($zone));
     }
     return $status;
   }
@@ -295,7 +298,7 @@ class provisionService_dns extends provisionService {
 
     if ($status) {
       drush_log(dt("deleting zone configuration from slaves"));
-      $status = $this->_each_server("delete_zone", $zone);
+      $status = $this->_each_server("delete_zone", array($zone));
     }
     return $status;
   }
@@ -319,6 +322,7 @@ class provisionService_dns extends provisionService {
       $host = $this->context->uri;
       $zone = $this->context->dns_zone;
       $sub = $this->context->dns_zone_subdomain;
+      $aliases = $this->context->aliases;
     }
     else {
       return drush_set_error('DRUSH_DNS_NO_ZONE', "Could not determine the zone to create");
@@ -337,6 +341,12 @@ class provisionService_dns extends provisionService {
     }
 
     $this->config('zone', $zone)->record_set($sub, array('A' => $ips));
+    foreach ($aliases as $alias) {
+        if ($this->guess_zone($alias) == $zone) {
+            $this->config('zone', $zone)->record_set($this->guess_zone($alias, 'subdomain'),
+                                                     array('CNAME' => array($zone . '.')));
+        }
+    }
     
     $this->create_zone($zone);
     $this->create_config('host');
@@ -360,14 +370,21 @@ class provisionService_dns extends provisionService {
       $host = $this->context->uri;
       $zone = $this->context->dns_zone;
       $sub = $this->context->dns_zone_subdomain;
+      $aliases = $this->context->aliases;
     }
     else {
       return drush_set_error('DRUSH_DNS_NO_ZONE', "Could not determine the zone to create");
     }
 
     // remove the records from the zone store
-    $this->config('zone', $zone)->
-      record_set($sub, array('A' => null))->write();
+    $this->config('zone', $zone)->record_set($sub, array('A' => NULL));
+    foreach ($aliases as $alias) {
+        if ($this->guess_zone($alias) == $zone) {
+            $this->config('zone', $zone)->record_set($this->guess_zone($alias, 'subdomain'),
+                                                     array('CNAME' => NULL));
+        }
+    }
+    $this->config('zone', $zone)->write();
   }
 
 }

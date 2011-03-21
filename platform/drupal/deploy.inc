@@ -2,7 +2,12 @@
 // $Id$
 
 $new_url = d()->uri;
-$old_url = drush_get_option('old_uri', $new_url, 'options');
+/**
+ * @deprecated in drush3 it's 'options', in drush 4 it's 'cli', drop
+ * 'options' when we drop drush3 support
+ */
+$context = drush_get_context('cli') ? 'cli' : 'options';
+$old_url = drush_get_option('old_uri', $new_url, $context);
 
 /**
  * @file
@@ -15,10 +20,26 @@ drush_log(
   dt('Changed paths from sites/@old_url to sites/@new_url',
   array('@old_url' => $old_url, '@new_url' => $new_url)));
 
-db_query("UPDATE {files} SET filepath=replace(filepath, 'sites/%s', 'sites/%s')", $old_url, $new_url);
-db_query("UPDATE {users} SET picture = replace(picture, 'sites/%s', 'sites/%s')", $old_url, $new_url);
-db_query("UPDATE {files} SET filepath=replace(filepath, 'sites/default', 'sites/%s')", $new_url);
-db_query("UPDATE {users} SET picture = replace(picture, 'sites/default', 'sites/%s')", $new_url);
+/*
+ *  Update paths for sites migrated
+ *  from standalone to the multisite install.
+ */
+db_query("UPDATE {files}       SET filepath   = REPLACE(filepath,   'sites/default', 'sites/%s')", $new_url);
+db_query("UPDATE {users}       SET picture    = REPLACE(picture,    'sites/default', 'sites/%s')", $new_url);
+db_query("UPDATE {boxes}       SET body       = REPLACE(body,       'sites/default', 'sites/%s')", $new_url);
+db_query("UPDATE {node_revisions} SET body    = REPLACE(body,       'sites/default', 'sites/%s')", $new_url);
+db_query("UPDATE {node_revisions} SET teaser  = REPLACE(teaser,     'sites/default', 'sites/%s')", $new_url);
+
+/*
+ *  Update paths for sites cloned/migrated/renamed
+ *  in the multisite install.
+ */
+db_query("UPDATE {files}       SET filepath   = REPLACE(filepath,   'sites/%s', 'sites/%s')", $old_url, $new_url);
+db_query("UPDATE {users}       SET picture    = REPLACE(picture,    'sites/%s', 'sites/%s')", $old_url, $new_url);
+db_query("UPDATE {boxes}       SET body       = REPLACE(body,       'sites/%s', 'sites/%s')", $old_url, $new_url);
+db_query("UPDATE {node_revisions} SET body    = REPLACE(body,       'sites/%s', 'sites/%s')", $old_url, $new_url);
+db_query("UPDATE {node_revisions} SET teaser  = REPLACE(teaser,     'sites/%s', 'sites/%s')", $old_url, $new_url);
+
 variable_set('file_directory_path', "sites/$new_url/files");
 variable_set('file_directory_temp', "sites/$new_url/files/tmp");
 
