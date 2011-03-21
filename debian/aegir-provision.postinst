@@ -61,71 +61,17 @@ case "$1" in
             echo "you'll need to copy the content of /etc/sudoers.d/aegir into /etc/sudoers for aegir to run properly"
         fi
 
+        if [ -d $VARLIB/.drush/provision ]; then
+            echo "existing provision in $VARLIB/.drush/provision detected, move away and try again"
+            exit 1
+        fi
+
         # fix permissions on installed directories
         chown aegir:aegir "$VARLIB"
-
-        # fetch the version number from the makefile. the line we're looking for looks like this
-        # projects[hostmaster][download][url] = "http://files.aegirproject.org/hostmaster-0.4-beta1.tgz"
-        # this obviously doesn't work for git releases
-        VERSION=`sed -n '/^version/{s/^.*= *//;p}' /usr/share/drush/commands/provision/provision.info`
-
-        TEMPFILE=`tempfile`
-        su aegir -c 'drush @hostmaster status' >> $TEMPFILE || true
-        if grep -q 'Drupal bootstrap.*Successful' $TEMPFILE; then
-            db_stop
-            echo "Aegir frontend (@hostmaster) site detected"
-            SITE=`grep URI $TEMPFILE | sed -e 's/^.*://'`
-            OLD_PLATFORM=`grep 'Drupal root' $TEMPFILE | sed -e 's/^.*:[[:space:]]*//;s/[[:space:]]*$//'`
-            NEW_PLATFORM="$VARLIB/hostmaster-$VERSION"
-            if [ -d "$NEW_PLATFORM" ] && [ "$OLD_PLATFORM" = "$NEW_PLATFORM" ]; then
-                echo "it seems to be the same version as the one we're trying to install, not upgrading"
-            else
-                echo "upgrading the frontend from $OLD_PLATFORM to $NEW_PLATFORM"
-                cd "$OLD_PLATFORM"
-                su aegir -c "drush hostmaster-migrate --yes '$SITE' '$NEW_PLATFORM'"
-            fi
-        else
-            db_get "aegir/site"
-            if [ ! -z "$RET" ]; then
-                SITE="$RET"
-            fi
-            db_get "aegir/db_host"
-            AEGIR_DB_HOST="$RET"
-            db_get "aegir/db_user"
-            AEGIR_DB_USER="$RET"
-            db_get "aegir/db_password"
-            AEGIR_DB_PASS="$RET"
-            db_get "aegir/email"
-            EMAIL="$RET"
-            db_get "aegir/makefile"
-            if [ ! -z "$RET" ]; then
-                MAKEFILE="--makefile='$RET'"
-            fi
-            db_reset aegir/db_password || true
-            db_fset aegir/db_password "seen" "true" || true
-
-            db_go
-            db_stop
-            
-            if [ -d $VARLIB/.drush/provision ]; then
-                echo "existing provision in $VARLIB/.drush/provision detected, move away and try again"
-                exit 1
-            fi
-            echo "installing the Aegir frontend (Drupal with the hostmaster profile), please wait..."
-            # pass data through JSON 
-            su aegir -c "drush hostmaster-install --backend $MAKEFILE $SITE | drush backend-parse" <<EOF
-{ "yes": 1,
-  "version": "$VERSION",
-  "aegir_db_host": "$AEGIR_DB_HOST",
-  "aegir_db_user": "$AEGIR_DB_USER",
-  "aegir_db_pass": "$AEGIR_DB_PASS",
-  "client_email": "$EMAIL"
-}
-EOF
-            ln -sf $VARLIB/config/apache.conf /etc/apache2/conf.d/aegir.conf
-            apache2ctl graceful
-        fi
-        rm -f $TEMPFILE
+        # make sure we have apache configs settled in, for remote headless aegir servers
+        touch $VARLIB/config/apache.conf
+        ln -sf $VARLIB/config/apache.conf /etc/apache2/conf.d/aegir.conf
+        apache2ctl graceful
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
