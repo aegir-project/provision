@@ -1,3 +1,12 @@
+aegir-provision (1.0~rc2-1) unstable; urgency=low
+
+  * new upstream version
+  * change watch file to point to Drupal.org
+  * remove frontend install scripts, the README.Debian has instructions
+    on how to install the frontend.
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Mon, 21 Mar 2011 18:58:06 -0400
+
 aegir-provision (0.4~beta2-1) unstable; urgency=low
 
   * fix minor issues found during testing:
