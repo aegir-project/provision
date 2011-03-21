@@ -78,7 +78,7 @@ class provisionService_db_mysql extends provisionService_db_pdo {
   function import_dump($dump_file, $creds) {
     extract($creds);
 
-    $cmd = sprintf("mysql --force --defaults-file=/dev/fd/3 %s", escapeshellcmd($db_name));
+    $cmd = sprintf("mysql --defaults-file=/dev/fd/3 %s", escapeshellcmd($db_name));
 
     $success = $this->safe_shell_exec($cmd, $db_host, $db_user, $db_passwd, $dump_file);
 
