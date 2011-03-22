@@ -30,25 +30,27 @@
    * array, otherwise they show up in phpinfo() and other friendly
    * places.
    */
-  apache_setenv('db_type', null);
-  apache_setenv('db_user', null);
-  apache_setenv('db_passwd', null);
-  apache_setenv('db_host', null);
-  apache_setenv('db_port', null);
-  apache_setenv('db_name', null);
+  if (function_exists('apache_setenv')) {
+    apache_setenv('db_type', null);
+    apache_setenv('db_user', null);
+    apache_setenv('db_passwd', null);
+    apache_setenv('db_host', null);
+    apache_setenv('db_port', null);
+    apache_setenv('db_name', null);
+    // no idea why they are also in REDIRECT_foo, but they are
+    apache_setenv('REDIRECT_db_type', null);
+    apache_setenv('REDIRECT_db_user', null);
+    apache_setenv('REDIRECT_db_passwd', null);
+    apache_setenv('REDIRECT_db_host', null);
+    apache_setenv('REDIRECT_db_port', null);
+    apache_setenv('REDIRECT_db_name', null);
+  }
   unset($_SERVER['db_type']);
   unset($_SERVER['db_user']);
   unset($_SERVER['db_passwd']);
   unset($_SERVER['db_host']);
   unset($_SERVER['db_port']);
   unset($_SERVER['db_name']);
-  // no idea why they are also in REDIRECT_foo, but they are
-  apache_setenv('REDIRECT_db_type', null);
-  apache_setenv('REDIRECT_db_user', null);
-  apache_setenv('REDIRECT_db_passwd', null);
-  apache_setenv('REDIRECT_db_host', null);
-  apache_setenv('REDIRECT_db_port', null);
-  apache_setenv('REDIRECT_db_name', null);
   unset($_SERVER['REDIRECT_db_type']);
   unset($_SERVER['REDIRECT_db_user']);
   unset($_SERVER['REDIRECT_db_passwd']);
