@@ -35,7 +35,9 @@ case "$1" in
             db_stop
             . $TEMPFILE
             echo "Aegir frontend (@hostmaster) site detected in $drupal_root"
-            NEW_PLATFORM="$VARLIB/hostmaster-$VERSION"
+            # make those paths canonical to make sure we can compare correctly
+            NEW_PLATFORM=`readlink -f "$VARLIB/hostmaster-$VERSION"`
+            drupal_root=`readlink -f $drupal_root`
             if [ -d "$NEW_PLATFORM" ] && [ "$drupal_root" = "$NEW_PLATFORM" ]; then
                 echo "it seems to be the same version as the one we're trying to install, not upgrading"
             else
