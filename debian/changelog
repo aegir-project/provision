@@ -4,6 +4,11 @@ aegir-provision (1.0~rc2-1) unstable; urgency=low
   * change watch file to point to Drupal.org
   * remove frontend install scripts, the README.Debian has instructions
     on how to install the frontend.
+  * configure git-buildpackage so this can be built more easily
+  * add frontend install scripts as a separate binary package
+    (aegir-hostmaster) that is just maintainer scripts within this source
+    package.
+  * cherry-pick the credentials security fix in b2236c6b and 039c7240
 
  -- Antoine Beaupré <anarcat@koumbit.org>  Mon, 21 Mar 2011 18:58:06 -0400
 
