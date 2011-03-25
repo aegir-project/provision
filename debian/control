@@ -16,16 +16,10 @@ Recommends: mysql-server
 Description: backend of the Aegir hosting system
  Provision is a component of the Aegir hosting system.
  .
- Aegir is a set of contributed modules for Drupal that aims to solve
- the problem of managing a large number of Drupal sites. It does this
- by providing you with a simple Drupal based hosting front end for
- your entire network of sites. To deploy a new site you simply have to
- create a new Site node. To backup or upgrade sites, you simply manage
- your site nodes as you would any other node.
- .
- The provision component of this system provides the back end used for
- system level tasks such as creating configuration files and managing
- databases and backup files.
+ This package provides Drush commands used for system level tasks such
+ as creating configuration files and managing databases and backup
+ files. It can be installed standalone although it is usually
+ installed with the hostmaster frontend.
 
 Package: aegir-hostmaster
 Architecture: all
@@ -33,6 +27,18 @@ Depends: ${misc:Depends}, drush (>= 2.0), php5-mysql, apache2 | apache, aegir-pr
 Description: frontend of the Aegir hosting system
  Hostmaster is a component of the Aegir hosting system.
  .
+ This package provides the frontend web interface that users generally
+ interact with. It's made up of a regular Drupal site with a custom
+ install profile, module and theme.
+ .
+ This meta-package will dynamically install the frontend using drush
+ and provision and as such doesn't bundle any files itself. Everything
+ is downloaded on the fly during the install.
+
+Package: aegir
+Architecture: all
+Depends: ${misc:Depends}, aegir-provision, aegir-hostmaster
+Description: Aegir hosting system metapackage
  Aegir is a set of contributed modules for Drupal that aims to solve
  the problem of managing a large number of Drupal sites. It does this
  by providing you with a simple Drupal based hosting front end for
@@ -40,9 +46,5 @@ Description: frontend of the Aegir hosting system
  create a new Site node. To backup or upgrade sites, you simply manage
  your site nodes as you would any other node.
  .
- The hostmaster component provides the frontend that drives the
- backend. It's made up of a regular Drupal site with a custom install
- profile, module and theme.
- .
- This meta-package will dynamically install the frontend using drush
- and provision.
+ This meta-package will install both the frontend (aegir-hostmaster)
+ and the backend (aegir-provision).
