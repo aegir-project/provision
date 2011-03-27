@@ -190,7 +190,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'client_name' => drush_get_option('client_name'),
     'profile' => 'hostmaster',
   ));
-  $data = provision_backend_invoke($site_name, 'provision-install');
+  $data = provision_backend_invoke($site_name, 'provision-install', array(), array('client_email' => drush_get_option('client_email')));
   provision_backend_invoke($site_name, 'provision-verify');
 
   // exit if an error has occured. 
