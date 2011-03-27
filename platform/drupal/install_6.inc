@@ -348,7 +348,7 @@ function install_main() {
   variable_set('install_profile', $profile);
 
   $client_email = drush_get_option('client_email');
-  $account = install_create_admin_user($url, $client_email);
+  $account = install_create_admin_user($client_email);
   $onetime = user_pass_reset_url($account);
   // Store the one time login link in an option so the front end can direct the user to their new site.
   drush_set_option('login_link', $onetime);
