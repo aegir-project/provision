@@ -7,7 +7,6 @@
 $GLOBALS['url'] = d()->uri;
 $GLOBALS['profile'] = d()->profile;
 $GLOBALS['install_locale'] = d()->language;
-$GLOBALS['client_email'] = d()->client_email;
 $GLOBALS['base_url'] = provision_get_base_url();
 
 
@@ -60,20 +59,16 @@ function install_create_admin_user($client_email = NULL) {
   return user_save($account,  $edit);
 }
 
-function install_send_welcome_mail($url, $account, $profile, $language, $client_email) {
+function install_send_welcome_mail($url, $account, $profile, $language, $client_email, $onetime) {
   global $base_url;
   // Mail one time login URL and instructions.
   $from = variable_get('site_mail', ini_get('sendmail_from'));
-  $onetime = user_pass_reset_url($account);
 
   $variables = array(
     '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
     '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail, 
     '!date' => format_date(time()), '!login_uri' => url('user', NULL, NULL, TRUE), 
     '!edit_uri' => url('user/'. $account->uid .'/edit', NULL, NULL, TRUE));
-
-  // Store the one time login link in an option so the front end can direct the user to their new site.
-  drush_set_option('login_link', $onetime);
 
   // allow the profile to override welcome email text
   if (file_exists("./profiles/$profile/provision_welcome_mail.inc")) {
@@ -110,7 +105,6 @@ function install_send_welcome_mail($url, $account, $profile, $language, $client_
   else {
     drush_log(t('Could not send welcome mail to @client', array('@client' => $client_email)));
   }
-  drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
 }
 
 function install_main() {
@@ -118,7 +112,8 @@ function install_main() {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
 
   // This must go after drupal_bootstrap(), which unsets globals!
-  global $profile, $install_locale, $client_email;
+  global $profile, $install_locale;
+
   require_once './modules/system/system.install';
   require_once './includes/file.inc';
 
@@ -193,9 +188,15 @@ function install_main() {
 
   variable_set('install_profile', $profile);
 
-  $account = install_create_admin_user($url, $client_email);
+  $client_email = drush_get_option('client_email');
+  $account = install_create_admin_user($client_email);
+  $onetime = user_pass_reset_url($account);
+  // Store the one time login link in an option so the front end can direct the user to their new site.
+  drush_set_option('login_link', $onetime);
+  drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
+
   if ($client_email) {
-    install_send_welcome_mail($url, $account, $profile, $install_locale, $client_email);
+    install_send_welcome_mail($url, $account, $profile, $install_locale, $client_email, $onetime);
   }
 }
 install_main();

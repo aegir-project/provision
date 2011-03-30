@@ -30,7 +30,7 @@ function drush_provision_drupal_provision_backup_validate($backup_file = NULL) {
       drush_set_error('PROVISION_BACKUP_ALREADY_EXISTS', dt('Back up file @path already exists.', array('@path' => $backup_file)));
     }
     else {
-      drush_log(dt('Backing site up to @path.', array('@path' => $backup_file)), 'ok');
+      drush_log(dt('Backing site up to @path.', array('@path' => $backup_file)));
       drush_set_option('backup_file', $backup_file);
     }
   }
@@ -108,6 +108,10 @@ function drush_provision_drupal_provision_backup() {
   if (!$result && !drush_get_option('force', false)) {
     drush_set_error('PROVISION_BACKUP_FAILED', dt("Could not back up sites directory for drupal"));
   }
+}
+
+function drush_provision_drupal_post_provision_backup() {
+  drush_log(dt('Backed up site up to @path.', array('@path' => drush_get_option('backup_file'))), 'success');
 }
 
 /**

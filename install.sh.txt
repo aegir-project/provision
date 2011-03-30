@@ -28,8 +28,8 @@
 ########################################################################
 
 # guess the aegir version based on the info file
-AEGIR_VERSION="0.4-rc1"
-DRUSH_VERSION=6.x-3.3
+AEGIR_VERSION="6.x-1.0-rc3"
+DRUSH_VERSION=7.x-4.4
 
 ########################################################################
 # functions
