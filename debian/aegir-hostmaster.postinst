@@ -33,6 +33,10 @@ case "$1" in
         if [ ! -z "$DEBUG" ]; then
             FLAGS="$FLAGS --debug"
         fi
+        db_get "aegir/makefile"
+        if [ ! -z "$RET" ]; then
+            FLAGS="$FLAGS --makefile='$RET'"
+        fi
 
         TEMPFILE=`tempfile`
         su -s /bin/sh aegir -c 'drush --pipe @hostmaster status | egrep "site_uri|drupal_root"' >> $TEMPFILE || true
@@ -63,10 +67,6 @@ case "$1" in
             AEGIR_DB_PASS="$RET"
             db_get "aegir/email"
             EMAIL="$RET"
-            db_get "aegir/makefile"
-            if [ ! -z "$RET" ]; then
-                MAKEFILE="--makefile='$RET'"
-            fi
             db_reset aegir/db_password || true
             db_fset aegir/db_password "seen" "true" || true
 
@@ -79,7 +79,7 @@ case "$1" in
             fi
             echo "installing the Aegir frontend (Drupal with the hostmaster profile), please wait..."
             # pass data through JSON 
-            su aegir -c "drush hostmaster-install $FLAGS --backend $MAKEFILE $site_uri | drush backend-parse" <<EOF
+            su aegir -c "drush hostmaster-install $FLAGS --backend $site_uri | drush backend-parse" <<EOF
 { "yes": 1,
   "version": "$VERSION",
   "aegir_db_host": "$AEGIR_DB_HOST",
