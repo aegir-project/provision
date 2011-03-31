@@ -1,3 +1,9 @@
+aegir-provision (1.0~rc3-5) unstable; urgency=low
+
+  * cleanup older empty platforms when upgrading
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Thu, 31 Mar 2011 14:58:48 -0400
+
 aegir-provision (1.0~rc3-4) unstable; urgency=low
 
   * fix internal version number to respect upstream convention (6.x-1.0~rc3)
