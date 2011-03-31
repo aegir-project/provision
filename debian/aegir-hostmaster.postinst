@@ -57,8 +57,9 @@ case "$1" in
                 echo "upgrading the frontend from $drupal_root to $NEW_PLATFORM"
                 cd "$drupal_root"
                 su -s /bin/sh aegir -c "drush hostmaster-migrate $FLAGS '$site_uri' '$NEW_PLATFORM'"
+                echo "upgrade finished"
                 cd $HOME
-                sites=`ls "$drupal_root/sites" | egrep -v '^all|default$'`
+                sites=`ls "$drupal_root/sites" | egrep -v '^all|default$' || true`
                 if [ -z "$sites" ]; then
                     echo "backing up old platform to $HOME/backups/$drupal_root.tgz"
                     tar -c -z -f "$HOME/backups/$drupal_root.tgz" "$drupal_root"
