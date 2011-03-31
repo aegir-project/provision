@@ -1,3 +1,9 @@
+aegir-provision (1.0~rc3-1) unstable; urgency=low
+
+  * new upstream release
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Thu, 31 Mar 2011 13:32:13 -0400
+
 aegir-provision (1.0~rc2-1) unstable; urgency=low
 
   * new upstream version
