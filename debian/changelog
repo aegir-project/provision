@@ -1,6 +1,7 @@
 aegir-provision (1.0~rc3-7) unstable; urgency=low
 
-  * make upgrades from custom installs easier by prompting for a makefile anyways
+  * make upgrades from custom installs easier by prompting for a makefile
+    anyways
 
  -- Antoine Beaupré <anarcat@koumbit.org>  Thu, 31 Mar 2011 15:18:43 -0400
 
