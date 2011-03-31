@@ -1,6 +1,6 @@
 aegir-provision (1.0~rc3-3) unstable; urgency=low
 
-  * depend explicitely on apache, which simplifies sudoers file install
+  * depend explicitly on apache, which simplifies sudoers file install
   * abort earlier when a manual provision install is detected
 
  -- Antoine Beaupré <anarcat@koumbit.org>  Thu, 31 Mar 2011 14:25:17 -0400
