@@ -35,30 +35,13 @@ case "$1" in
         fi
         adduser --quiet aegir www-data
 
-        TEMPFILE=`tempfile`
-        sedscript=""
-        for binary in /usr/sbin/apachectl /usr/sbin/apache2ctl ; do
-            if [ -x $binary ] ; then
-                sedscript=$sedscript';s#^\#\?\(.*'$binary'.*\)$#\1#'
-            else
-                sedscript=$sedscript';s#^\#\?\(.*'$binary'.*\)$#\#\1#'
-            fi
-        done
-        if ! [ -z "$sedscript" ]; then
-            sed -e "$sedscript" /usr/share/doc/aegir-provision/examples/example.sudoers >> $TEMPFILE
-        else
-            # this shouldn't happen, but still handle gracefully
-            cp /usr/share/doc/aegir-provision/examples/examples.sudoers $TEMPFILE
-        fi
-        
         if [ -d /etc/sudoers.d ]; then
-            ucf --debconf-ok $TEMPFILE /etc/sudoers.d/aegir
-            rm -f $TEMPFILE
+            ucf --debconf-ok /usr/share/doc/aegir-provision/examples/examples.sudoers /etc/sudoers.d/aegir
             ucfr aegir-provision /etc/sudoers.d/aegir
             chmod 440 /etc/sudoers.d/aegir
         else
             echo "running an older version of sudo"
-            echo "you'll need to copy the content of /etc/sudoers.d/aegir into /etc/sudoers for aegir to run properly"
+            echo "copy content of /usr/share/doc/aegir-provision/examples/examples.sudoers into /etc/sudoers for aegir to run properly"
         fi
 
         if [ -d $VARLIB/.drush/provision ]; then
