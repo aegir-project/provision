@@ -29,6 +29,11 @@ case "$1" in
         # this obviously doesn't work for git releases
         VERSION=`sed -n '/^version/{s/^.*= *//;p}' /usr/share/drush/commands/provision/provision.info`
 
+        FLAGS="--yes"
+        if [ ! -z "$DEBUG" ]; then
+            FLAGS="$FLAGS --debug"
+        fi
+
         TEMPFILE=`tempfile`
         su -s /bin/sh aegir -c 'drush --pipe @hostmaster status | egrep "site_uri|drupal_root"' >> $TEMPFILE || true
         if grep -q 'site_uri' $TEMPFILE; then
@@ -43,7 +48,7 @@ case "$1" in
             else
                 echo "upgrading the frontend from $drupal_root to $NEW_PLATFORM"
                 cd "$drupal_root"
-                su -s /bin/sh aegir -c "drush hostmaster-migrate --yes '$site_uri' '$NEW_PLATFORM'"
+                su -s /bin/sh aegir -c "drush hostmaster-migrate $FLAGS '$site_uri' '$NEW_PLATFORM'"
             fi
         else
             db_get "aegir/site"
@@ -74,7 +79,7 @@ case "$1" in
             fi
             echo "installing the Aegir frontend (Drupal with the hostmaster profile), please wait..."
             # pass data through JSON 
-            su aegir -c "drush hostmaster-install --backend $MAKEFILE $site_uri | drush backend-parse" <<EOF
+            su aegir -c "drush hostmaster-install $FLAGS --backend $MAKEFILE $site_uri | drush backend-parse" <<EOF
 { "yes": 1,
   "version": "$VERSION",
   "aegir_db_host": "$AEGIR_DB_HOST",
