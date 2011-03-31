@@ -1,3 +1,9 @@
+aegir-provision (1.0~rc3-6) unstable; urgency=low
+
+  * more debugging information
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Thu, 31 Mar 2011 15:15:10 -0400
+
 aegir-provision (1.0~rc3-5) unstable; urgency=low
 
   * cleanup older empty platforms when upgrading
