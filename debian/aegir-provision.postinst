@@ -24,6 +24,11 @@ VARLIB="/var/aegir"
 
 case "$1" in
     configure)
+        if [ -d $VARLIB/.drush/provision ]; then
+            echo "existing provision in $VARLIB/.drush/provision detected, move away and try again"
+            exit 1
+        fi
+
         # add a aegir user if one does not already exist
         if ! getent passwd aegir >/dev/null ; then
             echo "adding aegir user..."
@@ -42,11 +47,6 @@ case "$1" in
         else
             echo "running an older version of sudo"
             echo "copy content of /usr/share/doc/aegir-provision/examples/examples.sudoers into /etc/sudoers for aegir to run properly"
-        fi
-
-        if [ -d $VARLIB/.drush/provision ]; then
-            echo "existing provision in $VARLIB/.drush/provision detected, move away and try again"
-            exit 1
         fi
 
         # fix permissions on installed directories
