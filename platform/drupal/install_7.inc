@@ -7,29 +7,14 @@
 $GLOBALS['url'] = d()->uri;
 $GLOBALS['profile'] = d()->profile;
 $GLOBALS['install_locale'] = d()->language;
-$GLOBALS['client_email'] = d()->client_email;
 $GLOBALS['base_url'] = provision_get_base_url();
 
 define('MAINTENANCE_MODE', 'install');
 
-function install_send_welcome_mail($url, $profile, $language, $client_email) {
+function install_send_welcome_mail($url, $account, $language, $client_email, $onetime) {
   if ($client_email) {
-    // create the admin account
-    $account = user_load(1);
-    $edit['name'] = 'admin';
-    $edit['pass'] = user_password();
-    $edit['mail'] = $client_email;
-    $edit['status'] = 1;
-
-    // temporarily disable drupal's default mail notification
-    $prev = variable_get('user_mail_status_activated_notify', TRUE);
-    variable_set('user_mail_status_activated_notify', FALSE);
-    $account = user_save($account,  $edit);
-    variable_set('user_mail_status_activated_notify', $prev);
-
     // Mail one time login URL and instructions.
     $from = variable_get('site_mail', ini_get('sendmail_from'));
-    $onetime = user_pass_reset_url($account);
     $mail_params['variables'] = array(
       '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
       '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail, 
@@ -38,17 +23,12 @@ function install_send_welcome_mail($url, $profile, $language, $client_email) {
 
     $mail_success = drupal_mail('install', 'welcome-admin', $account->mail, user_preferred_language($account), $mail_params, $from, TRUE);
 
-  // Store the one time login link in an option so the front end can direct the user to their new site.
-  drush_set_option('login_link', $onetime);
-
-
     if ($mail_success) {
       drush_log(t('Sent welcome mail to @client', array('@client' => $client_email)), 'message');
     }
     else {
       drush_log(t('Could not send welcome mail to @client', array('@client' => $client_email)));
     }
-    drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
   }
 }
 
@@ -90,7 +70,9 @@ function install_mail($key, &$message, $params) {
 
 
 function install_main() {
-  global $profile, $install_locale, $client_email, $conf, $url, $base_url;
+  global $profile, $install_locale, $conf, $url, $base_url;
+
+  $client_email = drush_get_option('client_email');
 
   require_once DRUPAL_ROOT . '/includes/install.core.inc';
 
@@ -147,8 +129,26 @@ function install_main() {
   }
   _provision_drupal_create_directories();
 
+  // create the admin account
+  $account = user_load(1);
+  $edit['name'] = 'admin';
+  $edit['pass'] = $account_pass;
+  $edit['mail'] = $client_email;
+  $edit['status'] = 1;
+
+  // temporarily disable drupal's default mail notification
+  $prev = variable_get('user_mail_status_activated_notify', TRUE);
+  variable_set('user_mail_status_activated_notify', FALSE);
+  $account = user_save($account,  $edit);
+  variable_set('user_mail_status_activated_notify', $prev);
+
+  $onetime = user_pass_reset_url($account);
+  // Store the one time login link in an option so the front end can direct the user to their new site.
+  drush_set_option('login_link', $onetime);
+  drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
+
   if ($client_email) {
-    install_send_welcome_mail($url, $profile, $install_locale, $client_email);
+    install_send_welcome_mail($url, $account, $install_locale, $client_email, $onetime);
   }
 }
 install_main();

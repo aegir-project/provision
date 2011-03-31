@@ -15,7 +15,7 @@ server {
    ssl_ciphers                 HIGH:!ADH:!MD5;
    ssl_prefer_server_ciphers   on;
    keepalive_timeout           70;
-   
+
    ### Dont't reveal Aegir front-end URL here.
 }
 

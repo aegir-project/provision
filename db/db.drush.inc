@@ -21,6 +21,8 @@ function db_drush_exit() {
 
 function db_drush_help($section) {
   switch ($section) {
+    case 'error:PROVISION_CONNECT_DB_FAILED' :
+      return dt('Unable to connect to database server.');
     case 'error:PROVISION_CREATE_DB_FAILED' :
       return dt('Unable to create new databases.');
     case 'error:PROVISION_DROP_DB_FAILED' :
@@ -56,12 +58,15 @@ class provisionService_db extends provisionService {
   }
 
   function verify_server_cmd() {
-    $this->connect();
-    if ($this->can_create_database()) {
-      drush_log(dt('Provision can create new databases.'), 'message');
-    }
-    else {
-      drush_set_error('PROVISION_CREATE_DB_FAILED');
+    if ($this->connect()) {
+      if ($this->can_create_database()) {
+        drush_log(dt('Provision can create new databases.'), 'message');
+      }
+      else {
+        drush_set_error('PROVISION_CREATE_DB_FAILED');
+      }
+    } else {
+      drush_set_error('PROVISION_CONNECT_DB_FAILED');
     }
   }
 
@@ -281,6 +286,7 @@ class provisionService_db_pdo extends provisionService_db {
   function connect() {
     try {
       $this->conn = new PDO($this->dsn, $this->creds['user'], $this->creds['pass']);
+      return $this->conn;
     }
     catch (PDOException $e) {
       return drush_set_error('PROVISION_DB_CONNECT_FAIL', $e->getMessage());

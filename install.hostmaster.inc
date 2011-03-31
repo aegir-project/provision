@@ -15,8 +15,9 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   drush_set_default('script_user', provision_current_user());
   drush_set_default('web_group', _provision_default_web_group());
   drush_set_default('http_service_type', 'apache');
-  drush_set_default('drush_make_version', '6.x-2.1');
+  drush_set_default('drush_make_version', '6.x-2.2');
   drush_set_default('aegir_db_user', 'root');
+  drush_set_default('client_name', 'admin');
   $aegir_db_user = drush_get_option('aegir_db_user');
   drush_set_default('makefile', $aegir_root . '/.drush/provision/aegir.make');
 
@@ -82,7 +83,7 @@ The following settings will be used:
  Aegir version: !version
  Aegir platform path: !root
  Aegir makefile: !makefile
- Client email: !email
+ Admin email: !email
 ', array('!site' => $site,
          '!fqdn' => drush_get_option('aegir_host'),
          '!home' => drush_get_option('aegir_root'),
@@ -186,10 +187,10 @@ function drush_provision_hostmaster_install($site = NULL) {
     'platform' => $platform_name,
     'db_server' => $dbserver,
     'uri' => $site,
-    'client_email' => drush_get_option('client_email'),
+    'client_name' => drush_get_option('client_name'),
     'profile' => 'hostmaster',
   ));
-  $data = provision_backend_invoke($site_name, 'provision-install');
+  $data = provision_backend_invoke($site_name, 'provision-install', array(), array('client_email' => drush_get_option('client_email')));
   provision_backend_invoke($site_name, 'provision-verify');
 
   // exit if an error has occured. 

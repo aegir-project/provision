@@ -27,7 +27,7 @@
 
  ## Default index files
   index         index.php index.html;
- 
+
  ## Size Limits
   client_body_buffer_size        64k;
   client_header_buffer_size      32k;
@@ -43,8 +43,8 @@
   fastcgi_buffers             256 4k;
   fastcgi_busy_buffers_size     256k;
   fastcgi_temp_file_write_size  256k;
-  
- ## Timeouts 
+
+ ## Timeouts
   client_body_timeout             60;
   client_header_timeout           60;
   send_timeout                    60;
@@ -55,18 +55,18 @@
   fastcgi_read_timeout           300;
 
  ## Open File Performance
-  open_file_cache max=8000 inactive=30s; 
-  open_file_cache_valid          60s; 
+  open_file_cache max=8000 inactive=30s;
+  open_file_cache_valid          60s;
   open_file_cache_min_uses         3;
   open_file_cache_errors          on;
- 
+
  ## FastCGI Caching
   fastcgi_cache_path /var/lib/nginx/speed
                      levels=2:2:2
                      keys_zone=speed:50m
                      inactive=8h
                      max_size=1g;
-  
+
  ## General Options
   ignore_invalid_headers          on;
   limit_zone gulag $binary_remote_addr 10m;
@@ -74,13 +74,13 @@
   reset_timedout_connection       on;
   fastcgi_intercept_errors        on;
 
- ## TCP options  
+ ## TCP options 
   tcp_nopush  on;
 
  ## SSL performance
   ssl_session_cache   shared:SSL:10m;
   ssl_session_timeout            10m;
-    
+
  ## Compression
   gzip_buffers      16 8k;
   gzip_comp_level   5;
@@ -110,7 +110,7 @@ if ($nginx_has_upload_progress) {
   client_body_temp_path  /var/lib/nginx/body 1 2;
   access_log             /var/log/nginx/access.log main;
   error_log              /var/log/nginx/error.log crit;
-      
+
 
 #######################################################
 ###  nginx default server
