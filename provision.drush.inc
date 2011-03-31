@@ -196,18 +196,6 @@ function provision_drush_command() {
     ),
   );
   
-  $items['hostmaster-pause'] = array(
-    'description' => dt('Prepare the site to be migrated to a new platform.'),
-    'arguments' => array(
-      'example.com' => dt('The url of the site being migrated.')),
-  );
-
-  $items['hostmaster-resume'] = array(
-    'description' => dt('Complete the migration of the site to a new platform.'),
-    'arguments' => array(
-      'example.com' => dt('The url of the site being migrated.')),
-  );
-
   $items['backend-parse'] = array(
     'description' => dt('Parse the output of --backend commands to a human readable form'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,

@@ -10,11 +10,9 @@ This command will operate the following changes in your system:
 
 1. verify the server and the hostmaster site (provision-verify)
 2. verify the new platform (which will download it if missing)
-3. stop the Aegir frontend (hostmaster-pause)
-4. remove the cronjob (crontab -r)
-5. attempt a migration to the new platform (provision-migrate)
-6. start the Aegir frontend again (hostmaster-resume)
-7. replace the crontab.
+3. stop the queue (hosting-pause)
+4. attempt a migration to the new platform (provision-migrate)
+5. start the queue (hosting-resume)
 
 We are making the following assumptions:
  * you have read UPGRADE.txt
@@ -141,7 +139,7 @@ We are making the following assumptions:
 
 
 function drush_provision_pre_hostmaster_migrate($site, $platform) {
-  provision_backend_invoke(drush_get_option('site_name'), 'hostmaster-pause');
+  provision_backend_invoke(drush_get_option('site_name'), 'hosting-pause');
 }
 
 function drush_provision_hostmaster_migrate($site, $platform) {
@@ -151,7 +149,7 @@ function drush_provision_hostmaster_migrate($site, $platform) {
 function drush_provision_post_hostmaster_migrate($site, $platform) {
   // we pass the context names we generated to the task so we can enforce that the names
   // stay the same.
-  provision_backend_invoke(drush_get_option('site_name'), 'hostmaster-resume', array(), array( 
+  provision_backend_invoke(drush_get_option('site_name'), 'hosting-resume', array(), array( 
     'old_platform_name' => drush_get_option('old_platform'),
     'new_platform_name' => drush_get_option('new_platform'),
   ));
