@@ -28,7 +28,7 @@
 ########################################################################
 
 # guess the aegir version based on the info file
-AEGIR_VERSION="6.x-1.0-rc3"
+AEGIR_VERSION="HEAD"
 DRUSH_VERSION=7.x-4.4
 
 ########################################################################
