@@ -24,7 +24,7 @@ class provisionService_http_nginx_ssl extends provisionService_http_ssl {
   // We share the application name with nginx.
   protected $application_name = 'nginx';
   protected $has_restart_cmd = TRUE;
-  
+
   function default_restart_cmd() {
     // The nginx service defines it's restart command as a static
     // method so that we can make use of it here.
