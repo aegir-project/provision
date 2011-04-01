@@ -1,3 +1,9 @@
+aegir-provision (1.0~rc3-8) unstable; urgency=low
+
+  * have the makefile prompt pop up correctly
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 01 Apr 2011 14:30:57 -0400
+
 aegir-provision (1.0~rc3-7) unstable; urgency=low
 
   * make upgrades from custom installs easier by prompting for a makefile
