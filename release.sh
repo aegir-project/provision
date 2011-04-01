@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-# simple prompt, copied from install.sh
+# simple prompt
 prompt_yes_no() {
   while true ; do
     printf "$* [Y/n] "
@@ -49,13 +49,12 @@ cat <<EOF
 
 The following operations will be done:
  1. change the makefile to download tarball
- 2. change the install.sh.txt version
- 3. change the upgrade.sh.txt version
- 4. display the resulting diff
- 5. commit those changes to git
- 6. lay down the tag (prompting you for a changelog)
- 7. revert the commit
- 8. (optionally) push those changes
+ 2. change the upgrade.sh.txt version
+ 3. display the resulting diff
+ 4. commit those changes to git
+ 5. lay down the tag (prompting you for a changelog)
+ 6. revert the commit
+ 7. (optionally) push those changes
 
 The operation can be aborted before step 6 and 9. Don't forget that as
 long as changes are not pushed upstream, this can all be reverted (see
@@ -76,9 +75,6 @@ sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
 echo changing hostmaster-install version
 sed -i'.tmp' -e"s/version *=.*$/version=$version/" provision.info
 git add provision.info && rm provision.info.tmp
-
-echo changing install.sh.txt version
-sed -i'.tmp' -e"s/AEGIR_VERSION=.*$/AEGIR_VERSION=\"$version\"/" install.sh.txt && git add install.sh.txt && rm install.sh.txt.tmp
 
 echo changing upgrade.sh.txt version
 sed -i'.tmp' -e"s/AEGIR_VERSION=.*$/AEGIR_VERSION=\"$version\"/" upgrade.sh.txt && git add upgrade.sh.txt && rm upgrade.sh.txt.tmp
