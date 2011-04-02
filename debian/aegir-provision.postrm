@@ -33,12 +33,11 @@ case "$1" in
             ucf --purge $conffile
             rm -f $conffile
         done
-
-        ( rm /etc/apache/conf.d/aegir.conf > /dev/null 2>&1 && invoke-rc.d apache force-reload ) || true
-        ( rm /etc/apache2/conf.d/aegir.conf > /dev/null 2>&1 && invoke-rc.d apache2 force-reload ) || true
-        
         ;;
     remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        # unregister apache config
+        ( rm /etc/apache/conf.d/aegir.conf > /dev/null 2>&1 && invoke-rc.d apache force-reload ) || true
+        ( rm /etc/apache2/conf.d/aegir.conf > /dev/null 2>&1 && invoke-rc.d apache2 force-reload ) || true
     ;;
 
     *)
