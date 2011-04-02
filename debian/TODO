@@ -7,15 +7,37 @@ This shouldn't be used or published until this is fixed.
 
  * (nil)
 
+Debian policy compliance issues
+===============================
+
+ * comply with the FHS by not installing in /var/aegir (that is the
+   sole litian override we have)
+
+   the proper way to do this is to follow the webapps policies:
+   http://webapps-common.alioth.debian.org/draft/html/
+
+ * respect the PHP policy:
+   http://webapps-common.alioth.debian.org/draft-php/html/
+
+ * do not duplicate code with Drupal, to respect section 4.13 of the
+   policy: "Debian packages should not make use of these [...] copies
+   unless the included package is explicitly intended to be used in
+   this way. If the included code is already in the Debian archive in
+   the form of a library, the Debian packaging should ensure that
+   binary packages reference the libraries already in Debian and the
+   convenience copy is not used. If the included code is not already
+   in Debian, it should be packaged separately as a prerequisite if
+   possible." The main reason for this is that "Having multiple copies
+   of the same code in Debian is inefficient, often creates either
+   static linking or shared library conflicts, and, most importantly,
+   increases the difficulty of handling security vulnerabilities in
+   the duplicated code."
+ 
 Nice to have stuff
 ==================
 
- * make a separate package for hostmaster that installs the frontend
  * deal with /var/aegir after purge?
- * comply with the FHS
  * use a minimal rules file:
    /usr/share/doc/debhelper/examples/rules.tiny
- * do not duplicate code with Drupal (so that we're policy compliant,
-   probably impossible)
- * review and respect the webapps policies:
-   http://webapps-common.alioth.debian.org/draft/html/
+ * sign the md5s of hostmaster and friends so we have a trust path in
+   the packaging again
