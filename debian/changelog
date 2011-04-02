@@ -1,3 +1,11 @@
+aegir-provision (1.0~rc3-9) unstable; urgency=low
+
+  * silence warning on new installs
+  * fix path to sample sudoers file, which made new installs completely
+    fail
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Sat, 02 Apr 2011 18:21:27 -0400
+
 aegir-provision (1.0~rc3-8) unstable; urgency=low
 
   * have the makefile prompt pop up correctly
