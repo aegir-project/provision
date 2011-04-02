@@ -29,10 +29,9 @@ case "$1" in
             echo >&2 "not removing aegir system account because deluser command was not found"
         fi
 
-        for conffile in /etc/sudoers.d/aegir; do
-            ucf --purge $conffile
-            rm -f $conffile
-        done
+        # unregister sudo config file
+        ucf --purge /etc/sudoers.d/aegir
+        rm -f /etc/sudoers.d/aegir
         ;;
     remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
         # unregister apache config
