@@ -3,6 +3,8 @@ aegir-provision (1.0~rc3-9) unstable; urgency=low
   * silence warning on new installs
   * fix path to sample sudoers file, which made new installs completely
     fail
+  * move apache config unregistration to remove, as per webapps policy
+  * clarify Debian's TODO
 
  -- Antoine Beaupré <anarcat@koumbit.org>  Sat, 02 Apr 2011 18:21:27 -0400
 
