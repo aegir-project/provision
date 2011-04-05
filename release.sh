@@ -89,7 +89,7 @@ if prompt_yes_no "commit changes and tag release? (y/N) "; then
     echo okay, committing...
 else
     echo 'aborting, leaving changes in git staging area'
-    echo 'use "git reset; git checkout ." to revert'
+    echo 'use "git reset --hard" to revert the index'
     exit 1
 fi
 
