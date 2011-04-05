@@ -257,7 +257,6 @@ function _provision_drupal_rebuild_caches() {
   }
 }
 
-
 /**
  * Find available profiles on this platform.
  */
