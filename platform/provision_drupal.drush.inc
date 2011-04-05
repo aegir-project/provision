@@ -699,3 +699,35 @@ function provision_reload_config($context, $file = null) {
     }
   }
 }
+
+/**
+ * Maintain a symlink to the site within a client directory
+ *
+ * This creates a directory structure like this:
+ *
+ * ~/clients/foo/example.org -> ~/platforms/.../sites/example.org
+ * ~/clients/bar/bar.example.com -> ~/platforms/.../sites/bar.example.com
+ *
+ * @todo this probably doesn't belong in this file
+ */
+function _provision_client_create_symlink() {
+  $sites_dir = d()->server->clients_path . '/' . d()->client_name;
+  provision_file()->create_dir($sites_dir, dt('Client home directory for @client', array('@client' => d()->client_name)));
+  provision_file()->unlink($sites_dir . '/' . d()->uri); // deliberatly ignore errors
+  provision_file()->symlink(d()->site_path, $sites_dir . '/' . d()->uri)
+    ->succeed('Created symlink @path to @target')
+    ->fail('Could not create symlink @path to @target: @reason');
+}
+
+/**
+ * Delete the site symlink within the client directory
+ *
+ * This deletes the site symlink created on verify/install
+ *
+ * @see _provision_client_create_symlink()
+ */
+function _provision_client_delete_symlink() {
+  provision_file()->unlink(d()->server->clients_path . '/' . d()->client_name . '/' . d()->uri)
+    ->succeed('Deleted symlink @path')
+    ->fail('Failed to delete symlink @path: @reason');
+}

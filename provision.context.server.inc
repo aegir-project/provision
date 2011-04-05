@@ -60,6 +60,7 @@ class provisionContext_server extends provisionContext {
     $this->backup_path = $this->aegir_root . '/backups';
     $this->config_path = $this->aegir_root . '/config/' . ltrim($this->name, '@');
     $this->include_path = $this->aegir_root . '/config/includes';
+    $this->clients_path = $this->aegir_root . '/clients';
 
     $this->setProperty('master_url');
     $this->setProperty('admin_email', 'admin@' . $this->remote_host);
