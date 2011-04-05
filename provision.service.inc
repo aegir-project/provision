@@ -6,7 +6,20 @@ require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
 
 class provisionService extends provisionChainedState {
+
+  /**
+   * The server this service is associated to
+   */
   protected $server = '@server_master';
+
+  /**
+   * The context in which this service stores its data
+   *
+   * This is usually an object made from a class derived from the
+   * provisionContext base class
+   *
+   * @see provisionContext
+   */
   public $context;
 
   protected $service = null;
@@ -260,6 +273,13 @@ class provisionService extends provisionChainedState {
 
   /**
    * Set the currently active context of the service.
+   *
+   * @arg mixed $context
+   *    the context to store this services data into. this can be an
+   *    object, or a string in which case the object will be loaded
+   *    dynamically with d()
+   *
+   * @see d()
    */
   function setContext($context) {
     $this->context = is_object($context) ? $context : d($context);

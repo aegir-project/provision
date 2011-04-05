@@ -10,11 +10,9 @@ This command will operate the following changes in your system:
 
 1. verify the server and the hostmaster site (provision-verify)
 2. verify the new platform (which will download it if missing)
-3. stop the Aegir frontend (hostmaster-pause)
-4. remove the cronjob (crontab -r)
-5. attempt a migration to the new platform (provision-migrate)
-6. start the Aegir frontend again (hostmaster-resume)
-7. replace the crontab.
+3. stop the queue (hosting-pause)
+4. attempt a migration to the new platform (provision-migrate)
+5. start the queue (hosting-resume)
 
 We are making the following assumptions:
  * you have read UPGRADE.txt
@@ -139,15 +137,22 @@ We are making the following assumptions:
   }
 }
 
-
+/**
+ * Prepare the hostmaster site for migration
+ *
+ * @deprecated most of the stuff here needs to be removed in favor of
+ * hosting-pause, but since that exists only starting with rc3, we
+ * need to copy the content of it here. once 1.0 is released, we can
+ * remove that code and just keep hosting-pause.
+ */
 function drush_provision_pre_hostmaster_migrate($site, $platform) {
   // wipe out cron entry
   exec('crontab -r');
-
-  // we can't rely on the park command to exist in pre-0.4 alpha 2 releases
-  provision_backend_invoke(drush_get_option('site_name'), 'hostmaster-pause');
   // we can't rely on update.php to run that because it will run too late. this can be removed in 0.5 and above
   provision_backend_invoke(drush_get_option('site_name'), 'sqlq', array("UPDATE {system} SET weight = 0 WHERE type='module' AND name='hosting';"));
+
+  // we ignore errors here through integrate = FALSE
+  provision_backend_invoke(drush_get_option('site_name'), 'hosting-pause', array(), array('#integrate' => FALSE));
 }
 
 function drush_provision_hostmaster_migrate($site, $platform) {
@@ -157,7 +162,7 @@ function drush_provision_hostmaster_migrate($site, $platform) {
 function drush_provision_post_hostmaster_migrate($site, $platform) {
   // we pass the context names we generated to the task so we can enforce that the names
   // stay the same.
-  provision_backend_invoke(drush_get_option('site_name'), 'hostmaster-resume', array(), array( 
+  provision_backend_invoke(drush_get_option('site_name'), 'hosting-resume', array(), array( 
     'old_platform_name' => drush_get_option('old_platform'),
     'new_platform_name' => drush_get_option('new_platform'),
   ));
