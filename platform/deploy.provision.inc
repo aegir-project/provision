@@ -149,7 +149,7 @@ function drush_provision_drupal_post_provision_deploy() {
     // rebuild the node access tables only if necessary
     if (node_access_needs_rebuild()) {
       node_access_rebuild();
-      drush_log(t('Rebuild node access table'));
+      drush_log(t('Rebuilt node access table'));
     }
   } else {
     drush_log("could not bootstrap drupal after updatedb");

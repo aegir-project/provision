@@ -16,7 +16,7 @@
   }
 ?>
 
-  # Do not read the platform's .htaccess
+  # Do not read any .htaccess in the platform
   AllowOverride none
 
 </Directory>

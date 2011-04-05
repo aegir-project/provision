@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-# simple prompt, copied from install.sh
+# simple prompt
 prompt_yes_no() {
   while true ; do
     printf "$* [Y/n] "
@@ -28,7 +28,7 @@ if [ $# -lt 1 -o "$version" = "-h" ]; then
     cat <<EOF 
 not enough arguments
 
-Usage: $0 <new_version>
+Usage: $0 <new_version> [<old_version>]
 EOF
     exit 1
 fi
@@ -49,13 +49,12 @@ cat <<EOF
 
 The following operations will be done:
  1. change the makefile to download tarball
- 2. change the install.sh.txt version
- 3. change the upgrade.sh.txt version
- 4. display the resulting diff
- 5. commit those changes to git
- 6. lay down the tag (prompting you for a changelog)
- 7. revert the commit
- 8. (optionally) push those changes
+ 2. change the upgrade.sh.txt version
+ 3. display the resulting diff
+ 4. commit those changes to git
+ 5. lay down the tag (prompting you for a changelog)
+ 6. revert the commit
+ 7. (optionally) push those changes
 
 The operation can be aborted before step 6 and 9. Don't forget that as
 long as changes are not pushed upstream, this can all be reverted (see
@@ -69,16 +68,16 @@ fi
 
 git pull
 echo changing makefile to download tarball
-sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
-  -e'/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://ftp.drupal.org/files/projects/hostmaster-'$version'.tgz"#' \
-  -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[directory_name] = "hostmaster"/' aegir.make && git add aegir.make && rm aegir.make.tmp
+#sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
+#  -e'/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://ftp.drupal.org/files/projects/hostmaster-'$version'.tgz"#' \
+#  -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[directory_name] = "hostmaster"/' aegir.make && git add aegir.make && rm aegir.make.tmp
+sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/= "git"/' \
+  -e'/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://git.drupal.org/project/hostmaster.git"#' \
+  -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[tag] = "'$version'"/' aegir.make && git add aegir.make && rm aegir.make.tmp
 
 echo changing hostmaster-install version
 sed -i'.tmp' -e"s/version *=.*$/version=$version/" provision.info
 git add provision.info && rm provision.info.tmp
-
-echo changing install.sh.txt version
-sed -i'.tmp' -e"s/AEGIR_VERSION=.*$/AEGIR_VERSION=\"$version\"/" install.sh.txt && git add install.sh.txt && rm install.sh.txt.tmp
 
 echo changing upgrade.sh.txt version
 sed -i'.tmp' -e"s/AEGIR_VERSION=.*$/AEGIR_VERSION=\"$version\"/" upgrade.sh.txt && git add upgrade.sh.txt && rm upgrade.sh.txt.tmp
@@ -90,14 +89,14 @@ if prompt_yes_no "commit changes and tag release? (y/N) "; then
     echo okay, committing...
 else
     echo 'aborting, leaving changes in git staging area'
-    echo 'use "git reset; git checkout ." to revert'
+    echo 'use "git reset --hard" to revert the index'
     exit 1
 fi
 
 commitmsg=`git commit -m"change version information for release $version"`
 echo $commitmsg
-commitid=`echo $commitmsg | sed 's/^\[[a-z]* \([a-z0-9]*\)\].*$/\1/'`
-git tag -a provision-$version
+commitid=`echo $commitmsg | sed 's/^\[[^ ]* \([a-z0-9]*\)\].*$/\1/'`
+git tag -a $version
 
 echo reverting tree to HEAD versions
 git revert $commitid
