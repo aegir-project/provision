@@ -138,7 +138,7 @@ class provisionConfig_drupal_settings extends provisionConfig {
     $this->cloaked = drush_get_option('provision_db_cloaking', $this->context->service('http')->cloaked_db_creds());
 
     foreach (array('db_type', 'db_user', 'db_passwd', 'db_host', 'db_name', 'db_port') as $key) {
-      $this->creds[$key] = ($this->cloaked) ? "\$_SERVER[{$key}]" : urldecode($this->data[$key]);
+      $this->creds[$key] = urldecode($this->data[$key]);
     }
 
     $this->data['extra_config'] = "# Extra configuration from modules:\n";

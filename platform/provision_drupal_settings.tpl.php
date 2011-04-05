@@ -1,4 +1,6 @@
 <?php print '<?php' ?>
+
+<?php if ($this->cloaked): ?>
   /**
    * The database credentials are stored in the Apache vhost config
    * of the associated site with SetEnv parameters.
@@ -9,20 +11,14 @@
    * This is a security measure implemented by the Aegir project.
    */
   $databases['default']['default'] = array(
-    'driver' => "<?php print $this->creds['db_type']; ?>",
-    'database' => "<?php print $this->creds['db_name']; ?>",
-    'username' => "<?php print $this->creds['db_user']; ?>",
-    'password' => "<?php print $this->creds['db_passwd']; ?>",
-    'host' => "<?php print $this->creds['db_host']; ?>",
-    'port' => "<?php print $this->creds['db_port']; ?>",
+    'driver' => $_SERVER['driver'],
+    'database' => $_SERVER['db_name'],
+    'username' => $_SERVER['db_user'],
+    'password' => $_SERVER['db_passwd'],
+    'host' => $_SERVER['db_host'],
+    'port' => $_SERVER['db_port'],
   );
-  $db_url['default'] = "<?php print strtr("%db_type://%db_user:%db_passwd@%db_host:%db_port/%db_name", array(
-    '%db_type' => $this->creds['db_type'],
-    '%db_user' => $this->creds['db_user'], 
-    '%db_passwd' => $this->creds['db_passwd'],
-    '%db_host' => $this->creds['db_host'], 
-    '%db_port' => $this->creds['db_port'], 
-    '%db_name' => $this->creds['db_name'])); ?>";
+  $db_url['default'] = $_SERVER['db_type'] . '://' . $_SERVER['db_user'] . ':' . $_SERVER['db_passwd'] . '@' . $_SERVER['db_host'] . ':' . $_SERVER['db_port'] . '/' . $_SERVER['db_name'];
 
   /**
    * Now that we used the credentials from the apache environment, we
@@ -57,6 +53,26 @@
   unset($_SERVER['REDIRECT_db_host']);
   unset($_SERVER['REDIRECT_db_port']);
   unset($_SERVER['REDIRECT_db_name']);
+
+<?php else: ?>
+
+  $databases['default']['default'] = array(
+    'driver' => "<?php print $this->creds['db_type']; ?>",
+    'database' => "<?php print $this->creds['db_name']; ?>",
+    'username' => "<?php print $this->creds['db_user']; ?>",
+    'password' => "<?php print $this->creds['db_passwd']; ?>",
+    'host' => "<?php print $this->creds['db_host']; ?>",
+    'port' => "<?php print $this->creds['db_port']; ?>",
+   );
+  $db_url['default'] = "<?php print strtr("%db_type://%db_user:%db_passwd@%db_host:%db_port/%db_name", array(
+    '%db_type' => $this->creds['db_type'],
+    '%db_user' => $this->creds['db_user'],
+    '%db_passwd' => $this->creds['db_passwd'],
+    '%db_host' => $this->creds['db_host'],
+    '%db_port' => $this->creds['db_port'],
+    '%db_name' => $this->creds['db_name'])); ?>";
+
+<?php endif; ?>
 
   $profile = "<?php print $this->profile ?>";
   $install_profile = "<?php print $this->profile ?>";
