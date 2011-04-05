@@ -302,9 +302,22 @@ function _scrub_object($input) {
 
 /**
  * Execute a command against a specific context object.
+ *
+ * @arg string $target
+ *   the context to operate on, @ prefix is optional
+ * @arg string $command
+ *   drush command passed to drush_backend_invoke_args()
+ * @arg string $arguments
+ *   drush arguments passed to drush_backend_invoke_args()
+ * @arg string $data
+ *   drush data passed to drush_backend_invoke_args()
+ * @arg string $mode
+ *   drush IPC mode (GET/POST) passed to drush_backend_invoke_args()
+ *
+ * @see drush_backend_invoke_args()
  */
-function provision_backend_invoke($target, $command, $arguments = array(), $options = array(), $mode = 'GET') {
-  return drush_backend_invoke_args('@' . ltrim($target, '@') . ' ' . $command, $arguments, $options + array('root' => null, 'uri' => null), $mode);
+function provision_backend_invoke($target, $command, $arguments = array(), $data = array(), $mode = 'GET') {
+  return drush_backend_invoke_args('@' . ltrim($target, '@') . ' ' . $command, $arguments, $data + array('root' => null, 'uri' => null), $mode);
 }
 
 /**
