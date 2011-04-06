@@ -11,7 +11,7 @@
 ########################################################################
 
 # basic variables, change before running
-AEGIR_VERSION="6.x-1.0-rc3"
+AEGIR_VERSION="6.x-1.0-rc4"
 AEGIR_DOMAIN=aegir.example.com
 
 AEGIR_HOME="$HOME"
