@@ -95,13 +95,19 @@ cat <<EOF
 The Aegir version to upgrade to is $AEGIR_VERSION
 The Aegir home dir is $AEGIR_HOME
 The new hostmaster platform will be $DRUPAL_DIR
-The version of Drush will be $DRUSH_VERSION
-The version of Drush Make will be $DRUSH_MAKE_VERSION
 Your Aegir domain is $AEGIR_DOMAIN
 Your old hostmaster platform was $OLD_DRUPAL_DIR
 The Drush command is "$DRUSH"
-
 EOF
+
+if [ -w $DRUSH_DIR ]; then
+  cat <<EOF
+The version of Drush will be $DRUSH_VERSION
+The version of Drush Make will be $DRUSH_MAKE_VERSION
+EOF
+else
+  echo "Drush will not be upgraded as the directory is not writable: $DRUSH_DIR"
+fi
 
 if prompt_yes_no "Do you want to proceed with the upgrade?" ; then
   true
@@ -112,16 +118,18 @@ fi
 
 mkdir -p $BACKUP_DIR
 
-# Can we check Drush version?
-if [ -d $DRUSH_DIR ]; then
-  msg "Moving existing drush into $BACKUP_DIR"
-  mv $DRUSH_DIR $BACKUP_DIR
-fi
+if [ -w $DRUSH_DIR ]; then
+  # Can we check Drush version?
+  if [ -d $DRUSH_DIR ]; then
+    msg "Moving existing drush into $BACKUP_DIR"
+    mv $DRUSH_DIR $BACKUP_DIR
+  fi
 
-cd $AEGIR_HOME
-wget http://ftp.drupal.org/files/projects/drush-$DRUSH_VERSION.tar.gz 
-gunzip -c drush-$DRUSH_VERSION.tar.gz | tar -xf -
-rm drush-$DRUSH_VERSION.tar.gz
+  cd $AEGIR_HOME
+  wget http://ftp.drupal.org/files/projects/drush-$DRUSH_VERSION.tar.gz 
+  gunzip -c drush-$DRUSH_VERSION.tar.gz | tar -xf -
+  rm drush-$DRUSH_VERSION.tar.gz
+fi
 
 # fetch new version of provision
 # move existing provision
