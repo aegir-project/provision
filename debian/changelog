@@ -1,3 +1,9 @@
+aegir-provision (1.0~rc4-2) unstable; urgency=low
+
+  * fix command to find platform alias that was breaking upgrades
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 06 Apr 2011 14:30:23 -0400
+
 aegir-provision (1.0~rc4-1) unstable; urgency=low
 
   * new upstream release
