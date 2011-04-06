@@ -58,13 +58,14 @@ case "$1" in
                 cd "$drupal_root"
                 su -s /bin/sh aegir -c "drush hostmaster-migrate $FLAGS '$site_uri' '$NEW_PLATFORM'"
                 echo "upgrade finished"
-                cd $HOME
+                cd $VARLIB
                 sites=`ls "$drupal_root/sites" | egrep -v '^all|default$' || true`
                 if [ -z "$sites" ]; then
-                    echo "backing up old platform to $HOME/backups/$drupal_root.tgz"
-                    tar -c -z -f "$HOME/backups/$drupal_root.tgz" "$drupal_root"
-                    echo "removing old platform from $HOME/$drupal_root"
-                    rm -rf "$HOME/$drupal_root"
+                    base=`basename $drupal_root`
+                    echo "backing up old platform to $VARLIB/backups/$base.tgz"
+                    tar -c -z -f "$VARLIB/backups/$base.tgz" "$drupal_root"
+                    echo "removing old platform from $drupal_root"
+                    rm -rf "$drupal_root"
                 fi
             fi
         else
