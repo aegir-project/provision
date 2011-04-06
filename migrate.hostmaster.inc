@@ -150,9 +150,6 @@ function drush_provision_pre_hostmaster_migrate($site, $platform) {
   exec('crontab -r');
   // we can't rely on update.php to run that because it will run too late. this can be removed in 0.5 and above
   provision_backend_invoke(drush_get_option('site_name'), 'sqlq', array("UPDATE {system} SET weight = 0 WHERE type='module' AND name='hosting';"));
-
-  // we ignore errors here through integrate = FALSE
-  provision_backend_invoke(drush_get_option('site_name'), 'hosting-pause', array(), array('#integrate' => FALSE));
 }
 
 function drush_provision_hostmaster_migrate($site, $platform) {
