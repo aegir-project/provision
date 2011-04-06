@@ -159,7 +159,7 @@ function drush_provision_hostmaster_migrate($site, $platform) {
 function drush_provision_post_hostmaster_migrate($site, $platform) {
   // we pass the context names we generated to the task so we can enforce that the names
   // stay the same.
-  provision_backend_invoke(drush_get_option('site_name'), 'hosting-resume', array(), array( 
+  provision_backend_invoke(drush_get_option('site_name'), 'hostmaster-resume', array(), array(
     'old_platform_name' => drush_get_option('old_platform'),
     'new_platform_name' => drush_get_option('new_platform'),
   ));
