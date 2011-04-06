@@ -10,17 +10,31 @@
 # the packages provided by their platform.
 ########################################################################
 
+msg() {
+  echo "==> $*"
+}
+
 # basic variables, change before running
 AEGIR_VERSION="6.x-1.0-rc4"
 AEGIR_DOMAIN=aegir.example.com
+DRUSH_DIR=$AEGIR_HOME/drush
+DRUSH=$DRUSH_DIR/drush.php
+if which drush 2> /dev/null > /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
+  msg "Drush is in the path, good"
+  DRUSH=drush
+elif [ -x $DRUSH ] ; then
+  msg "Drush found in $DRUSH, good"
+  DRUSH="php $DRUSH"
+else
+  msg "Could not find drush in $DRUSH or in $PATH"
+  exit 1
+fi
 
 AEGIR_HOME="$HOME"
 DRUPAL_DIR=$AEGIR_HOME/hostmaster-$AEGIR_VERSION
 DRUSH_VERSION=7.x-4.4
 DRUSH_MAKE_VERSION=6.x-2.2
 OLD_DRUPAL_DIR=$AEGIR_HOME/hostmaster-6.x-1.0-rc2
-DRUSH_DIR=$AEGIR_HOME/drush
-DRUSH="php $DRUSH_DIR/drush.php"
 BACKUP_DIR=$AEGIR_HOME/pre-upgrade-`date '+%F-%H%M'`
 
 ########################################################################
