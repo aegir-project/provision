@@ -1,6 +1,7 @@
-aegir-provision (1.0~rc4-3) unstable; urgency=low
+aegir-provision (1.0~rc4+3-3) unstable; urgency=low
 
   * local patch: try to fix broken upgrade path
+  * fetch from hostmaster 1.x to fix upgrade path
 
  -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 06 Apr 2011 14:50:56 -0400
 
