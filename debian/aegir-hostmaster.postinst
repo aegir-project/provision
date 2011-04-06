@@ -54,6 +54,9 @@ case "$1" in
             if [ -d "$NEW_PLATFORM" ] && [ "$drupal_root" = "$NEW_PLATFORM" ]; then
                 echo "it seems to be the same version as the one we're trying to install, not upgrading"
             else
+                # get the platform alias before we upgrade
+                # ugly, but not accessible programatically
+                platform=`sed -n "/platform/{s/^.* => '//;s/'.*$//;p}" ~/.drush/hostmaster.alias.drushrc.php`
                 echo "upgrading the frontend from $drupal_root to $NEW_PLATFORM"
                 cd "$drupal_root"
                 su -s /bin/sh aegir -c "drush hostmaster-migrate $FLAGS '$site_uri' '$NEW_PLATFORM'"
@@ -61,11 +64,8 @@ case "$1" in
                 cd $VARLIB
                 sites=`ls "$drupal_root/sites" | egrep -v '^all|default$' || true`
                 if [ -z "$sites" ]; then
-                    base=`basename $drupal_root`
-                    echo "backing up old platform to $VARLIB/backups/$base.tgz"
-                    tar -c -z -f "$VARLIB/backups/$base.tgz" "$drupal_root"
-                    echo "removing old platform from $drupal_root"
-                    rm -rf "$drupal_root"
+                    echo "removing old platform $platform from $drupal_root"
+                    su -s /bin/sh aegir -c "drush $platform provision-delete $FLAGS" || true
                 fi
             fi
         else
