@@ -72,8 +72,7 @@ function provision_sitealias_get_record($name) {
  * function.
  */
 function provision_context_factory($name) {
-  $classes = array('server', 'platform', 'site');
-
+  // the default type, can also be 'platform' or 'site'
   $type = 'server';
 
   $record = provision_sitealias_get_record($name);

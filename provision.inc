@@ -302,17 +302,68 @@ function _scrub_object($input) {
 
 /**
  * Execute a command against a specific context object.
+ *
+ * @arg string $target
+ *   the context to operate on, @ prefix is optional
+ * @arg string $command
+ *   drush command passed to drush_backend_invoke_args()
+ * @arg string $arguments
+ *   drush arguments passed to drush_backend_invoke_args()
+ * @arg string $data
+ *   drush data passed to drush_backend_invoke_args()
+ * @arg string $mode
+ *   drush IPC mode (GET/POST) passed to drush_backend_invoke_args()
+ *
+ * @see drush_backend_invoke_args()
  */
-function provision_backend_invoke($target, $command, $arguments = array(), $options = array(), $mode = 'GET') {
-  return drush_backend_invoke_args('@' . ltrim($target, '@') . ' ' . $command, $arguments, $options + array('root' => null, 'uri' => null), $mode);
+function provision_backend_invoke($target, $command, $arguments = array(), $data = array(), $mode = 'GET') {
+  return drush_backend_invoke_args('@' . ltrim($target, '@') . ' ' . $command, $arguments, $data + array('root' => null, 'uri' => null), $mode);
 }
 
 /**
- * parse the .ini file to get the aegir version
+ * the aegir version of the backend
+ *
+ * @return string
+ *  the aegir version as stored in the .info file, potentially
+ *  including the 6.x- prefix. to get a cleaned up version, use
+ *  provision_version_parts()
+ *
+ * @see provision_version_parts()
  */
 function provision_version() {
   $ini = parse_ini_file(dirname(__FILE__) . '/provision.info');
   return $ini['version'];
+}
+
+/**
+ * Aegir API implemented by this backend
+ *
+ * This is the major release number, the first part of the version
+ * stored in the info file
+ *
+ * @return int 
+ *   a number greater than zero, 1 for 1.0 or 1.0-rc2, 2 for 2.0, etc.
+ *
+ * @see provision_version_parts()
+ */
+function provision_api_version() {
+  $parts = provision_version_parts();
+  return $parts[0];
+}
+
+/**
+ * The different parts of the version number
+ *
+ * This cleans up the version number by removing the Drupal version
+ * (6.x-...) and splits the remaining version on dots.
+ *
+ * @return array 
+ *   the major and minor version numbers, e.g. array(1, 0-rc3) for
+ *   1.0-rc3 or array(1, 2) for 1.2
+ */
+function provision_version_parts() {
+  $version = preg_replace('/^[^-]*-/', '', provision_version()); // remove "6.x-"
+  return explode('.', $version);
 }
 
 /**

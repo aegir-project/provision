@@ -16,7 +16,7 @@ class provisionContext_site extends provisionContext {
       '--language' => 'site: site language; default en',
       '--aliases' => 'site: comma-separated URIs',
       '--redirection' => 'site: boolean for whether --aliases should redirect; default false',
-      '--client_email' => 'site: email for the site owner',
+      '--client_name' => 'site: machine name of the client that owns this site',
       '--profile' => 'site: Drupal profile to use; default default',
     );
   }
@@ -32,7 +32,7 @@ class provisionContext_site extends provisionContext {
 
     $this->setProperty('site_enabled', true);
     $this->setProperty('language', 'en');
-    $this->setProperty('client_email');
+    $this->setProperty('client_name');
     $this->setProperty('aliases', array(), TRUE);
     $this->setProperty('redirection', FALSE);
 

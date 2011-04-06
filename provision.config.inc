@@ -293,6 +293,8 @@ class provisionConfig_drushrc_server extends provisionConfig_drushrc {
 class provisionConfig_drushrc_platform extends provisionConfig_drushrc {
   protected $context_name = 'drupal';
   public $description = 'Platform Drush configuration file';
+  // platforms contain no confidential information
+  protected $mode = 0444;
 
   function filename() {
     return $this->root . '/drushrc.php';

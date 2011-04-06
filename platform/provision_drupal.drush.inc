@@ -135,11 +135,12 @@ class provisionConfig_drupal_settings extends provisionConfig {
     if (drush_drupal_major_version() >= 7) {
       $this->data['db_type'] = ($this->data['db_type'] == 'mysqli') ? 'mysql' : $this->data['db_type'];
     }
-    $cloaked = $this->context->service('http')->cloaked_db_creds();
-    $cloaked = drush_get_option('provision_db_cloaking', $cloaked);
+    $this->version = provision_version();
+    $this->api_version = provision_api_version();
+    $this->cloaked = drush_get_option('provision_db_cloaking', $this->context->service('http')->cloaked_db_creds());
 
     foreach (array('db_type', 'db_user', 'db_passwd', 'db_host', 'db_name', 'db_port') as $key) {
-      $this->creds[$key] = ($cloaked) ? "\$_SERVER[{$key}]" : urldecode($this->data[$key]);
+      $this->creds[$key] = urldecode($this->data[$key]);
     }
 
     $this->data['extra_config'] = "# Extra configuration from modules:\n";
@@ -264,7 +265,6 @@ function _provision_drupal_rebuild_caches() {
     drush_include_engine('drupal', 'clear');
   }
 }
-
 
 /**
  * Find available profiles on this platform.
@@ -706,5 +706,41 @@ function provision_reload_config($context, $file = null) {
       $options = array_merge(drush_get_context($context, array()), $options);
       drush_set_context($context, $options);
     }
+  }
+}
+
+/**
+ * Maintain a symlink to the site within a client directory
+ *
+ * This creates a directory structure like this:
+ *
+ * ~/clients/foo/example.org -> ~/platforms/.../sites/example.org
+ * ~/clients/bar/bar.example.com -> ~/platforms/.../sites/bar.example.com
+ *
+ * @todo this probably doesn't belong in this file
+ */
+function _provision_client_create_symlink() {
+  if (d()->client_name) {
+    $sites_dir = d()->server->clients_path . '/' . d()->client_name;
+    provision_file()->create_dir($sites_dir, dt('Client home directory for @client', array('@client' => d()->client_name)), 0710);
+    provision_file()->unlink($sites_dir . '/' . d()->uri); // deliberatly ignore errors
+    provision_file()->symlink(d()->site_path, $sites_dir . '/' . d()->uri)
+      ->succeed('Created symlink @path to @target')
+      ->fail('Could not create symlink @path to @target: @reason');
+  }
+}
+
+/**
+ * Delete the site symlink within the client directory
+ *
+ * This deletes the site symlink created on verify/install
+ *
+ * @see _provision_client_create_symlink()
+ */
+function _provision_client_delete_symlink() {
+  if (d()->client_name) {
+    provision_file()->unlink(d()->server->clients_path . '/' . d()->client_name . '/' . d()->uri)
+      ->succeed('Deleted symlink @path')
+      ->fail('Failed to delete symlink @path: @reason');
   }
 }

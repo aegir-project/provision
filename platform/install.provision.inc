@@ -55,7 +55,7 @@ function drush_provision_drupal_provision_install() {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
   // call a backend task to do the actual installation.
-  $result = provision_backend_invoke(d()->name, "provision-install-backend");
+  $result = provision_backend_invoke(d()->name, "provision-install-backend", array(), array('client_email' => drush_get_option('client_email')));
   // pass the login link back to the front end.
   drush_set_option('login_link', $result['context']['login_link']);
 
@@ -72,5 +72,6 @@ function drush_provision_drupal_post_provision_install() {
   drush_set_option('installed', TRUE, 'site');
   _provision_drupal_rebuild_caches();
   drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
+  _provision_client_create_symlink();
 }
 

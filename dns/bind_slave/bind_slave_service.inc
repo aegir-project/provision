@@ -24,6 +24,18 @@ class provisionService_dns_bind_slave extends provisionService_dns {
     $this->restart();
   }
 
+  function verify_server_cmd() {
+    if (!is_null($this->application_name)) {
+      provision_file()->create_dir($this->server->dns_zoned_path, dt("DNS slave zone configuration"), 0775);
+      $this->sync($this->server->dns_zoned_path, array(
+        'exclude' => $this->server->dns_zoned_path . '/*',  // Make sure remote directory is created
+      ));
+
+      $this->create_config('server');
+    }
+
+  }
+
   /**
    * Create the zonefile record on the slave server
    *
