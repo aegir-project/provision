@@ -19,7 +19,7 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   drush_set_default('aegir_db_user', 'root');
   drush_set_default('client_name', 'admin');
   $aegir_db_user = drush_get_option('aegir_db_user');
-  drush_set_default('makefile', $aegir_root . '/.drush/provision/aegir.make');
+  drush_set_default('makefile', dirname(__FILE__) . '/aegir.make');
 
   drush_print("Aegir $version automated install script");
   drush_print("==============================================================================");
