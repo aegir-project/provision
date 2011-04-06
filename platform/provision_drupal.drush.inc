@@ -722,7 +722,7 @@ function provision_reload_config($context, $file = null) {
 function _provision_client_create_symlink() {
   if (d()->client_name) {
     $sites_dir = d()->server->clients_path . '/' . d()->client_name;
-    provision_file()->create_dir($sites_dir, dt('Client home directory for @client', array('@client' => d()->client_name)), 0710);
+    provision_file()->create_dir($sites_dir, dt('Client home directory for @client', array('@client' => d()->client_name)), 0750);
     provision_file()->unlink($sites_dir . '/' . d()->uri); // deliberatly ignore errors
     provision_file()->symlink(d()->site_path, $sites_dir . '/' . d()->uri)
       ->succeed('Created symlink @path to @target')
