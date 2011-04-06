@@ -10,26 +10,46 @@
 # the packages provided by their platform.
 ########################################################################
 
-# basic variables, change before running
-AEGIR_VERSION="6.x-1.0-rc4"
-AEGIR_DOMAIN=aegir.example.com
+msg() {
+  echo "==> $*"
+}
 
+# basic variables, change before running
+AEGIR_VERSION="6.x-1.0-rc5"
+DRUSH_DIR=$AEGIR_HOME/drush
+DRUSH=$DRUSH_DIR/drush.php
+if which drush 2> /dev/null > /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
+  msg "Drush is in the path, good"
+  DRUSH=drush
+elif [ -x $DRUSH ] ; then
+  msg "Drush found in $DRUSH, good"
+  DRUSH="php $DRUSH"
+else
+  msg "Could not find drush in $DRUSH or in $PATH"
+  exit 1
+fi
+
+TEMPFILE=`tempfile`
+$DRUSH --pipe @hostmaster status | egrep "site_uri|drupal_root" >> $TEMPFILE || true
+if grep -q 'site_uri' $TEMPFILE; then
+    # this sources the result of drush --pipe so we initialise shell variables used later
+    . $TEMPFILE
+else
+    msg 'could not find running hostmaster site'
+    msg 'try running "drush @hostmaster status" to diagnose and repair'
+    exit 1
+fi
+
+AEGIR_DOMAIN="$site_uri"
+OLD_DRUPAL_DIR="$drupal_root"
 AEGIR_HOME="$HOME"
 DRUPAL_DIR=$AEGIR_HOME/hostmaster-$AEGIR_VERSION
 DRUSH_VERSION=7.x-4.4
 DRUSH_MAKE_VERSION=6.x-2.2
-OLD_DRUPAL_DIR=$AEGIR_HOME/hostmaster-6.x-1.0-rc2
-DRUSH_DIR=$AEGIR_HOME/drush
-DRUSH="php $DRUSH_DIR/drush.php"
 BACKUP_DIR=$AEGIR_HOME/pre-upgrade-`date '+%F-%H%M'`
 
 ########################################################################
 # functions
-
-# noticeable messages
-msg() {
-  echo "==> $*"
-}
 
 # simple prompt
 prompt_yes_no() {
@@ -75,13 +95,19 @@ cat <<EOF
 The Aegir version to upgrade to is $AEGIR_VERSION
 The Aegir home dir is $AEGIR_HOME
 The new hostmaster platform will be $DRUPAL_DIR
-The version of Drush will be $DRUSH_VERSION
-The version of Drush Make will be $DRUSH_MAKE_VERSION
 Your Aegir domain is $AEGIR_DOMAIN
 Your old hostmaster platform was $OLD_DRUPAL_DIR
 The Drush command is "$DRUSH"
-
 EOF
+
+if [ -w $DRUSH_DIR ]; then
+  cat <<EOF
+The version of Drush will be $DRUSH_VERSION
+The version of Drush Make will be $DRUSH_MAKE_VERSION
+EOF
+else
+  echo "Drush will not be upgraded as the directory is not writable: $DRUSH_DIR"
+fi
 
 if prompt_yes_no "Do you want to proceed with the upgrade?" ; then
   true
@@ -92,16 +118,18 @@ fi
 
 mkdir -p $BACKUP_DIR
 
-# Can we check Drush version?
-if [ -d $DRUSH_DIR ]; then
-  msg "Moving existing drush into $BACKUP_DIR"
-  mv $DRUSH_DIR $BACKUP_DIR
-fi
+if [ -w $DRUSH_DIR ]; then
+  # Can we check Drush version?
+  if [ -d $DRUSH_DIR ]; then
+    msg "Moving existing drush into $BACKUP_DIR"
+    mv $DRUSH_DIR $BACKUP_DIR
+  fi
 
-cd $AEGIR_HOME
-wget http://ftp.drupal.org/files/projects/drush-$DRUSH_VERSION.tar.gz 
-gunzip -c drush-$DRUSH_VERSION.tar.gz | tar -xf -
-rm drush-$DRUSH_VERSION.tar.gz
+  cd $AEGIR_HOME
+  wget http://ftp.drupal.org/files/projects/drush-$DRUSH_VERSION.tar.gz 
+  gunzip -c drush-$DRUSH_VERSION.tar.gz | tar -xf -
+  rm drush-$DRUSH_VERSION.tar.gz
+fi
 
 # fetch new version of provision
 # move existing provision
