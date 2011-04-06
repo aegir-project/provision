@@ -56,7 +56,7 @@ case "$1" in
             else
                 # get the platform alias before we upgrade
                 # ugly, but not accessible programatically
-                platform=`sed -n "/platform/{s/^.* => '//;s/'.*$//;p}" ~/.drush/hostmaster.alias.drushrc.php`
+                platform=`sed -n "/platform/{s/^.* => '//;s/'.*$//;p}" $VARLIB/.drush/hostmaster.alias.drushrc.php`
                 echo "upgrading the frontend from $drupal_root to $NEW_PLATFORM"
                 cd "$drupal_root"
                 su -s /bin/sh aegir -c "drush hostmaster-migrate $FLAGS '$site_uri' '$NEW_PLATFORM'"
