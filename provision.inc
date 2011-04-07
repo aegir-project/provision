@@ -118,17 +118,21 @@ function provision_save_platform_data() {
 /**
  * Remove files or directories, recursively
  *
- * This was taken from imagecache.module, with slight modifications:
+ * This was taken from Drupal 7's file.inc, with slight modifications:
  * - carry error codes along the way (returns TRUE only if all operations return TRUE)
  * - remove any type of files encountered (not just links, files and dirs)
  * - safety checking since we don't necessarly trust the removed files
+ *
+ * @see file_unmanaged_delete_recursive()
  */
 function _provision_recursive_delete($path) {
   $ret = 1;
   if (is_dir($path)) {
     $d = dir($path);
     while (($entry = $d->read()) !== FALSE) {
-      if ($entry == '.' || $entry == '..') continue;
+      if ($entry == '.' || $entry == '..') {
+        continue;
+      }
       $entry_path = $path .'/'. $entry;
       if (_provision_file_check_location($entry_path, $path)) {
         $ret = _provision_recursive_delete($entry_path);
@@ -137,6 +141,7 @@ function _provision_recursive_delete($path) {
         $ret = 0;
       }
     }
+    $d->close();
 
     $rm = provision_file()->rmdir($path)
       ->succeed('Deleting @path directory successful.')
