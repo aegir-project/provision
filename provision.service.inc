@@ -95,6 +95,15 @@ class provisionService extends provisionChainedState {
   function config($config, $data = array()) {
     $this->_config = null;
     
+    if (!isset($this->configs[$config])) {
+      $service = (!is_null($this->application_name)) ? $this->application_name : $this->service;
+      drush_log(dt('%service has no %name config file', array(
+        '%service' => $service,
+        '%name' => $config))
+      );
+      return $this;
+    }
+
     if (!is_array($data) && is_string($data)) {
       $data = array('name' => $data);
     }
@@ -145,10 +154,14 @@ class provisionService extends provisionChainedState {
         }
         elseif (!is_numeric($arg1)) {
           if (is_array($arg2)) {
-            if (!is_array($this->_config->store->loaded_records[$arg1])) {
+            if (!isset($this->_config->store->loaded_records[$arg1])
+                || !is_array($this->_config->store->loaded_records[$arg1]))
+            {
               $this->_config->store->loaded_records[$arg1] = array();
             }
-            if (!is_array($this->_config->store->records[$arg1])) {
+            if (!isset($this->_config->store->records[$arg1])
+                || !is_array($this->_config->store->records[$arg1]))
+            {
               $this->_config->store->records[$arg1] = array();
             }
             $this->_config->store->records[$arg1] = array_merge($this->_config->store->loaded_records[$arg1], $this->_config->store->records[$arg1], $arg2);

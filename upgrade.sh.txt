@@ -16,7 +16,7 @@ msg() {
 
 # basic variables, change before running
 AEGIR_VERSION="6.x-1.x"
-DRUSH_DIR=$AEGIR_HOME/drush
+DRUSH_DIR=$HOME/drush
 DRUSH=$DRUSH_DIR/drush.php
 if which drush 2> /dev/null > /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
   msg "Drush is in the path, good"
@@ -42,11 +42,11 @@ fi
 
 AEGIR_DOMAIN="$site_uri"
 OLD_DRUPAL_DIR="$drupal_root"
-AEGIR_HOME="$HOME"
-DRUPAL_DIR=$AEGIR_HOME/hostmaster-$AEGIR_VERSION
+HOME="$HOME"
+DRUPAL_DIR=$HOME/hostmaster-$AEGIR_VERSION
 DRUSH_VERSION=7.x-4.4
 DRUSH_MAKE_VERSION=6.x-2.2
-BACKUP_DIR=$AEGIR_HOME/pre-upgrade-`date '+%F-%H%M'`
+BACKUP_DIR=$HOME/pre-upgrade-`date '+%F-%H%M'`
 
 ########################################################################
 # functions
@@ -93,7 +93,7 @@ cat <<EOF
  * that the following settings are correct
 
 The Aegir version to upgrade to is $AEGIR_VERSION
-The Aegir home dir is $AEGIR_HOME
+The Aegir home dir is $HOME
 The new hostmaster platform will be $DRUPAL_DIR
 Your Aegir domain is $AEGIR_DOMAIN
 Your old hostmaster platform was $OLD_DRUPAL_DIR
@@ -125,7 +125,7 @@ if [ -w $DRUSH_DIR ]; then
     mv $DRUSH_DIR $BACKUP_DIR
   fi
 
-  cd $AEGIR_HOME
+  cd $HOME
   wget http://ftp.drupal.org/files/projects/drush-$DRUSH_VERSION.tar.gz 
   gunzip -c drush-$DRUSH_VERSION.tar.gz | tar -xf -
   rm drush-$DRUSH_VERSION.tar.gz
@@ -140,7 +140,7 @@ if [ -d "provision" ] ; then
   mv provision $BACKUP_DIR
 fi
 
-if [ "$AEGIR_VERSION" = "HEAD" ]; then
+if [ "$AEGIR_VERSION" = "6.x-1.x" ]; then
   git clone http://git.drupal.org/project/provision.git $HOME/.drush/provision
 else
   wget http://ftp.drupal.org/files/projects/provision-$AEGIR_VERSION.tar.gz
