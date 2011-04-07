@@ -120,26 +120,22 @@ function provision_save_platform_data() {
  *
  * This was taken from Drupal 7's file.inc, with slight modifications:
  * - carry error codes along the way (returns TRUE only if all operations return TRUE)
- * - remove any type of files encountered (not just links, files and dirs)
- * - safety checking since we don't necessarly trust the removed files
+ * - remove any type of files encountered (not files and directories)
+ * - do not follow symlink directories
  *
  * @see file_unmanaged_delete_recursive()
  */
 function _provision_recursive_delete($path) {
   $ret = 1;
-  if (is_dir($path)) {
+  // is_dir() follows symlinks, so it can return true on a symlink
+  if (is_dir($path) && !is_link($path)) {
     $d = dir($path);
     while (($entry = $d->read()) !== FALSE) {
       if ($entry == '.' || $entry == '..') {
         continue;
       }
       $entry_path = $path .'/'. $entry;
-      if (_provision_file_check_location($entry_path, $path)) {
-        $ret = _provision_recursive_delete($entry_path);
-      } 
-      else {
-        $ret = 0;
-      }
+      $ret = _provision_recursive_delete($entry_path);
     }
     $d->close();
 
