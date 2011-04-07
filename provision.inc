@@ -119,9 +119,9 @@ function provision_save_platform_data() {
  * Remove files or directories, recursively
  *
  * This was taken from Drupal 7's file.inc, with slight modifications:
- * - carry error codes along the way (returns TRUE only if all operations return TRUE)
- * - remove any type of files encountered (not files and directories)
- * - do not follow symlink directories
+ *  * carry error codes along the way (returns TRUE only if all operations return TRUE)
+ *  * remove any type of files encountered (not files and directories)
+ *  * do not follow symlink directories
  *
  * @see file_unmanaged_delete_recursive()
  */
