@@ -135,7 +135,7 @@ function _provision_recursive_delete($path) {
         continue;
       }
       $entry_path = $path .'/'. $entry;
-      $ret = _provision_recursive_delete($entry_path);
+      $ret &= _provision_recursive_delete($entry_path);
     }
     $d->close();
 
