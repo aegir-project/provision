@@ -154,6 +154,24 @@ function _provision_recursive_delete($path) {
   return $ret;
 }
 
+/**
+ * Convenience copy of Drupal 6's file_check_location()
+ *
+ * Check if a file is really located inside $directory. Should be used to make
+ * sure a file specified is really located within the directory to prevent
+ * exploits.
+ *
+ * @code
+ *   // Returns FALSE:
+ *   file_check_location('/www/example.com/files/../../../etc/passwd', '/www/example.com/files');
+ * @endcode
+ *
+ * @param $source A string set to the file to check.
+ * @param $directory A string where the file should be located.
+ * @return 0 for invalid path or the real path of the source.
+ *
+ * @see file_check_location()
+ */
 function _provision_file_check_location($source, $directory = '') {
   $check = realpath($source);
   if ($check) {
