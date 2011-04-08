@@ -349,7 +349,6 @@ class provisionService_dns extends provisionService {
     }
     
     $this->create_zone($zone);
-    $this->create_config('host');
   }
 
 
