@@ -39,10 +39,6 @@ class provisionService_dns_bind_slave extends provisionService_dns {
   /**
    * Create the zonefile record on the slave server
    *
-   * This differs from the parent implementation because it *requires* you to
-   * pass the master server, as it is necessary for the slave to know what its
-   * slave is (and it can vary according to the zone).
-   *
    * Contrarily to the parent class implementation, this *only* creates the
    * bind config (managed through the provisionConfig_bind_slave class), and no
    * zonefile, because the zonefile should be managed by bind itself through
@@ -51,16 +47,11 @@ class provisionService_dns_bind_slave extends provisionService_dns {
    * Note that this function shouldn't be called directly through the API, but
    * only from the master server's create_zone() function.
    *
-   * @todo this needs to be pushed up in a provisionService_dns_slave common
-   * class
-   * 
-   * @arg $master mixed a string or array of strings of IPs pointing to the
-   * master server for this zone
-   *
    * @arg $zone string the zonefile name to create
    *
    * @see provisionService_dns::create_zone()
-  function create_zone($master, $zone = null) {
+   */
+  function create_zone($zone = null) {
     if (is_null($zone) && ($this->context->type == 'site')) {
       $host = $this->context->uri;
       $zone = $this->context->dns_zone;
@@ -71,9 +62,17 @@ class provisionService_dns_bind_slave extends provisionService_dns {
     }
 
     drush_log(dt("recording zone in slave configuration"));
-    $this->config('server')->record_set($zone, $master)->write();
+    $status = $this->config('server')->record_set($zone, $zone)->write();
+
+    return $status;
   }
+
+  /**
+   * This completely drops a zone, without any checks.
    */
+  function delete_zone($zone) {
+    return $this->config('server')->record_del($zone, $zone)->write();
+  }
 }
 
 class provisionConfig_bind_slave extends provisionConfig_dns_server {
