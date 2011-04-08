@@ -122,7 +122,8 @@
   $conf['file_directory_path'] = 'sites/<?php print $this->uri ?>/files';
   $conf['file_directory_temp'] = 'sites/<?php print $this->uri ?>/files/tmp';
   $conf['clean_url'] = 1;
-  $conf['aegir_api'] = <?php print $this->cloaked ? $this->api_version : 0 ?>;
+  //$conf['aegir_api'] = <?php print $this->cloaked ? $this->api_version : 0 ?>;
+  $conf['aegir_api'] = <?php print $this->api_version : 0 ?>;
 
   <?php if (!$this->site_enabled) : ?>
     $conf['site_offline'] = 1;
