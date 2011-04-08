@@ -18,6 +18,11 @@ class provisionService_dns_dnsmasq extends provisionService_dns {
   function parse_configs() {
     $this->restart();
   }
+
+  function create_host($host = NULL) {
+    parent::create_host($host);
+    $this->create_config('host');
+  }
 }
 
 class provisionConfig_dnsmasq_server extends provisionConfig_dns_server {
