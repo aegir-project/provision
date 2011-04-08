@@ -1,3 +1,10 @@
+aegir-provision (1.0~rc6-1) unstable; urgency=low
+
+  * new upstream release: fix an issue in the upgrade.sh script and Drupal
+    7 support
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 08 Apr 2011 16:38:18 -0400
+
 aegir-provision (1.0~rc5-1) unstable; urgency=low
 
   * new upstream release to fix the upgrade path
