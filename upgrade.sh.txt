@@ -20,7 +20,14 @@ DRUSH_DIR=$HOME/drush
 DRUSH=$DRUSH_DIR/drush.php
 if which drush 2> /dev/null > /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
   msg "Drush is in the path, good"
+  # we do not set DRUSH to `which drush` because we're not sure how 'which' will behave
   DRUSH=drush
+  DRUSH_DIR=`which drush`
+  # yes, this will fail on non-GNU readlink, but we don't care - it
+  # just means drush won't be upgraded if it's the path on those
+  # platforms
+  DRUSH_DIR=`readlink -f $DRUSH_DIR`
+  DRUSH_DIR=`dirname $DRUSH_DIR`
 elif [ -x $DRUSH ] ; then
   msg "Drush found in $DRUSH, good"
   DRUSH="php $DRUSH"
@@ -106,7 +113,7 @@ The version of Drush will be $DRUSH_VERSION
 The version of Drush Make will be $DRUSH_MAKE_VERSION
 EOF
 else
-  echo "Drush will not be upgraded as the directory is not writable: $DRUSH_DIR"
+  echo "Drush will not be upgraded as its directory is not writable: $DRUSH_DIR"
 fi
 
 if prompt_yes_no "Do you want to proceed with the upgrade?" ; then
