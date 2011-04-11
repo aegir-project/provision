@@ -2,6 +2,8 @@ aegir-provision (1.0~rc7-1) unstable; urgency=low
 
   * new upstream release, dropping local patch
   * fix permissions on provision directories (#1123276)
+  * add dependency on git while we wait for upstream to fix frontend
+    packaging
 
  -- Antoine Beaupré <anarcat@koumbit.org>  Mon, 11 Apr 2011 13:04:43 -0400
 
