@@ -147,15 +147,20 @@ class provisionConfig_drupal_settings extends provisionConfig {
     $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_drupal_config', d()->uri, $this->data));
 
     $this->group = $this->platform->server->web_group;
+
+    // Add a handy variable indicating if the site is being backed up, we can
+    // then react to this and change any settings we don't want backed up.
+    $backup_file = drush_get_option('backup_file');
+    $this->backup_in_progress = !empty($backup_file);
   }
 }
 
 /**
  * Create the directories needed to host a drupal site
- * 
+ *
  * Also maintains permissions on existing directories.
  */
-function _provision_drupal_create_directories($url = NULL, $profile = NULL) {  
+function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
   if (is_null($url)) {
     if (d()->type == 'site') {
       $url = d()->uri;
