@@ -116,13 +116,12 @@
   */
   umask(0002);
 
-
   global $conf;
   $conf['install_profile'] = '<?php print $this->profile ?>';
   $conf['file_directory_path'] = 'sites/<?php print $this->uri ?>/files';
   $conf['file_directory_temp'] = 'sites/<?php print $this->uri ?>/files/tmp';
   $conf['clean_url'] = 1;
-  $conf['aegir_api'] = <?php print $this->api_version ?>;
+  $conf['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
 
   <?php if (!$this->site_enabled) : ?>
     $conf['site_offline'] = 1;

@@ -36,7 +36,7 @@ else
   exit 1
 fi
 
-TEMPFILE=`tempfile`
+TEMPFILE=`mktemp`
 $DRUSH --pipe @hostmaster status | egrep "site_uri|drupal_root" >> $TEMPFILE || true
 if grep -q 'site_uri' $TEMPFILE; then
     # this sources the result of drush --pipe so we initialise shell variables used later
