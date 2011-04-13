@@ -66,4 +66,5 @@ class provisionConfig_bind_server extends provisionConfig_dns_server {
       $slaves = array_merge($slaves, d($slave)->ip_addresses);
     }
     $this->data['server']->slave_servers_ips = $slaves;
-  }}
+  }
+}
