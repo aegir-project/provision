@@ -1,10 +1,11 @@
-aegir-provision for Debian
---------------------------
+Aegir for Debian
+----------------
 
 This is part of the Aegir suite. This package takes care of installing
 the provision file in the proper location so it's seen by Drush and sets
 up some directories and the aegir user. Once this package is installed,
-the frontend needs to be manually installed using:
+the frontend can be installed with the aegir-hostmaster package, or
+the following command:
 
  su -u aegir -c 'drush hostmaster-install'
 
