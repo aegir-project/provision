@@ -95,7 +95,7 @@ fi
 
 msg "This script makes the following assumptions: "
 cat <<EOF
- * you have read UPGRADE.txt and prepared the server accordingly
+ * you have read http://community.aegirproject.org/upgrading and have prepared the server accordingly
  * you are executing this script as your "aegir" user
  * that the following settings are correct
 
