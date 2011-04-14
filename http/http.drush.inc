@@ -36,6 +36,16 @@ class provisionService_http extends provisionService {
     $this->parse_configs();
   }
 
+  /**
+   * Hook into command_invoke for provision-verify
+   *
+   * This deletes the http configuration for platforms
+   *
+   * @see ::verify_platform_cmd()
+   */
+  function verify_rollback_platform_cmd() {
+    $this->delete_config($this->context->type);
+  }
 
   /**
    * Register the http handler for platforms, based on the web_server option.
