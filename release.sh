@@ -56,7 +56,7 @@ The following operations will be done:
  6. revert the commit
  7. (optionally) push those changes
 
-The operation can be aborted before step 6 and 9. Don't forget that as
+The operation can be aborted before step 7. Don't forget that as
 long as changes are not pushed upstream, this can all be reverted (see
 git-reset(1) and git-revert(1) ).
 
