@@ -218,31 +218,8 @@ function drush_provision_save($alias = null) {
   }
 }
 
-/**
- * Implementation of drush_hook_verify()
- *
- * This is a shortcut to avoid declaring that hook for all object
- * combinations.
- *
- * @see provisionContext::command_invoke()
- */
 function drush_provision_verify() {
   d()->command_invoke('verify');
-}
-
-/**
- * Implementation of drush_hook_verify_rollback()
- *
- * This is to make sure that the command_invoke() magic is also
- * invoked on rollbacks for the contexts.
- *
- * We abuse a bit the semantics here by appending _rollback, but it's
- * better than nothing.
- *
- * @see provisionContext::command_invoke()
- */
-function drush_provision_verify_rollback() {
-  d()->command_invoke('verify_rollback');
 }
 
 function _provision_default_web_group() {
