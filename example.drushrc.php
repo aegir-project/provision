@@ -1,4 +1,6 @@
 /**
+ * @file
+ *
  * This configuration file manages the settings for the provision back end of the Aegir hosting system.
  *
  * If you are not using the hosting front end, you should copy this file to the root of your
@@ -6,6 +8,9 @@
  *
  * For the most parts the defaults should be sensible and just work.
  *
+ * @deprecated
+ *   Note that most of the settings here are deprecated and really not
+ *   supported anymore since the switch to drush aliases for storage.
  */
 
 /**
