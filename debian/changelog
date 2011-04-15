@@ -1,4 +1,4 @@
-aegir-provision (1.0-1) unstable; urgency=low
+aegir-provision (1.0-1) stable; urgency=low
 
   * new upstream release
   * add more packaging issues in the TODO
