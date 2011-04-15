@@ -15,7 +15,7 @@ msg() {
 }
 
 # basic variables, change before running
-AEGIR_VERSION="6.x-1.0-rc7"
+AEGIR_VERSION="6.x-1.0"
 DRUSH_DIR=$HOME/drush
 DRUSH=$DRUSH_DIR/drush.php
 if which drush 2> /dev/null > /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
@@ -36,7 +36,7 @@ else
   exit 1
 fi
 
-TEMPFILE=`tempfile`
+TEMPFILE=`mktemp`
 $DRUSH --pipe @hostmaster status | egrep "site_uri|drupal_root" >> $TEMPFILE || true
 if grep -q 'site_uri' $TEMPFILE; then
     # this sources the result of drush --pipe so we initialise shell variables used later
@@ -95,7 +95,7 @@ fi
 
 msg "This script makes the following assumptions: "
 cat <<EOF
- * you have read UPGRADE.txt and prepared the server accordingly
+ * you have read http://community.aegirproject.org/upgrading and have prepared the server accordingly
  * you are executing this script as your "aegir" user
  * that the following settings are correct
 
