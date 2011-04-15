@@ -1,3 +1,9 @@
+aegir-provision (1.0-3) unstable; urgency=low
+
+  * add missing libapache2-mod-php5 dependency
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 15 Apr 2011 19:15:11 -0400
+
 aegir-provision (1.0-2) unstable; urgency=low
 
   * activate the required modules SSL and rewrite
