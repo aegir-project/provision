@@ -11,7 +11,7 @@ Debian policy compliance issues
 ===============================
 
  * comply with the FHS by not installing in /var/aegir (that is the
-   sole litian override we have)
+   sole lintian override we have)
 
    the proper way to do this is to follow the webapps policies:
    http://webapps-common.alioth.debian.org/draft/html/
