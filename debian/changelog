@@ -1,6 +1,7 @@
 aegir-provision (1.0-2) unstable; urgency=low
 
   * activate the required modules SSL and rewrite
+  * make all maintainer scripts respect DEBUG
 
  -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 15 Apr 2011 14:30:16 -0400
 
