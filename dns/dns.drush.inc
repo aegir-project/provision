@@ -317,6 +317,7 @@ class provisionService_dns extends provisionService {
     if (!is_null($host)) {
       $zone = $this->guess_zone($host);
       $sub = $this->guess_zone($host, 'subdomain');
+      $aliases = array();
     } 
     elseif ($this->context->type == 'site') {
       $host = $this->context->uri;
@@ -364,6 +365,7 @@ class provisionService_dns extends provisionService {
     if (!is_null($host)) {
       $zone = $this->guess_zone($host);
       $sub = $this->guess_zone($host, 'subdomain');
+      $aliases = array();
     } 
     elseif ($this->context->type == 'site') {
       $host = $this->context->uri;
