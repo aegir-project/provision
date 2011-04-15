@@ -11,13 +11,6 @@ class provisionService_http_cluster extends provisionService_http {
     $this->server->setProperty('cluster_web_servers', array(), TRUE);
   }
 
-  function setContext($name) {
-    parent::setContext($name);
-    foreach ($this->server->cluster_web_servers as $server) {
-      call_user_func_array(array(d($server)->service('http'), 'setContext'), array($name));
-    }
-  }
-
   /**
    * Run a method on each server in the cluster.
    *

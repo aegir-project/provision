@@ -61,7 +61,7 @@ class provisionService_http_ssl extends provisionService_http_public {
         $data = array_merge($data, $certs);
 
         // assign ip address based on ssl_key
-        $ip = provisionService_http_ssl::get_certificate_ip($ssl_key, $this->server);
+        $ip = provisionService_http_ssl::assign_certificate_ip($ssl_key, $this->server);
 
         if (!$ip) {
           drush_set_error("SSL_IP_FAILURE", dt("There are no more IP addresses available on %server for the %ssl_key certificate.", array(
@@ -150,7 +150,7 @@ class provisionService_http_ssl extends provisionService_http_public {
    * This code uses the filesystem by touching a reciept file in the 
    * server's ssl.d directory. 
    */
-  static function get_certificate_ip($ssl_key, $server) {
+  static function assign_certificate_ip($ssl_key, $server) {
     $path = $server->http_ssld_path;
 
     $pattern = "{$path}/{$ssl_key}__*.receipt";
@@ -185,11 +185,11 @@ class provisionService_http_ssl extends provisionService_http_public {
    * Remove the certificate's lock on the server's public IP.
    *
    * This function will delete the receipt file left behind by
-   * the get_certificate_ip script, allowing the IP to be used
+   * the assign_certificate_ip script, allowing the IP to be used
    * by other certificates.
    */
   static function free_certificate_ip($ssl_key, $server) {
-    $ip = provisionService_http_ssl::get_certificate_ip($ssl_key, $server);
+    $ip = provisionService_http_ssl::assign_certificate_ip($ssl_key, $server);
     $file = "{$server->http_ssld_path}/{$ssl_key}__{$ip}.receipt";
     if (file_exists($file)) {
       unlink($file);
