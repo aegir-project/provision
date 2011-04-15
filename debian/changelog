@@ -1,3 +1,11 @@
+aegir-provision (1.0-1) unstable; urgency=low
+
+  * new upstream release
+  * add more packaging issues in the TODO
+  * detail how to install the frontend with just aegir-provision installed
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 15 Apr 2011 13:54:46 -0400
+
 aegir-provision (1.0~rc7-1) unstable; urgency=low
 
   * new upstream release, dropping local patch
