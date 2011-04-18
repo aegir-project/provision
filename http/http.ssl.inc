@@ -105,12 +105,12 @@ class provisionService_http_ssl extends provisionService_http_public {
     $path = "{$this->server->http_ssld_path}/{$ssl_key}";
     $certs['ssl_cert_key'] = "{$path}/openssl.key";
     $certs['ssl_cert'] = "{$path}/openssl.crt";
-    
-    // If the chain file exists, add it    
+
+    // If a certificate chain file exists, add it.
     $chain_cert_source = "{$source_path}/openssl_chain.crt";
-    if( provision_file()->exists($chain_cert_source)->status() ) {
-      $certs['ssl_chain_cert'] = "{$path}/openssl_chain.crt";
+    if (provision_file()->exists($chain_cert_source)->status()) {
       $certs['ssl_chain_cert_source'] = $chain_cert_source;
+      $certs['ssl_chain_cert'] = "{$path}/openssl_chain.crt";
     }
     return $certs;
   }
@@ -302,11 +302,11 @@ class provisionConfig_http_ssl_site extends provisionConfig_http_site {
       provision_file()->copy(
         $this->data['ssl_cert_key_source'],
         $this->data['ssl_cert_key']);
-      // Copy the chain certificate, if it is set
-      if(!empty($this->data['ssl_chain_cert_source'])) {
-	provision_file()->copy(
-        $this->data['ssl_chain_cert_source'],
-        $this->data['ssl_chain_cert']);
+      // Copy the chain certificate, if it is set.
+      if (!empty($this->data['ssl_chain_cert_source'])) {
+	      provision_file()->copy(
+          $this->data['ssl_chain_cert_source'],
+          $this->data['ssl_chain_cert']);
       }
       // Sync the key directory to the remote server.
       $this->data['server']->sync($path, array(
