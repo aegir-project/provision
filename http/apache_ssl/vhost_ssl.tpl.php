@@ -30,7 +30,11 @@
 
     SSLCertificateKeyFile <?php print $ssl_cert_key; ?>
 
-<?php 
+  <?php if (!empty($ssl_chain_cert)) : ?>
+    SSLCertificateChainFile <?php print $ssl_chain_cert; ?>
+  <?php endif; ?>
+
+<?php
 if (sizeof($this->aliases)) {
   print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
 
