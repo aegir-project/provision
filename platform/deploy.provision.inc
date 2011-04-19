@@ -147,7 +147,7 @@ function drush_provision_drupal_post_provision_deploy() {
     _provision_drupal_rebuild_caches();
 
     // rebuild the node access tables only if necessary
-    if (node_access_needs_rebuild()) {
+    if (!function_exists("node_access_needs_rebuild") || node_access_needs_rebuild()) {
       node_access_rebuild();
       drush_log(t('Rebuilt node access table'));
     }
