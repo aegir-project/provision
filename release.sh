@@ -28,7 +28,7 @@ if [ $# -lt 1 -o "$version" = "-h" ]; then
     cat <<EOF 
 not enough arguments
 
-Usage: $0 <new_version> [<old_version>]
+Usage: $0 <new_versio>
 EOF
     exit 1
 fi

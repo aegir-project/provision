@@ -112,6 +112,13 @@ function drush_provision_drupal_provision_backup() {
 
 function drush_provision_drupal_post_provision_backup() {
   drush_log(dt('Backed up site up to @path.', array('@path' => drush_get_option('backup_file'))), 'success');
+  if (d()->client_name) {
+    $backup_dir = d()->server->clients_path . '/' . d()->client_name . '/backups';
+    provision_file()->create_dir($backup_dir, dt('Client backup directory for @client', array('@client' => d()->client_name)), 0750);
+    provision_file()->symlink(drush_get_option('backup_file'), $backup_dir . '/' . basename(drush_get_option('backup_file')))
+      ->succeed('Created symlink @path to @target')
+      ->fail('Could not create symlink @path to @target: @reason');
+  }
 }
 
 /**
