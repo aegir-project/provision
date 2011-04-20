@@ -1,3 +1,10 @@
+aegir-provision (1.1-2) unstable; urgency=low
+
+  * Fix missing dependencies on unzip
+  * Add rsync, php5 and php5-gd recommends
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 20 Apr 2011 15:13:25 -0400
+
 aegir-provision (1.1-1) unstable; urgency=low
 
   * new upstream release
