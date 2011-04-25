@@ -134,6 +134,7 @@ class provisionConfig_drupal_settings extends provisionConfig {
   function process() {
     if (drush_drupal_major_version() >= 7) {
       $this->data['db_type'] = ($this->data['db_type'] == 'mysqli') ? 'mysql' : $this->data['db_type'];
+      $this->data['cron_key'] = $this->cron_key;
     }
     $this->version = provision_version();
     $this->api_version = provision_api_version();

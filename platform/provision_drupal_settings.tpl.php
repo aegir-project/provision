@@ -123,8 +123,8 @@
   $conf['file_directory_temp'] = 'sites/<?php print $this->uri ?>/files/tmp';
   $conf['clean_url'] = 1;
   $conf['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
-  <?php if (!empty($this->cron_key)) : ?>
-    $conf['cron_key'] = <?php print $this->cron_key; ?>;
+  <?php if (!empty($cron_key)) : ?>
+    $conf['cron_key'] = '<?php print $cron_key; ?>';
   <?php endif ?>
 
   <?php if (!$this->site_enabled) : ?>
