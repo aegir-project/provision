@@ -134,7 +134,6 @@ class provisionConfig_drupal_settings extends provisionConfig {
   function process() {
     if (drush_drupal_major_version() >= 7) {
       $this->data['db_type'] = ($this->data['db_type'] == 'mysqli') ? 'mysql' : $this->data['db_type'];
-      $this->data['cron_key'] = $this->cron_key;
     }
     $this->version = provision_version();
     $this->api_version = provision_api_version();
@@ -742,3 +741,20 @@ function _provision_client_delete_symlink() {
       ->fail('Failed to delete symlink @path: @reason');
   }
 }
+
+/**
+ * Fetch the cron key for the currently bootstrapped Drupal site.
+ *
+ * @return
+ *   The cron key for the site, may be an empty string on older versions of
+ *   Drupal.
+ */
+function provision_drupal_fetch_cron_key() {
+  $key = '';
+  if (drush_drupal_major_version() >= 7) {
+    $key = variable_get('cron_key', 'drupal');
+  }
+
+  return $key;
+}
+

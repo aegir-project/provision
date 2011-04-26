@@ -35,6 +35,8 @@ function drush_provision_drupal_post_provision_import() {
     drush_set_option('provision_save_config', false);
 
     provision_backend_invoke(d()->name, 'provision-verify');
+    
+    drush_set_option('cron_key', provision_drupal_fetch_cron_key());
 
     provision_reload_config('site');
   }
