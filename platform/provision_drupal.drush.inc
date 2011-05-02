@@ -35,10 +35,11 @@ function provision_drupal_drush_help($section) {
 
 function provision_drupal_drush_engine_drupal() {
   $engines = array();
-  $engines['install'] = array();
-  $engines['import'] = array();
-  $engines['deploy'] = array();
   $engines['clear'] = array();
+  $engines['cron_key'] = array();
+  $engines['deploy'] = array();
+  $engines['import'] = array();
+  $engines['install'] = array();
   $engines['packages'] = array();
   $engines['verify'] = array();
   return $engines;
@@ -741,20 +742,3 @@ function _provision_client_delete_symlink() {
       ->fail('Failed to delete symlink @path: @reason');
   }
 }
-
-/**
- * Fetch the cron key for the currently bootstrapped Drupal site.
- *
- * @return
- *   The cron key for the site, may be an empty string on older versions of
- *   Drupal.
- */
-function provision_drupal_fetch_cron_key() {
-  $key = '';
-  if (drush_drupal_major_version() >= 7) {
-    $key = variable_get('cron_key', 'drupal');
-  }
-
-  return $key;
-}
-
