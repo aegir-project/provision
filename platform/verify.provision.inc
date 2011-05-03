@@ -99,6 +99,7 @@ function drush_provision_drupal_post_provision_verify() {
     drush_set_option('installed', TRUE, 'site');
 
     _provision_client_create_symlink();
+    drush_include_engine('drupal', 'cron_key');
   }
 }
 

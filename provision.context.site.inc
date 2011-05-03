@@ -35,6 +35,7 @@ class provisionContext_site extends provisionContext {
     $this->setProperty('client_name');
     $this->setProperty('aliases', array(), TRUE);
     $this->setProperty('redirection', FALSE);
+    $this->setProperty('cron_key', '');
 
     // this can potentially be handled by a Drupal sub class
     $this->setProperty('profile', 'default');
