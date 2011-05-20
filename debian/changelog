@@ -1,3 +1,10 @@
+aegir-provision (1.1-4) unstable; urgency=high
+
+  * keep supporting the DEBUG flag, it is now deprecated, and DPKG_DEBUG
+    is still supported.
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 20 May 2011 15:18:55 -0400
+
 aegir-provision (1.1-3) unstable; urgency=low
 
   * use DPKG_DEBUG flag instead of just DEBUG
