@@ -1,3 +1,10 @@
+aegir-provision (1.1-2) unstable; urgency=low
+
+  * use DPKG_DEBUG flag instead of just DEBUG
+  * do not destroy old platform on upgrade
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 20 May 2011 14:08:31 -0400
+
 aegir-provision (1.1-1) unstable; urgency=low
 
   * new upstream release
