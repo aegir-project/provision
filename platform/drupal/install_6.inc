@@ -28,8 +28,10 @@ function install_verify_settings() {
   global $db_prefix, $db_type, $db_url;
   // Verify existing settings (if any).
   if (!empty($db_url)) {
-    // We need this because we want to run form_get_errors.
 
+    // We need this because we want to run form_get_errors.
+    // @todo why are we setting those variables if they are not
+    // reachable outside this scope?!
     $url = parse_url(is_array($db_url) ? $db_url['default'] : $db_url);
     $db_user = urldecode($url['user']);
     $db_pass = urldecode($url['pass']);
