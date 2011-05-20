@@ -18,7 +18,7 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-if [ ! -z "$DEBUG" ]; then
+if [ "$DPKG_DEBUG" = "developer" ]; then
     set -x
 fi
 
