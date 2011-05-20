@@ -60,13 +60,7 @@ case "$1" in
                 echo "upgrading the frontend from $drupal_root to $NEW_PLATFORM"
                 cd "$drupal_root"
                 su -s /bin/sh aegir -c "drush hostmaster-migrate $FLAGS '$site_uri' '$NEW_PLATFORM'"
-                echo "upgrade finished"
-                cd $VARLIB
-                sites=`ls "$drupal_root/sites" | egrep -v '^all|default$' || true`
-                if [ -z "$sites" ]; then
-                    echo "removing old platform $platform from $drupal_root"
-                    su -s /bin/sh aegir -c "drush $platform provision-delete $FLAGS" || true
-                fi
+                echo "upgrade finished, old platform $platform left in $drupal_root"
             fi
         else
             db_get "aegir/site"
