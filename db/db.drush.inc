@@ -339,5 +339,19 @@ class provisionService_db_pdo extends provisionService_db {
     }
 
   }
+  
+  function database_exists($name) {
+    $dsn = $this->dsn . ';dbname=' . $name;
+    try {
+      // Try to connect to the DB to test if it exists.
+      $conn = new PDO($dsn, $this->creds['user'], $this->creds['pass']);
+      // Free the $conn memory.
+      $conn = NULL;
+      return TRUE;
+    }
+    catch (PDOException $e) {
+      return FALSE;
+    }
+  }
 }
 
