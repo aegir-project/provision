@@ -1,0 +1,44 @@
+diff --git http/nginx/nginx_service.inc http/nginx/nginx_service.inc
+index a981449..0eb33c7 100644
+--- http/nginx/nginx_service.inc
++++ http/nginx/nginx_service.inc
+@@ -18,13 +18,28 @@ class provisionService_http_nginx extends provisionService_http_public {
+   }
+ 
+   function save_server() {
++    // Find nginx executable.
++    if (provision_file()->exists('/usr/local/sbin/nginx')->status()) {
++      $path = "/usr/local/sbin/nginx";
++    }
++    elseif (provision_file()->exists('/usr/sbin/nginx')->status()) {
++      $path = "/usr/sbin/nginx";
++    }
++    else {
++      return;
++    }
++    
+     // Check if some nginx features are supported and save them for later.
+-    $this->server->shell_exec('nginx -V');
++    $this->server->shell_exec($path . ' -V');
+     $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match);
+-    $this->server->nginx_has_upload_progress = preg_match("/(nginx-upload-progress-module)/", implode('', drush_shell_exec_output()), $match);
+     $this->server->nginx_has_new_version = preg_match("/(Barracuda\/1\.0\.)/", implode('', drush_shell_exec_output()), $match);
+     $this->server->provision_db_cloaking = FALSE;
+     $this->server->nginx_web_server = 1;
++    
++    // Check upload progress capability. Because configure parameters may vary,
++    // test sample config.
++    $this->server->shell_exec($path . ' -t -c ' . dirname(__FILE__) . '/upload_progress_test.conf');
++    $this->server->nginx_has_upload_progress = preg_match("/upload_progress_test\.conf syntax is ok/", implode('', drush_shell_exec_output()), $match);
+   }
+ 
+   function verify_server_cmd() {
+diff --git http/nginx/upload_progress_test.conf http/nginx/upload_progress_test.conf
+new file mode 100644
+index 0000000..20d062c
+--- /dev/null
++++ http/nginx/upload_progress_test.conf
+@@ -0,0 +1,3 @@
++http {
++    upload_progress uploads 1m;
++}
