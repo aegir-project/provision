@@ -15,7 +15,7 @@ class provisionService_http_nginx extends provisionService_http_public {
     parent::init_server();
     $this->configs['server'][] = 'provisionConfig_nginx_server';
     $this->configs['site'][] = 'provisionConfig_nginx_site';
-    
+
     $this->server->setProperty('nginx_has_gzip', 0);
     $this->server->setProperty('nginx_has_new_version', 0);
     $this->server->setProperty('nginx_web_server', 0);
@@ -33,14 +33,14 @@ class provisionService_http_nginx extends provisionService_http_public {
     else {
       return;
     }
-    
+
     // Check if some nginx features are supported and save them for later.
     $this->server->shell_exec($path . ' -V');
     $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match);
     $this->server->nginx_has_new_version = preg_match("/(Barracuda\/1\.0\.)/", implode('', drush_shell_exec_output()), $match);
     $this->server->provision_db_cloaking = FALSE;
     $this->server->nginx_web_server = 1;
-    
+
     // Check upload progress capability. Because configure parameters may vary,
     // test sample config.
     $this->server->shell_exec($path . ' -t -c ' . dirname(__FILE__) . '/upload_progress_test.conf');
