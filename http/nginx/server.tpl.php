@@ -116,9 +116,12 @@ if ($nginx_has_upload_progress) {
 ###  nginx default server
 #######################################################
 
+<?php
+$ip_address = !empty($ip_address) ? $ip_address : '*';
+?>
 server {
   limit_conn   gulag 10; # like mod_evasive - this allows max 10 simultaneous connections from one IP address
-  listen       *:<?php print $http_port; ?>;
+  listen       <?php print $ip_address . ':' . $http_port; ?>;
   server_name  _;
   location / {
      root   /var/www/nginx-default;
