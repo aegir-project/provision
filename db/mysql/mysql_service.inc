@@ -102,7 +102,7 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     // non-readable by the webserver.
     umask(0077);
     // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
-    $cmd = sprintf('mysqldump --defaults-file=/dev/fd/3 -r%s/database.sql %s', escapeshellcmd(d()->site_path), escapeshellcmd(drush_get_option('db_name'))); 
+    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 %s | sed 's|/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/|/\\*!50001 CREATE \\*/|g; s|/\\*!50017 DEFINER=`[^`]*`@`[^`]*` \\*/||g' | sed '/\\*!50013 DEFINER=.*/ d' > %s/database.sql", escapeshellcmd(drush_get_option('db_name')), escapeshellcmd(d()->site_path));
     $success = $this->safe_shell_exec($cmd, drush_get_option('db_host'), drush_get_option('db_user'), drush_get_option('db_passwd'));
 
     if (!$success && !drush_get_option('force', false)) {
