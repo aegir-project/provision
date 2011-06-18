@@ -162,7 +162,7 @@ function provision_drush_command() {
  
   $items['provision-delete'] = array(
     'description' => 'Delete a site.',
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
   );
 
   $items['provision-login_reset'] = array(
