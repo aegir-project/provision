@@ -76,11 +76,11 @@ binary: binary-indep binary-arch
 
 # this builds a debian package based on what the current branches are
 # this usually tests the latest release
-jenkins-official-build:
+jenkins-build-official:
 	git-buildpackage --git-upstream-branch=origin/upstream --git-debian-branch=origin/debian --git-ignore-branch -kjenkins@ci.aegirproject.org
 
 # this builds a debian package but first updates the branches to follow the latest 1.x branch
-jenkins-rebuild:
+jenkins-build-auto:
 	git checkout -b upstream || git checkout upstream
 	git merge 6.x-1.x
 	git checkout -b debian || git checkout debian
