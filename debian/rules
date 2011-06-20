@@ -79,7 +79,7 @@ binary: binary-indep binary-arch
 jenkins-build-official:
 	git-buildpackage --git-upstream-branch=origin/upstream --git-debian-branch=origin/debian --git-ignore-branch -kjenkins@ci.aegirproject.org
 
-version=`git describe --match 'debian/*' --tags | sed 's#debian/##;s/-\([0-9]*\)-\([0-9]*\)-/-\1+\2/'`
+version=$(shell git describe --match 'debian/*' --tags | sed 's#debian/##;s/-\([0-9]*\)-\([0-9]*\)-/-\1+\2/')
 
 # this builds a debian package but first updates the branches to follow the latest 1.x branch
 jenkins-build-auto:
