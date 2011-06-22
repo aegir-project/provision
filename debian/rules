@@ -20,10 +20,10 @@ version=$(shell git describe --match 'debian/*' --tags | sed 's/debian\///;s/-\(
 
 # this builds a debian package but first updates the branches to follow the latest 1.x branch
 jenkins-build-auto:
+	-git branch -D tmpdebian
 	git checkout -b tmpdebian origin/debian
 	git merge origin/6.x-1.x
 	dch -v ${version} "automatic jenkins build"
 	git commit -m"dummy commit for $version autobuild" debian/changelog
 	git-buildpackage -b --git-upstream-branch=origin/6.x-1.x --git-debian-branch=tmpdebian -kjenkins@ci.aegirproject.org
 	git checkout ${GIT_COMMIT}
-	git branch -D tmpdebian
