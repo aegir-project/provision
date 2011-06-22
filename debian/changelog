@@ -1,4 +1,4 @@
-aegir-provision (1.1-6) unstable; urgency=low
+aegir-provision (1.1-6) testing; urgency=low
 
   * fix autobuilder version numbers
   * allow for preseeding of the mysql password
