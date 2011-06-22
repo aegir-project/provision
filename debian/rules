@@ -26,11 +26,9 @@ upstream_version=$(shell git describe --tags origin/6.x-1.x | sed 's/6.x-//;s/-\
 debian_version=$(shell git describe --tags origin/debian | sed 's/debian\///;s/-\([0-9]*\)-\([^-]*\)$/+\1.\2/;s/^.*-//' )
 
 # this builds a debian package but first updates the branches to follow the latest 1.x branch
+# this assumes you are on a "debian" branch (of course)
 jenkins-build-auto:
-	-git branch -D tmpdebian
-	git checkout -b tmpdebian origin/debian
 	git merge origin/6.x-1.x
 	dch -v ${upstream_version}-${debian_version} "automatic jenkins build ${BUILD_TAG}"
 	git commit -m"dummy commit for $version autobuild" debian/changelog
-	git-buildpackage -b --git-upstream-branch=origin/6.x-1.x --git-debian-branch=tmpdebian -kjenkins@ci.aegirproject.org
-	git checkout ${GIT_COMMIT}
+	git-buildpackage -b --git-upstream-branch=origin/6.x-1.x -kjenkins@ci.aegirproject.org
