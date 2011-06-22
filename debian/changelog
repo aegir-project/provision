@@ -1,3 +1,11 @@
+aegir-provision (1.1-5) UNRELEASED; urgency=low
+
+  * update to standards version 3.9.2 (no change)
+  * use dh 7 simpler targets in rules file
+  * add targets for jenkins autobuilding
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Tue, 21 Jun 2011 23:40:22 -0400
+
 aegir-provision (1.1-4) unstable; urgency=high
 
   * keep supporting the DEBUG flag, it is now deprecated, and DPKG_DEBUG
