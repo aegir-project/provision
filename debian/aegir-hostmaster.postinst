@@ -73,10 +73,11 @@ case "$1" in
             AEGIR_DB_USER="$RET"
             db_get "aegir/db_password"
             AEGIR_DB_PASS="$RET"
+            echo "DEBUG: using password: $AEGIR_DB_PASS"
             db_get "aegir/email"
             EMAIL="$RET"
-            #db_reset aegir/db_password || true
-            #db_fset aegir/db_password "seen" "true" || true
+            db_reset aegir/db_password || true
+            db_fset aegir/db_password "seen" "true" || true
 
             db_go
             db_stop
