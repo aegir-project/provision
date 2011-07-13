@@ -20,8 +20,16 @@ drush_log(
   dt('Changed paths from sites/@old_url to sites/@new_url',
   array('@old_url' => $old_url, '@new_url' => $new_url)));
 
-db_query("UPDATE {file_managed} SET uri       = REPLACE(uri,        'sites/default', 'sites/%s')", $new_url);
-db_query("UPDATE {file_managed} SET uri       = REPLACE(uri,        'sites/%s', 'sites/%s')", $old_url, $new_url);
+/**
+ * According to Drupal API documentation, "db_query" should not be used for this purpose.
+ * Change this if you know how to convert it to "db_update" :)
+ */
+if (db_table_exists('file_managed')) {
+  db_query("UPDATE {file_managed} SET uri = REPLACE(uri, :old, :new)", array(':old' => 'sites/default',  ':new' => 'sites/$new_url'));
+  db_query("UPDATE {file_managed} SET uri = REPLACE(uri, :old, :new)", array(':old' => 'sites/$old_url', ':new' => 'sites/$new_url'));
+  db_query("UPDATE {files} SET filepath = REPLACE(filepath, :old, :new)", array(':old' => 'sites/default',  ':new' => 'sites/$new_url'));
+  db_query("UPDATE {files} SET filepath = REPLACE(filepath, :old, :new)", array(':old' => 'sites/$old_url', ':new' => 'sites/$new_url'));
+}
 
 variable_set('file_public_path', "sites/$new_url/files");
 variable_set('file_private_path', "sites/$new_url/private/files");
