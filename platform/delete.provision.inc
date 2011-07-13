@@ -18,6 +18,7 @@ function drush_provision_drupal_pre_provision_delete($backup_file = NULL) {
  */
 function drush_provision_drupal_provision_delete() {
   if (d()->type === 'site') {
+    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
     _provision_recursive_delete(d()->site_path);
     // we remove the aliases even if redirection is enabled as a precaution
     // if redirection is enabled, keep silent about errors
@@ -26,7 +27,7 @@ function drush_provision_drupal_provision_delete() {
     provision_drupal_sync_site();
   }
   elseif (d()->type === 'platform') {
-    if (provision_drupal_find_sites()) {
+    if (!drush_get_option('force', FALSE) && drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT) && provision_drupal_find_sites()) {
       drush_set_error(dt('Existing sites were found on this platform. These sites will need to be deleted before this platform can be deleted.'));
     }
     else {

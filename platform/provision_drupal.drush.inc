@@ -35,10 +35,11 @@ function provision_drupal_drush_help($section) {
 
 function provision_drupal_drush_engine_drupal() {
   $engines = array();
-  $engines['install'] = array();
-  $engines['import'] = array();
-  $engines['deploy'] = array();
   $engines['clear'] = array();
+  $engines['cron_key'] = array();
+  $engines['deploy'] = array();
+  $engines['import'] = array();
+  $engines['install'] = array();
   $engines['packages'] = array();
   $engines['verify'] = array();
   return $engines;
