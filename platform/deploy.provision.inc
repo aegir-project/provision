@@ -33,6 +33,7 @@ function drush_provision_drupal_provision_deploy_validate($backup_file = null) {
 
   if ($exists) {
     drush_set_option('extract_path', d()->site_path . '.restore');
+    drush_set_option('old_db_name', drush_get_option('db_name', ''));
   }
   else {
     drush_set_option('extract_path', d()->site_path);
@@ -161,4 +162,15 @@ function drush_provision_drupal_post_provision_deploy() {
     _provision_recursive_delete(drush_get_option('extract_path'));
   }
 
+  // Remove the old database.
+  if (!drush_get_error() && drush_get_option('deploy_replace_site', FALSE)) {
+    if ($old_database = drush_get_option('old_db_name', '')) {
+      if (!d()->service('db')->drop_database($old_database)) {
+        drush_log(dt('Failed to drop database @old_database', array('@old_database' => $old_database)), 'warning');
+      }
+      else {
+        drush_log(dt('Dropped the old database (@old_database).', array('@old_database' => $old_database)), 'info');
+      }
+    }
+  }
 }
