@@ -1,6 +1,7 @@
 aegir-provision (1.2-1) testing; urgency=low
 
   * new upstream release
+  * fix download url in copyright file
 
  -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 13 Jul 2011 14:46:07 -0400
 
