@@ -15,20 +15,16 @@ $old_url = drush_get_option('old_uri', $new_url, $context);
  *   This is primarily to handle the rename of the sites
  *   directories.
  */
- 
-/*
- *  Update paths for sites migrated
- *  from standalone to the multisite install.
- */
-db_query("UPDATE {file_managed} SET uri = REPLACE(uri, :old, :new)", array(':old' => 'sites/default', ':new' => 'sites/$new_url'));
-db_query("UPDATE {files} SET filepath = REPLACE(filepath, :old, :new)", array(':old' => 'sites/default', ':new' => 'sites/$new_url'));
 
-/*
- *  Update paths for sites cloned/migrated/renamed
- *  in the multisite install.
- */
-db_query("UPDATE {file_managed} SET uri = REPLACE(uri, :old, :new)", array(':old' => 'sites/$old_url', ':new' => 'sites/$new_url'));
-db_query("UPDATE {files} SET filepath = REPLACE(filepath, :old, :new)", array(':old' => 'sites/$old_url', ':new' => 'sites/$new_url'));
+if (db_table_exists('file_managed')) {
+  db_query("UPDATE {file_managed} SET uri = REPLACE(uri, :old, :new)", array(':old' => 'sites/default', ':new' => 'sites/$new_url'));
+  db_query("UPDATE {file_managed} SET uri = REPLACE(uri, :old, :new)", array(':old' => 'sites/$old_url', ':new' => 'sites/$new_url'));
+}
+
+if (db_table_exists('files')) {
+  db_query("UPDATE {files} SET filepath = REPLACE(filepath, :old, :new)", array(':old' => 'sites/$old_url', ':new' => 'sites/$new_url'));
+  db_query("UPDATE {files} SET filepath = REPLACE(filepath, :old, :new)", array(':old' => 'sites/default', ':new' => 'sites/$new_url'));
+}
 
 variable_set('file_public_path', "sites/$new_url/files");
 variable_set('file_private_path', "sites/$new_url/private/files");
