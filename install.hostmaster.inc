@@ -65,7 +65,8 @@ This script will operate the following changes in your system:
 5. Setup the dispatcher (a user cron job)
 
 We are making the following assumptions:
- * you have read INSTALL.txt and prepared the platform accordingly
+ * you have read and are following the install instructions at:
+    http://community.aegirproject.org/installing
  * the FQDN of this machine is valid and resolves
  * you are executing this script as your "aegir" user
 
