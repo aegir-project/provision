@@ -75,10 +75,11 @@ case "$1" in
             AEGIR_DB_PASS="$RET"
             db_get "aegir/email"
             EMAIL="$RET"
-            db_reset aegir/db_password || true
-            db_fset aegir/db_password "seen" "true" || true
 
             db_go
+
+            db_reset aegir/db_password || true
+            db_fset aegir/db_password "seen" "true" || true
             db_stop
             
             if [ -d $VARLIB/.drush/provision ]; then
