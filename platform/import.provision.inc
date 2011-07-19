@@ -25,6 +25,8 @@ function drush_provision_drupal_post_provision_import() {
     d()->aliases = drush_set_option('aliases', provision_drupal_find_aliases());
     d()->write_alias();
 
+    drush_set_option('client_name', drush_get_option('client_name', 'admin', 'site'));
+
     // set this in the site options too so it recurrs.
     drush_set_option('aliases', drush_get_option('aliases'),  'site');
 
