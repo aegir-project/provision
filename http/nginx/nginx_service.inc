@@ -56,6 +56,8 @@ class provisionService_http_nginx extends provisionService_http_public {
      $this->sync($this->server->include_path . '/fastcgi_params.conf');
      provision_file()->copy(dirname(__FILE__) . '/fastcgi_ssl_params.conf', $this->server->include_path . '/fastcgi_ssl_params.conf');
      $this->sync($this->server->include_path . '/fastcgi_ssl_params.conf');
+     provision_file()->copy(dirname(__FILE__) . '/upload_progress_test.conf', $this->server->include_path . '/upload_progress_test.conf');
+     $this->sync($this->server->include_path . '/upload_progress_test.conf');
     // Call the parent at the end. it will restart the server when it finishes.
     parent::verify_server_cmd();
   }
