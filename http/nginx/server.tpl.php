@@ -64,7 +64,7 @@
   fastcgi_cache_path /var/lib/nginx/speed
                      levels=2:2:2
                      keys_zone=speed:50m
-                     inactive=8h
+                     inactive=1h
                      max_size=1g;
 
  ## General Options
@@ -74,7 +74,7 @@
   reset_timedout_connection       on;
   fastcgi_intercept_errors        on;
 
- ## TCP options 
+ ## TCP options
   tcp_nopush  on;
 
  ## SSL performance
