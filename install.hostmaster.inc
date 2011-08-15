@@ -15,7 +15,7 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   drush_set_default('script_user', provision_current_user());
   drush_set_default('web_group', _provision_default_web_group());
   drush_set_default('http_service_type', 'apache');
-  drush_set_default('drush_make_version', '6.x-2.2');
+  drush_set_default('drush_make_version', '6.x-2.3');
   drush_set_default('aegir_db_user', 'root');
   drush_set_default('client_name', 'admin');
   $aegir_db_user = drush_get_option('aegir_db_user');
@@ -42,7 +42,7 @@ Don't worry: you will get to review those settings after the final install");
     system('stty -echo');
     drush_set_option('aegir_db_pass', drush_prompt(dt('MySQL privileged user ("!root") password', array('!root' => $aegir_db_user))));
     system('stty echo');
-    print "\n"; // add a newline since the user's didn't print    
+    print "\n"; // add a newline since the user's didn't print
   }
 
   if (drush_get_option('aegir_host') == 'localhost') {
@@ -116,7 +116,7 @@ function drush_provision_hostmaster_install($site = NULL) {
 
   $aegir_db_user = drush_get_option('aegir_db_user');
   $aegir_db_pass = drush_get_option('aegir_db_pass');
-  
+
   $server = '@server_master';
   $master_context = array(
     'context_type' => 'server',
@@ -149,7 +149,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   drush_backend_invoke_args("provision-save", array($server), $master_context);
   provision_backend_invoke($server, 'provision-verify');
 
-  // exit if an error has occured. 
+  // exit if an error has occured.
   if (drush_get_error()) {
     return false;
   }
@@ -177,7 +177,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   }
   provision_backend_invoke($platform_name, 'provision-verify', array(), $options);
 
-  // exit if an error has occured. 
+  // exit if an error has occured.
   if (drush_get_error()) {
     return false;
   }
@@ -194,7 +194,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   $data = provision_backend_invoke($site_name, 'provision-install', array(), array('client_email' => drush_get_option('client_email')));
   provision_backend_invoke($site_name, 'provision-verify');
 
-  // exit if an error has occured. 
+  // exit if an error has occured.
   if (drush_get_error()) {
     return false;
   }
