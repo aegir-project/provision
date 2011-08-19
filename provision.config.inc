@@ -81,7 +81,7 @@ class provisionConfig {
     if (sizeof($data)) {
       $this->data = $data;
     }
-    
+
     if (!is_null($this->data_store_class) && class_exists($this->data_store_class)) {
       $class = $this->data_store_class;
       $this->store = new $class($context, $data);
@@ -103,7 +103,7 @@ class provisionConfig {
 
   /**
    * The filename where the configuration is written.
-   * 
+   *
    * This is a stub to be implemented by subclasses.
    */
   function filename() {
@@ -134,7 +134,7 @@ class provisionConfig {
 
         $class_name = get_parent_class($class_name);
       }
-    } 
+    }
 
     return false;
   }
@@ -218,7 +218,7 @@ class provisionConfig {
   function unlink() {
     return provision_file()->unlink($this->filename())->status();
   }
-  
+
 }
 
 /**
@@ -226,7 +226,7 @@ class provisionConfig {
  *
  * This is based on the drush_save_config code, but has been abstracted
  * for our purposes.
- */ 
+ */
 class provisionConfig_drushrc extends provisionConfig {
   public $template = 'provision_drushrc.tpl.php';
   public $description = 'Drush configuration file';
@@ -275,7 +275,7 @@ class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
   }
 
   function filename() {
-    return drush_server_home() . '/.drush/' . $this->data['aliasname'] . '.alias.drushrc.php'; 
+    return drush_server_home() . '/.drush/' . $this->data['aliasname'] . '.alias.drushrc.php';
   }
 }
 

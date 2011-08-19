@@ -7,7 +7,7 @@
  *    The Nginx +SSL service implementation.
  */
 
-// Include the nginx service implementation. 
+// Include the nginx service implementation.
 // Even though we don't extend it, we do make use of it's config classes.
 include_once(dirname(__FILE__) . '/../nginx/nginx_service.inc');
 
@@ -16,7 +16,7 @@ include_once(dirname(__FILE__) . '/../nginx/nginx_service.inc');
  * Nginx SSL service class.
  *
  * This class doesn't extend the nginx service itself, so there may
- * be some duplication of code between them. The majority of the 
+ * be some duplication of code between them. The majority of the
  * functionality is however implemented in the provisionService_http_public
  * class, which we do extend.
  */
@@ -29,7 +29,7 @@ class provisionService_http_nginx_ssl extends provisionService_http_ssl {
     // The nginx service defines it's restart command as a static
     // method so that we can make use of it here.
     return provisionService_http_nginx::nginx_restart_cmd();
-  } 
+  }
 
   public $ssl_enabled = TRUE;
 
@@ -63,7 +63,7 @@ class provisionService_http_nginx_ssl extends provisionService_http_ssl {
 
   /**
    * Restart/reload nginx to pick up the new config files.
-   */ 
+   */
   function parse_configs() {
     return $this->restart();
   }
@@ -90,7 +90,7 @@ class provisionConfig_nginx_ssl_server extends provisionConfig_http_ssl_server {
 /**
  * Virtual host config file for Nginx + SSL.
  *
- * This file is created in addition to the existing virtual host, 
+ * This file is created in addition to the existing virtual host,
  * and includes some extra directives.
  */
 class provisionConfig_nginx_ssl_site extends provisionConfig_http_ssl_site {

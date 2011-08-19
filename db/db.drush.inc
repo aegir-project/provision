@@ -72,7 +72,7 @@ class provisionService_db extends provisionService {
 
   /**
    * Find a viable database name, based on the site's uri.
-   */ 
+   */
   function suggest_db_name() {
     $uri = $this->context->uri;
 
@@ -101,7 +101,7 @@ class provisionService_db extends provisionService {
       $creds = $this->generate_site_credentials();
     }
     extract($creds);
-    
+
     if (!$this->can_create_database()) {
       drush_set_error('PROVISION_CREATE_DB_FAILED');
       drush_log("Database could not be created.", 'error');
@@ -124,9 +124,9 @@ class provisionService_db extends provisionService {
     else {
       drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not create @name database", array("@name" => $db_name)));
     }
-    return $status; 
+    return $status;
   }
-  
+
   /**
    * Remove the database and user account for the supplied credentials
    */
@@ -142,12 +142,12 @@ class provisionService_db extends provisionService {
         drush_log(dt("Failed to drop database @dbname", array('@dbname' => $db_name)), 'warning');
       }
     }
-    
+
     if ( $this->database_exists($db_name) ) {
      drush_set_error('PROVISION_DROP_DB_FAILED');
      return FALSE;
     }
-    
+
     foreach ($this->grant_host_list() as $db_grant_host) {
       drush_log(dt("Revoking privileges of %user@%client from %database", array('%user' => $db_user, '%client' => $db_grant_host, '%database' => $db_name)));
       if (!$this->revoke($db_name, $db_user, $db_grant_host)) {
@@ -183,7 +183,7 @@ class provisionService_db extends provisionService {
 
   function generate_site_credentials() {
     $creds = array();
-    // replace with service type 
+    // replace with service type
     $db_type = drush_get_option('db_type', function_exists('mysqli_connect') ? 'mysqli' : 'mysql');
     // As of Drupal 7 there is no more mysqli type
     if (drush_drupal_major_version() >= 7) {
@@ -224,7 +224,7 @@ class provisionService_db extends provisionService {
     return FALSE;
   }
 
-  function can_create_database() { 
+  function can_create_database() {
     return FALSE;
   }
 
@@ -291,7 +291,7 @@ class provisionService_db_pdo extends provisionService_db {
     catch (PDOException $e) {
       return drush_set_error('PROVISION_DB_CONNECT_FAIL', $e->getMessage());
     }
-  } 
+  }
 
   function close() {
     $this->conn = null;
@@ -305,14 +305,14 @@ class provisionService_db_pdo extends provisionService_db {
     }
     $this->query_callback($args, TRUE);
     $query = preg_replace_callback(PROVISION_QUERY_REGEXP, array($this, 'query_callback'), $query);
-    
+
     try {
       $result = $this->conn->query($query);
     }
     catch (PDOException $e) {
       drush_log($e->getMessage(), 'warning');
       return FALSE;
-    } 
+    }
 
     return $result;
 
@@ -339,7 +339,7 @@ class provisionService_db_pdo extends provisionService_db {
     }
 
   }
-  
+
   function database_exists($name) {
     $dsn = $this->dsn . ';dbname=' . $name;
     try {

@@ -53,7 +53,7 @@ function & d($name = NULL, $_root_object = FALSE) {
  * Simple access layer for drush_sitealias_get_record.
  *
  * Everytime sitealiases are fetched a lot of processing happens, but if the
- * file doesnt exist yet there's a whole lot of unnecesary stuff happening. 
+ * file doesnt exist yet there's a whole lot of unnecesary stuff happening.
  *
  * We cache the result locally here.
  */
@@ -202,7 +202,7 @@ class provisionContext {
    */
   function method_invoke($func, $args = array(), $services = TRUE) {
     provision::method_invoke($this, $func, $args);
-    // Services will be invoked regardless of the existence of a 
+    // Services will be invoked regardless of the existence of a
     // implementation in the context class.
     if ($services) {
       $this->services_invoke($func, $args);
@@ -232,7 +232,7 @@ class provisionContext {
    * This allows the developer to not have to conditionally check the
    * context object type in all his methods, and reduces the need
    * to define drush_hook_$command methods for a lot of cases.
-   * 
+   *
    * This will generate a function call like : $method_$type_cmd.
    */
   function command_invoke($command, $args = array()) {
