@@ -80,7 +80,13 @@ function install_main() {
 
   // We have an existing settings.php.
 
-  $db_spec = drush_core_site_install_db_spec();
+  if (function_exists('drush_sql_read_db_spec')) {
+    $db_spec = drush_sql_read_db_spec();
+  }
+  else {
+    $db_spec = drush_core_site_install_db_spec();
+  }
+
   $db_spec['db_prefix'] = $GLOBALS['db_prefix'];
 
   if ($db_spec['driver'] == 'mysqli') {
