@@ -4,13 +4,13 @@
  *
  *
  * This module provides a framework for a Drupal site to manage and install new Drupal sites, using the command line
- * Drush utility. 
+ * Drush utility.
  *
  * It allows for pluggable 'provisioning modules' that can extend and modify the tasks that are taken during installation.
  *
  * Each site has the following commands that can be run on it.
  *
- * Implemented : 
+ * Implemented :
  *   install - Install a new Drupal site. The install command uses 3 separate hooks to do its job,
  *             namely hook_pre_provision_install(), hook_provision_install() and hook_post_provision_install().
  *   verify  - Recreate all configuration files, to be in synch with changes in the front end. And test that they are correct.
@@ -57,7 +57,8 @@ include_once('provision.inc');
  * @see provision_load_critical()
  */
 function provision_drush_init() {
-  d(drush_get_option('name', '@self', 'alias'), TRUE);
+  $hash_name = drush_get_option('#name') ? '#name' : 'name';
+  d(drush_get_option($hash_name, '@self', 'alias'), TRUE);
   $load = sys_getloadavg();
   if (provision_load_critical($load)) {
     drush_set_error('PROVISION_OVERLOAD', dt("load on system too heavy (@load), aborting", array('@load' => join(" ", $load))));
@@ -103,14 +104,14 @@ function provision_drush_command() {
     'description' => dt('Generate a back up for the site.'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
-  
+
   $items['provision-enable'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to enable (only if enabled).')),
     'description' => 'Enable a disabled site.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
   $items['provision-disable'] = array(
-    'arguments' => array('domain.com' => dt('The domain of the site to disable (only if disabled).')),    
+    'arguments' => array('domain.com' => dt('The domain of the site to disable (only if disabled).')),
     'description' => 'Disable a site.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
@@ -126,11 +127,11 @@ function provision_drush_command() {
   );
 
   $items['provision-verify'] = array(
-    'arguments' => array('domain.com' => dt('The domain of the site to verify).')),    
+    'arguments' => array('domain.com' => dt('The domain of the site to verify).')),
     'description' => 'Verify that the provisioning framework is correctly installed.',
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH, 
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
- 
+
   $items['provision-restore'] = array(
     'description' => 'Restore the site to a previous backup. This will also generate a backup of the site as it was.',
     'arguments' => array('domain.com' => dt('The domain of the site to be restored'),
@@ -159,7 +160,7 @@ function provision_drush_command() {
       '/path/to/platform' => dt('The platform to clone the site to.')),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
- 
+
   $items['provision-delete'] = array(
     'description' => 'Delete a site.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
@@ -169,7 +170,7 @@ function provision_drush_command() {
     'description' => 'Generate a one-time login reset URL.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
-  
+
   $items['provision-backup_delete'] = array(
     'description' => 'Delete a backup file.',
     'arguments' => array('backup-file' => dt('The backup file to delete. This will be a gzipped tarball.')),
@@ -195,7 +196,7 @@ function provision_drush_command() {
       'you@example.com' => dt('The email account to send a welcome mail to'),
     ),
   );
-  
+
   $items['backend-parse'] = array(
     'description' => dt('Parse the output of --backend commands to a human readable form'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
@@ -206,7 +207,7 @@ function provision_drush_command() {
 
 function drush_provision_save($alias = null) {
   if (drush_get_option('delete', false)) {
-    // remove an existing alias 
+    // remove an existing alias
     $config = new provisionConfig_drushrc_alias($alias);
     $config->unlink();
   }
@@ -227,7 +228,7 @@ function _provision_default_web_group() {
   $common_groups = array(
     'www',
     'httpd',
-    'www-data', 
+    'www-data',
     'apache',
     'webservd',
     'nogroup',
@@ -250,7 +251,7 @@ function _provision_default_web_group() {
  * useful for calculating sane load threshold.
  *
  * On Linux, this parses /proc/cpuinfo and looks for lines like this:
- * 
+ *
  * processor	: 0
  * ...
  * processor	: 1
