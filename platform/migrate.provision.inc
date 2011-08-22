@@ -73,7 +73,8 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = null) {
   if (!is_null($new_uri) && ($new_uri != d()->uri)) {
     $options = d()->options;
     $options['uri'] = ltrim($new_uri, '@');
-    $options['name'] = $new_uri;
+    $hash_name = drush_get_option('#name') ? '#name' : 'name';
+    $options[$hash_name] = $new_uri;
   }
   $options['platform'] = $platform;
   $options['root'] = d($platform)->root;
