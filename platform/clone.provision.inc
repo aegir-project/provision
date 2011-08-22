@@ -40,7 +40,7 @@ function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
 
   $options = d()->options;
   $options['uri'] = ltrim($new_uri, '@');
-  $options['name'] = $new_uri;
+  $options['#name'] = $new_uri;
   $options['platform'] = (isset($platform)) ? $platform : $options['platform'];
   $options['root'] = d($options['platform'])->root;
   $options['aliases'] = array();
