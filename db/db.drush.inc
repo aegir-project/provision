@@ -25,6 +25,8 @@ function db_drush_help($section) {
       return dt('Unable to connect to database server.');
     case 'error:PROVISION_CREATE_DB_FAILED' :
       return dt('Unable to create new databases.');
+    case 'error:PROVISION_CREATE_DB_USER_FAILED' :
+      return dt('Unable to create new database users.');
     case 'error:PROVISION_DROP_DB_FAILED' :
       return dt('Unable to drop database.');
   }
@@ -57,6 +59,9 @@ class provisionService_db extends provisionService {
     return TRUE;
   }
 
+  /**
+   * Verifies database connection and commands
+   */
   function verify_server_cmd() {
     if ($this->connect()) {
       if ($this->can_create_database()) {
@@ -64,6 +69,12 @@ class provisionService_db extends provisionService {
       }
       else {
         drush_set_error('PROVISION_CREATE_DB_FAILED');
+      }
+      if ($this->can_grant_privileges()) {
+        drush_log(dt('Provision can create database users.'), 'message');;
+      }
+      else {
+        drush_set_error('PROVISION_CREATE_DB_USER_FAILED');
       }
     } else {
       drush_set_error('PROVISION_CONNECT_DB_FAILED');

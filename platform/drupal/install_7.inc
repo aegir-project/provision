@@ -17,8 +17,8 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
     $from = variable_get('site_mail', ini_get('sendmail_from'));
     $mail_params['variables'] = array(
       '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
-      '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail, 
-      '!date' => format_date(time()), '!login_uri' => url('user', array('absolute' => TRUE)), 
+      '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail,
+      '!date' => format_date(time()), '!login_uri' => url('user', array('absolute' => TRUE)),
       '!edit_uri' => url('user/'. $account->uid .'/edit', array('absolute' => TRUE)));
 
     $mail_success = drupal_mail('install', 'welcome-admin', $account->mail, user_preferred_language($account), $mail_params, $from, TRUE);
@@ -42,7 +42,7 @@ function install_mail($key, &$message, $params) {
         require_once "./profiles/$profile/provision_welcome_mail.inc";
         $custom = TRUE;
       }
-      elseif (file_exists(dirname(__FILE__) . '/../provision_welcome_mail.inc')) { 
+      elseif (file_exists(dirname(__FILE__) . '/../provision_welcome_mail.inc')) {
         /** use the module provided welcome email
          * We can not use drupal_get_path here,
          * as we are connected to the provisioned site's database
@@ -86,6 +86,7 @@ function install_main() {
   else {
     $db_spec = drush_core_site_install_db_spec();
   }
+
   $db_spec['db_prefix'] = $GLOBALS['db_prefix'];
 
   if ($db_spec['driver'] == 'mysqli') {
