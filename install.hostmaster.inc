@@ -203,6 +203,8 @@ function drush_provision_hostmaster_install($site = NULL) {
   drush_print(dt("Initializing the hosting system"));
   provision_backend_invoke($site_name, 'hosting-setup');
 
+  drush_print("************************************************************************\n\n\n");
   drush_print(dt("Aegir is now installed. You can visit it at @link", array('@link' => $data['context']['login_link'])));
+  drush_print("************************************************************************");
 }
 
