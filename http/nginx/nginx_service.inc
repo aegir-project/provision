@@ -52,7 +52,24 @@ class provisionService_http_nginx extends provisionService_http_public {
    * service, even though it does not inherit this class.
    */
   public static function nginx_restart_cmd() {
-    return 'sudo /etc/init.d/nginx reload';
+    $command = '/etc/init.d/nginx'; // A proper default for most of the world
+    $options[] = $command;
+    foreach (explode(':', $_SERVER['PATH']) as $path) {
+      $options[] = "$path/nginx";
+    }
+    // Try to detect the nginx restart command.  
+    $options[] = '/usr/sbin/nginx -s';
+    $options[] = '/usr/local/sbin/nginx -s';
+    $options[] = '/usr/local/bin/nginx -s';
+
+    foreach ($options as $test) {
+      if (is_executable($test)) {
+        $command = $test;
+        break;
+      }
+    }
+
+    return "sudo $command reload";
   }
 
   /**
