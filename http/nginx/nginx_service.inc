@@ -74,10 +74,10 @@ class provisionService_http_nginx extends provisionService_http_public {
       $options[] = "$path/nginx";
       $options[] = "$path/nginx";
     }
-    // Try to detect the apache restart command.
-    $options[] = '/usr/local/bin/nginx -s';
-    $options[] = '/usr/local/sbin/nginx -s';
+    // Try to detect the nginx restart command.
     $options[] = $command;
+    $options[] = '/usr/local/sbin/nginx -s';
+    $options[] = '/usr/local/bin/nginx -s';
 
     foreach ($options as $test) {
       if (is_executable($test)) {
@@ -86,7 +86,7 @@ class provisionService_http_nginx extends provisionService_http_public {
       }
     }
 
-    return 'sudo $command reload';
+    return "sudo $command reload";
   }
 
   /**
