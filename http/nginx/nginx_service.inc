@@ -70,12 +70,12 @@ class provisionService_http_nginx extends provisionService_http_public {
    */
   public static function nginx_restart_cmd() {
     $command = '/etc/init.d/nginx'; // A proper default for most of the world
+    $options[] = $command;
     foreach (explode(':', $_SERVER['PATH']) as $path) {
       $options[] = "$path/nginx";
-      $options[] = "$path/nginx";
     }
-    // Try to detect the nginx restart command.
-    $options[] = $command;
+    // Try to detect the nginx restart command.  
+    $options[] = '/usr/sbin/nginx -s';
     $options[] = '/usr/local/sbin/nginx -s';
     $options[] = '/usr/local/bin/nginx -s';
 
