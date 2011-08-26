@@ -86,7 +86,7 @@ class provisionService_http_nginx extends provisionService_http_public {
       }
     }
 
-    return "sudo $command reload";
+    return 'sudo $command reload';
   }
 
   /**
