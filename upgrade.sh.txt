@@ -15,7 +15,7 @@ msg() {
 }
 
 # basic variables, change before running
-AEGIR_VERSION="6.x-1.2"
+AEGIR_VERSION="6.x-1.3"
 DRUSH_DIR=$HOME/drush
 DRUSH=$DRUSH_DIR/drush.php
 if which drush 2> /dev/null > /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
@@ -51,8 +51,8 @@ AEGIR_DOMAIN="$site_uri"
 OLD_DRUPAL_DIR="$drupal_root"
 HOME="$HOME"
 DRUPAL_DIR=$HOME/hostmaster-$AEGIR_VERSION
-DRUSH_VERSION=7.x-4.4
-DRUSH_MAKE_VERSION=6.x-2.2
+DRUSH_VERSION=7.x-4.5
+DRUSH_MAKE_VERSION=6.x-2.3
 BACKUP_DIR=$HOME/pre-upgrade-`date '+%F-%H%M'`
 
 ########################################################################
