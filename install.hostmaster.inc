@@ -15,7 +15,7 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   drush_set_default('script_user', provision_current_user());
   drush_set_default('web_group', _provision_default_web_group());
   drush_set_default('http_service_type', 'apache');
-  drush_set_default('drush_make_version', '6.x-2.2');
+  drush_set_default('drush_make_version', '6.x-2.3');
   drush_set_default('aegir_db_user', 'root');
   drush_set_default('client_name', 'admin');
   $aegir_db_user = drush_get_option('aegir_db_user');
@@ -203,6 +203,8 @@ function drush_provision_hostmaster_install($site = NULL) {
   drush_print(dt("Initializing the hosting system"));
   provision_backend_invoke($site_name, 'hosting-setup');
 
+  drush_print("************************************************************************\n\n\n");
   drush_print(dt("Aegir is now installed. You can visit it at @link", array('@link' => $data['context']['login_link'])));
+  drush_print("************************************************************************");
 }
 
