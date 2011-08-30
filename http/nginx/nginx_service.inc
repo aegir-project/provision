@@ -30,6 +30,9 @@ class provisionService_http_nginx extends provisionService_http_public {
     elseif (provision_file()->exists('/usr/sbin/nginx')->status()) {
       $path = "/usr/sbin/nginx";
     }
+    elseif (provision_file()->exists('/usr/local/bin/nginx')->status()) {
+      $path = "/usr/local/bin/nginx";
+    }
     else {
       return;
     }
@@ -71,17 +74,17 @@ class provisionService_http_nginx extends provisionService_http_public {
   public static function nginx_restart_cmd() {
     $command = '/etc/init.d/nginx'; // A proper default for most of the world
     $options[] = $command;
+    // Try to detect the nginx restart command.
     foreach (explode(':', $_SERVER['PATH']) as $path) {
       $options[] = "$path/nginx";
     }
-    // Try to detect the nginx restart command.  
-    $options[] = '/usr/sbin/nginx -s';
-    $options[] = '/usr/local/sbin/nginx -s';
-    $options[] = '/usr/local/bin/nginx -s';
+    $options[] = '/usr/sbin/nginx';
+    $options[] = '/usr/local/sbin/nginx';
+    $options[] = '/usr/local/bin/nginx';
 
     foreach ($options as $test) {
       if (is_executable($test)) {
-        $command = $test;
+        $command = ($test == '/etc/init.d/nginx') ? $test : $test . ' -s';
         break;
       }
     }
@@ -91,7 +94,7 @@ class provisionService_http_nginx extends provisionService_http_public {
 
   /**
    * Restart/reload nginx to pick up the new config files.
-   */ 
+   */
   function parse_configs() {
     return $this->restart();
   }
@@ -108,7 +111,7 @@ class provisionConfig_nginx_server extends provisionConfig_http_server {
   }
 }
 
-/** 
+/**
  * Nginx site level config class. Virtual host.
  */
 class provisionConfig_nginx_site extends provisionConfig_http_site {
