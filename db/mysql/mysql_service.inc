@@ -36,17 +36,21 @@ class provisionService_db_mysql extends provisionService_db_pdo {
   }
 
   /**
-   * Verifies that Aegir can grant privileges to a user on a database
+   * Verifies that provision can grant privileges to a user on a database.
    *
    * @return
-   *   boolean TRUE if the check was successful
+   *   TRUE if the check was successful.
    */
   function can_grant_privileges() {
-    $test = drush_get_option('aegir_db_prefix', 'site_');
-    $status = $this->grant($test, $test . 'user', $test . 'password', $test . 'host');
+    $dbname   = drush_get_option('aegir_db_prefix', 'site_');
+    $user     = $dbname . '_user';
+    $password = $dbname . '_password';
+    $host     = $dbname . '_host';
+    if ($status = $this->grant($dbname, $user, $password, $host)) {
+      $this->revoke($dbname, $user, $host);
+    }
     return $status;
   }
- 
 
   function grant($name, $username, $password, $host = '') {
     $host = ($host) ? $host : '%';
