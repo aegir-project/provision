@@ -72,7 +72,7 @@ class provisionConfig {
    */
   function __construct($context, $data = array()) {
     if (is_null($this->template)) {
-      throw(exception);
+      throw new Exception(dt("No template specified for: %class", array('%class' => get_class($this))));
     }
 
     // Accept both a reference and an alias name for the context.
