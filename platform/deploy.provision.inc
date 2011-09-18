@@ -81,25 +81,32 @@ function drush_provision_drupal_pre_provision_deploy($backup_file) {
     _provision_drupal_create_settings_file();
 
     $site_packages = drush_get_option('packages', array(), 'site');
-    $profiles = array_keys($site_packages['profiles']);
-    $profile = $profiles[0];
-
     $drupal_packages = drush_get_option('packages', array(), 'drupal');
-    $merged_modules = array_merge($drupal_packages['base']['modules'], $drupal_packages['profiles'][$profile]['modules']);
-    foreach ($site_packages['modules'] as $name => $module) {
-      if ($module['status'] == 1) {
-        if (!array_key_exists($name, $merged_modules)) {
-          drush_log(dt("Could not find a version of the !name module", array('!name' => $name)), 'warning');
-        }
-        else {
-          if (($merged_modules[$name]['schema_version'] > 0) && ($module['schema_version'] > $merged_modules[$name]['schema_version'])) {
-            drush_set_error('PROVISION_SCHEMA_UPGRADE_FAILURE', 
-              dt("The version of the !name module found on this platform (!versionB) has a lower Schema version than the one the site has installed (!versionA)", 
-              array('!name' => $name, '!versionA' => $module['schema_version'], '!versionB' => $merged_modules[$name]['schema_version'])));
+    $merged_modules = $drupal_packages['base']['modules'];
+    if (isset($site_packages['profiles'])) {
+      $profiles = array_keys($site_packages['profiles']);
+      $profile = $profiles[0];
+      if (isset($drupal_packages['profiles'][$profile]['modules'])) {
+        $merged_modules = array_merge($merged_modules, $drupal_packages['profiles'][$profile]['modules']);
+      }
+    }
+
+    if (isset($site_packages['modules']) && is_array($site_packages['modules'])) {
+      foreach ($site_packages['modules'] as $name => $module) {
+        if ($module['status'] == 1) {
+          if (!array_key_exists($name, $merged_modules)) {
+            drush_log(dt("Could not find a version of the !name module", array('!name' => $name)), 'warning');
           }
           else {
-            drush_log(dt("Found a valid version of the !name module with schema version !schema_version", 
-              array('!name' => $name, '!schema_version' => $merged_modules[$name]['schema_version'])));
+            if (($merged_modules[$name]['schema_version'] > 0) && ($module['schema_version'] > $merged_modules[$name]['schema_version'])) {
+              drush_set_error('PROVISION_SCHEMA_UPGRADE_FAILURE', 
+                dt("The version of the !name module found on this platform (!versionB) has a lower Schema version than the one the site has installed (!versionA)", 
+                array('!name' => $name, '!versionA' => $module['schema_version'], '!versionB' => $merged_modules[$name]['schema_version'])));
+            }
+            else {
+              drush_log(dt("Found a valid version of the !name module with schema version !schema_version", 
+                array('!name' => $name, '!schema_version' => $merged_modules[$name]['schema_version'])));
+            }
           }
         }
       }
