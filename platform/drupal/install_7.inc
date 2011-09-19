@@ -12,6 +12,7 @@ $GLOBALS['base_url'] = provision_get_base_url();
 define('MAINTENANCE_MODE', 'install');
 
 function install_send_welcome_mail($url, $account, $language, $client_email, $onetime) {
+  global $base_url;
   if ($client_email) {
     // Mail one time login URL and instructions.
     $from = variable_get('site_mail', ini_get('sendmail_from'));
