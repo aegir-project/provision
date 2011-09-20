@@ -299,8 +299,10 @@ class provisionService_db_pdo extends provisionService_db {
   }
 
   function connect() {
+    $user = isset($this->creds['user']) ? $this->creds['user'] : '';
+    $pass = isset($this->creds['pass']) ? $this->creds['pass'] : '';
     try {
-      $this->conn = new PDO($this->dsn, $this->creds['user'], $this->creds['pass']);
+      $this->conn = new PDO($this->dsn, $user, $pass);
       return $this->conn;
     }
     catch (PDOException $e) {
