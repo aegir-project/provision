@@ -116,6 +116,16 @@ if ($nginx_has_upload_progress) {
 ###  nginx default server
 #######################################################
 
+###
+### Support separate Boost and Speed Booster caches for various mobile devices.
+###
+map $http_user_agent $device {
+  default                                                                normal;
+  ~*Nokia|BlackBerry.+MIDP|240x|320x|Palm|NetFront|Symbian|SonyEricsson  mobile-other;
+  ~*iPhone|iPod|Android|BlackBerry.+AppleWebKit                          mobile-smart;
+  ~*iPad|Tablet                                                          mobile-tablet;
+}
+
 <?php
 $ip_address = !empty($ip_address) ? $ip_address : '*';
 ?>
