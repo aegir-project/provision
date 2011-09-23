@@ -34,6 +34,10 @@ function drush_provision_tests_run() {
   if (!drush_confirm(dt('This command should only be run on a clean Aegir install, and data may be lost! Do you want to continue?'))) {
     return drush_user_abort();
   }
+  // Disable the tasks queue, we run them manually instead.
+  // Todo: turn this back on after the tests have run.
+  provision_backend_invoke('@hostmaster', 'vset', array('hosting_queue_tasks_enabled', '0'));
+
   drush_provision_tests_install_platform('drupal5');
   drush_provision_tests_install_platform('drupal6');
   drush_provision_tests_install_platform('drupal7');
