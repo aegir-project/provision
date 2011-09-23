@@ -1,4 +1,4 @@
-core = 6.x
+core = 7.x
 api = 2
 
 projects[pressflow][type] = "core"
