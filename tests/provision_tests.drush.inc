@@ -97,7 +97,7 @@ function drush_provision_tests_install_platform($platform_name) {
  * Helper function to remove a platform.
  */
 function drush_provision_tests_remove_platform($platform_name) {
-  provision_backend_invoke('@hostmaster', 'hosting-task', array("@platform_$platform_name", 'delete'));
+  provision_backend_invoke('@hostmaster', 'hosting-task', array("@platform_$platform_name", 'delete'), array('force' => TRUE));
   drush_provision_tests_run_remaining_tasks();
 }
 
@@ -116,7 +116,7 @@ function drush_provision_tests_install_site($platform_name, $profile_name) {
   );
   drush_backend_invoke('provision-save', $args);
   provision_backend_invoke("@$platform_name.mig5.net", 'provision-install');
-  provision_backend_invoke('@hostmaster', 'hosting-task', array("@platform_$platform_name", 'verify'));
+  provision_backend_invoke('@hostmaster', 'hosting-task', array("@platform_$platform_name", 'verify'), array('force' => TRUE));
   drush_provision_tests_run_remaining_tasks();
 }
 
@@ -124,7 +124,7 @@ function drush_provision_tests_install_site($platform_name, $profile_name) {
  * Helper function to delete a site.
  */
 function drush_provision_tests_remove_site($platform_name, $profile_name) {
-  provision_backend_invoke('@hostmaster', 'hosting-task', array("@$platform_name.mig5.net", 'delete'));
+  provision_backend_invoke('@hostmaster', 'hosting-task', array("@$platform_name.mig5.net", 'delete'), array('force' => TRUE));
   drush_provision_tests_run_remaining_tasks();
 }
 
@@ -139,7 +139,7 @@ function drush_provision_tests_run_remaining_tasks() {
   }
   
   foreach ($tasks as $task) {
-    provision_backend_invoke('@hostmaster', "hosting-task", array($task->nid));
+    provision_backend_invoke('@hostmaster', "hosting-task", array($task->nid), array('force' => TRUE));
   }
 }
 
