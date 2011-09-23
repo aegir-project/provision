@@ -38,25 +38,33 @@ function drush_provision_tests_run() {
   // Todo: turn this back on after the tests have run.
   provision_backend_invoke('@hostmaster', 'vset', array('hosting_queue_tasks_enabled', '0'));
 
-  drush_provision_tests_install_platform('drupal5');
+  if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+    drush_provision_tests_install_platform('drupal5');
+  }
   drush_provision_tests_install_platform('drupal6');
   drush_provision_tests_install_platform('drupal7');
   drush_provision_tests_install_platform('openatrium');
   
   // Install some sites.
-  drush_provision_tests_install_site('drupal5', 'default');
+  if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+    drush_provision_tests_install_site('drupal5', 'default');
+  }
   drush_provision_tests_install_site('drupal6', 'default');
   drush_provision_tests_install_site('drupal7', 'standard');
   drush_provision_tests_install_site('openatrium', 'openatrium');
   
   // Remove the sites.
-  drush_provision_tests_remove_site('drupal5', 'default');
+  if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+    drush_provision_tests_remove_site('drupal5', 'default');
+  }
   drush_provision_tests_remove_site('drupal6', 'default');
   drush_provision_tests_remove_site('drupal7', 'standard');
   drush_provision_tests_remove_site('openatrium', 'openatrium');
   
   // Clean up a little.
-  drush_provision_tests_remove_platform('drupal5');
+  if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+    drush_provision_tests_remove_platform('drupal5');
+  }
   drush_provision_tests_remove_platform('drupal6');
   drush_provision_tests_remove_platform('drupal7');
   drush_provision_tests_remove_platform('openatrium');
