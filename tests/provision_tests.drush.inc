@@ -20,7 +20,9 @@ function provision_tests_drush_command() {
     // Although we're a provision command, we require hostmaster to be around to
     // run the tests correctly
     'drupal dependencies' => array(
-      'hosting',
+      // Remove the tests for now, the D7 branch is a long way off being able to run
+      // these.
+      //'hosting',
     ),
   );
   
