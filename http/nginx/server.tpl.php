@@ -113,7 +113,7 @@ if ($nginx_has_upload_progress) {
 
 <?php print $extra_config; ?>
 #######################################################
-###  nginx default server
+###  nginx default maps
 #######################################################
 
 ###
@@ -125,6 +125,34 @@ map $http_user_agent $device {
   ~*iPhone|iPod|Android|BlackBerry.+AppleWebKit                          mobile-smart;
   ~*iPad|Tablet                                                          mobile-tablet;
 }
+
+###
+### Live switch of $key_uri for Speed Booster cache depending on $args.
+###
+map $args $key_uri {
+  default                 $request_uri;
+  ~*utm_|__utm|_campaign  $uri;
+}
+
+###
+### Deny crawlers without 403 response.
+###
+map $http_user_agent $is_crawler {
+  default                                                                                                      0;
+  ~*HTTrack|HTMLParser|libwww|PECL|AutomaticSiteMap|ClickSense|ValueClick|SiteBot|BuzzTracker|sistrix|Offline  is_crawler;
+}
+
+###
+### Deny all known bots on some URIs without 403 response.
+###
+map $http_user_agent $is_bot {
+  default                                             0;
+  ~*crawl|goog|yahoo|spider|bot|tracker|click|parser  is_bot;
+}
+
+#######################################################
+###  nginx default server
+#######################################################
 
 <?php
 $ip_address = !empty($ip_address) ? $ip_address : '*';
