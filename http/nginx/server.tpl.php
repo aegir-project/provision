@@ -130,8 +130,8 @@ map $http_user_agent $device {
 ### Live switch of $key_uri for Speed Booster cache depending on $args.
 ###
 map $args $key_uri {
-  default                 $request_uri;
-  ~*utm_|__utm|_campaign  $uri;
+  default                       $request_uri;
+  ~*utm_|__utm|_campaign|gclid  $uri;
 }
 
 ###
