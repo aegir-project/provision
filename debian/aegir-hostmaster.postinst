@@ -99,6 +99,14 @@ case "$1" in
 EOF
         fi
         rm -f $TEMPFILE
+        # this will ensure that this script aborts if the site can't be bootstrapped
+        if su -s /bin/sh aegir -c 'drush @hostmaster status' 2>&1 | grep -q 'Drupal bootstrap.*Successful'; then
+            echo 'Aegir frontend bootstrap correctly, operation was a success!'
+        else
+            echo 'Aegir frontend failed to bootstrap, something went wrong!'
+            echo 'Look at the log above for clues or run with DPKG_DEBUG=developer'
+            exit 1
+        fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
