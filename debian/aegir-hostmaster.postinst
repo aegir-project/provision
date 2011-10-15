@@ -87,8 +87,8 @@ case "$1" in
                 exit 1
             fi
             echo "installing the Aegir frontend (Drupal with the hostmaster profile), please wait..."
-            # pass data through JSON 
-            su aegir -c "drush hostmaster-install $FLAGS --backend $site_uri | drush backend-parse" <<EOF
+            # pass data through JSON
+            su aegir -c "cd $VARLIB && drush hostmaster-install $FLAGS --backend $site_uri | drush backend-parse" <<EOF
 { "yes": 1,
   "version": "$VERSION",
   "aegir_db_host": "$AEGIR_DB_HOST",
