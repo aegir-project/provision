@@ -11,7 +11,7 @@ override_dh_install:
 	cp -r "$(CURDIR)/db/"  "$(CURDIR)/dns/"  "$(CURDIR)/http/" "$(CURDIR)/aegir.make" "$(CURDIR)/platform/" "$(CURDIR)"/*.inc "$(CURDIR)"/*.php "$(CURDIR)"/*.info "$(CURDIR)/debian/aegir-provision/usr/share/drush/commands/provision/"
 	# We need this nasty hack, because we added a directory.
 	# TODO: this is really lame, there must be a better way to do this?
-	if [ -d "$(CURDIR)/tests/" ]; then
+	if [ -d "$(CURDIR)/tests" ]; then
 	  cp -r "$(CURDIR)/tests/" "$(CURDIR)/debian/aegir-provision/usr/share/drush/commands/provision/"
 	fi
 	cp "$(CURDIR)/debian/aegir-provision.lintian" "$(CURDIR)/debian/aegir-provision/usr/share/lintian/overrides/aegir-provision"
