@@ -1,0 +1,4 @@
+api = 2
+
+core = 5.x
+projects[] = "drupal"
