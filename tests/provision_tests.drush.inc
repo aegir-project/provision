@@ -8,7 +8,7 @@
  *  them into Provision.
  */
 
-define('PROVISION_TESTS_BUILDS_REPO', 'https://github.com/mig5/builds/raw/master');
+define('PROVISION_TESTS_BUILDS_REPO', dirname(__FILE__) . '/makes');
 
 /**
  * Implementation of hook_drush_command().
