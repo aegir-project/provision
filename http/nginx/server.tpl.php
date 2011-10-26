@@ -150,6 +150,14 @@ map $http_user_agent $is_bot {
   ~*crawl|goog|yahoo|spider|bot|tracker|click|parser  is_bot;
 }
 
+###
+### Deny listed requests for security reasons without 403 response.
+###
+map $args $is_denied {
+  default                                                                                                                0;
+  ~*delete.+from|insert.+into|select.+from|union.+select|onload|\.php.+src|system\(.+|iframe|document\.cookie|\;|\.\.|\| is_denied;
+}
+
 #######################################################
 ###  nginx default server
 #######################################################
