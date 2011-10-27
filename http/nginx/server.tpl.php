@@ -154,8 +154,8 @@ map $http_user_agent $is_bot {
 ### Deny listed requests for security reasons without 403 response.
 ###
 map $args $is_denied {
-  default                                                                                                                0;
-  ~*delete.+from|insert.+into|select.+from|union.+select|onload|\.php.+src|system\(.+|iframe|document\.cookie|\;|\.\.|\| is_denied;
+  default                                                                                                      0;
+  ~*delete.+from|insert.+into|select.+from|union.+select|onload|\.php.+src|system\(.+|document\.cookie|\;|\.\. is_denied;
 }
 
 #######################################################
