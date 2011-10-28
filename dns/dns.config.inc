@@ -4,7 +4,7 @@
 /**
  * Base config class for all dns config files.
  */
-class provisionConfig_dns extends provisionConfig {
+class provisionConfig_dns extends Provision_Config {
   public $mode = 0777;
   function write() {
     parent::write();

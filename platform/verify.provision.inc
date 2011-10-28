@@ -81,7 +81,7 @@ function drush_provision_drupal_pre_provision_verify() {
   }
 }
 
-class provisionConfig_global_settings extends provisionConfig {
+class provisionConfig_global_settings extends Provision_Config {
   public $template = 'global_settings.tpl.php';
   public $description = 'Global settings.php file';
 

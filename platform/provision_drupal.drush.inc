@@ -122,7 +122,7 @@ function _provision_drupal_create_settings_file() {
   provision_drupal_sync_site();
 }
 
-class provisionConfig_drupal_settings extends provisionConfig {
+class provisionConfig_drupal_settings extends Provision_Config {
   public $template = 'provision_drupal_settings.tpl.php';
   public $description = 'Drupal settings.php file';
   public $creds = array();

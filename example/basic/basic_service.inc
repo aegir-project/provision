@@ -140,7 +140,7 @@ class provisionService_example_basic extends provisionService_example {
  *
  * Just a file containing the value passed to us.
  */
-class provisionConfig_example extends provisionConfig {
+class provisionConfig_example extends Provision_Config {
   /**
    * Template file to load. In the same directory as this class definition.
    */

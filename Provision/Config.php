@@ -6,7 +6,7 @@
  * Provision configuration generation classes.
  */
 
-class provisionConfig {
+class Provision_Config {
   /**
    * Template file, a PHP file which will have access to $this and variables
    * as defined in $data.
@@ -227,7 +227,7 @@ class provisionConfig {
  * This is based on the drush_save_config code, but has been abstracted
  * for our purposes.
  */ 
-class provisionConfig_drushrc extends provisionConfig {
+class provisionConfig_drushrc extends Provision_Config {
   public $template = 'provision_drushrc.tpl.php';
   public $description = 'Drush configuration file';
   protected $mode = 0400;
@@ -325,7 +325,7 @@ class provisionConfig_drushrc_site extends provisionConfig_drushrc {
  *
  * When we lock the file, we load the latest stored info.
  */
-class provisionConfig_data_store extends provisionConfig {
+class provisionConfig_data_store extends Provision_Config {
   public $template = 'data_store.tpl.php';
   public $key = 'record';
 

@@ -13,7 +13,7 @@
  * This class will publish the config files to remote
  * servers automatically.
  */
-class provisionConfig_http extends provisionConfig {
+class provisionConfig_http extends Provision_Config {
   function write() {
     parent::write();
     $this->data['server']->sync($this->filename());
