@@ -16,6 +16,40 @@
 drush_errors_on();
 
 /**
+ * Return an instance of the provision autoloader.
+ *
+ * This will instiatate an instance if it needs to.
+ */
+function provision_autoload() {
+  static $instance = NULL;
+
+  if (is_null($instance)) {
+    require_once(__DIR__ . '/Symfony/Component/ClassLoader/UniversalClassLoader.php');
+    $instance = new \Symfony\Component\ClassLoader\UniversalClassLoader();
+    // Activate the autoloader.
+    $instance->register();
+  }
+
+  return $instance;
+}
+
+/**
+ * Register a PECL style prefix with the provision autoloader.
+ *
+ * @param $prefix
+ *   The class prefix to register.
+ * @param $dir
+ *   The directory to search for the classes in.
+ */
+function provision_autoload_register_prefix($prefix, $dir) {
+  provision_autoload()->registerPrefix($prefix, $dir);
+}
+
+// Add our prefix to the autoloader.
+provision_autoload_register_prefix('Provision_', __DIR__);
+
+
+/**
  * @defgroup sitedata Site data management utility functions.
  * @{
  * The provision framework maintains a site.php file in the sites directory, to maintain additional
