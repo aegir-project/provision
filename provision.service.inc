@@ -5,7 +5,7 @@ require_once('provision.inc');
 require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
 
-class provisionService extends provisionChainedState {
+class provisionService extends Provision_ChainedState {
 
   /**
    * The server this service is associated to

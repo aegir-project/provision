@@ -19,7 +19,7 @@ function provision_file() {
   return $instance;
 }
 
-class provisionFileSystem extends provisionChainedState {
+class provisionFileSystem extends Provision_ChainedState {
    /**
    * Copy file from $source to $destination.
    *
