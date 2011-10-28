@@ -29,7 +29,7 @@ Description: mass Drupal hosting system - backend
 
 Package: aegir-hostmaster
 Architecture: all
-Depends: ${misc:Depends}, drush (>= 4.3), drush-make, php5-mysql, apache2, libapache2-mod-php5, aegir-provision, git-core, unzip
+Depends: ${misc:Depends}, drush (>= 4.3), drush-make, php5-mysql, apache2, libapache2-mod-php5, aegir-provision (>= ${source:Version}), git-core, unzip
 Recommends: php5-gd, php5
 Description: mass Drupal hosting system - frontend
  A set of contributed modules for Drupal that aims to solve the
@@ -49,7 +49,7 @@ Description: mass Drupal hosting system - frontend
 
 Package: aegir
 Architecture: all
-Depends: ${misc:Depends}, aegir-provision, aegir-hostmaster
+Depends: ${misc:Depends}, aegir-provision (>= ${source:Version}), aegir-hostmaster (>= ${source:Version})
 Description: mass Drupal hosting system
  A set of contributed modules for Drupal that aims to solve the
  problem of managing a large number of Drupal sites. It does this by
