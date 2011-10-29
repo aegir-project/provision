@@ -73,7 +73,7 @@ function dns_provision_services() {
 
 
 
-class provisionService_dns extends provisionService {
+class provisionService_dns extends Provision_Service {
   public $service = 'dns';
   public $slave = null;
 

@@ -15,7 +15,7 @@ class Provision_Context_server extends Provision_Context {
   /**
    * Associative array of services for this server.
    *
-   * @see provisionService
+   * @see Provision_Service
    */
   protected $services = array();
 
@@ -106,7 +106,7 @@ class Provision_Context_server extends Provision_Context {
       }
     }
     else {
-      $this->services[$service] = new provisionService_null($this->name);
+      $this->services[$service] = new Provision_Service_null($this->name);
     }
   }
 

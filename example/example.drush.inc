@@ -35,7 +35,7 @@ function example_provision_services() {
  * This class should define the 'public API' to be used by the rest
  * of the system, which should not expose implementation details.
  */
-class provisionService_example extends provisionService {
+class provisionService_example extends Provision_Service {
   public $service = 'http';
 
   /**

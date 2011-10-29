@@ -248,7 +248,7 @@ class Provision_Context {
       return $this->{$this->parent_key}->service($service, ($name) ? $name : $this->name);
     }
     else {
-      return new provisionService_null($this->name);
+      return new Provision_Service_null($this->name);
     }
   }
 

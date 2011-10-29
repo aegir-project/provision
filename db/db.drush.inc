@@ -33,7 +33,7 @@ function db_drush_help($section) {
 }
 
 
-class provisionService_db extends provisionService {
+class provisionService_db extends Provision_Service {
   protected $service = 'db';
 
   /**

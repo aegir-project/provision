@@ -8,7 +8,7 @@ function http_provision_services() {
 
 
 // Base http service class. 
-class provisionService_http extends provisionService {
+class provisionService_http extends Provision_Service {
   public $service = 'http';
   protected $ssl_enabled = FALSE;
 
