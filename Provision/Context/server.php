@@ -27,7 +27,7 @@ class Provision_Context_server extends Provision_Context {
       '--master_url' => 'server: Hostmaster URL',
     );
     foreach (drush_command_invoke_all('provision_services') as $service => $default) {
-      $reflect = new reflectionClass('provisionService_' . $service);
+      $reflect = new reflectionClass('Provision_Service_' . $service);
       $base_dir = dirname($reflect->getFilename());
       $types = array();
       $options['--' . $service . '_service_type'] = 'placeholder';
@@ -81,7 +81,7 @@ class Provision_Context_server extends Provision_Context {
    * Spawn an instance for a specific service type and associate it to the owner.
    */
   function spawn_service($service, $default = null) {
-    $reflect = new reflectionClass('provisionService_' . $service);
+    $reflect = new reflectionClass('Provision_Service_' . $service);
     $base_dir = dirname($reflect->getFilename());
 
     $type_option = "{$service}_service_type";
@@ -96,13 +96,16 @@ class Provision_Context_server extends Provision_Context {
     }
     if ($type) {
       $file = sprintf("%s/%s/%s_service.inc", $base_dir, $type, $type);
-      $className = sprintf("provisionService_%s_%s", $service, $type);
-      if (file_exists($file)) {
+      $className = sprintf("Provision_Service_%s_%s", $service, $type);
+      if (class_exists($className)) {
         drush_log("Loading $type driver for the $service service");
-        include_once($file);
+        //include_once($file);
         $object = new $className($this->name);
         $this->services[$service] = $object;
         $this->setProperty($type_option, $type);
+      }
+      else {
+        drush_log("Unable to load $type driver for the $service service", 'error');
       }
     }
     else {
