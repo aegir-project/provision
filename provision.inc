@@ -25,7 +25,7 @@ function provision_autoload() {
 
   if (is_null($instance)) {
     require_once(__DIR__ . '/Symfony/Component/ClassLoader/UniversalClassLoader.php');
-    $instance = new \Symfony\Component\ClassLoader\UniversalClassLoader();
+    $instance = new UniversalClassLoader();
     // Activate the autoloader.
     $instance->register();
   }
