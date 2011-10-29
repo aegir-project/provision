@@ -82,7 +82,7 @@ class Provision_Service_dns extends Provision_Service {
    * need to be merged, but then the cluster_web_server parameter need to be
    * renamed...
    *
-   * @see provisionService_http_cluster::_each_server()
+   * @see Provision_Service_http_cluster::_each_server()
    */
   function _each_server($method, $args = array()) {
     // Return True by default.

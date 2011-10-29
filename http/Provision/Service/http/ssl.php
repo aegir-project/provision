@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file The base implementation of the SSL capabale web service.
@@ -11,7 +10,7 @@
  * In general, these function the same as normal servers, but have an extra
  * port and some extra variables in their templates.
  */
-class provisionService_http_ssl extends provisionService_http_public {
+class Provision_Service_http_ssl extends Provision_Service_http_public {
   protected $ssl_enabled = TRUE;
 
   function default_ssl_port() {
@@ -61,7 +60,7 @@ class provisionService_http_ssl extends provisionService_http_public {
         $data = array_merge($data, $certs);
 
         // assign ip address based on ssl_key
-        $ip = provisionService_http_ssl::assign_certificate_ip($ssl_key, $this->server);
+        $ip = Provision_Service_http_ssl::assign_certificate_ip($ssl_key, $this->server);
 
         if (!$ip) {
           drush_set_error("SSL_IP_FAILURE", dt("There are no more IP addresses available on %server for the %ssl_key certificate.", array(
@@ -177,7 +176,7 @@ class provisionService_http_ssl extends provisionService_http_public {
 
     // try to assign one
     foreach ($server->ip_addresses as $ip) {
-      if (!provisionService_http_ssl::get_ip_certificate($ip, $server)) {
+      if (!Provision_Service_http_ssl::get_ip_certificate($ip, $server)) {
         touch("{$path}/{$ssl_key}__{$ip}.receipt");
         return $ip;
       }
@@ -195,7 +194,7 @@ class provisionService_http_ssl extends provisionService_http_public {
    * by other certificates.
    */
   static function free_certificate_ip($ssl_key, $server) {
-    $ip = provisionService_http_ssl::assign_certificate_ip($ssl_key, $server);
+    $ip = Provision_Service_http_ssl::assign_certificate_ip($ssl_key, $server);
     $file = "{$server->http_ssld_path}/{$ssl_key}__{$ip}.receipt";
     if (file_exists($file)) {
       unlink($file);
@@ -256,115 +255,3 @@ class provisionService_http_ssl extends provisionService_http_public {
     parent::verify();
   }
 }
-
-
-/**
- * Base class for SSL enabled server level config.
- */
-class provisionConfig_http_ssl_server extends provisionConfig_http_server {
-  public $template = 'server_ssl.tpl.php';
-  public $description = 'encryption enabled webserver configuration';
-}
-
-
-/**
- * Base class for SSL enabled virtual hosts.
- *
- * This class primarily abstracts the process of making sure the relevant keys
- * are synched to the server when the config files that use them get created.
- */
-class provisionConfig_http_ssl_site extends provisionConfig_http_site {
-  public $template = 'vhost_ssl.tpl.php';
-  public $disabled_template = 'vhost_ssl_disabled.tpl.php';
-
-  public $description = 'encrypted virtual host configuration';
-
-  function write() {
-    parent::write();
-
-    $ip_addresses = drush_get_option('site_ip_addresses', array(), 'site');
-    if ($this->ssl_enabled && $this->ssl_key) {
-      $path = dirname($this->data['ssl_cert']);
-      // Make sure the ssl.d directory in the server ssl.d exists. 
-      provision_file()->create_dir($path, 
-      dt("SSL Certificate directory for %key on %server", array(
-        '%key' => $this->ssl_key,
-        '%server' => $this->data['server']->remote_host,
-      )), 0700);
-
-      // Touch a file in the server's copy of this key, so that it knows the key is in use.
-      touch("{$path}/{$this->uri}.receipt");
-
-      // Copy the certificates to the server's ssl.d directory.
-      provision_file()->copy(
-        $this->data['ssl_cert_source'],
-        $this->data['ssl_cert']);
-      provision_file()->copy(
-        $this->data['ssl_cert_key_source'],
-        $this->data['ssl_cert_key']);
-      // Copy the chain certificate, if it is set.
-      if (!empty($this->data['ssl_chain_cert_source'])) {
-	      provision_file()->copy(
-          $this->data['ssl_chain_cert_source'],
-          $this->data['ssl_chain_cert']);
-      }
-      // Sync the key directory to the remote server.
-      $this->data['server']->sync($path, array(
-       'exclude' => "{$path}/*.receipt",  // Don't need to synch the receipts
-     ));
-    }
-    elseif ($ip = $ip_addresses[$this->data['server']->name]) {
-      if ($ssl_key = provisionService_http_ssl::get_ip_certificate($ip, $this->data['server'])) {
-        $this->clear_certs($ssl_key);
-      }
-    }
-  }
-
-  /**
-   * Remove a stale certificate file from the server.
-   */
-  function unlink() {
-    parent::unlink();
-
-    $ip_addresses = drush_get_option('site_ip_addresses', array(), 'site');
-
-    if ($this->ssl_enabled && $this->ssl_key) {
-      $this->clear_certs($this->ssl_key);
-    }
-    elseif ($ip = $ip_addresses[$this->data['server']->name]) {
-      if ($ssl_key = provisionService_http_ssl::get_ip_certificate($ip, $this->data['server'])) {
-        $this->clear_certs($ssl_key);
-      }
-    }
-
-  }
-  
-  /**
-   * Small utility function to stop code duplication.
-   */
-
-  private function clear_certs($ssl_key) {
-    $path = $this->data['server']->http_ssld_path . "/$ssl_key";
-
-    // Remove the file system reciept we left for this file
-    provision_file()->unlink("{$path}/{$this->uri}.receipt")->
-        succeed(dt("Deleted SSL Certificate association stub for %site on %server", array(
-          '%site' => $this->uri,
-          '%server' => $this->data['server']->remote_host)));
-
-    $used = provisionService_http_ssl::certificate_in_use($ssl_key, $this->data['server']);
-
-    if (!$used) {
-      // we can remove the certificate from the server ssl.d directory.
-      _provision_recursive_delete($path);
-      // remove the file from the remote server too.
-      $this->data['server']->sync($path);
-
-      // Most importantly, we remove the hold this cert had on the IP address.
-      provisionService_http_ssl::free_certificate_ip($ssl_key, $this->data['server']);
-    }
-  }
-
-
-}
-

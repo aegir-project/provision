@@ -35,7 +35,7 @@ class Provision_Context_server extends Provision_Context {
         if (preg_match('%^' . $base_dir . '/([a-z]+)/(?:\1)_service.inc$%', $service_file, $match)) {
           $types[] = $match[1];
           include_once($service_file);
-          $options = array_merge($options, call_user_func(array(sprintf('provisionService_%s_%s', $service, $match[1]), 'option_documentation')));
+          $options = array_merge($options, call_user_func(array(sprintf('Provision_Service_%s_%s', $service, $match[1]), 'option_documentation')));
         }
       }
       $options['--' . $service . '_service_type'] = 'server: ' . implode(', ', $types) . ', or null; default ' . (empty($default) ? 'null' : $default);

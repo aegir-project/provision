@@ -14,7 +14,7 @@
  *   Internal use only, set default object returned by d().
  *
  * @return
- *   provisionContext object.
+ *   Provision_Context object.
  */
 function & d($name = NULL, $_root_object = FALSE) {
   static $instances = null;

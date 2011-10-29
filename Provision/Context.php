@@ -178,7 +178,7 @@ class Provision_Context {
     // Set up subscriptions for the available services.
     $service_list = drush_command_invoke_all('provision_services');
     foreach ($service_list as $service => $default) {
-      $class = "provisionService_{$service}";
+      $class = "Provision_Service_{$service}";
       $func = "subscribe_{$this->type}";
       if (method_exists($class, $func)) {
         call_user_func(array($class, $func), $this);
@@ -238,7 +238,7 @@ class Provision_Context {
    *   Override service owner with a context name as accepted by d().
    *
    * @return
-   *   A provisionService object.
+   *   A Provision_Service object.
    */
   function service($service, $name = null) {
     if (isset($this->service_subs[$service])) {
@@ -256,7 +256,7 @@ class Provision_Context {
    * Call method $callback on each of the context's service objects.
    *
    * @param $callback
-   *   A provisionService method.
+   *   A Provision_Service method.
    * @return
    *   An array of return values from method implementations.
    */
