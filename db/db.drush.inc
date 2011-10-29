@@ -10,16 +10,25 @@
 
 //include_once(dirname(__FILE__) . '/../provision.service.inc');
 
+/**
+ * Implements hook_provision_services().
+ */
 function db_provision_services() {
   db_provision_register_autoload();
   return array('db' => NULL);
 }
 
+/**
+ * Implements hook_drush_exit().
+ */
 function db_drush_exit() {
   // determine how to close it too.
   d()->service('db')->close();
 }
 
+/**
+ * Implements hook_drush_help().
+ */
 function db_drush_help($section) {
   switch ($section) {
     case 'error:PROVISION_CONNECT_DB_FAILED' :
@@ -33,10 +42,16 @@ function db_drush_help($section) {
   }
 }
 
+/**
+ * Implements hook_drush_init().
+ */
 function db_drush_init() {
   db_provision_register_autoload();
 }
 
+/**
+ * Register our directory as a place to find provision classes.
+ */
 function db_provision_register_autoload() {
   static $loaded = FALSE;
   if (!$loaded) {
