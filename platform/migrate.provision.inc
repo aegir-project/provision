@@ -124,7 +124,7 @@ function drush_provision_drupal_post_provision_migrate($platform, $new_uri = nul
 
   if (!is_null($new_uri) && ($new_uri != d()->uri)) {
     // remove the existing alias 
-    $config = new provisionConfig_drushrc_alias(d()->name);
+    $config = new Provision_Config_Drushrc_Alias(d()->name);
     $config->unlink();
   }
 

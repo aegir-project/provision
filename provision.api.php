@@ -30,12 +30,12 @@ function drush_hook_provision_services() {
  * @param $uri
  *   URI for the site.
  * @param $data
- *   Associative array of data from provisionConfig_drupal_settings::data.
+ *   Associative array of data from Provision_Config_Drupal_Settings::data.
  *
  * @return
  *   Lines to add to the site's settings.php file.
  *
- * @see provisionConfig_drupal_settings
+ * @see Provision_Config_Drupal_Settings
  */
 function drush_hook_provision_drupal_config($uri, $data) {
   return '$conf[\'reverse_proxy\'] = TRUE;';

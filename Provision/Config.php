@@ -19,9 +19,9 @@ class Provision_Config {
   public $data = array();
 
   /**
-   * A provisionContext object thie configuration relates to.
+   * A Provision_Context object thie configuration relates to.
    *
-   * @var provisionContext
+   * @var Provision_Context
    */
   public $context = null;
 
@@ -64,7 +64,7 @@ class Provision_Config {
    * Constructor, overriding not recommended.
    *
    * @param $context
-   *   An alias name for d(), the provisionContext that this configuration
+   *   An alias name for d(), the Provision_Context that this configuration
    *   is relevant to.
    * @param $data
    *   An associative array to potentially manipulate in process() and make
@@ -119,6 +119,7 @@ class Provision_Config {
     $reflect = new reflectionObject($this);
 
     if (isset($this->template)) {
+      drush_print_r($this->template);
       while ($class_name) {
         // Iterate through the config file's parent classes until we
         // find the template file to use.
@@ -126,6 +127,7 @@ class Provision_Config {
         $base_dir = dirname($reflect->getFilename());
 
         $file = $base_dir . '/' . $this->template;
+        drush_print_r($file);
 
         if (file_exists($file) && is_readable($file)) {
           drush_log("Template loaded: $file");
@@ -134,7 +136,7 @@ class Provision_Config {
 
         $class_name = get_parent_class($class_name);
       }
-    } 
+    }
 
     return false;
   }
@@ -219,225 +221,4 @@ class Provision_Config {
     return provision_file()->unlink($this->filename())->status();
   }
   
-}
-
-/**
- * Specialized class to handle the creation of drushrc.php files.
- *
- * This is based on the drush_save_config code, but has been abstracted
- * for our purposes.
- */ 
-class provisionConfig_drushrc extends Provision_Config {
-  public $template = 'provision_drushrc.tpl.php';
-  public $description = 'Drush configuration file';
-  protected $mode = 0400;
-  protected $context_name = 'drush';
-
-  function filename() {
-    return _drush_config_file($this->context_name);
-  }
-
-  function __construct($context, $data = array()) {
-    parent::__construct($context, $data);
-    $this->load_data();
-  }
-
-  function load_data() {
-    // we fetch the context to pass into the template based on the context name
-    $this->data = array_merge(drush_get_context($this->context_name), $this->data);
-  }
-
-  function process() {
-    unset($this->data['context-path']);
-    unset($this->data['config-file']);
-    $this->data['option_keys'] = array_keys($this->data);
-  }
-}
-
-/**
- * Class to write an alias records.
- */
-class provisionConfig_drushrc_alias extends provisionConfig_drushrc {
-  public $template = 'provision_drushrc_alias.tpl.php';
-
-  /**
-   * @param $name
-   *   String '\@name' for named context.
-   * @param $options
-   *   Array of string option names to save.
-   */
-  function __construct($context, $data = array()) {
-    parent::__construct($context, $data);
-    $this->data = array(
-      'aliasname' => ltrim($context, '@'),
-      'options' => $data,
-    );
-  }
-
-  function filename() {
-    return drush_server_home() . '/.drush/' . $this->data['aliasname'] . '.alias.drushrc.php'; 
-  }
-}
-
-/**
- * Server level config for drushrc.php files.
- */
-class provisionConfig_drushrc_server extends provisionConfig_drushrc {
-  protected $context_name = 'user';
-  public $description = 'Server drush configuration';
-}
-
-/**
- * Class for writing $platform/drushrc.php files.
- */
-class provisionConfig_drushrc_platform extends provisionConfig_drushrc {
-  protected $context_name = 'drupal';
-  public $description = 'Platform Drush configuration file';
-  // platforms contain no confidential information
-  protected $mode = 0444;
-
-  function filename() {
-    return $this->root . '/drushrc.php';
-  }
-}
-
-/**
- * Class for writing $platform/sites/$url/drushrc.php files.
- */
-class provisionConfig_drushrc_site extends provisionConfig_drushrc {
-  protected $context_name = 'site';
-  public $template = 'provision_drushrc_site.tpl.php';
-  public $description = 'Site Drush configuration file';
-
-  function filename() {
-    return $this->site_path . '/drushrc.php';
-  }
-}
-
-/**
- * Base class for data storage.
- *
- * This class provides a file locking mechanism for configuration
- * files that may be susceptible to race conditions.
- *
- * The records loaded from the config and the records set in this
- * instance are kept in separate arrays.
- *
- * When we lock the file, we load the latest stored info.
- */
-class provisionConfig_data_store extends Provision_Config {
-  public $template = 'data_store.tpl.php';
-  public $key = 'record';
-
-  private $locked = FALSE;
-  protected $fp = null;
-
-  public $records = array();
-  public $loaded_records = array();
-
-  protected $mode = 0700;
-
-
-  function __construct($context, $data = array()) {
-    parent::__construct($context, $data);
-
-    $this->load_data();
-  }
-
-  /**
-   * Ensure the file pointer is closed and the lock released upon destruction.
-   */
-  function __destruct() {
-    // release the file lock if we have it.
-    $this->close();
-  }
-
-  /**
-   * Open the file.
-   */
-  function open() {
-    if (!is_resource($this->fp)) {
-      $this->fp = fopen($this->filename(), "w+");
-    }
-  }
-
-  /**
-   * Lock the file from other writes.
-   *
-   * After the file has been locked, we reload the data from the file
-   * so that any changes we make will not override previous changes.
-   */
-  function lock() {
-    if (!$this->locked) {
-      $this->open();
-      flock($this->fp, LOCK_EX);
-
-      // Do one last load before setting our locked status.
-      $this->load_data();
-      $this->locked = TRUE;
-    }
-  }
-
-  /**
-   * Put the contents in the locked file.
-   *
-   * We call the lock method here to insure we have the lock.
-   */
-  function file_put_contents($filename, $text) {
-    $this->lock();
-    fwrite($this->fp, $text);
-    fflush($this->fp);
-  }
-
-  /**
-   * Release the write log on the data store file.
-   */
-  function unlock() {
-    if ($this->locked && is_resource($this->fp)) {
-      flock($this->fp, LOCK_UN);
-      $this->locked = FALSE;
-    }
-  }
-
-  /**
-   * Close the file pointer and release the lock (if applicable).
-   */
-  function close() {
-    if (is_resource($this->fp)) {
-      fclose($this->fp);
-    }
-  }
-
-  /**
-   * Load the data from the data store into our loaded_records property.
-   */
-  function load_data() {
-    if (!$this->locked) {
-      // Once we have the lock we dont need to worry about it changing
-      // from under us.
-      if (file_exists($this->filename()) && is_readable($this->filename())) {
-        include($this->filename());
-        $data_key = $this->key;
-        if (isset(${$data_key}) && is_array(${$data_key})) {
-          $this->loaded_records = ${$data_key};
-        }
-      }
-    }
-  }
-
-  /**
-   * Return the merged contents of the records from the data store , and the values set by us.
-   *
-   * This is basically the data that would be written to the file if we were to write it right now.
-   */
-  function merged_records() {
-    return array_merge($this->loaded_records, $this->records);
-  }
-
-  /**
-   * Expose the merged records to the template file.
-   */
-  function process() {
-    $this->data['records'] = array_filter(array_merge($this->loaded_records, $this->records));
-  }
 }

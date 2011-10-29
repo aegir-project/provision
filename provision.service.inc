@@ -16,9 +16,9 @@ class provisionService extends Provision_ChainedState {
    * The context in which this service stores its data
    *
    * This is usually an object made from a class derived from the
-   * provisionContext base class
+   * Provision_Context base class
    *
-   * @see provisionContext
+   * @see Provision_Context
    */
   public $context;
 

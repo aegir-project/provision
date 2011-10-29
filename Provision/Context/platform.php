@@ -9,7 +9,7 @@
 /**
  * Class for the platform context.
  */
-class provisionContext_platform extends provisionContext {
+class Provision_Context_platform extends Provision_Context {
   public $parent_key = 'server';
 
   static function option_documentation() {

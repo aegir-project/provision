@@ -11,7 +11,7 @@
  * This class bootstraps the Service API by generating server
  * objects for each of the available service types.
  */
-class provisionContext_server extends provisionContext {
+class Provision_Context_server extends Provision_Context {
   /**
    * Associative array of services for this server.
    *

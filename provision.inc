@@ -40,9 +40,31 @@ function provision_autoload() {
  *   The class prefix to register.
  * @param $dir
  *   The directory to search for the classes in.
+ * @param $prepend
+ *   If the directory should be searched first for the classes in the given
+ *   prefix, set this to TRUE, otherwise, the default, FALSE, is fine.
  */
-function provision_autoload_register_prefix($prefix, $dir) {
-  provision_autoload()->registerPrefix($prefix, $dir);
+function provision_autoload_register_prefix($prefix, $dir, $prepend = FALSE) {
+  
+  // Get any current directories set for this prefix.
+  $current_prefixes = provision_autoload()->getPrefixes();
+  if (isset($current_prefixes[$prefix])) {
+    $dirs = $current_prefixes[$prefix];
+  }
+  else {
+    $dirs = array();
+  }
+  
+  // Now add the new one.
+  if ($prepend) {
+    array_unshift($dirs, $dir);
+  }
+  else {
+    array_push($dirs, $dir);
+  }
+  
+  // Set the prefixes.
+  provision_autoload()->registerPrefix($prefix, $dirs);
 }
 
 // Add our prefix to the autoloader.
@@ -118,7 +140,7 @@ function provision_get_base_url() {
  */
 function provision_save_server_data() {
   if (!drush_get_error()) {
-    $config = new provisionConfig_drushrc_server(d()->name);
+    $config = new Provision_Config_Drushrc_Server(d()->name);
     $config->write();
   }
 }
@@ -126,7 +148,7 @@ function provision_save_server_data() {
 
 function provision_save_site_data() {
   if (!drush_get_error()) {
-    $config = new provisionConfig_drushrc_site(d()->name);
+    $config = new Provision_Config_Drushrc_Site(d()->name);
     $config->write();
     provision_drupal_sync_site();
   }
@@ -138,7 +160,7 @@ function provision_save_site_data() {
  */
 function provision_save_platform_data() {
   if (!drush_get_error()) {
-    $config = new provisionConfig_drushrc_platform(d()->name);
+    $config = new Provision_Config_Drushrc_Platform(d()->name);
     $config->write();
     provision_drupal_sync_site();
   }
@@ -455,14 +477,6 @@ class provision {
   }
 }
 
-
-
 include_once('provision.context.inc');
-include_once('provision.context.server.inc');
-include_once('provision.context.platform.inc');
-include_once('provision.context.site.inc');
 include_once('provision.service.inc');
 include_once('provision.file.inc');
-include_once('provision.config.inc');
-
-

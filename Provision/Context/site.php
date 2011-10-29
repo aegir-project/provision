@@ -5,7 +5,7 @@
  * @file Provision named context site class.
  */
 
-class provisionContext_site extends provisionContext {
+class Provision_Context_site extends Provision_Context {
   public $parent_key = 'platform';
 
   static function option_documentation() {
@@ -41,4 +41,3 @@ class provisionContext_site extends provisionContext {
     $this->setProperty('profile', 'default');
   }
 }
-

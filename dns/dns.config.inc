@@ -20,7 +20,7 @@ class provisionConfig_dns extends Provision_Config {
 
 // The data store for the server configuration
 // contains a list of zones we manage.
-class provisionConfig_dns_server_store extends provisionConfig_data_store {
+class provisionConfig_dns_server_store extends Provision_Config_Data_Store {
   function filename() {
     return $this->data['server']->dns_data_path . '/zones.master.inc';
   }
@@ -72,7 +72,7 @@ class provisionConfig_dns_server extends provisionConfig_dns {
   }
 }
 
-class provisionConfig_dns_zone_store extends provisionConfig_data_store {
+class provisionConfig_dns_zone_store extends Provision_Config_Data_Store {
   function filename() {
     return "{$this->data['server']->dns_data_path}/{$this->data['name']}.zone.inc";
   }

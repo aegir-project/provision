@@ -1,4 +1,9 @@
-<?php include('provision_drushrc.tpl.php'); ?>
+<?php print "<?php \n"; ?>
+
+<?php foreach ($option_keys as $key) {
+  print "\n\$options['$key'] = ". var_export(${$key}, TRUE) .';';
+}
+?>
 
 # Aegir additions
 <?php foreach (array('db_type', 'db_port', 'db_host', 'db_user', 'db_passwd', 'db_name') as $key) { ?>
