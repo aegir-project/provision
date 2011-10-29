@@ -2,7 +2,7 @@
 
 // simple wrapper class for PDO based db services
 
-class provisionService_db_pdo extends provisionService_db {
+class Provision_Service_db_pdo extends Provision_Service_db {
   public $conn;
   protected $creds;
   private $dsn;

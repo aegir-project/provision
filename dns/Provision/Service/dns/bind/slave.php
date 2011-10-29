@@ -6,18 +6,18 @@
  * A lot of this is inspired by the BIND implementation of the DNS service and
  * the cluster HTTP service.
  */
-class provisionService_dns_bind_slave extends provisionService_dns {
+class Provision_Service_dns_bind_slave extends Provision_Service_dns {
   protected $application_name = 'bind';
 
   protected $has_restart_cmd = TRUE;
   
   function default_restart_cmd() {
-    return provisionService_dns_bind::bind_default_restart_cmd();
+    return Provision_Service_dns_bind::bind_default_restart_cmd();
   }
 
   function init_server() {
     parent::init_server();
-    $this->configs['server'][] = 'provisionConfig_bind_slave';
+    $this->configs['server'][] = 'Provision_Config_Bind_slave';
   }
 
   function parse_configs() {
@@ -49,7 +49,7 @@ class provisionService_dns_bind_slave extends provisionService_dns {
    *
    * @arg $zone string the zonefile name to create
    *
-   * @see provisionService_dns::create_zone()
+   * @see Provision_Service_dns::create_zone()
    */
   function create_zone($zone = null) {
     if (is_null($zone) && ($this->context->type == 'site')) {
@@ -72,20 +72,5 @@ class provisionService_dns_bind_slave extends provisionService_dns {
    */
   function delete_zone($zone) {
     return $this->config('server')->record_del($zone, $zone)->write();
-  }
-}
-
-class provisionConfig_bind_slave extends provisionConfig_dns_server {
-  public $template = 'slave.tpl.php';
-
-  function process() {
-    parent::process();
-    if ($this->context->type == 'server') {
-     $ips = $this->context->ip_addresses;
-    }
-    else {
-     $ips = $this->context->server->ip_addresses;
-    }
-    $this->data['master_ip_list'] = implode(';', $ips);
   }
 }

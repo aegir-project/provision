@@ -1,90 +1,12 @@
 <?php
 
-
-/**
- * Base config class for all dns config files.
- */
-class provisionConfig_dns extends Provision_Config {
-  public $mode = 0777;
-  function write() {
-    parent::write();
-    $this->data['server']->sync($this->filename());
-  }
-
-  function unlink() {
-    parent::unlink();
-    $this->data['server']->sync($this->filename());
-  }
-}
-
-
-// The data store for the server configuration
-// contains a list of zones we manage.
-class provisionConfig_dns_server_store extends Provision_Config_Data_Store {
-  function filename() {
-    return $this->data['server']->dns_data_path . '/zones.master.inc';
-  }
-}
-
-/**
- * Base config class for the server level config.
- */
-class provisionConfig_dns_server extends provisionConfig_dns {
-  public $template = 'server.tpl.php';
-  public $description = 'Server-wide DNS configuration';
-
-  public $data_store_class = 'provisionConfig_dns_server_store';
-
-  function filename() {
-    if (isset($this->data['application_name'])) {
-      $file = $this->data['application_name'] . '.conf';
-      return $this->data['server']->config_path . '/' . $file;
-    }
-    else {
-      return FALSE;
-    }
-  }
-
-  function write() {
-    // lock the store until we are done generating our config.
-    $this->store->lock();
-
-    parent::write();
-
-    $this->store->write();
-    $this->store->close();
-    if (isset($this->data['application_name'])) {
-      $file = $this->data['application_name'] . '.conf';
-      // We link the app_name.conf file on the remote server to the right version.
-      $cmd = sprintf('ln -sf %s %s', 
-        escapeshellarg($this->data['server']->config_path . '/' . $file), 
-        escapeshellarg($this->data['server']->aegir_root . '/config/' . $file)
-      );
-      
-      if ($this->data['server']->shell_exec($cmd)) {
-        drush_log(dt("Created symlink for %file on %server", array(
-          '%file' => $file,
-          '%server' => $this->data['server']->remote_host,
-        )));  
-       
-      };
-    }
-  }
-}
-
-class provisionConfig_dns_zone_store extends Provision_Config_Data_Store {
-  function filename() {
-    return "{$this->data['server']->dns_data_path}/{$this->data['name']}.zone.inc";
-  }
-}
-
 /**
  * Representation of a DNS zonefile
  *
  * This is the internal representation of a zonefile. It can be
  * extended by other subclasses to implement various engines, but it
  * has its own internal storage (through
- * provisionConfig_dns_zone_store).
+ * Provision_Config_Dns_Zone_Store).
  *
  * It assumes a certain structure in the records of the store.
  *
@@ -113,13 +35,13 @@ class provisionConfig_dns_zone_store extends Provision_Config_Data_Store {
  *
  * @see drush_dns_provision_zone()
  * @see increment_serial()
- * @see provisionConfig_dns_zone_store
+ * @see Provision_Config_Dns_Zone_Store
  */
-class provisionConfig_dns_zone extends provisionConfig_dns {
+class Provision_Config_Dns_Zone extends Provision_Config_Dns {
   public $template = 'zone.tpl.php';
   public $description = 'Zone-wide DNS configuration';
 
-  public $data_store_class = 'provisionConfig_dns_zone_store';
+  public $data_store_class = 'Provision_Config_Dns_Zone_Store';
 
   function filename() {
     return "{$this->data['server']->dns_zoned_path}/{$this->data['name']}.zone";
@@ -133,7 +55,7 @@ class provisionConfig_dns_zone extends provisionConfig_dns {
 
     // increment the serial.
     $serial = (isset($records['@']['SOA']['serial']) ? $records['@']['SOA']['serial'] : NULL);
-    $this->store->records['@']['SOA']['serial'] = $records['serial'] = provisionService_dns::increment_serial($serial);
+    $this->store->records['@']['SOA']['serial'] = $records['serial'] = Provision_Service_dns::increment_serial($serial);
 
     $this->data['records'] = $records;
   }
@@ -194,15 +116,3 @@ class provisionConfig_dns_zone extends provisionConfig_dns {
   }
 
 }
-
-
-class provisionConfig_dns_host extends provisionConfig_dns {
-  public $template = 'host.tpl.php';
-  public $description = 'Host-wide DNS configuration';
-
-  function filename() {
-    return "{$this->data['server']->dns_hostd_path}/{$this->uri}.hosts";
-  }
-}
-
-
