@@ -63,6 +63,37 @@ function drush_provision_tests_run() {
   drush_provision_tests_install_site('drupal7', 'drupal7-minimal', 'minimal');
   drush_provision_tests_install_site('openatrium', 'openatrium-openatrium', 'openatrium');
 
+  // Create some sites and migrate them.
+  if ($drupal5_tests) {
+    drush_provision_tests_install_platform('drupal5', 'drupal5_other');
+    drush_provision_tests_clone_site('drupal5-default', 'drupal5', 'drupal5-migrate-drupal5-other');
+    drush_provision_tests_migrate_site('drupal5-migrate-drupal5-other', 'drupal5_other');
+    drush_provision_tests_remove_site('drupal5-migrate-drupal5-other');
+    drush_provision_tests_remove_platform('drupal5_other');
+  }
+  drush_provision_tests_install_platform('drupal6', 'drupal6_other');
+  drush_provision_tests_clone_site('drupal6-default', 'drupal6', 'drupal6-migrate-drupal6-other');
+  drush_provision_tests_migrate_site('drupal6-migrate-drupal6-other', 'drupal6_other');
+  drush_provision_tests_remove_site('drupal6-migrate-drupal6-other');
+  drush_provision_tests_remove_platform('drupal6_other');
+
+  drush_provision_tests_install_platform('drupal7', 'drupal7_other');
+  drush_provision_tests_clone_site('drupal7-standard', 'drupal7', 'drupal7-migrate-drupal7-other');
+  drush_provision_tests_migrate_site('drupal7-migrate-drupal7-other', 'drupal7_other');
+  drush_provision_tests_remove_site('drupal7-migrate-drupal7-other');
+  drush_provision_tests_remove_platform('drupal7_other');
+
+  // Create some sites, and upgrade them
+  if ($drupal5_tests) {
+    drush_provision_tests_clone_site('drupal5-default', 'drupal5', 'drupal5-upgrade-drupal7');
+    drush_provision_tests_migrate_site('drupal5-upgrade-drupal7', 'drupal6');
+    drush_provision_tests_migrate_site('drupal5-upgrade-drupal7', 'drupal7');
+    drush_provision_tests_remove_site('drupal5-upgrade-drupal7');
+  }
+  drush_provision_tests_clone_site('drupal6-default', 'drupal6', 'drupal6-upgrade-drupal7');
+  drush_provision_tests_migrate_site('drupal6-upgrade-drupal7', 'drupal7');
+  drush_provision_tests_remove_site('drupal6-upgrade-drupal7');
+
   // Remove the sites.
   if ($drupal5_tests) {
     drush_provision_tests_remove_site('drupal5-default', 'default');
@@ -72,39 +103,8 @@ function drush_provision_tests_run() {
   drush_provision_tests_remove_site('drupal7-minimal');
   drush_provision_tests_remove_site('openatrium-openatrium');
 
-  // Create some sites and migrate them.
-  if ($drupal5_tests) {
-    drush_provision_tests_install_platform('drupal5', 'drupal5_other');
-    drush_provision_tests_install_site('drupal5', 'drupal5-migrate-drupal5-other', 'default');
-    drush_provision_tests_migrate_site('drupal5-migrate-drupal5-other', 'drupal5_other');
-    drush_provision_tests_remove_site('drupal5-migrate-drupal5-other');
-    drush_provision_tests_remove_platform('drupal5_other');
-  }
-  drush_provision_tests_install_platform('drupal6', 'drupal6_other');
-  drush_provision_tests_install_site('drupal6', 'drupal6-migrate-drupal6-other', 'default');
-  drush_provision_tests_migrate_site('drupal6-migrate-drupal6-other', 'drupal6_other');
-  drush_provision_tests_remove_site('drupal6-migrate-drupal6-other');
-  drush_provision_tests_remove_platform('drupal6_other');
-  drush_provision_tests_install_platform('drupal7', 'drupal7_other');
-  drush_provision_tests_install_site('drupal7', 'drupal7-migrate-drupal7-other', 'standard');
-  drush_provision_tests_migrate_site('drupal7-migrate-drupal7-other', 'drupal7_other');
-  drush_provision_tests_remove_site('drupal7-migrate-drupal7-other');
-  drush_provision_tests_remove_platform('drupal7_other');
-
-
-  // Create some sites, and upgrade them
-  if ($drupal5_tests) {
-    drush_provision_tests_install_site('drupal5', 'drupal5-upgrade-drupal7', 'default');
-    drush_provision_tests_migrate_site('drupal5-upgrade-drupal7', 'drupal6');
-    drush_provision_tests_migrate_site('drupal5-upgrade-drupal7', 'drupal7');
-    drush_provision_tests_remove_site('drupal5-upgrade-drupal7');
-  }
-  drush_provision_tests_install_site('drupal6', 'drupal6-upgrade-drupal7', 'default');
-  drush_provision_tests_migrate_site('drupal6-upgrade-drupal7', 'drupal7');
-  drush_provision_tests_remove_site('drupal6-upgrade-drupal7');
-
   // Clean up a little.
-  if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+  if ($drupal5_tests) {
     drush_provision_tests_remove_platform('drupal5');
   }
   drush_provision_tests_remove_platform('drupal6');
@@ -201,6 +201,28 @@ function drush_provision_tests_migrate_site($site, $target) {
   // Import and verify the site.
   provision_backend_invoke('@hostmaster', 'hosting-import', array("@$site.aegir.example.com",));
   provision_backend_invoke('@hostmaster', 'hosting-task', array("@$site.aegir.example.com", 'verify'));
+  drush_provision_tests_run_remaining_tasks();
+}
+
+/**
+ * Migrates a site from one platform to another.
+ *
+ * @param $site
+ *   The site to migrate.
+ * @param $target
+ *   The target platform to migrate to.
+ */
+function drush_provision_tests_clone_site($site, $target, $new_uri) {
+  drush_log(dt('Clone: @site to platform: @platform.', array('@site' => "$site.aegir.example.com", '@platform' => $target)), 'ok');
+  // Do the migrate.
+  provision_backend_invoke("@$site.aegir.example.com", 'provision-clone', array("$new_uri.aegir.example.com", "@platform_$target",));
+  // Import the site into the frontend.
+  provision_backend_invoke('@hostmaster', 'hosting-import', array("@$new_uri.aegir.example.com",));
+  // Verify the $target platform.
+  provision_backend_invoke('@hostmaster', 'hosting-task', array("@platform_$target", 'verify'));
+  // Import and verify the site.
+  provision_backend_invoke('@hostmaster', 'hosting-import', array("@$new_uri.aegir.example.com",));
+  provision_backend_invoke('@hostmaster', 'hosting-task', array("@$new_uri.aegir.example.com", 'verify'));
   drush_provision_tests_run_remaining_tasks();
 }
 
