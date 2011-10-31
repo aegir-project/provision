@@ -104,7 +104,7 @@ function drush_provision_tests_run() {
   drush_provision_tests_remove_site('drupal6-upgrade-drupal7');
 
   // Clean up a little.
-  if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+  if ($drupal5_tests) {
     drush_provision_tests_remove_platform('drupal5');
   }
   drush_provision_tests_remove_platform('drupal6');
