@@ -22,6 +22,13 @@ case "$1" in
             echo "disabled manual drush_make in /var/aegir/.drush/drush_make"
             echo "this should probably be removed after checking nothing will be lost"
         fi
+        if [ -d $VARLIB/.drush/provision ]; then
+            echo "existing provision install in $VARLIB/.drush/drush_make detected"
+            echo "this needs to be removed or moved away for the install to be completed"
+            echo "try: rm -rf $VARLIB/.drush/provision"
+            exit 1
+        fi
+
     ;;
 
     abort-upgrade)
