@@ -50,9 +50,9 @@ Don't worry: you will get to review those settings after the final install");
   } else {
     $default_email = 'webmaster@' . drush_get_option('aegir_host');
   }
-  while (!filter_var(drush_get_option('client_email'), FILTER_VALIDATE_EMAIL)) {
-   $client_email = drush_prompt(dt("Admin user e-mail"), $default_email);
-   drush_set_option('client_email', $client_email);
+  drush_set_default('client_email', $default_email);
+  while (!filter_var(drush_get_option('client_email'), FILTER_VALIDATE_EMAIL) && !drush_get_context('DRUSH_AFFIRMATIVE')) {
+    drush_set_option('client_email', drush_prompt(dt("Admin user e-mail"), $default_email));
   }
 
   drush_print(dt('
@@ -108,6 +108,9 @@ The following settings will be used:
   return TRUE;
 }
 
+/**
+ * Drush command to install hostmaster.
+ */
 function drush_provision_hostmaster_install($site = NULL) {
   $version = drush_get_option('version');
   $site = drush_get_option('site', provision_fqdn());
@@ -130,7 +133,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'master_url' => "http://" . $site,
   );
 
-  $master_db = sprintf("mysql://%s:%s@%s",$aegir_db_user, $aegir_db_pass, drush_get_option('aegir_db_host'));
+  $master_db = sprintf("mysql://%s:%s@%s", urlencode($aegir_db_user), urlencode($aegir_db_pass), drush_get_option('aegir_db_host'));
   if (drush_get_option('aegir_host') == drush_get_option('aegir_db_host')) {
     $master_context['db_service_type'] = 'mysql';
     $master_context['master_db'] = $master_db;

@@ -50,6 +50,7 @@ function _provision_drupal_find_themes($scope, $key = '') {
  */
 function _provision_drupal_parse_info_file($filename) {
   $info = array();
+  $constants = get_defined_constants();
 
   if (!file_exists($filename)) {
     return $info;
@@ -93,9 +94,9 @@ function _provision_drupal_parse_info_file($filename) {
         $parent = &$parent[$key];
       }
 
-      // Handle PHP constants
-      if (defined($value)) {
-        $value = constant($value);
+      // Handle PHP constants.
+      if (isset($constants[$value])) {
+        $value = $constants[$value];
       }
 
       // Insert actual value

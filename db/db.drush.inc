@@ -25,8 +25,8 @@ function db_drush_help($section) {
       return dt('Unable to connect to database server.');
     case 'error:PROVISION_CREATE_DB_FAILED' :
       return dt('Unable to create new databases.');
-    case 'error:PROVISION_CREATE_DB_USER_FAILED' :
-      return dt('Unable to create new database users.');
+    case 'error:PROVISION_GRANT_DB_USER_FAILED' :
+      return dt('Unable to grant privileges to database users.');
     case 'error:PROVISION_DROP_DB_FAILED' :
       return dt('Unable to drop database.');
   }
@@ -71,10 +71,10 @@ class provisionService_db extends provisionService {
         drush_set_error('PROVISION_CREATE_DB_FAILED');
       }
       if ($this->can_grant_privileges()) {
-        drush_log(dt('Provision can create database users.'), 'message');;
+        drush_log(dt('Provision can grant privileges on database users.'), 'message');;
       }
       else {
-        drush_set_error('PROVISION_CREATE_DB_USER_FAILED');
+        drush_set_error('PROVISION_GRANT_DB_USER_FAILED');
       }
     } else {
       drush_set_error('PROVISION_CONNECT_DB_FAILED');
@@ -235,7 +235,11 @@ class provisionService_db extends provisionService {
     return FALSE;
   }
 
-  function can_create_database() { 
+  function can_create_database() {
+    return FALSE;
+  }
+
+  function can_grant_privileges() {
     return FALSE;
   }
 
@@ -295,8 +299,10 @@ class provisionService_db_pdo extends provisionService_db {
   }
 
   function connect() {
+    $user = isset($this->creds['user']) ? $this->creds['user'] : '';
+    $pass = isset($this->creds['pass']) ? $this->creds['pass'] : '';
     try {
-      $this->conn = new PDO($this->dsn, $this->creds['user'], $this->creds['pass']);
+      $this->conn = new PDO($this->dsn, $user, $pass);
       return $this->conn;
     }
     catch (PDOException $e) {

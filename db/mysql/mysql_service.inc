@@ -36,17 +36,21 @@ class provisionService_db_mysql extends provisionService_db_pdo {
   }
 
   /**
-   * Verifies that Aegir can grant privileges to a user on a database
+   * Verifies that provision can grant privileges to a user on a database.
    *
    * @return
-   *   boolean TRUE if the check was successful
+   *   TRUE if the check was successful.
    */
   function can_grant_privileges() {
-    $test = drush_get_option('aegir_db_prefix', 'site_');
-    $status = $this->grant($test, $test . 'user', $test . 'password', $test . 'host');
+    $dbname   = drush_get_option('aegir_db_prefix', 'site_');
+    $user     = $dbname . '_user';
+    $password = $dbname . '_password';
+    $host     = $dbname . '_host';
+    if ($status = $this->grant($dbname, $user, $password, $host)) {
+      $this->revoke($dbname, $user, $host);
+    }
     return $status;
   }
- 
 
   function grant($name, $username, $password, $host = '') {
     $host = ($host) ? $host : '%';
@@ -114,7 +118,7 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     // non-readable by the webserver.
     umask(0077);
     // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
-    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 %s | sed 's|/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/|/\\*!50001 CREATE \\*/|g; s|/\\*!50017 DEFINER=`[^`]*`@`[^`]*` \\*/||g' | sed '/\\*!50013 DEFINER=.*/ d' > %s/database.sql", escapeshellcmd(drush_get_option('db_name')), escapeshellcmd(d()->site_path));
+    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 %s | sed 's|/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/|/\\*!50001 CREATE \\*/|g; s|/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/||g' | sed '/\\*!50013 DEFINER=.*/ d' > %s/database.sql", escapeshellcmd(drush_get_option('db_name')), escapeshellcmd(d()->site_path));
     $success = $this->safe_shell_exec($cmd, drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
 
     if (!$success && !drush_get_option('force', false)) {
