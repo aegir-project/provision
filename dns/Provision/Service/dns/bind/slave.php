@@ -40,7 +40,7 @@ class Provision_Service_dns_bind_slave extends Provision_Service_dns {
    * Create the zonefile record on the slave server
    *
    * Contrarily to the parent class implementation, this *only* creates the
-   * bind config (managed through the provisionConfig_bind_slave class), and no
+   * bind config (managed through the Provision_Config_Bind_Slave class), and no
    * zonefile, because the zonefile should be managed by bind itself through
    * regular zone transfers.
    *

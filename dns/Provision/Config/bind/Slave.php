@@ -1,6 +1,6 @@
 <?php
 
-class Provision_Config_Bind_slave extends provisionConfig_dns_server {
+class Provision_Config_Bind_slave extends Provision_Config_Dns_Server {
   public $template = 'slave.tpl.php';
 
   function process() {

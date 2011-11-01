@@ -3,7 +3,7 @@
 /**
  * Apache platform level configuration file class
  */
-class ProvisionConfig_Apache_Platform extends Provision_Config_Http_Platform {
+class Provision_Config_Apache_Platform extends Provision_Config_Http_Platform {
   function process() {
     parent::process();
     $this->data['extra_config'] = "# Extra configuration from modules:\n";
