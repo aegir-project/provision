@@ -63,12 +63,12 @@ function drush_hook_provision_apache_server_config($data) {
  * To use templating, return an include statement for the template.
  *
  * @param $data
- *   Associative array of data from ProvisionConfig_Apache_Platform::data.
+ *   Associative array of data from Provision_Config_Apache_Platform::data.
  *
  * @return
  *   Lines to add to the configuration file.
  *
- * @see ProvisionConfig_Apache_Platform
+ * @see Provision_Config_Apache_Platform
  */
 function drush_hook_provision_apache_dir_config($data) {
 }
