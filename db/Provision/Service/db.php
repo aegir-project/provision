@@ -237,7 +237,7 @@ class Provision_Service_db extends Provision_Service {
   /**
    * Return a hostname suitable for database grants from a server object.
    */
-  function grant_host(Provision_Context_Server $server) {
+  function grant_host(Provision_Context_server $server) {
     return $server->remote_host;
   }
 }
