@@ -1,7 +1,7 @@
 <?php
 // $Id$
 
-include_once(dirname(__FILE__) . '/../provision.config.inc');
+//include_once(dirname(__FILE__) . '/../provision.config.inc');
 
 /**
  * @file
@@ -117,43 +117,9 @@ function provision_drupal_sync_site() {
  *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file() {
-  $config = new provisionConfig_drupal_settings(d()->name, drush_get_context('site'));
+  $config = new Provision_Config_Drupal_Settings(d()->name, drush_get_context('site'));
   $config->write();
   provision_drupal_sync_site();
-}
-
-class provisionConfig_drupal_settings extends provisionConfig {
-  public $template = 'provision_drupal_settings.tpl.php';
-  public $description = 'Drupal settings.php file';
-  public $creds = array();
-  protected $mode = 0440;
-
-  function filename() {
-    return $this->site_path . '/settings.php';
-  }
-
-  function process() {
-    if (drush_drupal_major_version() >= 7) {
-      $this->data['db_type'] = ($this->data['db_type'] == 'mysqli') ? 'mysql' : $this->data['db_type'];
-    }
-    $this->version = provision_version();
-    $this->api_version = provision_api_version();
-    $this->cloaked = drush_get_option('provision_db_cloaking', $this->context->service('http')->cloaked_db_creds());
-
-    foreach (array('db_type', 'db_user', 'db_passwd', 'db_host', 'db_name', 'db_port') as $key) {
-      $this->creds[$key] = urldecode($this->data[$key]);
-    }
-
-    $this->data['extra_config'] = "# Extra configuration from modules:\n";
-    $this->data['extra_config'] .= join("\n", drush_command_invoke_all('provision_drupal_config', d()->uri, $this->data));
-
-    $this->group = $this->platform->server->web_group;
-
-    // Add a handy variable indicating if the site is being backed up, we can
-    // then react to this and change any settings we don't want backed up.
-    $backup_file = drush_get_option('backup_file');
-    $this->backup_in_progress = !empty($backup_file);
-  }
 }
 
 /**
@@ -362,37 +328,6 @@ function _provision_drupal_get_cvs_versions($files) {
   return $files;
 }
 
-class provisionConfig_drupal_alias_store extends provisionConfig_data_store {
-  public $template = 'provision_drupal_sites.tpl.php';
-  public $description = 'Drupal sites.php file';
-  public $key = 'sites';
-  protected $mode = 0644;
-
-  function filename() {
-    return $this->root . '/sites/sites.php';
-  }
-  
-  function maintain() {
-    $this->delete();
-    if (!$this->redirection) {
-      foreach ($this->aliases as $alias) {
-        $this->records[$alias] = $this->uri;
-      }
-    }
-  }
-  
-  function delete() {
-    foreach ($this->find() as $alias) {
-      unset($this->records[$alias]);
-      unset($this->loaded_records[$alias]);
-    }
-  }
-  
-  function find() {
-    return array_keys($this->merged_records(), $this->uri);
-  }
-}
-
 /**
  * Retrieve a list of aliases for the curent site.
  */
@@ -400,7 +335,7 @@ function provision_drupal_find_aliases() {
   $aliases = array();
   if (d()->type === 'site') {
     if (drush_drupal_major_version() >= 7) {
-      $config = new provisionConfig_drupal_alias_store(d()->name);
+      $config = new Provision_Config_Drupal_Alias_Store(d()->name);
       $aliases = $config->find();
     } else {
       if ($dir = opendir(d()->root . "/sites")) {
@@ -430,7 +365,7 @@ function provision_drupal_find_aliases() {
 function _provision_drupal_maintain_aliases() {
   if (d()->type === 'site') {
     if (drush_drupal_major_version() >= 7) {
-      $config = new provisionConfig_drupal_alias_store(d()->name);
+      $config = new Provision_Config_Drupal_Alias_Store(d()->name);
       $config->maintain();
       $config->write();
       d()->service('http')->sync($config->filename());
@@ -458,7 +393,7 @@ function _provision_drupal_delete_aliases() {
 
   if (d()->type === 'site') {
     if (drush_drupal_major_version() >= 7) {
-        $config = new provisionConfig_drupal_alias_store(d()->name);
+        $config = new Provision_Config_Drupal_Alias_Store(d()->name);
         $config->delete();
         $config->write();
         d()->service('http')->sync($config->filename());

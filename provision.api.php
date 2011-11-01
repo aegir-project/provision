@@ -10,7 +10,7 @@
 
 /**
  * Advertise what service types are available and their default
- * implementations. Services are class provisionService_{type}_{service} in
+ * implementations. Services are class Provision_Service_{type}_{service} in
  * {type}/{service}/{service}_service.inc files.
  *
  * @return
@@ -30,12 +30,12 @@ function drush_hook_provision_services() {
  * @param $uri
  *   URI for the site.
  * @param $data
- *   Associative array of data from provisionConfig_drupal_settings::data.
+ *   Associative array of data from Provision_Config_Drupal_Settings::data.
  *
  * @return
  *   Lines to add to the site's settings.php file.
  *
- * @see provisionConfig_drupal_settings
+ * @see Provision_Config_Drupal_Settings
  */
 function drush_hook_provision_drupal_config($uri, $data) {
   return '$conf[\'reverse_proxy\'] = TRUE;';
@@ -47,12 +47,12 @@ function drush_hook_provision_drupal_config($uri, $data) {
  * To use templating, return an include statement for the template.
  *
  * @param $data
- *   Associative array of data from provisionConfig_apache_server::data.
+ *   Associative array of data from Provision_Config_Apache_Server::data.
  *
  * @return
  *   Lines to add to the configuration file.
  *
- * @see provisionConfig_apache_server
+ * @see Provision_Config_Apache_Server
  */
 function drush_hook_provision_apache_server_config($data) {
 }
@@ -63,12 +63,12 @@ function drush_hook_provision_apache_server_config($data) {
  * To use templating, return an include statement for the template.
  *
  * @param $data
- *   Associative array of data from provisionConfig_apache_platform::data.
+ *   Associative array of data from ProvisionConfig_Apache_Platform::data.
  *
  * @return
  *   Lines to add to the configuration file.
  *
- * @see provisionConfig_apache_platform
+ * @see ProvisionConfig_Apache_Platform
  */
 function drush_hook_provision_apache_dir_config($data) {
 }
@@ -81,12 +81,12 @@ function drush_hook_provision_apache_dir_config($data) {
  * @param $uri
  *   URI for the site.
  * @param $data
- *   Associative array of data from provisionConfig_apache_site::data.
+ *   Associative array of data from Provision_Config_Apache_Site::data.
  *
  * @return
  *   Lines to add to the configuration file.
  *
- * @see provisionConfig_apache_site
+ * @see Provision_Config_Apache_Site
  */
 function drush_hook_provision_apache_vhost_config($uri, $data) {
 }
