@@ -119,7 +119,6 @@ class Provision_Config {
     $reflect = new reflectionObject($this);
 
     if (isset($this->template)) {
-      drush_print_r($this->template);
       while ($class_name) {
         // Iterate through the config file's parent classes until we
         // find the template file to use.
@@ -127,7 +126,6 @@ class Provision_Config {
         $base_dir = dirname($reflect->getFilename());
 
         $file = $base_dir . '/' . $this->template;
-        drush_print_r($file);
 
         if (file_exists($file) && is_readable($file)) {
           drush_log("Template loaded: $file");
