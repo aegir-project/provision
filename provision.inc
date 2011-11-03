@@ -70,6 +70,33 @@ function provision_autoload_register_prefix($prefix, $dir, $prepend = FALSE) {
 // Add our prefix to the autoloader.
 provision_autoload_register_prefix('Provision_', __DIR__);
 
+/**
+ * Return the directory containing the file a class is defined in.
+ *
+ * @param $class_name
+ *   The class name to search for.
+ * @return
+ *   A directory if the class can be found or an empty string if not.
+ */
+function provision_class_directory($class_name) {
+  return dirname(provision_class_file($class_name));
+}
+
+/**
+ * Return the file a class is defined in.
+ *
+ * @param $class_name
+ *   The class name to search for.
+ * @return
+ *   A file if the class can be found or an empty string if not.
+ */
+function provision_class_file($class_name) {
+  if (class_exists($class_name)) {
+    $reflect = new reflectionClass($class_name);
+    return $reflect->getFilename();
+  }
+  return '';
+}
 
 /**
  * @defgroup sitedata Site data management utility functions.
