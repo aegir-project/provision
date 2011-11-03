@@ -1,4 +1,4 @@
-<?php include('http/nginx/server.tpl.php'); ?>
+<?php include(provision_class_directory('Provision_Config_Nginx_Server') . '/server.tpl.php'); ?>
 
 #######################################################
 ###  nginx default ssl server

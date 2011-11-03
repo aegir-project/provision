@@ -31,5 +31,5 @@
 <?php endif; ?>
 
 <?php 
-  include('http/apache/vhost_disabled.tpl.php');
+  include(provision_class_directory('Provision_Config_Apache_Site') . '/vhost_disabled.tpl.php');
 ?>

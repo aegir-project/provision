@@ -6,4 +6,4 @@
   LoadModule ssl_module modules/mod_ssl.so
 </IfModule>
 
-<?php include('http/apache/server.tpl.php'); ?>
+<?php include(provision_class_directory('Provision_Config_Apache_Server') . '/server.tpl.php'); ?>
