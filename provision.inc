@@ -24,7 +24,7 @@ function provision_autoload() {
   static $instance = NULL;
 
   if (is_null($instance)) {
-    require_once(__DIR__ . '/Symfony/Component/ClassLoader/UniversalClassLoader.php');
+    require_once(dirname(__FILE__) . '/Symfony/Component/ClassLoader/UniversalClassLoader.php');
     $instance = new UniversalClassLoader();
     // Activate the autoloader.
     $instance->register();
@@ -68,7 +68,7 @@ function provision_autoload_register_prefix($prefix, $dir, $prepend = FALSE) {
 }
 
 // Add our prefix to the autoloader.
-provision_autoload_register_prefix('Provision_', __DIR__);
+provision_autoload_register_prefix('Provision_', dirname(__FILE__));
 
 /**
  * Return the directory containing the file a class is defined in.

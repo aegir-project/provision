@@ -56,7 +56,7 @@ function db_provision_register_autoload() {
   static $loaded = FALSE;
   if (!$loaded) {
     $loaded = TRUE;
-    provision_autoload_register_prefix('Provision_', __DIR__);
+    provision_autoload_register_prefix('Provision_', dirname(__FILE__));
   }
 }
 
