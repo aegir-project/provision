@@ -116,14 +116,11 @@ class Provision_Config {
   private function load_template() {
     $class_name = get_class($this);
 
-    $reflect = new reflectionObject($this);
-
     if (isset($this->template)) {
       while ($class_name) {
         // Iterate through the config file's parent classes until we
         // find the template file to use.
-        $reflect = new reflectionClass($class_name);
-        $base_dir = dirname($reflect->getFilename());
+        $base_dir = provision_class_directory($class_name);
 
         $file = $base_dir . '/' . $this->template;
 

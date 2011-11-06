@@ -23,5 +23,5 @@ server {
 
 <?php 
    // Generate the standard virtual host too.
-   include('http/nginx/vhost_disabled.tpl.php');
+   include(provision_class_directory('Provision_Config_Nginx_Site') . '/vhost_disabled.tpl.php');
 ?>

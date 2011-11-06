@@ -69,6 +69,6 @@ if (sizeof($this->aliases)) {
 <?php endif; ?>
 
 <?php 
-  include('http/apache/vhost.tpl.php');
+  include(provision_class_directory('Provision_Config_Apache_Site') . '/vhost.tpl.php');
 ?>
 
