@@ -15,7 +15,7 @@ function drush_provision_drupal_provision_migrate_validate($platform = null) {
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
 function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = null) {
-  /* Set offline mode to true and re-generate the settings.php. This will write a
+  /* Set offline mode to true and re-generate the settings.php. This will write a 
    * $conf['site_offline'] = 1; to the settings.php
    */
   drush_log(dt("Putting site under maintenance"));
@@ -47,7 +47,7 @@ function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = null
  * Restore the vhost conf per the original platform
  */
 function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_uri = null) {
-  // Set site_offline to false and regenerate the config
+  // Set site_offline to false and regenerate the config 
   drush_log(dt("Bringing site out of maintenance"));
   d()->site_enabled = true;
   _provision_drupal_create_settings_file();
@@ -123,8 +123,8 @@ function drush_provision_drupal_post_provision_migrate($platform, $new_uri = nul
 
 
   if (!is_null($new_uri) && ($new_uri != d()->uri)) {
-    // remove the existing alias
-    $config = new provisionConfig_drushrc_alias(d()->name);
+    // remove the existing alias 
+    $config = new Provision_Config_Drushrc_Alias(d()->name);
     $config->unlink();
   }
 

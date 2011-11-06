@@ -34,7 +34,7 @@ function drush_provision_drupal_pre_provision_verify() {
       if (!provision_file()->exists(d()->include_path . '/global.inc')->succeed('Global configuration file exists')->status()) {
         // Create an empty global.inc so the include doesn't fail with
         // open_basedir restrictions
-        $config = new provisionConfig_global_settings(d()->name);
+        $config = new Provision_Config_Global_Settings(d()->name);
         $config->write();
       }
     }
@@ -78,15 +78,6 @@ function drush_provision_drupal_pre_provision_verify() {
     _provision_drupal_maintain_aliases();
     // Requires at least the database settings to complete.
    _provision_drupal_create_settings_file();
-  }
-}
-
-class provisionConfig_global_settings extends provisionConfig {
-  public $template = 'global_settings.tpl.php';
-  public $description = 'Global settings.php file';
-
-  function filename() {
-    return $this->include_path . '/global.inc';
   }
 }
 
