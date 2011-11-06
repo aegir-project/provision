@@ -20,13 +20,31 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
   }
 
   function save_server() {
+    // Find nginx executable.
+    if (provision_file()->exists('/usr/local/sbin/nginx')->status()) {
+      $path = "/usr/local/sbin/nginx";
+    }
+    elseif (provision_file()->exists('/usr/sbin/nginx')->status()) {
+      $path = "/usr/sbin/nginx";
+    }
+    elseif (provision_file()->exists('/usr/local/bin/nginx')->status()) {
+      $path = "/usr/local/bin/nginx";
+    }
+    else {
+      return;
+    }
+
     // Check if some nginx features are supported and save them for later.
-    $this->server->shell_exec('nginx -V');
+    $this->server->shell_exec($path . ' -V');
     $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match);
-    $this->server->nginx_has_upload_progress = preg_match("/(nginx-upload-progress-module)/", implode('', drush_shell_exec_output()), $match);
-    $this->server->nginx_has_new_version = preg_match("/(Barracuda\/0\.9\.)/", implode('', drush_shell_exec_output()), $match);
+    $this->server->nginx_has_new_version = preg_match("/(Barracuda\/1\.0\.)/", implode('', drush_shell_exec_output()), $match);
     $this->server->provision_db_cloaking = FALSE;
     $this->server->nginx_web_server = 1;
+
+    // Check upload progress capability. Because configure parameters may vary,
+    // test sample config.
+    $this->server->shell_exec($path . ' -t -c ' . dirname(__FILE__) . '/upload_progress_test.conf');
+    $this->server->nginx_has_upload_progress = preg_match("/upload_progress_test\.conf syntax is ok/", implode('', drush_shell_exec_output()), $match);
   }
 
   function verify_server_cmd() {
@@ -38,6 +56,8 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
      $this->sync($this->server->include_path . '/fastcgi_params.conf');
      provision_file()->copy(dirname(__FILE__) . '/fastcgi_ssl_params.conf', $this->server->include_path . '/fastcgi_ssl_params.conf');
      $this->sync($this->server->include_path . '/fastcgi_ssl_params.conf');
+     provision_file()->copy(dirname(__FILE__) . '/upload_progress_test.conf', $this->server->include_path . '/upload_progress_test.conf');
+     $this->sync($this->server->include_path . '/upload_progress_test.conf');
     // Call the parent at the end. it will restart the server when it finishes.
     parent::verify_server_cmd();
   }
@@ -51,17 +71,17 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
   public static function nginx_restart_cmd() {
     $command = '/etc/init.d/nginx'; // A proper default for most of the world
     $options[] = $command;
+    // Try to detect the nginx restart command.
     foreach (explode(':', $_SERVER['PATH']) as $path) {
       $options[] = "$path/nginx";
     }
-    // Try to detect the nginx restart command.  
-    $options[] = '/usr/sbin/nginx -s';
-    $options[] = '/usr/local/sbin/nginx -s';
-    $options[] = '/usr/local/bin/nginx -s';
+    $options[] = '/usr/sbin/nginx';
+    $options[] = '/usr/local/sbin/nginx';
+    $options[] = '/usr/local/bin/nginx';
 
     foreach ($options as $test) {
       if (is_executable($test)) {
-        $command = $test;
+        $command = ($test == '/etc/init.d/nginx') ? $test : $test . ' -s';
         break;
       }
     }
