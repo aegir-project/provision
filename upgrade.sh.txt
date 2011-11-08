@@ -147,7 +147,7 @@ if [ -d "provision" ] ; then
   mv provision $BACKUP_DIR
 fi
 
-if [ "$AEGIR_VERSION" = "7.x-2.x" ]; then
+if [ "$AEGIR_VERSION" = "6.x-2.x" ]; then
   git clone http://git.drupal.org/project/provision.git $HOME/.drush/provision
 else
   wget http://ftp.drupal.org/files/projects/provision-$AEGIR_VERSION.tar.gz
