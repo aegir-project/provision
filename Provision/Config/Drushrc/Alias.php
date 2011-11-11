@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Provides the Provision_Config_Drushrc_Alias class.
+ */
 
 /**
  * Class to write an alias records.
@@ -21,6 +25,6 @@ class Provision_Config_Drushrc_Alias extends Provision_Config_Drushrc {
   }
 
   function filename() {
-    return drush_server_home() . '/.drush/' . $this->data['aliasname'] . '.alias.drushrc.php'; 
+    return drush_server_home() . '/.drush/' . $this->data['aliasname'] . '.alias.drushrc.php';
   }
 }
