@@ -76,7 +76,8 @@ class provisionService_db extends provisionService {
       else {
         drush_set_error('PROVISION_GRANT_DB_USER_FAILED');
       }
-    } else {
+    }
+    else {
       drush_set_error('PROVISION_CONNECT_DB_FAILED');
     }
   }
@@ -101,7 +102,7 @@ class provisionService_db extends provisionService {
     }
 
     drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not find a free database names after 100 attempts"));
-    return false;
+    return FALSE;
   }
 
   /**
@@ -168,7 +169,7 @@ class provisionService_db extends provisionService {
   }
 
 
-  function import_site_database($dump_file = null, $creds = array()) {
+  function import_site_database($dump_file = NULL, $creds = array()) {
     if (is_null($dump_file)) {
       $dump_file = d()->site_path . '/database.sql';
     }
@@ -311,7 +312,7 @@ class provisionService_db_pdo extends provisionService_db {
   } 
 
   function close() {
-    $this->conn = null;
+    $this->conn = NULL;
   }
 
   function query($query) {
