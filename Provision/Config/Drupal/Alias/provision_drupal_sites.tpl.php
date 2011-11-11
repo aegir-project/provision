@@ -1,4 +1,9 @@
-<?php print "<?php \n"; ?>
+<?php
+/**
+ * @file
+ * Template file to generate a D7 style sites.php.
+ */
+print "<?php \n"; ?>
 /**
  * @file
  * Configuration file for Drupal's multi-site directory aliasing feature.
