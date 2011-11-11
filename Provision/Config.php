@@ -9,7 +9,7 @@ class Provision_Config {
    * Template file, a PHP file which will have access to $this and variables
    * as defined in $data.
    */
-  public $template = null;
+  public $template = NULL;
 
   /**
    * Associate array of variables to make available to the template.
