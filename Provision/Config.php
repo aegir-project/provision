@@ -1,8 +1,6 @@
 <?php
-
-// $Id$
-
 /**
+ * @file
  * Provision configuration generation classes.
  */
 
@@ -23,12 +21,12 @@ class Provision_Config {
    *
    * @var Provision_Context
    */
-  public $context = null;
+  public $context = NULL;
 
   /**
    * If set, replaces file name in log messages.
    */
-  public $description = null;
+  public $description = NULL;
 
   /**
    * Octal Unix mode for permissons of the created file.
@@ -81,7 +79,7 @@ class Provision_Config {
     if (sizeof($data)) {
       $this->data = $data;
     }
-    
+
     if (!is_null($this->data_store_class) && class_exists($this->data_store_class)) {
       $class = $this->data_store_class;
       $this->store = new $class($context, $data);
@@ -98,16 +96,16 @@ class Provision_Config {
     if (is_object($this->store)) {
       $this->data['records'] = array_filter(array_merge($this->store->loaded_records, $this->store->records));
     }
-    return true;
+    return TRUE;
   }
 
   /**
    * The filename where the configuration is written.
-   * 
+   *
    * This is a stub to be implemented by subclasses.
    */
   function filename() {
-    return false;
+    return FALSE;
   }
 
   /**
@@ -133,7 +131,7 @@ class Provision_Config {
       }
     }
 
-    return false;
+    return FALSE;
   }
 
   /**
@@ -144,7 +142,7 @@ class Provision_Config {
     drush_errors_off();
     extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
     ob_start();                      // Start output buffering
-    eval('?>'. $template);                 // Generate content
+    eval('?>' . $template);                 // Generate content
     $contents = ob_get_contents();   // Get the contents of the buffer
     ob_end_clean();                  // End buffering and discard
     drush_errors_on();
@@ -215,5 +213,5 @@ class Provision_Config {
   function unlink() {
     return provision_file()->unlink($this->filename())->status();
   }
-  
+
 }
