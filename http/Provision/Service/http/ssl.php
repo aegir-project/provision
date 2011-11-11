@@ -1,7 +1,7 @@
 <?php
-
 /**
- * @file The base implementation of the SSL capabale web service.
+ * @file
+ * The base implementation of the SSL capabale web service.
  */
 
 /**
@@ -24,7 +24,7 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
     $this->server->setProperty('http_ssl_port', $this->default_ssl_port());
 
     // SSL certificate store.
-    // The certificates are generated from here, and distributed to the servers, 
+    // The certificates are generated from here, and distributed to the servers,
     // as needed.
     $this->server->ssld_path = "{$this->server->aegir_root}/config/ssl.d";
 
@@ -37,16 +37,16 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
     parent::init_site();
 
     $this->context->setProperty('ssl_enabled', 0);
-    $this->context->setProperty('ssl_key', null);
+    $this->context->setProperty('ssl_key', NULL);
   }
 
 
-  function config_data($config = null, $class = null) {
+  function config_data($config = NULL, $class = NULL) {
     $data = parent::config_data($config, $class);
     $data['http_ssl_port'] = $this->server->http_ssl_port;
 
     if ($config == 'site' && $this->context->ssl_enabled) {
-      
+
       if ($this->context->ssl_enabled == 2) {
         $data['ssl_redirection'] = TRUE;
         $data['redirect_url'] = "https://{$this->context->uri}";
@@ -83,7 +83,7 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
    *
    * If the files could not be found, this function will proceed to generate
    * certificates for the current site, so that the operation can complete
-   * succesfully. 
+   * succesfully.
    */
   function get_certificates($ssl_key) {
     $source_path = "{$this->server->ssld_path}/{$ssl_key}";
@@ -151,9 +151,9 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
    *
    * Each certificate needs a unique IP address on each server in order
    * to be able to be encrypted.
-   * 
-   * This code uses the filesystem by touching a reciept file in the 
-   * server's ssl.d directory. 
+   *
+   * This code uses the filesystem by touching a reciept file in the
+   * server's ssl.d directory.
    */
   static function assign_certificate_ip($ssl_key, $server) {
     $path = $server->http_ssld_path;
@@ -206,8 +206,8 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
    * Retrieve the status of a certificate on this server.
    *
    * This is primarily used to know when it's ok to remove the file.
-   * Each time a config file uses the key on the server, it touches 
-   * a 'receipt' file, and every time the site stops using it, 
+   * Each time a config file uses the key on the server, it touches
+   * a 'receipt' file, and every time the site stops using it,
    * the receipt is removed.
    *
    * This function just checks if any of the files are still present.
@@ -242,15 +242,15 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
     if ($this->context->type === 'server') {
       provision_file()->create_dir($this->server->ssld_path, dt("Central SSL certificate repository."), 0700);
 
-      provision_file()->create_dir($this->server->http_ssld_path, 
-        dt("SSL certificate repository for %server", 
+      provision_file()->create_dir($this->server->http_ssld_path,
+        dt("SSL certificate repository for %server",
         array('%server' => $this->server->remote_host)), 0700);
 
       $this->sync($this->server->http_ssld_path, array(
         'exclude' => $this->server->http_ssld_path . '/*',  // Make sure remote directory is created
-      )); 
+      ));
     }
-    
+
     // Call the parent at the end. it will restart the server when it finishes.
     parent::verify();
   }
