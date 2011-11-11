@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Provides the Provision_Config_Data_Store class.
+ */
 
 /**
  * Base class for data storage.
@@ -16,7 +20,7 @@ class Provision_Config_Data_Store extends Provision_Config {
   public $key = 'record';
 
   private $locked = FALSE;
-  protected $fp = null;
+  protected $fp = NULL;
 
   public $records = array();
   public $loaded_records = array();
