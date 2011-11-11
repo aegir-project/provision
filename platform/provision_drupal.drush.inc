@@ -630,7 +630,7 @@ function provision_prepare_environment() {
  * For the changes to become available, and more importantly passed to the
  * front end, we need to call this function after calling provision commands.
  */
-function provision_reload_config($context, $file = NU::) {
+function provision_reload_config($context, $file = NULL) {
   $file = ($file) ? $file : _drush_config_file($context);
   if (file_exists($file)) {
     drush_log("Reloading $context drushrc.php from $file");
