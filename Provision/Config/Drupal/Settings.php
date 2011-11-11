@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Provides the Provision_Config_Drupal_Settings class.
+ */
 
 class Provision_Config_Drupal_Settings extends Provision_Config {
   public $template = 'provision_drupal_settings.tpl.php';
