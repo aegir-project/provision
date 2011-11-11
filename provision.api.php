@@ -1,10 +1,10 @@
 <?php
-
 /**
- * @file Provision API
+ * @file
+ * Provision API
  *
  * @see drush.api.php
- * @see drush_command_invoke_all
+ * @see drush_command_invoke_all()
  */
 
 
@@ -24,7 +24,7 @@ function drush_hook_provision_services() {
 
 /**
  * Append PHP code to Drupal's settings.php file.
- * 
+ *
  * To use templating, return an include statement for the template.
  *
  * @param $uri
@@ -43,7 +43,7 @@ function drush_hook_provision_drupal_config($uri, $data) {
 
 /**
  * Append Apache configuration to server configuration.
- * 
+ *
  * To use templating, return an include statement for the template.
  *
  * @param $data
@@ -59,7 +59,7 @@ function drush_hook_provision_apache_server_config($data) {
 
 /**
  * Append Apache configuration to platform configuration.
- * 
+ *
  * To use templating, return an include statement for the template.
  *
  * @param $data
@@ -75,7 +75,7 @@ function drush_hook_provision_apache_dir_config($data) {
 
 /**
  * Append Apache configuration to site vhost configuration.
- * 
+ *
  * To use templating, return an include statement for the template.
  *
  * @param $uri
