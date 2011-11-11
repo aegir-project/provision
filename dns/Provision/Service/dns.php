@@ -87,7 +87,7 @@ class Provision_Service_dns extends Provision_Service {
    * need to be merged, but then the cluster_web_server parameter need to be
    * renamed...
    *
-   * @see Provision_Service_http_cluster::_each_server().
+   * @see Provision_Service_http_cluster::_each_server()
    */
   function _each_server($method, $args = array()) {
     // Return True by default.
@@ -114,7 +114,7 @@ class Provision_Service_dns extends Provision_Service {
         'exclude' => $this->server->dns_hostd_path . '/*',  // Make sure remote directory is created
       ));
 
-      # TODO: create a slave zone path too.
+      // TODO: create a slave zone path too.
 
       $this->create_config('server');
     }
@@ -161,7 +161,8 @@ class Provision_Service_dns extends Provision_Service {
         $tld = join(".", $parts);
         if (isset($zones[$tld])) {
           $found = TRUE;
-        } else {
+        }
+        else {
           $scrap = array_shift($parts);
           $subdomain[] = $scrap;
           drush_log("zone $tld not found, ditching $scrap, count: " . count($parts));
@@ -186,7 +187,8 @@ class Provision_Service_dns extends Provision_Service {
     if ($return == 'subdomain') {
       if (empty($subdomain)) {
         return '@';
-      } else {
+      }
+      else {
         return $subdomain;
       }
     }
@@ -276,10 +278,10 @@ class Provision_Service_dns extends Provision_Service {
 
     $this->config('zone', $zone)->record_set($sub, array('A' => $ips));
     foreach ($aliases as $alias) {
-        if ($this->guess_zone($alias) == $zone) {
-            $this->config('zone', $zone)->record_set($this->guess_zone($alias, 'subdomain'),
-                                                     array('CNAME' => array($zone . '.')));
-        }
+      if ($this->guess_zone($alias) == $zone) {
+        $this->config('zone', $zone)->record_set($this->guess_zone($alias, 'subdomain'),
+          array('CNAME' => array($zone . '.')));
+      }
     }
 
     $this->create_zone($zone);
@@ -313,10 +315,10 @@ class Provision_Service_dns extends Provision_Service {
     // remove the records from the zone store
     $this->config('zone', $zone)->record_set($sub, array('A' => NULL));
     foreach ($aliases as $alias) {
-        if ($this->guess_zone($alias) == $zone) {
-            $this->config('zone', $zone)->record_set($this->guess_zone($alias, 'subdomain'),
-                                                     array('CNAME' => NULL));
-        }
+      if ( $this->guess_zone($alias) == $zone) {
+        $this->config('zone', $zone)->record_set($this->guess_zone($alias, 'subdomain'),
+          array('CNAME' => NULL));
+      }
     }
     $this->config('zone', $zone)->write();
   }
