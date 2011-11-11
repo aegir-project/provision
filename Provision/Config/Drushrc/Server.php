@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @file
+ * Provides the Provision_Config_Drushrc_Server class.
+ */
 
 /**
  * Server level config for drushrc.php files.
