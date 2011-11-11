@@ -1,4 +1,9 @@
-<?php print '<?php' ?>
+<?php
+/**
+ * @file
+ * Template file for a settings.php.
+ */
+print '<?php' ?>
 
 /**
  * @file Drupal's settings.php file
@@ -16,8 +21,8 @@
   /**
    * The database credentials are stored in the Apache vhost config
    * of the associated site with SetEnv parameters.
-   * They are called here with $_SERVER environment variables to 
-   * prevent sensitive data from leaking to site administrators 
+   * They are called here with $_SERVER environment variables to
+   * prevent sensitive data from leaking to site administrators
    * with PHP access, that potentially might be of other sites in
    * Drupal's multisite set-up.
    * This is a security measure implemented by the Aegir project.
