@@ -134,8 +134,11 @@ function provision_drush_command() {
  
   $items['provision-restore'] = array(
     'description' => 'Restore the site to a previous backup. This will also generate a backup of the site as it was.',
-    'arguments' => array('domain.com' => dt('The domain of the site to be restored'),
+    'arguments' => array(
       'site_backup.tar.gz' => dt('The backup to restore the site to.')),
+    'examples' => array(
+      'drush @site provision-restore ~/backups/some_site.tar.gz' => 'Restore the site to the backup in ~/backups/some_site.tar.gz.',
+    ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
