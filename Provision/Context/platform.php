@@ -17,7 +17,7 @@ class Provision_Context_platform extends Provision_Context {
       '--root' => 'platform: path to a Drupal installation',
       '--server' => 'platform: drush backend server; default @server_master',
       '--web_server' => 'platform: web server hosting the platform; default @server_master',
-      '--makefile' => 'platform: makefile to use in building the platform',
+      '--makefile' => 'platform: drush makefile to use for building the platform if it doesn\'t already exist',
     );
   }
 
