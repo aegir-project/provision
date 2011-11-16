@@ -16,7 +16,16 @@
  */
 function drush_provision_drupal_provision_login_reset() {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
-  $account = user_load(1);
+  // Drupal 7/8 take a uid as an integer and not an array
+  if (drush_drupal_major_version() >= 7) {
+    $account = user_load(1);
+  }
+  else {
+    $account = user_load(array('uid' => 1));
+  }
+  if (empty($account)) {
+    return drush_set_error('PROVISION_UNABLE_TO_LOAD_UID_1', 'Could not load the admin user with uid 1 on this site.');
+  }
   $onetime = user_pass_reset_url($account);
   // pass the login link to the front end
   drush_set_option('login_link', $onetime);
