@@ -12,7 +12,6 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     parent::init_server();
     $this->configs['server'][] = 'Provision_Config_Nginx_Server';
     $this->configs['site'][] = 'Provision_Config_Nginx_Site';
-
     $this->server->setProperty('nginx_has_gzip', 0);
     $this->server->setProperty('nginx_has_new_version', 0);
     $this->server->setProperty('nginx_web_server', 0);
