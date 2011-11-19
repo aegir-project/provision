@@ -1,18 +1,22 @@
 
 <?php if ($this->ssl_enabled && $this->ssl_key) : ?>
 
-<?php
-if ($this->redirection) {
-  // Redirect all aliases to the main https url using separate vhosts blocks to avoid if{} in Nginx.
-  foreach ($this->aliases as $alias_url) {
-    print "server {\n";
-    print "   listen      {$ip_address}:{$http_ssl_port};\n";
-    print "   server_name {$alias_url};\n";
-    print "   rewrite ^ \$scheme://{$this->uri}\$request_uri? permanent;\n";
-    print "}\n";
-  }
+<?php if ($this->redirection): ?>
+  <?php foreach ($this->aliases as $alias_url): ?>
+server {
+   listen       <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
+   server_name  <?php print $alias_url; ?>;
+   rewrite ^ $scheme://<?php print $this->uri; ?>$request_uri? permanent;
+   ssl                         on;
+   ssl_certificate             <?php print $ssl_cert; ?>;
+   ssl_certificate_key         <?php print $ssl_cert_key; ?>;
+   ssl_protocols               SSLv3 TLSv1;
+   ssl_ciphers                 HIGH:!ADH:!MD5;
+   ssl_prefer_server_ciphers   on;
+   keepalive_timeout           70;
 }
-?>
+  <?php endforeach; ?>
+<?php endif ?>
 
 server {
    include      <?php print "{$server->include_path}"; ?>/fastcgi_ssl_params.conf;
