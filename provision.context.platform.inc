@@ -15,8 +15,9 @@ class provisionContext_platform extends provisionContext {
   static function option_documentation() {
     return array(
       '--root' => 'platform: path to a Drupal installation',
-      '--server' => 'drush backend server; default @server_master',
-      '--web_server' => 'web server hosting the platform; default @server_master',
+      '--server' => 'platform: drush backend server; default @server_master',
+      '--web_server' => 'platform: web server hosting the platform; default @server_master',
+      '--makefile' => 'platform: drush makefile to use for building the platform if it doesn\'t already exist',
     );
   }
 
