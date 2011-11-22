@@ -1,3 +1,9 @@
+aegir-provision (1.6-1) testing; urgency=low
+
+  * new upstream release
+
+ -- Antoine Beaupré <jenkins@ci.aegirproject.org>  Tue, 22 Nov 2011 08:28:10 +0000
+
 aegir-provision (1.5-2) testing; urgency=high
 
   * critical hotfix: do not trash the apache aegir.conf file on failed
