@@ -35,15 +35,20 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
 
     // Check if some nginx features are supported and save them for later.
     $this->server->shell_exec($path . ' -V');
+    $this->server->nginx_has_upload_progress = preg_match("/upload/", implode('', drush_shell_exec_output()), $match);
     $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match);
     $this->server->nginx_has_new_version = preg_match("/(Barracuda\/1\.0\.)/", implode('', drush_shell_exec_output()), $match);
     $this->server->provision_db_cloaking = FALSE;
     $this->server->nginx_web_server = 1;
 
     // Check upload progress capability. Because configure parameters may vary,
-    // test sample config.
-    $this->server->shell_exec($path . ' -t -c ' . dirname(__FILE__) . '/upload_progress_test.conf');
-    $this->server->nginx_has_upload_progress = preg_match("/upload_progress_test\.conf syntax is ok/", implode('', drush_shell_exec_output()), $match);
+    // test sample config. (Note: we replaced this test with previous nginx -V
+    // standard version because the extra config-test file is unreliable
+    // and tends to not work in some conditions, including remote heads,
+    // which can lead to turning all sites down on upgrades because of broken config.)
+    //
+    // $this->server->shell_exec($path . ' -t -c ' . dirname(__FILE__) . '/upload_progress_test.conf');
+    // $this->server->nginx_has_upload_progress = preg_match("/upload_progress_test\.conf syntax is ok/", implode('', drush_shell_exec_output()), $match);
   }
 
   function verify_server_cmd() {
