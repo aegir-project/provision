@@ -63,9 +63,9 @@
  ## FastCGI Caching
   fastcgi_cache_path /var/lib/nginx/speed
                      levels=2:2:2
-                     keys_zone=speed:50m
+                     keys_zone=speed:60m
                      inactive=1h
-                     max_size=1g;
+                     max_size=3g;
 
  ## General Options
   ignore_invalid_headers          on;
