@@ -32,6 +32,43 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     // Replace the server config with our own. See the class for more info.
     $this->configs['server'][] = 'Provision_Config_Nginx_Ssl_Server';
     $this->configs['site'][] = 'Provision_Config_Nginx_Ssl_Site';
+    $this->server->setProperty('nginx_has_gzip', 0);
+    $this->server->setProperty('nginx_has_new_version', 0);
+    $this->server->setProperty('nginx_web_server', 0);
+    $this->server->setProperty('nginx_has_upload_progress', 0);
+  }
+
+  function save_server() {
+    // Find nginx executable.
+    if (provision_file()->exists('/usr/local/sbin/nginx')->status()) {
+      $path = "/usr/local/sbin/nginx";
+    }
+    elseif (provision_file()->exists('/usr/sbin/nginx')->status()) {
+      $path = "/usr/sbin/nginx";
+    }
+    elseif (provision_file()->exists('/usr/local/bin/nginx')->status()) {
+      $path = "/usr/local/bin/nginx";
+    }
+    else {
+      return;
+    }
+
+    // Check if some nginx features are supported and save them for later.
+    $this->server->shell_exec($path . ' -V');
+    $this->server->nginx_has_upload_progress = preg_match("/upload/", implode('', drush_shell_exec_output()), $match);
+    $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match);
+    $this->server->nginx_has_new_version = preg_match("/(Barracuda\/1\.0\.)/", implode('', drush_shell_exec_output()), $match);
+    $this->server->provision_db_cloaking = FALSE;
+    $this->server->nginx_web_server = 1;
+
+    // Check upload progress capability. Because configure parameters may vary,
+    // test sample config. (Note: we replaced this test with previous nginx -V
+    // standard version because the extra config-test file is unreliable
+    // and tends to not work in some conditions, including remote heads,
+    // which can lead to turning all sites down on upgrades because of broken config.)
+    //
+    // $this->server->shell_exec($path . ' -t -c ' . dirname(__FILE__) . '/upload_progress_test.conf');
+    // $this->server->nginx_has_upload_progress = preg_match("/upload_progress_test\.conf syntax is ok/", implode('', drush_shell_exec_output()), $match);
   }
 
   function verify_server_cmd() {
