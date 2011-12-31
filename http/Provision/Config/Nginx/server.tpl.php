@@ -135,11 +135,19 @@ map $args $key_uri {
 }
 
 ###
+### Set cache expiration depending on the Drupal core version.
+###
+map $http_x_booster_expires $will_expire_in {
+  default          12h;
+  ~*D5|unknown|D8  50m;
+}
+
+###
 ### Deny crawlers without 403 response.
 ###
 map $http_user_agent $is_crawler {
   default                                                                                                      0;
-  ~*HTTrack|HTMLParser|libwww|PECL|AutomaticSiteMap|ClickSense|ValueClick|SiteBot|BuzzTracker|sistrix|Offline  is_crawler;
+  ~*HTTrack|MJ12bot|HTMLParser|libwww|PECL|AutomaticSiteMap|ClickSense|ValueClick|SiteBot|BuzzTracker|sistrix|Offline  is_crawler;
 }
 
 ###
@@ -147,7 +155,7 @@ map $http_user_agent $is_crawler {
 ###
 map $http_user_agent $is_bot {
   default                                             0;
-  ~*crawl|goog|yahoo|spider|bot|tracker|click|parser  is_bot;
+  ~*crawl|goog|yahoo|yandex|spider|bot|tracker|click|parser  is_bot;
 }
 
 ###
