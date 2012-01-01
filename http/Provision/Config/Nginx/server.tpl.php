@@ -137,7 +137,7 @@ map $args $key_uri {
 ###
 ### Set cache expiration depending on the Drupal core version.
 ###
-map $http_x_booster_expires $will_expire_in {
+map $sent_http_x_booster_expires $will_expire_in {
   default          12h;
   ~*D5|unknown|D8  50m;
 }
