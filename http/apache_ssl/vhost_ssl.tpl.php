@@ -39,7 +39,7 @@ if (sizeof($this->aliases)) {
 
     // Redirect all aliases to the main https url.
     print " RewriteCond %{HTTP_HOST} !^{$this->uri}$ [NC]\n";
-    print " RewriteRule ^/*(.*)$ https://{$this->uri}/$1 [L,R=301]\n";
+    print " RewriteRule ^/*(.*)$ https://{$this->uri}/$1 [NE,L,R=301]\n";
   }
 }
 ?>
