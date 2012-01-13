@@ -24,7 +24,6 @@ server {
 $nginx_has_new_version = drush_get_option('nginx_has_new_version');
 $nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
 if ($this->redirection || $ssl_redirection) {
-  print "\n   access_log  off;\n";
   if ($ssl_redirection && !$this->redirection) {
     // redirect aliases in non-ssl to the same alias on ssl.
     print "\n   rewrite ^ https://\$host\$request_uri? permanent;\n";
