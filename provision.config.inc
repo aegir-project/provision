@@ -230,7 +230,7 @@ class provisionConfig {
 class provisionConfig_drushrc extends provisionConfig {
   public $template = 'provision_drushrc.tpl.php';
   public $description = 'Drush configuration file';
-  protected $mode = 0400;
+  protected $mode = 0440;
   protected $context_name = 'drush';
 
   function filename() {
