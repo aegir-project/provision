@@ -22,6 +22,17 @@ drush_log(
 
 /*
  *  Update paths for sites migrated
+ *  from standalone non-standard D5 to the multisite install.
+ */
+if (drush_drupal_major_version() == 5) {
+  db_query("UPDATE {files}       SET filepath   = REPLACE(filepath,   'files/', 'sites/%s/files/')", $new_url);
+  db_query("UPDATE {users}       SET picture    = REPLACE(picture,    'files/', 'sites/%s/files/')", $new_url);
+  db_query("UPDATE {node_revisions} SET body    = REPLACE(body,       'files/', 'sites/%s/files/')", $new_url);
+  db_query("UPDATE {node_revisions} SET teaser  = REPLACE(teaser,     'files/', 'sites/%s/files/')", $new_url);
+}
+
+/*
+ *  Update paths for sites migrated
  *  from standalone to the multisite install.
  */
 db_query("UPDATE {files}       SET filepath   = REPLACE(filepath,   'sites/default', 'sites/%s')", $new_url);
