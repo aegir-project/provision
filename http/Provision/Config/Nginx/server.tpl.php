@@ -108,7 +108,7 @@ if ($nginx_has_upload_progress) {
 ?>
 
  ## Log Format
-  log_format        main '"$remote_addr" $host [$time_local] '
+  log_format        main '"$proxy_add_x_forwarded_for" $host [$time_local] '
                          '"$request" $status $body_bytes_sent '
                          '$request_length $bytes_sent "$http_referer" '
                          '"$http_user_agent" $request_time "$gzip_ratio"';
