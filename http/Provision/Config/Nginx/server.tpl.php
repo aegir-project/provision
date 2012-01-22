@@ -173,10 +173,14 @@ map $args $is_denied {
 }
 
 ###
-### Set access_log value depending on the location flag.
+### Set access_log and log_not_found depending on the location flag.
 ###
 map $nolog $iflog {
   default   "/var/log/nginx/access.log main";
+  ~*off|no  off;
+}
+map $nolog $iflog_not_found {
+  default   on;
   ~*off|no  off;
 }
 
