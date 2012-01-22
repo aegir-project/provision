@@ -172,6 +172,14 @@ map $args $is_denied {
   ~*delete.+from|insert.+into|select.+from|union.+select|onload|\.php.+src|system\(.+|document\.cookie|\;|\.\. is_denied;
 }
 
+###
+### Set access_log value depending on the location flag.
+###
+map $nolog $iflog {
+  default   "/var/log/nginx/access.log main";
+  ~*off|no  off;
+}
+
 #######################################################
 ###  nginx default server
 #######################################################
