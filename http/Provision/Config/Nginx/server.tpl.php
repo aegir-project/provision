@@ -76,6 +76,7 @@
   recursive_error_pages           on;
   reset_timedout_connection       on;
   fastcgi_intercept_errors        on;
+  server_tokens                  off;
 
  ## TCP options
   tcp_nopush  on;
