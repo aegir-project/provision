@@ -142,6 +142,14 @@ map $args $key_uri {
 }
 
 ###
+### Set backend depending on the Drupal core version.
+###
+map $sent_http_x_backend $this_backend {
+  default          9000;
+  ~*B|C|D7|D8      9090;
+}
+
+###
 ### Set cache expiration depending on the Drupal core version.
 ###
 map $sent_http_x_booster_expires $will_expire_in {
