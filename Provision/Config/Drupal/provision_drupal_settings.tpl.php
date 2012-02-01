@@ -118,7 +118,6 @@
 
   global $conf;
   $conf['install_profile'] = '<?php print $this->profile ?>';
-
   $conf['<?php print $this->file_directory_path_var ?>'] = 'sites/<?php print $this->uri ?>/files';
   $conf['<?php print $this->file_directory_temp_var ?>'] = 'sites/<?php print $this->uri ?>/files/tmp';
   $conf['clean_url'] = 1;
