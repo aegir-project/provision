@@ -118,8 +118,8 @@
 
   global $conf;
   $conf['install_profile'] = '<?php print $this->profile ?>';
-  $conf['file_directory_path'] = 'sites/<?php print $this->uri ?>/files';
-  $conf['file_directory_temp'] = 'sites/<?php print $this->uri ?>/files/tmp';
+  $conf['<?php print $this->file_directory_path_var ?>'] = 'sites/<?php print $this->uri ?>/files';
+  $conf['<?php print $this->file_directory_temp_var ?>'] = 'sites/<?php print $this->uri ?>/files/tmp';
   $conf['clean_url'] = 1;
   $conf['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
 
