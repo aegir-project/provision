@@ -9,6 +9,14 @@
  * It is intended to eventually replace the cluster module, but it is
  * not backwards compatible. Most notably, the "cluster_web_servers"
  * array is here renamed to "master_web_servers".
+ *
+ * I actually thought a lot before naming this "pack". While I do not
+ * like packs, crowds or herd mentality, I think it is an apt
+ * description of this setup. Furthermore, I tried to avoid
+ * master/slave vocabulary, but found that primary/secondary doesn't
+ * really reflect the dynamics at play here, where the master server
+ * *is* the authoritative reference, where the files *are*.
+ *                                     -- The Anarcat 2012
  */
 class Provision_Service_http_pack extends Provision_Service_http {
   static function option_documentation() {
