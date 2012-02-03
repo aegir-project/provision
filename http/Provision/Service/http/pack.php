@@ -1,6 +1,16 @@
 <?php
 
-class Provision_Service_http_dumbcluster extends Provision_Service_http {
+/**
+ * Pack cluster module.
+ *
+ * This is a rewrite of the cluster module to extend it and support
+ * "slave" servers that do not sync files around.
+ *
+ * It is intended to eventually replace the cluster module, but it is
+ * not backwards compatible. Most notably, the "cluster_web_servers"
+ * array is here renamed to "master_web_servers".
+ */
+class Provision_Service_http_pack extends Provision_Service_http {
   static function option_documentation() {
     return array(
       '--slave_web_servers' => 'server with dumbcluster: comma-separated list of slave web servers.'
@@ -14,7 +24,7 @@ class Provision_Service_http_dumbcluster extends Provision_Service_http {
   }
 
   /**
-   * Run a method on each server in the dumbcluster.
+   * Run a method on each server in the pack.
    *
    * This function does a logical AND on the return status of each of the
    * methods, and returns TRUE only if they all returned something that
@@ -51,7 +61,7 @@ class Provision_Service_http_dumbcluster extends Provision_Service_http {
   /**
    * Support the ability to cloak database credentials using environment variables.
    *
-   * The dumbcluster supports this functionality only if ALL the servers it maintains 
+   * The pack supports this functionality only if ALL the servers it maintains
    * supports this functionality.
    */
   function cloaked_db_creds() {
