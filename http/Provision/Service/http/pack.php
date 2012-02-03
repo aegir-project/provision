@@ -28,7 +28,7 @@ class Provision_Service_http_pack extends Provision_Service_http {
 
   function init_server() {
     $this->server->setProperty('slave_web_servers', array(), TRUE);
-    $this->server->setProperty('master_web_server', array(), TRUE);
+    $this->server->setProperty('master_web_servers', array(), TRUE);
   }
 
   /**
