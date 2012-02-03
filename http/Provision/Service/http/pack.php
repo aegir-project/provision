@@ -21,8 +21,8 @@
 class Provision_Service_http_pack extends Provision_Service_http {
   static function option_documentation() {
     return array(
-      '--slave_web_servers' => 'server with pack: comma-separated list of slave web servers.'
-      '--master_web_servers' => 'server with pack: comma-separated list of master web servers.'
+      '--slave_web_servers' => 'server with pack: comma-separated list of slave web servers.',
+      '--master_web_servers' => 'server with pack: comma-separated list of master web servers.',
     );
   }
 
