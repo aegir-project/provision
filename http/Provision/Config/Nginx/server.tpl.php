@@ -66,8 +66,8 @@
  ## FastCGI Caching
   fastcgi_cache_path /var/lib/nginx/speed
                      levels=2:2:2
-                     keys_zone=speed:60m
-                     inactive=1h
+                     keys_zone=speed:10m
+                     inactive=15m
                      max_size=3g;
 
  ## General Options
@@ -87,7 +87,7 @@
 
  ## GeoIP support
   geoip_country /usr/share/GeoIP/GeoIP.dat;
-  
+
  ## Compression
   gzip_buffers      16 8k;
   gzip_comp_level   5;
@@ -153,8 +153,8 @@ map $sent_http_x_backend $this_backend {
 ### Set cache expiration depending on the Drupal core version.
 ###
 map $sent_http_x_booster_expires $will_expire_in {
-  default          12h;
-  ~*D5|unknown|D8  50m;
+  default          on-demand;
+  ~*D5|unknown|D8  3h;
 }
 
 ###
