@@ -77,6 +77,10 @@
   reset_timedout_connection       on;
   fastcgi_intercept_errors        on;
   server_tokens                  off;
+  fastcgi_hide_header         'Link';
+  fastcgi_hide_header  'X-Generator';
+  fastcgi_hide_header 'X-Powered-By';
+  fastcgi_hide_header 'X-Drupal-Cache';
 
  ## TCP options
   tcp_nopush  on;
@@ -145,16 +149,16 @@ map $args $key_uri {
 ### Set backend depending on the Drupal core version.
 ###
 map $sent_http_x_backend $this_backend {
-  default          9000;
-  ~*B|C|D7|D8      9090;
+  default    9000;
+  ~*B|C|D|E  9090;
 }
 
 ###
 ### Set cache expiration depending on the Drupal core version.
 ###
-map $sent_http_x_booster_expires $will_expire_in {
-  default          on-demand;
-  ~*D5|unknown|D8  3h;
+map $sent_http_x_purge_level $will_expire_in {
+  default        on-demand;
+  ~*5|unknown|8  3h;
 }
 
 ###
