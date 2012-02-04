@@ -146,26 +146,18 @@ map $args $key_uri {
 }
 
 ###
-### Set backend depending on the Drupal core version.
-###
-map $sent_http_x_backend $this_backend {
-  default    9000;
-  ~*B|C|D|E  9090;
-}
-
-###
 ### Set cache expiration depending on the Drupal core version.
 ###
 map $sent_http_x_purge_level $will_expire_in {
-  default        on-demand;
-  ~*5|unknown|8  3h;
+  default   on-demand;
+  ~*5|none  3h;
 }
 
 ###
 ### Deny crawlers without 403 response.
 ###
 map $http_user_agent $is_crawler {
-  default                                                                                                      0;
+  default                                                                                                              0;
   ~*HTTrack|MJ12bot|HTMLParser|libwww|PECL|AutomaticSiteMap|ClickSense|ValueClick|SiteBot|BuzzTracker|sistrix|Offline  is_crawler;
 }
 
@@ -173,7 +165,7 @@ map $http_user_agent $is_crawler {
 ### Deny all known bots on some URIs without 403 response.
 ###
 map $http_user_agent $is_bot {
-  default                                             0;
+  default                                                    0;
   ~*crawl|goog|yahoo|yandex|spider|bot|tracker|click|parser  is_bot;
 }
 
