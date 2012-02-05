@@ -33,20 +33,30 @@ if ($this->redirection || $ssl_redirection) {
     print "\n   rewrite ^ https://{$this->uri}\$request_uri? permanent;\n";
   }
   elseif (!$ssl_redirection && $this->redirection) {
+    if (drush_drupal_major_version() >= 7) {
+      print "   include      " . $server->include_path . "/nginx_modern_include.conf;\n";
+    }
+    else {
+      if ($server->nginx_has_new_version || $server->nginx_has_upload_progress) {
+        print "   include      " . $server->include_path . "/nginx_advanced_include.conf;\n";
+      }
+      else {
+        print "   include      " . $server->include_path . "/nginx_simple_include.conf;\n";
+      }
+    }
+  }
+}
+else {
+  if (drush_drupal_major_version() >= 7) {
+    print "   include      " . $server->include_path . "/nginx_modern_include.conf;\n";
+  }
+  else {
     if ($server->nginx_has_new_version || $server->nginx_has_upload_progress) {
       print "   include      " . $server->include_path . "/nginx_advanced_include.conf;\n";
     }
     else {
       print "   include      " . $server->include_path . "/nginx_simple_include.conf;\n";
     }
-  }
-}
-else {
-  if ($server->nginx_has_new_version || $server->nginx_has_upload_progress) {
-    print "   include      " . $server->include_path . "/nginx_advanced_include.conf;\n";
-  }
-  else {
-    print "   include      " . $server->include_path . "/nginx_simple_include.conf;\n";
   }
 }
 ?>

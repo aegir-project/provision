@@ -35,18 +35,23 @@ server {
 <?php
 $nginx_has_new_version = drush_get_option('nginx_has_new_version');
 $nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
-    if ($nginx_has_new_version || $nginx_has_upload_progress) {
-      print "   include      " . $server->include_path . "/nginx_advanced_include.conf;\n";
+    if (drush_drupal_major_version() >= 7) {
+      print "   include      " . $server->include_path . "/nginx_modern_include.conf;\n";
     }
     else {
-      print "   include      " . $server->include_path . "/nginx_simple_include.conf;\n";
+      if ($server->nginx_has_new_version || $server->nginx_has_upload_progress) {
+        print "   include      " . $server->include_path . "/nginx_advanced_include.conf;\n";
+      }
+      else {
+        print "   include      " . $server->include_path . "/nginx_simple_include.conf;\n";
+      }
     }
 ?>
 }
 
 <?php endif; ?>
 
-<?php 
+<?php
    // Generate the standard virtual host too.
    include(provision_class_directory('Provision_Config_Nginx_Site') . '/vhost.tpl.php');
 ?>
