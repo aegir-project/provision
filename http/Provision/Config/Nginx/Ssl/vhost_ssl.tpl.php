@@ -38,6 +38,14 @@ $nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
     if (drush_drupal_major_version() >= 7) {
       print "   include      " . $server->include_path . "/nginx_modern_include.conf;\n";
     }
+    elseif (drush_drupal_major_version() == 5) {
+      if ($server->nginx_has_new_version || $server->nginx_has_upload_progress) {
+        print "   include      " . $server->include_path . "/nginx_advanced_include.conf;\n";
+      }
+      else {
+        print "   include      " . $server->include_path . "/nginx_simple_include.conf;\n";
+      }
+    }
     else {
       if ($server->nginx_has_new_version || $server->nginx_has_upload_progress) {
         print "   include      " . $server->include_path . "/nginx_advanced_include.conf;\n";
