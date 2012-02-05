@@ -138,6 +138,14 @@ map $http_user_agent $device {
 }
 
 ###
+### Set a cache_uid variable for authenticated users (by @perusio).
+###
+map $http_cookie $cache_uid {
+  default nil; # hommage to Lisp :)
+  ~SESS[[:alnum:]]+=(?<session_id>[[:alnum:]]+) $session_id;
+}
+
+###
 ### Live switch of $key_uri for Speed Booster cache depending on $args.
 ###
 map $args $key_uri {
