@@ -141,7 +141,7 @@ map $http_user_agent $device {
 ### Set a cache_uid variable for authenticated users (by @brianmercer and @perusio).
 ###
 map $http_cookie $cache_uid {
-  default nil; # hommage to Lisp :)
+  default                                       0;
   ~SESS[[:alnum:]]+=(?<session_id>[[:alnum:]]+) $session_id;
 }
 
