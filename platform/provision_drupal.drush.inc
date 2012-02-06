@@ -357,7 +357,7 @@ function _provision_drupal_get_cvs_versions($files) {
 function provision_drupal_find_aliases() {
   $aliases = array();
   if (d()->type === 'site') {
-    if (drush_drupal_major_version() >= 7) {
+    if (drush_drupal_major_version() >= 8) {
       $config = new Provision_Config_Drupal_Alias_Store(d()->name);
       $aliases = $config->find();
     } else {
