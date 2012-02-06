@@ -35,7 +35,7 @@ server {
 <?php
 $nginx_has_new_version = drush_get_option('nginx_has_new_version');
 $nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
-    if (drush_drupal_major_version() >= 7) {
+    if (drush_drupal_major_version() >= 7 || $this->profile == "hostmaster") {
       print "   include      " . $server->include_path . "/nginx_modern_include.conf;\n";
     }
     elseif (drush_drupal_major_version() == 5) {

@@ -33,7 +33,7 @@ if ($this->redirection || $ssl_redirection) {
     print "\n   rewrite ^ https://{$this->uri}\$request_uri? permanent;\n";
   }
   elseif (!$ssl_redirection && $this->redirection) {
-    if (drush_drupal_major_version() >= 7) {
+    if (drush_drupal_major_version() >= 7 || $this->profile == "hostmaster") {
       print "   include      " . $server->include_path . "/nginx_modern_include.conf;\n";
     }
     elseif (drush_drupal_major_version() == 5) {
@@ -55,7 +55,7 @@ if ($this->redirection || $ssl_redirection) {
   }
 }
 else {
-  if (drush_drupal_major_version() >= 7) {
+  if (drush_drupal_major_version() >= 7 || $this->profile == "hostmaster") {
     print "   include      " . $server->include_path . "/nginx_modern_include.conf;\n";
   }
   elseif (drush_drupal_major_version() == 5) {
