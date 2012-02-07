@@ -1,3 +1,10 @@
+aegir-provision (1.6+webpack-1) testing; urgency=low
+
+  * special build for the dev-webpack1x branch
+  * add scripts to configure the slave server
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Tue, 07 Feb 2012 17:55:01 -0500
+
 aegir-provision (1.6-1) testing; urgency=low
 
   * new upstream release

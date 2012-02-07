@@ -60,3 +60,22 @@ Description: mass Drupal hosting system
  .
  This meta-package will install both the frontend (aegir-hostmaster)
  and the backend (aegir-provision).
+
+Package: aegir-cluster-slave
+Architecture: all
+Depends: ${misc:Depends}, php5-mysql, sudo, apache2, adduser, ucf, libapache2-mod-php5, rsync, nfs-client
+Recommends: php5-gd, php5
+Description: web frontend for the Aegir hosting system
+ Configuration of lightweight slave servers for the Aegir "pack"
+ clustering system.
+ .
+ This is meant to be installed on remote servers that are "slave
+ servers" in the "pack" cluster. This package will configure the
+ following parts of your system, through debconf prompts:
+ .
+  * create a aegir user
+  * /etc/fstab - to NFS-mount the master server
+  * /var/aegir/.ssh/authorized_keys - to allow the master server to
+    connect via SSH to sync files and reload apache
+  * /etc/sudoers.d/aegir - allow aegir to restart apache
+  * /etc/apache2/conf.d/aegir.conf - load the aegir apache config
