@@ -6,6 +6,8 @@ Description: Public SSH key of the master server
  If this is changed, it will simply be *added* to the
  /var/aegir/.ssh/authorized_keys file, the previous key will not be
  removed.
+ .
+ If this is left empty, no key will be added to that file.
 
 Template:aegir/master_mountpoint
 Type: string
