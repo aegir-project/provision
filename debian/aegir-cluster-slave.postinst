@@ -24,6 +24,7 @@ if [ "$DPKG_DEBUG" = "developer" ]; then
     set -x
 fi
 
+# when changing this, change the regex in the sed replacement below
 VARLIB="/var/aegir"
 
 case "$1" in
@@ -68,20 +69,20 @@ case "$1" in
         fi
         db_get "aegir/master_mountpoint"
         MOUNT="$RET"
-        if grep -q "/var/aegir/platforms" /etc/fstab ; then
-            if ! grep -q "$MOUNT.*/var/aegir/platforms" /etc/fstab ; then
-                sed -i.dpkg-orig "/\\/var\\/aegir\\/platforms/s#^.*\$#$MOUNT /var/aegir/platforms nfs rw 0 0#" /etc/fstab
+        if grep -q "$VARLIB/platforms" /etc/fstab ; then
+            if ! grep -q "$MOUNT.*$VARLIB/platforms" /etc/fstab ; then
+                sed -i.dpkg-orig "/\/var\\/aegir\\/platforms/s#^.*\$#$MOUNT $VARLIB/platforms nfs rw 0 0#" /etc/fstab
                 echo "installed new fstab, original kept in /etc/fstab.dpkg-orig"
                 echo "for the changes to take effect, the $VARLIB/platforms directory need to be remounted"
                 echo "this may require a reboot"
             fi
         else
             cp /etc/fstab /etc/fstab.dpkg-orig
-            echo "$MOUNT /var/aegir/platforms nfs rw 0 0" >> /etc/fstab
+            echo "$MOUNT $VARLIB/platforms nfs rw 0 0" >> /etc/fstab
             echo "installed new fstab, original kept in /etc/fstab.dpkg-orig"
         fi
-        if ! mount | grep /var/aegir/platforms; then
-            mount /var/aegir/platforms
+        if ! mount | grep $VARLIB/platforms; then
+            mount $VARLIB/platforms
         fi
     ;;
 
