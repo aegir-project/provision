@@ -141,7 +141,7 @@ map $http_user_agent $device {
 ### Set a cache_uid variable for authenticated users (by @brianmercer and @perusio).
 ###
 map $http_cookie $cache_uid {
-  default                                       0;
+  default                                       '';
   ~SESS[[:alnum:]]+=(?<session_id>[[:alnum:]]+) $session_id;
 }
 
@@ -165,7 +165,7 @@ map $sent_http_x_purge_level $will_expire_in {
 ### Deny crawlers without 403 response.
 ###
 map $http_user_agent $is_crawler {
-  default                                                                                                              0;
+  default                                                                                                              '';
   ~*HTTrack|MJ12bot|HTMLParser|libwww|PECL|AutomaticSiteMap|ClickSense|ValueClick|SiteBot|BuzzTracker|sistrix|Offline  is_crawler;
 }
 
@@ -173,7 +173,7 @@ map $http_user_agent $is_crawler {
 ### Deny all known bots on some URIs without 403 response.
 ###
 map $http_user_agent $is_bot {
-  default                                                    0;
+  default                                                    '';
   ~*crawl|goog|yahoo|yandex|spider|bot|tracker|click|parser  is_bot;
 }
 
@@ -181,7 +181,7 @@ map $http_user_agent $is_bot {
 ### Deny listed requests for security reasons without 403 response.
 ###
 map $args $is_denied {
-  default                                                                                                      0;
+  default                                                                                                      '';
   ~*delete.+from|insert.+into|select.+from|union.+select|onload|\.php.+src|system\(.+|document\.cookie|\;|\.\. is_denied;
 }
 
