@@ -18,6 +18,10 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+
+# Source debconf library.
+. /usr/share/debconf/confmodule
+
 if [ "$DPKG_DEBUG" = "developer" ] ; then
     set -x
 fi
@@ -36,9 +40,11 @@ case "$1" in
         ucf --purge /etc/sudoers.d/aegir
         rm -f /etc/sudoers.d/aegir
 
+        rm -f /var/aegir/config/apache.conf
+
         db_get "aegir/master_ssh_key"
         SSH_KEY="$RET"
-        sed -i.dpkg-orig "s#$SSH_KEY##" $VARLIB/.ssh/authorized_keys
+        sed -i.dpkg-orig "s#$SSH_KEY##" /var/aegir/.ssh/authorized_keys
         sed -i.dpkg-orig '/\/var\/aegir\/platforms/d' /etc/fstab
         ;;
     remove|upgrade|abort-install|disappear)
