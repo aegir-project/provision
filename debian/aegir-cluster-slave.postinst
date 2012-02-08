@@ -60,29 +60,33 @@ case "$1" in
 
         db_get "aegir/master_ssh_key"
         SSH_KEY="$RET"
-        if ! grep -q "$SSH_KEY" $VARLIB/.ssh/authorized_keys; then
-            mkdir -p $VARLIB/.ssh
-            echo "$SSH_KEY" >> $VARLIB/.ssh/authorized_keys
-            chown aegir:aegir $VARLIB/.ssh $VARLIB/.ssh/authorized_keys
-            chmod 700 $VARLIB/.ssh
-            chmod 600 $VARLIB/.ssh/authorized_keys
+        if ! [ -z "$SSH_KEY" ]; then
+            if ! grep -q "$SSH_KEY" $VARLIB/.ssh/authorized_keys; then
+                mkdir -p $VARLIB/.ssh
+                echo "$SSH_KEY" >> $VARLIB/.ssh/authorized_keys
+                chown aegir:aegir $VARLIB/.ssh $VARLIB/.ssh/authorized_keys
+                chmod 700 $VARLIB/.ssh
+                chmod 600 $VARLIB/.ssh/authorized_keys
+            fi
         fi
         db_get "aegir/master_mountpoint"
         MOUNT="$RET"
-        if grep -q "$VARLIB/platforms" /etc/fstab ; then
-            if ! grep -q "$MOUNT.*$VARLIB/platforms" /etc/fstab ; then
-                sed -i.dpkg-orig "/\/var\\/aegir\\/platforms/s#^.*\$#$MOUNT $VARLIB/platforms nfs rw 0 0#" /etc/fstab
+        if ! [ -z "$MOUNT" ]; then
+            if grep -q "$VARLIB/platforms" /etc/fstab ; then
+                if ! grep -q "$MOUNT.*$VARLIB/platforms" /etc/fstab ; then
+                    sed -i.dpkg-orig "/\/var\\/aegir\\/platforms/s#^.*\$#$MOUNT $VARLIB/platforms nfs rw 0 0#" /etc/fstab
+                    echo "installed new fstab, original kept in /etc/fstab.dpkg-orig"
+                    echo "for the changes to take effect, the $VARLIB/platforms directory need to be remounted"
+                    echo "this may require a reboot"
+                fi
+            else
+                cp /etc/fstab /etc/fstab.dpkg-orig
+                echo "$MOUNT $VARLIB/platforms nfs rw 0 0" >> /etc/fstab
                 echo "installed new fstab, original kept in /etc/fstab.dpkg-orig"
-                echo "for the changes to take effect, the $VARLIB/platforms directory need to be remounted"
-                echo "this may require a reboot"
             fi
-        else
-            cp /etc/fstab /etc/fstab.dpkg-orig
-            echo "$MOUNT $VARLIB/platforms nfs rw 0 0" >> /etc/fstab
-            echo "installed new fstab, original kept in /etc/fstab.dpkg-orig"
-        fi
-        if ! mount | grep $VARLIB/platforms; then
-            mount $VARLIB/platforms
+            if ! mount | grep $VARLIB/platforms; then
+                mount $VARLIB/platforms
+            fi
         fi
     ;;
 
