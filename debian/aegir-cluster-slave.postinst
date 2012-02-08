@@ -84,7 +84,7 @@ case "$1" in
                 echo "$MOUNT $VARLIB/platforms nfs rw 0 0" >> /etc/fstab
                 echo "installed new fstab, original kept in /etc/fstab.dpkg-orig"
             fi
-            if ! mount | grep $VARLIB/platforms; then
+            if ! mount | grep -q $VARLIB/platforms; then
                 mount $VARLIB/platforms
             fi
         fi
