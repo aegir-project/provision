@@ -13,7 +13,6 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     $this->configs['server'][] = 'Provision_Config_Nginx_Server';
     $this->configs['site'][] = 'Provision_Config_Nginx_Site';
     $this->server->setProperty('nginx_has_gzip', 0);
-    $this->server->setProperty('nginx_has_new_version', 0);
     $this->server->setProperty('nginx_web_server', 0);
     $this->server->setProperty('nginx_has_upload_progress', 0);
   }
@@ -37,23 +36,17 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     $this->server->shell_exec($path . ' -V');
     $this->server->nginx_has_upload_progress = preg_match("/upload/", implode('', drush_shell_exec_output()), $match);
     $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match);
-    $this->server->nginx_has_new_version = preg_match("/(nginx\/1\.)/", implode('', drush_shell_exec_output()), $match);
     $this->server->provision_db_cloaking = FALSE;
     $this->server->nginx_web_server = 1;
-
-    // Check upload progress capability. Because configure parameters may vary,
-    // test sample config. (Note: we replaced this test with previous nginx -V
-    // standard version because the extra config-test file is unreliable
-    // and tends to not work in some conditions, including remote heads,
-    // which can lead to turning all sites down on upgrades because of broken config.)
-    //
-    // $this->server->shell_exec($path . ' -t -c ' . dirname(__FILE__) . '/upload_progress_test.conf');
-    // $this->server->nginx_has_upload_progress = preg_match("/upload_progress_test\.conf syntax is ok/", implode('', drush_shell_exec_output()), $match);
   }
 
   function verify_server_cmd() {
      provision_file()->copy(dirname(__FILE__) . '/nginx_modern_include.conf', $this->server->include_path . '/nginx_modern_include.conf');
      $this->sync($this->server->include_path . '/nginx_modern_include.conf');
+     provision_file()->copy(dirname(__FILE__) . '/nginx_octopus_include.conf', $this->server->include_path . '/nginx_octopus_include.conf');
+     $this->sync($this->server->include_path . '/nginx_octopus_include.conf');
+     provision_file()->copy(dirname(__FILE__) . '/nginx_legacy_include.conf', $this->server->include_path . '/nginx_legacy_include.conf');
+     $this->sync($this->server->include_path . '/nginx_legacy_include.conf');
      provision_file()->copy(dirname(__FILE__) . '/nginx_advanced_include.conf', $this->server->include_path . '/nginx_advanced_include.conf');
      $this->sync($this->server->include_path . '/nginx_advanced_include.conf');
      provision_file()->copy(dirname(__FILE__) . '/nginx_simple_include.conf', $this->server->include_path . '/nginx_simple_include.conf');
@@ -62,8 +55,6 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
      $this->sync($this->server->include_path . '/fastcgi_params.conf');
      provision_file()->copy(dirname(__FILE__) . '/fastcgi_ssl_params.conf', $this->server->include_path . '/fastcgi_ssl_params.conf');
      $this->sync($this->server->include_path . '/fastcgi_ssl_params.conf');
-     provision_file()->copy(dirname(__FILE__) . '/upload_progress_test.conf', $this->server->include_path . '/upload_progress_test.conf');
-     $this->sync($this->server->include_path . '/upload_progress_test.conf');
     // Call the parent at the end. it will restart the server when it finishes.
     parent::verify_server_cmd();
   }
