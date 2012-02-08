@@ -42,9 +42,7 @@ case "$1" in
         sed -i.dpkg-orig '/\/var\/aegir\/platforms/d' /etc/fstab
         ;;
     remove|upgrade|abort-install|disappear)
-        # unregister apache config
-        ( rm /etc/apache2/conf.d/aegir.conf > /dev/null 2>&1 && invoke-rc.d apache2 force-reload ) || true
-        umount /var/aegir/platforms
+        # now all in prerm
     ;;
 
     abort-upgrade|failed-upgrade)
