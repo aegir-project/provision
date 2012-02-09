@@ -1,6 +1,8 @@
 core = 6.x
 api = 2
 
+; BOA-2.0.2-log
+
 projects[pressflow][type] = "core"
 projects[pressflow][download][type] = "get"
 projects[pressflow][download][url] = "http://files.aegir.cc/dev/pressflow6.tar.gz"
