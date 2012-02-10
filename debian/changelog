@@ -1,4 +1,4 @@
-aegir-provision (1.6+webpack-1) testing; urgency=low
+aegir-provision (1.6-1+webpack) testing; urgency=low
 
   * special build for the dev-webpack1x branch
   * add scripts to configure the slave server
