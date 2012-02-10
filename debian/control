@@ -63,7 +63,7 @@ Description: mass Drupal hosting system
 
 Package: aegir-cluster-slave
 Architecture: all
-Depends: ${misc:Depends}, php5-mysql, sudo, apache2, adduser, ucf, libapache2-mod-php5, rsync, nfs-client
+Depends: ${misc:Depends}, php5-mysql, sudo, apache2, adduser, ucf, libapache2-mod-php5, rsync, nfs-client, mysql-client
 Recommends: php5-gd, php5
 Description: web frontend for the Aegir hosting system
  Configuration of lightweight slave servers for the Aegir "pack"
