@@ -27,6 +27,7 @@ server {
    ssl_ciphers                 HIGH:!ADH:!MD5;
    ssl_prefer_server_ciphers   on;
    keepalive_timeout           70;
+   <?php print $extra_config; ?>
 <?php
 $nginx_has_new_version = drush_get_option('nginx_has_new_version');
 $nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
