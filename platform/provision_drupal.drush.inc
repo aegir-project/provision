@@ -1,5 +1,8 @@
 <?php
-// $Id$
+/**
+ * @file
+ * Provision integration with Drupal sites.
+ */
 
 include_once(dirname(__FILE__) . '/../provision.config.inc');
 
@@ -8,26 +11,26 @@ include_once(dirname(__FILE__) . '/../provision.config.inc');
  * Drupal specific functions for the provisioning framework.
  *
  * This module is responsible for the creation and maintenance of the drupal settings.php file, the sites directory structure
- * and all the install api code. 
+ * and all the install api code.
  */
 
 function provision_drupal_drush_help($section) {
   switch ($section) {
-    case 'error:PROVISION_CONFIG_NOT_VALID' : 
+    case 'error:PROVISION_CONFIG_NOT_VALID' :
       return dt('Config file could not be loaded.');
-    case 'error:PROVISION_DRUPAL_SITE_INSTALLED' : 
+    case 'error:PROVISION_DRUPAL_SITE_INSTALLED' :
       return dt('Site has already been installed.');
-    case 'error:PROVISION_DRUPAL_SITE_NOT_FOUND' : 
+    case 'error:PROVISION_DRUPAL_SITE_NOT_FOUND' :
       return dt('Site was not found.');
-    case 'error:PROVISION_DRUPAL_INSTALL_FAILED' : 
+    case 'error:PROVISION_DRUPAL_INSTALL_FAILED' :
       return dt('Could not complete Drupal installation.');
-    case 'error:PROVISION_DRUPAL_UPDATE_FAILED' : 
+    case 'error:PROVISION_DRUPAL_UPDATE_FAILED' :
       return dt('Could not complete Drupal update.');
     case 'error:PROVISION_BACKUP_PATH_NOT_FOUND' :
       return dt("Backup directory does not exist.");
     case 'error:PROVISION_DRUPAL_INSTALL_MISSING_REQUIREMENTS' :
       return dt("Could not meet the requirements for installing the drupal profile");
-    case 'error:PROVISION_REQUIRES_URL' : 
+    case 'error:PROVISION_REQUIRES_URL' :
       return dt('You need to specify the URL argument for this command');
   }
 
@@ -113,7 +116,7 @@ function provision_drupal_sync_site() {
  * @param url
  *   The url of the site being invoked.
  * @param data
- *   A reference to the associated array containing the data for the site. This needs to be a reference, 
+ *   A reference to the associated array containing the data for the site. This needs to be a reference,
  *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file() {
@@ -182,7 +185,7 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     "sites/$url"                 => 0755,
     # those should be writable by the aegir primary group to ease development
     "sites/$url/themes"          => 02775,
-    "sites/$url/modules"         => 02775,  
+    "sites/$url/modules"         => 02775,
     "sites/$url/libraries"       => 02775, # http://drupal.org/node/496240
   );
 
@@ -246,7 +249,7 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
 
   foreach ($mkdir as $path => $perm) {
     if (!is_dir($path)) {
-      provision_file()->mkdir($path) 
+      provision_file()->mkdir($path)
         ->succeed('Created <code>@path</code>')
         ->fail('Could not create <code>@path</code>', 'DRUSH_PERM_ERROR');
     }
@@ -320,7 +323,7 @@ function _provision_find_profiles() {
     $profile->info['languages'] = array_keys($languages);
 
     // Drupal 7 renamed the default install profile to 'standard'
-    // Aegir now allows projects to specify an "old short name" to provide an upgrade path when projects get renamed. 
+    // Aegir now allows projects to specify an "old short name" to provide an upgrade path when projects get renamed.
     if ($profile->name == 'standard') {
       $profile->info['old_short_name'] = 'default';
     }
@@ -363,7 +366,7 @@ function _provision_drupal_get_cvs_versions($files) {
       }
       _cvs_deploy_version_alter($file->info['version'], $project);
       $name = !empty($project['project']) ? $project['project'] : $modulename;
-      $files[$name] = $file; 
+      $files[$name] = $file;
   }
 
   return $files;
@@ -378,7 +381,7 @@ class provisionConfig_drupal_alias_store extends provisionConfig_data_store {
   function filename() {
     return $this->root . '/sites/sites.php';
   }
-  
+
   function maintain() {
     $this->delete();
     if (!$this->redirection) {
@@ -387,14 +390,14 @@ class provisionConfig_drupal_alias_store extends provisionConfig_data_store {
       }
     }
   }
-  
+
   function delete() {
     foreach ($this->find() as $alias) {
       unset($this->records[$alias]);
       unset($this->loaded_records[$alias]);
     }
   }
-  
+
   function find() {
     return array_keys($this->merged_records(), $this->uri);
   }
@@ -441,11 +444,11 @@ function _provision_drupal_maintain_aliases() {
       $config->maintain();
       $config->write();
       d()->service('http')->sync($config->filename());
-    } else {
+    }
+    else {
       _provision_drupal_delete_aliases();
-
       if (!d()->redirection) {
-        foreach(d()->aliases as $alias) {
+        foreach (d()->aliases as $alias) {
           if ($alias = trim($alias)) {
             provision_file()->symlink(d()->uri, d()->root . '/sites/' . $alias)
               ->succeed('Created symlink for alias @target')
@@ -469,9 +472,9 @@ function _provision_drupal_delete_aliases() {
         $config->delete();
         $config->write();
         d()->service('http')->sync($config->filename());
-    } else {
+    }
+    else {
       $aliases = provision_drupal_find_aliases();
-
       foreach ($aliases as $alias) {
         $path = d()->root . '/sites/' . $alias;
         provision_file()->unlink($path)
@@ -496,7 +499,7 @@ function provision_find_packages() {
 
   // Find install profiles.
   $profiles = _provision_find_profiles();
-  drush_set_option('profiles', array_keys((array) $profiles), 'drupal'); 
+  drush_set_option('profiles', array_keys((array) $profiles), 'drupal');
 
   // Iterate through the install profiles, finding the profile specific packages
   foreach ($profiles as $profile => $info) {
@@ -514,7 +517,7 @@ function provision_find_packages() {
 function _provision_find_platforms() {
   return array(
     'drupal' => array(
-    'short_name' => 'drupal', 'version' => drush_drupal_version(), 
+    'short_name' => 'drupal', 'version' => drush_drupal_version(),
     'description' => dt("This platform is running @short_name @version", array('@short_name' => 'Drupal', '@version' => VERSION))));
 }
 
@@ -530,8 +533,8 @@ function _provision_find_packages($scope, $key = '') {
     $result = $func($scope, $key);
     if (sizeof($result)) {
       $packages[$type] = $result;
-      drush_log(dt("Found !count !type in !scope", 
-        array('!count' => sizeof($result), 
+      drush_log(dt("Found !count !type in !scope",
+        array('!count' => sizeof($result),
         '!scope' => $scope_text, '!type' => $type)));
     }
   }
@@ -559,7 +562,7 @@ function provision_drupal_system_map() {
   $packages['profiles'][$profile] = $profiles[$profile];
   $packages['profiles'][$profile]->status = 1;
 
-  foreach (_provision_system_query("module") as $module) { 
+  foreach (_provision_system_query("module") as $module) {
     $frags = explode("/", $module->filename);
     // ignore site-specific modules
     if ($frags[0] == 'sites' && $frags[1] != 'all') {
@@ -607,16 +610,16 @@ function _provision_drupal_search_paths($scope, $key = '', $type = 'modules') {
   $searchpaths = array();
   $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
   switch ($scope) {
-    case 'base' : 
+    case 'base' :
       $searchpaths[] = sprintf("%s/%s", $drupal_root, $type);
       $searchpaths[] = sprintf("%s/sites/all/%s", $drupal_root, $type);
       break;
-    default : 
-      if ($key) { 
+    default :
+      if ($key) {
         $searchpaths[] = sprintf("%s/%s/%s/%s", $drupal_root, $scope, $key, $type);
       }
       break;
-     
+
   }
   return $searchpaths;
 }
@@ -631,7 +634,7 @@ function _provision_drupal_find_modules($scope, $key = '') {
   $paths = _provision_drupal_search_paths($scope, $key, 'modules');
   $files = array();
   foreach ($paths as $path) {
-    $files = array_merge($files, drush_scan_directory($path, "/\.module$/", array('.', '..', 'CVS', '.svn'), 0, true, 'name'));
+    $files = array_merge($files, drush_scan_directory($path, "/\.module$/", array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name'));
   }
   foreach ($files as $name => $info) {
     $install_file = sprintf("%s/%s.install", dirname($info->filename), $name);
@@ -642,7 +645,7 @@ function _provision_drupal_find_modules($scope, $key = '') {
       $source = str_replace("\r", "\n", $source);
       $function_matches = array();
         preg_match_all('!function\s*&?([a-zA-Z0-9_]+)_update_([0-9]+)\s*\(.*?\s*\{!', $source, $function_matches);
-      
+
       if (sizeof($function_matches[0])) {
         $schema_version = max($function_matches[2]);
       }
@@ -664,7 +667,7 @@ function provision_parse_info_file($filename) {
     'version' => NULL,
     'php' => DRUPAL_MINIMUM_PHP,
   );
-  
+
   if (file_exists($filename)) {
     $info = _provision_drupal_parse_info_file($filename);
   }
@@ -675,14 +678,14 @@ function provision_parse_info_file($filename) {
 
 /**
  * Set up the $_SERVER environment variable so that drupal can correctly parse the settings.php file.
- * The real credentials are stored in the Apache vhost of the relevant site, to prevent leaking of 
- * sensitive data to site administrators with PHP access who might otherwise access such credentials 
+ * The real credentials are stored in the Apache vhost of the relevant site, to prevent leaking of
+ * sensitive data to site administrators with PHP access who might otherwise access such credentials
  * potentially of other sites' settings.php in a multisite set-up.
  */
 function provision_prepare_environment() {
   $fields = array('db_type', 'db_host', 'db_user', 'db_passwd', 'db_name', 'db_port');
   foreach ($fields as $key) {
-    $_SERVER[$key] = drush_get_option($key, null, 'site');
+    $_SERVER[$key] = drush_get_option($key, NULL, 'site');
   }
 
   // As of Drupal 7 there is no more mysqli type
@@ -695,14 +698,14 @@ function provision_prepare_environment() {
 /**
  * Reload drushrc files (if available) from several possible locations.
  *
- * Because the base drush_load_config method only uses an include_once, 
+ * Because the base drush_load_config method only uses an include_once,
  * we run into issues when provision commands call other commands that
  * modify these config files.
  *
  * For the changes to become available, and more importantly passed to the
  * front end, we need to call this function after calling provision commands.
  */
-function provision_reload_config($context, $file = null) {
+function provision_reload_config($context, $file = NULL) {
   $file = ($file) ? $file : _drush_config_file($context);
   if (file_exists($file)) {
     drush_log("Reloading $context drushrc.php from $file");
