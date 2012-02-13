@@ -1,4 +1,9 @@
-<?php print '<?php' ?>
+<?php
+/**
+ * @file
+ * Template file for a settings.php.
+ */
+print '<?php' ?>
 
 /**
  * @file Drupal's settings.php file
@@ -16,8 +21,8 @@
   /**
    * The database credentials are stored in the Apache vhost config
    * of the associated site with SetEnv parameters.
-   * They are called here with $_SERVER environment variables to 
-   * prevent sensitive data from leaking to site administrators 
+   * They are called here with $_SERVER environment variables to
+   * prevent sensitive data from leaking to site administrators
    * with PHP access, that potentially might be of other sites in
    * Drupal's multisite set-up.
    * This is a security measure implemented by the Aegir project.
@@ -118,8 +123,11 @@
 
   global $conf;
   $conf['install_profile'] = '<?php print $this->profile ?>';
-  $conf['<?php print $this->file_directory_path_var ?>'] = 'sites/<?php print $this->uri ?>/files';
-  $conf['<?php print $this->file_directory_temp_var ?>'] = 'sites/<?php print $this->uri ?>/files/tmp';
+  $conf['<?php print $file_directory_path_var ?>'] = 'sites/<?php print $this->uri ?>/files';
+  $conf['<?php print $file_directory_temp_var ?>'] = 'sites/<?php print $this->uri ?>/private/temp';
+  <?php if (isset($file_directory_private_var)): ?>
+  $conf['<?php print $file_directory_private_var ?>'] = 'sites/<?php print $this->uri ?>/private/files';
+  <?php endif; ?>
   $conf['clean_url'] = 1;
   $conf['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
 

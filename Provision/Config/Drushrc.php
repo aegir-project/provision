@@ -1,11 +1,15 @@
 <?php
+/**
+ * @file
+ * Provides the Provision_Config_Drushrc class.
+ */
 
 /**
  * Specialized class to handle the creation of drushrc.php files.
  *
  * This is based on the drush_save_config code, but has been abstracted
  * for our purposes.
- */ 
+ */
 class Provision_Config_Drushrc extends Provision_Config {
   public $template = 'provision_drushrc.tpl.php';
   public $description = 'Drush configuration file';

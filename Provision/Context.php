@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Provides the Provision_Context class.
+ */
 
 /**
  * Base context class.
@@ -9,12 +13,12 @@ class Provision_Context {
   /**
    * Name for saving aliases and referencing.
    */
-  public $name = null;
+  public $name = NULL;
 
   /**
    * 'server', 'platform', or 'site'.
    */
-  public $type = null;
+  public $type = NULL;
 
   /**
    * Properties that will be persisted by provision-save. Access as object
@@ -30,7 +34,7 @@ class Provision_Context {
   protected $oid_map = array();
 
   protected $service_subs = array();
-  protected $parent_key = null;
+  protected $parent_key = NULL;
 
   /**
    * Retrieve value from $properties array if property does not exist in class
@@ -97,7 +101,7 @@ class Provision_Context {
   /**
    * Implement the __call magic method.
    *
-   * This implementation is really simple. It simply return null if the
+   * This implementation is really simple. It simply return NULL if the
    * method doesn't exist.
    *
    * This is used so that we can create methods for drush commands, and
@@ -113,7 +117,7 @@ class Provision_Context {
    */
   function method_invoke($func, $args = array(), $services = TRUE) {
     provision::method_invoke($this, $func, $args);
-    // Services will be invoked regardless of the existence of a 
+    // Services will be invoked regardless of the existence of a
     // implementation in the context class.
     if ($services) {
       $this->services_invoke($func, $args);
@@ -143,7 +147,7 @@ class Provision_Context {
    * This allows the developer to not have to conditionally check the
    * context object type in all his methods, and reduces the need
    * to define drush_hook_$command methods for a lot of cases.
-   * 
+   *
    * This will generate a function call like : $method_$type_cmd.
    */
   function command_invoke($command, $args = array()) {
@@ -240,7 +244,7 @@ class Provision_Context {
    * @return
    *   A Provision_Service object.
    */
-  function service($service, $name = null) {
+  function service($service, $name = NULL) {
     if (isset($this->service_subs[$service])) {
       return d($this->service_subs[$service])->service($service, ($name) ? $name : $this->name);
     }

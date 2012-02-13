@@ -1,21 +1,24 @@
 <?php
-
+/**
+ * @file
+ * The base Provision DNS service.
+ */
 
 class Provision_Service_dns extends Provision_Service {
   public $service = 'dns';
-  public $slave = null;
+  public $slave = NULL;
 
   /**
    * Helper function to increment a zone's serial number.
    *
    * @param $serial
-   *    A serial in YYYYMMDDnn format. If null, a new serial based on
+   *    A serial in YYYYMMDDnn format. If NULL, a new serial based on
    *    the date will be generated.
    *
    * @return
    *    The serial, incremented based on current date and index
    */
-  static public function increment_serial($serial = null) {
+  static public function increment_serial($serial = NULL) {
     $today = date('Ymd');
     if (is_null($serial)) {
       return $today . '00';
@@ -23,11 +26,13 @@ class Provision_Service_dns extends Provision_Service {
     $date = substr($serial, 0, 8); # Get the YYYYMMDD part
     if ($date != $today) {
       return $today . '00';
-    } else {
+    }
+    else {
       $index = substr($serial, 8, 2); # Get the index part
       if ($index >= 99) {
         drush_set_error("serial number overflow");
-      } else {
+      }
+      else {
         $index++;
       }
       return $date . sprintf('%02d', $index);
@@ -52,7 +57,7 @@ class Provision_Service_dns extends Provision_Service {
     }
 
     $this->server->setProperty('slave_servers', array());
-    $this->server->setProperty('dns_default_mx', null); # XXX: until we get full zone management
+    $this->server->setProperty('dns_default_mx', NULL); # XXX: until we get full zone management
     $this->server->setProperty('dns_ttl', 86400); # 24h
     $this->server->setProperty('dns_refresh', 21600); # 6h
     $this->server->setProperty('dns_retry', 3600); # 1h
@@ -63,7 +68,7 @@ class Provision_Service_dns extends Provision_Service {
   function init_site() {
     parent::init_site();
 
-    $this->context->setProperty('dns_zone', null);
+    $this->context->setProperty('dns_zone', NULL);
     if (is_null($this->context->dns_zone)) {
       $this->context->dns_zone = $this->guess_zone($this->context->uri);
     }
@@ -102,21 +107,21 @@ class Provision_Service_dns extends Provision_Service {
       provision_file()->create_dir($this->server->dns_zoned_path, dt("DNS zone configuration"), 0755);
       $this->sync($this->server->dns_zoned_path, array(
         'exclude' => $this->server->dns_zoned_path . '/*',  // Make sure remote directory is created
-      )); 
+      ));
 
       provision_file()->create_dir($this->server->dns_hostd_path , dt("DNS host configuration"), 0755);
       $this->sync($this->server->dns_hostd_path, array(
         'exclude' => $this->server->dns_hostd_path . '/*',  // Make sure remote directory is created
       ));
 
-      # TODO: create a slave zone path too.
+      // TODO: create a slave zone path too.
 
       $this->create_config('server');
-    } 
+    }
 
   }
 
-  function config_data($config = null, $class = null) {
+  function config_data($config = NULL, $class = NULL) {
     $data = parent::config_data($config, $class);
     if (!is_null($this->application_name)) {
       $data['dns_data_path'] = $this->server->dns_zoned_path;
@@ -156,12 +161,13 @@ class Provision_Service_dns extends Provision_Service {
         $tld = join(".", $parts);
         if (isset($zones[$tld])) {
           $found = TRUE;
-        } else {
+        }
+        else {
           $scrap = array_shift($parts);
           $subdomain[] = $scrap;
           drush_log("zone $tld not found, ditching $scrap, count: " . count($parts));
           $found = FALSE;
-        } 
+        }
       }
 
       // this is necessary if we hit the limit of two subdomains
@@ -181,7 +187,8 @@ class Provision_Service_dns extends Provision_Service {
     if ($return == 'subdomain') {
       if (empty($subdomain)) {
         return '@';
-      } else {
+      }
+      else {
         return $subdomain;
       }
     }
@@ -192,7 +199,7 @@ class Provision_Service_dns extends Provision_Service {
   /**
    * This creates a zone, which mostly consists of adding the SOA record.
    */
-  function create_zone($zone = null) {
+  function create_zone($zone = NULL) {
     if (is_null($zone) && ($this->context->type == 'site')) {
       $host = $this->context->uri;
       $zone = $this->context->dns_zone;
@@ -231,22 +238,22 @@ class Provision_Service_dns extends Provision_Service {
     return $status;
   }
 
-    /** 
+    /**
    * Create a host in DNS.
    *
    * This can do a lot of things, create a zonefile, add a record to a
    * zonefile, it's going to make its best guess doing the Right
    * Thing.
    *
-   * @arg $host string the hostname to create. If null, we look in the
+   * @arg $host string the hostname to create. If NULL, we look in the
    * current context (should be a site) for a URI.
    */
-  function create_host($host = null) {
+  function create_host($host = NULL) {
     if (!is_null($host)) {
       $zone = $this->guess_zone($host);
       $sub = $this->guess_zone($host, 'subdomain');
       $aliases = array();
-    } 
+    }
     elseif ($this->context->type == 'site') {
       $host = $this->context->uri;
       $zone = $this->context->dns_zone;
@@ -271,12 +278,12 @@ class Provision_Service_dns extends Provision_Service {
 
     $this->config('zone', $zone)->record_set($sub, array('A' => $ips));
     foreach ($aliases as $alias) {
-        if ($this->guess_zone($alias) == $zone) {
-            $this->config('zone', $zone)->record_set($this->guess_zone($alias, 'subdomain'),
-                                                     array('CNAME' => array($zone . '.')));
-        }
+      if ($this->guess_zone($alias) == $zone) {
+        $this->config('zone', $zone)->record_set($this->guess_zone($alias, 'subdomain'),
+          array('CNAME' => array($zone . '.')));
+      }
     }
-    
+
     $this->create_zone($zone);
   }
 
@@ -286,15 +293,15 @@ class Provision_Service_dns extends Provision_Service {
    *
    * Similar to create host, this will seek and destroy that host throughout zonefiles.
    *
-   * @arg $host string the hostname to create. If null, we look in the
+   * @arg $host string the hostname to create. If NULL, we look in the
    * current context (should be a site) for a URI.
    */
-  function delete_host($host = null) {
+  function delete_host($host = NULL) {
     if (!is_null($host)) {
       $zone = $this->guess_zone($host);
       $sub = $this->guess_zone($host, 'subdomain');
       $aliases = array();
-    } 
+    }
     elseif ($this->context->type == 'site') {
       $host = $this->context->uri;
       $zone = $this->context->dns_zone;
@@ -308,10 +315,10 @@ class Provision_Service_dns extends Provision_Service {
     // remove the records from the zone store
     $this->config('zone', $zone)->record_set($sub, array('A' => NULL));
     foreach ($aliases as $alias) {
-        if ($this->guess_zone($alias) == $zone) {
-            $this->config('zone', $zone)->record_set($this->guess_zone($alias, 'subdomain'),
-                                                     array('CNAME' => NULL));
-        }
+      if ( $this->guess_zone($alias) == $zone) {
+        $this->config('zone', $zone)->record_set($this->guess_zone($alias, 'subdomain'),
+          array('CNAME' => NULL));
+      }
     }
     $this->config('zone', $zone)->write();
   }

@@ -1,29 +1,31 @@
 <?php
-// $Id$
+/**
+ * @file
+ * Provides the MySQL service driver.
+ */
 
-
-
-// extends the pdo implementation
+/**
+ * The MySQL provision service.
+ */
 class Provision_Service_db_mysql extends Provision_Service_db_pdo {
-   public $PDO_type = 'mysql';
+  public $PDO_type = 'mysql';
 
-   protected $has_port = TRUE;
+  protected $has_port = TRUE;
 
-   function default_port() {
-     return 3306;
-   }
+  function default_port() {
+    return 3306;
+  }
 
   function drop_database($name) {
     return $this->query("DROP DATABASE `%s`", $name);
   }
 
-
   function create_database($name) {
-    return $this->query("CREATE DATABASE `%s`", $name);  
+    return $this->query("CREATE DATABASE `%s`", $name);
   }
 
   function can_create_database() {
-    $test = drush_get_option('aegir_db_prefix', 'site_') .'test';
+    $test = drush_get_option('aegir_db_prefix', 'site_') . 'test';
     $this->create_database($test);
 
     if ($this->database_exists($test)) {
@@ -94,7 +96,7 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
       drush_set_error('PROVISION_DB_IMPORT_FAILED', dt("Database import failed: %output", array('%output' => $this->safe_shell_exec_output)));
     }
   }
-  
+
   function grant_host(Provision_Context_server $server) {
     $command = sprintf('mysql -u intntnllyInvalid -h %s -P %s -e ""',
       escapeshellarg($this->server->remote_host),
@@ -121,7 +123,7 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
     $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 %s | sed 's|/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/|/\\*!50001 CREATE \\*/|g; s|/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/||g' | sed '/\\*!50013 DEFINER=.*/ d' > %s/database.sql", escapeshellcmd(drush_get_option('db_name')), escapeshellcmd(d()->site_path));
     $success = $this->safe_shell_exec($cmd, drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
 
-    if (!$success && !drush_get_option('force', false)) {
+    if (!$success && !drush_get_option('force', FALSE)) {
       drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not generate database backup from mysqldump. (error: %msg)', array('%msg' => $this->safe_shell_exec_output)));
     }
     // Reset the umask to normal permissions.
@@ -140,40 +142,40 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
    * just any command)
    *  - can be pushed upstream to drush (http://drupal.org/node/671906)
    */
-  function safe_shell_exec($cmd, $db_host, $db_user, $db_passwd, $dump_file = null) {
-   $mycnf = sprintf('[client]
+  function safe_shell_exec($cmd, $db_host, $db_user, $db_passwd, $dump_file = NULL) {
+    $mycnf = sprintf('[client]
 host=%s
 user=%s
 password=%s
 port=%s
 ', $db_host, $db_user, $db_passwd, $this->server->db_port);
 
-   $stdin_spec = (!is_null($dump_file)) ? array("file", $dump_file, "r") : array("pipe", "r");
+    $stdin_spec = (!is_null($dump_file)) ? array("file", $dump_file, "r") : array("pipe", "r");
 
-   $descriptorspec = array(
-     0 => $stdin_spec,
-     1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
-     2 => array("pipe", "w"),  // stderr is a file to write to
-     3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials
-   );
-   $pipes = array();
-   $process = proc_open($cmd, $descriptorspec, $pipes);
-   $this->safe_shell_exec_output = '';
-   if (is_resource($process)) {
-     fwrite($pipes[3], $mycnf);
-     fclose($pipes[3]);
+    $descriptorspec = array(
+      0 => $stdin_spec,
+      1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+      2 => array("pipe", "w"),  // stderr is a file to write to
+      3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials
+    );
+    $pipes = array();
+    $process = proc_open($cmd, $descriptorspec, $pipes);
+    $this->safe_shell_exec_output = '';
+    if (is_resource($process)) {
+      fwrite($pipes[3], $mycnf);
+      fclose($pipes[3]);
 
-     $this->safe_shell_exec_output = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
-     // "It is important that you close any pipes before calling
-     // proc_close in order to avoid a deadlock"
-     fclose($pipes[1]);
-     fclose($pipes[2]);
-     $return_value = proc_close($process);
-   }
-   else {
-     // XXX: failed to execute? unsure when this happens
-     $return_value = -1;
-   }
-   return ($return_value == 0);
+      $this->safe_shell_exec_output = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
+      // "It is important that you close any pipes before calling
+      // proc_close in order to avoid a deadlock"
+      fclose($pipes[1]);
+      fclose($pipes[2]);
+      $return_value = proc_close($process);
+    }
+    else {
+      // XXX: failed to execute? unsure when this happens
+      $return_value = -1;
+    }
+  return ($return_value == 0);
   }
 }

@@ -1,16 +1,10 @@
 <?php
-// $Id$
-
 /**
  * @file
  * The provisioning framework API.
  *
- * API functions that are used by the provisioning framework to provide structure to the provisioning modules.
- *
- * @see errorhandling
- * @see logging
- * @see sitedata
- * @see provisionvalues
+ * API functions that are used by the provisioning framework to provide
+ * structure to the provisioning modules.
  */
 
 drush_errors_on();
@@ -45,7 +39,7 @@ function provision_autoload() {
  *   prefix, set this to TRUE, otherwise, the default, FALSE, is fine.
  */
 function provision_autoload_register_prefix($prefix, $dir, $prepend = FALSE) {
-  
+
   // Get any current directories set for this prefix.
   $current_prefixes = provision_autoload()->getPrefixes();
   if (isset($current_prefixes[$prefix])) {
@@ -54,7 +48,7 @@ function provision_autoload_register_prefix($prefix, $dir, $prepend = FALSE) {
   else {
     $dirs = array();
   }
-  
+
   // Now add the new one.
   if ($prepend) {
     array_unshift($dirs, $dir);
@@ -62,7 +56,7 @@ function provision_autoload_register_prefix($prefix, $dir, $prepend = FALSE) {
   else {
     array_push($dirs, $dir);
   }
-  
+
   // Set the prefixes.
   provision_autoload()->registerPrefix($prefix, $dirs);
 }
@@ -102,7 +96,7 @@ function provision_class_file($class_name) {
  * @defgroup sitedata Site data management utility functions.
  * @{
  * The provision framework maintains a site.php file in the sites directory, to maintain additional
- * information from the front end, as well as providing a change history of setting changes. 
+ * information from the front end, as well as providing a change history of setting changes.
  *
  * These functions load, save and manage changes made to the site data. This data has diagnostic and infrastructure
  * values, that allow sites to be more easily moved between different provisioned platforms.
@@ -126,7 +120,7 @@ function provision_is_local_host($host) {
   // your site alias.  Note that sometimes 'uname -n' does not return the
   // correct value.  To fix it, put the correct hostname in /etc/hostname
   // and then run 'hostname -F /etc/hostname'.
-  return ($host == 'localhost') || 
+  return ($host == 'localhost') ||
     ($host == '127.0.0.1') ||
     (gethostbyname($host) == '127.0.0.1') ||
     (gethostbyname($host) == '127.0.1.1') || // common setting on
@@ -140,7 +134,7 @@ function provision_is_local_host($host) {
  *
  * this replicates hostname -f, which is not portable
  */
-function provision_fqdn($host = null) {
+function provision_fqdn($host = NULL) {
   if (is_null($host)) {
     $host = php_uname('n');
   }
@@ -217,7 +211,7 @@ function _provision_recursive_delete($path) {
       if ($entry == '.' || $entry == '..') {
         continue;
       }
-      $entry_path = $path .'/'. $entry;
+      $entry_path = $path . '/' . $entry;
       $ret &= _provision_recursive_delete($entry_path);
     }
     $d->close();
@@ -299,7 +293,7 @@ function provision_current_user() {
  *   groupname or group id of group.
  *
  * @return
- *   Boolean. True if user does belong to group, 
+ *   Boolean. True if user does belong to group,
  *   and FALSE if the user does not belong to the group, or either the user or group do not exist.
  */
 function provision_user_in_group($user, $group) {
@@ -419,7 +413,7 @@ function _scrub_object($input) {
  * @see drush_backend_invoke_args()
  */
 function provision_backend_invoke($target, $command, $arguments = array(), $data = array(), $mode = 'GET') {
-  return drush_backend_invoke_args('@' . ltrim($target, '@') . ' ' . $command, $arguments, $data + array('root' => null, 'uri' => null), $mode);
+  return drush_backend_invoke_args('@' . ltrim($target, '@') . ' ' . $command, $arguments, $data + array('root' => NULL, 'uri' => NULL), $mode);
 }
 
 /**
@@ -443,7 +437,7 @@ function provision_version() {
  * This is the major release number, the first part of the version
  * stored in the info file
  *
- * @return int 
+ * @return int
  *   a number greater than zero, 1 for 1.0 or 1.0-rc2, 2 for 2.0, etc.
  *
  * @see provision_version_parts()
@@ -459,7 +453,7 @@ function provision_api_version() {
  * This cleans up the version number by removing the Drupal version
  * (6.x-...) and splits the remaining version on dots.
  *
- * @return array 
+ * @return array
  *   the major and minor version numbers, e.g. array(1, 0-rc3) for
  *   1.0-rc3 or array(1, 2) for 1.2
  */
@@ -493,7 +487,7 @@ class provisionException_continue extends provisionException {
 class provision {
   /**
    * The actual body of the method_invoke function.
-   * 
+   *
    * This is a static method so it can be re-used by some other classes
    * that aren't contexts. (notably services and configs).
    */

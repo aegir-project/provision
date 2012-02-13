@@ -1,25 +1,25 @@
 <?php
-
 /**
+ * @file
  * Migrate command implementation
  */
 
 /**
  * Make sure we have a valid site being migrated, and that the file being migrated from exists
  */
-function drush_provision_drupal_provision_migrate_validate($platform = null) {
+function drush_provision_drupal_provision_migrate_validate($platform = NULL) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 }
 
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
-function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = null) {
-  /* Set offline mode to true and re-generate the settings.php. This will write a 
+function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = NULL) {
+  /* Set offline mode to true and re-generate the settings.php. This will write a
    * $conf['site_offline'] = 1; to the settings.php
    */
   drush_log(dt("Putting site under maintenance"));
-  d()->site_enabled = false;
+  d()->site_enabled = FALSE;
   _provision_drupal_create_settings_file();
   drush_invoke('provision-backup');
 
@@ -46,8 +46,8 @@ function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = null
  * Remove the extracted site directory
  * Restore the vhost conf per the original platform
  */
-function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_uri = null) {
-  // Set site_offline to false and regenerate the config 
+function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_uri = NULL) {
+  // Set site_offline to false and regenerate the config
   drush_log(dt("Bringing site out of maintenance"));
   d()->site_enabled = true;
   _provision_drupal_create_settings_file();
@@ -62,7 +62,7 @@ function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_u
 /**
  * Switch the migrate directories around now that we have the new db installed
  */
-function drush_provision_drupal_provision_migrate($platform, $new_uri = null) {
+function drush_provision_drupal_provision_migrate($platform, $new_uri = NULL) {
 
   $target = drush_get_option('target_name');
 
@@ -93,8 +93,8 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = null) {
   provision_backend_invoke($target, 'provision-deploy', array(drush_get_option('backup_file')), array('old_uri' => d()->uri));
   if (!drush_get_error()) {
     drush_log(dt("Bringing site out of maintenance"));
-    d()->site_enabled = true;
-    drush_set_option('provision_save_config', false);
+    d()->site_enabled = TRUE;
+    drush_set_option('provision_save_config', FALSE);
     provision_backend_invoke($target, 'provision-verify');
   }
 }
@@ -103,13 +103,13 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = null) {
  * Something went wrong
  */
 function drush_provision_drupal_provision_migrate_rollback($platform) {
-  drush_backend_invoke_args('provision-save', array(d()->name), array('platform' => drush_get_option('old_platform'), 'root' => null, 'uri' => null));
+  drush_backend_invoke_args('provision-save', array(d()->name), array('platform' => drush_get_option('old_platform'), 'root' => NULL, 'uri' => NULL));
 }
 
 /**
  * Delete the old site directory and recreate the settings file
  */
-function drush_provision_drupal_post_provision_migrate($platform, $new_uri = null) {
+function drush_provision_drupal_post_provision_migrate($platform, $new_uri = NULL) {
   drush_set_option('installed', FALSE);
 
   if (!drush_get_option('deploy_replace_site', FALSE)) {
@@ -123,7 +123,7 @@ function drush_provision_drupal_post_provision_migrate($platform, $new_uri = nul
 
 
   if (!is_null($new_uri) && ($new_uri != d()->uri)) {
-    // remove the existing alias 
+    // remove the existing alias
     $config = new Provision_Config_Drushrc_Alias(d()->name);
     $config->unlink();
   }
@@ -131,4 +131,3 @@ function drush_provision_drupal_post_provision_migrate($platform, $new_uri = nul
   // Load the config file of the newly migrated site and return it to hosting.
   provision_reload_config('site', drush_get_option('new_site_path', d()->site_path) . '/drushrc.php');
 }
-

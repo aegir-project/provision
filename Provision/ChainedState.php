@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * The Provision_ChainedState class.
+ */
 
 /**
  * A base class for the service and file handling classes that implements
@@ -30,13 +34,13 @@ class Provision_ChainedState {
   /**
    * Log a notice into the logging system, if the last operation completed
    * succesfully.
-   * 
+   *
    * @param $message
    *   The message to log, a string.
    */
   function succeed($message) {
     if ($this->last_status === TRUE) {
-      drush_log(dt($message, $this->tokens), 'message');      
+      drush_log(dt($message, $this->tokens), 'message');
     }
 
     return $this;
@@ -45,7 +49,7 @@ class Provision_ChainedState {
   /**
    * Log a notice into the logging system, if the last operation did not
    * complete succesfully.
-   * 
+   *
    * @param $message
    *   Log this as a error to the logging system, if the $error_codes parameter
    *   has been set, otherwise, log this as a warning. If the operation

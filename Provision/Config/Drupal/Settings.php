@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Provides the Provision_Config_Drupal_Settings class.
+ */
 
 class Provision_Config_Drupal_Settings extends Provision_Config {
   public $template = 'provision_drupal_settings.tpl.php';
@@ -13,12 +17,13 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
   function process() {
     if (drush_drupal_major_version() >= 7) {
       $this->data['db_type'] = ($this->data['db_type'] == 'mysqli') ? 'mysql' : $this->data['db_type'];
-      $this->file_directory_path_var = 'file_public_path';
-      $this->file_directory_temp_var = 'file_temporary_path';
+      $this->data['file_directory_path_var'] = 'file_public_path';
+      $this->data['file_directory_temp_var'] = 'file_temporary_path';
+      $this->data['file_directory_private_var'] = 'file_private_path';
     }
     else {
-      $this->file_directory_path_var = 'file_directory_path';
-      $this->file_directory_temp_var = 'file_directory_temp';
+      $this->data['file_directory_path_var'] = 'file_directory_path';
+      $this->data['file_directory_temp_var'] = 'file_directory_temp';
     }
     $this->version = provision_version();
     $this->api_version = provision_api_version();

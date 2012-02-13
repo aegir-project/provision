@@ -1,16 +1,17 @@
 <?php
 /**
- * Drush commands
+ * @file
+ * Provisoon Drush commands.
  *
  *
  * This module provides a framework for a Drupal site to manage and install new Drupal sites, using the command line
- * Drush utility. 
+ * Drush utility.
  *
  * It allows for pluggable 'provisioning modules' that can extend and modify the tasks that are taken during installation.
  *
  * Each site has the following commands that can be run on it.
  *
- * Implemented : 
+ * Implemented :
  *   install - Install a new Drupal site. The install command uses 3 separate hooks to do its job,
  *             namely hook_pre_provision_install(), hook_provision_install() and hook_post_provision_install().
  *   verify  - Recreate all configuration files, to be in synch with changes in the front end. And test that they are correct.
@@ -50,7 +51,7 @@ if ($name['name'] == 'root') {
 include_once('provision.inc');
 
 /**
- * implementation of hook_drush_init().
+ * Implements hook_drush_init().
  *
  * This will abort any process running drush if the load is critical.
  *
@@ -111,7 +112,7 @@ function provision_drush_command() {
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
-  
+
   $items['provision-enable'] = array(
     'description' => 'Enable a disabled site.',
     'examples' => array(
@@ -120,6 +121,7 @@ function provision_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
   $items['provision-disable'] = array(
+    'arguments' => array('domain.com' => dt('The domain of the site to disable (only if disabled).')),
     'description' => 'Disable a site.',
     'examples' => array(
       'drush @site provision-disable' => 'Disable the site as defined by the site Drush alias generated with provision-save.',
@@ -144,6 +146,7 @@ function provision_drush_command() {
   );
 
   $items['provision-verify'] = array(
+    'arguments' => array('domain.com' => dt('The domain of the site to verify).')),
     'description' => 'Verify that the provisioning framework is correctly installed.',
     'examples' => array(
       'drush @site provision-verify' => 'Verify the site as defined by the site Drush alias generated with provision-save.',
@@ -151,7 +154,7 @@ function provision_drush_command() {
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH 
   );
- 
+
   $items['provision-restore'] = array(
     'description' => 'Restore the site to a previous backup. This will also generate a backup of the site as it was.',
     'arguments' => array(
@@ -192,7 +195,7 @@ function provision_drush_command() {
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
- 
+
   $items['provision-delete'] = array(
     'description' => 'Delete a site.',
     'examples' => array(
@@ -208,7 +211,7 @@ function provision_drush_command() {
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
-  
+
   $items['provision-backup_delete'] = array(
     'description' => 'Delete a backup file.',
     'arguments' => array('backup-file' => dt('The backup file to delete. This will be a gzipped tarball.')),
@@ -252,7 +255,7 @@ function provision_drush_command() {
      'aegir_root' => dt('Install aegir in this home directory (default: %home). Do not change unless you know what you are doing.', array('%home' => drush_server_home())),
      ),
   );
-  
+
   $items['backend-parse'] = array(
     'description' => dt('Parse the output of --backend commands to a human readable form'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
@@ -261,9 +264,9 @@ function provision_drush_command() {
   return $items;
 }
 
-function drush_provision_save($alias = null) {
-  if (drush_get_option('delete', false)) {
-    // remove an existing alias 
+function drush_provision_save($alias = NULL) {
+  if (drush_get_option('delete', FALSE)) {
+    // remove an existing alias
     $config = new Provision_Config_Drushrc_Alias($alias);
     $config->unlink();
   }
@@ -284,7 +287,7 @@ function _provision_default_web_group() {
   $common_groups = array(
     'www',
     'httpd',
-    'www-data', 
+    'www-data',
     'apache',
     'webservd',
     'nogroup',
@@ -297,7 +300,7 @@ function _provision_default_web_group() {
       break;
     }
   }
-  return null;
+  return NULL;
 }
 
 /**
@@ -307,7 +310,7 @@ function _provision_default_web_group() {
  * useful for calculating sane load threshold.
  *
  * On Linux, this parses /proc/cpuinfo and looks for lines like this:
- * 
+ *
  * processor	: 0
  * ...
  * processor	: 1
@@ -363,18 +366,18 @@ function provision_count_cpus() {
  *
  * @see sys_getloadavg()
  */
-function provision_load_critical($load = null, $threshold = null) {
+function provision_load_critical($load = NULL, $threshold = NULL) {
   if (is_null($load)) {
     $load = sys_getloadavg();
   }
   if (is_null($threshold)) {
     if ($ncpus = provision_count_cpus()) {
       $threshold = $ncpus * 5;
-    } else {
+    }
+    else {
       // can't determine the number of CPU, we hardcode at load 10
       $threshold = 10;
     }
   }
   return ($load[0] > $threshold);
 }
-

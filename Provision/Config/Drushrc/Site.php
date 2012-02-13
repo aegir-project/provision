@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Provides the Provision_Config_Drushrc_Site class.
+ */
 
 /**
  * Class for writing $platform/sites/$url/drushrc.php files.

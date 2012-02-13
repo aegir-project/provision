@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * The base Provision service class.
+ */
 
 require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
@@ -20,23 +24,23 @@ class Provision_Service extends Provision_ChainedState {
    */
   public $context;
 
-  protected $service = null;
-  protected $application_name = null;
+  protected $service = NULL;
+  protected $application_name = NULL;
 
   protected $has_restart_cmd = FALSE;
   protected $has_port = FALSE;
 
   protected $configs = array();
 
-  
+
   protected $config_cache = array();
-  private $_config = null;
+  private $_config = NULL;
 
 
   /**
    * Implement the __call magic method.
    *
-   * This implementation is really simple. It simply return null if the
+   * This implementation is really simple. It simply return NULL if the
    * method doesn't exist.
    *
    * This is used so that we can create methods for drush commands, and
@@ -91,8 +95,8 @@ class Provision_Service extends Provision_ChainedState {
    *   turned into an array with the 'name' property the value of the string.
    */
   function config($config, $data = array()) {
-    $this->_config = null;
-    
+    $this->_config = NULL;
+
     if (!isset($this->configs[$config])) {
       $service = (!is_null($this->application_name)) ? $this->application_name : $this->service;
       drush_log(dt('%service has no %name config file', array(
@@ -144,7 +148,7 @@ class Provision_Service extends Provision_ChainedState {
   /**
    * Set a record on the data store of the currently active config file (if applicable).
    */
-  function record_set($arg1, $arg2 = null) {
+  function record_set($arg1, $arg2 = NULL) {
     if (is_object($this->_config)) {
       if (is_object($this->_config->store)) {
         if (is_array($arg1)) {
@@ -153,17 +157,16 @@ class Provision_Service extends Provision_ChainedState {
         elseif (!is_numeric($arg1)) {
           if (is_array($arg2)) {
             if (!isset($this->_config->store->loaded_records[$arg1])
-                || !is_array($this->_config->store->loaded_records[$arg1]))
-            {
+                || !is_array($this->_config->store->loaded_records[$arg1])) {
               $this->_config->store->loaded_records[$arg1] = array();
             }
             if (!isset($this->_config->store->records[$arg1])
-                || !is_array($this->_config->store->records[$arg1]))
-            {
+                || !is_array($this->_config->store->records[$arg1])) {
               $this->_config->store->records[$arg1] = array();
             }
             $this->_config->store->records[$arg1] = array_merge($this->_config->store->loaded_records[$arg1], $this->_config->store->records[$arg1], $arg2);
-          } else {
+          }
+          else {
             $this->_config->store->records[$arg1] = $arg2;
           }
         }
@@ -176,7 +179,7 @@ class Provision_Service extends Provision_ChainedState {
    * Delete a record from the data store of the currently active config file (if applicable).
    */
   function record_del($record) {
-    return $this->record_set($record, null);
+    return $this->record_set($record, NULL);
   }
 
   /**
@@ -194,7 +197,7 @@ class Provision_Service extends Provision_ChainedState {
   /**
    * Fetch record(s) from the data store of the currently active config file (if applicable).
    */
-  function record_get($key = null, $default = null) {
+  function record_get($key = NULL, $default = NULL) {
     if (is_object($this->_config)) {
       if (is_object($this->_config->store)) {
         $records = $this->_config->store->merged_records();
@@ -224,7 +227,7 @@ class Provision_Service extends Provision_ChainedState {
 
   /**
    * Delete a configuration file.
-   * 
+   *
    * This method will fetch the class to instantiate from the internal
    * $this->configs control array.
    */
@@ -235,7 +238,7 @@ class Provision_Service extends Provision_ChainedState {
   /**
    * Fetch extra information the service wants to pass to he config file classes.
    */
-  function config_data($config = null, $class = null) {
+  function config_data($config = NULL, $class = NULL) {
     $data = array();
     // Always pass the server this service is running on to configs.
     $data['server'] = $this->server;
@@ -267,10 +270,10 @@ class Provision_Service extends Provision_ChainedState {
           return TRUE;
         }
         else {
-          drush_log(dt('%service on %server could not be restarted.'.
+          drush_log(dt('%service on %server could not be restarted.' .
             ' Changes might not be available until this has been done. (error: %msg)', array(
             '%service' => $service,
-            '%server' => $this->server->remote_host, 
+            '%server' => $this->server->remote_host,
             '%msg' => join("\n", drush_shell_exec_output()))), 'warning');
         }
       }
