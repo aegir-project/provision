@@ -44,6 +44,20 @@ class provisionService_http_nginx_ssl extends provisionService_http_ssl {
     // Replace the server config with our own. See the class for more info.
     $this->configs['server'][] = 'provisionConfig_nginx_ssl_server';
     $this->configs['site'][] = 'provisionConfig_nginx_ssl_site';
+    $this->server->setProperty('nginx_has_gzip', 0);
+    $this->server->setProperty('nginx_has_new_version', 0);
+    $this->server->setProperty('nginx_web_server', 0);
+    $this->server->setProperty('nginx_has_upload_progress', 0);
+  }
+
+  function save_server() {
+    // Check if some nginx features are supported and save them for later.
+    $this->server->shell_exec('nginx -V');
+    $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match);
+    $this->server->nginx_has_upload_progress = preg_match("/upload/", implode('', drush_shell_exec_output()), $match);
+    $this->server->nginx_has_new_version = preg_match("/(Barracuda\/1\.0\.)/", implode('', drush_shell_exec_output()), $match);
+    $this->server->provision_db_cloaking = FALSE;
+    $this->server->nginx_web_server = 1;
   }
 
   function verify_server_cmd() {
