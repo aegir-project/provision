@@ -1,3 +1,10 @@
+aegir-provision (1.6+dev) unstable; urgency=low
+
+  * merge in the debian branch to the main 1.x branch, making this a
+    native package.
+
+ -- Antoine Beaupré <anarcat@debian.org>  Thu, 16 Feb 2012 15:47:18 -0500
+
 aegir-provision (1.6-1+webpack) testing; urgency=low
 
   * special build for the dev-webpack1x branch
