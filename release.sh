@@ -66,7 +66,8 @@ if ! prompt_yes_no "continue?" ; then
     exit 1
 fi
 
-git pull
+git pull --rebase
+
 echo changing makefile to download tarball
 #sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
 #  -e'/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://ftp.drupal.org/files/projects/hostmaster-'$version'.tgz"#' \
