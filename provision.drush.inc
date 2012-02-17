@@ -204,7 +204,7 @@ function provision_drush_command() {
   $items['provision-login_reset'] = array(
     'description' => 'Generate a one-time login reset URL.',
     'examples' => array(
-      'drush @site provision-login-reset' => 'Generate a one-time login reset URL for the site as defined by the site Drush alias generated with provision-save.',
+      'drush @site provision-login_reset' => 'Generate a one-time login reset URL for the site as defined by the site Drush alias generated with provision-save.',
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
