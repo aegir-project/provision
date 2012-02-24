@@ -138,7 +138,7 @@ map $http_user_agent $device {
 }
 
 ###
-### Set a cache_uid variable for authenticated users (by @brianmercer and @perusio).
+### Set a cache_uid variable for authenticated users (by @brianmercer and @perusio, fixed by @omega8cc).
 ###
 map $http_cookie $cache_uid {
   default                                        '';
