@@ -178,6 +178,14 @@ map $http_user_agent $is_bot {
 }
 
 ###
+### Deny almost all crawlers under high load.
+###
+map $http_user_agent $deny_on_high_load {
+  default                                                           '';
+  ~*crawl|goog|yahoo|yandex|baidu|bing|spider|tracker|click|parser  deny_on_high_load;
+}
+
+###
 ### Deny listed requests for security reasons without 403 response.
 ###
 map $args $is_denied {
