@@ -47,10 +47,6 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
      $this->sync($this->server->include_path . '/nginx_octopus_include.conf');
      provision_file()->copy(dirname(__FILE__) . '/nginx_legacy_include.conf', $this->server->include_path . '/nginx_legacy_include.conf');
      $this->sync($this->server->include_path . '/nginx_legacy_include.conf');
-     provision_file()->copy(dirname(__FILE__) . '/nginx_advanced_include.conf', $this->server->include_path . '/nginx_advanced_include.conf');
-     $this->sync($this->server->include_path . '/nginx_advanced_include.conf');
-     provision_file()->copy(dirname(__FILE__) . '/nginx_simple_include.conf', $this->server->include_path . '/nginx_simple_include.conf');
-     $this->sync($this->server->include_path . '/nginx_simple_include.conf');
      provision_file()->copy(dirname(__FILE__) . '/fastcgi_params.conf', $this->server->include_path . '/fastcgi_params.conf');
      $this->sync($this->server->include_path . '/fastcgi_params.conf');
      provision_file()->copy(dirname(__FILE__) . '/fastcgi_ssl_params.conf', $this->server->include_path . '/fastcgi_ssl_params.conf');
