@@ -149,8 +149,8 @@ map $http_cookie $cache_uid {
 ### Live switch of $key_uri for Speed Booster cache depending on $args.
 ###
 map $request_uri $key_uri {
-  default                                                          $request_uri;
-  ~(?<no_args_uri>[[:graph:]]+)\?(.*)(utm_|__utm|_campaign|gclid)  $no_args_uri;
+  default                                                                            $request_uri;
+  ~(?<no_args_uri>[[:graph:]]+)\?(.*)(utm_|__utm|_campaign|gclid|source=|adv=|req=)  $no_args_uri;
 }
 
 ###
