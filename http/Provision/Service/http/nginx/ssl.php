@@ -4,7 +4,7 @@
  * Nginx SSL service class.
  *
  * This class doesn't extend the nginx service itself, so there may
- * be some duplication of code between them. The majority of the 
+ * be some duplication of code between them. The majority of the
  * functionality is however implemented in the Provision_Service_http_public
  * class, which we do extend.
  */
@@ -17,7 +17,7 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     // The nginx service defines it's restart command as a static
     // method so that we can make use of it here.
     return Provision_Service_http_nginx::nginx_restart_cmd();
-  } 
+  }
 
   public $ssl_enabled = TRUE;
 
@@ -49,7 +49,7 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
 
   /**
    * Restart/reload nginx to pick up the new config files.
-   */ 
+   */
   function parse_configs() {
     return $this->restart();
   }
