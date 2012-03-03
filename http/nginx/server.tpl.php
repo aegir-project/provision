@@ -73,6 +73,11 @@
   recursive_error_pages           on;
   reset_timedout_connection       on;
   fastcgi_intercept_errors        on;
+  server_tokens                  off;
+  fastcgi_hide_header         'Link';
+  fastcgi_hide_header  'X-Generator';
+  fastcgi_hide_header 'X-Powered-By';
+  fastcgi_hide_header 'X-Drupal-Cache';
 
  ## TCP options
   tcp_nopush  on;
