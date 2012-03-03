@@ -6,6 +6,7 @@ if ($ssl_redirection || $this->redirection) {
     print "server {\n";
     print "   listen      {$ip_address}:{$http_port};\n";
     print "   server_name {$alias_url};\n";
+    print "   access_log  off;\n";
     print "   rewrite ^ \$scheme://{$this->uri}\$request_uri? permanent;\n";
     print "}\n";
   }
