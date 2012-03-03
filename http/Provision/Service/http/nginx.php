@@ -12,7 +12,6 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     parent::init_server();
     $this->configs['server'][] = 'Provision_Config_Nginx_Server';
     $this->configs['site'][] = 'Provision_Config_Nginx_Site';
-
     $this->server->setProperty('nginx_has_gzip', 0);
     $this->server->setProperty('nginx_has_new_version', 0);
     $this->server->setProperty('nginx_web_server', 0);
@@ -54,7 +53,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     foreach (explode(':', $_SERVER['PATH']) as $path) {
       $options[] = "$path/nginx";
     }
-    // Try to detect the nginx restart command.  
+    // Try to detect the nginx restart command.
     $options[] = '/usr/sbin/nginx -s';
     $options[] = '/usr/local/sbin/nginx -s';
     $options[] = '/usr/local/bin/nginx -s';
@@ -71,7 +70,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
 
   /**
    * Restart/reload nginx to pick up the new config files.
-   */ 
+   */
   function parse_configs() {
     return $this->restart();
   }
