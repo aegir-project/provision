@@ -118,6 +118,60 @@ if ($nginx_has_upload_progress) {
 
 <?php print $extra_config; ?>
 #######################################################
+###  nginx default maps
+#######################################################
+
+###
+### Support separate Boost and Speed Booster caches for various mobile devices.
+###
+map $http_user_agent $device {
+  default                                                                normal;
+  ~*Nokia|BlackBerry.+MIDP|240x|320x|Palm|NetFront|Symbian|SonyEricsson  mobile-other;
+  ~*iPhone|iPod|Android|BlackBerry.+AppleWebKit                          mobile-smart;
+  ~*iPad|Tablet                                                          mobile-tablet;
+}
+
+###
+### Set a cache_uid variable for authenticated users (by @brianmercer and @perusio, fixed by @omega8cc).
+###
+map $http_cookie $cache_uid {
+  default                                        '';
+  ~SESS[[:alnum:]]+=(?<session_id>[[:graph:]]+)  $session_id;
+}
+
+###
+### Live switch of $key_uri for Speed Booster cache depending on $args.
+###
+map $request_uri $key_uri {
+  default                                                                            $request_uri;
+  ~(?<no_args_uri>[[:graph:]]+)\?(.*)(utm_|__utm|_campaign|gclid|source=|adv=|req=)  $no_args_uri;
+}
+
+###
+### Deny crawlers without 403 response.
+###
+map $http_user_agent $is_crawler {
+  default                                                                                                                        '';
+  ~*HTTrack|MJ12bot|HTMLParser|libwww|PECL|AutomaticSiteMap|ClickSense|ValueClick|SiteBot|BuzzTracker|sistrix|Offline|Screaming  is_crawler;
+}
+
+###
+### Deny all known bots on some URIs without 403 response.
+###
+map $http_user_agent $is_bot {
+  default                                                    '';
+  ~*crawl|goog|yahoo|yandex|spider|bot|tracker|click|parser  is_bot;
+}
+
+###
+### Deny listed requests for security reasons without 403 response.
+###
+map $args $is_denied {
+  default                                                                                                      '';
+  ~*delete.+from|insert.+into|select.+from|union.+select|onload|\.php.+src|system\(.+|document\.cookie|\;|\.\. is_denied;
+}
+
+#######################################################
 ###  nginx default server
 #######################################################
 
