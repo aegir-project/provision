@@ -32,6 +32,32 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     // Replace the server config with our own. See the class for more info.
     $this->configs['server'][] = 'Provision_Config_Nginx_Ssl_Server';
     $this->configs['site'][] = 'Provision_Config_Nginx_Ssl_Site';
+    $this->server->setProperty('nginx_has_gzip', 0);
+    $this->server->setProperty('nginx_web_server', 0);
+    $this->server->setProperty('nginx_has_upload_progress', 0);
+  }
+
+  function save_server() {
+    // Find nginx executable.
+    if (provision_file()->exists('/usr/local/sbin/nginx')->status()) {
+      $path = "/usr/local/sbin/nginx";
+    }
+    elseif (provision_file()->exists('/usr/sbin/nginx')->status()) {
+      $path = "/usr/sbin/nginx";
+    }
+    elseif (provision_file()->exists('/usr/local/bin/nginx')->status()) {
+      $path = "/usr/local/bin/nginx";
+    }
+    else {
+      return;
+    }
+
+    // Check if some nginx features are supported and save them for later.
+    $this->server->shell_exec($path . ' -V');
+    $this->server->nginx_has_upload_progress = preg_match("/upload/", implode('', drush_shell_exec_output()), $match);
+    $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match);
+    $this->server->provision_db_cloaking = FALSE;
+    $this->server->nginx_web_server = 1;
   }
 
   function verify_server_cmd() {

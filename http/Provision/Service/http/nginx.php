@@ -18,11 +18,24 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
   }
 
   function save_server() {
+    // Find nginx executable.
+    if (provision_file()->exists('/usr/local/sbin/nginx')->status()) {
+      $path = "/usr/local/sbin/nginx";
+    }
+    elseif (provision_file()->exists('/usr/sbin/nginx')->status()) {
+      $path = "/usr/sbin/nginx";
+    }
+    elseif (provision_file()->exists('/usr/local/bin/nginx')->status()) {
+      $path = "/usr/local/bin/nginx";
+    }
+    else {
+      return;
+    }
+
     // Check if some nginx features are supported and save them for later.
-    $this->server->shell_exec('nginx -V');
+    $this->server->shell_exec($path . ' -V');
+    $this->server->nginx_has_upload_progress = preg_match("/upload/", implode('', drush_shell_exec_output()), $match);
     $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match);
-    $this->server->nginx_has_upload_progress = preg_match("/(nginx-upload-progress-module)/", implode('', drush_shell_exec_output()), $match);
-    $this->server->nginx_has_new_version = preg_match("/(Barracuda\/0\.9\.)/", implode('', drush_shell_exec_output()), $match);
     $this->server->provision_db_cloaking = FALSE;
     $this->server->nginx_web_server = 1;
   }
@@ -49,17 +62,17 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
   public static function nginx_restart_cmd() {
     $command = '/etc/init.d/nginx'; // A proper default for most of the world
     $options[] = $command;
+    // Try to detect the nginx restart command.
     foreach (explode(':', $_SERVER['PATH']) as $path) {
       $options[] = "$path/nginx";
     }
-    // Try to detect the nginx restart command.
-    $options[] = '/usr/sbin/nginx -s';
-    $options[] = '/usr/local/sbin/nginx -s';
-    $options[] = '/usr/local/bin/nginx -s';
+    $options[] = '/usr/sbin/nginx';
+    $options[] = '/usr/local/sbin/nginx';
+    $options[] = '/usr/local/bin/nginx';
 
     foreach ($options as $test) {
       if (is_executable($test)) {
-        $command = $test;
+        $command = ($test == '/etc/init.d/nginx') ? $test : $test . ' -s';
         break;
       }
     }
