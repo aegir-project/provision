@@ -16,7 +16,6 @@ class provisionService_http_nginx extends provisionService_http_public {
     $this->configs['server'][] = 'provisionConfig_nginx_server';
     $this->configs['site'][] = 'provisionConfig_nginx_site';
     $this->server->setProperty('nginx_has_gzip', 0);
-    $this->server->setProperty('nginx_has_new_version', 0);
     $this->server->setProperty('nginx_web_server', 0);
     $this->server->setProperty('nginx_has_upload_progress', 0);
   }

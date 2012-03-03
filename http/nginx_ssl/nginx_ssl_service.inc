@@ -45,7 +45,6 @@ class provisionService_http_nginx_ssl extends provisionService_http_ssl {
     $this->configs['server'][] = 'provisionConfig_nginx_ssl_server';
     $this->configs['site'][] = 'provisionConfig_nginx_ssl_site';
     $this->server->setProperty('nginx_has_gzip', 0);
-    $this->server->setProperty('nginx_has_new_version', 0);
     $this->server->setProperty('nginx_web_server', 0);
     $this->server->setProperty('nginx_has_upload_progress', 0);
   }
