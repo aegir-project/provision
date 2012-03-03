@@ -15,7 +15,6 @@ class provisionService_http_nginx extends provisionService_http_public {
     parent::init_server();
     $this->configs['server'][] = 'provisionConfig_nginx_server';
     $this->configs['site'][] = 'provisionConfig_nginx_site';
-
     $this->server->setProperty('nginx_has_gzip', 0);
     $this->server->setProperty('nginx_has_new_version', 0);
     $this->server->setProperty('nginx_web_server', 0);
@@ -74,7 +73,7 @@ class provisionService_http_nginx extends provisionService_http_public {
 
   /**
    * Restart/reload nginx to pick up the new config files.
-   */ 
+   */
   function parse_configs() {
     return $this->restart();
   }
@@ -91,7 +90,7 @@ class provisionConfig_nginx_server extends provisionConfig_http_server {
   }
 }
 
-/** 
+/**
  * Nginx site level config class. Virtual host.
  */
 class provisionConfig_nginx_site extends provisionConfig_http_site {
