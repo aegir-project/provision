@@ -45,7 +45,7 @@ $nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
 
 <?php endif; ?>
 
-<?php 
+<?php
    // Generate the standard virtual host too.
    include('http/nginx/vhost.tpl.php');
 ?>
