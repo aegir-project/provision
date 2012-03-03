@@ -50,11 +50,24 @@ class provisionService_http_nginx_ssl extends provisionService_http_ssl {
   }
 
   function save_server() {
+    // Find nginx executable.
+    if (provision_file()->exists('/usr/local/sbin/nginx')->status()) {
+      $path = "/usr/local/sbin/nginx";
+    }
+    elseif (provision_file()->exists('/usr/sbin/nginx')->status()) {
+      $path = "/usr/sbin/nginx";
+    }
+    elseif (provision_file()->exists('/usr/local/bin/nginx')->status()) {
+      $path = "/usr/local/bin/nginx";
+    }
+    else {
+      return;
+    }
+
     // Check if some nginx features are supported and save them for later.
-    $this->server->shell_exec('nginx -V');
-    $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match);
+    $this->server->shell_exec($path . ' -V');
     $this->server->nginx_has_upload_progress = preg_match("/upload/", implode('', drush_shell_exec_output()), $match);
-    $this->server->nginx_has_new_version = preg_match("/(Barracuda\/1\.0\.)/", implode('', drush_shell_exec_output()), $match);
+    $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match);
     $this->server->provision_db_cloaking = FALSE;
     $this->server->nginx_web_server = 1;
   }
