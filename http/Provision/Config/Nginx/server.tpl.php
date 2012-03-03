@@ -74,7 +74,7 @@
   reset_timedout_connection       on;
   fastcgi_intercept_errors        on;
 
- ## TCP options 
+ ## TCP options
   tcp_nopush  on;
 
  ## SSL performance
