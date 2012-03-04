@@ -180,7 +180,6 @@ $ip_address = !empty($ip_address) ? $ip_address : '*';
 ?>
 server {
   limit_conn   gulag 10; # like mod_evasive - this allows max 10 simultaneous connections from one IP address
-  #listen      <?php print $ip_address . ':' . $http_port; ?>;
 <?php foreach ($server->ip_addresses as $ip) :?>
   listen       <?php print $ip . ':' . $http_port; ?>;
 <?php endforeach; ?>
