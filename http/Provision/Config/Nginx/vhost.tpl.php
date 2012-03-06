@@ -4,8 +4,13 @@ if ($ssl_redirection || $this->redirection) {
   // Redirect all aliases to the main http url using separate vhosts blocks to avoid if{} in Nginx.
   foreach ($this->aliases as $alias_url) {
     print "server {\n";
-    foreach ($server->ip_addresses as $ip) {
-      print "   listen      {$ip}:{$http_port};\n";
+    if ($ip_address == '*') {
+      print "   listen      {$ip_address}:{$http_port};\n";
+    }
+    else {
+      foreach ($server->ip_addresses as $ip) {
+        print "   listen      {$ip}:{$http_port};\n";
+      }
     }
     print "   server_name {$alias_url};\n";
     print "   access_log  off;\n";
@@ -18,9 +23,16 @@ if ($ssl_redirection || $this->redirection) {
 server {
    include      <?php print "{$server->include_path}"; ?>/fastcgi_params.conf;
    limit_conn   gulag 18; # like mod_evasive - this allows max 18 simultaneous connections from one IP address
-<?php foreach ($server->ip_addresses as $ip) :?>
-   listen       <?php print $ip . ':' . $http_port; ?>;
-<?php endforeach; ?>
+<?php
+if ($ip_address == '*') {
+  print "   listen       {$ip_address}:{$http_port};\n";
+}
+else {
+  foreach ($server->ip_addresses as $ip) {
+    print "   listen       {$ip}:{$http_port};\n";
+  }
+}
+?>
    server_name  <?php print $this->uri; ?><?php if (!$this->redirection && is_array($this->aliases)) : foreach ($this->aliases as $alias_url) : if (trim($alias_url)) : ?> <?php print $alias_url; ?><?php endif; endforeach; endif; ?>;
    root         <?php print "{$this->root}"; ?>;
    <?php print $extra_config; ?>
