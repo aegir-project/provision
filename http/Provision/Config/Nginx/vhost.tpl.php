@@ -5,15 +5,15 @@ if ($ssl_redirection || $this->redirection) {
   foreach ($this->aliases as $alias_url) {
     print "server {\n";
     if ($ip_address == '*') {
-      print "   listen      {$ip_address}:{$http_port};\n";
+      print "   listen       {$ip_address}:{$http_port};\n";
     }
     else {
       foreach ($server->ip_addresses as $ip) {
-        print "   listen      {$ip}:{$http_port};\n";
+        print "   listen       {$ip}:{$http_port};\n";
       }
     }
-    print "   server_name {$alias_url};\n";
-    print "   access_log  off;\n";
+    print "   server_name  {$alias_url};\n";
+    print "   access_log   off;\n";
     print "   rewrite ^ \$scheme://{$this->uri}\$request_uri? permanent;\n";
     print "}\n";
   }
