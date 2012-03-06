@@ -1,0 +1,23 @@
+Template:aegir/master_ssh_key
+Type: string
+Description: Public SSH key of the master server
+ This is the public SSH key of the Aegir user on the master server.
+ .
+ If this is changed, it will simply be *added* to the
+ /var/aegir/.ssh/authorized_keys file, the previous key will not be
+ removed.
+ .
+ If this is left empty, no key will be added to that file.
+
+Template:aegir/master_mountpoint
+Type: string
+Description: Mountpoint of the master server
+ Enter here the location of the remote filesystem the slave should
+ mount. This should look something like this:
+ .
+    master.example.com:/var/aegir/platforms
+ .
+ This will be mounted to /var/aegir/platforms.
+ .
+ Enter nothing if you do not want this package to meddle with your
+ /etc/fstab.
