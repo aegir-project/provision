@@ -1,9 +1,17 @@
-aegir-provision (1.6+dev) unstable; urgency=low
+aegir-provision (2.0~alpha) UNRELEASED; urgency=low
 
-  * merge in the debian branch to the main 1.x branch, making this a
-    native package.
+  * switch to a native package
+  
+    while Aegir is desgined to run on other systems than Debian, it is
+    currently *not* uploaded into Debian itself, and therefore there is
+    only one source of packages, debian.aegirproject.org.
 
- -- Antoine Beaupré <anarcat@debian.org>  Thu, 16 Feb 2012 15:47:18 -0500
+    this will mean we will need to make a new release every time we want
+    to publish changes to the Debian package, but this annoyance
+    outweights the trouble of having to maintain 4 different branches
+    (1.x, 2.x and debian, debian2x) to have a 2.x debian package.
+
+ -- Antoine Beaupré <anarcat@debian.org>  Tue, 06 Mar 2012 14:39:41 -0500
 
 aegir-provision (1.6-1+webpack) testing; urgency=low
 
