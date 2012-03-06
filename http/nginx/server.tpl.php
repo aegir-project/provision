@@ -98,11 +98,11 @@
 <?php
 $nginx_has_gzip = drush_get_option('nginx_has_gzip');
 if ($nginx_has_gzip) {
-   print "  gzip_static       on;\n";
+  print "  gzip_static       on;\n";
 }
 $nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
 if ($nginx_has_upload_progress) {
-   print "  upload_progress uploads 1m;\n";
+  print "  upload_progress uploads 1m;\n";
 }
 ?>
 
@@ -179,10 +179,17 @@ map $args $is_denied {
 $ip_address = !empty($ip_address) ? $ip_address : '*';
 ?>
 server {
-  limit_conn   gulag 10; # like mod_evasive - this allows max 10 simultaneous connections from one IP address
-<?php foreach ($server->ip_addresses as $ip) :?>
-  listen       <?php print $ip . ':' . $http_port; ?>;
-<?php endforeach; ?>
+  limit_conn   gulag 18; # like mod_evasive - this allows max 18 simultaneous connections from one IP address
+<?php
+if ($ip_address == '*') {
+  print "  listen       {$ip_address}:{$http_port};\n";
+}
+else {
+  foreach ($server->ip_addresses as $ip) {
+    print "  listen       {$ip}:{$http_port};\n";
+  }
+}
+?>
   server_name  _;
   location / {
      root   /var/www/nginx-default;
