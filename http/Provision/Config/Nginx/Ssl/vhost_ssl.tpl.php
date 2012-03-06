@@ -4,6 +4,7 @@
 <?php if ($this->redirection): ?>
 <?php foreach ($this->aliases as $alias_url): ?>
 server {
+  limit_conn   gulag 18;
   listen       <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
   server_name  <?php print $alias_url; ?>;
   ssl                        on;
