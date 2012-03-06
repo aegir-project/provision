@@ -1,0 +1,47 @@
+This package was debianized by Antoine Beaupré <anarcat@koumbit.org> on
+Fri, 12 Jun 2009 13:25:02 -0400.
+
+It was downloaded from <http://drupal.org/project/provision>
+
+Upstream Authors:
+
+    Adrian Rossouw, Antoine Beaupré, Miguel Jacq
+
+Copyright:
+
+    Copyright (C) 2008-2010 Adrian Rossouw, Antoine Beaupré, Miguel Jacq
+
+License:
+
+    This package is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This package is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this package; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+
+Provision is a Drupal module, and as all Drupal.org hosted code, it is
+GPL2+, according to the Drupal association:
+
+http://drupal.org/licensing/faq
+
+"Drupal and all contributed files hosted on Drupal.org are licensed
+under the GNU General Public License, version 2 or later. That means you
+are free to download, reuse, modify, and distribute any files hosted on
+Drupal.org's CVS repository under the terms of either the GPL version 2
+or version 3, and to run Drupal in combination with any code with any
+license that is compatible with either versions 2 or 3, such as the
+Affero General Public License (AGPL) version 3."
+
+On Debian systems, the complete text of the GNU General
+Public License can be found in `/usr/share/common-licenses/GPL'.
+
+The Debian packaging is (C) 2009-2010, Antoine Beaupré <anarcat@koumbit.org> and
+is licensed under the GPL, see above.
