@@ -151,8 +151,8 @@ map $request_uri $key_uri {
 ### Deny crawlers without 403 response.
 ###
 map $http_user_agent $is_crawler {
-  default                                                                                                                              '';
-  ~*HTTrack|MJ12bot|HTMLParser|libwww|PECL|AutomaticSiteMap|ClickSense|ValueClick|SiteBot|BuzzTracker|sistrix|Offline|Screaming|Nutch  is_crawler;
+  default                                                                                                        '';
+  ~*HTTrack|MJ12|HTMLParser|libwww|PECL|Automatic|Click|SiteBot|BuzzTrack|Sistrix|Offline|Screaming|Nutch|Mireo  is_crawler;
 }
 
 ###
