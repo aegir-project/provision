@@ -104,11 +104,11 @@
 <?php
 $nginx_has_gzip = drush_get_option('nginx_has_gzip');
 if ($nginx_has_gzip) {
-   print "  gzip_static       on;\n";
+  print "  gzip_static       on;\n";
 }
 $nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
 if ($nginx_has_upload_progress) {
-   print "  upload_progress uploads 1m;\n";
+  print "  upload_progress uploads 1m;\n";
 }
 ?>
 
