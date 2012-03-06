@@ -1,3 +1,13 @@
+aegir-provision (1.7) testing; urgency=low
+
+  * new release: various bugfixes that have accumulated in the issue queue
+    since the 1.6 release, including a lot of fixes on Nginx support. We
+    also ship a new clustering module aimed at lightweight slave
+    deployments named the pack module, designed to replace the cluster
+    module which has performance and configuration issues.
+
+ -- Antoine Beaupré <anarcat@debian.org>  Tue, 06 Mar 2012 18:39:37 -0500
+
 aegir-provision (1.6+dev) unstable; urgency=low
 
   * merge in the debian branch to the main 1.x branch, making this a
