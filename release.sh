@@ -48,11 +48,12 @@ EOF
 cat <<EOF
 
 The following operations will be done:
+ 0. prompt you for a debian/changelog entry
  1. change the makefile to download tarball
  2. change the upgrade.sh.txt version
  3. display the resulting diff
  4. commit those changes to git
- 5. lay down the tag (prompting you for a changelog)
+ 5. lay down the tag
  6. revert the commit
  7. (optionally) push those changes
 
@@ -66,7 +67,11 @@ if ! prompt_yes_no "continue?" ; then
     exit 1
 fi
 
-git pull
+git pull --rebase
+
+dch -v $version -D testing
+git add debian/changelog
+
 echo changing makefile to download tarball
 #sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
 #  -e'/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://ftp.drupal.org/files/projects/hostmaster-'$version'.tgz"#' \
@@ -96,7 +101,7 @@ fi
 commitmsg=`git commit -m"change version information for release $version"`
 echo $commitmsg
 commitid=`echo $commitmsg | sed 's/^\[[^ ]* \([a-z0-9]*\)\].*$/\1/'`
-git tag -a $version
+sed -n '1,/ --/p' debian/changelog | git tag -a -F - $version
 
 echo reverting tree to HEAD versions
 git revert $commitid

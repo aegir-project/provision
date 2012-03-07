@@ -1,0 +1,81 @@
+Source: aegir-provision
+Section: admin
+Priority: optional
+Maintainer: Antoine Beaupré <anarcat@debian.org>
+DM-Upload-Allowed: yes
+Build-Depends: debhelper (>= 7.0.50~)
+Standards-Version: 3.9.2
+Homepage: http://aegirproject.org/
+Vcs-git: http://git.drupal.org/project/provision.git
+Vcs-browser: http://drupalcode.org/project/provision.git
+
+Package: aegir-provision
+Architecture: all
+Depends: ${misc:Depends}, drush (>= 4.3), php5-mysql, mysql-client, sudo, postfix | mail-transport-agent, apache2, adduser, ucf
+Recommends: mysql-server, rsync
+Suggests: drush-make
+Description: mass Drupal hosting system - backend
+ A set of contributed modules for Drupal that aims to solve the
+ problem of managing a large number of Drupal sites. It does this by
+ providing you with a simple Drupal based hosting front end for your
+ entire network of sites. To deploy a new site you simply have to
+ create a new Site node. To backup or upgrade sites, you simply manage
+ your site nodes as you would any other node.
+ .
+ This package provides Drush commands used for system level tasks such
+ as creating configuration files and managing databases and backup
+ files. It can be installed standalone although it is usually
+ installed with the hostmaster frontend.
+
+Package: aegir-hostmaster
+Architecture: all
+Depends: ${misc:Depends}, drush (>= 4.3), drush-make, php5-mysql, apache2, libapache2-mod-php5, aegir-provision (>= ${source:Version}), git-core, unzip
+Recommends: php5-gd, php5
+Description: mass Drupal hosting system - frontend
+ A set of contributed modules for Drupal that aims to solve the
+ problem of managing a large number of Drupal sites. It does this by
+ providing you with a simple Drupal based hosting front end for your
+ entire network of sites. To deploy a new site you simply have to
+ create a new Site node. To backup or upgrade sites, you simply manage
+ your site nodes as you would any other node.
+ .
+ This package provides the frontend web interface that users generally
+ interact with. It's made up of a regular Drupal site with a custom
+ install profile, module and theme.
+ .
+ This meta-package will dynamically install the frontend using drush
+ and provision and as such doesn't bundle any files itself. Everything
+ is downloaded on the fly during the install.
+
+Package: aegir
+Architecture: all
+Depends: ${misc:Depends}, aegir-provision (>= ${source:Version}), aegir-hostmaster (>= ${source:Version})
+Description: mass Drupal hosting system
+ A set of contributed modules for Drupal that aims to solve the
+ problem of managing a large number of Drupal sites. It does this by
+ providing you with a simple Drupal based hosting front end for your
+ entire network of sites. To deploy a new site you simply have to
+ create a new Site node. To backup or upgrade sites, you simply manage
+ your site nodes as you would any other node.
+ .
+ This meta-package will install both the frontend (aegir-hostmaster)
+ and the backend (aegir-provision).
+
+Package: aegir-cluster-slave
+Architecture: all
+Depends: ${misc:Depends}, php5-mysql, sudo, apache2, adduser, ucf, libapache2-mod-php5, rsync, nfs-client
+Recommends: php5-gd, php5
+Description: web frontend for the Aegir hosting system
+ Configuration of lightweight slave servers for the Aegir "pack"
+ clustering system.
+ .
+ This is meant to be installed on remote servers that are "slave
+ servers" in the "pack" cluster. This package will configure the
+ following parts of your system, through debconf prompts:
+ .
+  * create a aegir user
+  * /etc/fstab - to NFS-mount the master server
+  * /var/aegir/.ssh/authorized_keys - to allow the master server to
+    connect via SSH to sync files and reload apache
+  * /etc/sudoers.d/aegir - allow aegir to restart apache
+  * /etc/apache2/conf.d/aegir.conf - load the aegir apache config

@@ -1,0 +1,334 @@
+aegir-provision (2.0~alpha) UNRELEASED; urgency=low
+
+  * switch to a native package
+  
+    while Aegir is desgined to run on other systems than Debian, it is
+    currently *not* uploaded into Debian itself, and therefore there is
+    only one source of packages, debian.aegirproject.org.
+
+    this will mean we will need to make a new release every time we want
+    to publish changes to the Debian package, but this annoyance
+    outweights the trouble of having to maintain 4 different branches
+    (1.x, 2.x and debian, debian2x) to have a 2.x debian package.
+
+ -- Antoine Beaupré <anarcat@debian.org>  Tue, 06 Mar 2012 14:39:41 -0500
+
+aegir-provision (1.6-1+webpack) testing; urgency=low
+
+  * special build for the dev-webpack1x branch
+  * add scripts to configure the slave server
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Tue, 07 Feb 2012 17:55:01 -0500
+
+aegir-provision (1.6-1) testing; urgency=low
+
+  * new upstream release
+
+ -- Antoine Beaupré <jenkins@ci.aegirproject.org>  Tue, 22 Nov 2011 08:28:10 +0000
+
+aegir-provision (1.5-2) testing; urgency=high
+
+  * critical hotfix: do not trash the apache aegir.conf file on failed
+    upgrades (Closes: 1328316)
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Tue, 01 Nov 2011 12:10:06 -0400
+
+aegir-provision (1.5-1) testing; urgency=low
+
+  * new upstream release
+
+ -- Steven Jones <steven.jones@computerminds.co.uk>  Mon, 31 Oct 2011 21:13:19 +0000
+
+aegir-provision (1.4-1) testing; urgency=low
+
+  * new upstream release
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Thu, 29 Sep 2011 15:02:11 -0400
+
+aegir-provision (1.3-1) testing; urgency=low
+
+  * new upstream release
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 26 Aug 2011 18:56:51 +0100
+
+aegir-provision (1.2-1) testing; urgency=low
+
+  * new upstream release
+  * fix download url in copyright file
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 13 Jul 2011 14:46:07 -0400
+
+aegir-provision (1.1-6) testing; urgency=low
+
+  * upload to testing since "unstable" is reserved for auto-builds of the
+    ... unstable branch
+  * fix autobuilder version numbers
+  * make PGP key customizable in autobuilder
+  * allow for preseeding of the mysql password
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 22 Jun 2011 13:23:27 -0400
+
+aegir-provision (1.1-5) unstable; urgency=low
+
+  * update to standards version 3.9.2 (no change)
+  * use dh 7 simpler targets in rules file
+  * add targets for jenkins autobuilding
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Tue, 21 Jun 2011 23:42:35 -0400
+
+aegir-provision (1.1-4) unstable; urgency=high
+
+  * keep supporting the DEBUG flag, it is now deprecated, and DPKG_DEBUG
+    is still supported.
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 20 May 2011 15:18:55 -0400
+
+aegir-provision (1.1-3) unstable; urgency=low
+
+  * use DPKG_DEBUG flag instead of just DEBUG
+  * do not destroy old platform on upgrade
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 20 May 2011 14:08:31 -0400
+
+aegir-provision (1.1-2) unstable; urgency=low
+
+  * Fix missing dependencies on unzip
+  * Add rsync, php5 and php5-gd recommends
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 20 Apr 2011 15:13:25 -0400
+
+aegir-provision (1.1-1) unstable; urgency=low
+
+  * new upstream release
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 20 Apr 2011 12:46:57 -0400
+
+aegir-provision (1.0-3) unstable; urgency=low
+
+  * add missing libapache2-mod-php5 dependency
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 15 Apr 2011 19:15:11 -0400
+
+aegir-provision (1.0-2) unstable; urgency=low
+
+  * activate the required modules SSL and rewrite
+  * make all maintainer scripts respect DEBUG
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 15 Apr 2011 14:30:16 -0400
+
+aegir-provision (1.0-1) unstable; urgency=low
+
+  * new upstream release
+  * add more packaging issues in the TODO
+  * detail how to install the frontend with just aegir-provision installed
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 15 Apr 2011 13:54:46 -0400
+
+aegir-provision (1.0~rc7-1) unstable; urgency=low
+
+  * new upstream release, dropping local patch
+  * fix permissions on provision directories (#1123276)
+  * add dependency on git while we wait for upstream to fix frontend
+    packaging
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Mon, 11 Apr 2011 13:04:43 -0400
+
+aegir-provision (1.0~rc6-2) unstable; urgency=low
+
+  * fix the makefile that was broken by the release script
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 08 Apr 2011 17:11:15 -0400
+
+aegir-provision (1.0~rc6-1) unstable; urgency=low
+
+  * new upstream release: fix an issue in the upgrade.sh script and Drupal
+    7 support
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 08 Apr 2011 16:38:18 -0400
+
+aegir-provision (1.0~rc5-1) unstable; urgency=low
+
+  * new upstream release to fix the upgrade path
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 06 Apr 2011 16:05:51 -0400
+
+aegir-provision (1.0~rc4+3-3) unstable; urgency=low
+
+  * local patch: try to fix broken upgrade path
+  * fetch from hostmaster 1.x to fix upgrade path
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 06 Apr 2011 14:50:56 -0400
+
+aegir-provision (1.0~rc4-2) unstable; urgency=low
+
+  * fix command to find platform alias that was breaking upgrades
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 06 Apr 2011 14:30:23 -0400
+
+aegir-provision (1.0~rc4-1) unstable; urgency=low
+
+  * new upstream release
+  * delete platforms the right way, using provision-delete instead of
+    manually
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Tue, 05 Apr 2011 19:34:41 -0400
+
+aegir-provision (1.0~rc3-10) unstable; urgency=low
+
+  * correctly create the config directory otherwise postinst fails on
+    new installs
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Tue, 05 Apr 2011 10:11:33 -0400
+
+aegir-provision (1.0~rc3-9) unstable; urgency=low
+
+  * silence warning on new installs
+  * fix path to sample sudoers file, which made new installs completely
+    fail
+  * move apache config unregistration to remove, as per webapps policy
+  * clarify Debian's TODO
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Sat, 02 Apr 2011 18:21:27 -0400
+
+aegir-provision (1.0~rc3-8) unstable; urgency=low
+
+  * have the makefile prompt pop up correctly
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 01 Apr 2011 14:30:57 -0400
+
+aegir-provision (1.0~rc3-7) unstable; urgency=low
+
+  * make upgrades from custom installs easier by prompting for a makefile
+    anyways
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Thu, 31 Mar 2011 15:18:43 -0400
+
+aegir-provision (1.0~rc3-6) unstable; urgency=low
+
+  * more debugging information
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Thu, 31 Mar 2011 15:15:10 -0400
+
+aegir-provision (1.0~rc3-5) unstable; urgency=low
+
+  * cleanup older empty platforms when upgrading
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Thu, 31 Mar 2011 14:58:48 -0400
+
+aegir-provision (1.0~rc3-4) unstable; urgency=low
+
+  * fix internal version number to respect upstream convention (6.x-1.0~rc3)
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Thu, 31 Mar 2011 14:48:12 -0400
+
+aegir-provision (1.0~rc3-3) unstable; urgency=low
+
+  * depend explicitly on apache, which simplifies sudoers file install
+  * abort earlier when a manual provision install is detected
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Thu, 31 Mar 2011 14:25:17 -0400
+
+aegir-provision (1.0~rc3-2) unstable; urgency=low
+
+  * add a DEBUG environment variable that can be set to anything not empty
+    to make the drush commands run with --debug
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Thu, 31 Mar 2011 14:14:05 -0400
+
+aegir-provision (1.0~rc3-1) unstable; urgency=low
+
+  * new upstream release
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Thu, 31 Mar 2011 13:32:13 -0400
+
+aegir-provision (1.0~rc2-1) unstable; urgency=low
+
+  * new upstream version
+  * change watch file to point to Drupal.org
+  * remove frontend install scripts, the README.Debian has instructions
+    on how to install the frontend.
+  * configure git-buildpackage so this can be built more easily
+  * add frontend install scripts as a separate binary package
+    (aegir-hostmaster) that is just maintainer scripts within this source
+    package.
+  * cherry-pick the credentials security fix in b2236c6b and 039c7240
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Mon, 21 Mar 2011 18:58:06 -0400
+
+aegir-provision (0.4~beta2-1) unstable; urgency=low
+
+  * fix minor issues found during testing:
+    * do not depend on a specific sudo version, instead warn the user on
+      problems
+    * don't operate on non-existent directories
+  * new upstream release
+  * Switch to dpkg-source 3.0 (quilt) format
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Mon, 20 Dec 2010 15:35:56 -0500
+
+aegir-provision (0.4~beta1-1) unstable; urgency=low
+
+  * major overhaul of this package for the new upstream release
+  * clarify GPL2+ copyright of drupal.org material
+  * make a standard git-based release process in debian/rules
+  * do not generate a drushrc.php, things are all different now
+  * do not install apache config and reload apache until we use
+    hostmaster-install
+  * install the frontend using hostmaster-install
+  * install straight to /var/aegir again
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 24 Nov 2010 00:31:17 -0500
+
+aegir-provision (0.3-2) unstable; urgency=low
+
+  * install sudoers file in /etc/sudoers.d, and the drushrc using ucf so
+    that local changes are preserved
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 09 Sep 2009 16:07:37 +0200
+
+aegir-provision (0.3-1) unstable; urgency=low
+
+  * new upstream version (0.3)
+  * update to latest standards (no changes)
+  * make DM-Upload-Allowed
+  * make the aegir user part of the www-data group, as recommended by the
+    upstream INSTALL.txt file (in the hostmaster package)
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Sun, 30 Aug 2009 16:27:17 -0400
+
+aegir-provision (0.3~rc2-1) unstable; urgency=low
+
+  * new upstream version (0.3-rc2)
+  * fix typos in changelog
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Wed, 29 Jul 2009 18:34:30 -0400
+
+aegir-provision (0.2-4) unstable; urgency=low
+
+  * add DM-Upload-Allowed field since I'm now a Debian Maintainer
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Tue, 14 Jul 2009 21:08:05 -0400
+
+aegir-provision (0.2-3) unstable; urgency=low
+
+  * remove parts of the post* scripts that were violating section 10.7.4
+    of the Debian policy, namely the edition of /etc/sudoers and
+    /etc/drush/drushrc.php.
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Sun, 14 Jun 2009 20:52:54 -0400
+
+aegir-provision (0.2-2) unstable; urgency=low
+
+  * configure apache properly
+  * configure backup and config paths properly
+  * setup users and groups, fix ownership
+  * setup sudoers line
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 12 Jun 2009 17:57:38 -0400
+
+aegir-provision (0.2-1) unstable; urgency=low
+
+  * Initial release (Closes: #532923)
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Fri, 12 Jun 2009 13:30:16 -0400
+

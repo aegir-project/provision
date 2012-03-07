@@ -1,0 +1,85 @@
+Here are the parts missing in this package.
+
+Critical stuff
+==============
+
+This shouldn't be used or published until this is fixed.
+
+ * (nil)
+
+Debian policy compliance issues
+===============================
+
+ * comply with the FHS by not installing in /var/aegir (that is the
+   sole lintian override we have)
+
+   the proper way to do this is to follow the webapps policies:
+   http://webapps-common.alioth.debian.org/draft/html/
+
+ * respect the PHP policy:
+   http://webapps-common.alioth.debian.org/draft-php/html/
+
+ * do not duplicate code with Drupal, to respect section 4.13 of the
+   policy: "Debian packages should not make use of these [...] copies
+   unless the included package is explicitly intended to be used in
+   this way. If the included code is already in the Debian archive in
+   the form of a library, the Debian packaging should ensure that
+   binary packages reference the libraries already in Debian and the
+   convenience copy is not used. If the included code is not already
+   in Debian, it should be packaged separately as a prerequisite if
+   possible." The main reason for this is that "Having multiple copies
+   of the same code in Debian is inefficient, often creates either
+   static linking or shared library conflicts, and, most importantly,
+   increases the difficulty of handling security vulnerabilities in
+   the duplicated code."
+
+How to handle the drupal6 package code duplication
+--------------------------------------------------
+
+It could be argued that this is not necessary, as "the included
+package is explicitely intended to be used this way": one could say
+that Drupal is *not* intended to be installed system-wide and that it
+is OK to create third-party distributions by copying the code of the
+Drupal core.
+
+One could also argue that we don't actually *ship* Drupal in the
+package, but merely manage copies of the code, the same way the
+flashplugin-nonfree package operates. This is the approach we are
+currently taking.
+
+But let's say for the sake of argument that we need to comply with
+section 4.13, how the heck do we do this?
+
+Daniel Kahn Gillmor (dkg) suggested two alternative approaches for
+this problem. One is the "trac" package approach, where no instance of
+trac is setup on install, and the admin has to create its own
+instances with provided scripts. On upgrade, the instances are not
+upgraded and the admin has to upgrade the databases manually. The
+instances however, already use the new provided code.
+
+The second approach is the way the postgresql package works. When
+postgresql is installed, it sets up a new instance automatically and
+then on *minor* upgrades, that instance is automatically updated. On
+major upgrades, those instances are not touched and the admin has to
+manually perform the upgrade.
+
+This would mean that we would make a Debian package to ship the
+hostmaster code within /usr/share/drupal6/profiles directory. We would
+then create a "platform" out of the drupal6 directory and install the
+Aegir frontend in there. When Drupal6 would get upgraded, we would run
+drush updatedb directly in there instead of our regular
+hostmaster-migrate, which would be used only for major (Aegir 1.0 ->
+2.0, which updates to drupal7, for example) upgrades. The biggest
+problem I see with this is that then the drupal6 package could be
+upgraded without Aegir's knowledge and updatedb wouldn't be ran.
+
+This also seems like a significant amount of work.
+
+Nice to have stuff
+==================
+
+ * deal with /var/aegir after purge?
+ * use a minimal rules file:
+   /usr/share/doc/debhelper/examples/rules.tiny
+ * sign the md5s of hostmaster and friends so we have a trust path in
+   the packaging again

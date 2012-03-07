@@ -1,0 +1,25 @@
+Aegir for Debian
+----------------
+
+This is part of the Aegir suite. This package takes care of installing
+the provision file in the proper location so it's seen by Drush and sets
+up some directories and the aegir user. Once this package is installed,
+the frontend can be installed with the aegir-hostmaster package, or
+the following command:
+
+ su -u aegir -c 'drush hostmaster-install'
+
+Aegir is installed under /var/aegir. I haven't gone through the trouble
+of separating the directories to follow the FHS, as Aegir doesn't
+support this well yet.
+
+To migrate to this package, you need to first remove
+/var/aegir/.drush/provision (this package will stop processing if it
+finds it), then install the package, which should find the necessary
+aliases and goods to do its own hostmaster-migrate. This procedure
+will only work from 0.4-alpha9 and above:
+
+  rm -rf /var/aegir/.drush/provision
+  apt-get install aegir-provision
+
+ -- Antoine Beaupré <anarcat@koumbit.org>, Wed, 24 Nov 2010 02:40:34 -0500
