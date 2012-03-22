@@ -560,6 +560,7 @@ function _provision_drupal_search_paths($scope, $key = '', $type = 'modules') {
   switch ($scope) {
     case 'base' :
       $searchpaths[] = sprintf("%s/%s", $drupal_root, $type);
+      $searchpaths[] = sprintf("%s/core/%s", $drupal_root, $type);
       $searchpaths[] = sprintf("%s/sites/all/%s", $drupal_root, $type);
       break;
     default :

@@ -75,7 +75,7 @@ function install_main() {
 
   $client_email = drush_get_option('client_email');
 
-  require_once DRUPAL_ROOT . '/includes/install.core.inc';
+  require_once DRUPAL_ROOT . '/core/includes/install.core.inc';
 
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
 
