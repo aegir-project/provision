@@ -349,8 +349,12 @@ function _provision_drupal_rebuild_caches() {
  * Find available profiles on this platform.
  */
 function _provision_find_profiles() {
-  include_once('includes/install.inc');
-
+  if (drush_drupal_major_version() >= 8) {
+    include_once('core/includes/install.inc');
+  }
+  else {
+    include_once('includes/install.inc');
+  }
   if (!$dir = opendir("./profiles")) {
     drush_log(dt("Cannot find profiles directory"), 'error');
     return FALSE;
@@ -665,6 +669,8 @@ function _provision_drupal_search_paths($scope, $key = '', $type = 'modules') {
   switch ($scope) {
     case 'base' :
       $searchpaths[] = sprintf("%s/%s", $drupal_root, $type);
+      $searchpaths[] = sprintf("%s/core/%s", $drupal_root, $type);
+      $searchpaths[] = sprintf("%s/sites/all/%s", $drupal_root, $type);
       break;
     default :
       if ($key) {
