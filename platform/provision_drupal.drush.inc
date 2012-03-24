@@ -419,6 +419,8 @@ function provision_find_packages() {
 
   $packages['base'] = _provision_find_packages('base');
 
+  $packages['sites-all'] = _provision_find_packages('sites', 'all');
+
   // Create a package for the Drupal release
   $packages['base']['platforms'] = _provision_find_platforms();
 
@@ -537,7 +539,6 @@ function _provision_drupal_search_paths($scope, $key = '', $type = 'modules') {
   switch ($scope) {
     case 'base' :
       $searchpaths[] = sprintf("%s/%s", $drupal_root, $type);
-      $searchpaths[] = sprintf("%s/sites/all/%s", $drupal_root, $type);
       break;
     default :
       if ($key) {
