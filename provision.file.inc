@@ -341,32 +341,32 @@ class provisionFileSystem extends provisionChainedState {
   }
 
   /**
-   * Create a symlink from $path to $target.
+   * Creates a symbolic link to the existing target with the specified name.
    *
    * Sets @path, @target, and @reason tokens for ->succeed and ->fail.
    *
-   * @param $path
-   *   The path you want to perform this operation on.
    * @param $target
-   *   The path you want the link to point to.
+   *   The existing path you want the link to point to.
+   * @param $path
+   *   The path of the link to create.
    */
-  function symlink($path, $target) {
+  function symlink($target, $path) {
     $this->_clear_state();
 
-    $this->tokens = array('@path' => $path, '@target' => $target);
+    $this->tokens = array('@target' => $target, '@path' => $path);
 
-    if (file_exists($target) && !is_link($target)) {
+    if (file_exists($path) && !is_link($path)) {
       $this->tokens['@reason'] = dt("A file already exists at @path");
       $this->last_status = FALSE;
     }
-    elseif (is_link($target) && (readlink($target) != $path)) {
-      $this->tokens['@reason'] = dt("A symlink already exists at target, but it is pointing to @link", array("@link" => readlink($target)));
+    elseif (is_link($path) && (readlink($path) != $target)) {
+      $this->tokens['@reason'] = dt("A symlink already exists at target, but it is pointing to @link", array("@link" => readlink($path)));
       $this->last_status = FALSE;
     }
-    elseif (is_link($target) && (readlink($target) == $path)) {
+    elseif (is_link($path) && (readlink($path) == $target)) {
       $this->last_status = TRUE;
     }
-    elseif (symlink($path, $target)) {
+    elseif (symlink($target, $path)) {
       $this->last_status = TRUE;
     }
     else {
