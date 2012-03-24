@@ -126,6 +126,9 @@ function drush_provision_drupal_post_provision_migrate($platform, $new_uri = nul
     // remove the existing alias 
     $config = new provisionConfig_drushrc_alias(d()->name);
     $config->unlink();
+
+    // Remove the symlink in the clients directory.
+    _provision_client_delete_symlink();
   }
 
   // Load the config file of the newly migrated site and return it to hosting.
