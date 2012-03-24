@@ -24,6 +24,9 @@ function drush_provision_drupal_provision_delete() {
     // if redirection is enabled, keep silent about errors
     _provision_drupal_delete_aliases();
 
+    // Remove the symlink in the clients directory.
+    _provision_client_delete_symlink();
+
     provision_drupal_sync_site();
   }
   elseif (d()->type === 'platform') {
