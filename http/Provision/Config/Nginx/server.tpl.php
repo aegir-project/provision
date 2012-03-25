@@ -39,6 +39,7 @@
   server_names_hash_max_size    8192;
   types_hash_max_size           8192;
   types_hash_bucket_size         512;
+  map_hash_bucket_size           192;
   fastcgi_buffer_size           128k;
   fastcgi_buffers             256 4k;
   fastcgi_busy_buffers_size     256k;
