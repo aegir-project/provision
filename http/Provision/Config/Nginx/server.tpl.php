@@ -22,6 +22,7 @@
   fastcgi_param  SERVER_ADDR        $server_addr;
   fastcgi_param  SERVER_PORT        $server_port;
   fastcgi_param  SERVER_NAME        $server_name;
+  fastcgi_param  USER_DEVICE        $device;
   fastcgi_param  REDIRECT_STATUS    200;
   fastcgi_index  index.php;
 
