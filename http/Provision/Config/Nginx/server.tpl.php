@@ -22,6 +22,7 @@
   fastcgi_param  SERVER_ADDR         $server_addr;
   fastcgi_param  SERVER_PORT         $server_port;
   fastcgi_param  SERVER_NAME         $server_name;
+  fastcgi_param  USER_DEVICE         $device;
   fastcgi_param  GEOIP_COUNTRY_CODE  $geoip_country_code;
   fastcgi_param  GEOIP_COUNTRY_CODE3 $geoip_country_code3;
   fastcgi_param  GEOIP_COUNTRY_NAME  $geoip_country_name;
