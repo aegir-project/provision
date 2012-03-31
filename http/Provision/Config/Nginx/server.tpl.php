@@ -160,7 +160,7 @@ map $request_uri $key_uri {
 ###
 map $sent_http_x_purge_level $will_expire_in {
   default   on-demand;
-  ~*5|none  3h;
+  ~*5|none  5m;
 }
 
 ###
