@@ -63,7 +63,6 @@ function provision_drupal_drush_exit() {
           provision_file()->chmod($local_settings, 0660)
             ->succeed('Changed permissions of <code>@path</code> to @perm')
             ->fail('Could not change permissions of <code>@path</code> to @perm');
-          }
         }
       }
       if (drush_get_option('installed')) {
