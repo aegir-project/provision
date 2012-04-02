@@ -55,7 +55,6 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
       provision_file()->chmod($local_settings, $this->mode | 0440)
         ->succeed('Changed permissions of <code>@path</code> to @perm')
         ->fail('Could not change permissions of <code>@path</code> to @perm');
-      }
     }
     else {
       provision_file()->file_put_contents($local_settings, $local_settings_blank)
