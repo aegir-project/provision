@@ -55,6 +55,17 @@ function provision_drupal_drush_exit() {
 
   if (preg_match("/^provision-/", $command[0]) && drush_get_option('provision_save_config', TRUE)) {
     if (d()->type === 'site') {
+      if (preg_match("/^provision-login_reset/", $command[0])) {
+        // Open local.settings.php file for group write access
+        // until the next site verify task, if exists.
+        $local_settings = d()->site_path . '/local.settings.php';
+        if (provision_file()->exists($local_settings)->status()) {
+          provision_file()->chmod($local_settings, 0660)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+          }
+        }
+      }
       if (drush_get_option('installed')) {
         // Don't generate the drushrc.php on provision-save/delete commands.
         if (!preg_match("/^provision-(save|delete)/", $command[0])) {
