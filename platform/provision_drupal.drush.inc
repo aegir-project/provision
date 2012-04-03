@@ -56,11 +56,66 @@ function provision_drupal_drush_exit() {
   if (preg_match("/^provision-/", $command[0]) && drush_get_option('provision_save_config', TRUE)) {
     if (d()->type === 'site') {
       if (preg_match("/^provision-login_reset/", $command[0])) {
-        // Open local.settings.php file for group write access
-        // until the next site verify task, if exists.
+        // Make site and platform directories world writable temporarily,
+        // until the next site verify, but only if apps module exists.
+        $profile = drush_get_option('profile');
+        $site_modules_apps = d()->site_path . '/modules/apps/apps.module';
+        $allp_modules_apps = d()->root . '/sites/all/modules/apps/apps.module';
+        $dist_modules_apps = d()->root . '/profiles/' . $profile . '/modules/apps/apps.module';
+        $dist_contrib_apps = d()->root . '/profiles/' . $profile . '/modules/contrib/apps/apps.module';
+        if (provision_file()->exists($site_modules_apps)->status() ||
+            provision_file()->exists($allp_modules_apps)->status() ||
+            provision_file()->exists($dist_modules_apps)->status() ||
+            provision_file()->exists($dist_contrib_apps)->status()) {
+          provision_file()->chmod(d()->site_path, 0777)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+          provision_file()->chmod(d()->root . '/sites/all/modules', 0777)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+          provision_file()->chmod(d()->root . '/sites/all/themes', 0777)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+          provision_file()->chmod(d()->root . '/sites/all/libraries', 0777)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+          provision_file()->chmod(d()->root . '/sites/all', 0777)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+        }
+        // Make local.settings.php file group writable
+        // temporarily (if exists), until the next site verify.
         $local_settings = d()->site_path . '/local.settings.php';
         if (provision_file()->exists($local_settings)->status()) {
           provision_file()->chmod($local_settings, 0660)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+        }
+      }
+      elseif (preg_match("/^provision-verify/", $command[0])) {
+        // Revert site and platform directories permissions.
+        provision_file()->chmod(d()->site_path, 0755)
+          ->succeed('Changed permissions of <code>@path</code> to @perm')
+          ->fail('Could not change permissions of <code>@path</code> to @perm');
+        provision_file()->chmod(d()->root . '/sites/all/modules', 02775)
+          ->succeed('Changed permissions of <code>@path</code> to @perm')
+          ->fail('Could not change permissions of <code>@path</code> to @perm');
+        provision_file()->chmod(d()->root . '/sites/all/themes', 02775)
+          ->succeed('Changed permissions of <code>@path</code> to @perm')
+          ->fail('Could not change permissions of <code>@path</code> to @perm');
+        provision_file()->chmod(d()->root . '/sites/all/libraries', 02775)
+          ->succeed('Changed permissions of <code>@path</code> to @perm')
+          ->fail('Could not change permissions of <code>@path</code> to @perm');
+        provision_file()->chmod(d()->root . '/sites/all', 0751)
+          ->succeed('Changed permissions of <code>@path</code> to @perm')
+          ->fail('Could not change permissions of <code>@path</code> to @perm');
+        provision_file()->chmod(d()->root . '/sites', 0751)
+          ->succeed('Changed permissions of <code>@path</code> to @perm')
+          ->fail('Could not change permissions of <code>@path</code> to @perm');
+        // Revert local.settings.php permissions.
+        $local_settings = d()->site_path . '/local.settings.php';
+        if (provision_file()->exists($local_settings)->status()) {
+          provision_file()->chmod($local_settings, 0440)
             ->succeed('Changed permissions of <code>@path</code> to @perm')
             ->fail('Could not change permissions of <code>@path</code> to @perm');
         }
