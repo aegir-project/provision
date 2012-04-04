@@ -43,8 +43,7 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
     $backup_file = drush_get_option('backup_file');
     $this->backup_in_progress = !empty($backup_file);
 
-    // Ensure that if a local.settings.php file exists, it has the correct
-    // ownership and permissions. Create a blank file if not exists.
+    // Create a blank local.settings.php file if not exists.
     $local_settings = $this->site_path . '/local.settings.php';
     $local_settings_blank = "<?php # local settings.php \n";
     $local_description = 'Drupal local.settings.php file';
