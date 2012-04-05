@@ -87,6 +87,16 @@ function provision_drupal_drush_exit() {
               ->fail('Could not change permissions of <code>@path</code> to @perm');
           }
         }
+        // Make local.settings.php file group writable temporarily,
+        // until the next site verify, but only if control file exists.
+        $ctrl_local_settings = d()->site_path . '/modules/local-allow.info';
+        $local_settings = d()->site_path . '/local.settings.php';
+        if (provision_file()->exists($ctrl_local_settings)->status() &&
+            provision_file()->exists($local_settings)->status()) {
+          provision_file()->chmod($local_settings, 0660)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+        }
       }
       elseif (preg_match("/^provision-verify/", $command[0])) {
         // Revert site and platform directories permissions to default.
@@ -108,6 +118,13 @@ function provision_drupal_drush_exit() {
         provision_file()->chmod(d()->root . '/sites', 0751)
           ->succeed('Changed permissions of <code>@path</code> to @perm')
           ->fail('Could not change permissions of <code>@path</code> to @perm');
+        // Revert local.settings.php permissions to default.
+        $local_settings = d()->site_path . '/local.settings.php';
+        if (provision_file()->exists($local_settings)->status()) {
+          provision_file()->chmod($local_settings, 0440)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+        }
       }
       if (drush_get_option('installed')) {
         // Don't generate the drushrc.php on provision-save/delete commands.
