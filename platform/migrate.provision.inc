@@ -78,19 +78,17 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = NULL) {
     provision_backend_invoke('@hostmaster', 'hosting-task', array(d($platform)->name, 'verify'), array('force' => TRUE));
     sleep(5); // A small trick to avoid high load.
   }
+  // We should update also the info collected about the site before running migrate task.
+  if (d()->type === 'site') {
+    provision_backend_invoke('@hostmaster', 'hosting-task', array(d()->uri, 'verify'), array('force' => TRUE));
+    sleep(5); // A small trick to avoid high load.
+  }
 
   if (!is_null($new_uri) && ($new_uri != d()->uri)) {
     $options = d()->options;
     $options['uri'] = ltrim($new_uri, '@');
     $hash_name = drush_get_option('#name') ? '#name' : 'name';
     $options[$hash_name] = $new_uri;
-  }
-  else {
-    // We should update also the info collected about the site before running migrate task,
-    // but it is safe only when the site is migrated with the same name - see issue #1067702
-    $local_uri_verify = '@' . d()->uri;
-    provision_backend_invoke('@hostmaster', 'hosting-task', array($local_uri_verify, 'verify'), array('force' => TRUE));
-    sleep(5); // A small trick to avoid high load.
   }
   $options['platform'] = $platform;
   $options['root'] = d($platform)->root;
@@ -113,9 +111,8 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = NULL) {
     drush_set_option('provision_save_config', FALSE);
     provision_backend_invoke($target, 'provision-verify');
     // Verify again the site via frontend to avoid issue #1004526
-    // This doesn't work yet - see issue #1067702
-    //sleep(5); // A small trick to avoid high load.
-    //provision_backend_invoke('@hostmaster', 'hosting-task', array($target, 'verify'), array('force' => TRUE));
+    sleep(5); // A small trick to avoid high load.
+    provision_backend_invoke('@hostmaster', 'hosting-task', array($target, 'verify'), array('force' => TRUE));
   }
 }
 
@@ -139,6 +136,8 @@ function drush_provision_drupal_post_provision_migrate($platform, $new_uri = NUL
     _provision_recursive_delete(d()->site_path);
     d()->service('http')->sync(d()->site_path);
   }
+
+
 
   if (!is_null($new_uri) && ($new_uri != d()->uri)) {
     // remove the existing alias
