@@ -34,8 +34,9 @@ function drush_provision_drupal_post_provision_import() {
     // Do not automatically save the drushrc at the end of the command.
     drush_set_option('provision_save_config', false);
 
-    provision_backend_invoke(d()->name, 'provision-verify');
-    
+    // We run this verify via frontend to avoid issue #1004526.
+    provision_backend_invoke('@hostmaster', 'hosting-task', array(d()->name, 'verify'), array('force' => TRUE));
+
     drush_include_engine('drupal', 'cron_key');
 
     provision_reload_config('site');
