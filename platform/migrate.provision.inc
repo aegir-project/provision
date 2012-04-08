@@ -70,58 +70,11 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = NULL) {
 
   $options['uri'] = d()->uri;
 
-  // If the site is migrated between platforms and not just renamed,
-  // we should update the info collected about source and target platform first.
-  if (!is_null(d($platform)->name) && (d($platform)->name != d()->platform->name)) {
-    provision_backend_invoke('@hostmaster', 'hosting-task', array(d()->platform->name, 'verify'), array('force' => TRUE));
-    sleep(5); // A small trick to avoid high load and race conditions.
-    provision_backend_invoke('@hostmaster', 'hosting-task', array(d($platform)->name, 'verify'), array('force' => TRUE));
-    sleep(5); // A small trick to avoid high load and race conditions.
-  }
-
   if (!is_null($new_uri) && ($new_uri != d()->uri)) {
     $options = d()->options;
     $options['uri'] = ltrim($new_uri, '@');
     $hash_name = drush_get_option('#name') ? '#name' : 'name';
     $options[$hash_name] = $new_uri;
-    $new_aliases = array();
-    $old_aliases = (is_array($options['aliases'])) ? $options['aliases'] : FALSE;
-    $pre_old_uri = ltrim(d()->uri, '@');
-    $pre_new_uri = ltrim($new_uri, '@');
-    $raw_old_uri = preg_replace('/^www\./', '', $pre_old_uri);
-    $raw_new_uri = preg_replace('/^www\./', '', $pre_new_uri);
-    $www_old_uri = "www." . $raw_old_uri;
-    $www_new_uri = "www." . $raw_new_uri;
-    if (is_array($old_aliases)) {
-      foreach ($old_aliases as $alias) {
-        if (!preg_match("/^www\./", $pre_old_uri) && preg_match("/^www\./", $pre_new_uri)) {
-          $new_aliases[] = str_replace($www_old_uri, $raw_new_uri, $alias);
-        }
-        elseif (preg_match("/^www\./", $pre_old_uri) && !preg_match("/^www\./", $pre_new_uri)) {
-          $new_aliases[] = str_replace($raw_old_uri, $www_new_uri, $alias);
-        }
-        elseif (!preg_match("/^www\./", $pre_old_uri) && !preg_match("/^www\./", $pre_new_uri)) {
-          $new_aliases[] = str_replace($www_old_uri, $www_new_uri, $alias);
-        }
-        elseif (preg_match("/^www\./", $pre_old_uri) && preg_match("/^www\./", $pre_new_uri)) {
-          $new_aliases[] = str_replace($raw_old_uri, $raw_new_uri, $alias);
-        }
-      }
-      $unique_aliases = array_unique($new_aliases); // Make sure there are no duplicates.
-      $options['aliases'] = array(); // Reset original aliases array.
-      $options['aliases'] = $unique_aliases; // Use rewritten aliases array.
-    }
-    // Warning: do not try to re-verify the original site here
-    // even with backend-only verify, because it would create
-    // (and never delete) duplicate vhost with old domain
-    // and all aliases included - see issue #1067702.
-  }
-  else {
-    // We should update also the info collected about the site before running migrate task.
-    // Doing this is safe only when the site is migrated with the same name - see issue #1067702.
-    $local_uri_verify = '@' . d()->uri;
-    provision_backend_invoke('@hostmaster', 'hosting-task', array($local_uri_verify, 'verify'), array('force' => TRUE));
-    sleep(5); // A small trick to avoid high load and race conditions.
   }
   $options['platform'] = $platform;
   $options['root'] = d($platform)->root;
@@ -166,6 +119,8 @@ function drush_provision_drupal_post_provision_migrate($platform, $new_uri = NUL
     _provision_recursive_delete(d()->site_path);
     d()->service('http')->sync(d()->site_path);
   }
+
+
 
   if (!is_null($new_uri) && ($new_uri != d()->uri)) {
     // remove the existing alias
