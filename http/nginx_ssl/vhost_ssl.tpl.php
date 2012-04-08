@@ -4,7 +4,7 @@
 <?php if ($this->redirection): ?>
 <?php foreach ($this->aliases as $alias_url): ?>
 server {
-  limit_conn   gulag 18;
+  limit_conn   gulag 32;
   listen       <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
   server_name  <?php print $alias_url; ?>;
   ssl                        on;
@@ -21,7 +21,7 @@ server {
 
 server {
   include      <?php print "{$server->include_path}"; ?>/fastcgi_ssl_params.conf;
-  limit_conn   gulag 18; # like mod_evasive - this allows max 18 simultaneous connections from one IP address
+  limit_conn   gulag 32; # like mod_evasive - this allows max 18 simultaneous connections from one IP address
   listen       <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
   server_name  <?php print $this->uri; ?><?php if (!$this->redirection && is_array($this->aliases)) : foreach ($this->aliases as $alias_url) : if (trim($alias_url)) : ?> <?php print $alias_url; ?><?php endif; endforeach; endif; ?>;
   root         <?php print "{$this->root}"; ?>;
