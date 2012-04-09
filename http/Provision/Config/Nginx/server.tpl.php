@@ -164,7 +164,7 @@ map $sent_http_x_purge_level $will_expire_in {
 }
 
 ###
-### Deny crawlers without 403 response.
+### Deny crawlers.
 ###
 map $http_user_agent $is_crawler {
   default                                                                                                                     '';
@@ -172,7 +172,7 @@ map $http_user_agent $is_crawler {
 }
 
 ###
-### Deny all known bots on some URIs without 403 response.
+### Deny all known bots on some URIs.
 ###
 map $http_user_agent $is_bot {
   default                                                    '';
@@ -188,7 +188,7 @@ map $http_user_agent $deny_on_high_load {
 }
 
 ###
-### Deny listed requests for security reasons without 403 response.
+### Deny listed requests for security reasons.
 ###
 map $args $is_denied {
   default                                                                                                      '';
