@@ -23,7 +23,7 @@ if ($ssl_redirection || $this->redirection) {
 
 server {
   include      <?php print "{$server->include_path}"; ?>/fastcgi_params.conf;
-  limit_conn   gulag 32; # like mod_evasive - this allows max 18 simultaneous connections from one IP address
+  limit_conn   gulag 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
 <?php
 if ($ip_address == '*') {
   print "  listen       {$ip_address}:{$http_port};\n";
