@@ -38,7 +38,6 @@
   request_pool_size               4k;
   server_names_hash_bucket_size  512;
   server_names_hash_max_size    8192;
-  types_hash_max_size           8192;
   types_hash_bucket_size         512;
   map_hash_bucket_size           192;
   fastcgi_buffer_size           128k;
@@ -81,8 +80,7 @@
   fastcgi_hide_header 'X-Powered-By';
   fastcgi_hide_header 'X-Drupal-Cache';
 
- ## TCP options
-  tcp_nopush  on;
+ ## TCP options moved to /etc/nginx/nginx.conf
 
  ## SSL performance
   ssl_session_cache   shared:SSL:10m;
@@ -96,7 +94,6 @@
   gzip_types        text/plain text/css application/x-javascript text/xml application/xml application/xml+rss text/javascript;
   gzip_vary         on;
   gzip_proxied      any;
-  gzip_disable      "MSIE [1-6]\.";
 <?php
 $nginx_has_gzip = drush_get_option('nginx_has_gzip');
 if ($nginx_has_gzip) {
