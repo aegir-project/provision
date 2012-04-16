@@ -115,7 +115,7 @@ class provisionService_example_basic extends provisionService_example {
      * You could also choose to only conditionally pass values based on
      * the parameters.
      */
-    $data['example_current_time'] = date(DATE_COOKIE, mktime());
+    $data['example_current_time'] = date(DATE_COOKIE, time());
 
     return $data;
   }
