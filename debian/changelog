@@ -1,3 +1,10 @@
+aegir-provision (1.8) testing; urgency=low
+
+  * new release: various bugfixes to regressions introduced in 1.7, a few
+    general bug fixes and lots of Nginx fixes.
+
+ -- Steven Jones <steven.jones@computerminds.co.uk>  Wed, 18 Apr 2012 09:34:44 +0100
+
 aegir-provision (1.7) testing; urgency=low
 
   * new release: various bugfixes that have accumulated in the issue queue
