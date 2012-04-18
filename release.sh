@@ -105,7 +105,12 @@ commitid=`echo $commitmsg | sed 's/^\[[^ ]* \([a-z0-9]*\)\].*$/\1/'`
 sed -n '1,/ --/p' debian/changelog | git tag -a -F - $major-$version
 
 echo reverting tree to HEAD versions
-git revert $commitid
+git revert --no-commit $commitid
+# Unstage the debian/changelog change, as we don't want to revert that.
+git reset --quiet HEAD 'debian/changelog'
+git checkout -- 'debian/changelog'
+git commit
+
 
 if prompt_yes_no "push tags and commits upstream? "; then
     # this makes sure we push the commit *and* the tag
