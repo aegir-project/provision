@@ -153,6 +153,14 @@ map $request_uri $key_uri {
 }
 
 ###
+### Set cache expiration depending on the Drupal core version.
+###
+map $sent_http_x_purge_level $will_expire_in {
+  default   on-demand;
+  ~*5|none  5m;
+}
+
+###
 ### Deny crawlers.
 ###
 map $http_user_agent $is_crawler {
