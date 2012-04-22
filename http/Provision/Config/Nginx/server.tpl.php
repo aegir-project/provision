@@ -140,7 +140,7 @@ map $http_user_agent $device {
 ### Set a cache_uid variable for authenticated users (by @brianmercer and @perusio, fixed by @omega8cc).
 ###
 map $http_cookie $cache_uid {
-  default                                        '';
+  default  '';
   ~SESS[[:alnum:]]+=(?<session_id>[[:graph:]]+)  $session_id;
 }
 
@@ -172,7 +172,7 @@ map $http_user_agent $is_crawler {
 ### Deny all known bots on some URIs.
 ###
 map $http_user_agent $is_bot {
-  default                                                    '';
+  default  '';
   ~*crawl|goog|yahoo|yandex|spider|bot|tracker|click|parser  is_bot;
 }
 
@@ -180,7 +180,7 @@ map $http_user_agent $is_bot {
 ### Deny almost all crawlers under high load.
 ###
 map $http_user_agent $deny_on_high_load {
-  default                                                           '';
+  default  '';
   ~*crawl|goog|yahoo|yandex|baidu|bing|spider|tracker|click|parser  deny_on_high_load;
 }
 
@@ -188,8 +188,8 @@ map $http_user_agent $deny_on_high_load {
 ### Deny listed requests for security reasons.
 ###
 map $args $is_denied {
-  default                                                                                                      '';
-  ~*delete.+from|insert.+into|select.+from|union.+select|onload|\.php.+src|system\(.+|document\.cookie|\;|\.\. is_denied;
+  default  '';
+  ~*delete.+from|insert.+into|select.+from|union.+select|onload|\.php.+src|system\(.+|document\.cookie|\;|\.\.  is_denied;
 }
 
 #######################################################
