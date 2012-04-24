@@ -431,7 +431,7 @@ function _provision_drupal_get_cvs_versions($files) {
 function provision_drupal_find_aliases() {
   $aliases = array();
   if (d()->type === 'site') {
-    if (drush_drupal_major_version() >= 8) {
+    if (drush_drupal_major_version() >= 7) {
       $config = new Provision_Config_Drupal_Alias_Store(d()->name);
       $aliases = $config->find();
     }
@@ -462,7 +462,7 @@ function provision_drupal_find_aliases() {
  */
 function _provision_drupal_maintain_aliases() {
   if (d()->type === 'site') {
-    if (drush_drupal_major_version() >= 8) {
+    if (drush_drupal_major_version() >= 7) {
       $config = new Provision_Config_Drupal_Alias_Store(d()->name);
       $config->maintain();
       $config->write();
@@ -491,7 +491,7 @@ function _provision_drupal_maintain_aliases() {
 function _provision_drupal_delete_aliases() {
 
   if (d()->type === 'site') {
-    if (drush_drupal_major_version() >= 8) {
+    if (drush_drupal_major_version() >= 7) {
         $config = new Provision_Config_Drupal_Alias_Store(d()->name);
         $config->delete();
         $config->write();
