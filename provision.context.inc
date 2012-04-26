@@ -90,7 +90,7 @@ function provision_context_factory($name, $allow_creation = TRUE) {
 
   $record = provision_sitealias_get_record($name);
   if (!$allow_creation && empty($record)) {
-    drush_log(dt('Could not find provision alias named: @name' , array('@name' => $name)), 'failed');
+    drush_set_error('PROVISION_MISSING_CONTEXT', dt('Could not find provision alias named: @name' , array('@name' => $name)));
     return NULL;
   }
   $options = array_merge(drush_get_context('stdin'), drush_get_context('options'), drush_get_context('cli'));
