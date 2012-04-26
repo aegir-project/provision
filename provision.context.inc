@@ -12,11 +12,15 @@
  *   A Drush alias name, including leading @.
  * @param $_root_object
  *   Internal use only, set default object returned by d().
+ * @param $allow_creation
+ *   Defaults to TRUE. Allows creating a new context object with the specified
+ *   $name.
  *
  * @return
- *   provisionContext object.
+ *   provisionContext object or NULL if it can't be loaded and
+ *   $allow_creation == FALSE.
  */
-function & d($name = NULL, $_root_object = FALSE) {
+function & d($name = NULL, $_root_object = FALSE, $allow_creation = TRUE) {
   static $instances = null;
   static $default_instance = '@self';
 
@@ -40,10 +44,11 @@ function & d($name = NULL, $_root_object = FALSE) {
       return $instances[$name];
     }
     else {
-      $instances[$name] = provision_context_factory($name);
-      $instances[$name]->method_invoke('init');
-      $instances[$name]->type_invoke('init');
-
+      $instances[$name] = provision_context_factory($name, $allow_creation);
+      if (!is_null($instances[$name])) {
+        $instances[$name]->method_invoke('init');
+        $instances[$name]->type_invoke('init');
+      }
       return $instances[$name];
     }
   }
@@ -68,14 +73,26 @@ function provision_sitealias_get_record($name) {
 }
 
 /**
- * Create a new context object and cache it in the d() static cache
- * function.
+ * Create a new context object.
+ *
+ * @param $name
+ *   The name of the context object to instantiate.
+ * @param $allow_creation
+ *   Defaults to TRUE. Allows creating a new context object with the specified
+ *   $name.
+ *
+ * @return
+ *   An instance of the specified context, or NULL if it could not be loaded.
  */
-function provision_context_factory($name) {
+function provision_context_factory($name, $allow_creation = TRUE) {
   // the default type, can also be 'platform' or 'site'
   $type = 'server';
 
   $record = provision_sitealias_get_record($name);
+  if (!$allow_creation && empty($record)) {
+    drush_log(dt('Could not find provision alias named: @name' , array('@name' => $name)), 'failed');
+    return NULL;
+  }
   $options = array_merge(drush_get_context('stdin'), drush_get_context('options'), drush_get_context('cli'));
 
   if (isset($record['context_type'])) {
@@ -136,7 +153,10 @@ class provisionContext {
     }
     if (array_key_exists($name, $this->properties)) {
       if (isset($this->oid_map[$name]) && !empty($this->properties[$name])) {
-        return d($this->properties[$name]);
+        $service = d($this->properties[$name], FALSE, FALSE);
+        if (!is_null($service)) {
+          return $service;
+        }
       }
       else {
         return $this->properties[$name];
