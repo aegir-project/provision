@@ -6,6 +6,8 @@
 
 /**
  * Make sure we have a valid site being migrated, and that the file being migrated from exists
+ *
+ * Implementation of drush_hook_COMMAND_validate().
  */
 function drush_provision_drupal_provision_migrate_validate($platform = NULL) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
@@ -13,6 +15,8 @@ function drush_provision_drupal_provision_migrate_validate($platform = NULL) {
 
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
+ *
+ * Implementation of drush_hook_pre_COMMAND().
  */
 function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = NULL) {
   /* Set offline mode to true and re-generate the settings.php. This will write a
@@ -45,6 +49,8 @@ function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = NULL
 /**
  * Remove the extracted site directory
  * Restore the vhost conf per the original platform
+ *
+ * Implementation of drush_hook_pre_COMMAND_rollback().
  */
 function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_uri = NULL) {
   // Set site_offline to false and regenerate the config
@@ -61,6 +67,8 @@ function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_u
 
 /**
  * Switch the migrate directories around now that we have the new db installed
+ *
+ * Implementation of drush_hook_COMMAND().
  */
 function drush_provision_drupal_provision_migrate($platform, $new_uri = NULL) {
 
@@ -101,6 +109,8 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = NULL) {
 
 /**
  * Something went wrong
+ *
+ * Implementation of drush_hook_COMMAND_rollback().
  */
 function drush_provision_drupal_provision_migrate_rollback($platform) {
   drush_backend_invoke_args('provision-save', array(d()->name), array('platform' => drush_get_option('old_platform'), 'root' => NULL, 'uri' => NULL));
@@ -108,6 +118,8 @@ function drush_provision_drupal_provision_migrate_rollback($platform) {
 
 /**
  * Delete the old site directory and recreate the settings file
+ *
+ * Implementation of drush_hook_post_COMMAND().
  */
 function drush_provision_drupal_post_provision_migrate($platform, $new_uri = NULL) {
   drush_set_option('installed', FALSE);
