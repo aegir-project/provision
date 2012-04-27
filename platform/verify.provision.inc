@@ -55,7 +55,7 @@ function drush_provision_drupal_pre_provision_verify() {
       }
       $options[] = d()->makefile;
       $options[] = d()->root;
-      drush_backend_invoke("make", $options);
+      drush_invoke_process('@none', "make", $options);
       if (drush_get_error()) {
         return drush_set_error("DRUSH_MAKE_FAILED", 
           "Could not download platform using drush make. No platform present");

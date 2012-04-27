@@ -133,13 +133,13 @@ function drush_provision_tests_install_platform($platform_name, $platform_alias 
     PROVISION_TESTS_BUILDS_REPO . "/$platform_name.build",
     "/var/aegir/platforms/$platform_alias"
   );
-  drush_backend_invoke('make', $args);
+  drush_invoke_process('@none', 'make', $args);
   $args = array(
     'root' => "/var/aegir/platforms/$platform_alias",
     "@platform_$platform_alias",
     'context_type' => 'platform',
   );
-  drush_backend_invoke('provision-save', $args);
+  drush_invoke_process('@none', 'provision-save', $args);
   provision_backend_invoke('@hostmaster', 'hosting-import', array("@platform_$platform_alias",));
   drush_provision_tests_run_remaining_tasks();
 }
@@ -167,7 +167,7 @@ function drush_provision_tests_install_site($platform_name, $site, $profile_name
     'db_server' => '@server_localhost',
     'root' => "/var/aegir/platforms/$platform_name",
   );
-  drush_backend_invoke('provision-save', $args);
+  drush_invoke_process('@none', 'provision-save', $args);
   provision_backend_invoke("@$site.aegir.example.com", 'provision-install');
   provision_backend_invoke('@hostmaster', 'hosting-task', array("@platform_$platform_name", 'verify'), array('force' => TRUE));
   drush_provision_tests_run_remaining_tasks();

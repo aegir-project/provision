@@ -87,7 +87,7 @@ function drush_provision_drupal_pre_provision_deploy($backup_file) {
 
     $site_packages = drush_get_option('packages', array(), 'site');
     $drupal_packages = drush_get_option('packages', array(), 'drupal');
-    $merged_modules = $drupal_packages['base']['modules'];
+    $merged_modules = isset($drupal_packages['base']['modules']) ? $drupal_packages['base']['modules'] : array();
     if (isset($site_packages['profiles'])) {
       $profiles = array_keys($site_packages['profiles']);
       $profile = $profiles[0];

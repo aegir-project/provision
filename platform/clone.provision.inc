@@ -62,7 +62,7 @@ function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
     $options['db_server'] = $db_server;
   }
 
-  drush_backend_invoke_args('provision-save', array($new_uri), $options);
+  drush_invoke_process('@none', 'provision-save', array($new_uri), $options);
   # note that we reset the aliases so they don't conflict with the original site
 
   provision_backend_invoke($new_uri, 'provision-deploy', array(drush_get_option('backup_file')), array('old_uri' => d()->uri));

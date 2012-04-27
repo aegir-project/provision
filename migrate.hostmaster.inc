@@ -44,7 +44,7 @@ We are making the following assumptions:
     drush_set_option('old_platform', d('@hostmaster')->platform->name);
 
     $new_platform = '@platform_' . preg_replace("/[!\W]/", "", basename(rtrim($platform, '/')));
-    drush_backend_invoke_args("provision-save", array($new_platform), array(
+    drush_invoke_process('@none', "provision-save", array($new_platform), array(
       'context_type' => 'platform',
       'server' => '@server_master',
       'web_server' => '@server_master',
@@ -67,7 +67,7 @@ We are making the following assumptions:
      * 'options' when we drop drush3 support
      */
     $context = drush_get_context('cli') ? 'cli' : 'options';
-    drush_backend_invoke_args("provision-save", array($server), array(
+    drush_invoke_process('@none', "provision-save", array($server), array(
       'context_type' => 'server',
       'aegir_root' => dirname(rtrim($data['config_path'], '/')),
       'remote_host' => php_uname('n'),
@@ -91,7 +91,7 @@ We are making the following assumptions:
 
    
     $old_platform = '@platform_' . preg_replace("/[!\W]/", "", basename(rtrim($data['publish_path'], '/')));
-    drush_backend_invoke_args("provision-save", array($old_platform), array(
+    drush_invoke_process('@none', "provision-save", array($old_platform), array(
       'context_type' => 'platform',
       'server' => $server,
       'web_server' => $server,
@@ -105,7 +105,7 @@ We are making the following assumptions:
     }
 
     $new_platform = '@platform_' . preg_replace("/[!\W]/", "", basename(rtrim($platform, '/')));
-    drush_backend_invoke_args("provision-save", array($new_platform), array(
+    drush_invoke_process('@none', "provision-save", array($new_platform), array(
       'context_type' => 'platform',
       'server' => $server,
       'web_server' => $server,
@@ -121,7 +121,7 @@ We are making the following assumptions:
 
 
     $site_name = '@hostmaster';
-    drush_backend_invoke_args("provision-save", array($site_name), array(
+    drush_invoke_process('@none', "provision-save", array($site_name), array(
       'context_type' => 'site',
       'platform' => $old_platform,
       'db_server' => $server,

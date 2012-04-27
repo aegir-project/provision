@@ -399,21 +399,22 @@ function _scrub_object($input) {
 /**
  * Execute a command against a specific context object.
  *
- * @arg string $target
- *   the context to operate on, @ prefix is optional
- * @arg string $command
- *   drush command passed to drush_backend_invoke_args()
- * @arg string $arguments
- *   drush arguments passed to drush_backend_invoke_args()
- * @arg string $data
- *   drush data passed to drush_backend_invoke_args()
- * @arg string $mode
- *   drush IPC mode (GET/POST) passed to drush_backend_invoke_args()
+ * @param $target
+ *   the context to operate on, @ prefix is optional.
+ * @param $command
+ *   drush command passed to drush_invoke_process().
+ * @param $arguments
+ *   drush arguments passed to drush_invoke_process().
+ * @param $data
+ *   drush data passed to drush_invoke_process().
+ * @param $mode
+ *   drush IPC mode (GET/POST) passed to drush_invoke_process().
  *
- * @see drush_backend_invoke_args()
+ * @see drush_invoke_process()
  */
 function provision_backend_invoke($target, $command, $arguments = array(), $data = array(), $mode = 'GET') {
-  return drush_backend_invoke_args('@' . ltrim($target, '@') . ' ' . $command, $arguments, $data + array('root' => NULL, 'uri' => NULL), $mode);
+  $context = '@' . ltrim($target, '@');
+  return drush_invoke_process($context, $context . ' ' . $command, $arguments, $data /*+ array('root' => NULL, 'uri' => NULL)*/, array('method' => $mode, 'integrate' => TRUE));
 }
 
 /**
