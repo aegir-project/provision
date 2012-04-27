@@ -51,7 +51,10 @@ class Provision_Context {
     }
     if (array_key_exists($name, $this->properties)) {
       if (isset($this->oid_map[$name]) && !empty($this->properties[$name])) {
-        return d($this->properties[$name]);
+        $service = d($this->properties[$name], FALSE, FALSE);
+        if (!is_null($service)) {
+          return $service;
+        }
       }
       else {
         return $this->properties[$name];

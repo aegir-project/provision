@@ -17,6 +17,8 @@
 
 /**
  * Make sure we have a valid site being deployd, and that the file being deployd from exists
+ *
+ * Implementation of drush_hook_COMMAND_validate().
  */
 function drush_provision_drupal_provision_deploy_validate($backup_file = null) {
   $exists = provision_file()->exists($backup_file)
@@ -44,6 +46,8 @@ function drush_provision_drupal_provision_deploy_validate($backup_file = null) {
 
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
+ *
+ * Implementation of drush_hook_pre_COMMAND().
  */
 function drush_provision_drupal_pre_provision_deploy($backup_file) {
   // the url is likely to have changed in the deployment
@@ -117,6 +121,8 @@ function drush_provision_drupal_pre_provision_deploy($backup_file) {
 
 /**
  * Remove the extracted site directory
+ *
+ * Implementation of drush_hook_pre_COMMAND_rollback().
  */
 function drush_provision_drupal_pre_provision_deploy_rollback() {
   if (drush_get_option('deploy_replace_site', FALSE)) {
@@ -140,11 +146,17 @@ function drush_provision_drupal_pre_provision_deploy_rollback() {
   }
 }
 
+/**
+ * Implementation of drush_hook_COMMAND().
+ */
 function drush_provision_drupal_provision_deploy() {
   _provision_drupal_maintain_aliases();
   _provision_drupal_create_directories();
 }
 
+/**
+ * Implementation of drush_hook_post_COMMAND().
+ */
 function drush_provision_drupal_post_provision_deploy() {
   // call the drush updatedb command.
   provision_backend_invoke(d()->name, 'updatedb');
