@@ -200,6 +200,7 @@ function drush_provision_hostmaster_install($site = NULL) {
 
 
   drush_print(dt("Initializing the hosting system"));
+  drush_invoke_process('@none', 'cache-clear', array('drush'));
   provision_backend_invoke($site_name, 'hosting-setup');
 
   drush_print("");
