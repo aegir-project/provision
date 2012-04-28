@@ -218,3 +218,12 @@ function drush_provision_hostmaster_install($site = NULL) {
   drush_print("");
 }
 
+/**
+ *  Implements drush_hook_post_hostmaster_install().
+ */
+function drush_provision_post_hostmaster_install() {
+  $backend_only = drush_get_option('backend-only');
+  if (empty($backend_only)) {
+    drush_invoke_process('@hostmaster', 'cache-clear', array('drush'));
+  }
+}
