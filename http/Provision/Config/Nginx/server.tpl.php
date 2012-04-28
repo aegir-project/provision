@@ -76,10 +76,10 @@
 <?php
 $nginx_is_modern = drush_get_option('nginx_is_modern');
 if ($nginx_is_modern) {
-  print "  limit_conn_zone $binary_remote_addr zone=gulag:10m;\n";
+  print "  limit_conn_zone \$binary_remote_addr zone=gulag:10m;\n";
 }
 else {
-  print "  limit_zone gulag $binary_remote_addr 10m;\n";
+  print "  limit_zone gulag \$binary_remote_addr 10m;\n";
 }
 ?>
   recursive_error_pages           on;
