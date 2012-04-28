@@ -55,9 +55,9 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
 
     // Check if some nginx features are supported and save them for later.
     $this->server->shell_exec($path . ' -V 2>&1 | tr -d "\n"');
-    $this->server->nginx_is_modern = preg_match("/nginx\/1\.((1\.(8|9|(1[0-9]+)))|(2\.))/", implode('', drush_shell_exec_output()), $match);
-    $this->server->nginx_has_upload_progress = preg_match("/upload/", implode('', drush_shell_exec_output()), $match);
-    $this->server->nginx_has_gzip = preg_match("/http_gzip_static_module/", implode('', drush_shell_exec_output()), $match);
+    $this->server->nginx_is_modern = preg_match("/nginx\/1\.((1\.(8|9|(1[0-9]+)))|(2\.))/", drush_shell_exec_output(), $match);
+    $this->server->nginx_has_upload_progress = preg_match("/upload/", drush_shell_exec_output(), $match);
+    $this->server->nginx_has_gzip = preg_match("/http_gzip_static_module/", drush_shell_exec_output(), $match);
     $this->server->provision_db_cloaking = FALSE;
     $this->server->nginx_web_server = 1;
   }
