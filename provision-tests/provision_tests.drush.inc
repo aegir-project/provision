@@ -135,11 +135,13 @@ function drush_provision_tests_install_platform($platform_name, $platform_alias 
   );
   drush_invoke_process('@none', 'make', $args);
   $args = array(
-    'root' => "/var/aegir/platforms/$platform_alias",
     "@platform_$platform_alias",
+  );
+  $options = array(
+    'root' => "/var/aegir/platforms/$platform_alias",
     'context_type' => 'platform',
   );
-  drush_invoke_process('@none', 'provision-save', $args);
+  provision_backend_invoke('@none', 'provision-save', $args, $options);
   provision_backend_invoke('@hostmaster', 'hosting-import', array("@platform_$platform_alias",));
   drush_provision_tests_run_remaining_tasks();
 }

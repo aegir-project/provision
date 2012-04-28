@@ -414,7 +414,285 @@ function _scrub_object($input) {
  */
 function provision_backend_invoke($target, $command, $arguments = array(), $data = array(), $mode = 'GET') {
   $context = '@' . ltrim($target, '@');
-  return drush_invoke_process($context, $context . ' ' . $command, $arguments, $data /*+ array('root' => NULL, 'uri' => NULL)*/, array('method' => $mode, 'integrate' => TRUE));
+  return _provision__drush_invoke_process($context, $command, $arguments, $data /*+ array('root' => NULL, 'uri' => NULL)*/, array('method' => $mode, 'integrate' => TRUE));
+}
+/**
+ * Invoke a command in a new process, targeting the site specified by
+ * the provided site alias record.
+ *
+ * Use this function instead of drush_backend_invoke_sitealias,
+ * drush_backend_invoke_args, or drush_backend_invoke_command
+ * (all obsolete in drush 5).
+ *
+ * @param array $site_alias_record
+ *  The site record to execute the command on.  Use '@self' to run on the current site.
+ * @param string $command_name
+ *  The command to invoke.
+ * @param array $commandline_args
+ *  The arguments to pass to the command.
+ * @param array $commandline_options
+ *  The options (e.g. --select) to provide to the command.
+ * @param $backend_options
+ *   TRUE - integrate errors
+ *   FALSE - do not integrate errors
+ *   array - @see drush_backend_invoke_concurrent
+ *     There are also several options that _only_ work when set in
+ *     this parameter.  They include:
+ *      'invoke-multiple'
+ *        If $site_alias_record represents a single site, then 'invoke-multiple'
+ *        will cause the _same_ command with the _same_ arguments and options
+ *        to be invoked concurrently (e.g. for running concurrent batch processes).
+ *      'concurrency'
+ *        Limits the number of concurrent processes that will run at the same time.
+ *        Defaults to '4'.
+ *      'override-simulated'
+ *        Forces the command to run, even in 'simulated' mode. Useful for
+ *        commands that do not change any state on the machine, e.g. to fetch
+ *        database information for sql-sync via sql-conf.
+ *      'interactive'
+ *        Overrides the backend invoke process to run commands interactively.
+ *      'fork'
+ *        Overrides the backend invoke process to run non blocking commands in 
+ *        the background. Forks a new process by adding a '&' at the end of the 
+ *        command. The calling process does not receive any output from the child 
+ *        process. The fork option is used to spawn a process that outlives its
+ *        parent.
+ *
+ * @return
+ *   If the command could not be completed successfully, FALSE.
+ *   If the command was completed, this will return an associative
+ *   array containing the results of the API call.
+ *   @see drush_backend_get_result()
+ *
+ * Do not change the signature of this function!  drush_invoke_process
+ * is one of the key Drush APIs.  See http://drupal.org/node/1152908
+ */
+function _provision__drush_invoke_process($site_alias_record, $command_name, $commandline_args = array(), $commandline_options = array(), $backend_options = FALSE) {
+  if (is_array($site_alias_record) && array_key_exists('site-list', $site_alias_record)) {
+    $site_alias_records = drush_sitealias_resolve_sitespecs($site_alias_record['site-list']);
+    $site_alias_records = drush_sitealias_simplify_names($site_alias_records);
+    foreach ($site_alias_records as $alias_name => $alias_record) {
+      $invocations[] = array(
+        'site' => $alias_record,
+        'command' => $command_name,
+        'args' => $commandline_args,
+      );
+    }
+  }
+  else {
+    $invocations[] = array(
+      'site' => $site_alias_record,
+      'command' => $command_name,
+      'args' => $commandline_args);
+    $invoke_multiple = drush_get_option_override($backend_options, 'invoke-multiple', 0);
+    if ($invoke_multiple) {
+      $invocations = array_fill(0, $invoke_multiple, $invocations[0]);
+    }
+  }
+  return _provison__drush_backend_invoke_concurrent($invocations, $commandline_options, $backend_options);
+}
+
+/**
+ * Execute a new local or remote command in a new process.
+ *
+ * n.b. Prefer drush_invoke_process() to this function.
+ *
+ * @param invocations
+ *   An array of command records to exacute. Each record should contain:
+ *     'site':
+ *       An array containing information used to generate the command.
+ *         'remote-host'
+ *            Optional. A remote host to execute the drush command on.
+ *         'remote-user'
+ *            Optional. Defaults to the current user. If you specify this, you can choose which module to send.
+ *         'ssh-options'
+ *            Optional.  Defaults to "-o PasswordAuthentication=no"
+ *         'path-aliases'
+ *            Optional; contains paths to folders and executables useful to the command.
+ *         '%drush-script'
+ *            Optional. Defaults to the current drush.php file on the local machine, and
+ *            to simply 'drush' (the drush script in the current PATH) on remote servers.
+ *            You may also specify a different drush.php script explicitly.  You will need
+ *            to set this when calling drush on a remote server if 'drush' is not in the
+ *            PATH on that machine.
+ *     'command':
+ *       A defined drush command such as 'cron', 'status' or any of the available ones such as 'drush pm'.
+ *     'args':
+ *       An array of arguments for the command.
+ *     'options'
+ *       Optional. An array containing options to pass to the remote script.
+ *       Array items with a numeric key are treated as optional arguments to the
+ *       command.
+ *     'backend-options':
+ *       Optional. Additional parameters that control the operation of the invoke.
+ *         'method'
+ *            Optional. Defaults to 'GET'.
+ *            If this parameter is set to 'POST', the $data array will be passed
+ *            to the script being called as a JSON encoded string over the STDIN
+ *            pipe of that process. This is preferable if you have to pass
+ *            sensitive data such as passwords and the like.
+ *            For any other value, the $data array will be collapsed down into a
+ *            set of command line options to the script.
+ *         'integrate'
+ *            Optional. Defaults to TRUE.
+ *            If TRUE, any error statuses will be integrated into the current
+ *            process. This might not be what you want, if you are writing a
+ *            command that operates on multiple sites.
+ *         'log'
+ *            Optional. Defaults to TRUE.
+ *            If TRUE, any log messages will be integrated into the current
+ *            process.
+ *         'output'
+ *            Optional. Defaults to TRUE.
+ *            If TRUE, output from the command will be synchronously printed to
+ *            stdout.
+ *         'drush-script'
+ *            Optional. Defaults to the current drush.php file on the local
+ *            machine, and to simply 'drush' (the drush script in the current
+ *            PATH) on remote servers.  You may also specify a different drush.php
+ *            script explicitly.  You will need to set this when calling drush on
+ *            a remote server if 'drush' is not in the PATH on that machine.
+ * @param common_options
+ *    Optional. Merged in with the options for each invocation.
+ * @param backend_options
+ *    Optional. Merged in with the backend options for each invocation.
+ * @param default_command
+ *    Optional. Used as the 'command' for any invocation that does not
+ *    define a command explicitly.
+ * @param default_site
+ *    Optional. Used as the 'site' for any invocation that does not
+ *    define a site explicitly.
+ * @param context
+ *    Optional. Passed in to proc_open if provided.
+ *
+ * @return
+ *   If the command could not be completed successfully, FALSE.
+ *   If the command was completed, this will return an associative array containing the data from drush_backend_output().
+ */
+function _provison__drush_backend_invoke_concurrent($invocations, $common_options = array(), $common_backend_options = array(), $default_command = NULL, $default_site = NULL, $context = NULL) {
+  $index = 0;
+
+  // Slice and dice our options in preparation to build a command string
+  $invocation_options = array();
+  foreach ($invocations as $invocation)  {
+    $site_record = isset($invocation['site']) ? $invocation['site'] : $default_site;
+    // NULL is a synonym to '@self', although the latter is preferred.
+    if (!isset($site_record)) {
+      $site_record = '@self';
+    }
+    // If the first parameter is not a site alias record,
+    // then presume it is an alias name, and try to look up
+    // the alias record.
+    if (!is_array($site_record)) {
+      $site_record = drush_sitealias_get_record($site_record);
+    }
+    $command = isset($invocation['command']) ? $invocation['command'] : $default_command;
+    $args = isset($invocation['args']) ? $invocation['args'] : array();
+    $command_options = isset($invocation['options']) ? $invocation['options'] : array();
+    $backend_options = isset($invocation['backend-options']) ? $invocation['backend-options'] : array();
+    // If $backend_options is passed in as a bool, interpret that as the value for 'integrate'
+    if (!is_array($common_backend_options)) {
+      $integrate = (bool)$common_backend_options;
+      $common_backend_options = array('integrate' => $integrate);
+    }
+
+    $command_options += $common_options;
+    $backend_options += $common_backend_options;
+
+    $backend_options = _drush_backend_adjust_options($site_record, $command, $command_options, $backend_options);
+
+    // Insure that contexts such as DRUSH_SIMULATE and NO_COLOR are included.
+    $command_options += _drush_backend_get_global_contexts($site_record);
+
+    if (isset($site_record['#name'])) {
+      list($post_options, $commandline_options, $drush_global_options) = _drush_backend_classify_options(array(), $command_options, $backend_options);
+      $command = '@' . ltrim($site_record['#name'], '@') . ' ' . $command;
+    }
+    else {
+      list($post_options, $commandline_options, $drush_global_options) = _drush_backend_classify_options($site_record, $command_options, $backend_options);
+    }
+    $site_record += array('path-aliases' => array());
+    $site_record['path-aliases'] += array(
+      '%drush-script' => NULL,
+    );
+
+    $site = (array_key_exists('#name', $site_record) && !array_key_exists($site_record['#name'], $invocation_options)) ? $site_record['#name'] : $index++;
+    $invocation_options[$site] = array(
+      'site-record' => $site_record,
+      'command' => $command,
+      'args' => $args,
+      'post-options' => $post_options,
+      'drush-global-options' => $drush_global_options,
+      'commandline-options' => $commandline_options,
+      'command-options' => $command_options,
+      'backend-options' => $backend_options,
+    );
+  }
+
+  // Calculate the length of the longest output label
+  $max_name_length = 0;
+  $label_separator = '';
+  if (!array_key_exists('no-label', $common_options) && (count($invocation_options) > 1)) {
+    $label_separator = array_key_exists('#label-separator', $common_options) ? $common_options['#label-separator'] : ' >> ';
+    foreach ($invocation_options as $site => $item) {
+      $backend_options = $item['backend-options'];
+      if (!array_key_exists('#output-label', $backend_options)) {
+        if (is_numeric($site)) {
+          $backend_options['#output-label'] = ' * [@self.' . $site;
+          $label_separator = '] ';
+        }
+        else {
+          $backend_options['#output-label'] = $site;
+        }
+        $invocation_options[$site]['backend-options']['#output-label'] = $backend_options['#output-label'];
+      }
+      $name_len = strlen($backend_options['#output-label']);
+      if ($name_len > $max_name_length) {
+        $max_name_length = $name_len;
+      }
+      if (array_key_exists('#label-separator', $backend_options)) {
+        $label_separator = $backend_options['#label-separator'];
+      }
+    }
+  }
+  // Now pad out the output labels and add the label separator.
+  $reserve_margin = $max_name_length + strlen($label_separator);
+  foreach ($invocation_options as $site => $item) {
+    $backend_options = $item['backend-options'] + array('#output-label' => '');
+    $invocation_options[$site]['backend-options']['#output-label'] = str_pad($backend_options['#output-label'], $max_name_length, " ") . $label_separator;
+    if ($reserve_margin) {
+      $invocation_options[$site]['drush-global-options']['reserve-margin'] = $reserve_margin;
+    }
+  }
+
+  // Now take our prepared options and generate the command strings
+  $cmds = array();
+  foreach ($invocation_options as $site => $item) {
+    $site_record = $item['site-record'];
+    $command = $item['command'];
+    $args = $item['args'];
+    $post_options = $item['post-options'];
+    $commandline_options = $item['commandline-options'];
+    $command_options = $item['command-options'];
+    $drush_global_options = $item['drush-global-options'];
+    $backend_options = $item['backend-options'];
+    $os = drush_os($site_record);
+    // If the caller did not pass in a specific path to drush, then we will
+    // use a default value.  For commands that are being executed on the same
+    // machine, we will use DRUSH_COMMAND, which is the path to the drush.php
+    // that is running right now.  For remote commands, we will run a wrapper
+    // script instead of drush.php -- drush.bat on Windows, or drush on Linux.
+    $drush_path = $site_record['path-aliases']['%drush-script'];
+    $drush_command_path = drush_build_drush_command($drush_path, array_key_exists('php', $command_options) ? $command_options['php'] : NULL, $os, array_key_exists('remote-host', $site_record));
+    $cmd = _drush_backend_generate_command($site_record, $drush_command_path . " " . _drush_backend_argument_string($drush_global_options, $os) . " " .  $command, $args, $commandline_options, $backend_options) . ' 2>&1';
+    $cmds[$site] = array(
+      'cmd' => $cmd,
+      'post-options' => $post_options,
+      'backend-options' => $backend_options,
+    );
+  }
+
+  return _drush_backend_invoke($cmds, $common_backend_options, $context);
 }
 
 /**
