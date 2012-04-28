@@ -23,6 +23,7 @@ prompt_yes_no() {
 }
 
 version=$1
+major="6.x"
 
 if [ $# -lt 1 -o "$version" = "-h" ]; then
     cat <<EOF 
@@ -42,7 +43,7 @@ official release. If you are not one of those people, you probably
 shouldn't be running this.
 
 This script is going to modify the configs and documentation to
-release $version.
+release $major-$version.
 EOF
 
 cat <<EOF
@@ -74,18 +75,18 @@ git add debian/changelog
 
 echo changing makefile to download tarball
 #sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
-#  -e'/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://ftp.drupal.org/files/projects/hostmaster-'$version'.tgz"#' \
+#  -e'/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://ftp.drupal.org/files/projects/hostmaster-'$major-$version'.tgz"#' \
 #  -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[directory_name] = "hostmaster"/' aegir.make && git add aegir.make && rm aegir.make.tmp
 sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/= "git"/' \
   -e'/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://git.drupal.org/project/hostmaster.git"#' \
-  -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[tag] = "'$version'"/' aegir.make && git add aegir.make && rm aegir.make.tmp
+  -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[tag] = "'$major-$version'"/' aegir.make && git add aegir.make && rm aegir.make.tmp
 
 echo changing provision.info version
-sed -i'.tmp' -e"s/version *=.*$/version=$version/" provision.info
+sed -i'.tmp' -e"s/version *=.*$/version=$major-$version/" provision.info
 git add provision.info && rm provision.info.tmp
 
 echo changing upgrade.sh.txt version
-sed -i'.tmp' -e"s/AEGIR_VERSION=.*$/AEGIR_VERSION=\"$version\"/" upgrade.sh.txt && git add upgrade.sh.txt && rm upgrade.sh.txt.tmp
+sed -i'.tmp' -e"s/AEGIR_VERSION=.*$/AEGIR_VERSION=\"$major-$version\"/" upgrade.sh.txt && git add upgrade.sh.txt && rm upgrade.sh.txt.tmp
 
 echo resulting changes to be committed:
 git diff --cached | cat
@@ -101,10 +102,15 @@ fi
 commitmsg=`git commit -m"change version information for release $version"`
 echo $commitmsg
 commitid=`echo $commitmsg | sed 's/^\[[^ ]* \([a-z0-9]*\)\].*$/\1/'`
-sed -n '1,/ --/p' debian/changelog | git tag -a -F - $version
+sed -n '1,/ --/p' debian/changelog | git tag -a -F - $major-$version
 
 echo reverting tree to HEAD versions
-git revert $commitid
+git revert --no-commit $commitid
+# Unstage the debian/changelog change, as we don't want to revert that.
+git reset --quiet HEAD 'debian/changelog'
+git checkout -- 'debian/changelog'
+git commit
+
 
 if prompt_yes_no "push tags and commits upstream? (y/N) "; then
     # this makes sure we push the commit *and* the tag

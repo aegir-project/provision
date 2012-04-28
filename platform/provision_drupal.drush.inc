@@ -370,7 +370,6 @@ function _provision_drupal_maintain_aliases() {
     }
     else {
       _provision_drupal_delete_aliases();
-
       if (!d()->redirection) {
         foreach (d()->aliases as $alias) {
           if ($alias = trim($alias)) {
@@ -399,7 +398,6 @@ function _provision_drupal_delete_aliases() {
     }
     else {
       $aliases = provision_drupal_find_aliases();
-
       foreach ($aliases as $alias) {
         $path = d()->root . '/sites/' . $alias;
         provision_file()->unlink($path)
