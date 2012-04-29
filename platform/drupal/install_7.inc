@@ -80,10 +80,16 @@ function install_main() {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
 
   // We have an existing settings.php.
-
-  if (function_exists('drush_sql_read_db_spec')) {
+  
+  // Drush 5.
+  if (function_exists('_drush_sql_get_db_spec')) {
+    $db_spec = _drush_sql_get_db_spec();
+  }
+  // Drush 4.
+  elseif (function_exists('drush_sql_read_db_spec')) {
     $db_spec = drush_sql_read_db_spec();
   }
+  // Drush 3.
   else {
     $db_spec = drush_core_site_install_db_spec();
   }

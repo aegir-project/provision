@@ -13,6 +13,30 @@ aegir-provision (2.0~alpha) UNRELEASED; urgency=low
 
  -- Antoine Beaupré <anarcat@debian.org>  Tue, 06 Mar 2012 14:39:41 -0500
 
+aegir-provision (1.8) testing; urgency=low
+
+  * new release: various bugfixes to regressions introduced in 1.7, a few
+    general bug fixes and lots of Nginx fixes.
+
+ -- Steven Jones <steven.jones@computerminds.co.uk>  Wed, 18 Apr 2012 09:34:44 +0100
+
+aegir-provision (1.7) testing; urgency=low
+
+  * new release: various bugfixes that have accumulated in the issue queue
+    since the 1.6 release, including a lot of fixes on Nginx support. We
+    also ship a new clustering module aimed at lightweight slave
+    deployments named the pack module, designed to replace the cluster
+    module which has performance and configuration issues.
+
+ -- Antoine Beaupré <anarcat@debian.org>  Tue, 06 Mar 2012 18:39:37 -0500
+
+aegir-provision (1.6+dev) unstable; urgency=low
+
+  * merge in the debian branch to the main 1.x branch, making this a
+    native package.
+
+ -- Antoine Beaupré <anarcat@debian.org>  Thu, 16 Feb 2012 15:47:18 -0500
+
 aegir-provision (1.6-1+webpack) testing; urgency=low
 
   * special build for the dev-webpack1x branch

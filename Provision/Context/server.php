@@ -52,7 +52,10 @@ class Provision_Context_server extends Provision_Context {
     }
     else {
       $this->aegir_root = d('@server_master')->aegir_root;
-      $this->script_user = d('@server_master')->script_user;
+      // In certain cicumstances it might be useful to have different
+      // script_users on different Aegir servers, but this could also cause
+      // weird things to happen, so use with caution!
+      $this->setProperty('script_user', d('@server_master')->script_user);
     }
 
     $this->setProperty('ip_addresses', array(), true);

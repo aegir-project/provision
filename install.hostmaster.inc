@@ -146,10 +146,10 @@ function drush_provision_hostmaster_install($site = NULL) {
       'db_service_type' => 'mysql',
       'master_db' => $master_db,
     );
-    drush_backend_invoke_args("provision-save", array($dbserver), $dbserver_context);
+    drush_invoke_process('@none', "provision-save", array($dbserver), $dbserver_context);
     provision_backend_invoke($dbserver, 'provision-verify');
   }
-  drush_backend_invoke_args("provision-save", array($server), $master_context);
+  drush_invoke_process('@none', "provision-save", array($server), $master_context);
   provision_backend_invoke($server, 'provision-verify');
 
   // exit if an error has occured. 
@@ -161,12 +161,8 @@ function drush_provision_hostmaster_install($site = NULL) {
     return;
   }
 
-  if (!function_exists('drush_make_drush_command')) {
-    drush_backend_invoke('dl', array('drush_make-' . drush_get_option('drush_make_version'), 'destination' => $aegir_root . '/.drush/'));
-  }
-
   $platform_name = '@platform_hostmaster';
-  drush_backend_invoke_args("provision-save", array($platform_name), array(
+  drush_invoke_process('@none', "provision-save", array($platform_name), array(
     'context_type' => 'platform',
     'server' => $server,
     'web_server' => $server,
@@ -186,7 +182,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   }
 
   $site_name = '@hostmaster';
-  drush_backend_invoke_args("provision-save", array($site_name), array(
+  drush_invoke_process('@none', "provision-save", array($site_name), array(
     'context_type' => 'site',
     'platform' => $platform_name,
     'db_server' => $dbserver,
@@ -204,6 +200,7 @@ function drush_provision_hostmaster_install($site = NULL) {
 
 
   drush_print(dt("Initializing the hosting system"));
+  drush_invoke_process('@none', 'cache-clear', array('drush'));
   provision_backend_invoke($site_name, 'hosting-setup');
 
   drush_print("");
@@ -221,3 +218,12 @@ function drush_provision_hostmaster_install($site = NULL) {
   drush_print("");
 }
 
+/**
+ *  Implements drush_hook_post_hostmaster_install().
+ */
+function drush_provision_post_hostmaster_install() {
+  $backend_only = drush_get_option('backend-only');
+  if (empty($backend_only)) {
+    drush_invoke_process('@hostmaster', 'cache-clear', array('drush'));
+  }
+}
