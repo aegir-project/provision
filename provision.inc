@@ -741,6 +741,19 @@ function provision_version_parts() {
   return explode('.', $version);
 }
 
+/**
+ * Normalise a context name, ensuring that it starts with one '@'.
+ *
+ * @param $name
+ *   The context name to normalise.
+ *
+ * @return
+ *   The normalised context name.
+ */
+function provision_normalise_context_name($name) {
+  return '@' . ltrim($name, '@');
+}
+
 // Base class for provision exceptions.
 class provisionException extends Exception {
 

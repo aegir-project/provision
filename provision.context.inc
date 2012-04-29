@@ -33,24 +33,25 @@ function & d($name = NULL, $_root_object = FALSE, $allow_creation = TRUE) {
   }
 
   if (is_null($name)) {
-    return $instances[$default_instance];
+    $name = $default_instance;
+  }
+  
+  if ($_root_object) {
+    $default_instance = $name;
+  }
+  
+  $name = provision_normalise_context_name($name);
+
+  if (isset($instances[$name])) {
+    return $instances[$name];
   }
   else {
-    if ($_root_object) {
-      $default_instance = $name;
+    $instances[$name] = provision_context_factory($name, $allow_creation);
+    if (!is_null($instances[$name])) {
+      $instances[$name]->method_invoke('init');
+      $instances[$name]->type_invoke('init');
     }
-
-    if (isset($instances[$name])) {
-      return $instances[$name];
-    }
-    else {
-      $instances[$name] = provision_context_factory($name, $allow_creation);
-      if (!is_null($instances[$name])) {
-        $instances[$name]->method_invoke('init');
-        $instances[$name]->type_invoke('init');
-      }
-      return $instances[$name];
-    }
+    return $instances[$name];
   }
 }
 
@@ -64,6 +65,8 @@ function & d($name = NULL, $_root_object = FALSE, $allow_creation = TRUE) {
  */
 function provision_sitealias_get_record($name) {
   static $cache = array();
+  
+  $name = provision_normalise_context_name($name);
 
   if (!isset($cache[$name])) {
     $cache[$name] = drush_sitealias_get_record($name);

@@ -87,6 +87,9 @@ function provision_drush_command() {
     'examples' => array(
       'drush @site provision-install' => 'Install the site as defined by the site Drush alias generated with provision-save.',
     ),
+    'options' => array(
+      'client_email' => dt('The email address of the client to use.'),
+    ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
