@@ -71,7 +71,7 @@ function drush_provision_tests_run() {
   drush_provision_tests_remove_site('drupal7-standard');
   drush_provision_tests_remove_site('drupal7-minimal');
   drush_provision_tests_remove_site('openatrium-openatrium');
-
+  
   // Create some sites and migrate them.
   if ($drupal5_tests) {
     drush_provision_tests_install_platform('drupal5', 'drupal5_other');
@@ -90,8 +90,8 @@ function drush_provision_tests_run() {
   drush_provision_tests_migrate_site('drupal7-migrate-drupal7-other', 'drupal7_other');
   drush_provision_tests_remove_site('drupal7-migrate-drupal7-other');
   drush_provision_tests_remove_platform('drupal7_other');
-
-
+  
+  
   // Create some sites, and upgrade them
   if ($drupal5_tests) {
     drush_provision_tests_install_site('drupal5', 'drupal5-upgrade-drupal7', 'default');
@@ -102,7 +102,7 @@ function drush_provision_tests_run() {
   drush_provision_tests_install_site('drupal6', 'drupal6-upgrade-drupal7', 'default');
   drush_provision_tests_migrate_site('drupal6-upgrade-drupal7', 'drupal7');
   drush_provision_tests_remove_site('drupal6-upgrade-drupal7');
-
+  
   // Clean up a little.
   if ($drupal5_tests) {
     drush_provision_tests_remove_platform('drupal5');
@@ -141,7 +141,7 @@ function drush_provision_tests_install_platform($platform_name, $platform_alias 
     'root' => "/var/aegir/platforms/$platform_alias",
     'context_type' => 'platform',
   );
-  provision_backend_invoke('@none', 'provision-save', $args, $options);
+  drush_invoke_process('@none', 'provision-save', $args, $options);
   provision_backend_invoke('@hostmaster', 'hosting-import', array("@platform_$platform_alias",));
   drush_provision_tests_run_remaining_tasks();
 }
@@ -161,15 +161,17 @@ function drush_provision_tests_remove_platform($platform_name) {
 function drush_provision_tests_install_site($platform_name, $site, $profile_name) {
   drush_log(dt('Installing: @site on platform: @platform with profile: @profile.', array('@site' => "$site.aegir.example.com", '@platform' => $platform_name, '@profile' => $profile_name)), 'ok');
   $args = array(
-    'uri' => "$site.aegir.example.com",
     "@$site.aegir.example.com",
+  );
+  $options = array(
+    'uri' => "$site.aegir.example.com",
     'context_type' => 'site',
     'platform' => "@platform_$platform_name",
     'profile' => $profile_name,
     'db_server' => '@server_localhost',
     'root' => "/var/aegir/platforms/$platform_name",
   );
-  drush_invoke_process('@none', 'provision-save', $args);
+  drush_invoke_process('@none', 'provision-save', $args, $options);
   provision_backend_invoke("@$site.aegir.example.com", 'provision-install');
   provision_backend_invoke('@hostmaster', 'hosting-task', array("@platform_$platform_name", 'verify'), array('force' => TRUE));
   drush_provision_tests_run_remaining_tasks();

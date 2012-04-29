@@ -26,7 +26,13 @@ class Provision_Service_db_pdo extends Provision_Service_db {
     catch (PDOException $e) {
       return drush_set_error('PROVISION_DB_CONNECT_FAIL', $e->getMessage());
     }
-  } 
+  }
+  
+  function ensure_connected() {
+    if (is_null($this->conn)) {
+      $this->connect();
+    }
+  }
 
   function close() {
     $this->conn = null;
@@ -38,6 +44,7 @@ class Provision_Service_db_pdo extends Provision_Service_db {
     if (isset($args[0]) and is_array($args[0])) { // 'All arguments in one array' syntax
       $args = $args[0];
     }
+    $this->ensure_connected();
     $this->query_callback($args, TRUE);
     $query = preg_replace_callback(PROVISION_QUERY_REGEXP, array($this, 'query_callback'), $query);
     
