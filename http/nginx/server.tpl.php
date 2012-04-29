@@ -70,7 +70,15 @@
 
  ## General Options
   ignore_invalid_headers          on;
-  limit_zone gulag $binary_remote_addr 10m;
+<?php
+$nginx_is_modern = drush_get_option('nginx_is_modern');
+if ($nginx_is_modern) {
+  print "  limit_conn_zone \$binary_remote_addr zone=gulag:10m;\n";
+}
+else {
+  print "  limit_zone gulag \$binary_remote_addr 10m;\n";
+}
+?>
   recursive_error_pages           on;
   reset_timedout_connection       on;
   fastcgi_intercept_errors        on;
