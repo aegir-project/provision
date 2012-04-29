@@ -15,6 +15,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     $this->server->setProperty('nginx_has_gzip', 0);
     $this->server->setProperty('nginx_web_server', 0);
     $this->server->setProperty('nginx_has_upload_progress', 0);
+    $this->server->setProperty('nginx_is_modern', 0);
   }
 
   function save_server() {
@@ -34,8 +35,9 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
 
     // Check if some nginx features are supported and save them for later.
     $this->server->shell_exec($path . ' -V');
+    $this->server->nginx_is_modern = preg_match("/nginx\/1\.((1\.(8|9|(1[0-9]+)))|(2\.))/", implode('', drush_shell_exec_output()), $match);
     $this->server->nginx_has_upload_progress = preg_match("/upload/", implode('', drush_shell_exec_output()), $match);
-    $this->server->nginx_has_gzip = preg_match("/(with-http_gzip_static_module)/", implode('', drush_shell_exec_output()), $match);
+    $this->server->nginx_has_gzip = preg_match("/http_gzip_static_module/", implode('', drush_shell_exec_output()), $match);
     $this->server->provision_db_cloaking = FALSE;
     $this->server->nginx_web_server = 1;
   }
