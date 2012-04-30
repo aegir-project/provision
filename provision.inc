@@ -416,6 +416,7 @@ function provision_backend_invoke($target, $command, $arguments = array(), $data
   $context = '@' . ltrim($target, '@');
   return _provision__drush_invoke_process($context, $command, $arguments, $data /*+ array('root' => NULL, 'uri' => NULL)*/, array('method' => $mode, 'integrate' => TRUE));
 }
+
 /**
  * Invoke a command in a new process, targeting the site specified by
  * the provided site alias record.
@@ -433,25 +434,25 @@ function provision_backend_invoke($target, $command, $arguments = array(), $data
  * @param array $commandline_options
  *  The options (e.g. --select) to provide to the command.
  * @param $backend_options
- *   TRUE - integrate errors
- *   FALSE - do not integrate errors
- *   array - @see drush_backend_invoke_concurrent
+ * - TRUE - integrate errors
+ * - FALSE - do not integrate errors
+ * - array - @see drush_backend_invoke_concurrent
  *     There are also several options that _only_ work when set in
  *     this parameter.  They include:
- *      'invoke-multiple'
+ *     - 'invoke-multiple'
  *        If $site_alias_record represents a single site, then 'invoke-multiple'
  *        will cause the _same_ command with the _same_ arguments and options
  *        to be invoked concurrently (e.g. for running concurrent batch processes).
- *      'concurrency'
+ *     - 'concurrency'
  *        Limits the number of concurrent processes that will run at the same time.
  *        Defaults to '4'.
- *      'override-simulated'
+ *     - 'override-simulated'
  *        Forces the command to run, even in 'simulated' mode. Useful for
  *        commands that do not change any state on the machine, e.g. to fetch
  *        database information for sql-sync via sql-conf.
- *      'interactive'
+ *     - 'interactive'
  *        Overrides the backend invoke process to run commands interactively.
- *      'fork'
+ *     - 'fork'
  *        Overrides the backend invoke process to run non blocking commands in 
  *        the background. Forks a new process by adding a '&' at the end of the 
  *        command. The calling process does not receive any output from the child 
@@ -499,33 +500,33 @@ function _provision__drush_invoke_process($site_alias_record, $command_name, $co
  *
  * @param invocations
  *   An array of command records to exacute. Each record should contain:
- *     'site':
+ *   - 'site':
  *       An array containing information used to generate the command.
- *         'remote-host'
+ *       - 'remote-host'
  *            Optional. A remote host to execute the drush command on.
- *         'remote-user'
+ *       - 'remote-user'
  *            Optional. Defaults to the current user. If you specify this, you can choose which module to send.
- *         'ssh-options'
+ *       - 'ssh-options'
  *            Optional.  Defaults to "-o PasswordAuthentication=no"
- *         'path-aliases'
+ *       - 'path-aliases'
  *            Optional; contains paths to folders and executables useful to the command.
- *         '%drush-script'
+ *       - '%drush-script'
  *            Optional. Defaults to the current drush.php file on the local machine, and
  *            to simply 'drush' (the drush script in the current PATH) on remote servers.
  *            You may also specify a different drush.php script explicitly.  You will need
  *            to set this when calling drush on a remote server if 'drush' is not in the
  *            PATH on that machine.
- *     'command':
+ *   - 'command':
  *       A defined drush command such as 'cron', 'status' or any of the available ones such as 'drush pm'.
- *     'args':
+ *   - 'args':
  *       An array of arguments for the command.
- *     'options'
+ *   - 'options'
  *       Optional. An array containing options to pass to the remote script.
  *       Array items with a numeric key are treated as optional arguments to the
  *       command.
- *     'backend-options':
+ *   - 'backend-options':
  *       Optional. Additional parameters that control the operation of the invoke.
- *         'method'
+ *       - 'method'
  *            Optional. Defaults to 'GET'.
  *            If this parameter is set to 'POST', the $data array will be passed
  *            to the script being called as a JSON encoded string over the STDIN
@@ -533,20 +534,20 @@ function _provision__drush_invoke_process($site_alias_record, $command_name, $co
  *            sensitive data such as passwords and the like.
  *            For any other value, the $data array will be collapsed down into a
  *            set of command line options to the script.
- *         'integrate'
+ *       - 'integrate'
  *            Optional. Defaults to TRUE.
  *            If TRUE, any error statuses will be integrated into the current
  *            process. This might not be what you want, if you are writing a
  *            command that operates on multiple sites.
- *         'log'
+ *       - 'log'
  *            Optional. Defaults to TRUE.
  *            If TRUE, any log messages will be integrated into the current
  *            process.
- *         'output'
+ *       - 'output'
  *            Optional. Defaults to TRUE.
  *            If TRUE, output from the command will be synchronously printed to
  *            stdout.
- *         'drush-script'
+ *       - 'drush-script'
  *            Optional. Defaults to the current drush.php file on the local
  *            machine, and to simply 'drush' (the drush script in the current
  *            PATH) on remote servers.  You may also specify a different drush.php
