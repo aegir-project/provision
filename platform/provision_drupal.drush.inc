@@ -244,6 +244,9 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     $mkdir["sites/$url/files/ctools"]     = 02770;
     $chgrp["sites/$url/files/ctools"]     = d('@server_master')->web_group;
 
+    $mkdir["sites/$url/files/ctools/css"] = 02770;
+    $chgrp["sites/$url/files/ctools/css"] = d('@server_master')->web_group;
+
     $mkdir["sites/$url/files/imagecache"] = 02770;
     $chgrp["sites/$url/files/imagecache"] = d('@server_master')->web_group;
 
@@ -282,6 +285,7 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     "sites/$url/files/advagg_css",
     "sites/$url/files/advagg_js",
     "sites/$url/files/ctools",
+    "sites/$url/files/ctools/css",
     "sites/$url/files/imagecache",
     "sites/$url/files/locations",
     "sites/$url/modules",
