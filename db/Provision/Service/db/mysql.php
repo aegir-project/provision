@@ -111,7 +111,7 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
       return $match[1];
     }
     else {
-      return drush_set_error('PROVISION_DB_CONNECT_FAIL', dt('Dummy connection failed to fail: %msg', array('%msg' => join("\n", drush_shell_exec_output()))));
+      return drush_set_error('PROVISION_DB_CONNECT_FAIL', dt('Dummy connection failed to fail. Either your MySQL permissions are too lax, or the response was not understood. See http://is.gd/Y6i4FO for more information. %msg', array('%msg' => join("\n", drush_shell_exec_output()))));
     }
   }
 
