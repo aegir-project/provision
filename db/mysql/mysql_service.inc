@@ -96,7 +96,7 @@ class provisionService_db_mysql extends provisionService_db_pdo {
   }
   
   function grant_host(provisionContext_server $server) {
-    $command = sprintf('mysql -u intntnllyInvalid -h %s -P %s -e ""',
+    $command = sprintf('mysql -u intntnllyInvalid -h %s -P %s -e "SELECT VERSION()"',
       escapeshellarg($this->server->remote_host),
       escapeshellarg($this->server->db_port));
 
