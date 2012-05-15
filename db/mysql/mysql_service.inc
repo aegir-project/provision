@@ -96,7 +96,7 @@ class provisionService_db_mysql extends provisionService_db_pdo {
   }
   
   function grant_host(provisionContext_server $server) {
-    $command = sprintf('mysql -u intntnllyInvalid -h %s -P %s -e ""',
+    $command = sprintf('mysql -u intntnllyInvalid -h %s -P %s -e "SELECT VERSION()"',
       escapeshellarg($this->server->remote_host),
       escapeshellarg($this->server->db_port));
 
@@ -109,7 +109,8 @@ class provisionService_db_mysql extends provisionService_db_pdo {
       return $match[1];
     }
     else {
-      return drush_set_error('PROVISION_DB_CONNECT_FAIL', dt('Dummy connection failed to fail: %msg', array('%msg' => join("\n", drush_shell_exec_output()))));
+      return drush_set_error('PROVISION_DB_CONNECT_FAIL', dt('Dummy connection failed to fail. Either your MySQL permissions are too lax, or the response was not understood. See http://is.gd/Y6i4FO for more information. %msg',
+        array('%msg' => join("\n", drush_shell_exec_output()))));
     }
   }
 

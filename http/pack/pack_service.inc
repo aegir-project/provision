@@ -92,6 +92,7 @@ class provisionService_http_pack extends provisionService_http {
 
   function grant_server_list() {
     return array_merge(
+      array_map('d', $this->server->master_web_servers),
       array_map('d', $this->server->slave_web_servers),
       array($this->context->platform->server)
     );
