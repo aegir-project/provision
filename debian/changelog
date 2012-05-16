@@ -1,3 +1,10 @@
+aegir-provision (1.9) testing; urgency=high
+
+  * new release: Security fixes for less-critical vulnerabilities found in 
+    the front-end, also various bug fixes since release 1.8.
+
+ -- Steven Jones <steven.jones@computerminds.co.uk>  Wed, 16 May 2012 13:03:17 +0100
+
 aegir-provision (1.8) testing; urgency=low
 
   * new release: various bugfixes to regressions introduced in 1.7, a few

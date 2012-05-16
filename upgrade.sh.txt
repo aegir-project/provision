@@ -15,7 +15,7 @@ msg() {
 }
 
 # basic variables, change before running
-AEGIR_VERSION="6.x-1.x"
+AEGIR_VERSION="6.x-1.9"
 DRUSH_DIR=$HOME/drush
 DRUSH=$DRUSH_DIR/drush.php
 if which drush 2> /dev/null > /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
