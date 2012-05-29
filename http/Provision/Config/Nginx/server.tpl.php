@@ -173,7 +173,7 @@ map $sent_http_x_purge_level $will_expire_in {
 ###
 map $http_user_agent $is_crawler {
   default  '';
-  ~*HTTrack|2009042316.*Firefox.*3\.0\.10|MJ12|HTMLParser|libwww|PECL|Automatic|Click|SiteBot|BuzzTrack|Sistrix|Offline|Screaming|Nutch|Mireo|SWEB|Morfeus  is_crawler;
+  ~*HTTrack|2009042316.*Firefox.*3\.0\.10|MJ12|HTMLParser|libwww|PECL|Automatic|Click|SiteBot|BuzzTrack|Sistrix|Offline|Screaming|Nutch|Mireo|SWEB|Morfeus|GSLFbot  is_crawler;
 }
 
 ###
