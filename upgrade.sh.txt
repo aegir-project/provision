@@ -155,11 +155,5 @@ else
   rm provision-$AEGIR_VERSION.tar.gz
 fi
 
-if [ -d "drush_make" ] ; then
-  msg "Moving existing drush_make into $BACKUP_DIR"
-  mv drush_make $BACKUP_DIR
-fi
-$DRUSH dl drush_make-$DRUSH_MAKE_VERSION --destination="$HOME/.drush"
-
 cd $OLD_DRUPAL_DIR
 $DRUSH hostmaster-migrate $AEGIR_DOMAIN $DRUPAL_DIR

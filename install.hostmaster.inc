@@ -15,7 +15,6 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   drush_set_default('script_user', provision_current_user());
   drush_set_default('web_group', _provision_default_web_group());
   drush_set_default('http_service_type', 'apache');
-  drush_set_default('drush_make_version', '6.x-2.3');
   drush_set_default('aegir_db_user', 'root');
   drush_set_default('client_name', 'admin');
   $aegir_db_user = drush_get_option('aegir_db_user');
@@ -59,10 +58,9 @@ Don't worry: you will get to review those settings after the final install");
 This script will operate the following changes in your system:
 
 1. Create server-level configuration directories
-2. Download drush_make
-3. Create the Hostmaster frontend platform
-4. Install the frontend site
-5. Setup the dispatcher (a user cron job)
+2. Create the Hostmaster frontend platform
+3. Install the frontend site
+4. Setup the dispatcher (a user cron job)
 
 We are making the following assumptions:
  * you have read and are following the install instructions at:
@@ -80,7 +78,6 @@ The following settings will be used:
  Aegir DB host: !db_host
  Aegir DB user: !db_user
  Aegir DB password: !db_pass
- Drush make version: !drush_make
  Aegir version: !version
  Aegir platform path: !root
  Aegir makefile: !makefile
@@ -94,7 +91,6 @@ The following settings will be used:
          '!db_host' => drush_get_option('aegir_db_host'),
          '!db_user' => drush_get_option('aegir_db_user'),
          '!db_pass' => is_null(drush_get_option('aegir_db_pass', NULL, 'process')) ? '<previously set>' : '<prompted>',
-         '!drush_make' => drush_get_option('drush_make_version'),
          '!version' => drush_get_option('version'),
          '!root' => drush_get_option(array('r', 'root')),
          '!makefile' => drush_get_option('makefile'),

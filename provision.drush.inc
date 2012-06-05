@@ -244,7 +244,6 @@ function provision_drush_command() {
     'options' => array
     (
      'http_service_type' => dt('Webserver type to configure (default: %webserver)', array('%webserver' => 'apache')),
-     'drush_make_version' => dt('Drush make version to install, if not present (default: %drush_make', array('%drush_make' => '6.x-2.3')),
      'aegir_db_host' => dt('Database host to connect to (default: %host)', array('%host' => 'localhost')),
      'aegir_db_user' => dt('Database user to connect as (default: %user)', array('%user' => 'root')),
      'aegir_db_pass' => dt('Database password to use'),
