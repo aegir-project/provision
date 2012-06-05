@@ -51,7 +51,7 @@ AEGIR_DOMAIN="$site_uri"
 OLD_DRUPAL_DIR="$drupal_root"
 HOME="$HOME"
 DRUPAL_DIR=$HOME/hostmaster-$AEGIR_VERSION
-DRUSH_VERSION=7.x-4.5
+DRUSH_VERSION=7.x-5.3
 DRUSH_MAKE_VERSION=6.x-2.3
 BACKUP_DIR=$HOME/pre-upgrade-`date '+%F-%H%M'`
 
