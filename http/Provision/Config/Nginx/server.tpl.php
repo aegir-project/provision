@@ -121,7 +121,6 @@ if ($nginx_has_upload_progress) {
 
   client_body_temp_path  /var/lib/nginx/body 1 2;
   access_log             /var/log/nginx/access.log main;
-  error_log              /var/log/nginx/error.log crit;
 
 <?php print $extra_config; ?>
 #######################################################
