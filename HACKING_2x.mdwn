@@ -1,0 +1,206 @@
+This document summarizes issues I have found while working offline on
+Aegir 2.x on june 2012. It should be posted as a blog or something.
+
+Install notes
+=============
+
+Those are notes from a manual install of Aegir 2.x using the Nginx
+backend. I have taken those notes instead of filing bugs as this work
+was done offline.
+
+use sudo instead of su
+----------------------
+
+use the following instead of su aegir:
+
+    sudo -u aegir -H /bin/bash
+
+install drush through PEAR
+--------------------------
+
+we should follow Arch linux's lead and install drush through PEAR, as
+it is upstream's suggestion.
+
+aegir 2.x modifications
+-----------------------
+
+ 1. install drush 5 instead of drush 4 (should be in the docs)
+ 2. we don't depend on drush make anymore, as it's in drush 5 core!!
+ make sure we change the hostmaster-install help and process at the
+ very least (done?)
+
+other issues
+------------
+
+ * we should not talk about using a makefile if the hostmaster platform
+   already exists
+ * the aegir config file generates this nginx error:
+
+    nginx on localhost could not be restarted. Changes might not be available until this has been done.  [warning]
+    (error: Reloading nginx configuration: nginx: [emerg] "error_log" directive is duplicate in
+    /etc/nginx/conf.d/aegir.conf:107
+
+   (fixed)
+
+ * install error:
+
+    The hosting_platform_pathauto module is required but was not found. Please move it into the modules  [error]
+    subdirectory.
+
+   (fixed by removing said module, would need to be merged in)
+
+ * the nginx config file is way too big, it sets policy, like hiding
+   headers, SSL performance, gzip compression, size limits and so
+   on. those do not belong in an aegir configuration file, and should
+   at least be optional. the fastcgi_params are also duplicate of a
+   file in /etc/nginx.conf
+
+   (work started in the dev-nginx-cleanup branch)
+
+ * out of the box, nginx shows "bad gateway" error when following the
+   login link - fix:
+   
+    diff --git a/php5/fpm/pool.d/www.conf b/php5/fpm/pool.d/www.conf
+    index 28a0651..e6d552d 100644
+    --- a/php5/fpm/pool.d/www.conf
+    +++ b/php5/fpm/pool.d/www.conf
+    @@ -30,7 +30,8 @@ group = www-data
+     ;                            specific port;
+     ;   '/path/to/unix/socket' - to listen on a unix socket.
+     ; Note: This value is mandatory.
+    -listen = /var/run/php5-fpm.sock
+    +;listen = /var/run/php5-fpm.sock
+    +listen = localhost:9000
+
+     ; Set listen(2) backlog.
+     ; Default Value: 128 (-1 on FreeBSD and OpenBSD)
+
+   not sure how to fix this
+
+ * the nginx includes may fail on remote servers because
+   /var/aegir/config/includes may not be rsync'd to remote servers
+
+ * the nginx advanced and simple configuration are almost exactly the
+   same minus about 10 lines of diff - they should include each other
+   instead of duplicating stuff
+
+   (fixed in cleanup branch)
+
+things i forgot
+---------------
+
+ * forgot to clone pkg-drush
+ * forgot to install the nginx-doc package
+ * forgot to install ab or siege (crap)
+
+offline hacks
+-------------
+
+I had to go through a few hoops to make this work offline. To install
+drush, i worked from a previous clone I had lying around:
+
+    sudo aegir -H git clone ~anarcat/src/drush
+    sudo ln -s /var/aegir/drush/drush /usr/local/bin/drush
+
+And the same for provision:
+
+    sudo aegir -H git clone ~anarcat/src/provision .drush/provision --branch 6.x-2.x
+
+Then for the frontend (trickier), I had to fiddle around with also a
+previously existing hostmaster platform:
+
+    git clone ~anarcat/src/drupal hostmaster-6.x-2.x --branch 6.26
+    git clone ~anarcat/src/hostmaster hostmaster-6.x-2.x/profiles/hostmaster --branch 6.x-2.x
+    cd hostmaster-6.x-2.x/profiles/hostmaster
+    cp -a ~/hostmaster-6.x-1.x/profiles/hostmaster/modules/{admin_menu,install_profile_api,jquery_ui,modalframe,openidadmin} modules
+
+Multiserver redesign
+====================
+
+One of the things I have been thinking of doing for a while was to
+move the dispatcher to the backend and move more logic to remote
+servers. This section details my findings related to that work
+
+Task queue
+----------
+
+This queue is tightly bound with the frontend. There's a complete
+'task' module, complete with a database schema, in the hosting
+package. It would be difficult if not illogical to move all that stuff
+to the provision module.
+
+This, in turn, makes it difficult to implement the task queue on the
+remote servers directly.
+
+An alternative would be to keep the task module in the frontend but
+create a skeleton implementation in the backend that would do the task
+unserialization necessary to produce the drush task.
+
+In other words, we would need to split the task module in two: one
+part which would write tasks to the MySQL database (by default, other
+backends could be implemented!) and another end (on the provision
+side), which would read tasks from the database.
+
+The dispatcher
+--------------
+
+The dispatcher, however, is less bound with the frontend. It uses the
+Drupal variable storage for locking itself, but that is probably not a
+blocker for moving the code to the backend.
+
+In fact, we could consider simply dropping all this code in favor of
+the more stable, complete and logical hosting_queued.
+
+Settings for the queues that are used by the dispatcher could still be
+managed by the frontend, provided we clearly specify which settings
+are applied of course. Again, those settings are specific to our MySQL
+"ghetto queue" implementation and could be extended to support other
+queuing systems.
+
+Multiple queue support
+----------------------
+
+Moving the dispatcher code to the backend would have the advantage of
+allowing that logic to be moved out of the main site, and allow to
+have multiple queues, for example one per server.
+
+For this, we would need to have a server column to separate the queues
+directly in the SQL tables. This, in turn, would duplicate the server
+information, which is already in the hosting_site/platform/server
+tables. In other words, maybe this information should be fetched
+through a JOIN instead.
+
+Aliases location
+----------------
+
+Regardless, that information is also duplicated in the drush aliases,
+which would need to be synced to remote servers anyways. One of the
+reason for the hub/spoke model is that it makes it much easier to find
+where a site is - you just look in the alias and there you are, you
+log into that server and you do your things.
+
+Having a queue per server would probably mean completely removing
+certain aliases, specifically the server aliases, which could mean
+problem for slave servers in the 'pack' cluster module.
+
+The cron queue
+--------------
+
+The cron queue is an odd anomaly in all this. It is the only known
+implementation of the "batch" queue (although there is talk of
+implementing a civicrm cron queue). It also happens to oddly duplicate
+and overlap the functionality of the builtin cron daemon, which it
+depends on.
+
+My thought is currently to *not* duplicate the functionality of cron
+(which we depend on *anyways* - we do not want to reimplement this in
+hosting_queued I believe) and instead start looking at writing cron
+jobs individually to the crontab. This could be done in the verify
+task of sites.
+
+Unfortunately, the crontab command doesn't feature a locking
+mechanism, which means we will have to implement our own to avoid
+overwriting changes if we ever allow some tasks to be ran in parallel.
+
+Nevertheless, this seems like a much simpler implementation that would
+also allow per-task cron periods.
