@@ -1,4 +1,4 @@
-aegir-provision (2.0~alpha) UNRELEASED; urgency=low
+aegir-provision (2.0~0.0alpha0) UNRELEASED; urgency=low
 
   * switch to a native package
   
