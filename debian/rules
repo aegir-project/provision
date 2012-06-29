@@ -16,7 +16,7 @@ override_dh_install:
 
 	cp "$(CURDIR)/debian/aegir-provision.lintian" "$(CURDIR)/debian/aegir-provision/usr/share/lintian/overrides/aegir-provision"
 
-override_dh_install_init:
+override_dh_installinit:
 	dh_installinit --name=hosting-queued
 
 DOMAIN?=$(shell hostname -f)
