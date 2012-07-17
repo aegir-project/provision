@@ -87,9 +87,9 @@ function drush_provision_drupal_provision_backup() {
   }
   if (substr($backup_file, -2) == 'gz') {
     // same as above: some do not support -z
-    $command = "tar cpf - . | gzip -c > %s";
+    $command = 'tar cpf - . | gzip -c > %s';
   } else {
-    $command = "tar cpf %s .";
+    $command = 'tar cpf %s .';
   }
   $result = drush_shell_exec($command,  $backup_file);
 
