@@ -9,7 +9,6 @@ function drush_provision_drupal_provision_verify_validate() {
   if (d()->type === 'site') {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
     provision_prepare_environment();
-
     _provision_drupal_create_settings_file();
     drush_errors_on();
     provision_backend_invoke(d()->name, 'registry-rebuild');
