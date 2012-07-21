@@ -138,15 +138,15 @@ function install_main() {
 
   // create the admin account
   $account = user_load(1);
-  $edit['name'] = 'admin';
-  $edit['pass'] = $account_pass;
-  $edit['mail'] = $client_email;
-  $edit['status'] = 1;
+  $account->name = 'admin';
+  $account->pass = $account_pass;
+  $account->mail = $client_email;
+  $account->status = 1;
 
   // temporarily disable drupal's default mail notification
   $prev = variable_get('user_mail_status_activated_notify', TRUE);
   variable_set('user_mail_status_activated_notify', FALSE);
-  $account = user_save($account,  $edit);
+  $account->save();
   variable_set('user_mail_status_activated_notify', $prev);
 
   $onetime = user_pass_reset_url($account);
