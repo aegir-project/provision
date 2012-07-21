@@ -1,21 +1,39 @@
 <?php
-// $Id$
 /**
  *  @file
  *    Rebuild all the caches
  */
-cache_clear_all();
-drush_log(t('Cleared all caches'));
-
-node_types_rebuild();
-drush_log(t('Rebuilt node type cache'));
 
 module_rebuild_cache();
 drush_log(t('Rebuilt module cache'));
 
-drupal_rebuild_theme_registry();
-system_theme_data();
-drush_log(t('Rebuilt theme cache'));
+drupal_flush_all_caches();
+drush_log(t('All caches flushed'));
 
-menu_rebuild();
-drush_log(t('Rebuilt menu cache'));
+// function drupal_flush_all_caches() {
+//   // Change query-strings on css/js files to enforce reload for all users.
+//   _drupal_flush_css_js();
+//
+//   drupal_clear_css_cache();
+//   drupal_clear_js_cache();
+//
+//   // If invoked from update.php, we must not update the theme information in the
+//   // database, or this will result in all themes being disabled.
+//   if (defined('MAINTENANCE_MODE') && MAINTENANCE_MODE == 'update') {
+//     _system_theme_data();
+//   }
+//   else {
+//     system_theme_data();
+//   }
+//
+//   drupal_rebuild_theme_registry();
+//   menu_rebuild();
+//   node_types_rebuild();
+//   // Don't clear cache_form - in-progress form submissions may break.
+//   // Ordered so clearing the page cache will always be the last action.
+//   $core = array('cache', 'cache_block', 'cache_filter', 'cache_page');
+//   $cache_tables = array_merge(module_invoke_all('flush_caches'), $core);
+//   foreach ($cache_tables as $table) {
+//     cache_clear_all('*', $table, TRUE);
+//   }
+// }
