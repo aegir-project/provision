@@ -3,14 +3,6 @@
     Allow from all
 <?php print $extra_config; ?>
 
-  <IfModule mod_rewrite.c>
-    RewriteEngine on
-    # allow files to be accessed without /sites/fqdn/
-    RewriteRule ^files/(.*)$ /sites/%{HTTP_HOST}/files/$1 [L]
-
-    RewriteCond <?php print $this->root; ?>/sites/%{HTTP_HOST}/files/robots.txt -f
-    RewriteRule ^robots.txt /sites/%{HTTP_HOST}/files/robots.txt [L]
-  </IfModule>
 
 <?php
   if (file_exists("{$this->root}/.htaccess")) {
