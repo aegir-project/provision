@@ -24,9 +24,12 @@
 if (sizeof($this->aliases)) {
   print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
 }
- 
+?>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine on
+<?php
 if ($this->redirection || $ssl_redirection) {
-  print " RewriteEngine on\n";
 
   if ($ssl_redirection && !$this->redirection) {
     // redirect aliases in non-ssl to the same alias on ssl.
@@ -43,7 +46,10 @@ if ($this->redirection || $ssl_redirection) {
   }
 }
 ?>
-
+  RewriteRule ^/files/(.*)$ /sites/<?php print $this->uri; ?>/files/$1 [L]
+  RewriteCond <?php print $this->site_path; ?>/files/robots.txt -f
+  RewriteRule ^/robots.txt /sites/<?php print $this->uri; ?>/files/robots.txt [L]
+</IfModule>
 
 <?php print $extra_config; ?>
 
