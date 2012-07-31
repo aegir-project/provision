@@ -134,10 +134,13 @@ class provisionService_http_ssl extends provisionService_http_public {
       // generate a key
       drush_shell_exec('openssl genrsa -out %s/openssl.key 1024', $pass, $path);
 
-      // Generate the CSR
+      // Generate the CSR to make the key certifiable by third parties
       $ident = "/C=us/CN={$this->context->uri}/OU={$this->context->uri}/emailAddress=admin@{$this->context->uri}";
       drush_shell_exec("openssl req -new -subj '%s' -key %s/openssl.key -out %s/openssl.csr -batch", $ident, $path, $path);
 
+      // sign the certificate with itself, generating a self-signed
+      // certificate. this will make a SHA1 certificate by default in
+      // current OpenSSL.
       drush_shell_exec("openssl x509 -req -days 365 -in %s/openssl.csr -signkey %s/openssl.key  -out %s/openssl.crt", $path, $path, $path);
     }
   }
