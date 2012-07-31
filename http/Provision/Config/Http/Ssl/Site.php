@@ -31,15 +31,18 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
       // Copy the certificates to the server's ssl.d directory.
       provision_file()->copy(
         $this->data['ssl_cert_source'],
-        $this->data['ssl_cert']);
+        $this->data['ssl_cert'])
+        || drush_set_error('SSL_CERT_COPY_FAIL', dt('failed to copy SSL certificate in place'));
       provision_file()->copy(
         $this->data['ssl_cert_key_source'],
-        $this->data['ssl_cert_key']);
+        $this->data['ssl_cert_key'])
+        || drush_set_error('SSL_KEY_COPY_FAIL', dt('failed to copy SSL key in place'));
       // Copy the chain certificate, if it is set.
       if (!empty($this->data['ssl_chain_cert_source'])) {
 	      provision_file()->copy(
           $this->data['ssl_chain_cert_source'],
-          $this->data['ssl_chain_cert']);
+          $this->data['ssl_chain_cert'])
+        || drush_set_error('SSL_CHAIN_COPY_FAIL', dt('failed to copy SSL certficate chain in place'));
       }
       // Sync the key directory to the remote server.
       $this->data['server']->sync($path, array(
