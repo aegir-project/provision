@@ -131,17 +131,21 @@ class provisionService_http_ssl extends provisionService_http_public {
       )), 0700);
 
     if (provision_file()->exists($path)->status()) {
+      drush_log(dt('generating 2048 bit RSA key in %path/', array('%path' => $path)));
       // generate a key
-      drush_shell_exec('openssl genrsa -out %s/openssl.key 2048', $pass, $path);
+      drush_shell_exec('openssl genrsa -out %s/openssl.key 2048', $path)
+        || drush_set_error('SSL_KEY_GEN_FAIL', dt('failed to generate SSL key in %path', array('%path' => $path . '/openssl.key')));
 
       // Generate the CSR to make the key certifiable by third parties
       $ident = "/C=us/CN={$this->context->uri}/OU={$this->context->uri}/emailAddress=admin@{$this->context->uri}";
-      drush_shell_exec("openssl req -new -subj '%s' -key %s/openssl.key -out %s/openssl.csr -batch", $ident, $path, $path);
+      drush_shell_exec("openssl req -new -subj '%s' -key %s/openssl.key -out %s/openssl.csr -batch", $ident, $path, $path)
+        || drush_log(dt('failed to generate signing request for certificate in %path', array('%path' => $path . '/openssl.csr')));
 
       // sign the certificate with itself, generating a self-signed
       // certificate. this will make a SHA1 certificate by default in
       // current OpenSSL.
-      drush_shell_exec("openssl x509 -req -days 365 -in %s/openssl.csr -signkey %s/openssl.key  -out %s/openssl.crt", $path, $path, $path);
+      drush_shell_exec("openssl x509 -req -days 365 -in %s/openssl.csr -signkey %s/openssl.key  -out %s/openssl.crt", $path, $path, $path)
+        || drush_set_error('SSL_CERT_GEN_FAIL', dt('failed to generate self-signed certificate in %path', array('%path' => $path . '/openssl.crt')));
     }
   }
 
