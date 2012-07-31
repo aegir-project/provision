@@ -131,13 +131,8 @@ class provisionService_http_ssl extends provisionService_http_public {
       )), 0700);
 
     if (provision_file()->exists($path)->status()) {
-      $pass = 'pass';
-
       // generate a key
-      drush_shell_exec('openssl genrsa -passout pass:%s -des3 -out %s/openssl.key.orig 1024', $pass, $path);
-
-      // unsign it
-      drush_shell_exec('openssl rsa -passin pass:%s -in %s/openssl.key.orig -out %s/openssl.key', $pass, $path, $path);
+      drush_shell_exec('openssl genrsa -out %s/openssl.key 1024', $pass, $path);
 
       // Generate the CSR
       $ident = "/C=us/CN={$this->context->uri}/OU={$this->context->uri}/emailAddress=admin@{$this->context->uri}";
