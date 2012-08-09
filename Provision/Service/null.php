@@ -13,7 +13,7 @@ class Provision_Service_null extends Provision_Service {
     return false;
   }
 
-  function __call($name, $args) {
+  function __call($name, $args = array()) {
     return false;
   }
 
