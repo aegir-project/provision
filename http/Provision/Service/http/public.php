@@ -96,11 +96,6 @@ class Provision_Service_http_public extends Provision_Service_http {
       $this->sync($this->server->http_vhostd_path, array(
         'exclude' => $this->server->http_vhostd_path . '/*',  // Make sure remote directory is created
       ));
-
-      provision_file()->create_dir($this->server->http_platforms_path, dt("Platforms"), 0711);
-      $this->sync($this->server->http_platforms_path, array(
-        'exclude' => $this->server->http_platforms_path . '/*',  // Make sure remote directory is created
-      ));
     } 
 
     parent::verify_server_cmd();

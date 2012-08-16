@@ -169,6 +169,10 @@ function drush_provision_drupal_provision_install_backend() {
  * finishing operations that affect the filesystem.
  */
 function provision_drupal_sync_site() {
+  provision_file()->create_dir(d()->service('http')->server->http_platforms_path, dt("Platforms"), 0755);
+  d()->server->sync(d()->server->http_platforms_path, array(
+    'exclude' => d()->server->http_platforms_path . '/*',  // Make sure remote directory is created
+  ));
   d()->service('http')->sync(d()->root, array('exclude-sites' => TRUE));
   if (d()->type === 'site') {
     // Sync all filesystem changes to the remote server.
