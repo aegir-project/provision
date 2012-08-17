@@ -37,11 +37,6 @@
  *   login_reset - Generate a one-time login reset URL.
  */
 
-// Do not allow the program to be run as the root user. ever
-$name = posix_getpwuid(posix_geteuid());
-if ($name['name'] == 'root') {
-  return drush_set_error('PROVISION_IS_ROOT', dt('You are running the provision script as the root user. Exiting'));
-}
 
 /**
  * @defgroup provisiondrush Command line interface for Provision.
@@ -50,13 +45,33 @@ if ($name['name'] == 'root') {
 include_once('provision.inc');
 
 /**
- * implementation of hook_drush_init().
- *
+ * Implements hook_drush_init().
+ */
+function provision_drush_init() {
+  // Make sure that the provision command is not being run as the root user.
+  _provision_drush_check_user();
+  // Abort the process if the load is too high.
+  _provision_drush_check_load();
+}
+
+/**
+ * This will abort any process running drush provision commands if the
+ * user running the command is root.
+ */
+function _provision_drush_check_user() {
+  $command = drush_get_command();
+  $name = posix_getpwuid(posix_geteuid());
+  if (preg_match("/^provision-\b/", $command['command']) && $name['name'] == 'root') {
+    return drush_set_error('PROVISION_IS_ROOT', dt('You are running the provision script as the root user. Exiting'));
+  }
+}
+
+/**
  * This will abort any process running drush if the load is critical.
  *
  * @see provision_load_critical()
  */
-function provision_drush_init() {
+function _provision_drush_check_load() {
   $hash_name = drush_get_option('#name') ? '#name' : 'name';
   d(drush_get_option($hash_name, '@self', 'alias'), TRUE);
   $load = sys_getloadavg();
