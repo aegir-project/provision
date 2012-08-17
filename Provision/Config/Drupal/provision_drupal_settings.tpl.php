@@ -133,7 +133,10 @@ print '<?php' ?>
   $conf['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
 
   <?php if (!$this->site_enabled) : ?>
+    // This is for Drupal 6 and below.
     $conf['site_offline'] = 1;
+    // And this is for Drupal 7 and above.
+    $conf['maintenance_mode'] = 1;
   <?php endif ?>
 
 <?php print $extra_config; ?>
