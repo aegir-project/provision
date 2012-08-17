@@ -51,7 +51,7 @@ function drush_provision_drupal_pre_provision_verify() {
       drush_log(dt("Platform path does not exist, fetching from drush makefile"));
       $options = array('root' => null, 'uri' => null);
       // propagate working-copy args downward
-      if (drush_get_option('working-copy')) {
+      if (drush_get_option('working-copy') || !empty(d()->make_working_copy)) {
         $options['working-copy'] = 1;
       }
       $options[] = d()->makefile;
