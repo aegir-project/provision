@@ -351,17 +351,19 @@ function _provision_drupal_rebuild_caches() {
 function _provision_find_profiles() {
   if (drush_drupal_major_version() >= 8) {
     include_once('core/includes/install.inc');
+    $profiles_subdir = "./core/profiles";
   }
   else {
     include_once('includes/install.inc');
+    $profiles_subdir = "./profiles";
   }
-  if (!$dir = opendir("./profiles")) {
+  if (!$dir = opendir($profiles_subdir)) {
     drush_log(dt("Cannot find profiles directory"), 'error');
     return FALSE;
   }
   while (FALSE !== ($name = readdir($dir))) {
     $languages = array();
-    $file = "./profiles/$name/$name.profile";
+    $file = "$profiles_subdir/$name/$name.profile";
     if ($name == '..' || $name == '.' || !file_exists($file)) {
       continue;
     }
@@ -373,7 +375,7 @@ function _provision_find_profiles() {
 
     $profile->info = array();
 
-    $info_file = "./profiles/$name/$name.info";
+    $info_file = "$profiles_subdir/$name/$name.info";
     if (file_exists($info_file)) {
       $profile->info = provision_parse_info_file($info_file);
       // Skip hidden profiles
@@ -390,8 +392,8 @@ function _provision_find_profiles() {
 
     $languages['en'] = 1;
     // Find languages available
-    $files = array_keys(drush_scan_directory('./profiles/' . $name . '/translations', '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
-    $files = array_merge($files, array_keys(drush_scan_directory('./profiles/' . $name , '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath')));
+    $files = array_keys(drush_scan_directory($profiles_subdir . '/' . $name . '/translations', '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
+    $files = array_merge($files, array_keys(drush_scan_directory($profiles_subdir . '/' . $name , '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath')));
     if (is_array($files)) {
       foreach ($files as $file) {
         if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
