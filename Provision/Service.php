@@ -318,7 +318,7 @@ class Provision_Service extends Provision_ChainedState {
    * Return service-specific configuration options for help.
    *
    * @return
-   *   array('--option' => 'description')
+   *   array('option' => 'description')
    */
   static function option_documentation() {
     return array();

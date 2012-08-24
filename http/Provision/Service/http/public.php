@@ -73,9 +73,9 @@ class Provision_Service_http_public extends Provision_Service_http {
 
   static function option_documentation() {
     return array(
-      '--web_group' => 'server with http: OS group for permissions; working default will be attempted',
-      '--web_disable_url' => 'server with http: URL disabled sites are redirected to; default {master_url}/hosting/disabled',
-      '--web_maintenance_url' => 'server with http: URL maintenance sites are redirected to; default {master_url}/hosting/maintenance',
+      'web_group' => 'server with http: OS group for permissions; working default will be attempted',
+      'web_disable_url' => 'server with http: URL disabled sites are redirected to; default {master_url}/hosting/disabled',
+      'web_maintenance_url' => 'server with http: URL maintenance sites are redirected to; default {master_url}/hosting/maintenance',
     );
   }
 

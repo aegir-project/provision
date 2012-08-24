@@ -3,7 +3,7 @@
 class Provision_Service_http_cluster extends Provision_Service_http {
   static function option_documentation() {
     return array(
-      '--cluster_web_servers' => 'server with cluster: comma-separated list of web servers.'
+      'cluster_web_servers' => 'server with cluster: comma-separated list of web servers.'
     );
   }
 

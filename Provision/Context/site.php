@@ -10,14 +10,14 @@ class Provision_Context_site extends Provision_Context {
 
   static function option_documentation() {
     return array(
-      '--platform' => 'site: the platform the site is run on',
-      '--db_server' => 'site: the db server the site is run on',
-      '--uri' => 'site: example.com URI, no http:// or trailing /',
-      '--language' => 'site: site language; default en',
-      '--aliases' => 'site: comma-separated URIs',
-      '--redirection' => 'site: boolean for whether --aliases should redirect; default false',
-      '--client_name' => 'site: machine name of the client that owns this site',
-      '--profile' => 'site: Drupal profile to use; default default',
+      'platform' => 'site: the platform the site is run on',
+      'db_server' => 'site: the db server the site is run on',
+      'uri' => 'site: example.com URI, no http:// or trailing /',
+      'language' => 'site: site language; default en',
+      'aliases' => 'site: comma-separated URIs',
+      'redirection' => 'site: boolean for whether --aliases should redirect; default false',
+      'client_name' => 'site: machine name of the client that owns this site',
+      'profile' => 'site: Drupal profile to use; default default',
     );
   }
 

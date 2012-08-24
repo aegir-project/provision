@@ -92,8 +92,8 @@ function provision_drush_command() {
       '@context_name' => 'Context to save',
     ),
     'options' => array_merge(array(
-      '--context_type' => 'server, platform, or site; default server',
-      '--delete' => 'Remove the alias.',
+      'context_type' => 'server, platform, or site; default server',
+      'delete' => 'Remove the alias.',
     ), Provision_Context_server::option_documentation(), Provision_Context_platform::option_documentation(), Provision_Context_site::option_documentation()),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
@@ -246,7 +246,9 @@ function provision_drush_command() {
     'arguments' => array(
       'example.com' => dt('The name of the site to migrate'),
       '/path/to/platform' => dt('The platform to migrate the site to.'),
-      '--makefile' => dt('The optional makefile to use instead of aegir.')
+    ),
+    'options' => array(
+      'makefile' => dt('The optional makefile to use instead of aegir.')
     ),
   );
 

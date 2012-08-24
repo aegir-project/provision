@@ -21,16 +21,16 @@ class Provision_Context_server extends Provision_Context {
 
   static function option_documentation() {
     $options = array(
-      '--remote_host' => 'server: host name; default localhost',
-      '--script_user' => 'server: OS user name; default current user',
-      '--aegir_root' => 'server: Aegir root; default ' . getenv('HOME'),
-      '--master_url' => 'server: Hostmaster URL',
+      'remote_host' => 'server: host name; default localhost',
+      'script_user' => 'server: OS user name; default current user',
+      'aegir_root' => 'server: Aegir root; default ' . getenv('HOME'),
+      'master_url' => 'server: Hostmaster URL',
     );
     foreach (drush_command_invoke_all('provision_services') as $service => $default) {
       $reflect = new reflectionClass('Provision_Service_' . $service);
       $base_dir = dirname($reflect->getFilename());
       $types = array();
-      $options['--' . $service . '_service_type'] = 'placeholder';
+      $options[$service . '_service_type'] = 'placeholder';
       foreach (array_keys(drush_scan_directory($base_dir, '%.*_service\.inc%')) as $service_file) {
         if (preg_match('%^' . $base_dir . '/([a-z]+)/(?:\1)_service.inc$%', $service_file, $match)) {
           $types[] = $match[1];
@@ -38,7 +38,7 @@ class Provision_Context_server extends Provision_Context {
           $options = array_merge($options, call_user_func(array(sprintf('Provision_Service_%s_%s', $service, $match[1]), 'option_documentation')));
         }
       }
-      $options['--' . $service . '_service_type'] = 'server: ' . implode(', ', $types) . ', or null; default ' . (empty($default) ? 'null' : $default);
+      $options[$service . '_service_type'] = 'server: ' . implode(', ', $types) . ', or null; default ' . (empty($default) ? 'null' : $default);
     }
     return $options;
   }

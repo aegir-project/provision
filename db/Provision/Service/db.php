@@ -14,7 +14,7 @@ class Provision_Service_db extends Provision_Service {
 
   static function option_documentation() {
     return array(
-      '--master_db' => 'server with db: Master database connection info, {type}://{user}:{password}@{host}',
+      'master_db' => 'server with db: Master database connection info, {type}://{user}:{password}@{host}',
     );
   }
 

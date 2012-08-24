@@ -306,7 +306,7 @@ class Provision_Context {
    * Return context-specific configuration options for help.
    *
    * @return
-   *   array('--option' => 'description')
+   *   array('option' => 'description')
    */
   static function option_documentation() {
     return array();
