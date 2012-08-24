@@ -9,10 +9,9 @@ function drush_provision_drupal_provision_verify_validate() {
   if (d()->type === 'site') {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
     provision_prepare_environment();
+
     _provision_drupal_create_settings_file();
     drush_errors_on();
-    provision_backend_invoke(d()->name, 'registry-rebuild --no-cache-clear');
-    drush_log(dt('Rebuilt registry with --no-cache-clear option'));
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   }
 
@@ -28,9 +27,9 @@ function drush_provision_drupal_pre_provision_verify() {
     $config_root = dirname(d()->config_path);
     provision_file()->create_dir($config_root, dt('Provision configuration root'), 0711);
     provision_file()->create_dir(d()->config_path, dt('Provision configuration'), 0711);
-    provision_file()->create_dir(d()->clients_path, dt('Provision client home'), 0750);
+    provision_file()->create_dir(d()->clients_path, dt('Provision client home'), 0711);
     if (d()->name == '@server_master') {
-      provision_file()->create_dir(d()->backup_path, dt('Backup'), 0750);
+      provision_file()->create_dir(d()->backup_path, dt('Backup'), 0700);
       provision_file()->create_dir(d()->include_path, dt('Provision PHP configuration'), 0711);
       if (!provision_file()->exists(d()->include_path . '/global.inc')->succeed('Global configuration file exists')->status()) {
         // Create an empty global.inc so the include doesn't fail with
@@ -49,16 +48,17 @@ function drush_provision_drupal_pre_provision_verify() {
     // create a platform from a makefile, if it doesnt already exist and the makefile does.
     if (!provision_file()->exists(d()->root)->status() && !empty(d()->makefile)) {
       drush_log(dt("Platform path does not exist, fetching from drush makefile"));
-      $options = array('root' => null, 'uri' => null);
+      $arguments = array();
+      $options = array();
       // propagate working-copy args downward
       if (drush_get_option('working-copy') || !empty(d()->make_working_copy)) {
-        $options['working-copy'] = 1;
+        $options[] = '--working-copy';
       }
-      $options[] = d()->makefile;
-      $options[] = d()->root;
-      drush_backend_invoke("make", $options);
+      $arguments[] = d()->makefile;
+      $arguments[] = d()->root;
+      drush_invoke_process('@none', "make", $arguments, $options);
       if (drush_get_error()) {
-        return drush_set_error("DRUSH_MAKE_FAILED", 
+        return drush_set_error("DRUSH_MAKE_FAILED",
           "Could not download platform using drush make. No platform present");
       }
     }
