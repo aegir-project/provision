@@ -271,6 +271,8 @@ function provision_drush_command() {
      'version' => dt('The version of this released. (default: %version)', array('%version' => provision_version())),
      'aegir_root' => dt('Install aegir in this home directory (default: %home). Do not change unless you know what you are doing.', array('%home' => drush_server_home())),
      'root' => dt('Install the frontend in this directory (default: %home/hostmaster-%version).', array('%home' => drush_server_home(), '%version' => provision_version())),
+     'backend-only' => dt('Install just the backend, and not the frontend UI.'),
+     'working-copy' => dt('Keep VCS files when building the hostmaster platform using Drush make.')
      ),
   );
 
