@@ -12,6 +12,8 @@ function drush_provision_drupal_provision_verify_validate() {
 
     _provision_drupal_create_settings_file();
     drush_errors_on();
+    provision_backend_invoke(d()->name, 'registry-rebuild --no-cache-clear');
+    drush_log(dt('Rebuilt registry with --no-cache-clear option'));
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   }
 
@@ -27,9 +29,9 @@ function drush_provision_drupal_pre_provision_verify() {
     $config_root = dirname(d()->config_path);
     provision_file()->create_dir($config_root, dt('Provision configuration root'), 0711);
     provision_file()->create_dir(d()->config_path, dt('Provision configuration'), 0711);
-    provision_file()->create_dir(d()->clients_path, dt('Provision client home'), 0711);
+    provision_file()->create_dir(d()->clients_path, dt('Provision client home'), 0750);
     if (d()->name == '@server_master') {
-      provision_file()->create_dir(d()->backup_path, dt('Backup'), 0700);
+      provision_file()->create_dir(d()->backup_path, dt('Backup'), 0750);
       provision_file()->create_dir(d()->include_path, dt('Provision PHP configuration'), 0711);
       if (!provision_file()->exists(d()->include_path . '/global.inc')->succeed('Global configuration file exists')->status()) {
         // Create an empty global.inc so the include doesn't fail with
