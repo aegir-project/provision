@@ -52,6 +52,7 @@ class Provision_Service_dns extends Provision_Service {
 
     if (!is_null($this->application_name)) {
       $app_dir = "{$this->server->config_path}/{$this->application_name}";
+      $this->server->dns_app_path = $app_dir;
       $this->server->dns_zoned_path = "{$app_dir}/zone.d";
       $this->server->dns_hostd_path = "{$app_dir}/host.d";
     }
@@ -104,6 +105,11 @@ class Provision_Service_dns extends Provision_Service {
     provision_file()->create_dir($this->server->dns_data_path, dt("DNS data store"), 0700);
 
     if (!is_null($this->application_name)) {
+      // Ensure that the base DNS configuration folder is at least permissive
+      // for users other than the owner, sub folders and files can further
+      // restrict access normally.
+      provision_file()->create_dir($this->server->dns_app_path, dt("DNS pre-configuration"), 0711);
+
       provision_file()->create_dir($this->server->dns_zoned_path, dt("DNS zone configuration"), 0755);
       $this->sync($this->server->dns_zoned_path, array(
         'exclude' => $this->server->dns_zoned_path . '/*',  // Make sure remote directory is created
