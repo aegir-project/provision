@@ -27,6 +27,7 @@ class Provision_Context_server extends Provision_Context {
       '--master_url' => 'server: Hostmaster URL',
     );
     foreach (drush_command_invoke_all('provision_services') as $service => $default) {
+      // TODO: replace this file scanning nastiness, with a hook!
       $reflect = new reflectionClass('Provision_Service_' . $service);
       $base_dir = dirname($reflect->getFilename());
       $types = array();
@@ -98,11 +99,9 @@ class Provision_Context_server extends Provision_Context {
       }
     }
     if ($type) {
-      $file = sprintf("%s/%s/%s_service.inc", $base_dir, $type, $type);
       $className = sprintf("Provision_Service_%s_%s", $service, $type);
       if (class_exists($className)) {
         drush_log("Loading $type driver for the $service service");
-        //include_once($file);
         $object = new $className($this->name);
         $this->services[$service] = $object;
         $this->setProperty($type_option, $type);
