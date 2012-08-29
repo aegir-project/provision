@@ -414,7 +414,7 @@ function _scrub_object($input) {
  */
 function provision_backend_invoke($target, $command, $arguments = array(), $data = array(), $mode = 'GET') {
   $context = '@' . ltrim($target, '@');
-  return _provision__drush_invoke_process($context, $command, $arguments, $data /*+ array('root' => NULL, 'uri' => NULL)*/, array('method' => $mode, 'integrate' => TRUE));
+  return drush_invoke_process($context, $command, $arguments, $data, array('method' => $mode, 'integrate' => TRUE, 'dispatch-using-alias' => TRUE));
 }
 
 /**
