@@ -62,6 +62,7 @@ class Provision_Service_http_public extends Provision_Service_http {
 
     if (!is_null($this->application_name)) {
       $app_dir = "{$this->server->config_path}/{$this->application_name}";
+      $this->server->http_app_path = $app_dir;
       $this->server->http_pred_path = "{$app_dir}/pre.d";
       $this->server->http_postd_path = "{$app_dir}/post.d";
       $this->server->http_platformd_path = "{$app_dir}/platform.d";
@@ -82,6 +83,11 @@ class Provision_Service_http_public extends Provision_Service_http {
 
   function verify_server_cmd() {
     if (!is_null($this->application_name)) {
+      // Ensure that the base apache configuration folder is at least permissive
+      // for users other than the owner, sub folders and files can further
+      // restrict access normally.
+      provision_file()->create_dir($this->server->http_app_path, dt("Webserver custom pre-configuration"), 0711);
+
       provision_file()->create_dir($this->server->http_pred_path, dt("Webserver custom pre-configuration"), 0700);
       $this->sync($this->server->http_pred_path);
       provision_file()->create_dir($this->server->http_postd_path, dt("Webserver custom post-configuration"), 0700);
