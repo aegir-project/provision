@@ -35,7 +35,7 @@
  *             nor any sites currently provisioned on it.
  *   unlock  - Unlock a platform so that sites can be provisioned on it.
  *
- *   login_reset - Generate a one-time login reset URL.
+ *   login-reset - Generate a one-time login reset URL.
  */
 
 
@@ -219,19 +219,19 @@ function provision_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
   );
 
-  $items['provision-login_reset'] = array(
+  $items['provision-login-reset'] = array(
     'description' => 'Generate a one-time login reset URL.',
     'examples' => array(
-      'drush @site provision-login_reset' => 'Generate a one-time login reset URL for the site as defined by the site Drush alias generated with provision-save.',
+      'drush @site provision-login-reset' => 'Generate a one-time login reset URL for the site as defined by the site Drush alias generated with provision-save.',
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
-  $items['provision-backup_delete'] = array(
+  $items['provision-backup-delete'] = array(
     'description' => 'Delete a backup file.',
     'arguments' => array('backup-file' => dt('The backup file to delete. This will be a gzipped tarball.')),
     'examples' => array(
-      'drush @site provision-backup_delete /path/to/site_backup.tgz' => 'Delete a backup of this site as defined by the site Drush alias generated with provision-save.',
+      'drush @site provision-backup-delete /path/to/site_backup.tgz' => 'Delete a backup of this site as defined by the site Drush alias generated with provision-save.',
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
 
