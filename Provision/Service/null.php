@@ -10,18 +10,18 @@
 class Provision_Service_null extends Provision_Service {
 
   function __get($name) {
-    return false;
+    return FALSE;
   }
 
   function __call($name, $args = array()) {
-    return false;
+    return FALSE;
   }
 
   /**
    * Null services do not synch files to the remote server,
    * because they have no associated config files.
    */
-  function sync() {
-    return null;
+  function sync($path = NULL, $additional_options = array()) {
+    return NULL;
   }
 }
