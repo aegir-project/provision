@@ -146,7 +146,7 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
     $mycnf = sprintf('[client]
 host=%s
 user=%s
-password=%s
+password="%s"
 port=%s
 ', $db_host, $db_user, $db_passwd, $this->server->db_port);
 
