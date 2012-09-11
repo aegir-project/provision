@@ -134,7 +134,16 @@ if (isset($_SERVER['db_name'])) {
   $conf['<?php print $file_directory_temp_var ?>'] = 'sites/<?php print $this->uri ?>/private/temp';
   <?php if (isset($file_directory_private_var)): ?>
   $conf['<?php print $file_directory_private_var ?>'] = 'sites/<?php print $this->uri ?>/private/files';
-  <?php endif; ?>
+<?php endif; ?>
+<?php if (isset($drupal_hash_salt_var)): ?>
+  $drupal_hash_salt = '';
+<?php endif; ?>
+<?php if (isset($config_directories_active_var)): ?>
+  $config_directories['active'] = 'sites/<?php print $this->uri ?>/private/config/active';
+<?php endif; ?>
+<?php if (isset($config_directories_staging_var)): ?>
+  $config_directories['staging'] = 'sites/<?php print $this->uri ?>/private/config/staging';
+<?php endif; ?>
   $conf['clean_url'] = 1;
   $conf['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
 
