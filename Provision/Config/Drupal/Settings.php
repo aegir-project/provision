@@ -15,11 +15,16 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
   }
 
   function process() {
+    if (drush_drupal_major_version() >= 8) {
+      $this->data['config_directories_active_var'] = 'config_directories_active';
+      $this->data['config_directories_staging_var'] = 'config_directories_staging';
+    }
     if (drush_drupal_major_version() >= 7) {
       $this->data['db_type'] = ($this->data['db_type'] == 'mysqli') ? 'mysql' : $this->data['db_type'];
       $this->data['file_directory_path_var'] = 'file_public_path';
       $this->data['file_directory_temp_var'] = 'file_temporary_path';
       $this->data['file_directory_private_var'] = 'file_private_path';
+      $this->data['drupal_hash_salt_var'] = 'empty';
     }
     else {
       $this->data['file_directory_path_var'] = 'file_directory_path';
