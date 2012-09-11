@@ -1,11 +1,11 @@
 <?php
 /**
  * @file
- *   Provision hooks for the provision backup_delete command.
+ *   Provision hooks for the provision backup-delete command.
  */
 
 /**
- * Provision backup_delete command
+ * Provision backup-delete command
  *
  * These are the hooks that will be executed by the drush_invoke function
  * when deleting a backup file from the backend.

@@ -5,7 +5,7 @@
  */
 
 /**
- * Provision login_reset command
+ * Provision login-reset command
  *
  * These are the hooks that will be executed by the drush_invoke function
  * when generating a one-time login reset URL.
