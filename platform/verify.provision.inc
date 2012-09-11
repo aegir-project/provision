@@ -11,8 +11,10 @@ function drush_provision_drupal_provision_verify_validate() {
     provision_prepare_environment();
     _provision_drupal_create_settings_file();
     drush_errors_on();
-    provision_backend_invoke(d()->name, 'registry-rebuild --no-cache-clear');
-    drush_log(dt('Rebuilt registry with --no-cache-clear option'));
+    if (drush_drupal_major_version() < 8) {
+      provision_backend_invoke(d()->name, 'registry-rebuild --no-cache-clear');
+      drush_log(dt('Rebuilt registry with --no-cache-clear option'));
+    }
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   }
 }
