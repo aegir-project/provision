@@ -118,9 +118,9 @@ class provisionService_http_ssl extends provisionService_http_public {
   /**
    * Generate a self-signed certificate for that key.
    *
-   * Because we only generate certificates for sites we make
-   * some assumptions based on the uri, but this cert should
-   * REALLY be replaced by the admin as soon as possible.
+   * Because we only generate certificates for sites we make some assumptions
+   * based on the uri, but this cert may be replaced by the admin if they
+   * already have an existing certificate.
    */
   function generate_certificates($ssl_key) {
     $path = "{$this->server->ssld_path}/{$ssl_key}";
