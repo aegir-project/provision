@@ -37,16 +37,22 @@
 <?php
 if (sizeof($this->aliases)) {
   print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
-
-  if ($this->redirection) {
-    print " RewriteEngine on\n";
-
-    // Redirect all aliases to the main https url.
-    print " RewriteCond %{HTTP_HOST} !^{$this->uri}$ [NC]\n";
-    print " RewriteRule ^/*(.*)$ https://{$this->uri}/$1 [NE,L,R=301]\n";
-  }
 }
 ?>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine on
+<?php
+if ($this->redirection) {
+  // Redirect all aliases to the main https url.
+  print " RewriteCond %{HTTP_HOST} !^{$this->uri}$ [NC]\n";
+  print " RewriteRule ^/*(.*)$ https://{$this->uri}/$1 [NE,L,R=301]\n";
+}
+?>
+  RewriteRule ^/files/(.*)$ /sites/<?php print $this->uri; ?>/files/$1 [L]
+  RewriteCond <?php print $this->site_path; ?>/files/robots.txt -f
+  RewriteRule ^/robots.txt /sites/<?php print $this->uri; ?>/files/robots.txt [L]
+</IfModule>
 
   <?php print $extra_config; ?>
 
