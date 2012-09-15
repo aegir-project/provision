@@ -1,9 +1,9 @@
 <?php
-// $Id$
 /**
  *  @file
  *    Rebuild all the caches
  */
+
 cache_clear_all();
 drush_log(t('Cleared all caches'));
 
