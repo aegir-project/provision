@@ -2,7 +2,7 @@
  // $Id$
 
 /**
- * @file Package management code for Drupal 7 
+ * @file Package management code for Drupal 8
  */
 
 
