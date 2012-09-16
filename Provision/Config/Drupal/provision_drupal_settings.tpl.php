@@ -133,10 +133,12 @@ print '<?php' ?>
   $drupal_hash_salt = '';
 <?php endif; ?>
 <?php if (isset($config_directories_active_var)): ?>
-  $config_directories['active'] = 'private/config/active';
+  $config_directories['active']['path'] = 'sites/<?php print $this->uri ?>/private/config/active';
+  $config_directories['active']['absolute'] = TRUE;
 <?php endif; ?>
 <?php if (isset($config_directories_staging_var)): ?>
-  $config_directories['staging'] = 'private/config/staging';
+  $config_directories['staging']['path'] = 'sites/<?php print $this->uri ?>/private/config/staging';
+  $config_directories['staging']['absolute'] = TRUE;
 <?php endif; ?>
   $conf['clean_url'] = 1;
   $conf['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;

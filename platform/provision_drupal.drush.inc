@@ -277,17 +277,14 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     $chgrp["sites/$url/files/styles"]     = d('@server_master')->web_group;
 
     // d8 support
-    $mkdir["sites/$url/files/private"]    = 02770;
-    $chgrp["sites/$url/files/private"]    = d('@server_master')->web_group;
+    $mkdir["sites/$url/private/config"]   = 02770;
+    $chgrp["sites/$url/private/config"]   = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/private/config"]   = 02770;
-    $chgrp["sites/$url/files/private/config"]   = d('@server_master')->web_group;
+    $mkdir["sites/$url/private/config/active"] = 02770;
+    $chgrp["sites/$url/private/config/active"] = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/private/config/active"] = 02770;
-    $chgrp["sites/$url/files/private/config/active"] = d('@server_master')->web_group;
-
-    $mkdir["sites/$url/files/private/config/staging"] = 02770;
-    $chgrp["sites/$url/files/private/config/staging"] = d('@server_master')->web_group;
+    $mkdir["sites/$url/private/config/staging"] = 02770;
+    $chgrp["sites/$url/private/config/staging"] = d('@server_master')->web_group;
   }
 
   // These paths should not have recursive operations performed on them.
@@ -315,9 +312,9 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     "sites/$url/private/temp",
     "sites/$url/files/styles",
     "sites/$url/files/private",
-    "sites/$url/files/private/config",
-    "sites/$url/files/private/config/active",
-    "sites/$url/files/private/config/staging"
+    "sites/$url/private/config",
+    "sites/$url/private/config/active",
+    "sites/$url/private/config/staging"
   );
 
   foreach ($mkdir as $path => $perm) {
