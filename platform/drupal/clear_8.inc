@@ -4,9 +4,6 @@
  *    Rebuild all the caches
  */
 
-node_types_rebuild();
-drush_log(t('Rebuilt node types cache'));
-
 drupal_flush_all_caches();
 drush_log(t('All caches flushed'));
 
