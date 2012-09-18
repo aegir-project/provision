@@ -28,15 +28,19 @@ if (db_table_exists('files')) {
 if (db_table_exists('field_data_body')) {
   db_query("UPDATE {field_data_body} SET body_value = REPLACE(body_value, :old, :new)", array(':old' => 'sites/$old_url', ':new' => 'sites/$new_url'));
   db_query("UPDATE {field_data_body} SET body_value = REPLACE(body_value, :old, :new)", array(':old' => 'sites/default', ':new' => 'sites/$new_url'));
-  db_query("UPDATE {field_data_body} SET body_summary = REPLACE(body_summary, :old, :new)", array(':old' => 'sites/$old_url', ':new' => 'sites/$new_url'));
-  db_query("UPDATE {field_data_body} SET body_summary = REPLACE(body_summary, :old, :new)", array(':old' => 'sites/default', ':new' => 'sites/$new_url'));
+  if (db_field_exists('field_data_body', 'body_summary')) {
+    db_query("UPDATE {field_data_body} SET body_summary = REPLACE(body_summary, :old, :new)", array(':old' => 'sites/$old_url', ':new' => 'sites/$new_url'));
+    db_query("UPDATE {field_data_body} SET body_summary = REPLACE(body_summary, :old, :new)", array(':old' => 'sites/default', ':new' => 'sites/$new_url'));
+  }
 }
 
 if (db_table_exists('field_revision_body')) {
   db_query("UPDATE {field_revision_body} SET body_value = REPLACE(body_value, :old, :new)", array(':old' => 'sites/$old_url', ':new' => 'sites/$new_url'));
   db_query("UPDATE {field_revision_body} SET body_value = REPLACE(body_value, :old, :new)", array(':old' => 'sites/default', ':new' => 'sites/$new_url'));
-  db_query("UPDATE {field_revision_body} SET body_summary = REPLACE(body_summary, :old, :new)", array(':old' => 'sites/$old_url', ':new' => 'sites/$new_url'));
-  db_query("UPDATE {field_revision_body} SET body_summary = REPLACE(body_summary, :old, :new)", array(':old' => 'sites/default', ':new' => 'sites/$new_url'));
+  if (db_field_exists('field_revision_body', 'body_summary')) {
+    db_query("UPDATE {field_revision_body} SET body_summary = REPLACE(body_summary, :old, :new)", array(':old' => 'sites/$old_url', ':new' => 'sites/$new_url'));
+    db_query("UPDATE {field_revision_body} SET body_summary = REPLACE(body_summary, :old, :new)", array(':old' => 'sites/default', ':new' => 'sites/$new_url'));
+  }
 }
 
 variable_set('file_public_path', "sites/$new_url/files");
