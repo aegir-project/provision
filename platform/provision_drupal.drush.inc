@@ -55,7 +55,7 @@ function provision_drupal_drush_exit() {
 
   if (preg_match("/^provision-/", $command[0]) && drush_get_option('provision_save_config', TRUE)) {
     if (d()->type === 'site') {
-      if (preg_match("/^provision-login_reset/", $command[0])) {
+      if (preg_match("/^provision-login-reset/", $command[0])) {
         // Make site and platform directories world writable temporarily,
         // until the next site verify, but only if apps module and
         // control file both exist.
