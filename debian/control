@@ -11,7 +11,7 @@ Vcs-browser: http://drupalcode.org/project/provision.git
 
 Package: aegir-provision
 Architecture: all
-Depends: ${misc:Depends}, drush (>= 4.3), php5-mysql, mysql-client, sudo, postfix | mail-transport-agent, apache2, adduser, ucf
+Depends: ${misc:Depends}, drush (>= 4.3), drush (<< 5.0), php5-mysql, mysql-client, sudo, postfix | mail-transport-agent, apache2, adduser, ucf
 Recommends: mysql-server, rsync
 Suggests: drush-make
 Description: mass Drupal hosting system - backend
@@ -29,7 +29,7 @@ Description: mass Drupal hosting system - backend
 
 Package: aegir-hostmaster
 Architecture: all
-Depends: ${misc:Depends}, drush (>= 4.3), drush-make, php5-mysql, apache2, libapache2-mod-php5, aegir-provision (>= ${source:Version}), git-core, unzip
+Depends: ${misc:Depends}, drush (>= 4.3), drush (<< 5.0), drush-make, php5-mysql, apache2, libapache2-mod-php5, aegir-provision (>= ${source:Version}), git-core, unzip
 Recommends: php5-gd, php5
 Description: mass Drupal hosting system - frontend
  A set of contributed modules for Drupal that aims to solve the
