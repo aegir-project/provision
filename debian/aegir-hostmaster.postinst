@@ -57,13 +57,10 @@ case "$1" in
             if [ -d "$NEW_PLATFORM" ] && [ "$drupal_root" = "$NEW_PLATFORM" ]; then
                 echo "it seems to be the same version as the one we're trying to install, not upgrading"
             else
-                # get the platform alias before we upgrade
-                # ugly, but not accessible programatically
-                platform=`sed -n "/platform/{s/^.* => '//;s/'.*$//;p}" $VARLIB/.drush/hostmaster.alias.drushrc.php`
                 echo "upgrading the frontend from $drupal_root to $NEW_PLATFORM"
                 cd "$drupal_root"
                 su -s /bin/sh aegir -c "drush hostmaster-migrate $FLAGS '$site_uri' '$NEW_PLATFORM'"
-                echo "upgrade finished, old platform $platform left in $drupal_root"
+                echo "upgrade finished, old platform left in $drupal_root"
             fi
         else
             # fresh install
