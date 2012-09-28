@@ -28,8 +28,8 @@ VARLIB="/var/aegir"
 
 case "$1" in
     configure)
-        # fetch the version number from the makefile. the line we're looking for looks like this
-        # projects[hostmaster][download][url] = "http://files.aegirproject.org/hostmaster-0.4-beta1.tgz"
+        # fetch the version number from provision. the line we're looking for looks like this
+        # version=6.x-1.9
         # this obviously doesn't work for git releases
         VERSION=`sed -n '/^version/{s/^.*= *//;p}' /usr/share/drush/commands/provision/provision.info`
 
@@ -45,12 +45,15 @@ case "$1" in
         TEMPFILE=`tempfile`
         su -s /bin/sh aegir -c 'drush --pipe @hostmaster status | egrep "site_uri|drupal_root"' >> $TEMPFILE || true
         if grep -q 'site_uri' $TEMPFILE; then
+            # upgrade
             db_stop
             . $TEMPFILE
             echo "Aegir frontend (@hostmaster) site detected in $drupal_root"
             # make those paths canonical to make sure we can compare correctly
             NEW_PLATFORM=`readlink -f "$VARLIB/hostmaster-$VERSION"`
             drupal_root=`readlink -f $drupal_root`
+            # we upgrade only if the target platform doesn't exit *OR*
+            # if it's not the current platform
             if [ -d "$NEW_PLATFORM" ] && [ "$drupal_root" = "$NEW_PLATFORM" ]; then
                 echo "it seems to be the same version as the one we're trying to install, not upgrading"
             else
@@ -63,6 +66,7 @@ case "$1" in
                 echo "upgrade finished, old platform $platform left in $drupal_root"
             fi
         else
+            # fresh install
             db_get "aegir/site"
             if [ ! -z "$RET" ]; then
                 site_uri="$RET"
@@ -78,6 +82,7 @@ case "$1" in
 
             db_go
 
+            # forget the DB password in debconf storage
             db_reset aegir/db_password || true
             db_fset aegir/db_password "seen" "true" || true
             db_stop
@@ -87,7 +92,7 @@ case "$1" in
                 exit 1
             fi
             echo "installing the Aegir frontend (Drupal with the hostmaster profile), please wait..."
-            # pass data through JSON
+            # pass data through JSON for extra security
             su aegir -c "cd $VARLIB && drush hostmaster-install $FLAGS --backend $site_uri | drush backend-parse" <<EOF
 { "yes": 1,
   "version": "$VERSION",
