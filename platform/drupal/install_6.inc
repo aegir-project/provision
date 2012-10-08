@@ -172,7 +172,7 @@ function install_main() {
   drush_log(st("Installing Drupal schema"), 'install');
   // Load the profile.
   require_once "./profiles/$profile/$profile.profile";
-  drush_log(st("Loading @profile install profile", array("@profile" => $profile)), 'install');
+  drush_log(st("Loading @profile installation profile", array("@profile" => $profile)), 'install');
 
   drush_log(st("Installing translation : @locale", array("@locale" => $install_locale)), 'install');
 
@@ -283,7 +283,7 @@ function install_main() {
   menu_rebuild();
 
   // profile task
-  // @TODO support install profiles with multiple additional tasks
+  // @TODO support installation profiles with multiple additional tasks
   $task = 'profile';
 
   $function = $profile .'_profile_tasks';

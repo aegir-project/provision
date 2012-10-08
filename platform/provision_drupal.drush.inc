@@ -398,14 +398,14 @@ function _provision_find_profiles() {
     }
     $profile->info['languages'] = array_keys($languages);
 
-    // Drupal 7 renamed the default install profile to 'standard'
+    // Drupal 7 renamed the default installation profile to 'standard'
     // Aegir now allows projects to specify an "old short name" to provide an upgrade path when projects get renamed.
     if ($profile->name == 'standard') {
       $profile->info['old_short_name'] = 'default';
     }
 
     $return[$name] = $profile;
-    drush_log(dt('Found install profile %name', array('%name' => $name)));
+    drush_log(dt('Found installation profile %name', array('%name' => $name)));
   }
 
   return $return;
@@ -548,11 +548,11 @@ function provision_find_packages() {
   // Create a package for the Drupal release
   $packages['base']['platforms'] = _provision_find_platforms();
 
-  // Find install profiles.
+  // Find installation profiles.
   $profiles = _provision_find_profiles();
   drush_set_option('profiles', array_keys((array) $profiles), 'drupal');
 
-  // Iterate through the install profiles, finding the profile specific packages
+  // Iterate through the installation profiles, finding the profile specific packages
   foreach ($profiles as $profile => $info) {
     _provision_cvs_deploy($info);
     if (!$info->version) {

@@ -46,7 +46,7 @@ function install_create_admin_user($client_email = NULL) {
   if (!$client_email) {
     $client_email = 'webmaster@localhost';
   }
-  // create the admin account or change some parameters if the install profile
+  // create the admin account or change some parameters if the installation profile
   // already created one
   $account = user_load(array('uid' => 1));
   if (!$account) {
@@ -145,7 +145,7 @@ function install_main() {
   drush_log(st("Installing Drupal schema"), 'install');
   // Load the profile.
   require_once "./profiles/$profile/$profile.profile";
-  drush_log(st("Loading @profile install profile", array("@profile" => $profile)), 'install');
+  drush_log(st("Loading @profile installation profile", array("@profile" => $profile)), 'install');
   $requirements = drupal_check_profile($profile);
   $severity = drupal_requirements_severity($requirements);
 
