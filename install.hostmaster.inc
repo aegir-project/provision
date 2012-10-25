@@ -177,6 +177,9 @@ function drush_provision_hostmaster_install($site = NULL) {
     return false;
   }
 
+  drush_set_default('profile', 'hostmaster');
+  $profile = drush_get_option('profile');
+
   $site_name = '@hostmaster';
   drush_invoke_process('@none', "provision-save", array($site_name), array(
     'context_type' => 'site',
@@ -184,7 +187,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'db_server' => $dbserver,
     'uri' => $site,
     'client_name' => drush_get_option('client_name'),
-    'profile' => 'hostmaster',
+    'profile' => $profile,
   ));
   $data = provision_backend_invoke($site_name, 'provision-install', array(), array('client_email' => drush_get_option('client_email')));
   provision_backend_invoke($site_name, 'provision-verify');
