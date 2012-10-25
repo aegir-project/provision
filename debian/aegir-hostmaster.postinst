@@ -41,6 +41,13 @@ case "$1" in
         if [ ! -z "$RET" ]; then
             FLAGS="$FLAGS --makefile='$RET'"
         fi
+        db_get "aegir/webserver"
+        if [ ! -z "$RET" ]; then
+            if [ "$RET" = 'apache2' ]; then
+                RET='apache' # convert argument to something aegir can understand
+            fi
+            FLAGS="$FLAGS --http_service_type='$RET'"
+        fi
 
         TEMPFILE=`tempfile`
         su -s /bin/sh aegir -c 'drush --pipe @hostmaster status | egrep "site_uri|drupal_root"' >> $TEMPFILE || true
