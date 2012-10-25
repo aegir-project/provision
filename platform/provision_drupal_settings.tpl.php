@@ -13,6 +13,7 @@
  */
 
 <?php if ($this->cloaked): ?>
+if (isset($_SERVER['db_name'])) {
   /**
    * The database credentials are stored in the Apache vhost config
    * of the associated site with SetEnv parameters.
@@ -31,6 +32,7 @@
     'port' => $_SERVER['db_port'],
   );
   $db_url['default'] = $_SERVER['db_type'] . '://' . $_SERVER['db_user'] . ':' . $_SERVER['db_passwd'] . '@' . $_SERVER['db_host'] . ':' . $_SERVER['db_port'] . '/' . $_SERVER['db_name'];
+}
 
   /**
    * Now that we used the credentials from the apache environment, we
