@@ -82,12 +82,16 @@ function drush_provision_tests_run() {
   }
   drush_provision_tests_install_platform('drupal6', 'drupal6_other');
   drush_provision_tests_install_site('drupal6', 'drupal6-migrate-drupal6-other', 'default');
+  drush_provision_tests_dl_module_to_site('token', 'drupal6-migrate-drupal6-other');
   drush_provision_tests_migrate_site('drupal6-migrate-drupal6-other', 'drupal6_other');
+  drush_provision_tests_en_module_on_site('token', 'drupal6-migrate-drupal6-other');
   drush_provision_tests_remove_site('drupal6-migrate-drupal6-other');
   drush_provision_tests_remove_platform('drupal6_other');
   drush_provision_tests_install_platform('drupal7', 'drupal7_other');
   drush_provision_tests_install_site('drupal7', 'drupal7-migrate-drupal7-other', 'standard');
+  drush_provision_tests_dl_module_to_site('token', 'drupal7-migrate-drupal7-other');
   drush_provision_tests_migrate_site('drupal7-migrate-drupal7-other', 'drupal7_other');
+  drush_provision_tests_en_module_on_site('token', 'drupal7-migrate-drupal7-other');
   drush_provision_tests_remove_site('drupal7-migrate-drupal7-other');
   drush_provision_tests_remove_platform('drupal7_other');
 
@@ -170,6 +174,42 @@ function drush_provision_tests_install_site($platform_name, $site, $profile_name
   drush_backend_invoke('provision-save', $args);
   provision_backend_invoke("@$site.aegir.example.com", 'provision-install');
   provision_backend_invoke('@hostmaster', 'hosting-task', array("@platform_$platform_name", 'verify'), array('force' => TRUE));
+  drush_provision_tests_run_remaining_tasks();
+}
+
+/**
+ * Helper function to download a module to a site.
+ */
+function drush_provision_tests_dl_module_to_site($module, $site) {
+  drush_log(dt('Downloading module: @module to site: @site.', array('@site' => "$site.aegir.example.com", '@module' => $module)), 'ok');
+  $args = array(
+    $module,
+  );
+  $options = array(
+    // Normally 'dl' in a site context should know to put it in the site-
+    // specific modules directory, but not through provision_backend_invoke()?
+    'destination' => "sites/$site.aegir.example.com/modules",
+  );
+  provision_backend_invoke("@$site.aegir.example.com", 'dl', $args, $options);
+  drush_provision_tests_run_remaining_tasks();
+}
+
+/**
+ * Helper function to enable a module on a site.
+ */
+function drush_provision_tests_en_module_on_site($module, $site) {
+  drush_log(dt('Enabling module: @module on site: @site.', array('@site' => "$site.aegir.example.com", '@module' => $module)), 'ok');
+  $args = array(
+    $module,
+  );
+  provision_backend_invoke("@$site.aegir.example.com", 'en', $args);
+  // Failing 'en' only results in a warning, so we need to set our own error.
+  $log = array_slice(drush_get_log(), 10);
+  foreach ($log as $serial => $entry) {
+    if ($entry['type'] == 'warning' && $entry['message'] == "$module was not found and will not be enabled.") {
+      drush_set_error('DRUSH_FRAMEWORK_ERROR', "Error enabling module: $module on site: $site.");
+    }
+  }
   drush_provision_tests_run_remaining_tasks();
 }
 
