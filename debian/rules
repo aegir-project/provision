@@ -27,7 +27,12 @@ KEY?="-kjenkins@$(DOMAIN)"
 jenkins-build-official:
 	git-buildpackage -b --git-upstream-branch=origin/upstream --git-debian-branch=origin/debian --git-ignore-branch -kjenkins@ci.aegirproject.org
 
+# the dev version we're building
 version=2.0~0.$(shell git log -n 1 --oneline | sed 's/ .*$$//')
+
+# debug for the above
+show-version:
+	@echo ${version}
 
 # this builds a debian package but first updates the branches to follow the latest 2.x branch
 # this assumes you are on a "debian" branch (of course)
@@ -39,6 +44,3 @@ jenkins-build-auto:
 # helper to debug the above
 show-jenkins-build-auto:
 	@echo would build version ${version} with key ${KEY}
-
-show-version:
-	@echo ${version}
