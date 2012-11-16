@@ -36,5 +36,9 @@ jenkins-build-auto:
 	git commit -m"dummy commit for jenkins ${BUILD_TAG} autobuild" debian/changelog
 	git-buildpackage -b ${KEY}
 
+# helper to debug the above
+show-jenkins-build-auto:
+	@echo would build version ${version} with key ${KEY}
+
 show-version:
 	@echo ${version}
