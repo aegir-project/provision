@@ -38,6 +38,7 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
 
     $this->context->setProperty('ssl_enabled', 0);
     $this->context->setProperty('ssl_key', NULL);
+    $this->context->setProperty('ip_address', '*');
   }
 
 
@@ -55,23 +56,8 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
       if ($ssl_key = $this->context->ssl_key) {
         // Retrieve the paths to the cert and key files.
         // they are generated if not found.
-
         $certs = $this->get_certificates($ssl_key);
         $data = array_merge($data, $certs);
-
-        // assign ip address based on ssl_key
-        $ip = Provision_Service_http_ssl::assign_certificate_ip($ssl_key, $this->server);
-
-        if (!$ip) {
-          drush_set_error("SSL_IP_FAILURE", dt("There are no more IP addresses available on %server for the %ssl_key certificate.", array(
-            "%server" => $this->server->remote_host,
-            "%ssl_key" => $ssl_key,
-          )));
-        }
-        else {
-          $data['ip_address'] = $ip;
-
-        }
       }
     }
 
@@ -149,6 +135,50 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
   }
 
   /**
+   * Assign the given site to a certificate to mark its usage.
+   *
+   * This is necessary for the backend to figure out when it's okay to
+   * remove certificates.
+   *
+   * Should never fail unless the receipt file cannot be created.
+   *
+   * @return the path to the receipt file if allocation succeeded
+   */
+  static function assign_certificate_site($ssl_key, $site) {
+    $path = $site->platform->server->httpd_ssld_path . "/" . $ssl_key . "/" . $site->uri . ".receipt";
+    if (touch($path)) {
+      return $path;
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+  /**
+   * Unallocate this certificate from that site.
+   *
+   * @return the path to the receipt file if removal was successful
+   */
+  static function free_certificate_site($ssl_key, $site) {
+    $path = $site->platform->server->httpd_ssld_path . "/" . $ssl_key . "/" . $site->uri . ".receipt";
+    // Remove the file system reciept we left for this file
+    if (provision_file()->unlink($path)->
+        succeed(dt("Deleted SSL Certificate association receipt for %site on %server", array(
+          '%site' => $site->uri,
+          '%server' => $site->server->remote_host)))->status()) {
+      if (!Provision_Service_http_ssl::certificate_in_use($ssl_key, $site->server)) {
+        // not in use anymore, we can remove the certificate
+        _provision_recursive_delete($site->platform->server->httpd_ssld_path . "/" . $ssl_key . "/");
+        $site->server->sync($path);
+      }
+      return $path;
+    }
+    else {
+      return FALSE;
+    }
+  }
+  
+  /**
    * Assign the certificate it's own distinct IP address for this server.
    *
    * Each certificate needs a unique IP address on each server in order
@@ -156,37 +186,13 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
    *
    * This code uses the filesystem by touching a reciept file in the
    * server's ssl.d directory.
+   *
+   * @deprecated this is now based the site URI
+   * @see assign_certificate_site()
    */
   static function assign_certificate_ip($ssl_key, $server) {
-    $path = $server->http_ssld_path;
-
-    $pattern = "{$path}/{$ssl_key}__*.receipt";
-    $files = glob($pattern);
-    if (sizeof($files) == 1) {
-      $pattern = "/^{$ssl_key}__(.*)\.receipt$/";
-      preg_match($pattern, basename($files[0]), $matches);
-      if (in_array($matches[1], $server->ip_addresses)) {
-        // Return an existing match.
-        return $matches[1];
-      }
-
-      // This is a stale match, remove it.
-      // Any sites using it will either find a new
-      // IP on the next verify task, or fail.
-      unlink($files[0]);
-    }
-
-    // try to assign one
-    foreach ($server->ip_addresses as $ip) {
-      if (!Provision_Service_http_ssl::get_ip_certificate($ip, $server)) {
-        touch("{$path}/{$ssl_key}__{$ip}.receipt");
-        return $ip;
-      }
-    }
-
-    return FALSE; // generate error
+    return FALSE;
   }
-
 
   /**
    * Remove the certificate's lock on the server's public IP.
@@ -194,13 +200,12 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
    * This function will delete the receipt file left behind by
    * the assign_certificate_ip script, allowing the IP to be used
    * by other certificates.
+   *
+   * @deprecated this is now based on the site URI
+   * @see free_certificate_site()
    */
   static function free_certificate_ip($ssl_key, $server) {
-    $ip = Provision_Service_http_ssl::assign_certificate_ip($ssl_key, $server);
-    $file = "{$server->http_ssld_path}/{$ssl_key}__{$ip}.receipt";
-    if (file_exists($file)) {
-      unlink($file);
-    }
+    return FALSE;
   }
 
 
@@ -222,18 +227,10 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
 
   /**
    * Check for an existing record for this IP address.
+   *
+   * @deprecated we only use the URI-based allocation now
    */
   static function get_ip_certificate($ip, $server) {
-    $path = $server->http_ssld_path;
-
-    $pattern = "{$path}/*__{$ip}.receipt";
-    $files = glob($pattern);
-    if (sizeof($files) == 1) {
-      $pattern = "/^(.*)__{$ip}\.receipt$/";
-      preg_match($pattern, basename($files[0]), $matches);
-      return $matches[1];
-    }
-
     return FALSE;
   }
 

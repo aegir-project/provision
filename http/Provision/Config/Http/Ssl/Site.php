@@ -26,7 +26,9 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
       )), 0700);
 
       // Touch a file in the server's copy of this key, so that it knows the key is in use.
-      touch("{$path}/{$this->uri}.receipt");
+      // XXX: test. data structure may not be sound. try d($this->uri)
+      // if $this fails
+      Provision_Service_http_ssl::assign_certificate_site($ssl_key, $this);
 
       // Copy the certificates to the server's ssl.d directory.
       provision_file()->copy(
@@ -49,10 +51,9 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
        'exclude' => "{$path}/*.receipt",  // Don't need to synch the receipts
      ));
     }
-    elseif ($ip = $ip_addresses[$this->data['server']->name]) {
-      if ($ssl_key = Provision_Service_http_ssl::get_ip_certificate($ip, $this->data['server'])) {
-        $this->clear_certs($ssl_key);
-      }
+    else {
+      // XXX: to be tested, not sure the data structure is sound
+      Provision_Service_http_ssl::free_certificate_site($ssl_key, $this);
     }
   }
 
@@ -62,45 +63,18 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
   function unlink() {
     parent::unlink();
 
-    $ip_addresses = drush_get_option('site_ip_addresses', array(), 'site');
-
-    if ($this->ssl_enabled && $this->ssl_key) {
-      $this->clear_certs($this->ssl_key);
-    }
-    elseif ($ip = $ip_addresses[$this->data['server']->name]) {
-      if ($ssl_key = Provision_Service_http_ssl::get_ip_certificate($ip, $this->data['server'])) {
-        $this->clear_certs($ssl_key);
-      }
-    }
-
+    // XXX: to be tested, not sure the data structure is sound
+    Provision_Service_http_ssl::free_certificate_site($ssl_key, $this);
   }
   
   /**
    * Small utility function to stop code duplication.
+   *
+   * @deprecated unused
+   * @see Provision_Service_http_ssl::free_certificate_site()
    */
-
   private function clear_certs($ssl_key) {
-    $path = $this->data['server']->http_ssld_path . "/$ssl_key";
-
-    // Remove the file system reciept we left for this file
-    provision_file()->unlink("{$path}/{$this->uri}.receipt")->
-        succeed(dt("Deleted SSL Certificate association stub for %site on %server", array(
-          '%site' => $this->uri,
-          '%server' => $this->data['server']->remote_host)));
-
-    $used = Provision_Service_http_ssl::certificate_in_use($ssl_key, $this->data['server']);
-
-    if (!$used) {
-      // we can remove the certificate from the server ssl.d directory.
-      _provision_recursive_delete($path);
-      // remove the file from the remote server too.
-      $this->data['server']->sync($path);
-
-      // Most importantly, we remove the hold this cert had on the IP address.
-      Provision_Service_http_ssl::free_certificate_ip($ssl_key, $this->data['server']);
-    }
+    return FALSE;
   }
-
-
 }
 
