@@ -236,7 +236,7 @@ class Provision_Service extends Provision_ChainedState {
   }
 
   /**
-   * Fetch extra information the service wants to pass to he config file classes.
+   * Fetch extra information the service wants to pass to the config file classes.
    */
   function config_data($config = NULL, $class = NULL) {
     $data = array();
