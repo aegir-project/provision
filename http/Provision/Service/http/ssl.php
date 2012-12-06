@@ -145,7 +145,8 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
    * @return the path to the receipt file if allocation succeeded
    */
   static function assign_certificate_site($ssl_key, $site) {
-    $path = $site->platform->server->httpd_ssld_path . "/" . $ssl_key . "/" . $site->uri . ".receipt";
+    $path = $site->platform->server->http_ssld_path . "/" . $ssl_key . "/" . $site->uri . ".receipt";
+    drush_log(dt("registering site %site with SSL certificate %key with receipt file %path", array("%site" => $site->uri, "%key" => $ssl_key, "%path" => $path)));
     if (touch($path)) {
       return $path;
     }

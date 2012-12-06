@@ -136,7 +136,13 @@ class Provision_Service_dns extends Provision_Service {
     }
 
     if ($config == 'host') {
-      $data['site_ip_addresses'] = drush_get_option('site_ip_addresses', array(), 'site');
+      // get the IP explicitely allocate to this site
+      $ips = drush_get_option('ip_address', array(), 'site');
+      // .. or the server IPs if none is allocated
+      if (count($ips) < 1) {
+        $ips = $this->server->ip_addresses;
+      }
+      $data['ip_address'] = $ips;
     }
 
     return $data;
@@ -244,7 +250,7 @@ class Provision_Service_dns extends Provision_Service {
     return $status;
   }
 
-    /**
+  /**
    * Create a host in DNS.
    *
    * This can do a lot of things, create a zonefile, add a record to a
@@ -270,16 +276,11 @@ class Provision_Service_dns extends Provision_Service {
       return drush_set_error('DRUSH_DNS_NO_ZONE', "Could not determine the zone to create");
     }
 
-    $ips = drush_get_option('site_ip_addresses', array(), 'site');
+    $ips = drush_get_option('ip_address', array(), 'site');
 
     if (!$ips && count($ips) < 1) {
       drush_log(dt("no IP found for server, trying loopback"));
       $ips = array('127.0.0.1');
-    }
-
-    // XXX: kill me?
-    if (!is_array($ips)) {
-      $ips = array($ips); // backward compatibility?
     }
 
     $this->config('zone', $zone)->record_set($sub, array('A' => $ips));
