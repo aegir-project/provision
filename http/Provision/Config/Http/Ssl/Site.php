@@ -15,7 +15,6 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
   function write() {
     parent::write();
 
-    $ip_addresses = drush_get_option('site_ip_addresses', array(), 'site');
     if ($this->ssl_enabled && $this->ssl_key) {
       $path = dirname($this->data['ssl_cert']);
       // Make sure the ssl.d directory in the server ssl.d exists. 
@@ -28,7 +27,7 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
       // Touch a file in the server's copy of this key, so that it knows the key is in use.
       // XXX: test. data structure may not be sound. try d($this->uri)
       // if $this fails
-      Provision_Service_http_ssl::assign_certificate_site($ssl_key, $this);
+      Provision_Service_http_ssl::assign_certificate_site($this->ssl_key, $this);
 
       // Copy the certificates to the server's ssl.d directory.
       provision_file()->copy(
