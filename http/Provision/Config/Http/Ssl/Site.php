@@ -52,7 +52,7 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
     }
     else {
       // XXX: to be tested, not sure the data structure is sound
-      Provision_Service_http_ssl::free_certificate_site($ssl_key, $this);
+      Provision_Service_http_ssl::free_certificate_site($this->ssl_key, $this);
     }
   }
 
@@ -63,7 +63,7 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
     parent::unlink();
 
     // XXX: to be tested, not sure the data structure is sound
-    Provision_Service_http_ssl::free_certificate_site($ssl_key, $this);
+    Provision_Service_http_ssl::free_certificate_site($this->ssl_key, $this);
   }
   
   /**
