@@ -161,15 +161,15 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
    * @return the path to the receipt file if removal was successful
    */
   static function free_certificate_site($ssl_key, $site) {
-    $path = $site->platform->server->httpd_ssld_path . "/" . $ssl_key . "/" . $site->uri . ".receipt";
+    $ssl_dir = $site->platform->server->http_ssld_path . "/" . $ssl_key . "/";
     // Remove the file system reciept we left for this file
-    if (provision_file()->unlink($path)->
+    if (provision_file()->unlink($ssl_dir . $site->uri . ".receipt")->
         succeed(dt("Deleted SSL Certificate association receipt for %site on %server", array(
           '%site' => $site->uri,
           '%server' => $site->server->remote_host)))->status()) {
       if (!Provision_Service_http_ssl::certificate_in_use($ssl_key, $site->server)) {
-        // not in use anymore, we can remove the certificate
-        _provision_recursive_delete($site->platform->server->httpd_ssld_path . "/" . $ssl_key . "/");
+        drush_log(dt("Deleting unused SSL directory: %dir", array('%dir' => $ssl_dir)));
+        _provision_recursive_delete($ssl_dir);
         $site->server->sync($path);
       }
       return $path;
