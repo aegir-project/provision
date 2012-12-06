@@ -207,7 +207,7 @@ function _provision_recursive_delete($path) {
   // is_dir() follows symlinks, so it can return true on a symlink
   if (is_dir($path) && !is_link($path)) {
     $d = dir($path);
-    while (($entry = $d->read()) !== FALSE) {
+    while ($dir && ($entry = $d->read()) !== FALSE) {
       if ($entry == '.' || $entry == '..') {
         continue;
       }
