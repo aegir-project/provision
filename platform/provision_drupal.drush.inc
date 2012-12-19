@@ -659,10 +659,41 @@ function _provision_client_create_symlink() {
   if (d()->client_name) {
     $sites_dir = d()->server->clients_path . '/' . d()->client_name;
     provision_file()->create_dir($sites_dir, dt('Client home directory for @client', array('@client' => d()->client_name)), 0750);
-    provision_file()->unlink($sites_dir . '/' . d()->uri); // deliberatly ignore errors
+    _provision_client_delete_old_symlink();
     provision_file()->symlink(d()->site_path, $sites_dir . '/' . d()->uri)
       ->succeed('Created symlink @path to @target')
       ->fail('Could not create symlink @path to @target: @reason');
+  }
+}
+
+/**
+ * Delete dangling symlinks for this site.
+ *
+ * This is a crude implementation, as we do not have the old client name so we
+ * need to iterate over the directories. We only remove the first entry we
+ * find to save some I/O.
+ */
+function _provision_client_delete_old_symlink() {
+  $previous = d()->server->clients_path . '/' . d()->client_name . '/' . d()->uri;
+  // this is necessary because unlink doesn't fail on missing files (!)
+  $found = (file_exists($previous) || is_link($previous));
+  provision_file()->unlink($previous);
+  if (!$found) {
+    drush_log(dt("couldn't find previous client symlink, iterating through all sites"));
+    // only iterate if the symlink location changed
+    if ($dh = @opendir(d()->server->clients_path)) {
+      while (($file = readdir($dh)) !== false) {
+        if ($file != '.' && $file != '..') {
+          $path = d()->server->clients_path . '/' . $file . '/' . d()->uri;
+          if (file_exists($path) || is_link($path)) {
+            provision_file()->unlink($path);
+            drush_log(dt("removed previous symlink in @path", array("@path" => $path)), 'success');
+            break; // found it
+          }
+        }
+      }
+      closedir($dh);
+    }
   }
 }
 
