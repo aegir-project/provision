@@ -207,14 +207,16 @@ function _provision_recursive_delete($path) {
   // is_dir() follows symlinks, so it can return true on a symlink
   if (is_dir($path) && !is_link($path)) {
     $d = dir($path);
-    while (($entry = $d->read()) !== FALSE) {
-      if ($entry == '.' || $entry == '..') {
-        continue;
+    if (!empty($d)) {
+      while (($entry = $d->read()) !== FALSE) {
+        if ($entry == '.' || $entry == '..') {
+          continue;
+        }
+        $entry_path = $path . '/' . $entry;
+        $ret &= _provision_recursive_delete($entry_path);
       }
-      $entry_path = $path . '/' . $entry;
-      $ret &= _provision_recursive_delete($entry_path);
+      $d->close();
     }
-    $d->close();
 
     $rm = provision_file()->rmdir($path)
       ->succeed('Deleting @path directory successful.')
