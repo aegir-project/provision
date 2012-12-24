@@ -90,3 +90,36 @@ function drush_hook_provision_apache_dir_config($data) {
  */
 function drush_hook_provision_apache_vhost_config($uri, $data) {
 }
+
+/**
+ * Specify a different template for rendering a config file.
+ *
+ * @param $config
+ *   The Provision_config object trying to find its template.
+ *
+ * @return
+ *   A filename of a template to use for rendering.
+ *
+ * @see hook_provision_config_load_templates_alter()
+ */
+function hook_provision_config_load_templates($config) {
+  if (is_a($config, 'Provision_Config_Drupal_Settings')) {
+    $file = dirname(__FILE__) . '/custom-php-settings.tpl.php';
+    return $file;
+  }
+}
+
+/**
+ * Alter the templates suggested for rendering a config file.
+ *
+ * @param $templates
+ *   The array of templates suggested by other Drush commands.
+ * @param $config
+ *   The Provision_config object trying to find its template.
+ *
+ * @see hook_provision_config_load_templates()
+ */
+function hook_provision_config_load_templates_alter(&$templates, $config) {
+  // Don't let any custom templates be used.
+  $templates = array();
+}
