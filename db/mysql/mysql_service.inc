@@ -119,6 +119,9 @@ class provisionService_db_mysql extends provisionService_db_pdo {
     // non-readable by the webserver.
     umask(0077);
     // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
+    // we do this ridiculous sed here to make the dump portable, an upstream
+    // MySQL issue, see https://mariadb.atlassian.net/browse/MDEV-3836
+    // and http://bugs.mysql.com/bug.php?id=24680
     $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 --single-transaction --quick %s | sed 's|/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/|/\\*!50001 CREATE \\*/|g; s|/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/||g' | sed '/\\*!50013 DEFINER=.*/ d' > %s/database.sql", escapeshellcmd(drush_get_option('db_name')), escapeshellcmd(d()->site_path));
     $success = $this->safe_shell_exec($cmd, drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
 
