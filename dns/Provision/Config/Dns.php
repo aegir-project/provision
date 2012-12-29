@@ -11,7 +11,8 @@ class Provision_Config_Dns extends Provision_Config {
   }
 
   function unlink() {
-    parent::unlink();
+    $result = parent::unlink();
     $this->data['server']->sync($this->filename());
+    return $result;
   }
 }
