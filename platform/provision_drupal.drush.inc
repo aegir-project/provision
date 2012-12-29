@@ -638,6 +638,7 @@ function provision_reload_config($context, $file = NULL) {
   if (file_exists($file)) {
     drush_log("Reloading $context drushrc.php from $file");
     include($file);
+    // @TODO: There's a bug here, because $options doesn't exist!
     if (sizeof($options)) {
       $options = array_merge(drush_get_context($context, array()), $options);
       drush_set_context($context, $options);
