@@ -26,7 +26,7 @@ function drush_provision_drupal_provision_login_reset() {
   if (empty($account)) {
     return drush_set_error('PROVISION_UNABLE_TO_LOAD_UID_1', 'Could not load the admin user with uid 1 on this site.');
   }
-  $onetime = user_pass_reset_url($account);
+  $onetime = user_pass_reset_url($account) . '/login';
   // pass the login link to the front end
   drush_set_option('login_link', $onetime);
   drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');

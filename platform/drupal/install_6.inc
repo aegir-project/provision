@@ -353,8 +353,8 @@ function install_main() {
   $account = install_create_admin_user($client_email);
   $onetime = user_pass_reset_url($account);
   // Store the one time login link in an option so the front end can direct the user to their new site.
-  drush_set_option('login_link', $onetime);
-  drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
+  drush_set_option('login_link', $onetime . '/login');
+  drush_log(t('Login url: !onetime', array('!onetime' => $onetime . '/login')), 'message');
 
   if ($client_email) {
     install_send_welcome_mail($url, $account, $profile, $install_locale, $client_email, $onetime);
