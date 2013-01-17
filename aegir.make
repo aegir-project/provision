@@ -5,7 +5,7 @@ api = 2
 
 projects[pressflow][type] = "core"
 projects[pressflow][download][type] = "get"
-projects[pressflow][download][url] = "http://files.aegir.cc/dev/pressflow-6.27.1.tar.gz"
+projects[pressflow][download][url] = "http://files.aegir.cc/dev/pressflow-6.28.1.tar.gz"
 
 projects[hostmaster][type] = "profile"
 projects[hostmaster][download][type] = "git"
