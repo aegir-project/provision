@@ -113,6 +113,10 @@ case "$1" in
   "client_email": "$EMAIL"
 }
 EOF
+            # on new installs, we default to having the daemon enabled
+            echo 'Enabling hosting-queued daemon'
+            su aegir -c 'drush @hostmaster pm-enable hosting-queued'
+            service hosting-queued start
         fi
         rm -f $TEMPFILE
         # this will ensure that this script aborts if the site can't be bootstrapped
