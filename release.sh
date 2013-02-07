@@ -29,7 +29,7 @@ if [ $# -lt 1 -o "$version" = "-h" ]; then
     cat <<EOF 
 not enough arguments
 
-Usage: $0 <new_version> [<old_version>]
+Usage: $0 <new_version>
 EOF
     exit 1
 fi
@@ -91,7 +91,7 @@ sed -i'.tmp' -e"s/AEGIR_VERSION=.*$/AEGIR_VERSION=\"$major-$version\"/" upgrade.
 echo resulting changes to be committed:
 git diff --cached | cat
 
-if prompt_yes_no "commit changes and tag release? (y/N) "; then
+if prompt_yes_no "commit changes and tag release?"; then
     echo okay, committing...
 else
     echo 'aborting, leaving changes in git staging area'
@@ -112,7 +112,7 @@ git checkout -- 'debian/changelog'
 git commit
 
 
-if prompt_yes_no "push tags and commits upstream? (y/N) "; then
+if prompt_yes_no "push tags and commits upstream? "; then
     # this makes sure we push the commit *and* the tag
     git push --tags origin HEAD
 fi
