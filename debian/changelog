@@ -1,3 +1,10 @@
+aegir-provision (2.0~alpha1) experimental; urgency=low
+
+  * first alpha release of the 2.x branch, release notes too long to
+    document here: http://community.aegirproject.org/2.0-alpha1
+
+ -- Antoine Beaupré <anarcat@debian.org>  Thu, 07 Feb 2013 16:52:49 -0500
+
 aegir-provision (2.0~0.0alpha0) UNRELEASED; urgency=low
 
   * switch to a native package
