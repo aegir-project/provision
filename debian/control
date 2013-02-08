@@ -1,4 +1,4 @@
-Source: aegir-provision
+Source: aegir-provision2
 Section: admin
 Priority: optional
 Maintainer: Antoine Beaupré <anarcat@debian.org>
@@ -9,11 +9,13 @@ Homepage: http://aegirproject.org/
 Vcs-git: http://git.drupal.org/project/provision.git
 Vcs-browser: http://drupalcode.org/project/provision.git
 
-Package: aegir-provision
+Package: aegir-provision2
 Architecture: all
 Depends: ${misc:Depends}, drush (>= 5.5), php5-mysql, mysql-client, sudo, postfix | mail-transport-agent, apache2 | nginx, adduser, ucf
 Recommends: mysql-server, rsync
 Suggests: drush-make
+Conflicts: aegir-provision
+Replaces: aegir-provision
 Description: mass Drupal hosting system - backend
  A set of contributed modules for Drupal that aims to solve the
  problem of managing a large number of Drupal sites. It does this by
@@ -27,10 +29,12 @@ Description: mass Drupal hosting system - backend
  files. It can be installed standalone although it is usually
  installed with the hostmaster frontend.
 
-Package: aegir-hostmaster
+Package: aegir-hostmaster2
 Architecture: all
-Depends: ${misc:Depends}, drush (>= 5.5), php5-mysql, apache2 | nginx, libapache2-mod-php5 | php5-fpm, aegir-provision (>= ${source:Version}), git-core, unzip, lsb-base (>= 3.0-6)
+Depends: ${misc:Depends}, drush (>= 5.5), php5-mysql, apache2 | nginx, libapache2-mod-php5 | php5-fpm, aegir-provision2 (>= ${source:Version}), git-core, unzip, lsb-base (>= 3.0-6)
 Recommends: php5-gd, php5
+Conflicts: aegir-hostmaster
+Replaces: aegir-hostmaster
 Description: mass Drupal hosting system - frontend
  A set of contributed modules for Drupal that aims to solve the
  problem of managing a large number of Drupal sites. It does this by
@@ -47,9 +51,11 @@ Description: mass Drupal hosting system - frontend
  and provision and as such doesn't bundle any files itself. Everything
  is downloaded on the fly during the install.
 
-Package: aegir
+Package: aegir2
 Architecture: all
-Depends: ${misc:Depends}, aegir-provision (>= ${source:Version}), aegir-hostmaster (>= ${source:Version})
+Depends: ${misc:Depends}, aegir-provision2 (>= ${source:Version}), aegir-hostmaster2 (>= ${source:Version})
+Conflicts: aegir
+Replaces: aegir
 Description: mass Drupal hosting system
  A set of contributed modules for Drupal that aims to solve the
  problem of managing a large number of Drupal sites. It does this by
@@ -61,10 +67,12 @@ Description: mass Drupal hosting system
  This meta-package will install both the frontend (aegir-hostmaster)
  and the backend (aegir-provision).
 
-Package: aegir-cluster-slave
+Package: aegir-cluster-slave2
 Architecture: all
 Depends: ${misc:Depends}, php5-mysql, sudo, apache2, adduser, ucf, libapache2-mod-php5, rsync, nfs-client, mysql-client
 Recommends: php5-gd, php5
+Conflicts: aegir-cluster-slave
+Replaces: aegir-cluster-slave
 Description: web frontend for the Aegir hosting system
  Configuration of lightweight slave servers for the Aegir "pack"
  clustering system.
