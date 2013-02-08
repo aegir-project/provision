@@ -20,7 +20,7 @@ set -e
 # Source debconf library.
 . /usr/share/debconf/confmodule
 
-if [ "$DPKG_DEBUG" = "developer" ] || [ ! -z "$DEBUG" ]; then
+if [ "$DPKG_DEBUG" = "developer" ]; then
     set -x
 fi
 
@@ -34,7 +34,7 @@ case "$1" in
         VERSION=`sed -n '/^version/{s/^.*= *//;p}' /usr/share/drush/commands/provision/provision.info`
 
         FLAGS="--yes"
-        if [ "$DPKG_DEBUG" = "developer" ] || [ ! -z "$DEBUG" ]; then
+        if [ "$DPKG_DEBUG" = "developer" ]; then
             FLAGS="$FLAGS --debug"
         fi
         db_get "aegir/makefile"

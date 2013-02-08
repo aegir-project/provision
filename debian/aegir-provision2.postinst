@@ -20,7 +20,7 @@ set -e
 # Source debconf library.
 . /usr/share/debconf/confmodule
 
-if [ "$DPKG_DEBUG" = "developer" ] || [ ! -z "$DEBUG" ]; then
+if [ "$DPKG_DEBUG" = "developer" ]; then
     set -x
 fi
 
