@@ -148,8 +148,6 @@ We are making the following assumptions:
 function drush_provision_pre_hostmaster_migrate($site, $platform) {
   // wipe out cron entry
   exec('crontab -r');
-  // we can't rely on update.php to run that because it will run too late. this can be removed in 0.5 and above
-  provision_backend_invoke(drush_get_option('site_name'), 'sqlq', array("UPDATE {system} SET weight = 0 WHERE type='module' AND name='hosting';"));
 }
 
 function drush_provision_hostmaster_migrate($site, $platform) {
