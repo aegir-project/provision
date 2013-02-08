@@ -27,8 +27,12 @@ KEY?="-kjenkins@$(DOMAIN)"
 jenkins-build-official:
 	git-buildpackage -b --git-upstream-branch=origin/upstream --git-debian-branch=origin/debian --git-ignore-branch -kjenkins@ci.aegirproject.org
 
-# the dev version we're building
-version=2.0~0.$(shell git log -n 1 --oneline | sed 's/ .*$$//')
+# the version from the changelog, add the git hash
+version=$(shell sed -ne 's/^[^(]*(\([^)]*\)).*/\1/;1p' debian/changelog)
+commit=$(shell git log -n 1 --oneline | sed 's/ .*$$//')
+
+# the version we're building with jenkins
+jenkins_version=${version}~${BUILD_TAG}+${commit}
 
 # debug for the above
 show-version:
@@ -37,10 +41,10 @@ show-version:
 # this builds a debian package but first updates the branches to follow the latest 2.x branch
 # this assumes you are on a "debian" branch (of course)
 jenkins-build-auto:
-	dch -D unstable -v ${version} "automatic jenkins build ${BUILD_TAG}"
+	dch -D unstable -v ${jenkins_version} "automatic jenkins build ${BUILD_TAG} for commit ${commit}"
 	git commit -m"dummy commit for jenkins ${BUILD_TAG} autobuild" debian/changelog
 	git-buildpackage -b ${KEY}
 
 # helper to debug the above
 show-jenkins-build-auto:
-	@echo would build version ${version} with key ${KEY}
+	@echo would build version ${jenkins_version} with key ${KEY}
