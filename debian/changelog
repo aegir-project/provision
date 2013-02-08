@@ -1,4 +1,4 @@
-aegir-provision2 (2.0~alpha1) experimental; urgency=low
+aegir-provision2 (2.0~alpha1) unstable; urgency=low
 
   * first alpha release of the 2.x branch, release notes too long to
     document here: http://community.aegirproject.org/2.0-alpha1
