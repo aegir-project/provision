@@ -32,7 +32,7 @@ version=$(shell sed -ne 's/^[^(]*(\([^)]*\)).*/\1/;1p' debian/changelog)
 commit=$(shell git log -n 1 --oneline | sed 's/ .*$$//')
 
 # the version we're building with jenkins
-jenkins_version=${version}~${BUILD_TAG}+${commit}
+jenkins_version=${version}+${BUILD_NUMBER}.${commit}
 
 # debug for the above
 show-version:
