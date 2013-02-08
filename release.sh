@@ -77,7 +77,7 @@ echo changing makefile to download tarball
 #sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
 #  -e'/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://ftp.drupal.org/files/projects/hostmaster-'$major-$version'.tgz"#' \
 #  -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[directory_name] = "hostmaster"/' aegir.make && git add aegir.make && rm aegir.make.tmp
-sed -i'.tmp'-e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[tag] = "'$major-$version'"/' aegir.make && git add aegir.make && rm aegir.make.tmp
+sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[tag] = "'$major-$version'"/' aegir.make && git add aegir.make && rm aegir.make.tmp
 
 echo changing provision.info version
 sed -i'.tmp' -e"s/version *=.*$/version=$major-$version/" provision.info
