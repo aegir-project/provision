@@ -11,7 +11,7 @@ Vcs-browser: http://drupalcode.org/project/provision.git
 
 Package: aegir-provision
 Architecture: all
-Depends: ${misc:Depends}, drush (>= 5.5), php5-mysql, mysql-client, sudo, mail-transport-agent, apache2 | nginx, adduser, ucf
+Depends: ${misc:Depends}, drush (>= 5.5), php5-mysql, mysql-client, sudo, postfix | mail-transport-agent, apache2 | nginx, adduser, ucf
 Recommends: mysql-server, rsync
 Suggests: drush-make
 Description: mass Drupal hosting system - backend
