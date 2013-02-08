@@ -248,6 +248,7 @@ function provision_drush_command() {
       '/path/to/platform' => dt('The platform to migrate the site to.'),
     ),
     'options' => array(
+      'http_service_type' => dt('Webserver type to configure (default: %webserver)', array('%webserver' => 'apache')),
       'makefile' => dt('The optional makefile to use instead of aegir.')
     ),
   );
