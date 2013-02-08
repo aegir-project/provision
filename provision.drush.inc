@@ -249,7 +249,7 @@ function provision_drush_command() {
     ),
     'options' => array(
       'http_service_type' => dt('Webserver type to configure (default: %webserver)', array('%webserver' => 'apache')),
-      'makefile' => dt('The optional makefile to use instead of aegir.')
+      'makefile' => dt('The makefile used to create the hostmaster platform (default: %makefile)', array('%makefile' => dirname(__FILE__). '/aegir.make')),
     ),
   );
 
