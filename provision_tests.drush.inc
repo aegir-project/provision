@@ -8,7 +8,7 @@
  *  them into Provision.
  */
 
-define('PROVISION_TESTS_BUILDS_REPO', dirname(__FILE__) . 'provision-tests/makes');
+define('PROVISION_TESTS_BUILDS_REPO', dirname(__FILE__) . '/provision-tests/makes');
 
 /**
  * Implementation of hook_drush_command().
