@@ -98,7 +98,7 @@ The following settings will be used:
          )));
 
   if (!drush_confirm(dt('Do you really want to proceed with the install'))) {
-    return drush_set_error('PROVISION_CANCEL_INSTALL', dt('Installation aborted by user'));
+    return drush_set_error('PROVISION_CANCEL_INSTALL', dt('Installation aborted'));
   }
 
   return TRUE;
