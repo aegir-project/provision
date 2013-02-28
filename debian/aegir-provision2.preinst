@@ -26,7 +26,7 @@ case "$1" in
             exit 1
         fi
         if [ -d $VARLIB/.drush/provision ]; then
-            echo "existing provision install in $VARLIB/.drush/drush_make detected"
+            echo "existing provision install in $VARLIB/.drush/provision detected"
             echo "this needs to be removed or moved away for the install to be completed"
             echo "try: rm -rf $VARLIB/.drush/provision"
             exit 1
