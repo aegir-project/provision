@@ -279,6 +279,15 @@ function provision_drush_command() {
      ),
   );
 
+  $items['hostmaster-uninstall'] = array(
+    'description' => dt('Uninstall the Hostmaster frontend.'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_SITE,
+    'options' => array
+    (
+     'all' => dt('Destroy *ALL* sites managed by the Aegir frontend'),
+     ),
+  );
+
   $items['backend-parse'] = array(
     'description' => dt('Parse the output of --backend commands to a human readable form'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
