@@ -19,6 +19,9 @@ function drush_provision_drupal_pre_provision_delete($backup_file = NULL) {
 function drush_provision_drupal_provision_delete() {
   if (d()->type === 'site') {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
+
+    drush_invoke_process('@none', 'provision-save', array(d()->name), array('delete' => TRUE));
+
     _provision_recursive_delete(d()->site_path);
     // we remove the aliases even if redirection is enabled as a precaution
     // if redirection is enabled, keep silent about errors
