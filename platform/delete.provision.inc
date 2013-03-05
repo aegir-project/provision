@@ -22,6 +22,9 @@ function drush_provision_drupal_provision_delete() {
 
     drush_invoke_process('@none', 'provision-save', array(d()->name), array('delete' => TRUE));
 
+    // Do not automatically save the drushrc at the end of the command.
+    drush_set_option('provision_save_config', false);
+
     _provision_recursive_delete(d()->site_path);
     // we remove the aliases even if redirection is enabled as a precaution
     // if redirection is enabled, keep silent about errors
