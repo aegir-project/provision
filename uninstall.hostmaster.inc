@@ -41,7 +41,7 @@ function drush_provision_hostmaster_uninstall() {
 
     drush_log(dt('Destroying sites'), 'info');
     $query = db_query("SELECT n.title AS uri, h.name AS context FROM {node} n INNER JOIN {hosting_site} s ON s.nid=n.nid LEFT JOIN {hosting_context} h ON h.nid = n.nid WHERE n.type = '%s' AND s.status != %d AND h.name != 'hostmaster'", 'site', -2);
-    while ($resource = db_fetch_object($query)) {
+    while ($resource = $query->fetch()) {
       drush_log(dt("Destroying @resource", array('@resource' => $resource->uri)));
       $context = $resource->context;
       if (!$context) {
@@ -53,7 +53,7 @@ function drush_provision_hostmaster_uninstall() {
 
     drush_log(dt('Destroying platforms'), 'info');
     $query = db_query("SELECT n.title AS uri, h.name AS context FROM {node} n INNER JOIN {hosting_platform} p LEFT JOIN {hosting_context} h ON h.nid = n.nid WHERE n.type = '%s' AND p.status != %d AND h.name != '%s'", 'platform', -2, d('@hostmaster')->platform->name);
-    while ($resource = db_fetch_object($query)) {
+    while ($resource = $query->fetch()) {
       drush_log(dt("Destroying @resource", array('@resource' => $resource->uri)));
       $context = $resource->context;
       if (!$context) {
@@ -65,7 +65,7 @@ function drush_provision_hostmaster_uninstall() {
 
     drush_log(dt('Destroying servers'), 'info');
     $query = db_query("SELECT n.title AS uri, h.name AS context FROM {node} n LEFT JOIN {hosting_context} h ON h.nid = n.nid WHERE n.type = '%s' AND h.name != '%s' AND h.name != '%s'", 'server', d('@hostmaster')->server->name, d('@hostmaster')->db_server->name);
-    while ($resource = db_fetch_object($query)) {
+    while ($resource = $query->fetch()) {
       drush_log(dt("Destroying @resource", array('@resource' => $resource->uri)));
       $context = $resource->context;
       if (!$context) {
