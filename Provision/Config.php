@@ -205,8 +205,8 @@ class Provision_Config {
         }
 
         $status = provision_file()->file_put_contents($filename, $this->render_template($template, $this->data))
-          ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description), 'success')
-          ->fail('Could not generate ' . (empty($this->description) ? $filename : $this->description))->status();
+          ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description . ' (' . $filename. ')'), 'success')
+          ->fail('Could not generate ' . (empty($this->description) ? $filename : $this->description . ' (' . $filename. ')'))->status();
 
         // Change the permissions of the file if needed
         if (!is_null($this->mode)) {

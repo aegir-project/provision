@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file Provision named context base classes.
@@ -17,7 +16,7 @@
  *   $name.
  *
  * @return
- *   provision_Context object or NULL if it can't be loaded and
+ *   provision_Context object (by reference) or NULL if it can't be loaded and
  *   $allow_creation == FALSE.
  */
 function & d($name = NULL, $_root_object = FALSE, $allow_creation = TRUE) {
