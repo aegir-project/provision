@@ -81,30 +81,18 @@ class Provision_Service_db_pdo extends Provision_Service_db {
     }
 
   }
-
+  
   function database_exists($name) {
-
     $dsn = $this->dsn . ';dbname=' . $name;
-
-    // Try to connect to the DB to test if it exists.
-    // This used to implement try/catch, but caused errors that were difficult
-    // to debug. See: http://drupal.org/node/1938522.
-    if (!($conn = new PDO($dsn, $this->creds['user'], $this->creds['pass']))) {
-      $error = $conn->errorInfo();
-      drush_set_error('PROVISION_DB_EXISTS_FAILED',
-        dt("Provision failed to connect to the database: !dsn. Full debug information follows:\nSQLSTATE error code: !sql_error\nDriver-specific error code: !driver_error\nDriver-specific error message: !error_msg\n", array(
-          '!dsn' => $dsn,
-          '!sql_error' => $error['0'],
-          '!driver_error' => $error['1'],
-          '!error_msg' => $error['2'],
-          )
-        )
-      );
-    }
-    else {
+    try {
+      // Try to connect to the DB to test if it exists.
+      $conn = new PDO($dsn, $this->creds['user'], $this->creds['pass']);
       // Free the $conn memory.
       $conn = NULL;
       return TRUE;
+    }
+    catch (PDOException $e) {
+      return FALSE;
     }
   }
 }
