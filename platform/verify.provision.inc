@@ -11,7 +11,7 @@ function drush_provision_drupal_provision_verify_validate() {
     provision_prepare_environment();
     _provision_drupal_create_settings_file();
     drush_errors_on();
-    if (drush_drupal_major_version() < 8) {
+    if (drush_drupal_major_version() < 8 && d()->profile != 'hostmaster') {
       provision_backend_invoke(d()->name, 'registry-rebuild');
       drush_log(dt('Rebuilt registry without --no-cache-clear option'));
     }
