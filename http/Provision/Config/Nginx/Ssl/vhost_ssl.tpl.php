@@ -34,8 +34,7 @@ server {
   keepalive_timeout          70;
   <?php print $extra_config; ?>
 <?php
-$nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
-if ($nginx_has_upload_progress) {
+if ($server->extended_nginx_config) {
   print "  include      " . $server->include_path . "/nginx_advanced_include.conf;\n";
 }
 else {
