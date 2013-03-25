@@ -34,7 +34,11 @@ if (isset($_SERVER['db_name'])) {
     'username' => $_SERVER['db_user'],
     'password' => $_SERVER['db_passwd'],
     'host' => $_SERVER['db_host'],
-    'port' => $_SERVER['db_port'],
+    /* Drupal interprets $databases['db_port'] as a string, whereas Drush sees
+     * it as an integer. To maintain consistency, we cast it to a string. This
+     * should probably be fixed in Drush.
+     */
+    'port' => (string) $_SERVER['db_port'],
   );
   $db_url['default'] = $_SERVER['db_type'] . '://' . $_SERVER['db_user'] . ':' . $_SERVER['db_passwd'] . '@' . $_SERVER['db_host'] . ':' . $_SERVER['db_port'] . '/' . $_SERVER['db_name'];
 }
