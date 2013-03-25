@@ -39,7 +39,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     $this->server->nginx_has_gzip = preg_match("/http_gzip_static_module/", implode('', drush_shell_exec_output()), $match);
 
     // Use basic nginx configuration if this control file exists.
-    $basic_nginx_config_file = "/etc/nginx/basic_nginx_config.conf";
+    $basic_nginx_config_file = "/etc/nginx/basic_nginx.conf";
     if (provision_file()->exists($basic_nginx_config_file)->status()) {
       $this->server->basic_nginx_config = 1;
       $this->server->extended_nginx_config = 0;
@@ -72,7 +72,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     $this->server->nginx_has_gzip = preg_match("/http_gzip_static_module/", implode('', drush_shell_exec_output()), $match);
 
     // Use basic nginx configuration if this control file exists.
-    $basic_nginx_config_file = "/etc/nginx/basic_nginx_config.conf";
+    $basic_nginx_config_file = "/etc/nginx/basic_nginx.conf";
     if (provision_file()->exists($basic_nginx_config_file)->status()) {
       $this->server->basic_nginx_config = 1;
       $this->server->extended_nginx_config = 0;
