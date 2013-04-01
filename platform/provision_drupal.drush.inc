@@ -309,6 +309,7 @@ function _provision_find_profiles() {
 }
 
 function provision_drupal_find_sites() {
+  $sites = array();
   if ($dir = opendir("./sites")) {
     while (FALSE !== ($subdir = readdir($dir))) {
       // skip internal directory pointers
