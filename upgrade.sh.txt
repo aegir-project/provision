@@ -146,7 +146,7 @@ if [ -d "provision" ] ; then
 fi
 
 if [ "$AEGIR_VERSION" = "6.x-2.x" ]; then
-  git clone http://git.drupal.org/project/provision.git $HOME/.drush/provision
+  git clone --branch '$AEGIR_VERSION' http://git.drupal.org/project/provision.git $HOME/.drush/provision
 else
   wget http://ftp.drupal.org/files/projects/provision-$AEGIR_VERSION.tar.gz
   gunzip -c provision-$AEGIR_VERSION.tar.gz | tar -xf -
