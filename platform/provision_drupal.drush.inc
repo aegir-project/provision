@@ -181,6 +181,22 @@ function provision_drupal_sync_site() {
 }
 
 /**
+ * Sync the current Drupal site BACK from a slave. Call before
+ * running operations that need files where the slave is authoritative.
+ *
+ * E.g. before a backup is made.
+ */
+function provision_drupal_sync_site_back() {
+  // synch filesystem changes back from the remote server.
+  d()->service('http')->fetch(d()->site_path . '/files/');
+  d()->service('http')->fetch(d()->site_path . '/private/');
+  d()->service('http')->fetch(d()->site_path . '/modules/');
+  d()->service('http')->fetch(d()->site_path . '/themes/');
+  d()->service('http')->fetch(d()->site_path . '/libraries/');
+  d()->service('http')->fetch(d()->site_path . '/local.settings.php');
+}
+
+/**
  * Generate a settings file for the site.
  *
  * @param url
