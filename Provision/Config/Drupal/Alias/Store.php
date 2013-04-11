@@ -16,10 +16,8 @@ class Provision_Config_Drupal_Alias_Store extends Provision_Config_Data_Store {
 
   function maintain() {
     $this->delete();
-    if (!$this->redirection) {
-      foreach ($this->aliases as $alias) {
-        $this->records[$alias] = $this->uri;
-      }
+    foreach ($this->aliases as $alias) {
+      $this->records[$alias] = $this->uri;
     }
   }
 
