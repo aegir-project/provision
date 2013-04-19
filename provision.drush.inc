@@ -187,6 +187,9 @@ function provision_drush_command() {
     'description' => 'Deploy an existing backup to a new url.',
     'arguments' => array(
       'site_backup.tar.gz' => dt('The backup to deploy.')),
+    'options' => array(
+      'old_uri' => dt('Old site uri to replace in references to sites/example.com/files/ in the database content.)'),
+    ),
     'examples' => array(
       'drush @site provision-deploy ~/backups/some_site.tar.gz' => 'Deploy the site as defined by the site Drush alias, from the backup in ~/backups/some_site.tar.gz.',
     ),
