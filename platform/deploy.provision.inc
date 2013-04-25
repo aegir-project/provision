@@ -84,6 +84,7 @@ function drush_provision_drupal_pre_provision_deploy($backup_file) {
     // Load the newly created information, including re-loading the new db creds.
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
     _provision_drupal_create_settings_file();
+    provision_drupal_sync_site($override_slave_authority = TRUE);
 
     $site_packages = drush_get_option('packages', array(), 'site');
     $drupal_packages = drush_get_option('packages', array(), 'drupal');

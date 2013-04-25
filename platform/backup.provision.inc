@@ -73,6 +73,8 @@ function drush_provision_drupal_provision_backup() {
 
     // Write the uncloaked credentials to the settings.php
     _provision_drupal_create_settings_file();
+    provision_drupal_sync_site();
+
   }
 
   $olddir = getcwd();
@@ -99,6 +101,8 @@ function drush_provision_drupal_provision_backup() {
     drush_log(dt("Re-cloaking database credentials after backup"));
     drush_set_option('provision_db_cloaking', TRUE);
     _provision_drupal_create_settings_file();
+    provision_drupal_sync_site();
+
   }
 
   if (!$result && !drush_get_option('force', false)) {

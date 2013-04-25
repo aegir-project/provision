@@ -212,13 +212,25 @@ class Provision_Context_server extends Provision_Context {
    *
    * @param $path
    *   Full path to fetch.
+   * @param $additional_options
+   *   An array of options that overrides whatever was passed in on the command
+   *   line (like the 'process' context, but only for the scope of this one
+   *   call).
    */
-  function fetch($path) {
+  function fetch($path, $additional_options = array()) {
     if (!provision_is_local_host($this->remote_host)) {
       if (provision_file()->exists($path)->status()) {
-        $options = array(
+        $options = array_merge(array(
           'omit-dir-times' => TRUE,
-        );
+        ), $additional_options);
+
+        // We need to do this due to how drush creates the rsync command.
+        // If the option is present at all, even if false or null, it will
+        // add it to the command.
+        if (!isset($additional_options['no-delete']) || $additional_options['no-delete'] == FALSE ) {
+          $options['delete'] = TRUE;
+        }
+
         if (drush_core_call_rsync(escapeshellarg($this->script_user . '@' . $this->remote_host . ':/') . $path, $path, $options, TRUE, FALSE)) {
           drush_log(dt('@path has been fetched from remote server @remote_host.', array(
             '@path' => $path, 
