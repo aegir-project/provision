@@ -99,7 +99,7 @@ function drush_provision_drupal_provision_install_backend() {
  *    Overwrite e.g. the files directory on the slave.
  *    Useful when the master server has donw file operations, such as restoring a backup.
  */
-function provision_drupal_sync_site($override_slave_authority = FALSE) {
+function provision_drupal_push_site($override_slave_authority = FALSE) {
 
   provision_file()->create_dir(d()->server->http_platforms_path, dt("Platforms"), 0755);
   d()->server->sync(d()->server->http_platforms_path, array(
@@ -145,7 +145,7 @@ function provision_drupal_sync_site($override_slave_authority = FALSE) {
  *
  * E.g. before a backup is made.
  */
-function provision_drupal_sync_site_back() {
+function provision_drupal_fetch_site() {
 
   // synch filesystem changes back from the remote server.
   d()->service('http')->fetch(d()->site_path . '/files/');

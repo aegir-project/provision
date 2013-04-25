@@ -11,7 +11,7 @@ function drush_provision_drupal_provision_verify_validate() {
     provision_prepare_environment();
 
     _provision_drupal_create_settings_file();
-    provision_drupal_sync_site();
+    provision_drupal_push_site();
 
     drush_errors_on();
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
@@ -78,7 +78,7 @@ function drush_provision_drupal_pre_provision_verify() {
     drush_set_option('sites', array_keys((array) provision_drupal_find_sites()), 'drupal'); 
     drush_log(dt("This platform is running @short_name @version", array('@short_name' => 'drupal', '@version' => VERSION)));
     drush_set_option('packages', _scrub_object(provision_find_packages()), 'drupal');
-    provision_drupal_sync_site();
+    provision_drupal_push_site();
   }
   elseif (d()->type === 'site') {
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
@@ -89,7 +89,7 @@ function drush_provision_drupal_pre_provision_verify() {
 
     _provision_drupal_create_settings_file();
 
-    provision_drupal_sync_site();
+    provision_drupal_push_site();
   }
 }
 
