@@ -108,7 +108,6 @@ else {
   gzip_types        text/plain text/css application/x-javascript text/xml application/xml application/xml+rss text/javascript;
   gzip_vary         on;
   gzip_proxied      any;
-  add_header Vary "Accept-Encoding";
 <?php
 $nginx_has_gzip = drush_get_option('nginx_has_gzip');
 if ($nginx_has_gzip) {
