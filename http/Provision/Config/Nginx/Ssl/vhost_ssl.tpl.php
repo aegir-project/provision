@@ -33,14 +33,7 @@ server {
   ssl_prefer_server_ciphers  on;
   keepalive_timeout          70;
   <?php print $extra_config; ?>
-<?php
-if ($server->extended_nginx_config) {
-  print "  include      " . $server->include_path . "/nginx_advanced_include.conf;\n";
-}
-else {
-  print "  include      " . $server->include_path . "/nginx_simple_include.conf;\n";
-}
-?>
+  include                    <?php print $server->include_path; ?>/nginx_vhost_common.conf;
 }
 
 <?php endif; ?>
