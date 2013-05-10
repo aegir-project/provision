@@ -6,7 +6,14 @@ if ($ssl_redirection || $this->redirection) {
     print "server {\n";
     print "  limit_conn   gulag 32;\n";
     print "  listen       *:{$http_port};\n";
-    print "  server_name  {$alias_url};\n";
+    // if we use redirections, we need to change the redirection
+    // target to be the original site URL ($this->uri instead of
+    // $alias_url)
+    if ($this->redirection && $alias_url == $this->redirection) {
+      print "  server_name  {$this->uri};\n";
+    } else {
+      print "  server_name  {$alias_url};\n";
+    }
     print "  access_log   off;\n";
     print "  rewrite ^ \$scheme://{$this->redirection}\$request_uri? permanent;\n";
     print "}\n";
@@ -18,7 +25,14 @@ server {
   limit_conn   gulag 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
   listen       *:<?php print $http_port; ?>;
   server_name  <?php
-    print $this->uri;
+    // this is the main vhost, so we need to put the redirection
+    // target as the hostname (if it exists) and not the original URL
+    // ($this->uri)
+    if ($this->redirection) {
+      print $this->redirection;
+    } else {
+      print $this->uri;
+    }
     if (!$this->redirection && is_array($this->aliases)) {
       foreach ($this->aliases as $alias_url) {
         if (trim($alias_url)) {
