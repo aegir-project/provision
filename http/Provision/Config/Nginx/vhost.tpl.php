@@ -15,6 +15,7 @@ if ($ssl_redirection || $this->redirection) {
 ?>
 
 server {
+  fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
   limit_conn   gulag 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
   listen       *:<?php print $http_port; ?>;
   server_name  <?php print $this->uri; ?><?php if (!$this->redirection && is_array($this->aliases)) : foreach ($this->aliases as $alias_url) : if (trim($alias_url)) : ?> <?php print $alias_url; ?><?php endif; endforeach; endif; ?>;

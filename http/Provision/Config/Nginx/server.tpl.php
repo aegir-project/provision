@@ -87,7 +87,7 @@ if ($nginx_has_gzip) {
 
   client_body_temp_path  /var/lib/nginx/body 1 2;
   access_log             /var/log/nginx/access.log main;
-  include                /etc/nginx/fastcgi.conf;
+  include                /etc/nginx/fastcgi_params;
 
 <?php print $extra_config; ?>
 <?php if ($extended_nginx_config): ?>

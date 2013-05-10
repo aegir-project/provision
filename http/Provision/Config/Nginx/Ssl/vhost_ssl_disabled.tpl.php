@@ -2,7 +2,6 @@
 <?php if ($this->ssl_enabled && $this->ssl_key) : ?>
 
 server {
-  fastcgi_param HTTPS on;
   limit_conn   gulag 32;
   listen       <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
   server_name  <?php print $this->uri . ' ' . implode(' ', $this->aliases); ?>;
