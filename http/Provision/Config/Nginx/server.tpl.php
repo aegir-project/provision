@@ -149,8 +149,7 @@ else {
 ?>
   server_name  _;
   location / {
-     root   /var/www/nginx-default;
-     index  index.html index.htm;
+    return 404;
   }
 }
 
