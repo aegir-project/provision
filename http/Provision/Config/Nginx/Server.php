@@ -52,7 +52,7 @@ class Provision_Config_Nginx_Includes extends Provision_Config_Http_Server {
   function filename() {
     if (isset($this->data['application_name'])) {
       $file = $this->data['application_name'] . '_vhost_common.conf';
-      return $this->data['server']->include_path . '/' . $file
+      return $this->data['server']->include_path . '/' . $file;
     }
     else {
       return FALSE;
