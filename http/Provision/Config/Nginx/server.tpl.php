@@ -31,6 +31,7 @@ if ($nginx_has_gzip) {
   print "  gzip_static       on;\n";
 }
 ?>
+
 <?php if ($nginx_config_mode == 'extended'): ?>
  ## Size Limits
   client_body_buffer_size        64k;
