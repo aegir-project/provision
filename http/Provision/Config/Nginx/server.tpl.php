@@ -106,6 +106,16 @@ if ($nginx_has_gzip) {
 #######################################################
 
 ###
+### Support separate Speed Booster caches for various mobile devices.
+###
+map $http_user_agent $device {
+  default                                                                normal;
+  ~*Nokia|BlackBerry.+MIDP|240x|320x|Palm|NetFront|Symbian|SonyEricsson  mobile-other;
+  ~*iPhone|iPod|Android|BlackBerry.+AppleWebKit                          mobile-smart;
+  ~*iPad|Tablet                                                          mobile-tablet;
+}
+
+###
 ### Set a cache_uid variable for authenticated users (by @brianmercer and @perusio, fixed by @omega8cc).
 ###
 map $http_cookie $cache_uid {
