@@ -1,12 +1,18 @@
-#######################################################
-###  nginx.conf site common vhost include start
-#######################################################
-
 <?php
-$extended_nginx_config = drush_get_option('extended_nginx_config');
+$nginx_config_mode = drush_get_option('nginx_config_mode');
+if (!$nginx_config_mode && $server->nginx_config_mode) {
+  $nginx_config_mode = $server->nginx_config_mode;
+}
 ?>
+#######################################################
+<?php if ($nginx_config_mode == 'extended'): ?>
+###  nginx.conf site level extended vhost include start
+<?php else: ?>
+###  nginx.conf site level basic vhost include start
+<?php endif; ?>
+#######################################################
 
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
 set $nocache_details "Cache";
 
 ###
@@ -41,14 +47,14 @@ location = /favicon.ico {
 location = /robots.txt {
   access_log    off;
   log_not_found off;
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
   try_files /sites/$server_name/files/robots.txt $uri @cache;
 <?php else: ?>
   try_files /sites/$server_name/files/robots.txt $uri @drupal;
 <?php endif; ?>
 }
 
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Allow local access to support wget method in Aegir settings
 ### for running sites cron.
@@ -131,7 +137,7 @@ location ~* (/\..*|settings\.php$|\.(?:git|htaccess|engine|inc|info|install|modu
   return 403;
 }
 
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Responsive Images support.
 ### http://drupal.org/project/responsive_images
@@ -169,7 +175,7 @@ location ~* /(?:external|system|files/imagecache|files/styles)/ {
   access_log off;
   log_not_found off;
   expires    30d;
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
   # fix common problems with old paths after import from standalone to Aegir multisite
   rewrite    ^/sites/(.*)/files/imagecache/(.*)/sites/default/files/(.*)$  /sites/$server_name/files/imagecache/$2/$3 last;
   rewrite    ^/sites/(.*)/files/imagecache/(.*)/files/(.*)$                /sites/$server_name/files/imagecache/$2/$3 last;
@@ -192,7 +198,7 @@ location ~* ^/sites/.*/files/backup_migrate/ {
   deny all;
 }
 
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Private downloads are always sent to the drupal backend.
 ### Note: this location doesn't work with X-Accel-Redirect.
@@ -214,7 +220,7 @@ location ~* ^/sites/.*/files/private/ {
 ### Note: this location works with X-Accel-Redirect.
 ###
 location ~* ^/sites/.*/private/ {
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
   if ($is_bot) {
     return 403;
   }
@@ -223,7 +229,7 @@ location ~* ^/sites/.*/private/ {
   internal;
 }
 
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Deny direct access to private downloads also for short, rewritten URLs.
 ### Note: this location works with X-Accel-Redirect.
@@ -335,7 +341,7 @@ location ~* ^.+\.(?:jpe?g|gif|png|ico|bmp|svg|swf|pdf|docx?|xlsx?|pptx?|tiff?|tx
   tcp_nodelay   off;
   access_log    off;
   log_not_found off;
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
   add_header  Access-Control-Allow-Origin *;
   # allow files/images/downloads to be accessed without /sites/fqdn/
   rewrite     ^/downloads/(.*)$ /sites/$server_name/files/downloads/$1 last;
@@ -354,7 +360,7 @@ location ~* ^.+\.(?:avi|mpe?g|mov|wmv|mp3|mp4|m4a|ogg|ogv|flv|wav|midi|zip|tar|t
   expires     30d;
   tcp_nodelay off;
   tcp_nopush  off;
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
   add_header  Access-Control-Allow-Origin *;
   # allow downloads to be accessed without /sites/fqdn/
   rewrite     ^/downloads/(.*)$ /sites/$server_name/files/downloads/$1 last;
@@ -376,7 +382,7 @@ location ~* /(?:cross-?domain)\.xml$ {
   try_files   $uri =404;
 }
 
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Allow some known php files (like serve.php in the ad module).
 ###
@@ -467,14 +473,14 @@ location ~* ^/(?:.*/)?(?:node/[0-9]+/edit|node/add|approve) {
 ### Catch all unspecified requests.
 ###
 location / {
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
   try_files $uri @cache;
 <?php else: ?>
   try_files $uri @drupal;
 <?php endif; ?>
 }
 
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Boost compatible cache check.
 ###
@@ -504,7 +510,7 @@ location @cache {
 ### Send all not cached requests to drupal with clean URLs support.
 ###
 location @drupal {
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
   error_page 418 = @nobots;
   if ($args) {
     return 418;
@@ -513,7 +519,7 @@ location @drupal {
   rewrite ^/(.*)$  /index.php?q=$1 last;
 }
 
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Send all known bots to $args free URLs.
 ###
@@ -567,7 +573,7 @@ location = /index.php {
 ###
 ### Send other known php requests/files to php-fpm without any caching.
 ###
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
 location ~* ^/(?:boost_stats|update|authorize|xmlrpc)\.php$ {
 <?php else: ?>
 location ~* ^/(?:index|cron|boost_stats|update|authorize|xmlrpc)\.php$ {
@@ -588,6 +594,10 @@ location ~* ^.+\.php$ {
 }
 
 #######################################################
-###  nginx.conf site common vhost include end
+<?php if ($nginx_config_mode == 'extended'): ?>
+###  nginx.conf site level extended vhost include end
+<?php else: ?>
+###  nginx.conf site level basic vhost include end
+<?php endif; ?>
 #######################################################
 
