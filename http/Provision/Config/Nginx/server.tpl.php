@@ -6,8 +6,19 @@
 
 <?php
 $nginx_is_modern = drush_get_option('nginx_is_modern');
+if (!$nginx_is_modern && $server->nginx_is_modern) {
+  $nginx_is_modern = $server->nginx_is_modern;
+}
+
 $nginx_has_gzip = drush_get_option('nginx_has_gzip');
-$extended_nginx_config = drush_get_option('extended_nginx_config');
+if (!$nginx_has_gzip && $server->nginx_has_gzip) {
+  $nginx_has_gzip = $server->nginx_has_gzip;
+}
+
+$nginx_config_mode = drush_get_option('nginx_config_mode');
+if (!$nginx_config_mode && $server->nginx_config_mode) {
+  $nginx_config_mode = $server->nginx_config_mode;
+}
 
 if ($nginx_is_modern) {
   print "  limit_conn_zone \$binary_remote_addr zone=gulag:10m;\n";
@@ -20,8 +31,7 @@ if ($nginx_has_gzip) {
   print "  gzip_static       on;\n";
 }
 ?>
-
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
  ## Size Limits
   client_body_buffer_size        64k;
   client_header_buffer_size      32k;
@@ -90,7 +100,7 @@ if ($nginx_has_gzip) {
   include                /etc/nginx/fastcgi_params;
 
 <?php print $extra_config; ?>
-<?php if ($extended_nginx_config): ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
 #######################################################
 ###  nginx default maps
 #######################################################
