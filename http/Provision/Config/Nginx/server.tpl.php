@@ -99,7 +99,6 @@ if ($nginx_has_gzip) {
 
   client_body_temp_path  /var/lib/nginx/body 1 2;
   access_log             /var/log/nginx/access.log main;
-  include                /etc/nginx/fastcgi_params;
 
 <?php print $extra_config; ?>
 <?php if ($nginx_config_mode == 'extended'): ?>

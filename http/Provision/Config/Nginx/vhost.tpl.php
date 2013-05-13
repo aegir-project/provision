@@ -21,10 +21,11 @@ if ($ssl_redirection || $this->redirection) {
 ?>
 
 server {
+  include       fastcgi_params;
   fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-  limit_conn   gulag 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
-  listen       *:<?php print $http_port; ?>;
-  server_name  <?php
+  limit_conn    gulag 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
+  listen        *:<?php print $http_port; ?>;
+  server_name   <?php
     // this is the main vhost, so we need to put the redirection
     // target as the hostname (if it exists) and not the original URL
     // ($this->uri)
@@ -40,7 +41,7 @@ server {
         }
       }
     } ?>;
-  root         <?php print "{$this->root}"; ?>;
+  root          <?php print "{$this->root}"; ?>;
   <?php print $extra_config; ?>
 <?php
 if ($this->redirection || $ssl_redirection) {
@@ -53,11 +54,11 @@ if ($this->redirection || $ssl_redirection) {
     print "\n  rewrite ^ https://{$this->uri}\$request_uri? permanent;\n";
   }
   elseif (!$ssl_redirection && $this->redirection) {
-    print "  include      " . $server->include_path . "/nginx_vhost_common.conf;\n";
+    print "  include       " . $server->include_path . "/nginx_vhost_common.conf;\n";
   }
 }
 else {
-  print "  include      " . $server->include_path . "/nginx_vhost_common.conf;\n";
+  print "  include       " . $server->include_path . "/nginx_vhost_common.conf;\n";
 }
 ?>
 }
