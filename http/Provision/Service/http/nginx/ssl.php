@@ -32,10 +32,9 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     // Replace the server config with our own. See the class for more info.
     $this->configs['server'][] = 'Provision_Config_Nginx_Ssl_Server';
     $this->configs['site'][] = 'Provision_Config_Nginx_Ssl_Site';
-    $this->server->setProperty('nginx_is_modern', 0);
-    $this->server->setProperty('nginx_has_gzip', 0);
-    $this->server->setProperty('basic_nginx_config', 0);
-    $this->server->setProperty('extended_nginx_config', 0);
+    $this->server->setProperty('nginx_config_mode', 'extended');
+    $this->server->setProperty('nginx_is_modern', FALSE);
+    $this->server->setProperty('nginx_has_gzip', FALSE);
     $this->server->setProperty('provision_db_cloaking', FALSE);
   }
 
@@ -59,16 +58,14 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     $this->server->nginx_has_gzip = preg_match("/http_gzip_static_module/", implode('', drush_shell_exec_output()), $match);
 
     // Use basic nginx configuration if this control file exists.
-    $basic_nginx_config_file = "/etc/nginx/basic_nginx.conf";
-    if (provision_file()->exists($basic_nginx_config_file)->status()) {
-      $this->server->basic_nginx_config = 1;
-      $this->server->extended_nginx_config = 0;
-      drush_log(dt('Basic Nginx Config Active - YES control file found @path.', array('@path' => $basic_nginx_config_file)));
+    $nginx_config_mode_file = "/etc/nginx/basic_nginx.conf";
+    if (provision_file()->exists($nginx_config_mode_file)->status()) {
+      $this->server->nginx_config_mode = 'basic';
+      drush_log(dt('Basic Nginx Config Active -SAVE- YES control file found @path.', array('@path' => $nginx_config_mode_file)));
     }
     else {
-      $this->server->basic_nginx_config = 0;
-      $this->server->extended_nginx_config = 1;
-      drush_log(dt('Extended Nginx Config Active - NO control file found @path.', array('@path' => $basic_nginx_config_file)));
+      $this->server->nginx_config_mode = 'extended';
+      drush_log(dt('Extended Nginx Config Active -SAVE- NO control file found @path.', array('@path' => $nginx_config_mode_file)));
     }
   }
 
@@ -92,16 +89,14 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     $this->server->nginx_has_gzip = preg_match("/http_gzip_static_module/", implode('', drush_shell_exec_output()), $match);
 
     // Use basic nginx configuration if this control file exists.
-    $basic_nginx_config_file = "/etc/nginx/basic_nginx.conf";
-    if (provision_file()->exists($basic_nginx_config_file)->status()) {
-      $this->server->basic_nginx_config = 1;
-      $this->server->extended_nginx_config = 0;
-      drush_log(dt('Basic Nginx Config Active - YES control file found @path.', array('@path' => $basic_nginx_config_file)));
+    $nginx_config_mode_file = "/etc/nginx/basic_nginx.conf";
+    if (provision_file()->exists($nginx_config_mode_file)->status()) {
+      $this->server->nginx_config_mode = 'basic';
+      drush_log(dt('Basic Nginx Config Active -VERIFY- YES control file found @path.', array('@path' => $nginx_config_mode_file)));
     }
     else {
-      $this->server->basic_nginx_config = 0;
-      $this->server->extended_nginx_config = 1;
-      drush_log(dt('Extended Nginx Config Active - NO control file found @path.', array('@path' => $basic_nginx_config_file)));
+      $this->server->nginx_config_mode = 'extended';
+      drush_log(dt('Extended Nginx Config Active -VERIFY- NO control file found @path.', array('@path' => $nginx_config_mode_file)));
     }
 
     // Call the parent at the end. it will restart the server when it finishes.
