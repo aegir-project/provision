@@ -92,6 +92,56 @@ function drush_hook_provision_apache_vhost_config($uri, $data) {
 }
 
 /**
+ * Append Nginx configuration to server configuration.
+ *
+ * To use templating, return an include statement for the template.
+ *
+ * @param $data
+ *   Associative array of data from Provision_Config_Nginx_Server::data.
+ *
+ * @return
+ *   Lines to add to the configuration file.
+ *
+ * @see Provision_Config_Nginx_Server
+ */
+function drush_hook_provision_nginx_server_config($data) {
+}
+
+/**
+ * Append Nginx configuration to platform configuration.
+ *
+ * To use templating, return an include statement for the template.
+ *
+ * @param $data
+ *   Associative array of data from Provision_Config_Nginx_Platform::data.
+ *
+ * @return
+ *   Lines to add to the configuration file.
+ *
+ * @see Provision_Config_Nginx_Platform
+ */
+function drush_hook_provision_nginx_dir_config($data) {
+}
+
+/**
+ * Append Nginx configuration to site vhost configuration.
+ *
+ * To use templating, return an include statement for the template.
+ *
+ * @param $uri
+ *   URI for the site.
+ * @param $data
+ *   Associative array of data from Provision_Config_Nginx_Site::data.
+ *
+ * @return
+ *   Lines to add to the configuration file.
+ *
+ * @see Provision_Config_Nginx_Site
+ */
+function drush_hook_provision_nginx_vhost_config($uri, $data) {
+}
+
+/**
  * Specify a different template for rendering a config file.
  *
  * @param $config
