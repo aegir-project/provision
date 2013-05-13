@@ -1,5 +1,4 @@
 <?php
-$ip_address = !empty($ip_address) ? $ip_address : '*';
 if ($ssl_redirection || $this->redirection) {
   // Redirect all aliases to the main http url using separate vhosts blocks to avoid if{} in Nginx.
   foreach ($this->aliases as $alias_url) {
