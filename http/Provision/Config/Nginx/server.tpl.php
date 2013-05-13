@@ -122,6 +122,14 @@ map $request_uri $key_uri {
 }
 
 ###
+### Deny crawlers.
+###
+map $http_user_agent $is_crawler {
+  default  '';
+  ~*HTTrack|BrokenLinkCheck|2009042316.*Firefox.*3\.0\.10|MJ12|HTMLParser|PECL|Automatic|SiteBot|BuzzTrack|Sistrix|Offline|Screaming|Nutch|Mireo|SWEB|Morfeus|GSLFbot  is_crawler;
+}
+
+###
 ### Deny all known bots on some URIs.
 ###
 map $http_user_agent $is_bot {
