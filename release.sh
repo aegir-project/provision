@@ -75,7 +75,7 @@ fi
 git pull --rebase
 
 debversion=$(echo $version | sed -e 's/-/~/')
-dch -v $debversion -D testing
+dch -v $debversion -D unstable
 git add debian/changelog
 
 echo changing makefile to download tarball
