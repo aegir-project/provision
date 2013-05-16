@@ -50,21 +50,17 @@ cat <<EOF
 
 The following operations will be done:
  0. prompt you for a debian/changelog entry
- 1. change the makefile to download the stable release
+ 1. change the makefile to download tarball
  2. change the upgrade.sh.txt version
  3. display the resulting diff
  4. commit those changes to git
  5. lay down the tag
  6. revert the commit
- 7. change the version numbers in the hostmaster makefile
- 8. lay down the tag in hostmaster
- 9. lay down the tags in eldir and hosting
+ 7. (optionally) push those changes
 
-Don't forget that as long as changes are not pushed upstream, this can
-all be reverted (see git-reset(1) and git-revert(1)).
-
-YOU WILL NEED TO PUSH CHANGES TO provision, hostmaster, hosting and
-eldir ONCE THIS SCRIPT IS DONE.
+The operation can be aborted before step 7. Don't forget that as
+long as changes are not pushed upstream, this can all be reverted (see
+git-reset(1) and git-revert(1) ).
 
 EOF
 
@@ -74,13 +70,14 @@ fi
 
 git pull --rebase
 
-debversion=$(echo $version | sed -e 's/-/~/')
-dch -v $debversion -D unstable
+dch -v $version -D testing
 git add debian/changelog
 
 echo changing makefile to download tarball
-sed -i'.tmp' -e"/^includes\[hostmaster\].*/s# *= .*\$# = \"http://drupalcode.org/project/hostmaster.git/blob_plain/$major-$version:/drupal-org.make\"#" aegir.make
-git add aegir.make && rm aegir.make.tmp
+#sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
+#  -e'/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://ftp.drupal.org/files/projects/hostmaster-'$major-$version'.tgz"#' \
+#  -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[directory_name] = "hostmaster"/' aegir.make && git add aegir.make && rm aegir.make.tmp
+sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[tag] = "'$major-$version'"/' aegir.make && git add aegir.make && rm aegir.make.tmp
 
 echo changing provision.info version
 sed -i'.tmp' -e"s/version *=.*$/version=$major-$version/" provision.info
@@ -112,24 +109,7 @@ git reset --quiet HEAD 'debian/changelog'
 git checkout -- 'debian/changelog'
 git commit
 
-echo checking out slave modules
-for module in hostmaster hosting eldir; do
-    if [ ! -d ../$module ]; then
-        git clone git.drupal.org:project/$module ../$module
-    fi
-    ( cd ../$module ; git pull --rebase )
-done
-
-echo "changing version numbers in hostmaster makefile"
-(
-cd ../hostmaster
-sed -i.tmp -e "/^projects\[\(eldir\|hosting\)\]\[version\]/s/ *=.*\$/ = \"$version\"/" drupal-org.make
-git add drupal-org.make && rm drupal-org.make.tmp
-git diff --cached
-git commit -m"bump to release $version" 
-)
-
-for module in hostmaster hosting eldir; do
-    echo tagging $module
-    sed -n '1,/ --/p' debian/changelog | ( cd ../$module && git tag -a -F - $major-$version )
-done
+if prompt_yes_no "push tags and commits upstream? "; then
+    # this makes sure we push the commit *and* the tag
+    git push --tags origin HEAD
+fi
