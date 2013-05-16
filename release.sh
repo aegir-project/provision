@@ -114,21 +114,20 @@ git commit
 
 echo checking out slave modules
 for module in hostmaster hosting eldir; do
-    if [ ! -d $module ]; then
-        git clone git.drupal.org:project/$module
+    if [ ! -d ../$module ]; then
+        git clone git.drupal.org:project/$module ../$module
     fi
-    ( cd $hostmaster ; git pull --rebase )
+    ( cd ../$module ; git pull --rebase )
 done
 
-sed -n '1,/ --/p' debian/changelog | (
-cd hostmaster
+(
+cd ../hostmaster
 sed -i.tmp -e "/^projects\[\(eldir|hosting\)\]\[version\]/s/ *=.*$/ = $major-$version/" drupal-org.make
 git diff
 git commit -m"bump to release $version"
-git tag -a -F - $major-$version
 )
 
-for module in hosting eldir; do
+for module in hostmaster hosting eldir; do
     echo tagging $module
-    sed -n '1,/ --/p' debian/changelog | ( cd $module && git tag -a -F - $major-$version )
+    sed -n '1,/ --/p' debian/changelog | ( cd ../$module && git tag -a -F - $major-$version )
 done
