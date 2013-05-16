@@ -1,3 +1,9 @@
+aegir-provision2 (2.0~alpha2) unstable; urgency=low
+
+  * test release scripts
+
+ -- Antoine Beaupré <anarcat@debian.org>  Thu, 16 May 2013 17:58:07 -0400
+
 aegir-provision2 (2.0~alpha1) unstable; urgency=low
 
   * first alpha release of the 2.x branch, release notes too long to
