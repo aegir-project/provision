@@ -1,8 +1,19 @@
 aegir-provision2 (2.0~alpha2) unstable; urgency=low
 
-  * test release scripts
+  * This release features improvements to the IP management mechanisms that
+    were broken in the last alpha1 release. We now manage IP addresses
+    individually, and check if an IP is in use before allowing it to be
+    deleted.
 
- -- Antoine Beaupré <anarcat@debian.org>  Thu, 16 May 2013 17:58:07 -0400
+  * We also finally leave the files alone on spokes in the multi-server
+    model, a long-standing bug in the 1.x series that led to data loss. A
+    lot of work was done to standardize the Nginx configuration to allow
+    for simpler, yet optional, configurations that leave the admin in
+    charge of choosing the optimisation methods. This is still work in
+    progress, tracked in #1635596: nginx: do not decide the policy for
+    users.
+
+ -- Antoine Beaupré <anarcat@debian.org>  Thu, 16 May 2013 19:13:17 -0400
 
 aegir-provision2 (2.0~alpha1) unstable; urgency=low
 
