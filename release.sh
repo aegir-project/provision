@@ -124,8 +124,9 @@ echo "changing version numbers in hostmaster makefile"
 (
 cd ../hostmaster
 sed -i.tmp -e "/^projects\[\(eldir\|hosting\)\]\[version\]/s/ *=.*\$/ = \"$version\"/" drupal-org.make
-git diff
-git commit -m"bump to release $version" && rm drupal-org.make.tmp
+git add drupal-org.make && rm drupal-org.make.tmp
+git diff --cached
+git commit -m"bump to release $version" 
 )
 
 for module in hostmaster hosting eldir; do
