@@ -120,11 +120,12 @@ for module in hostmaster hosting eldir; do
     ( cd ../$module ; git pull --rebase )
 done
 
+echo "changing version numbers in hostmaster makefile"
 (
 cd ../hostmaster
-sed -i.tmp -e "/^projects\[\(eldir|hosting\)\]\[version\]/s/ *=.*$/ = $major-$version/" drupal-org.make
+sed -i.tmp -e "/^projects\[\(eldir\|hosting\)\]\[version\]/s/ *=.*\$/ = \"$version\"/" drupal-org.make
 git diff
-git commit -m"bump to release $version"
+git commit -m"bump to release $version" && rm drupal-org.make.tmp
 )
 
 for module in hostmaster hosting eldir; do
