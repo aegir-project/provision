@@ -11,7 +11,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
   function init_server() {
     parent::init_server();
     $this->configs['server'][] = 'Provision_Config_Nginx_Server';
-    $this->configs['platform'][] = 'Provision_Config_Nginx_Inc_Server';
+    $this->configs['server'][] = 'Provision_Config_Nginx_Inc_Server';
     $this->configs['site'][] = 'Provision_Config_Nginx_Site';
     $this->server->setProperty('nginx_config_mode', 'extended');
     $this->server->setProperty('nginx_is_modern', FALSE);
