@@ -117,7 +117,7 @@ case "$1" in
 EOF
             # on new installs, we default to having the daemon enabled
             echo 'Enabling hosting-queued daemon'
-            su -s /bin/sh aegir -c 'drush @hostmaster pm-enable hosting-queued'
+            su -s /bin/sh aegir -c 'drush @hostmaster pm-enable -y hosting_queued'
             service hosting-queued start
         fi
         rm -f $TEMPFILE
