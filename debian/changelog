@@ -1,3 +1,9 @@
+aegir-provision2 (2.0~alpha2+.7604132) unstable; urgency=low
+
+  * automatic jenkins build  for commit 7604132
+
+ -- Antoine Beaupré <anarcat@debian.org>  Thu, 23 May 2013 13:24:11 -0700
+
 aegir-provision2 (2.0~alpha2) unstable; urgency=low
 
   * This release features improvements to the IP management mechanisms that
