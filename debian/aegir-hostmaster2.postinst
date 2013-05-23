@@ -105,8 +105,11 @@ case "$1" in
                 exit 1
             fi
             echo "installing the Aegir frontend (Drupal with the hostmaster profile), please wait..."
+            if [ "$DPKG_DEBUG" = "developer" ]; then
+                DEBUG="--debug"
+            fi
             # pass data through JSON for extra security
-            su -s /bin/sh aegir -c "cd $VARLIB && drush hostmaster-install $FLAGS --backend $site_uri | drush backend-parse" <<EOF
+            su -s /bin/sh aegir -c "cd $VARLIB && drush hostmaster-install $FLAGS --backend $site_uri 2>&1 | drush backend-parse $DEBUG" <<EOF
 { "yes": 1,
   "version": "$VERSION",
   "aegir_db_host": "$AEGIR_DB_HOST",
