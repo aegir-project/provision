@@ -127,6 +127,8 @@ EOF
         # this will ensure that this script aborts if the site can't be bootstrapped
         if su -s /bin/sh aegir -c 'drush @hostmaster status' 2>&1 | grep -q 'Drupal bootstrap.*Successful'; then
             echo 'Aegir frontend bootstrap correctly, operation was a success!'
+            echo 'Use this URL to login on your new site:'
+            su -s /bin/sh aegir -c 'drush @hostmaster uli'
         else
             echo 'Aegir frontend failed to bootstrap, something went wrong!'
             echo 'Look at the log above for clues or run with DPKG_DEBUG=developer'
