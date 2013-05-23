@@ -49,6 +49,8 @@ case "$1" in
             FLAGS="$FLAGS --http_service_type='$RET'"
         fi
 
+        # flush the drush cache to find new commands
+        su -s /bin/sh aegir -c 'drush cc drush'
         TEMPFILE=`tempfile`
         su -s /bin/sh aegir -c 'drush --pipe @hostmaster status | egrep "site_uri|drupal_root"' >> $TEMPFILE || true
         if grep -q 'site_uri' $TEMPFILE; then
