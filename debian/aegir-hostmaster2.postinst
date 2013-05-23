@@ -106,7 +106,7 @@ case "$1" in
             fi
             echo "installing the Aegir frontend (Drupal with the hostmaster profile), please wait..."
             # pass data through JSON for extra security
-            su aegir -c "cd $VARLIB && drush hostmaster-install $FLAGS --backend $site_uri | drush backend-parse" <<EOF
+            su -s /bin/sh aegir -c "cd $VARLIB && drush hostmaster-install $FLAGS --backend $site_uri | drush backend-parse" <<EOF
 { "yes": 1,
   "version": "$VERSION",
   "aegir_db_host": "$AEGIR_DB_HOST",
@@ -117,7 +117,7 @@ case "$1" in
 EOF
             # on new installs, we default to having the daemon enabled
             echo 'Enabling hosting-queued daemon'
-            su aegir -c 'drush @hostmaster pm-enable hosting-queued'
+            su -s /bin/sh aegir -c 'drush @hostmaster pm-enable hosting-queued'
             service hosting-queued start
         fi
         rm -f $TEMPFILE
