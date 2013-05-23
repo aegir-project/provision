@@ -28,6 +28,14 @@ VARLIB="/var/aegir"
 
 case "$1" in
     configure)
+        db_get "aegir/webserver"
+        if [ ! -z "$RET" ]; then
+            if [ "$RET" = 'apache2' ]; then
+                RET='apache' # convert argument to something aegir can understand
+            fi
+            WEBSERVER="$RET"
+        fi
+
         # add a aegir user if one does not already exist
         if ! getent passwd aegir >/dev/null ; then
             echo "adding aegir user..."
@@ -51,11 +59,18 @@ case "$1" in
         # fix permissions on installed directories
         chown aegir:aegir "$VARLIB" "$VARLIB/config"
         # make sure we have apache configs settled in, for remote headless aegir servers
-        touch $VARLIB/config/apache.conf
-        chown aegir:aegir "$VARLIB/config/apache.conf"
-        ln -sf $VARLIB/config/apache.conf /etc/apache2/conf.d/aegir.conf
-        a2enmod ssl rewrite
-        apache2ctl graceful
+        touch $VARLIB/config/$WEBSERVER.conf
+        chown aegir:aegir "$VARLIB/config/$WEBSERVER.conf"
+        ln -sf $VARLIB/config/$WEBSERVER.conf /etc/apache2/conf.d/aegir.conf
+        case $WEBSERVER in
+            apache)
+                a2enmod ssl rewrite
+                apache2ctl graceful
+                ;;
+            nginx)
+                service nginx reload
+                ;;
+        esac
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
