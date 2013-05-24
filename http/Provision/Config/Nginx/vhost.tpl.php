@@ -2,6 +2,7 @@
 if ($ssl_redirection || $this->redirection) {
   // Redirect all aliases to the main http url using separate vhosts blocks to avoid if{} in Nginx.
   foreach ($this->aliases as $alias_url) {
+    print "# alias redirection virtual host";
     print "server {\n";
     print "  limit_conn   gulag 32;\n";
     print "  listen       *:{$http_port};\n";
@@ -37,7 +38,7 @@ server {
     if (!$this->redirection && is_array($this->aliases)) {
       foreach ($this->aliases as $alias_url) {
         if (trim($alias_url)) {
-          print $alias_url;
+          print " " . $alias_url;
         }
       }
     } ?>;
