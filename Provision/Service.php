@@ -111,8 +111,9 @@ class Provision_Service extends Provision_ChainedState {
     }
 
     if (!isset($this->config_cache[$this->context->name][$config])) {
+      $this->config_cache[$this->context->name][$config] = array();
       foreach ((array) $this->configs[$config] as $class) {
-        $this->config_cache[$this->context->name][$config] = new $class($this->context, array_merge($this->config_data($config), $data));
+        $this->config_cache[$this->context->name][$config][] = new $class($this->context, array_merge($this->config_data($config), $data));
       }
     }
 
@@ -127,8 +128,10 @@ class Provision_Service extends Provision_ChainedState {
    * Unlink the currently active config file.
    */
   function unlink() {
-    if (is_object($this->_config)) {
-      $this->_config->unlink();
+    foreach ($this->_config as $config) {
+      if (is_object($config)) {
+        $config->unlink();
+      }
     }
 
     return $this;
@@ -138,8 +141,10 @@ class Provision_Service extends Provision_ChainedState {
    * Write the currently active config file.
    */
   function write() {
-    if (is_object($this->_config)) {
-      $this->_config->write();
+    foreach ($this->_config as $config) {
+      if (is_object($config)) {
+        $config->write();
+      }
     }
 
     return $this;
@@ -149,25 +154,27 @@ class Provision_Service extends Provision_ChainedState {
    * Set a record on the data store of the currently active config file (if applicable).
    */
   function record_set($arg1, $arg2 = NULL) {
-    if (is_object($this->_config)) {
-      if (is_object($this->_config->store)) {
-        if (is_array($arg1)) {
-          $this->_config->store->records = array_merge($this->_config->store->records, $arg1);
-        }
-        elseif (!is_numeric($arg1)) {
-          if (is_array($arg2)) {
-            if (!isset($this->_config->store->loaded_records[$arg1])
-                || !is_array($this->_config->store->loaded_records[$arg1])) {
-              $this->_config->store->loaded_records[$arg1] = array();
-            }
-            if (!isset($this->_config->store->records[$arg1])
-                || !is_array($this->_config->store->records[$arg1])) {
-              $this->_config->store->records[$arg1] = array();
-            }
-            $this->_config->store->records[$arg1] = array_merge($this->_config->store->loaded_records[$arg1], $this->_config->store->records[$arg1], $arg2);
+    foreach ($this->_config as $config) {
+      if (is_object($config)) {
+        if (is_object($config->store)) {
+          if (is_array($arg1)) {
+            $config->store->records = array_merge($config->store->records, $arg1);
           }
-          else {
-            $this->_config->store->records[$arg1] = $arg2;
+          elseif (!is_numeric($arg1)) {
+            if (is_array($arg2)) {
+              if (!isset($config->store->loaded_records[$arg1])
+                  || !is_array($config->store->loaded_records[$arg1])) {
+                $config->store->loaded_records[$arg1] = array();
+              }
+              if (!isset($config->store->records[$arg1])
+                  || !is_array($config->store->records[$arg1])) {
+                $config->store->records[$arg1] = array();
+              }
+              $config->store->records[$arg1] = array_merge($config->store->loaded_records[$arg1], $config->store->records[$arg1], $arg2);
+            }
+            else {
+              $config->store->records[$arg1] = $arg2;
+            }
           }
         }
       }
@@ -186,9 +193,11 @@ class Provision_Service extends Provision_ChainedState {
    * Check if a record exists in the data store of the currently active config file (if applicable).
    */
   function record_exists($record) {
-    if (is_object($this->_config)) {
-      if (is_object($this->_config->store)) {
-        return array_key_exists($record, $this->_config->store->merged_records());
+    foreach ($this->_config as $config) {
+      if (is_object($config)) {
+        if (is_object($config->store)) {
+          return array_key_exists($record, $config->store->merged_records());
+        }
       }
     }
     return FALSE;
@@ -198,16 +207,18 @@ class Provision_Service extends Provision_ChainedState {
    * Fetch record(s) from the data store of the currently active config file (if applicable).
    */
   function record_get($key = NULL, $default = NULL) {
-    if (is_object($this->_config)) {
-      if (is_object($this->_config->store)) {
-        $records = $this->_config->store->merged_records();
+    foreach ($this->_config as $config) {
+      if (is_object($config)) {
+        if (is_object($config->store)) {
+          $records = $config->store->merged_records();
 
-        if (is_null($key)) {
-          return $records;
-        }
+          if (is_null($key)) {
+            return $records;
+          }
 
-        if (isset($records[$key])) {
-          return $records[$key];
+          if (isset($records[$key])) {
+            return $records[$key];
+          }
         }
       }
     }
