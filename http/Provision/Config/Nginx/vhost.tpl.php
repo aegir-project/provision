@@ -24,6 +24,12 @@ if ($ssl_redirection || $this->redirection) {
 server {
   include       fastcgi_params;
   fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+  fastcgi_param db_type   <?php print urlencode($db_type); ?>;
+  fastcgi_param db_name   <?php print urlencode($db_name); ?>;
+  fastcgi_param db_user   <?php print urlencode($db_user); ?>;
+  fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
+  fastcgi_param db_host   <?php print urlencode($db_host); ?>;
+  fastcgi_param db_port   <?php print urlencode($db_port); ?>;
   limit_conn    gulag 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
   listen        *:<?php print $http_port; ?>;
   server_name   <?php

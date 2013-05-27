@@ -21,6 +21,10 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
 
   public $ssl_enabled = TRUE;
 
+  function cloaked_db_creds() {
+    return TRUE;
+  }
+
   /**
    * Initialize the configuration files.
    *
@@ -35,7 +39,7 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     $this->server->setProperty('nginx_config_mode', 'extended');
     $this->server->setProperty('nginx_is_modern', FALSE);
     $this->server->setProperty('nginx_has_gzip', FALSE);
-    $this->server->setProperty('provision_db_cloaking', FALSE);
+    $this->server->setProperty('provision_db_cloaking', TRUE);
   }
 
   function save_server() {

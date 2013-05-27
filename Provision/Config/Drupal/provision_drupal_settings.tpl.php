@@ -20,8 +20,8 @@ print '<?php' ?>
 <?php if ($this->cloaked): ?>
 if (isset($_SERVER['db_name'])) {
   /**
-   * The database credentials are stored in the Apache vhost config
-   * of the associated site with SetEnv parameters.
+   * The database credentials are stored in the Apache or Nginx vhost config
+   * of the associated site with SetEnv (fastcgi_param in Nginx) parameters.
    * They are called here with $_SERVER environment variables to
    * prevent sensitive data from leaking to site administrators
    * with PHP access, that potentially might be of other sites in

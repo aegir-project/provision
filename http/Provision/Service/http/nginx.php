@@ -8,6 +8,10 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     return Provision_Service_http_nginx::nginx_restart_cmd();
   }
 
+  function cloaked_db_creds() {
+    return TRUE;
+  }
+
   function init_server() {
     parent::init_server();
     $this->configs['server'][] = 'Provision_Config_Nginx_Server';
@@ -16,7 +20,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     $this->server->setProperty('nginx_config_mode', 'extended');
     $this->server->setProperty('nginx_is_modern', FALSE);
     $this->server->setProperty('nginx_has_gzip', FALSE);
-    $this->server->setProperty('provision_db_cloaking', FALSE);
+    $this->server->setProperty('provision_db_cloaking', TRUE);
   }
 
   function save_server() {
