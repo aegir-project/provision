@@ -3,6 +3,10 @@ $nginx_config_mode = drush_get_option('nginx_config_mode');
 if (!$nginx_config_mode && $server->nginx_config_mode) {
   $nginx_config_mode = $server->nginx_config_mode;
 }
+$phpfpm_mode = drush_get_option('phpfpm_mode');
+if (!$phpfpm_mode && $server->phpfpm_mode) {
+  $phpfpm_mode = $server->phpfpm_mode;
+}
 ?>
 #######################################################
 <?php if ($nginx_config_mode == 'extended'): ?>
@@ -66,7 +70,11 @@ location = /cron.php {
   allow        127.0.0.1;
   deny         all;
   try_files    $uri =404;
+<?php if ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
 }
 
 ###
@@ -394,7 +402,11 @@ location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tin
     return 403;
   }
   try_files    $uri =404;
+<?php if ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
 }
 
 ###
@@ -544,7 +556,11 @@ location = /index.php {
   tcp_nopush    off;
   keepalive_requests 0;
   try_files     $uri =404; ### check for existence of php file first
+<?php if ($phpfpm_mode == 'port'): ?>
   fastcgi_pass  127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass  unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
   ###
   ### Use Nginx cache for all visitors.
   ###
@@ -583,7 +599,11 @@ location ~* ^/(?:index|cron|boost_stats|update|authorize|xmlrpc)\.php$ {
   keepalive_requests 0;
   access_log   off;
   try_files    $uri =404; ### check for existence of php file first
+<?php if ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
 }
 
 ###

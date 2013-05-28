@@ -40,6 +40,7 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     $this->server->setProperty('nginx_is_modern', FALSE);
     $this->server->setProperty('nginx_has_gzip', FALSE);
     $this->server->setProperty('provision_db_cloaking', TRUE);
+    $this->server->setProperty('phpfpm_mode', 'port');
   }
 
   function save_server() {
@@ -71,6 +72,16 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
       $this->server->nginx_config_mode = 'extended';
       drush_log(dt('Extended Nginx Config Active -SAVE- NO control file found @path.', array('@path' => $nginx_config_mode_file)));
     }
+
+    // Check if there is php-fpm listening on unix socket, otherwise use port 9000 to connect
+    if (provision_file()->exists('/var/run/php5-fpm.sock')->status()) {
+      $this->server->phpfpm_mode = 'socket';
+      drush_log(dt('PHP-FPM unix socket mode detected -SAVE- YES socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
+    }
+    else {
+      $this->server->phpfpm_mode = 'port';
+      drush_log(dt('PHP-FPM port mode detected -SAVE- NO socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
+    }
   }
 
   function verify_server_cmd() {
@@ -101,6 +112,16 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     else {
       $this->server->nginx_config_mode = 'extended';
       drush_log(dt('Extended Nginx Config Active -VERIFY- NO control file found @path.', array('@path' => $nginx_config_mode_file)));
+    }
+
+    // Check if there is php-fpm listening on unix socket, otherwise use port 9000 to connect
+    if (provision_file()->exists('/var/run/php5-fpm.sock')->status()) {
+      $this->server->phpfpm_mode = 'socket';
+      drush_log(dt('PHP-FPM unix socket mode detected -VERIFY- YES socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
+    }
+    else {
+      $this->server->phpfpm_mode = 'port';
+      drush_log(dt('PHP-FPM port mode detected -VERIFY- NO socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
     }
 
     // Call the parent at the end. it will restart the server when it finishes.
