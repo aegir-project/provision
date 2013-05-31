@@ -95,6 +95,9 @@ function provision_drush_command() {
       'context_type' => 'server, platform, or site; default server',
       'delete' => 'Remove the alias.',
     ), Provision_Context_server::option_documentation(), Provision_Context_platform::option_documentation(), Provision_Context_site::option_documentation()),
+    // we should populate from all known contexts, unfortunately we don't
+    // enumerate them yet... see https://drupal.org/node/1972286
+    'allow-additional-options' => TRUE,
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
   $items['provision-install'] = array(
