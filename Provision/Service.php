@@ -34,7 +34,7 @@ class Provision_Service extends Provision_ChainedState {
 
 
   protected $config_cache = array();
-  private $_config = NULL;
+  private $_config = array();
 
 
   /**
@@ -95,7 +95,7 @@ class Provision_Service extends Provision_ChainedState {
    *   turned into an array with the 'name' property the value of the string.
    */
   function config($config, $data = array()) {
-    $this->_config = NULL;
+    $this->_config = array();
 
     if (!isset($this->configs[$config])) {
       $service = (!is_null($this->application_name)) ? $this->application_name : $this->service;
