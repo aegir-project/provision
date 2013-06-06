@@ -292,6 +292,16 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     $mkdir["sites/$url/files/styles"]     = 02770;
     $chgrp["sites/$url/files/styles"]     = d('@server_master')->web_group;
 
+    // backup_migrate support
+    $mkdir["sites/$url/private/files/backup_migrate"] = 02770;
+    $chgrp["sites/$url/private/files/backup_migrate"] = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/private/files/backup_migrate/manual"] = 02770;
+    $chgrp["sites/$url/private/files/backup_migrate/manual"] = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/private/files/backup_migrate/scheduled"] = 02770;
+    $chgrp["sites/$url/private/files/backup_migrate/scheduled"] = d('@server_master')->web_group;
+
     // d8 support
     $mkdir["sites/$url/private/config"]   = 02770;
     $chgrp["sites/$url/private/config"]   = d('@server_master')->web_group;
