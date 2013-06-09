@@ -41,6 +41,16 @@ function drush_subdirs_pre_provision_install() {
 }
 
 /**
+ * Implements hook_provision_config_load_templates().
+ */
+function subdirs_provision_config_load_templates($config) {
+  if ($config->template == 'provision_drupal_sites.tpl.php') {
+    drush_log('Generating sites.php for use with subdirectories.', 'notice');
+    return dirname(__FILE__) . '/Provision/Config/subdirs_drupal_sites.tpl.php';
+  }
+}
+
+/**
  * Implements drush_hook_pre_provision_install_rollback().
  */
 function drush_subdirs_pre_provision_install_rollback() {
