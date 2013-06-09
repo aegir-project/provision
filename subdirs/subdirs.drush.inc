@@ -123,17 +123,37 @@ function _subdirs_create_domain_vhost($alias) {
  * Delete the config file for the subdirectory.
  */
 function _subdirs_delete_site_location($alias) {
-  drush_log('Deleting site location config file for subdirectory ' . $alias, 'warning');
+  $alias = explode('/', $alias, 2);
+  $context = d();
+
+  $location_path = $includes_path . '/' . $alias[1] . '.conf';
+
+  if (unlink($location_path)) {
+    drush_log('Deleted site location config file for subdirectory ' . implode('/', $alias), 'success');
+  }
+  else {
+    drush_log('Error encountered attempting to delete site location config file for subdirectory ' . implode('/', $alias), 'error');
+  }
+
 }
 
 /**
  * Delete the vhost for the subdirectory domain.
  */
 function _subdirs_delete_domain_vhost($alias) {
-  drush_log('Deleting domain vhost for subdirectory ' . $alias, 'warning');
+  $alias = explode('/', $alias, 2);
+  $context = d();
+
+  $domain_vhost_path = $context->server->http_vhostd_path . '/' . $alias[0];
+
+  if (unlink($domain_vhost_path)) {
+    drush_log('Deleted domain vhost for subdirectory ' . implode('/', $alias), 'success');
+  }
+  else {
+    drush_log('Error encountered attempting to delete domain vhost for subdirectory ' . implode('/', $alias), 'error');
+  }
+
 }
-
-
 
 // TODO: Remove this, once we've got a working Config class.
 function _subdirs_render_template($template, $variables) {
