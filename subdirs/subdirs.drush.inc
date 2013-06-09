@@ -165,8 +165,11 @@ function _subdirs_delete_domain_vhost($alias) {
 
 }
 
-// TODO: Remove this, once we've got a working Config class.
+/**
+ * Helper function to render our config file templates.
+ */
 function _subdirs_render_template($template, $variables) {
+  // TODO: Remove this, once we've got a working Config class.
 
   $template_path = dirname(__FILE__) . '/Provision/Config/' . $template;
 
