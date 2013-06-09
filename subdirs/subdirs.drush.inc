@@ -31,7 +31,7 @@ function drush_subdirs_pre_provision_install() {
     if (count($aliases)) {
       foreach ($aliases as $alias) {
         if (strpos($alias, '/')) {
-          drush_log("Subdirectory alias `$alias` found. Creating configuration files.",'warning');
+          drush_log("Subdirectory alias `$alias` found. Creating configuration files.", 'notice');
           _subdirs_create_site_location($alias);
           _subdirs_create_domain_vhost($alias);
         }
@@ -83,9 +83,13 @@ function _subdirs_create_site_location($alias) {
 
   $location_path = $includes_path . '/' . $alias[1] . '.conf';
 
-  drush_log('Creating site location config file for subdirectory ' . $alias. ' at ' . $location_path, 'warning');
+  if (fwrite(fopen($location_path, 'w'), $output)) {
+    drush_log('Created site location config file for subdirectory ' . implode('/', $alias) . ' at ' . $location_path, 'success');
+  }
+  else {
+    drush_log('Error encountered attempting to create site location config file for subdirectory ' . implode('/', $alias), 'error');
+  }
 
-  return fwrite(fopen($location_path, 'w'), $output);
 }
 
 /**
@@ -106,9 +110,13 @@ function _subdirs_create_domain_vhost($alias) {
 
   $domain_vhost_path = $context->server->http_vhostd_path . '/' . $alias[0];
 
-  drush_log('Creating domain vhost for subdirectory ' . $alias . ' at ' . $domain_vhost_path, 'warning');
+  if (fwrite(fopen($domain_vhost_path, 'w'), $output)) {
+    drush_log('Created domain vhost for subdirectory ' . implode('/', $alias) . ' at ' . $domain_vhost_path, 'success');
+  }
+  else {
+    drush_log('Error encountered attempting to create domain vhost for subdirectory ' . implode('/', $alias), 'error');
+  }
 
-  return fwrite(fopen($domain_vhost_path, 'w'), $output);
 }
 
 /**
