@@ -45,9 +45,10 @@ print "<?php \n"; ?>
  */
 
 <?php
+  $aliases = d()->aliases;
   // Fix our subdir aliases.
-  foreach ($records as $alias => $site) {
-    $records[str_replace('/', '.', $alias)] = $site;
+  foreach ($aliases as $alias) {
+    $records[str_replace('/', '.', $alias)] = $records[$alias];
     unset($records[$alias]);
   }
 ?>

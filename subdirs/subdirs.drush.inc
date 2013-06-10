@@ -75,8 +75,17 @@ function drush_subdirs_pre_provision_enable() {
  */
 function subdirs_provision_config_load_templates($config) {
   if ($config->template == 'provision_drupal_sites.tpl.php') {
-    drush_log('Generating sites.php for use with subdirectories.', 'notice');
-    return dirname(__FILE__) . '/Provision/Config/subdirs_drupal_sites.tpl.php';
+    $context = d();
+    $use_subdirs_tpl = FALSE;
+    foreach ($context->aliases as $alias) {
+      if (strpos($alias, '/')) {
+        $use_subdirs_tpl = TRUE;
+      }
+    }
+    if ($use_subdirs_tpl) {
+      drush_log('Generating sites.php for use with subdirectories.', 'notice');
+      return dirname(__FILE__) . '/Provision/Config/subdirs_drupal_sites.tpl.php';
+    }
   }
 }
 
@@ -105,7 +114,6 @@ function _subdirs_remove_site_configs() {
   $context = d();
   $aliases = $context->aliases;
   $subdirs_path = $context->server->http_app_path . '/subdirs.d';
-
   if (count($aliases)) {
     foreach ($aliases as $alias) {
       _subdirs_delete_site_location($alias);
