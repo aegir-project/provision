@@ -67,7 +67,7 @@ function drush_subdirs_pre_provision_install_rollback() {
  * Create the config file for the subdirectory.
  */
 function _subdirs_create_site_location($alias) {
-  $alias = explode('/', $alias, 2);
+  $alias_parts = explode('/', $alias, 2);
   $context = d();
 
   // Generate variables to pass to template
@@ -78,7 +78,7 @@ function _subdirs_create_site_location($alias) {
   }
   $variables['site_path'] = $context->site_path;
   $variables['platform_path'] = $context->platform->root;
-  $variables['location'] = $alias[1];
+  $variables['location'] = $alias_parts[1];
   $output = _subdirs_render_template('site_location.tpl.php', $variables);
 
   // Create the relevant include paths
@@ -86,18 +86,18 @@ function _subdirs_create_site_location($alias) {
   if (!is_dir($subdirs_path)) {
     mkdir($subdirs_path);
   }
-  $includes_path = $subdirs_path . '/' . $alias[0];
+  $includes_path = $subdirs_path . '/' . $alias_parts[0];
   if (!is_dir($includes_path)) {
     mkdir($includes_path);
   }
 
-  $location_path = $includes_path . '/' . $alias[1] . '.conf';
+  $location_path = $includes_path . '/' . $alias_parts[1] . '.conf';
 
   if (fwrite(fopen($location_path, 'w'), $output)) {
-    drush_log('Created site location config file for subdirectory ' . implode('/', $alias) . ' at ' . $location_path, 'success');
+    drush_log('Created site location config file for subdirectory ' . $alias . ' at ' . $location_path, 'success');
   }
   else {
-    drush_log('Error encountered attempting to create site location config file for subdirectory ' . implode('/', $alias), 'error');
+    drush_log('Error encountered attempting to create site location config file for subdirectory ' . $alias, 'error');
   }
 
 }
@@ -106,25 +106,25 @@ function _subdirs_create_site_location($alias) {
  * Create the vhost for the subdirectory domain.
  */
 function _subdirs_create_domain_vhost($alias) {
-  $alias = explode('/', $alias, 2);
+  $alias_parts = explode('/', $alias, 2);
   $context = d();
 
   // Generate variables to pass to template
   $variables = array(
     'http_port' => $context->server->http_port,
     'subdirs_path' => $context->server->http_app_path . '/subdirs.d',
-    'uri' => $alias[0],
+    'uri' => $alias_parts[0],
   );
 
   $output = _subdirs_render_template('domain_vhost.tpl.php', $variables);
 
-  $domain_vhost_path = $context->server->http_vhostd_path . '/' . $alias[0];
+  $domain_vhost_path = $context->server->http_vhostd_path . '/' . $alias_parts[0];
 
   if (fwrite(fopen($domain_vhost_path, 'w'), $output)) {
-    drush_log('Created domain vhost for subdirectory ' . implode('/', $alias) . ' at ' . $domain_vhost_path, 'success');
+    drush_log('Created domain vhost for subdirectory ' . $alias . ' at ' . $domain_vhost_path, 'success');
   }
   else {
-    drush_log('Error encountered attempting to create domain vhost for subdirectory ' . implode('/', $alias), 'error');
+    drush_log('Error encountered attempting to create domain vhost for subdirectory ' . $alias, 'error');
   }
 
 }
@@ -133,16 +133,18 @@ function _subdirs_create_domain_vhost($alias) {
  * Delete the config file for the subdirectory.
  */
 function _subdirs_delete_site_location($alias) {
-  $alias = explode('/', $alias, 2);
+  $alias_parts = explode('/', $alias, 2);
   $context = d();
 
-  $location_path = $includes_path . '/' . $alias[1] . '.conf';
+  $subdirs_path = $context->server->http_app_path . '/subdirs.d';
+  $includes_path = $subdirs_path . '/' . $alias_parts[0];
+  $location_path = $includes_path . '/' . $alias_parts[1] . '.conf';
 
   if (unlink($location_path)) {
-    drush_log('Deleted site location config file for subdirectory ' . implode('/', $alias), 'success');
+    drush_log('Deleted site location config file for subdirectory ' . $alias, 'success');
   }
   else {
-    drush_log('Error encountered attempting to delete site location config file for subdirectory ' . implode('/', $alias), 'error');
+    drush_log('Error encountered attempting to delete site location config file for subdirectory ' . $alias, 'error');
   }
 
 }
@@ -151,16 +153,16 @@ function _subdirs_delete_site_location($alias) {
  * Delete the vhost for the subdirectory domain.
  */
 function _subdirs_delete_domain_vhost($alias) {
-  $alias = explode('/', $alias, 2);
+  $alias_parts = explode('/', $alias, 2);
   $context = d();
 
-  $domain_vhost_path = $context->server->http_vhostd_path . '/' . $alias[0];
+  $domain_vhost_path = $context->server->http_vhostd_path . '/' . $alias_parts[0];
 
   if (unlink($domain_vhost_path)) {
-    drush_log('Deleted domain vhost for subdirectory ' . implode('/', $alias), 'success');
+    drush_log('Deleted domain vhost for subdirectory ' . $alias, 'success');
   }
   else {
-    drush_log('Error encountered attempting to delete domain vhost for subdirectory ' . implode('/', $alias), 'error');
+    drush_log('Error encountered attempting to delete domain vhost for subdirectory ' . $alias, 'error');
   }
 
 }
