@@ -21,11 +21,55 @@ function subdirs_provision_register_autoload() {
   }
 }
 
-
 /**
  * Implements drush_hook_pre_provision_install().
  */
 function drush_subdirs_pre_provision_install() {
+  _subdirs_create_site_configs();
+}
+
+/**
+ * Implements drush_hook_pre_provision_install_rollback().
+ */
+function drush_subdirs_pre_provision_install_rollback() {
+  _subdirs_remove_site_configs();
+}
+
+/**
+ * Implementation of drush_hook_pre_provision_verify()
+ */
+function drush_subdirs_provision_verify() {
+  _subdirs_create_site_configs();
+}
+
+/**
+ * Implementation of drush_hook_post_provision_deploy()
+ */
+function drush_subdirs_provision_deploy() {
+  _subdirs_create_site_configs();
+}
+
+/**
+ * Implementation of drush_hook_provision_delete()
+ */
+function drush_subfolder_provision_delete() {
+  _subdirs_remove_site_configs();
+}
+
+/**
+ * Implements hook_provision_config_load_templates().
+ */
+function subdirs_provision_config_load_templates($config) {
+  if ($config->template == 'provision_drupal_sites.tpl.php') {
+    drush_log('Generating sites.php for use with subdirectories.', 'notice');
+    return dirname(__FILE__) . '/Provision/Config/subdirs_drupal_sites.tpl.php';
+  }
+}
+
+/**
+ * Helper function to create configuration files for subdirectories.
+ */
+function _subdirs_create_site_configs() {
   if (d()->type == 'site') {
     $aliases = d()->aliases;
     if (count($aliases)) {
@@ -41,24 +85,25 @@ function drush_subdirs_pre_provision_install() {
 }
 
 /**
- * Implements hook_provision_config_load_templates().
+ * Helper function to remove configuration files for subdirectories.
  */
-function subdirs_provision_config_load_templates($config) {
-  if ($config->template == 'provision_drupal_sites.tpl.php') {
-    drush_log('Generating sites.php for use with subdirectories.', 'notice');
-    return dirname(__FILE__) . '/Provision/Config/subdirs_drupal_sites.tpl.php';
-  }
-}
+function _subdirs_remove_site_configs() {
+  $context = d();
+  $aliases = $context->aliases;
+  $subdirs_path = $context->server->http_app_path . '/subdirs.d';
 
-/**
- * Implements drush_hook_pre_provision_install_rollback().
- */
-function drush_subdirs_pre_provision_install_rollback() {
-  $aliases = d()->aliases;
   if (count($aliases)) {
     foreach ($aliases as $alias) {
       _subdirs_delete_site_location($alias);
-      _subdirs_delete_domain_vhost($alias);
+      // We only want to remove the domain vhost after the last subdirectory
+      // site has been deleted.
+      $alias_parts = explode('/', $alias, 2);
+      $includes_path = $subdirs_path . '/' . $alias_parts[0];
+      if ($handle = opendir($includes_path)) {
+        if (FALSE === readdir($handle)) {
+          _subdirs_delete_domain_vhost($alias);
+        }
+      }
     }
   }
 }
@@ -168,7 +213,7 @@ function _subdirs_delete_domain_vhost($alias) {
 }
 
 /**
- * Helper function to render our config file templates.
+ * Render our config file templates.
  */
 function _subdirs_render_template($template, $variables) {
   // TODO: Remove this, once we've got a working Config class.
