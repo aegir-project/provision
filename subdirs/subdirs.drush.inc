@@ -57,6 +57,20 @@ function drush_subdirs_pre_provision_delete() {
 }
 
 /**
+ * Implementation of drush_hook_provision_disable()
+ */
+function drush_subdirs_pre_provision_disable() {
+  _subdirs_disable_sites();
+}
+
+/**
+ * Implements drush_hook_pre_provision_enable().
+ */
+function drush_subdirs_pre_provision_enable() {
+  _subdirs_create_site_configs();
+}
+
+/**
  * Implements hook_provision_config_load_templates().
  */
 function subdirs_provision_config_load_templates($config) {
@@ -170,6 +184,47 @@ function _subdirs_create_domain_vhost($alias) {
   }
   else {
     drush_log('Error encountered attempting to create domain vhost for subdirectory ' . $alias, 'error');
+  }
+
+}
+
+/**
+ * Helper function to remove configuration files for subdirectories.
+ */
+function _subdirs_disable_sites() {
+  $aliases = d()->aliases;
+  if (count($aliases)) {
+    foreach ($aliases as $alias) {
+      if (strpos($alias, '/')) {
+        drush_log("Disabling subdirectory site $alias.", 'notice');
+        _subdirs_create_disabled_site_location($alias);
+      }
+    }
+  }
+}
+
+/**
+ * Create the config file for the disabled subdirectory.
+ */
+function _subdirs_create_disabled_site_location($alias) {
+  $alias_parts = explode('/', $alias, 2);
+  $context = d();
+
+  // Generate variables to pass to template
+  $variables['location'] = $alias_parts[1];
+  $variables['web_disable_url'] = $context->platform->server->web_disable_url;
+  $variables['uri'] = $context->uri;
+  $output = _subdirs_render_template('site_location_disabled.tpl.php', $variables);
+
+  $subdirs_path = $context->server->http_app_path . '/subdirs.d';
+  $includes_path = $subdirs_path . '/' . $alias_parts[0];
+  $location_path = $includes_path . '/' . $alias_parts[1] . '.conf';
+
+  if (fwrite(fopen($location_path, 'w'), $output)) {
+    drush_log('Created disabled site location config file for subdirectory ' . $alias . ' at ' . $location_path, 'success');
+  }
+  else {
+    drush_log('Error encountered attempting to create disabled site location config file for subdirectory ' . $alias, 'error');
   }
 
 }
