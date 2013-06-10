@@ -38,21 +38,21 @@ function drush_subdirs_pre_provision_install_rollback() {
 /**
  * Implementation of drush_hook_pre_provision_verify()
  */
-function drush_subdirs_provision_verify() {
+function drush_subdirs_pre_provision_verify() {
   _subdirs_create_site_configs();
 }
 
 /**
  * Implementation of drush_hook_post_provision_deploy()
  */
-function drush_subdirs_provision_deploy() {
+function drush_subdirs_pre_provision_deploy() {
   _subdirs_create_site_configs();
 }
 
 /**
  * Implementation of drush_hook_provision_delete()
  */
-function drush_subfolder_provision_delete() {
+function drush_subdirs_pre_provision_delete() {
   _subdirs_remove_site_configs();
 }
 
