@@ -128,13 +128,14 @@ EOF
         # make sure we have apache configs settled in, for remote headless aegir servers
         touch $VARLIB/config/$WEBSERVER.conf
         chown aegir:aegir "$VARLIB/config/$WEBSERVER.conf"
-        ln -sf $VARLIB/config/$WEBSERVER.conf /etc/apache2/conf.d/aegir.conf
         case $WEBSERVER in
             apache)
+                ln -sf $VARLIB/config/$WEBSERVER.conf /etc/apache2/conf.d/aegir.conf
                 a2enmod ssl rewrite
                 apache2ctl graceful
                 ;;
             nginx)
+                ln -sf $VARLIB/config/$WEBSERVER.conf /etc/nginx/conf.d/aegir.conf
                 service nginx reload
                 ;;
         esac
