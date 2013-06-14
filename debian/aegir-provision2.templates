@@ -1,9 +1,0 @@
-Template:aegir/webserver
-Type: select
-Description: Webserver type to use:
- Aegir supports two different webserver engines. You need to select
- which one you wish to use to deploy the main frontend
- interface. Regardless of the option chosen here, you can still deploy
- other webserver types on remote servers.
-Default: apache2
-Choices: apache2, nginx

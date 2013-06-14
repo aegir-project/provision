@@ -124,6 +124,21 @@ EOF
             service hosting-queued start
         fi
         rm -f $TEMPFILE
+
+        # make sure we have apache configs settled in, for remote headless aegir servers
+        touch $VARLIB/config/$WEBSERVER.conf
+        chown aegir:aegir "$VARLIB/config/$WEBSERVER.conf"
+        ln -sf $VARLIB/config/$WEBSERVER.conf /etc/apache2/conf.d/aegir.conf
+        case $WEBSERVER in
+            apache)
+                a2enmod ssl rewrite
+                apache2ctl graceful
+                ;;
+            nginx)
+                service nginx reload
+                ;;
+        esac
+
         # this will ensure that this script aborts if the site can't be bootstrapped
         if su -s /bin/sh aegir -c 'drush @hostmaster status' 2>&1 | grep -q 'Drupal bootstrap.*Successful'; then
             echo 'Aegir frontend bootstrap correctly, operation was a success!'
