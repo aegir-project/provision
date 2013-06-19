@@ -161,6 +161,7 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
    * @return the path to the receipt file if removal was successful
    */
   static function free_certificate_site($ssl_key, $site) {
+    if (empty($ssl_key)) return FALSE;
     $ssl_dir = $site->platform->server->http_ssld_path . "/" . $ssl_key . "/";
     // Remove the file system reciept we left for this file
     if (provision_file()->unlink($ssl_dir . $site->uri . ".receipt")->
