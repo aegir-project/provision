@@ -47,7 +47,7 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
     $data['http_ssl_port'] = $this->server->http_ssl_port;
 
     if ($config == 'site' && $this->context->ssl_enabled) {
-
+      $data['ip_address'] = $this->context->ip_address;
       if ($this->context->ssl_enabled == 2) {
         $data['ssl_redirection'] = TRUE;
         $data['redirect_url'] = "https://{$this->context->uri}";
