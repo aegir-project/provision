@@ -108,6 +108,11 @@ case "$1" in
             if [ "$DPKG_DEBUG" = "developer" ]; then
                 DEBUG="--debug"
             fi
+
+            # fix permissions on installed directories
+            touch $VARLIB/config/$WEBSERVER.conf
+            chown aegir:aegir "$VARLIB" "$VARLIB/config" "$VARLIB/config/$WEBSERVER.conf"
+
             # pass data through JSON for extra security
             su -s /bin/sh aegir -c "cd $VARLIB && drush hostmaster-install $FLAGS --backend $site_uri 2>&1 | drush backend-parse $DEBUG" <<EOF
 { "yes": 1,
@@ -125,9 +130,6 @@ EOF
         fi
         rm -f $TEMPFILE
 
-        # make sure we have apache configs settled in, for remote headless aegir servers
-        touch $VARLIB/config/$WEBSERVER.conf
-        chown aegir:aegir "$VARLIB/config/$WEBSERVER.conf"
         case $WEBSERVER in
             apache)
                 ln -sf $VARLIB/config/$WEBSERVER.conf /etc/apache2/conf.d/aegir.conf
