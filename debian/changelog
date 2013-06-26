@@ -1,3 +1,15 @@
+aegir-provision2 (2.0~beta2) unstable; urgency=low
+
+  * This release mainly targets a few critical bugs that were found in the
+    first beta, namely IP allocation on non-SSL and non-cluster sites
+    which was completely broken, some problems with the new views
+    integration and the Debian package.
+  * We also introduce a few new features and finally drop support for
+    provisionning Drupal 5 sites completely.
+  * Full release notes at http://community.aegirproject.org/2.0-beta2
+
+ -- Antoine Beaupré <anarcat@debian.org>  Wed, 26 Jun 2013 14:30:31 -0400
+
 aegir-provision2 (2.0~beta1) unstable; urgency=low
 
   * Feature freeze begins, only critical and major bug fixes will be
