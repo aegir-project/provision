@@ -29,7 +29,7 @@ function drush_provision_drupal_provision_login_reset() {
   $onetime = user_pass_reset_url($account) . '/login';
   // pass the login link to the front end
   drush_set_option('login_link', $onetime);
-  drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'message');
+  drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'success');
 
   if (drush_drupal_major_version() >= 7) {
     drupal_session_destroy_uid(1);

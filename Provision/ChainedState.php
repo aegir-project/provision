@@ -40,7 +40,7 @@ class Provision_ChainedState {
    */
   function succeed($message) {
     if ($this->last_status === TRUE) {
-      drush_log(dt($message, $this->tokens), 'message');
+      drush_log(dt($message, $this->tokens), 'success');
     }
 
     return $this;
