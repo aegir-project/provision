@@ -306,6 +306,10 @@ function _provision_find_profiles() {
     $info_file = "./profiles/$name/$name.info";
     if (file_exists($info_file)) {
       $profile->info = provision_parse_info_file($info_file);
+      // Skip hidden profiles
+      if (isset($profile->info['hidden']) && $profile->info['hidden'] == 1) {
+        continue;
+      }
     }
 
     require_once($profile->filename);
@@ -542,13 +546,17 @@ function provision_drupal_system_map() {
   $packages['profiles'][$profile]->status = 1;
 
   foreach (_provision_system_query("module") as $module) {
+    $info_file = sprintf("%s/%s.info", dirname($module->filename), $module->name);
+    $module->info = provision_parse_info_file($info_file);
+    // Skip hidden modules
+    if (isset($module->info['hidden']) && $module->info['hidden'] == 1) {
+      continue;
+    }
     $frags = explode("/", $module->filename);
     // flag site-specific modules
     if ($frags[0] == 'sites' && $frags[1] != 'all') {
       $module->platform = -1;
     }
-    $info_file = sprintf("%s/%s.info", dirname($module->filename), $module->name);
-    $module->info = provision_parse_info_file($info_file);
 
     _provision_cvs_deploy($module);
     $module->filename = realpath($module->filename);
@@ -615,6 +623,13 @@ function _provision_drupal_find_modules($scope, $key = '') {
     $files = array_merge($files, drush_scan_directory($path, "/\.module$/", array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name'));
   }
   foreach ($files as $name => $info) {
+    $info_file = sprintf("%s/%s.info", dirname($info->filename), $name);
+    $files[$name]->info = provision_parse_info_file($info_file);
+    // Skip hidden modules
+    if (isset($files[$name]->info['hidden']) && $files[$name]->info['hidden'] != FALSE) {
+      unset($files[$name]);
+      continue;
+    }
     $install_file = sprintf("%s/%s.install", dirname($info->filename), $name);
     $schema_version = 0;
     if (file_exists($install_file)) {
@@ -628,8 +643,6 @@ function _provision_drupal_find_modules($scope, $key = '') {
         $schema_version = max($function_matches[2]);
       }
     }
-    $info_file = sprintf("%s/%s.info", dirname($info->filename), $name);
-    $files[$name]->info = provision_parse_info_file($info_file);
     $files[$name]->schema_version = $schema_version;
     _provision_cvs_deploy($files[$name]);
   }
