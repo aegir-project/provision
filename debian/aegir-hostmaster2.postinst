@@ -47,7 +47,13 @@ case "$1" in
                 RET='apache' # convert argument to something aegir can understand
             fi
             FLAGS="$FLAGS --http_service_type='$RET'"
+            WEBSERVER="$RET"
         fi
+
+        # make sure the configuration file exists before symlinking it in place (below)
+        touch $VARLIB/config/$WEBSERVER.conf
+        # fix permissions on installed directories
+        chown aegir:aegir "$VARLIB" "$VARLIB/config" "$VARLIB/config/$WEBSERVER.conf"
 
         # flush the drush cache to find new commands
         su -s /bin/sh aegir -c 'drush cc drush'
@@ -108,10 +114,6 @@ case "$1" in
             if [ "$DPKG_DEBUG" = "developer" ]; then
                 DEBUG="--debug"
             fi
-
-            # fix permissions on installed directories
-            touch $VARLIB/config/$WEBSERVER.conf
-            chown aegir:aegir "$VARLIB" "$VARLIB/config" "$VARLIB/config/$WEBSERVER.conf"
 
             # pass data through JSON for extra security
             su -s /bin/sh aegir -c "cd $VARLIB && drush hostmaster-install $FLAGS --backend $site_uri 2>&1 | drush backend-parse $DEBUG" <<EOF
