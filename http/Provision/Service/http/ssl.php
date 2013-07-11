@@ -117,7 +117,17 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
 
     if (provision_file()->exists($path)->status()) {
       drush_log(dt('generating 2048 bit RSA key in %path/', array('%path' => $path)));
-      // generate a key
+      /* 
+       * according to RSA security and most sites I could read, 1024
+       * was recommended until 2010-2015 and 2048 is now the
+       * recommended length for more sensitive data. we are therefore
+       * taking the safest route.
+       *
+       * http://www.javamex.com/tutorials/cryptography/rsa_key_length.shtml
+       * http://www.vocal.com/cryptography/rsa-key-size-selection/
+       * https://en.wikipedia.org/wiki/Key_size#Key_size_and_encryption_system
+       * http://www.redkestrel.co.uk/Articles/CSR.html
+       */
       drush_shell_exec('openssl genrsa -out %s/openssl.key 2048', $path)
         || drush_set_error('SSL_KEY_GEN_FAIL', dt('failed to generate SSL key in %path', array('%path' => $path . '/openssl.key')));
 
