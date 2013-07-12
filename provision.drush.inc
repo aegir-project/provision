@@ -113,6 +113,9 @@ function provision_drush_command() {
 
   $items['provision-install-backend'] = array(
     'description' => dt('Provision a new site using the provided data.'),
+    'options' => array(
+      'client_email' => dt('The email address of the client to use.'),
+    ),
     'hidden' => TRUE,
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_SITE
   );
