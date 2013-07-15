@@ -15,7 +15,7 @@ server {
   ssl_ciphers                RC4:HIGH:!aNULL:!MD5;
   ssl_prefer_server_ciphers  on;
   keepalive_timeout          70;
-  ### Dont't reveal Aegir front-end URL here.
+  ### Do not reveal Aegir front-end URL here.
 }
 
 <?php endif; ?>
