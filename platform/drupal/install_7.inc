@@ -74,8 +74,6 @@ function install_mail($key, &$message, $params) {
 function install_main() {
   global $profile, $install_locale, $conf, $url, $base_url;
 
-  $client_email = drush_get_option('client_email');
-
   require_once DRUPAL_ROOT . '/includes/install.core.inc';
   require_once DRUPAL_ROOT . '/includes/entity.inc';
   require_once DRUPAL_ROOT . '/includes/unicode.inc';
@@ -112,8 +110,13 @@ function install_main() {
   $account_pass = provision_password();
   $name = drush_get_option('admin_user', PROVISION_DEFAULT_ADMIN_USER);
   if ($error = user_validate_name($name)) {
+    drush_log(dt('Error setting UID username to `!user`: ', array('!user' => $name)) . $error . dt(' Using default (!default) instead.', array('!default' => PROVISION_DEFAULT_ADMIN_USER)) , 'warning');
     $name = PROVISION_DEFAULT_ADMIN_USER;
-    drush_log(dt('Error setting UID username to `!user`: ', array('!user' => $name)) . $error . dt(' Using default (!default) instead.', array('!default' => $name)) , 'warning');
+  }
+  $client_email = drush_get_option('client_email', PROVISION_DEFAULT_ADMIN_EMAIL);
+  if (!filter_var($client_email, FILTER_VALIDATE_EMAIL)) {
+    drush_log(dt('Error validating client email `!email`. Please check your user account email. Using default (!default) instead.', array('!email' => $client_email, '!default' => PROVISION_DEFAULT_ADMIN_EMAIL)) , 'warning');
+    $client_email = PROVISION_DEFAULT_ADMIN_EMAIL;
   }
   $settings = array(
     'parameters' => array(
@@ -125,10 +128,10 @@ function install_main() {
       'install_settings_form' => $db_spec,
       'install_configure_form' => array(
         'site_name' => $url,
-        'site_mail' => $client_email ? $client_email : 'admin@example.com',
+        'site_mail' => $client_email,
         'account' => array(
           'name' => $name,
-          'mail' => $client_email ? $client_email : 'admin@example.com',
+          'mail' => $client_email,
           'pass' => array(
             'pass1' => $account_pass,
             'pass2' => $account_pass,
@@ -169,7 +172,7 @@ function install_main() {
   drush_set_option('login_link', $onetime . '/login');
   drush_log(t('Login url: !onetime', array('!onetime' => $onetime . '/login')), 'success');
 
-  if ($client_email) {
+  if (drush_get_option('client_email', FALSE)) {
     install_send_welcome_mail($url, $account, $install_locale, $client_email, $onetime);
   }
 }

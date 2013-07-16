@@ -6,3 +6,4 @@
  */
 
 define('PROVISION_DEFAULT_ADMIN_USER', 'admin');
+define('PROVISION_DEFAULT_ADMIN_EMAIL', 'admin@example.com');
