@@ -9,6 +9,7 @@ $GLOBALS['profile'] = d()->profile;
 $GLOBALS['install_locale'] = d()->language;
 $GLOBALS['base_url'] = provision_get_base_url();
 
+require_once 'install.inc';  // From Provision, not the Drupal platform.
 define('MAINTENANCE_MODE', 'install');
 
 function install_send_welcome_mail($url, $account, $language, $client_email, $onetime) {
@@ -76,6 +77,8 @@ function install_main() {
   $client_email = drush_get_option('client_email');
 
   require_once DRUPAL_ROOT . '/includes/install.core.inc';
+  require_once DRUPAL_ROOT . '/includes/entity.inc';
+  require_once DRUPAL_ROOT . '/modules/user/user.module';
 
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
 
@@ -106,6 +109,11 @@ function install_main() {
   unset($GLOBALS['db_url']);
 
   $account_pass = provision_password();
+  $name = drush_get_option('admin_user', PROVISION_DEFAULT_ADMIN_USER);
+  if ($error = user_validate_name($name)) {
+    $name = PROVISION_DEFAULT_ADMIN_USER;
+    drush_log(dt('Error setting UID username to `!user`: ', array('!user' => $name)) . $error . dt(' Using default (!default) instead.', array('!default' => $name)) , 'warning');
+  }
   $settings = array(
     'parameters' => array(
       'profile' => $profile,
@@ -118,7 +126,7 @@ function install_main() {
         'site_name' => $url,
         'site_mail' => $client_email ? $client_email : 'admin@example.com',
         'account' => array(
-          'name' => 'admin',
+          'name' => $name,
           'mail' => $client_email ? $client_email : 'admin@example.com',
           'pass' => array(
             'pass1' => $account_pass,
@@ -144,7 +152,7 @@ function install_main() {
 
   // create the admin account
   $account = user_load(1);
-  $edit['name'] = 'admin';
+  $edit['name'] = $name;
   $edit['pass'] = $account_pass;
   $edit['mail'] = $client_email;
   $edit['status'] = 1;

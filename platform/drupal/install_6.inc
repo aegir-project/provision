@@ -9,8 +9,10 @@ $GLOBALS['profile'] = d()->profile;
 $GLOBALS['install_locale'] = d()->language;
 $GLOBALS['base_url'] = provision_get_base_url();
 
+// @TODO Document how/why this works.
+require_once 'includes/install.inc';  // From the Drupal platform.
+require_once 'install.inc';           // From Provision.
 
-require_once 'includes/install.inc';
 define('MAINTENANCE_MODE', 'install');
 
 /**
@@ -46,12 +48,17 @@ function install_verify_settings() {
 }
 
 function install_create_admin_user($client_email = NULL) {
+  $name = drush_get_option('admin_user', PROVISION_DEFAULT_ADMIN_USER);
+  if ($error = user_validate_name($name)) {
+    $name = PROVISION_DEFAULT_ADMIN_USER;
+    drush_log(dt('Error setting UID username to `!user`: ', array('!user' => $name)) . $error . dt(' Using default (!default) instead.', array('!default' => $name)), 'warning');
+  }
   if (!$client_email) {
     $client_email = 'webmaster@localhost';
   }
   // create the admin account
   $account = user_load(1);
-  $edit['name'] = 'admin';
+  $edit['name'] = $name;
   $edit['pass'] = user_password();
   $edit['mail'] = $client_email;
   $edit['status'] = 1;
