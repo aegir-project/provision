@@ -78,6 +78,7 @@ function install_main() {
 
   require_once DRUPAL_ROOT . '/includes/install.core.inc';
   require_once DRUPAL_ROOT . '/includes/entity.inc';
+  require_once DRUPAL_ROOT . '/includes/unicode.inc';
   require_once DRUPAL_ROOT . '/modules/user/user.module';
 
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
