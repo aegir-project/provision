@@ -1,3 +1,10 @@
+aegir-provision (1.10) testing; urgency=high
+
+  * new release: Security fixes for a moderately critical vulnerability found in 
+    the front-end, also various bug fixes since release 1.9.
+
+ -- Christopher Gervais <chris@ergonlogic.com>  Wed, 17 Jul 2013 16:33:37 -0400
+
 aegir-provision (1.9) testing; urgency=high
 
   * new release: Security fixes for less-critical vulnerabilities found in 
