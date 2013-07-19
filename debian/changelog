@@ -1,3 +1,16 @@
+aegir-provision2 (2.0~rc1) unstable; urgency=low
+
+  * This release mainly targets a few critical bugs that were found in the
+    second beta, mostly related to ongoing Views and Drush integration and
+    access control. We also introduce a number of new features and finally
+    drop support for provisionning Drupal 5 sites completely.
+  * We've added some long-standing UI enhancements, and fixed a number of
+    bugs in the views integration and other usability problems, as well as
+    overhauling our access control.
+  * Full release notes at http://community.aegirproject.org/2.0-rc1
+
+ -- Christopher Gervais <chris@ergonlogic.com>  Fri, 19 Jul 2013 14:41:19 -0400
+
 aegir-provision2 (2.0~beta2) unstable; urgency=low
 
   * This release mainly targets a few critical bugs that were found in the
