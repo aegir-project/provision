@@ -69,7 +69,7 @@ class provisionFileSystem extends provisionChainedState {
   function exists($path) {
     $this->_clear_state();
 
-    $this->last_status = file_exists($path);
+    $this->last_status = file_exists($path) || is_link($path);
     $this->tokens = array('@path' => $path);
 
     return $this;
