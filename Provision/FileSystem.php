@@ -50,7 +50,7 @@ class Provision_FileSystem extends Provision_ChainedState {
   function exists($path) {
     $this->_clear_state();
 
-    $this->last_status = file_exists($path);
+    $this->last_status = file_exists($path) || is_link($path);
     $this->tokens = array('@path' => $path);
 
     return $this;
