@@ -1,3 +1,13 @@
+aegir-provision2 (2.0~rc2) unstable; urgency=low
+
+  * This release mainly fixes an error during the rc1 release, which had not
+    been properly updated to pull in the latest tagged code.
+  * A small fix to SSL handling, and updates to external dependencies are
+    the only other changes since rc1.
+  * Full release notes at http://community.aegirproject.org/2.0-rc2
+
+ -- Christopher Gervais <chris@ergonlogic.com>  Sat, 20 Jul 2013 15:32:46 -0400
+
 aegir-provision2 (2.0~rc1) unstable; urgency=low
 
   * This release mainly targets a few critical bugs that were found in the
