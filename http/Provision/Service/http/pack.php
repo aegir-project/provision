@@ -31,6 +31,11 @@ class Provision_Service_http_pack extends Provision_Service_http {
     $this->server->setProperty('master_web_servers', array(), TRUE);
   }
 
+  function init_site() {
+    $this->_each_server($this->server->master_web_servers, __FUNCTION__);
+    $this->_each_server($this->server->slave_web_servers, __FUNCTION__);
+  }
+
   /**
    * Run a method on each server in the pack.
    *

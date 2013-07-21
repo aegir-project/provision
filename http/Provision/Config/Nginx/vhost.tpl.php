@@ -1,44 +1,56 @@
 <?php
-$ip_address = !empty($ip_address) ? $ip_address : '*';
 if ($ssl_redirection || $this->redirection) {
   // Redirect all aliases to the main http url using separate vhosts blocks to avoid if{} in Nginx.
   foreach ($this->aliases as $alias_url) {
+    print "# alias redirection virtual host";
     print "server {\n";
     print "  limit_conn   gulag 32;\n";
-    if ($ip_address == '*') {
-      print "  listen       {$ip_address}:{$http_port};\n";
+    print "  listen       *:{$http_port};\n";
+    // if we use redirections, we need to change the redirection
+    // target to be the original site URL ($this->uri instead of
+    // $alias_url)
+    if ($this->redirection && $alias_url == $this->redirection) {
+      print "  server_name  {$this->uri};\n";
+    } else {
+      print "  server_name  {$alias_url};\n";
     }
-    else {
-      foreach ($server->ip_addresses as $ip) {
-        print "  listen       {$ip}:{$http_port};\n";
-      }
-    }
-    print "  server_name  {$alias_url};\n";
     print "  access_log   off;\n";
-    print "  rewrite ^ \$scheme://{$this->uri}\$request_uri? permanent;\n";
+    print "  rewrite ^ \$scheme://{$this->redirection}\$request_uri? permanent;\n";
     print "}\n";
   }
 }
 ?>
 
 server {
-  include      <?php print "{$server->include_path}"; ?>/fastcgi_params.conf;
-  limit_conn   gulag 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
-<?php
-if ($ip_address == '*') {
-  print "  listen       {$ip_address}:{$http_port};\n";
-}
-else {
-  foreach ($server->ip_addresses as $ip) {
-    print "  listen       {$ip}:{$http_port};\n";
-  }
-}
-?>
-  server_name  <?php print $this->uri; ?><?php if (!$this->redirection && is_array($this->aliases)) : foreach ($this->aliases as $alias_url) : if (trim($alias_url)) : ?> <?php print $alias_url; ?><?php endif; endforeach; endif; ?>;
-  root         <?php print "{$this->root}"; ?>;
+  include       fastcgi_params;
+  fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+  fastcgi_param db_type   <?php print urlencode($db_type); ?>;
+  fastcgi_param db_name   <?php print urlencode($db_name); ?>;
+  fastcgi_param db_user   <?php print urlencode($db_user); ?>;
+  fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
+  fastcgi_param db_host   <?php print urlencode($db_host); ?>;
+  fastcgi_param db_port   <?php print urlencode($db_port); ?>;
+  limit_conn    gulag 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
+  listen        *:<?php print $http_port; ?>;
+  server_name   <?php
+    // this is the main vhost, so we need to put the redirection
+    // target as the hostname (if it exists) and not the original URL
+    // ($this->uri)
+    if ($this->redirection) {
+      print $this->redirection;
+    } else {
+      print $this->uri;
+    }
+    if (!$this->redirection && is_array($this->aliases)) {
+      foreach ($this->aliases as $alias_url) {
+        if (trim($alias_url)) {
+          print " " . $alias_url;
+        }
+      }
+    } ?>;
+  root          <?php print "{$this->root}"; ?>;
   <?php print $extra_config; ?>
 <?php
-$nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
 if ($this->redirection || $ssl_redirection) {
   if ($ssl_redirection && !$this->redirection) {
     // redirect aliases in non-ssl to the same alias on ssl.
@@ -49,21 +61,11 @@ if ($this->redirection || $ssl_redirection) {
     print "\n  rewrite ^ https://{$this->uri}\$request_uri? permanent;\n";
   }
   elseif (!$ssl_redirection && $this->redirection) {
-    if ($server->nginx_has_upload_progress) {
-      print "  include      " . $server->include_path . "/nginx_advanced_include.conf;\n";
-    }
-    else {
-      print "  include      " . $server->include_path . "/nginx_simple_include.conf;\n";
-    }
+    print "  include       " . $server->include_path . "/nginx_vhost_common.conf;\n";
   }
 }
 else {
-  if ($server->nginx_has_upload_progress) {
-    print "  include      " . $server->include_path . "/nginx_advanced_include.conf;\n";
-  }
-  else {
-    print "  include      " . $server->include_path . "/nginx_simple_include.conf;\n";
-  }
+  print "  include       " . $server->include_path . "/nginx_vhost_common.conf;\n";
 }
 ?>
 }

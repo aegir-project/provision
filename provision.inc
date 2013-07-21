@@ -171,7 +171,7 @@ function provision_save_site_data() {
   if (!drush_get_error()) {
     $config = new Provision_Config_Drushrc_Site(d()->name);
     $config->write();
-    provision_drupal_sync_site();
+    provision_drupal_push_site();
   }
 }
 
@@ -183,7 +183,7 @@ function provision_save_platform_data() {
   if (!drush_get_error()) {
     $config = new Provision_Config_Drushrc_Platform(d()->name);
     $config->write();
-    provision_drupal_sync_site();
+    provision_drupal_push_site();
   }
 }
 

@@ -20,8 +20,8 @@ print '<?php' ?>
 <?php if ($this->cloaked): ?>
 if (isset($_SERVER['db_name'])) {
   /**
-   * The database credentials are stored in the Apache vhost config
-   * of the associated site with SetEnv parameters.
+   * The database credentials are stored in the Apache or Nginx vhost config
+   * of the associated site with SetEnv (fastcgi_param in Nginx) parameters.
    * They are called here with $_SERVER environment variables to
    * prevent sensitive data from leaking to site administrators
    * with PHP access, that potentially might be of other sites in
@@ -146,22 +146,6 @@ if (isset($_SERVER['db_name'])) {
   <?php endif ?>
 
 <?php print $extra_config; ?>
-
-  /**
-  * This was added from Drupal 5.2 onwards.
-  */
-  /**
-  * We try to set the correct cookie domain. If you are experiencing problems
-  * try commenting out the code below or specifying the cookie domain by hand.
-  */
-  if (isset($_SERVER['HTTP_HOST'])) {
-    $domain = '.'. preg_replace('`^www.`', '', $_SERVER['HTTP_HOST']);
-    // Per RFC 2109, cookie domains must contain at least one dot other than the
-    // first. For hosts such as 'localhost', we don't set a cookie domain.
-    if (count(explode('.', $domain)) > 2) {
-      @ini_set('session.cookie_domain', $domain);
-    }
-  }
 
   # Additional host wide configuration settings. Useful for safely specifying configuration settings.
   if (file_exists('<?php print $this->platform->server->include_path  ?>/global.inc')) {

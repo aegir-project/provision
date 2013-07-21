@@ -59,12 +59,7 @@ function drush_provision_drupal_provision_backup() {
 
 
   // synch all filesystem changes back from the remote server.
-  d()->service('http')->fetch(d()->site_path . '/files/');
-  d()->service('http')->fetch(d()->site_path . '/private/');
-  d()->service('http')->fetch(d()->site_path . '/modules/');
-  d()->service('http')->fetch(d()->site_path . '/themes/');
-  d()->service('http')->fetch(d()->site_path . '/libraries/');
-  d()->service('http')->fetch(d()->site_path . '/local.settings.php');
+  provision_drupal_fetch_site();
 
   // Check if we are currently cloaking credentials
   $cloaked = d()->service('http')->cloaked_db_creds();
@@ -78,6 +73,8 @@ function drush_provision_drupal_provision_backup() {
 
     // Write the uncloaked credentials to the settings.php
     _provision_drupal_create_settings_file();
+    provision_drupal_push_site();
+
   }
 
   $olddir = getcwd();
@@ -104,6 +101,8 @@ function drush_provision_drupal_provision_backup() {
     drush_log(dt("Re-cloaking database credentials after backup"));
     drush_set_option('provision_db_cloaking', TRUE);
     _provision_drupal_create_settings_file();
+    provision_drupal_push_site();
+
   }
 
   if (!$result && !drush_get_option('force', false)) {

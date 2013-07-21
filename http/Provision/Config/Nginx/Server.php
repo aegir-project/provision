@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Nginx server level configuration file class
+ * Nginx server level configuration file class.
  */
 class Provision_Config_Nginx_Server extends Provision_Config_Http_Server {
   function process() {

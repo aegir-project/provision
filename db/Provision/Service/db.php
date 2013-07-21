@@ -32,13 +32,13 @@ class Provision_Service_db extends Provision_Service {
   function verify_server_cmd() {
     if ($this->connect()) {
       if ($this->can_create_database()) {
-        drush_log(dt('Provision can create new databases.'), 'message');
+        drush_log(dt('Provision can create new databases.'), 'success');
       }
       else {
         drush_set_error('PROVISION_CREATE_DB_FAILED');
       }
       if ($this->can_grant_privileges()) {
-        drush_log(dt('Provision can grant privileges on database users.'), 'message');;
+        drush_log(dt('Provision can grant privileges on database users.'), 'success');;
       }
       else {
         drush_set_error('PROVISION_GRANT_DB_USER_FAILED');

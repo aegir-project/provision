@@ -4,42 +4,42 @@
 ###  nginx.conf main
 #######################################################
 
- ## FastCGI params
-  fastcgi_param  SCRIPT_FILENAME    $document_root$fastcgi_script_name;
-  fastcgi_param  QUERY_STRING       $query_string;
-  fastcgi_param  REQUEST_METHOD     $request_method;
-  fastcgi_param  CONTENT_TYPE       $content_type;
-  fastcgi_param  CONTENT_LENGTH     $content_length;
-  fastcgi_param  SCRIPT_NAME        $fastcgi_script_name;
-  fastcgi_param  REQUEST_URI        $request_uri;
-  fastcgi_param  DOCUMENT_URI       $document_uri;
-  fastcgi_param  DOCUMENT_ROOT      $document_root;
-  fastcgi_param  SERVER_PROTOCOL    $server_protocol;
-  fastcgi_param  GATEWAY_INTERFACE  CGI/1.1;
-  fastcgi_param  SERVER_SOFTWARE    ApacheSolaris/$nginx_version;
-  fastcgi_param  REMOTE_ADDR        $remote_addr;
-  fastcgi_param  REMOTE_PORT        $remote_port;
-  fastcgi_param  SERVER_ADDR        $server_addr;
-  fastcgi_param  SERVER_PORT        $server_port;
-  fastcgi_param  SERVER_NAME        $server_name;
-  fastcgi_param  USER_DEVICE        $device;
-  fastcgi_param  REDIRECT_STATUS    200;
-  fastcgi_index  index.php;
+<?php
+$nginx_is_modern = drush_get_option('nginx_is_modern');
+if (!$nginx_is_modern && $server->nginx_is_modern) {
+  $nginx_is_modern = $server->nginx_is_modern;
+}
 
- ## Default index files
-  index         index.php index.html;
+$nginx_has_gzip = drush_get_option('nginx_has_gzip');
+if (!$nginx_has_gzip && $server->nginx_has_gzip) {
+  $nginx_has_gzip = $server->nginx_has_gzip;
+}
 
+$nginx_config_mode = drush_get_option('nginx_config_mode');
+if (!$nginx_config_mode && $server->nginx_config_mode) {
+  $nginx_config_mode = $server->nginx_config_mode;
+}
+
+if ($nginx_is_modern) {
+  print "  limit_conn_zone \$binary_remote_addr zone=gulag:10m;\n";
+}
+else {
+  print "  limit_zone gulag \$binary_remote_addr 10m;\n";
+}
+
+if ($nginx_has_gzip) {
+  print "  gzip_static       on;\n";
+}
+?>
+
+<?php if ($nginx_config_mode == 'extended'): ?>
  ## Size Limits
   client_body_buffer_size        64k;
   client_header_buffer_size      32k;
-  client_max_body_size          100m;
   large_client_header_buffers 32 32k;
   connection_pool_size           256;
   request_pool_size               4k;
   server_names_hash_bucket_size  512;
-  server_names_hash_max_size    8192;
-  types_hash_bucket_size         512;
-  map_hash_bucket_size           192;
   fastcgi_buffer_size           128k;
   fastcgi_buffers             256 4k;
   fastcgi_busy_buffers_size     256k;
@@ -70,29 +70,9 @@
 
  ## General Options
   ignore_invalid_headers          on;
-<?php
-$nginx_is_modern = drush_get_option('nginx_is_modern');
-if ($nginx_is_modern) {
-  print "  limit_conn_zone \$binary_remote_addr zone=gulag:10m;\n";
-}
-else {
-  print "  limit_zone gulag \$binary_remote_addr 10m;\n";
-}
-?>
   recursive_error_pages           on;
   reset_timedout_connection       on;
   fastcgi_intercept_errors        on;
-  server_tokens                  off;
-  fastcgi_hide_header         'Link';
-  fastcgi_hide_header  'X-Generator';
-  fastcgi_hide_header 'X-Powered-By';
-  fastcgi_hide_header 'X-Drupal-Cache';
-
- ## TCP options moved to /etc/nginx/nginx.conf
-
- ## SSL performance
-  ssl_session_cache   shared:SSL:10m;
-  ssl_session_timeout            10m;
 
  ## Compression
   gzip_buffers      16 8k;
@@ -102,16 +82,14 @@ else {
   gzip_types        text/plain text/css application/x-javascript text/xml application/xml application/xml+rss text/javascript;
   gzip_vary         on;
   gzip_proxied      any;
-<?php
-$nginx_has_gzip = drush_get_option('nginx_has_gzip');
-if ($nginx_has_gzip) {
-  print "  gzip_static       on;\n";
-}
-$nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
-if ($nginx_has_upload_progress) {
-  print "  upload_progress uploads 1m;\n";
-}
-?>
+
+ ## SSL performance
+  ssl_session_cache   shared:SSL:10m;
+  ssl_session_timeout            10m;
+<?php endif; ?>
+
+ ## Default index files
+  index         index.php index.html;
 
  ## Log Format
   log_format        main '"$proxy_add_x_forwarded_for" $host [$time_local] '
@@ -123,12 +101,13 @@ if ($nginx_has_upload_progress) {
   access_log             /var/log/nginx/access.log main;
 
 <?php print $extra_config; ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
 #######################################################
 ###  nginx default maps
 #######################################################
 
 ###
-### Support separate Boost and Speed Booster caches for various mobile devices.
+### Support separate Speed Booster caches for various mobile devices.
 ###
 map $http_user_agent $device {
   default                                                                normal;
@@ -157,8 +136,8 @@ map $request_uri $key_uri {
 ### Deny crawlers.
 ###
 map $http_user_agent $is_crawler {
-  default                                                                                                                     '';
-  ~*HTTrack|MJ12|HTMLParser|libwww|PECL|Automatic|Click|SiteBot|BuzzTrack|Sistrix|Offline|Screaming|Nutch|Mireo|SWEB|Morfeus  is_crawler;
+  default  '';
+  ~*HTTrack|BrokenLinkCheck|2009042316.*Firefox.*3\.0\.10|MJ12|HTMLParser|PECL|Automatic|SiteBot|BuzzTrack|Sistrix|Offline|Screaming|Nutch|Mireo|SWEB|Morfeus|GSLFbot  is_crawler;
 }
 
 ###
@@ -176,30 +155,18 @@ map $args $is_denied {
   default                                                                                                      '';
   ~*delete.+from|insert.+into|select.+from|union.+select|onload|\.php.+src|system\(.+|document\.cookie|\;|\.\. is_denied;
 }
+<?php endif; ?>
 
 #######################################################
 ###  nginx default server
 #######################################################
 
-<?php
-$ip_address = !empty($ip_address) ? $ip_address : '*';
-?>
 server {
   limit_conn   gulag 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
-<?php
-if ($ip_address == '*') {
-  print "  listen       {$ip_address}:{$http_port};\n";
-}
-else {
-  foreach ($server->ip_addresses as $ip) {
-    print "  listen       {$ip}:{$http_port};\n";
-  }
-}
-?>
+  listen       *:<?php print $http_port; ?>;
   server_name  _;
   location / {
-     root   /var/www/nginx-default;
-     index  index.html index.htm;
+    return 404;
   }
 }
 

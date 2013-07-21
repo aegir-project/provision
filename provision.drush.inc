@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Provisoon Drush commands.
+ * Provision Drush commands.
  *
  *
  * This module provides a framework for a Drupal site to manage and install new Drupal sites, using the command line
@@ -97,6 +97,9 @@ function provision_drush_command() {
       Provision_Context_server::option_documentation(),
       Provision_Context_platform::option_documentation(),
       Provision_Context_site::option_documentation()),
+    // we should populate from all known contexts, unfortunately we don't
+    // enumerate them yet... see https://drupal.org/node/1972286
+    'allow-additional-options' => TRUE,
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
   $items['provision-install'] = array(
@@ -112,6 +115,9 @@ function provision_drush_command() {
 
   $items['provision-install-backend'] = array(
     'description' => dt('Provision a new site using the provided data.'),
+    'options' => array(
+      'client_email' => dt('The email address of the client to use.'),
+    ),
     'hidden' => TRUE,
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_SITE
   );
@@ -172,7 +178,7 @@ function provision_drush_command() {
       'drush @site provision-verify' => 'Verify the site as defined by the site Drush alias generated with provision-save.',
       'drush @platform provision-verify' => 'Verify the platform as defined by the platform Drush alias generated with provision-save.',
     ),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH 
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
   );
 
   $items['provision-restore'] = array(
@@ -189,6 +195,9 @@ function provision_drush_command() {
     'description' => 'Deploy an existing backup to a new url.',
     'arguments' => array(
       'site_backup.tar.gz' => dt('The backup to deploy.')),
+    'options' => array(
+      'old_uri' => dt('Old site uri to replace in references to sites/example.com/files/ in the database content.)'),
+    ),
     'examples' => array(
       'drush @site provision-deploy ~/backups/some_site.tar.gz' => 'Deploy the site as defined by the site Drush alias, from the backup in ~/backups/some_site.tar.gz.',
     ),

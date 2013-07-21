@@ -47,10 +47,18 @@ case "$1" in
                 RET='apache' # convert argument to something aegir can understand
             fi
             FLAGS="$FLAGS --http_service_type='$RET'"
+            WEBSERVER="$RET"
         fi
 
+        # make sure the configuration file exists before symlinking it in place (below)
+        touch $VARLIB/config/$WEBSERVER.conf
+        # fix permissions on installed directories
+        chown aegir:aegir "$VARLIB" "$VARLIB/config" "$VARLIB/config/$WEBSERVER.conf"
+
+        # flush the drush cache to find new commands
+        su -s /bin/sh aegir -c 'drush cc drush'
         TEMPFILE=`tempfile`
-        su -s /bin/sh aegir -c 'drush --pipe @hostmaster status | egrep "site_uri|drupal_root"' >> $TEMPFILE || true
+        su -s /bin/sh aegir -c 'drush --pipe @hostmaster status 2>/dev/null | egrep "site_uri|drupal_root"' >> $TEMPFILE || true
         if grep -q 'site_uri' $TEMPFILE; then
             # upgrade
             db_stop
@@ -103,8 +111,12 @@ case "$1" in
                 exit 1
             fi
             echo "installing the Aegir frontend (Drupal with the hostmaster profile), please wait..."
+            if [ "$DPKG_DEBUG" = "developer" ]; then
+                DEBUG="--debug"
+            fi
+
             # pass data through JSON for extra security
-            su aegir -c "cd $VARLIB && drush hostmaster-install $FLAGS --backend $site_uri | drush backend-parse" <<EOF
+            su -s /bin/sh aegir -c "cd $VARLIB && drush hostmaster-install $FLAGS --backend $site_uri 2>&1 | drush backend-parse $DEBUG" <<EOF
 { "yes": 1,
   "version": "$VERSION",
   "aegir_db_host": "$AEGIR_DB_HOST",
@@ -115,13 +127,28 @@ case "$1" in
 EOF
             # on new installs, we default to having the daemon enabled
             echo 'Enabling hosting-queued daemon'
-            su aegir -c 'drush @hostmaster pm-enable hosting-queued'
+            su -s /bin/sh aegir -c 'drush @hostmaster pm-enable -y hosting_queued'
             service hosting-queued start
         fi
         rm -f $TEMPFILE
+
+        case $WEBSERVER in
+            apache)
+                ln -sf $VARLIB/config/$WEBSERVER.conf /etc/apache2/conf.d/aegir.conf
+                a2enmod ssl rewrite
+                apache2ctl graceful
+                ;;
+            nginx)
+                ln -sf $VARLIB/config/$WEBSERVER.conf /etc/nginx/conf.d/aegir.conf
+                service nginx reload
+                ;;
+        esac
+
         # this will ensure that this script aborts if the site can't be bootstrapped
         if su -s /bin/sh aegir -c 'drush @hostmaster status' 2>&1 | grep -q 'Drupal bootstrap.*Successful'; then
             echo 'Aegir frontend bootstrap correctly, operation was a success!'
+            echo 'Use this URL to login on your new site:'
+            su -s /bin/sh aegir -c 'drush @hostmaster uli'
         else
             echo 'Aegir frontend failed to bootstrap, something went wrong!'
             echo 'Look at the log above for clues or run with DPKG_DEBUG=developer'

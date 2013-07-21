@@ -15,7 +15,7 @@ msg() {
 }
 
 # basic variables, change before running
-AEGIR_VERSION="6.x-2.x"
+AEGIR_VERSION="6.x-2.0-rc2"
 DRUSH_DIR=$HOME/drush
 DRUSH=$DRUSH_DIR/drush.php
 if which drush 2> /dev/null > /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
@@ -51,8 +51,7 @@ AEGIR_DOMAIN="$site_uri"
 OLD_DRUPAL_DIR="$drupal_root"
 HOME="$HOME"
 DRUPAL_DIR=$HOME/hostmaster-$AEGIR_VERSION
-DRUSH_VERSION=7.x-5.3
-DRUSH_MAKE_VERSION=6.x-2.3
+DRUSH_VERSION=7.x-5.9
 BACKUP_DIR=$HOME/pre-upgrade-`date '+%F-%H%M'`
 
 ########################################################################
@@ -110,7 +109,6 @@ EOF
 if [ -w $DRUSH_DIR ]; then
   cat <<EOF
 The version of Drush will be $DRUSH_VERSION
-The version of Drush Make will be $DRUSH_MAKE_VERSION
 EOF
 else
   echo "Drush will not be upgraded as its directory is not writable: $DRUSH_DIR"
@@ -148,12 +146,15 @@ if [ -d "provision" ] ; then
 fi
 
 if [ "$AEGIR_VERSION" = "6.x-2.x" ]; then
-  git clone http://git.drupal.org/project/provision.git $HOME/.drush/provision
+  git clone --branch '$AEGIR_VERSION' http://git.drupal.org/project/provision.git $HOME/.drush/provision
 else
   wget http://ftp.drupal.org/files/projects/provision-$AEGIR_VERSION.tar.gz
   gunzip -c provision-$AEGIR_VERSION.tar.gz | tar -xf -
   rm provision-$AEGIR_VERSION.tar.gz
 fi
+
+# Clear the drush command cache
+drush cache-clear drush
 
 cd $OLD_DRUPAL_DIR
 $DRUSH hostmaster-migrate $AEGIR_DOMAIN $DRUPAL_DIR

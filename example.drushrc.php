@@ -63,3 +63,8 @@
  * The database prefix to use instead of the default 'site_'
  */
 # $options['aegir_db_prefix'] = 'prefix_';
+
+/**
+ * The username to assign UID1 for provisioned sites.
+ */
+# $options['admin_user'] = 'admin';

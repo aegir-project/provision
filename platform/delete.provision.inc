@@ -33,7 +33,7 @@ function drush_provision_drupal_provision_delete() {
     // Remove the symlink in the clients directory.
     _provision_client_delete_symlink();
 
-    provision_drupal_sync_site();
+    provision_drupal_push_site($override_slave_authority = TRUE);
   }
   elseif (d()->type === 'platform') {
     if (!drush_get_option('force', FALSE) && drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT) && provision_drupal_find_sites()) {

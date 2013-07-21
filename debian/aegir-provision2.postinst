@@ -47,15 +47,6 @@ case "$1" in
             echo "running an older version of sudo"
             echo "copy content of /usr/share/doc/aegir-provision2/examples/example.sudoers into /etc/sudoers for aegir to run properly"
         fi
-
-        # fix permissions on installed directories
-        chown aegir:aegir "$VARLIB" "$VARLIB/config"
-        # make sure we have apache configs settled in, for remote headless aegir servers
-        touch $VARLIB/config/apache.conf
-        chown aegir:aegir "$VARLIB/config/apache.conf"
-        ln -sf $VARLIB/config/apache.conf /etc/apache2/conf.d/aegir.conf
-        a2enmod ssl rewrite
-        apache2ctl graceful
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

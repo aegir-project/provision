@@ -50,10 +50,6 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
        'exclude' => "{$path}/*.receipt",  // Don't need to synch the receipts
      ));
     }
-    else {
-      // XXX: to be tested, not sure the data structure is sound
-      Provision_Service_http_ssl::free_certificate_site($this->ssl_key, $this);
-    }
   }
 
   /**
@@ -62,8 +58,10 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
   function unlink() {
     parent::unlink();
 
-    // XXX: to be tested, not sure the data structure is sound
-    Provision_Service_http_ssl::free_certificate_site($this->ssl_key, $this);
+    if ($this->ssl_enabled) {
+      // XXX: to be tested, not sure the data structure is sound
+      Provision_Service_http_ssl::free_certificate_site($this->ssl_key, $this);
+    }
   }
   
   /**

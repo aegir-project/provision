@@ -1,3 +1,68 @@
+aegir-provision2 (2.0~rc2) unstable; urgency=low
+
+  * This release mainly fixes an error during the rc1 release, which had not
+    been properly updated to pull in the latest tagged code.
+  * A small fix to SSL handling, and updates to external dependencies are
+    the only other changes since rc1.
+  * Full release notes at http://community.aegirproject.org/2.0-rc2
+
+ -- Christopher Gervais <chris@ergonlogic.com>  Sat, 20 Jul 2013 15:32:46 -0400
+
+aegir-provision2 (2.0~rc1) unstable; urgency=low
+
+  * This release mainly targets a few critical bugs that were found in the
+    second beta, mostly related to ongoing Views and Drush integration and
+    access control. We also introduce a number of new features and finally
+    drop support for provisionning Drupal 5 sites completely.
+  * We've added some long-standing UI enhancements, and fixed a number of
+    bugs in the views integration and other usability problems, as well as
+    overhauling our access control.
+  * Full release notes at http://community.aegirproject.org/2.0-rc1
+
+ -- Christopher Gervais <chris@ergonlogic.com>  Fri, 19 Jul 2013 14:41:19 -0400
+
+aegir-provision2 (2.0~beta2) unstable; urgency=low
+
+  * This release mainly targets a few critical bugs that were found in the
+    first beta, namely IP allocation on non-SSL and non-cluster sites
+    which was completely broken, some problems with the new views
+    integration and the Debian package.
+  * We also introduce a few new features and finally drop support for
+    provisionning Drupal 5 sites completely.
+  * Full release notes at http://community.aegirproject.org/2.0-beta2
+
+ -- Antoine Beaupré <anarcat@debian.org>  Wed, 26 Jun 2013 14:30:31 -0400
+
+aegir-provision2 (2.0~beta1) unstable; urgency=low
+
+  * Feature freeze begins, only critical and major bug fixes will be
+    committed.
+  * A few bugfixes, especially to the Debian package, the new views code
+    and nginx support.
+  * This release adds subdirectory support, a nice homepage and fixes SSL
+    support and IP allocation on clusters. We also ship with a wider
+    variety of roles.
+  * Full release notes at http://community.aegirproject.org/2.0-beta1
+
+ -- Antoine Beaupré <anarcat@debian.org>  Fri, 14 Jun 2013 17:01:07 -0400
+
+aegir-provision2 (2.0~alpha2) unstable; urgency=low
+
+  * This release features improvements to the IP management mechanisms that
+    were broken in the last alpha1 release. We now manage IP addresses
+    individually, and check if an IP is in use before allowing it to be
+    deleted.
+
+  * We also finally leave the files alone on spokes in the multi-server
+    model, a long-standing bug in the 1.x series that led to data loss. A
+    lot of work was done to standardize the Nginx configuration to allow
+    for simpler, yet optional, configurations that leave the admin in
+    charge of choosing the optimisation methods. This is still work in
+    progress, tracked in #1635596: nginx: do not decide the policy for
+    users.
+
+ -- Antoine Beaupré <anarcat@debian.org>  Thu, 16 May 2013 19:13:17 -0400
+
 aegir-provision2 (2.0~alpha1) unstable; urgency=low
 
   * first alpha release of the 2.x branch, release notes too long to
