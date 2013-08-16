@@ -4,6 +4,29 @@
  * @file install the hostmaster system
  */
 
+/**
+ * Implements drush_COMMAND_pre_validate().
+ *
+ * Ensure the database cannot be accessed by anonymous users, as it will
+ * otherwise fail later in the install, and thus be harder to recover from.
+ *
+ * @see Provision_Service_db_mysql::grant_host().
+ */
+function drush_provision_hostmaster_install_pre_validate() {
+  $command = sprintf('mysql -u intntnllyInvalid -h %s -e "SELECT VERSION()"', drush_get_option('aegir_db_host', 'localhost'));
+  drush_shell_exec($command);
+
+  if (preg_match("/Access denied for user 'intntnllyInvalid'@'([^']*)'/", implode('', drush_shell_exec_output()), $match)) {
+    return;
+  }
+  elseif (preg_match("/Host '([^']*)' is not allowed to connect to/", implode('', drush_shell_exec_output()), $match)) {
+    return;
+  }
+  else {
+    return drush_set_error('PROVISION_DB_CONNECT_FAIL', dt('Dummy connection failed to fail. Either your MySQL permissions are too lax, or the response was not understood. See http://is.gd/Y6i4FO for more information. %msg', array('%msg' => join("\n", drush_shell_exec_output()))));
+  }
+}
+
 function drush_provision_hostmaster_install_validate($site = NULL) {
   // set defaults for this whole script
   // those are settings that are not prompted to the user but still overridable
