@@ -176,6 +176,12 @@ function provision_drush_command() {
       'drush @site provision-verify' => 'Verify the site as defined by the site Drush alias generated with provision-save.',
       'drush @platform provision-verify' => 'Verify the platform as defined by the platform Drush alias generated with provision-save.',
     ),
+    'options' => array(
+      'working-copy' => array(
+        'description' => dt('Keep VCS files when building the a platform using Drush make.'),
+        'hidden' => TRUE,
+      ),
+    ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH 
   );
 
