@@ -287,6 +287,7 @@ function provision_drush_command() {
      'aegir_host' => dt('Fully qualified domain name of the local server (default: %fqdn)', array('%fqdn' => provision_fqdn())),
      'script_user' => dt('User to run the backend as (default: %user)', array('%user' => provision_current_user())),
      'web_group' => dt('Group the webserver is running as (default: %group)', array('%group' => _provision_default_web_group())),
+     'http_port' => dt('Port the webserver is running on (default: %port)', array('%port' => '80')),
      'version' => dt('The version of this released. (default: %version)', array('%version' => provision_version())),
      'aegir_root' => dt('Install aegir in this home directory (default: %home). Do not change unless you know what you are doing.', array('%home' => drush_server_home())),
      'root' => dt('Install the frontend in this directory (default: %home/hostmaster-%version).', array('%home' => drush_server_home(), '%version' => provision_version())),

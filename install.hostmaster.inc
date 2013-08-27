@@ -38,6 +38,7 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   drush_set_default('script_user', provision_current_user());
   drush_set_default('web_group', _provision_default_web_group());
   drush_set_default('http_service_type', 'apache');
+  drush_set_default('http_port', '80');
   drush_set_default('aegir_db_user', 'root');
   drush_set_default('aegir_db_port', '3306');
   drush_set_default('client_name', 'admin');
@@ -99,6 +100,7 @@ The following settings will be used:
  Aegir user: !user
  Web group: !web
  Web server: !web_server
+ Web server port: !web_server_port
  Aegir DB host: !db_host
  Aegir DB user: !db_user
  Aegir DB password: !db_pass
@@ -113,6 +115,7 @@ The following settings will be used:
          '!user' => drush_get_option('script_user'),
          '!web' => drush_get_option('web_group'),
          '!web_server' => drush_get_option('http_service_type'),
+         '!web_server_port' => drush_get_option('http_port'),
          '!db_host' => drush_get_option('aegir_db_host'),
          '!db_user' => drush_get_option('aegir_db_user'),
          '!db_pass' => is_null(drush_get_option('aegir_db_pass', NULL, 'process')) ? '<previously set>' : '<prompted>',
@@ -139,6 +142,8 @@ function drush_provision_hostmaster_install($site = NULL) {
   $aegir_root = drush_get_option('aegir_root');
   $platform = drush_get_option(array('r', 'root'));
 
+  $aegir_http_host = drush_get_option('aegir_host');
+  $aegir_http_port = drush_get_option('http_port');
   $aegir_db_user = drush_get_option('aegir_db_user');
   $aegir_db_pass = drush_get_option('aegir_db_pass');
   $aegir_db_port = drush_get_option('aegir_db_port');
@@ -148,11 +153,12 @@ function drush_provision_hostmaster_install($site = NULL) {
   $master_context = array(
     'context_type' => 'server',
     // files
-    'remote_host' => drush_get_option('aegir_host'),
+    'remote_host' => $aegir_http_host,
     'aegir_root' => $aegir_root,
     'script_user' => drush_get_option('script_user'),
    // apache or nginx or..
     'http_service_type' => drush_get_option('http_service_type'),
+    'http_port' => $aegir_http_port,
     'web_group' => drush_get_option('web_group'),
     'master_url' => "http://" . $site,
     'db_port' => $aegir_db_port,
