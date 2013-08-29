@@ -165,7 +165,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   );
 
   $master_db = sprintf("mysql://%s:%s@%s:%s", urlencode($aegir_db_user), urlencode($aegir_db_pass), $aegir_db_host, $aegir_db_port);
-  if (drush_get_option('aegir_host') == $aegir_db_host) {
+  if ($aegir_http_host == $aegir_db_host) {
     $master_context['db_service_type'] = 'mysql';
     $master_context['master_db'] = $master_db;
     $dbserver = $server;
