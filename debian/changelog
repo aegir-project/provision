@@ -1,3 +1,16 @@
+aegir-provision2 (2.0~rc3) unstable; urgency=low
+
+  * This release mainly fixes a couple critical bugs in 2.0-rc2 that were
+    causing problems when sites were being cloned or renamed.
+  * We've added a couple small features, such as additional options during
+    hostmaster-install, and allowing the redirect to the Welcome page to be
+    turned off.
+  * Also, we've made a small addition to the API, in that there is now a hook
+    available (hook_provision_drupal_create_directories_alter()) to allow
+    altering the directories created when a site installed.
+
+ -- Christopher Gervais <chris@ergonlogic.com>  Thu, 29 Aug 2013 11:53:43 -0400
+
 aegir-provision2 (2.0~rc2) unstable; urgency=low
 
   * This release mainly fixes an error during the rc1 release, which had not
