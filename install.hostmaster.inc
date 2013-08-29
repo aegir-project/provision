@@ -142,6 +142,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   $aegir_db_user = drush_get_option('aegir_db_user');
   $aegir_db_pass = drush_get_option('aegir_db_pass');
   $aegir_db_port = drush_get_option('aegir_db_port');
+  $aegir_db_host = drush_get_option('aegir_db_host');
 
   $server = '@server_master';
   $master_context = array(
@@ -157,15 +158,15 @@ function drush_provision_hostmaster_install($site = NULL) {
     'db_port' => $aegir_db_port,
   );
 
-  $master_db = sprintf("mysql://%s:%s@%s:%s", urlencode($aegir_db_user), urlencode($aegir_db_pass), drush_get_option('aegir_db_host'), $aegir_db_port);
-  if (drush_get_option('aegir_host') == drush_get_option('aegir_db_host')) {
+  $master_db = sprintf("mysql://%s:%s@%s:%s", urlencode($aegir_db_user), urlencode($aegir_db_pass), $aegir_db_host, $aegir_db_port);
+  if (drush_get_option('aegir_host') == $aegir_db_host) {
     $master_context['db_service_type'] = 'mysql';
     $master_context['master_db'] = $master_db;
     $dbserver = $server;
   } else {
-    $dbserver = '@server_' . drush_get_option('aegir_db_host');
+    $dbserver = '@server_' . $aegir_db_host;
     $dbserver_context = array(
-      'remote_host' => drush_get_option('aegir_db_host'),
+      'remote_host' => $aegir_db_host,
       'context_type' => 'server',
       'db_service_type' => 'mysql',
       'master_db' => $master_db,
