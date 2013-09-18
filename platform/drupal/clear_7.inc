@@ -4,10 +4,10 @@
  *    Rebuild all the caches
  */
 
-drupal_flush_all_caches();
 cache_clear_all('*', 'cache_form', TRUE); // This bin is excluded in drupal_flush_all_caches()
                                           // but if not purged, it may break tasks with
                                           // mysterious errors thanks to garbage collected.
+drupal_flush_all_caches();
 drush_log(t('All caches flushed'));
 
 // function drupal_flush_all_caches() {
