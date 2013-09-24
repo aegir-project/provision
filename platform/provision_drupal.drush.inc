@@ -253,7 +253,8 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
   );
 
   // Allow other commands to add or alter the directories to be created.
-  drush_command_invoke_all('provision_drupal_create_directories_alter', $mkdir, $url);
+  drush_command_invoke_all_ref('provision_drupal_create_directories_alter', $mkdir, $url);
+  drush_command_invoke_all_ref('provision_drupal_chgrp_directories_alter', $chgrp, $url);
 
   foreach ($mkdir as $path => $perm) {
     if (!is_dir($path)) {
