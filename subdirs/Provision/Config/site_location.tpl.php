@@ -14,11 +14,14 @@ Alias /<?php print $location; ?> <?php print $platform_path; ?>
 
   SetEnv db_port  <?php print urlencode($db_port); ?>
 
+  <IfModule mod_rewrite.c>
+  RewriteEngine on
+
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !=/favicon.ico
   RewriteRule ^<?php print $platform_path; ?>/(.*)$ /<?php print $location; ?>/index.php?q=$1 [L,QSA]
-
+  </IfModule>
 </Location>
 
 # Error handler for Drupal > 4.6.7
