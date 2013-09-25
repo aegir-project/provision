@@ -101,6 +101,7 @@ function _subdirs_create_site_configs() {
           drush_log("Subdirectory alias `$alias` found. Creating configuration files.", 'notice');
           _subdirs_create_site_location($alias);
           _subdirs_create_domain_vhost($alias);
+          _subdirs_create_symlinks($alias, d()->uri);
         }
       }
     }
@@ -124,6 +125,7 @@ function _subdirs_remove_site_configs() {
       if ($handle = opendir($includes_path)) {
         if (FALSE === readdir($handle)) {
           _subdirs_delete_domain_vhost($alias);
+          _subdirs_delete_symlinks($alias);
         }
       }
     }
@@ -273,6 +275,29 @@ function _subdirs_delete_domain_vhost($alias) {
     drush_log('Error encountered attempting to delete domain vhost for subdirectory ' . $alias, 'error');
   }
 
+}
+
+/**
+ * Create subdirectory symlinks
+ *
+ * This create a sites/example.com.foo symlink pointing to the main
+ * URL of the site.
+ */
+function _subdirs_create_symlinks($alias, $main) {
+  provision_file()->symlink($main, 'sites/' . str_replace('/', '.', $alias))
+    ->succeed('symlinked @path to @target')
+    ->fail('failed to symlink @path to @target');
+}
+
+/**
+ * Delete subdirectory symlinks
+ *
+ * This deletes the symlinks created by _subdirs_create_symlinks().
+ */
+function _subdirs_delete_symlinks($alias) {
+  provision_file()->unlink('sites/' . str_replace('/', '.', $alias))
+    ->succeed('removed @path symlink')
+    ->fail('failed to remove @path symlink');
 }
 
 /**
