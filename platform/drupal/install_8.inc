@@ -16,13 +16,30 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
   if ($client_email) {
     // Mail one time login URL and instructions.
     $from = variable_get('site_mail', ini_get('sendmail_from'));
-    $mail_params['variables'] = array(
-      '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
-      '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail,
-      '!date' => format_date(time()), '!login_uri' => url('user', array('absolute' => TRUE)),
-      '!edit_uri' => url('user/'. $account->uid .'/edit', array('absolute' => TRUE)));
 
-    $mail_success = drupal_mail('install', 'welcome-admin', $account->mail, user_preferred_langcode($account), $mail_params, $from, TRUE);
+    $username = $account->getUsername();
+    $site = variable_get('site_name', 'Drupal');
+    $uri_brief = preg_replace('!^https?://!', '', $base_url);
+    $mailto = $account->getEmail();
+    $date = format_date(time());
+    $login_uri = url('user', array('absolute' => TRUE));
+    $edit_uri = url('user/'. $account->id() .'/edit', array('absolute' => TRUE));
+
+    $mail_params['variables'] = array(
+      '!username' => $username,
+      '!site' => $site,
+      '!login_url' => $onetime,
+      '!uri' => $base_url,
+      '!uri_brief' => $uri_brief,
+      '!mailto' => $mailto,
+      '!date' => $date,
+      '!login_uri' => $login_uri,
+      '!edit_uri' => $edit_uri,
+    );
+
+    $langcode = $account->getPreferredLangcode();
+
+    $mail_success = drupal_mail('install', 'welcome-admin', $mailto, $langcode, $mail_params, $from, TRUE);
 
     if ($mail_success) {
       drush_log(t('Sent welcome mail to @client', array('@client' => $client_email)), 'message');
@@ -57,8 +74,8 @@ function install_mail($key, &$message, $params) {
       }
 
       if ($custom) {
-        $message['subject'] = st($mail['subject'], $params['variables']);
-        $message['body'][] = st($mail['body'], $params['variables']);
+        $message['subject'] = t($mail['subject'], $params['variables']);
+        $message['body'][] = t($mail['body'], $params['variables']);
       }
       else {
         $message['subject'] = _user_mail_text('pass_subject', $params['variables']);
@@ -83,6 +100,9 @@ function install_main() {
 
   if (function_exists('drush_sql_read_db_spec')) {
     $db_spec = drush_sql_read_db_spec();
+  }
+  else if (function_exists('_drush_sql_get_db_spec')) {
+    $db_spec = _drush_sql_get_db_spec();
   }
   else {
     $db_spec = drush_core_site_install_db_spec();

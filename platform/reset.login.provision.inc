@@ -31,6 +31,10 @@ function drush_provision_drupal_provision_login_reset() {
   drush_set_option('login_link', $onetime);
   drush_log(t('Login url: !onetime', array('!onetime' => $onetime)), 'success');
 
+  if (drush_drupal_major_version() >= 8) {
+    require_once 'core/includes/session.inc';
+  }
+
   if (drush_drupal_major_version() >= 7) {
     drupal_session_destroy_uid(1);
   }
