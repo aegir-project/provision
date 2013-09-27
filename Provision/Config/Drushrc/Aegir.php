@@ -22,14 +22,11 @@ class Provision_Config_Drushrc_Aegir extends Provision_Config_Drushrc {
     $features = hosting_get_features();
     foreach ($features as $name => $info) {
       if ($info['enabled'] == 1) {
-        $features[$name] = $name;
-      }
-      else {
-        unset($features[$name]);
+        $enabled_features[] = $name;
       }
     }
 
-    $this->data['hosting_features'] = $features;
+    $this->data['hosting_features'] = $enabled_features;
   }
 
 }
