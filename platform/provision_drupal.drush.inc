@@ -74,8 +74,6 @@ function provision_drupal_drush_exit() {
 /**
  * Test to see if the site settings.php exists
  *
- * @param url
- *   The url of the site to check
  * @return
  *   If the file exists, return TRUE, else return FALSE.
  */
@@ -159,12 +157,6 @@ function provision_drupal_fetch_site() {
 
 /**
  * Generate a settings file for the site.
- *
- * @param url
- *   The url of the site being invoked.
- * @param data
- *   A reference to the associated array containing the data for the site. This needs to be a reference,
- *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file() {
   $config = new Provision_Config_Drupal_Settings(d()->name, drush_get_context('site'));
@@ -175,8 +167,11 @@ function _provision_drupal_create_settings_file() {
  * Create the directories needed to host a drupal site
  *
  * Also maintains permissions on existing directories.
- */
-function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
+ *
+ * @param $url
+ *   The url of the site being invoked.
+  */
+function _provision_drupal_create_directories($url = NULL) {
   if (is_null($url)) {
     if (d()->type == 'site') {
       $url = d()->uri;
