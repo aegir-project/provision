@@ -56,12 +56,6 @@ function drush_subdirs_pre_provision_delete() {
   _subdirs_remove_site_configs();
 }
 
-/**
- * Implements drush_hook_pre_provision_enable().
- */
-function drush_subdirs_pre_provision_enable() {
-  _subdirs_create_site_configs();
-}
 
 /**
  * Implements hook_provision_config_load_templates().
