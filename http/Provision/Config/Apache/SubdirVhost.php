@@ -42,7 +42,7 @@ class Provision_Config_Apache_SubdirVhost extends Provision_Config_Http {
     parent::process();
     $this->data['uri'] = $this->uri();
     $this->data['subdir'] = $this->subdir();
-    $this->data['subdirs_path'] = $this->data['http_subdird_path'] . '/' . $this->uri() . '/';
+    $this->data['subdirs_path'] = $this->data['http_subdird_path'];
   }
 
   function filename() {
