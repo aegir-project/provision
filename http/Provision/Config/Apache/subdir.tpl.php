@@ -1,4 +1,4 @@
-Alias /<?php print $subdir; ?> <?php print $platform_path; ?>
+Alias /<?php print $subdir; ?> <?php print $this->root; ?>
 
 <Location /<?php print $subdir; ?>>
 
@@ -20,7 +20,7 @@ Alias /<?php print $subdir; ?> <?php print $platform_path; ?>
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !=/favicon.ico
-  RewriteRule ^<?php print $platform_path; ?>/(.*)$ /<?php print $location; ?>/index.php?q=$1 [L,QSA]
+  RewriteRule ^<?php print $this->root; ?>/(.*)$ /<?php print $location; ?>/index.php?q=$1 [L,QSA]
   </IfModule>
 </Location>
 
