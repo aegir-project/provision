@@ -8,6 +8,7 @@
  */
 class Provision_Config_Apache_Subdir extends Provision_Config_Http {
   public $template = 'subdir.tpl.php';
+  public $disabled_template = 'subdir_disabled.tpl.php';
   public $description = 'subdirectory support';
 
   // hack: because the parent class doesn't support multiple config
@@ -47,6 +48,9 @@ class Provision_Config_Apache_Subdir extends Provision_Config_Http {
     parent::process();
     $this->data['uri'] = $this->uri();
     $this->data['subdir'] = $this->subdir();
+    if (!$this->site_enabled) {
+      $this->template = $this->disabled_template;
+    }
   }
 
   function filename() {
