@@ -173,3 +173,27 @@ function hook_provision_config_load_templates_alter(&$templates, $config) {
   // Don't let any custom templates be used.
   $templates = array();
 }
+
+/**
+ * Alter the array of directories to create.
+ *
+ * @param $mkdir
+ *    The array of directories to create.
+ * @param string $url
+ *    The url of the site being invoked.
+ */
+function hook_provision_drupal_create_directories_alter(&$mkdir, $url) {
+  $mkdir["sites/$url/my_special_dir"] = 02770;
+}
+
+/**
+ * Alter the array of directories to change group ownership of.
+ *
+ * @param $chgrp
+ *    The array of directories to change group ownership of.
+ * @param string $url
+ *    The url of the site being invoked.
+ */
+function hook_provision_drupal_chgrp_directories_alter(&$chgrp, $url) {
+  $chgrp["sites/$url/my_special_dir"] = d('@server_master')->web_group;
+}
