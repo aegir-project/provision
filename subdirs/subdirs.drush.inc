@@ -85,7 +85,7 @@ function _subdirs_create_site_configs() {
     if (count($aliases)) {
       foreach ($aliases as $alias) {
         if (strpos($alias, '/')) {
-          drush_log("Subdirectory alias `$alias` found. Creating configuration files.", 'notice');
+          drush_log("Subdirectory alias `$alias` found. Creating magic symlinks.", 'notice');
           _subdirs_create_symlinks($alias, d()->uri);
         }
       }
