@@ -89,6 +89,13 @@ function drush_provision_drupal_pre_provision_verify() {
 
     _provision_drupal_create_settings_file();
 
+    if (function_exists('hosting_get_features')) {
+      // We're verifying the hostmaster site, so record a list of enabled
+      // Hosting Features.
+      $aegir_drushrc = new Provision_Config_Drushrc_Aegir();
+      $aegir_drushrc->write();
+    }
+
     provision_drupal_push_site();
   }
 }
