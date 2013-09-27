@@ -32,6 +32,6 @@ class Provision_Config_Apache_SubdirVhost extends Provision_Config_Http {
   }
 
   function filename() {
-    return $this->data['http_subdird_path'] . '/' . $this->uri() . '/' . $this->subdir() . '.conf';
+    return $this->data['http_vhostd_path'] . '/' . $this->uri();
   }
 }
