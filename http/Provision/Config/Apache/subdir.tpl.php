@@ -20,7 +20,7 @@ Alias /<?php print $subdir; ?> <?php print $this->root; ?>
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !=/favicon.ico
-  RewriteRule ^<?php print $this->root; ?>/(.*)$ /<?php print $location; ?>/index.php?q=$1 [L,QSA]
+  RewriteRule ^<?php print $this->root; ?>/(.*)$ /<?php print $subdir; ?>/index.php?q=$1 [L,QSA]
   </IfModule>
 </Location>
 
