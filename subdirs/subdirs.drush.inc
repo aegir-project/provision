@@ -86,7 +86,6 @@ function _subdirs_create_site_configs() {
       foreach ($aliases as $alias) {
         if (strpos($alias, '/')) {
           drush_log("Subdirectory alias `$alias` found. Creating configuration files.", 'notice');
-          _subdirs_create_domain_vhost($alias);
           _subdirs_create_symlinks($alias, d()->uri);
         }
       }
@@ -109,7 +108,6 @@ function _subdirs_remove_site_configs() {
       $includes_path = $subdirs_path . '/' . $alias_parts[0];
       if ($handle = opendir($includes_path)) {
         if (FALSE === readdir($handle)) {
-          _subdirs_delete_domain_vhost($alias);
           _subdirs_delete_symlinks($alias);
         }
       }
@@ -117,50 +115,6 @@ function _subdirs_remove_site_configs() {
   }
 }
 
-/**
- * Create the vhost for the subdirectory domain.
- */
-function _subdirs_create_domain_vhost($alias) {
-  $alias_parts = explode('/', $alias, 2);
-  $context = d();
-
-  // Generate variables to pass to template
-  $variables = array(
-    'http_port' => $context->server->http_port,
-    'subdirs_path' => $context->server->http_app_path . '/subdirs.d',
-    'uri' => $alias_parts[0],
-  );
-
-  $output = _subdirs_render_template('domain_vhost.tpl.php', $variables);
-
-  $domain_vhost_path = $context->server->http_vhostd_path . '/' . $alias_parts[0];
-
-  if (fwrite(fopen($domain_vhost_path, 'w'), $output)) {
-    drush_log('Created domain vhost for subdirectory ' . $alias . ' at ' . $domain_vhost_path, 'success');
-  }
-  else {
-    drush_log('Error encountered attempting to create domain vhost for subdirectory ' . $alias, 'error');
-  }
-
-}
-
-/**
- * Delete the vhost for the subdirectory domain.
- */
-function _subdirs_delete_domain_vhost($alias) {
-  $alias_parts = explode('/', $alias, 2);
-  $context = d();
-
-  $domain_vhost_path = $context->server->http_vhostd_path . '/' . $alias_parts[0];
-
-  if (unlink($domain_vhost_path)) {
-    drush_log('Deleted domain vhost for subdirectory ' . $alias, 'success');
-  }
-  else {
-    drush_log('Error encountered attempting to delete domain vhost for subdirectory ' . $alias, 'error');
-  }
-
-}
 
 /**
  * Create subdirectory symlinks
@@ -184,20 +138,3 @@ function _subdirs_delete_symlinks($alias) {
     ->succeed('removed @path symlink')
     ->fail('failed to remove @path symlink');
 }
-
-/**
- * Render our config file templates.
- */
-function _subdirs_render_template($template, $variables) {
-  // TODO: Remove this, once we've got a working Config class.
-
-  $template_path = dirname(__FILE__) . '/Provision/Config/' . $template;
-
-  extract($variables);
-  ob_start();
-  include $template_path;
-  $content = ob_get_clean();
-
-  return $content;
-}
-
