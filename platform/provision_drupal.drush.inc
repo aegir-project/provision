@@ -591,7 +591,7 @@ function _provision_find_platforms() {
   return array(
     'drupal' => array(
     'short_name' => 'drupal', 'version' => drush_drupal_version(),
-    'description' => dt("This platform is running @short_name @version", array('@short_name' => 'Drupal', '@version' => drush_drupal_version())))
+    'description' => dt("This platform is running @short_name @version", array('@short_name' => 'Drupal', '@version' => drush_drupal_version()))));
 }
 
 /**
