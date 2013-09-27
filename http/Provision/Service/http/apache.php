@@ -17,6 +17,7 @@ class Provision_Service_http_apache extends Provision_Service_http_public {
     $this->configs['server'][] = 'Provision_Config_Apache_Server';
     $this->configs['platform'][] = 'Provision_Config_Apache_Platform';
     $this->configs['site'][] = 'Provision_Config_Apache_Site';
+    $this->configs['site'][] = 'Provision_Config_Apache_Subdir';
   }
 
   /**

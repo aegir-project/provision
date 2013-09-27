@@ -1,6 +1,6 @@
-Alias /<?php print $location; ?> <?php print $platform_path; ?>
+Alias /<?php print $subdir; ?> <?php print $platform_path; ?>
 
-<Location /<?php print $location; ?>>
+<Location /<?php print $subdir; ?>>
 
   SetEnv db_type  <?php print urlencode($db_type); ?>
 
