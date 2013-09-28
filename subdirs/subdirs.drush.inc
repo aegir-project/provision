@@ -25,35 +25,35 @@ function subdirs_provision_register_autoload() {
  * Implements drush_hook_pre_provision_install().
  */
 function drush_subdirs_pre_provision_install() {
-  _subdirs_create_site_configs();
+  _subdirs_create_symlinks();
 }
 
 /**
  * Implements drush_hook_pre_provision_install_rollback().
  */
 function drush_subdirs_pre_provision_install_rollback() {
-  _subdirs_remove_site_configs();
+  _subdirs_remove_symlinks();
 }
 
 /**
  * Implementation of drush_hook_pre_provision_verify()
  */
 function drush_subdirs_pre_provision_verify() {
-  _subdirs_create_site_configs();
+  _subdirs_create_symlinks();
 }
 
 /**
  * Implementation of drush_hook_post_provision_deploy()
  */
 function drush_subdirs_pre_provision_deploy() {
-  _subdirs_create_site_configs();
+  _subdirs_create_symlinks();
 }
 
 /**
  * Implementation of drush_hook_provision_delete()
  */
 function drush_subdirs_pre_provision_delete() {
-  _subdirs_remove_site_configs();
+  _subdirs_remove_symlinks();
 }
 
 
@@ -76,36 +76,6 @@ function subdirs_provision_config_load_templates($config) {
   }
 }
 
-/**
- * Helper function to create configuration files for subdirectories.
- */
-function _subdirs_create_site_configs() {
-  if (d()->type == 'site') {
-    $aliases = d()->aliases;
-    if (count($aliases)) {
-      foreach ($aliases as $alias) {
-        if (strpos($alias, '/')) {
-          drush_log("Subdirectory alias `$alias` found. Creating magic symlinks.", 'notice');
-          _subdirs_create_symlinks($alias, d()->uri);
-        }
-      }
-    }
-  }
-}
-
-/**
- * Helper function to remove configuration files for subdirectories.
- */
-function _subdirs_remove_site_configs() {
-  if (d()->type == 'site') {
-    $aliases = d()->aliases;
-    if (count($aliases)) {
-      foreach ($aliases as $alias) {
-        _subdirs_delete_symlinks($alias);
-      }
-    }
-  }
-}
 
 
 /**
@@ -114,10 +84,20 @@ function _subdirs_remove_site_configs() {
  * This create a sites/example.com.foo symlink pointing to the main
  * URL of the site.
  */
-function _subdirs_create_symlinks($alias, $main) {
-  provision_file()->symlink($main, 'sites/' . str_replace('/', '.', $alias))
-    ->succeed('symlinked @path to @target')
-    ->fail('failed to symlink @path to @target');
+function _subdirs_create_symlinks() {
+  if (d()->type == 'site') {
+    $aliases = d()->aliases;
+    if (count($aliases)) {
+      foreach ($aliases as $alias) {
+        if (strpos($alias, '/')) {
+          drush_log("Subdirectory alias `$alias` found. Creating magic symlinks.", 'notice');
+          provision_file()->symlink(d()->uri, 'sites/' . str_replace('/', '.', $alias))
+            ->succeed('symlinked @path to @target')
+            ->fail('failed to symlink @path to @target');
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -125,8 +105,15 @@ function _subdirs_create_symlinks($alias, $main) {
  *
  * This deletes the symlinks created by _subdirs_create_symlinks().
  */
-function _subdirs_delete_symlinks($alias) {
-  provision_file()->unlink('sites/' . str_replace('/', '.', $alias))
-    ->succeed('removed @path symlink')
-    ->fail('failed to remove @path symlink');
+function _subdirs_remove_symlinks() {
+  if (d()->type == 'site') {
+    $aliases = d()->aliases;
+    if (count($aliases)) {
+      foreach ($aliases as $alias) {
+        provision_file()->unlink('sites/' . str_replace('/', '.', $alias))
+          ->succeed('removed @path symlink')
+          ->fail('failed to remove @path symlink');
+      }
+    }
+  }
 }
