@@ -48,13 +48,13 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
 
     if ($config == 'site' && $this->context->ssl_enabled) {
       foreach ($this->context->ip_addresses as $server => $ip_address) {
-        if ($this->server->name == $server) {
+        if ($this->server->name == '@' . $server) {
           $data['ip_address'] = $ip_address;
           break;
         }
       }
-      if (!$data['ip_address']) {
-        drush_log(dt('no proper IP provided by the frontend for server %servername, using wildcard', array('%servername' => $this->server->name)), 'warning');
+      if (!isset($data['ip_address'])) {
+        drush_log(dt('No proper IP provided by the frontend for server %servername, using wildcard', array('%servername' => $this->server->name)), 'warning');
         $data['ip_address'] = '*';
       }
       if ($this->context->ssl_enabled == 2) {
