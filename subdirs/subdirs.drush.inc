@@ -97,20 +97,10 @@ function _subdirs_create_site_configs() {
  * Helper function to remove configuration files for subdirectories.
  */
 function _subdirs_remove_site_configs() {
-  $context = d();
-  $aliases = $context->aliases;
-  $subdirs_path = $context->server->http_app_path . '/subdirs.d';
+  $aliases = d()->aliases;
   if (count($aliases)) {
     foreach ($aliases as $alias) {
-      // We only want to remove the domain vhost after the last subdirectory
-      // site has been deleted.
-      $alias_parts = explode('/', $alias, 2);
-      $includes_path = $subdirs_path . '/' . $alias_parts[0];
-      if ($handle = opendir($includes_path)) {
-        if (FALSE === readdir($handle)) {
-          _subdirs_delete_symlinks($alias);
-        }
-      }
+      _subdirs_delete_symlinks($alias);
     }
   }
 }
