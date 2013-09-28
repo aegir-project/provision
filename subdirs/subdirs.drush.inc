@@ -97,10 +97,12 @@ function _subdirs_create_site_configs() {
  * Helper function to remove configuration files for subdirectories.
  */
 function _subdirs_remove_site_configs() {
-  $aliases = d()->aliases;
-  if (count($aliases)) {
-    foreach ($aliases as $alias) {
-      _subdirs_delete_symlinks($alias);
+  if (d()->type == 'site') {
+    $aliases = d()->aliases;
+    if (count($aliases)) {
+      foreach ($aliases as $alias) {
+        _subdirs_delete_symlinks($alias);
+      }
     }
   }
 }
