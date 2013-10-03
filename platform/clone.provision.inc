@@ -67,6 +67,10 @@ function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
   $options['ssl_enabled'] = 0;
   unset($options['ssl_key']);
 
+  // Do not copy CDN aliases to the cloned site --CDN vhost
+  $options['cdn'] = 0;
+  unset($options['cdn']);
+
   if ($profile = drush_get_option('profile', FALSE)) {
     $options['profile'] = $profile;
   }
