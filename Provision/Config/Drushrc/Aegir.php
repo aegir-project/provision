@@ -18,12 +18,10 @@ class Provision_Config_Drushrc_Aegir extends Provision_Config_Drushrc {
   }
 
   function load_data() {
-    // List enabled Hosting Features.
+    // List Hosting Features and their enabled status.
     $features = hosting_get_features();
     foreach ($features as $name => $info) {
-      if ($info['enabled'] == 1) {
-        $enabled_features[] = $name;
-      }
+      $enabled_features[$name] = $info['enabled'];
     }
 
     $this->data['hosting_features'] = $enabled_features;
