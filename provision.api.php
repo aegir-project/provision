@@ -9,6 +9,19 @@
 
 
 /**
+ * Implements hook_drush_load().
+ *
+ * In a drush contrib check if the frontend part (hosting_hook variant) is enabled.
+ */
+function hook_drush_load() {
+  $features = drush_get_option('hosting_features', array());
+  $hook_feature_name = 'something';
+
+  return array_key_exists($hook_feature_name, $features) // Front-end module is installed...
+    && $features[$hook_feature_name];                    // ... and enabled.
+}
+
+/**
  * Advertise what service types are available and their default
  * implementations. Services are class Provision_Service_{type}_{service} in
  * {type}/{service}/{service}_service.inc files.
