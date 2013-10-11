@@ -51,7 +51,7 @@ AEGIR_DOMAIN="$site_uri"
 OLD_DRUPAL_DIR="$drupal_root"
 HOME="$HOME"
 DRUPAL_DIR=$HOME/hostmaster-$AEGIR_VERSION
-DRUSH_VERSION=7.x-5.9
+DRUSH_VERSION=5.10.0
 BACKUP_DIR=$HOME/pre-upgrade-`date '+%F-%H%M'`
 
 ########################################################################
@@ -131,9 +131,10 @@ if [ -w $DRUSH_DIR ]; then
   fi
 
   cd $HOME
-  wget http://ftp.drupal.org/files/projects/drush-$DRUSH_VERSION.tar.gz 
-  gunzip -c drush-$DRUSH_VERSION.tar.gz | tar -xf -
-  rm drush-$DRUSH_VERSION.tar.gz
+  wget http://github.com/drush-ops/drush/archive/$DRUSH_VERSION.zip
+  unzip $DRUSH_VERSION.zip
+  rm $DRUSH_VERSION.zip
+  mv drush-$DRUSH_VERSION $DRUSH_DIR
 fi
 
 # fetch new version of provision
