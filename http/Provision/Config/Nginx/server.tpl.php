@@ -76,10 +76,10 @@
 <?php
 $nginx_is_modern = drush_get_option('nginx_is_modern');
 if ($nginx_is_modern) {
-  print "  limit_conn_zone \$binary_remote_addr zone=gulag:10m;\n";
+  print "  limit_conn_zone \$binary_remote_addr zone=limreq:10m;\n";
 }
 else {
-  print "  limit_zone gulag \$binary_remote_addr 10m;\n";
+  print "  limit_zone limreq \$binary_remote_addr 10m;\n";
 }
 ?>
   recursive_error_pages           on;
@@ -208,7 +208,7 @@ map $args $is_denied {
 $ip_address = !empty($ip_address) ? $ip_address : '*';
 ?>
 server {
-  limit_conn   gulag 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
+  limit_conn   limreq 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
 <?php
 if ($ip_address == '*') {
   print "  listen       {$ip_address}:{$http_port};\n";
