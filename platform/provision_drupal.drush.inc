@@ -147,8 +147,6 @@ function provision_drupal_drush_exit() {
 /**
  * Test to see if the site settings.php exists
  *
- * @param url
- *   The url of the site to check
  * @return
  *   If the file exists, return TRUE, else return FALSE.
  */
@@ -167,7 +165,51 @@ function drush_provision_drupal_provision_install_backend() {
 /**
  * Sync the current Drupal platform and, if applicable, site. Call after
  * finishing operations that affect the filesystem.
+ *
+ * @param boolean $override_slave_authority
+ *    Overwrite e.g. the files directory on the slave.
+ *    Useful when the master server has donw file operations, such as restoring a backup.
  */
+function provision_drupal_push_site($override_slave_authority = FALSE) {
+
+  provision_file()->create_dir(d()->server->http_platforms_path, dt("Platforms"), 0755);
+  d()->server->sync(d()->server->http_platforms_path, array(
+    'exclude' => d()->server->http_platforms_path . '/*',  // Make sure remote directory is created
+  ));
+
+  // Sync the platform
+  d()->service('http')->sync(d()->root, array('exclude-sites' => TRUE));
+
+  if (d()->type === 'site') {
+    $options = array();
+    if ($override_slave_authority) {
+      $exclude = NULL;
+    }
+    else {
+      $exclude = 'files/*' . PATH_SEPARATOR . 'private/*';
+    }
+
+    // Store the current exclude-path option
+    $old_exclude = NULL;
+    if(!is_null($exclude)) {
+      $old_exclude = drush_get_option('exclude-paths');
+      drush_set_option('exclude-paths', $exclude);
+    }
+
+    // Sync all filesystem changes to the remote server.
+    d()->service('http')->sync(d()->site_path, $options);
+
+    // Reset the exclude-path option
+    if(!is_null($exclude)) {
+      if(empty($old_exclude)) {
+        drush_unset_option('exclude-paths');
+      } else {
+        drush_set_option('exclude-paths', $old_exclude);
+      }
+    }
+  }
+}
+
 function provision_drupal_sync_site() {
   provision_file()->create_dir(d()->server->http_platforms_path, dt("Platforms"), 0711);
   d()->server->sync(d()->server->http_platforms_path, array(
