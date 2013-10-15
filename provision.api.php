@@ -197,6 +197,7 @@ function hook_provision_config_load_templates_alter(&$templates, $config) {
  */
 function hook_provision_drupal_create_directories_alter(&$mkdir, $url) {
   $mkdir["sites/$url/my_special_dir"] = 02770;
+  $mkdir["sites/$url/my_other_dir"] = FALSE; // Skip the chmod on this directory.
 }
 
 /**
@@ -209,4 +210,5 @@ function hook_provision_drupal_create_directories_alter(&$mkdir, $url) {
  */
 function hook_provision_drupal_chgrp_directories_alter(&$chgrp, $url) {
   $chgrp["sites/$url/my_special_dir"] = d('@server_master')->web_group;
+  $chgrp["sites/$url/my_other_dir"] = FALSE; // Skip the chgrp on this directory.
 }

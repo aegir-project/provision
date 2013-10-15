@@ -258,14 +258,18 @@ function _provision_drupal_create_directories($url = NULL) {
         ->fail('Could not create <code>@path</code>', 'DRUSH_PERM_ERROR');
     }
 
-    provision_file()->chmod($path, $perm, !in_array($path, $not_recursive))
-      ->succeed('Changed permissions of <code>@path</code> to @perm')
-      ->fail('Could not change permissions <code>@path</code> to @perm');
+    if ($perm !== FALSE) {
+      provision_file()->chmod($path, $perm, !in_array($path, $not_recursive))
+        ->succeed('Changed permissions of <code>@path</code> to @perm')
+        ->fail('Could not change permissions <code>@path</code> to @perm');
+    }
   }
   foreach ($chgrp as $path => $group) {
-    provision_file()->chgrp($path, $group, !in_array($path, $not_recursive))
-      ->succeed('Changed group ownership of <code>@path</code> to @gid')
-      ->fail('Could not change group ownership <code>@path</code> to @gid');
+    if ($group !== FALSE) {
+      provision_file()->chgrp($path, $group, !in_array($path, $not_recursive))
+        ->succeed('Changed group ownership of <code>@path</code> to @gid')
+        ->fail('Could not change group ownership <code>@path</code> to @gid');
+    }
   }
 }
 
