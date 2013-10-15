@@ -43,7 +43,16 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   drush_set_default('aegir_db_port', '3306');
   drush_set_default('client_name', 'admin');
   $aegir_db_user = drush_get_option('aegir_db_user');
-  drush_set_default('makefile', dirname(__FILE__) . '/aegir.make');
+
+  $root = drush_get_option(array('r', 'root'));
+  if (is_dir($root) && !drush_get_option('makefile', FALSE)) {
+    // Don't assume we know the makefile used to build an existing platform
+    $makefile_msg = '';
+  }
+  else {
+    drush_set_default('makefile', dirname(__FILE__) . '/aegir.make');
+    $makefile_msg = dt("Aegir makefile: !makefile\n", array('!makefile' => drush_get_option('makefile')));
+  }
 
   drush_print("Aegir $version automated install script");
   drush_print("==============================================================================");
@@ -107,24 +116,25 @@ The following settings will be used:
  Aegir DB port: !db_port
  Aegir version: !version
  Aegir platform path: !root
- Aegir makefile: !makefile
  Admin email: !email
-', array('!site' => $site,
-         '!fqdn' => drush_get_option('aegir_host'),
-         '!home' => drush_get_option('aegir_root'),
-         '!user' => drush_get_option('script_user'),
-         '!web' => drush_get_option('web_group'),
-         '!web_server' => drush_get_option('http_service_type'),
-         '!web_server_port' => drush_get_option('http_port'),
-         '!db_host' => drush_get_option('aegir_db_host'),
-         '!db_user' => drush_get_option('aegir_db_user'),
-         '!db_pass' => is_null(drush_get_option('aegir_db_pass', NULL, 'process')) ? '<previously set>' : '<prompted>',
-         '!db_port' => drush_get_option('aegir_db_port'),
-         '!version' => drush_get_option('version'),
-         '!root' => drush_get_option(array('r', 'root')),
-         '!makefile' => drush_get_option('makefile'),
-         '!email' => drush_get_option('client_email'),
-         )));
+ !makefile',
+  array(
+    '!site' => $site,
+    '!fqdn' => drush_get_option('aegir_host'),
+    '!home' => drush_get_option('aegir_root'),
+    '!user' => drush_get_option('script_user'),
+    '!web' => drush_get_option('web_group'),
+    '!web_server' => drush_get_option('http_service_type'),
+    '!web_server_port' => drush_get_option('http_port'),
+    '!db_host' => drush_get_option('aegir_db_host'),
+    '!db_user' => drush_get_option('aegir_db_user'),
+    '!db_pass' => is_null(drush_get_option('aegir_db_pass', NULL, 'process')) ? '<previously set>' : '<prompted>',
+    '!db_port' => drush_get_option('aegir_db_port'),
+    '!version' => drush_get_option('version'),
+    '!root' => $root,
+    '!makefile' => $makefile_msg,
+    '!email' => drush_get_option('client_email'),
+  )));
 
   if (!drush_confirm(dt('Do you really want to proceed with the install'))) {
     return drush_set_error('PROVISION_CANCEL_INSTALL', dt('Installation aborted'));
