@@ -74,11 +74,11 @@ debversion=$(echo $version | sed -e 's/-/~/')
 dch -v $debversion -D unstable
 git add debian/changelog
 
-echo changing makefile to download tarball
-#sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[type\]/s/=.*$/ = "get"/' \
-#  -e'/^projects\[hostmaster\]\[download\]\[url\]/s#=.*$#= "http://ftp.drupal.org/files/projects/hostmaster-'$major-$version'.tgz"#' \
-#  -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[directory_name] = "hostmaster"/' aegir.make && git add aegir.make && rm aegir.make.tmp
-sed -i'.tmp' -e'/^projects\[hostmaster\]\[download\]\[branch\].*/s/\[branch\] *=.*$/[tag] = "'$major-$version'"/' aegir.make && git add aegir.make && rm aegir.make.tmp
+echo changing hostmaster version in aegir-release.make
+sed -i'.tmp' -e '/^projects\[hostmaster\]\[download\]\[version\]/s/=.*$/ = "'"$major-$version"'"/' aegir-release.make && git add aegir-release.make && rm aegir-release.make.tmp
+
+echo enabling release makefilexs
+ln -sf aegir-release.make aegir.make && git add aegir.make
 
 echo changing provision.info version
 sed -i'.tmp' -e"s/version *=.*$/version=$major-$version/" provision.info
