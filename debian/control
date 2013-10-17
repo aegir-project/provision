@@ -31,7 +31,7 @@ Description: mass Drupal hosting system - backend
 
 Package: aegir2-hostmaster
 Architecture: all
-Depends: ${misc:Depends}, drush (>= 5.5), php5-mysql, apache2 | nginx, libapache2-mod-php5 | php5-fpm, aegir-provision2 (>= ${source:Version}), git-core, unzip, lsb-base (>= 3.0-6)
+Depends: ${misc:Depends}, drush (>= 5.5), php5-mysql, apache2 | nginx, libapache2-mod-php5 | php5-fpm, aegir2-provision (>= ${source:Version}), git-core, unzip, lsb-base (>= 3.0-6)
 Recommends: php5-gd, php5
 Conflicts: aegir-hostmaster, aegir-hostmaster2
 Replaces: aegir-hostmaster, aegir-hostmaster2
