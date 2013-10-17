@@ -1,3 +1,21 @@
+aegir-provision2 (2.0~rc5) unstable; urgency=low
+
+  * This release ships a ton of bugfixes we have found in RC4. We also
+    finalised subdirectory support which, while it still has some issues,
+    is now actually working correctly, even on multiple servers. The IP
+    allocation code for SSL on multiple servers was also fixed, making
+    this probably the most solid multi-server Aegir release ever. We also
+    did some API cleanups that seemed necessary before the final 2.0
+    release.
+  * Finally, we should also mentionned that the install process was
+    significantly sped up thanks to the use of Drupal.org distributions to
+    ship a single tarball for the hostmaster platform instead of using a
+    makefile to build it from its parts all the times. During out tests,
+    the platform make step went from 60 seconds to 1.5 seconds, an amazing
+    improvement!
+
+ -- Antoine Beaupré <anarcat@debian.org>  Thu, 17 Oct 2013 10:21:36 -0400
+
 aegir-provision2 (2.0~rc4) unstable; urgency=low
 
   * Fixes a missed step in the 2.0~rc3 release process.
