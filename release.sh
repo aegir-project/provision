@@ -75,7 +75,7 @@ dch -v $debversion -D unstable
 git add debian/changelog
 
 echo changing hostmaster version in aegir-release.make
-sed -i'.tmp' -e '/^projects\[hostmaster\]\[version\]/s/=.*$/ = "'"$major-$version"'"/' aegir-release.make && git add aegir-release.make && rm aegir-release.make.tmp
+sed -i'.tmp' -e '/^projects\[hostmaster\]\[version\]/s/=.*$/= "'"$major-$version"'"/' aegir-release.make && git add aegir-release.make && rm aegir-release.make.tmp
 
 echo enabling release makefilexs
 ln -sf aegir-release.make aegir.make && git add aegir.make
