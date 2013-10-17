@@ -1,4 +1,4 @@
-aegir-provision2 (2.0~rc5) unstable; urgency=low
+aegir2-provision (2.0~rc5) unstable; urgency=low
 
   * This release ships a ton of bugfixes we have found in RC4. We also
     finalised subdirectory support which, while it still has some issues,
@@ -13,7 +13,8 @@ aegir-provision2 (2.0~rc5) unstable; urgency=low
     makefile to build it from its parts all the times. During out tests,
     the platform make step went from 60 seconds to 1.5 seconds, an amazing
     improvement!
-
+  * Note that the binary package name changes here
+  
  -- Antoine Beaupré <anarcat@debian.org>  Thu, 17 Oct 2013 10:21:36 -0400
 
 aegir-provision2 (2.0~rc4) unstable; urgency=low
