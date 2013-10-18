@@ -226,6 +226,7 @@ function install_main() {
   db_query("INSERT INTO {system} (filename, name, type, owner, status, throttle, bootstrap, schema_version) VALUES('%s', '%s', '%s', '%s', %d, %d, %d, %d)", $system_path .'/system.module', 'system', 'module', '', 1, 0, 0, $system_version);
   // Now that we've installed things properly, bootstrap the full Drupal environment
 
+  module_list(TRUE, FALSE);
   module_rebuild_cache();
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   $modules = array_diff($modules, array('system'));
@@ -291,6 +292,7 @@ function install_main() {
   if (function_exists($function)) {
     while (!in_array($task, array('profile-finished', 'finished'))) {
       drush_log(dt("Running profile specific task : !task", array('!task' => $task)));
+      module_list(TRUE, FALSE);
       module_rebuild_cache();
       module_load_all();
       // stop batch api from re-directing. ever.
