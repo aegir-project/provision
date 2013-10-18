@@ -4,6 +4,7 @@
  *    Rebuild all the caches
  */
 
+module_list(TRUE, FALSE);
 module_rebuild_cache();
 drush_log(t('Rebuilt module cache'));
 

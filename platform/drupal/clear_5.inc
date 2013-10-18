@@ -10,6 +10,7 @@ drush_log(t('Cleared all caches'));
 node_types_rebuild();
 drush_log(t('Rebuilt node type cache'));
 
+module_list(TRUE, FALSE);
 module_rebuild_cache();
 drush_log(t('Rebuilt module cache'));
 
