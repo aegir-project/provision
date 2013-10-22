@@ -177,11 +177,11 @@ map $http_user_agent $is_crawler {
 }
 
 ###
-### Deny all known bots on some URIs.
+### Deny all known bots/spiders on some URIs.
 ###
 map $http_user_agent $is_bot {
   default  '';
-  ~*crawl|goog|yahoo|yandex|spider|bot|tracker|click|parser  is_bot;
+  ~*crawl|bot|spider|tracker|click|parser|google|yahoo|yandex|baidu|bing  is_bot;
 }
 
 ###
@@ -189,7 +189,7 @@ map $http_user_agent $is_bot {
 ###
 map $http_user_agent $deny_on_high_load {
   default  '';
-  ~*crawl|goog|yahoo|yandex|baidu|bing|spider|tracker|click|parser  deny_on_high_load;
+  ~*crawl|spider|tracker|click|parser|google|yahoo|yandex|baidu|bing  deny_on_high_load;
 }
 
 ###
