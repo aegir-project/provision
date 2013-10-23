@@ -48,7 +48,7 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
 
     if ($config == 'site' && $this->context->ssl_enabled) {
       foreach ($this->context->ip_addresses as $server => $ip_address) {
-        if ($this->server->name == '@' . $server) {
+        if ($server == $this->server->name || '@' . $server == $this->server->name) {
           $data['ip_address'] = $ip_address;
           break;
         }
