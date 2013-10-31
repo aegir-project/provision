@@ -6,5 +6,6 @@
  * Checks if the corresponsing Hosting Feature is enabled.
  */
 function site_data_drush_load() {
-  return in_array('site_data', drush_get_option('hosting_features', array()));
+  $features = drush_get_option('hosting_features', array());
+  return array_key_exists('site_data', $features) && $features['site_data'];
 }
