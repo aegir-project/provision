@@ -5,8 +5,8 @@ api = 2
 
 projects[pressflow][type] = "core"
 projects[pressflow][download][type] = "get"
-projects[pressflow][download][url] = "http://files.aegir.cc/dev/pressflow-6.28.2.tar.gz"
+projects[pressflow][download][url] = "http://files.aegir.cc/core/pressflow-6.28.3.tar.gz"
 
 projects[hostmaster][type] = "profile"
 projects[hostmaster][download][type] = "get"
-projects[hostmaster][download][url] = "http://files.aegir.cc/versions/hostmaster-BOA-2.1.0.tar.gz"
+projects[hostmaster][download][url] = "http://files.aegir.cc/versions/stable/tar/hostmaster-BOA-2.1.0.tar.gz"
