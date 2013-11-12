@@ -471,6 +471,21 @@ function _provision_find_profiles() {
     if ($profile->name == 'standard') {
       $profile->info['old_short_name'] = 'default';
     }
+    elseif ($profile->name == 'minimal') {
+      $profile->info['old_short_name'] = 'uberdrupal';
+    }
+    elseif ($profile->name == 'testing') {
+      $profile->info['old_short_name'] = 'acquia';
+    }
+    elseif ($profile->name == 'commons') {
+      $profile->info['old_short_name'] = 'drupal_commons';
+    }
+    elseif ($profile->name == 'commerce_kickstart') {
+      $profile->info['commercedev'] = 'commercedev';
+    }
+    elseif ($profile->name == 'default') {
+      $profile->info['commercedev'] = 'acquia';
+    }
 
     $return[$name] = $profile;
     drush_log(dt('Found installation profile %name', array('%name' => $name)));
