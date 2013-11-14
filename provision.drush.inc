@@ -212,6 +212,8 @@ function provision_drush_command() {
     'description' => 'Migrate a site between platforms.',
     'arguments' => array(
       '@platform_name' => dt('The Drush alias of the platform.')),
+    'options' => array(
+      'profile' => dt('The Drupal profile to use.')),
     'examples' => array(
       'drush @site provision-migrate @platform_name' => 'Migrate the site as defined by the Drush alias, to the platform as defined by the platform\'s Drush alias',
     ),
