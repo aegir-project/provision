@@ -477,14 +477,17 @@ function _provision_find_profiles() {
     elseif ($profile->name == 'testing') {
       $profile->info['old_short_name'] = 'acquia';
     }
+    elseif ($profile->name == 'default') {
+      $profile->info['old_short_name'] = 'acquia';
+    }
+    elseif ($profile->name == 'acquia') {
+      $profile->info['old_short_name'] = 'default';
+    }
     elseif ($profile->name == 'commons') {
       $profile->info['old_short_name'] = 'drupal_commons';
     }
     elseif ($profile->name == 'commerce_kickstart') {
-      $profile->info['commercedev'] = 'commercedev';
-    }
-    elseif ($profile->name == 'default') {
-      $profile->info['commercedev'] = 'acquia';
+      $profile->info['old_short_name'] = 'commercedev';
     }
 
     $return[$name] = $profile;
