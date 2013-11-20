@@ -24,7 +24,7 @@ if [ "$DPKG_DEBUG" = "developer" ]; then
     set -x
 fi
 
-AEGIRHOME="/var/aegir"
+AEGIRHOME="$(su aegir -s /bin/sh -c 'echo $HOME')"
 
 case "$1" in
     configure)
