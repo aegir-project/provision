@@ -55,8 +55,8 @@
   lingering_time                  30;
   lingering_timeout                5;
   fastcgi_connect_timeout         60;
-  fastcgi_send_timeout           300;
-  fastcgi_read_timeout           300;
+  fastcgi_send_timeout           180;
+  fastcgi_read_timeout           180;
 
  ## Open File Performance
   open_file_cache max=8000 inactive=30s;
