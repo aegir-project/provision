@@ -16,7 +16,7 @@
   fastcgi_param  DOCUMENT_ROOT       $document_root;
   fastcgi_param  SERVER_PROTOCOL     $server_protocol;
   fastcgi_param  GATEWAY_INTERFACE   CGI/1.1;
-  fastcgi_param  SERVER_SOFTWARE     ApacheSolaris (nginx)/$nginx_version;
+  fastcgi_param  SERVER_SOFTWARE     ApacheSolarisNginx/$nginx_version;
   fastcgi_param  REMOTE_ADDR         $remote_addr;
   fastcgi_param  REMOTE_PORT         $remote_port;
   fastcgi_param  SERVER_ADDR         $server_addr;
