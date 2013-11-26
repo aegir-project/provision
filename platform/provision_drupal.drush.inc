@@ -266,6 +266,69 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
 }
 
 /**
+ * Call the core file_create_htaccess() functions.
+ *
+ * Unlink the files first to avoid permission issues.
+ * If drupal already created the file then it's owned by e.g. www-data and aegir can not chmod those.
+ *
+ * @see https://drupal.org/SA-CORE-2013-003
+ */
+function _provision_drupal_ensure_htaccess_update() {
+
+  if (drush_drupal_major_version() == 7) {
+
+    // Copied from modules/system/system.install system_requirements()
+    $htaccess_files['public://.htaccess'] = array(
+      'directory' => variable_get('file_public_path', conf_path() . '/files'),
+    );
+    if ($private_files_directory = variable_get('file_private_path')) {
+      $htaccess_files['private://.htaccess'] = array(
+        'directory' => $private_files_directory,
+      );
+    }
+    $htaccess_files['temporary://.htaccess'] = array(
+      'directory' => variable_get('file_temporary_path', file_directory_temp()),
+    );
+    foreach ($htaccess_files as $htaccess_file => $info) {
+      // Check for the string which was added to the recommended .htaccess file
+      // in the latest security update.
+      if (!file_exists($htaccess_file) || !($contents = @file_get_contents($htaccess_file)) || strpos($contents, 'Drupal_Security_Do_Not_Remove_See_SA_2013_003') === FALSE) {
+
+        // Aegir specific
+        @unlink($htaccess_file);
+        file_create_htaccess($info['directory'], FALSE);
+        drush_log(dt('Updated @file to match http://drupal.org/SA-CORE-2013-003', array('@file' => $info['directory'] . '/.htaccess')), 'notice');
+        $path = file_stream_wrapper_get_instance_by_uri($htaccess_file)->getDirectoryPath();
+        d()->service('http')->sync(d()->root . '/' . $info['directory'] . '/.htaccess');
+      }
+    }
+  }
+  elseif (drush_drupal_major_version() == 6 && function_exists('file_create_htaccess')) {
+
+    // Copied from modules/system/system.install system_requirements()
+    $htaccess_files['files_htaccess'] = array(
+      'directory' => file_directory_path(),
+    );
+    $htaccess_files['temporary_files_htaccess'] = array(
+      'directory' => file_directory_temp(),
+    );
+    foreach ($htaccess_files as $key => $info) {
+      // Check for the string which was added to the recommended .htaccess file
+      // in the latest security update.
+      $htaccess_file = $info['directory'] . '/.htaccess';
+      if (!file_exists($htaccess_file) || !($contents = @file_get_contents($htaccess_file)) || strpos($contents, 'Drupal_Security_Do_Not_Remove_See_SA_2013_003') === FALSE) {
+
+        // Aegir specific
+        @unlink($info['directory'] . '/.htaccess');
+        file_create_htaccess($info['directory'], NULL);
+        drush_log(dt('Updated @file to match http://drupal.org/SA-CORE-2013-003', array('@file' => $info['directory'] . '/.htaccess')), 'notice');
+        d()->service('http')->sync(d()->root . '/' . $info['directory'] . '/.htaccess');
+      }
+    }
+  }
+}
+
+/**
  * Runs an external script to reload all the various drupal caches
  */
 function _provision_drupal_rebuild_caches() {

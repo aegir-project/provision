@@ -55,17 +55,33 @@ if ($this->redirection || $ssl_redirection) {
 
     # Error handler for Drupal > 4.6.7
     <Directory "<?php print $this->site_path; ?>/files">
-      SetHandler This_is_a_Drupal_security_line_do_not_remove
+      <Files *>
+        SetHandler This_is_a_Drupal_security_line_do_not_remove
+      </Files>
+      Options None
+      Options +FollowSymLinks
+
+      # If we know how to do it safely, disable the PHP engine entirely.
+      <IfModule mod_php5.c>
+        php_flag engine off
+      </IfModule>
     </Directory>
 
     # Prevent direct reading of files in the private dir.
     # This is for Drupal7 compatibility, which would normally drop
     # a .htaccess in those directories, but we explicitly ignore those
     <Directory "<?php print $this->site_path; ?>/private/" >
-       SetHandler This_is_a_Drupal_security_line_do_not_remove
-       Deny from all
-       Options None
-       Options +FollowSymLinks
+      <Files *>
+        SetHandler This_is_a_Drupal_security_line_do_not_remove
+      </Files>
+      Deny from all
+      Options None
+      Options +FollowSymLinks
+
+      # If we know how to do it safely, disable the PHP engine entirely.
+      <IfModule mod_php5.c>
+        php_flag engine off
+      </IfModule>
     </Directory>
     
 
