@@ -1,3 +1,10 @@
+aegir-provision (1.11) testing; urgency=high
+
+  * fix mild security issue with login-reset links (#1220062)
+  * security fix: SA-CORE-2013-003, files/ protection (#2141799)
+
+ -- Antoine Beaupré <anarcat@debian.org>  Tue, 26 Nov 2013 11:31:55 -0500
+
 aegir-provision (1.10) testing; urgency=high
 
   * new release: Security fixes for a moderately critical vulnerability found in 
