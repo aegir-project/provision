@@ -85,6 +85,7 @@ function drush_provision_drupal_pre_provision_verify() {
     // This is the actual drupal provisioning requirements. 
     _provision_drupal_create_directories();
     _provision_drupal_maintain_aliases();
+    _provision_drupal_ensure_htaccess_update();
     // Requires at least the database settings to complete.
 
     _provision_drupal_create_settings_file();
