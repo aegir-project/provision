@@ -221,6 +221,9 @@ else {
 ?>
   server_name  _;
   location / {
+     expires 60s;
+     add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+     add_header Access-Control-Allow-Origin *;
      root   /var/www/nginx-default;
      index  index.html index.htm;
   }
