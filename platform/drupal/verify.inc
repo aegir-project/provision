@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 drush_set_option('modules', _scrub_object(module_rebuild_cache()), 'site');
 // Find theme engines

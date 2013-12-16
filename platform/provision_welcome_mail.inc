@@ -1,5 +1,5 @@
 <?php
-// $Id$
+
 /**
  * @file
  * Define subject and body text for an email to the admin user created

@@ -1,5 +1,4 @@
 <?php
- // $Id$
 
 /**
  * @file Package management code for Drupal 7 

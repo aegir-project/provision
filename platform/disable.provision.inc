@@ -1,7 +1,5 @@
 <?php
 
-// $Id$
-
 /**
  * Provision disable command
  *
