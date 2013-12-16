@@ -1,7 +1,7 @@
 <?php
 
 $new_url = drush_get_option('uri');
-$old_url = drush_get_option('uri', 'site');
+$old_url = drush_get_option('old_uri');
 
 /**
  * @file
@@ -10,9 +10,11 @@ $old_url = drush_get_option('uri', 'site');
  *   directories.
  */
 
-drush_log(
-  dt('Changed paths from sites/@old_url to sites/@new_url',
-  array('@old_url' => $old_url, '@new_url' => $new_url)));
+if ($new_url != $old_url) {
+  drush_log(
+    dt('Changed paths from sites/@old_url to sites/@new_url',
+    array('@old_url' => $old_url, '@new_url' => $new_url)));
+}
 
 variable_set('file_public_path', "sites/$new_url/files");
 variable_set('file_private_path', "sites/$new_url/private/files");
