@@ -16,7 +16,3 @@ if ($new_url != $old_url) {
     array('@old_url' => $old_url, '@new_url' => $new_url)));
 }
 
-variable_set('file_public_path', "sites/$new_url/files");
-variable_set('file_private_path', "sites/$new_url/private/files");
-variable_set('file_temporary_path', "sites/$new_url/private/temp");
-
