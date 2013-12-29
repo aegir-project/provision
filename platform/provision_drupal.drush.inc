@@ -473,10 +473,10 @@ function _provision_find_profiles() {
         $profile->info['old_short_name'] = 'default';
       }
       elseif ($profile->name == 'minimal') {
-        $profile->info['old_short_name'] = 'uberdrupal';
+        $profile->info['old_short_name'] = 'acquia';
       }
       elseif ($profile->name == 'testing') {
-        $profile->info['old_short_name'] = 'acquia';
+        $profile->info['old_short_name'] = 'uberdrupal';
       }
       elseif ($profile->name == 'default') {
         $profile->info['old_short_name'] = 'acquia';
