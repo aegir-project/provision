@@ -16,6 +16,10 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     $this->server->setProperty('nginx_web_server', 0);
     $this->server->setProperty('nginx_has_upload_progress', 0);
     $this->server->setProperty('nginx_is_modern', 0);
+    if (subdirs_drush_load()) {
+      $this->configs['site'][] = 'Provision_Config_Nginx_Subdir';
+      $this->configs['site'][] = 'Provision_Config_Nginx_SubdirVhost';
+    }
   }
 
   function save_server() {
