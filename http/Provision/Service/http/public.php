@@ -15,6 +15,7 @@ class Provision_Service_http_public extends Provision_Service_http {
       $data['http_postd_path'] = $this->server->http_postd_path;
       $data['http_platformd_path'] = $this->server->http_platformd_path;
       $data['http_vhostd_path'] = $this->server->http_vhostd_path;
+      $data['http_subdird_path'] = $this->server->http_subdird_path;
     }
 
     $data['http_port'] = $this->server->http_port;
@@ -67,6 +68,7 @@ class Provision_Service_http_public extends Provision_Service_http {
       $this->server->http_postd_path = "{$app_dir}/post.d";
       $this->server->http_platformd_path = "{$app_dir}/platform.d";
       $this->server->http_vhostd_path = "{$app_dir}/vhost.d";
+      $this->server->http_subdird_path = "{$app_dir}/subdir.d";
       $this->server->http_platforms_path = "{$this->server->aegir_root}/platforms";
     }
   }
@@ -102,7 +104,12 @@ class Provision_Service_http_public extends Provision_Service_http {
       $this->sync($this->server->http_vhostd_path, array(
         'exclude' => $this->server->http_vhostd_path . '/*',  // Make sure remote directory is created
       ));
-    } 
+
+      provision_file()->create_dir($this->server->http_subdird_path, dt("Webserver subdir configuration"), 0700);
+      $this->sync($this->server->http_subdird_path, array(
+        'exclude' => $this->server->http_subdird_path . '/*',  // Make sure remote directory is created
+      ));
+    }
 
     parent::verify_server_cmd();
   }
