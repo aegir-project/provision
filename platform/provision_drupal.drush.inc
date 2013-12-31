@@ -497,7 +497,7 @@ function _provision_drupal_maintain_aliases() {
       if (!d()->redirection) {
         foreach (d()->aliases as $alias) {
           if ($alias = trim($alias)) {
-            provision_file()->symlink(d()->uri, d()->root . '/sites/' . $alias)
+            provision_file()->symlink(d()->uri, d()->root . '/sites/' . str_replace('/', '.', $alias))
               ->succeed('Created symlink for alias @target')
               ->fail('Could not create symlink for alias @target');
             d()->service('http')->sync(d()->root . '/sites/' . $alias);
