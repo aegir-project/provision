@@ -34,8 +34,15 @@ class Provision_Config_Apache_SubdirVhost extends Provision_Config_Http {
     foreach (d()->aliases as $alias) {
       if (strpos($alias, '/')) {
         $this->current_alias = $alias;
-        drush_log("Subdirectory alias `$alias` found. Creating vhost configuration file.", 'notice');
-        parent::write();
+        if (d($this->uri())) {
+          drush_log(dt('virtual host %vhost already exist for alias %alias, skipping', array('%vhost' => $this->uri(), '%alias' => $alias)), 'warning');
+          // XXX: we need to verify that vhost here, or at least
+          // generate its configuration file.
+        }
+        else {
+          drush_log("Subdirectory alias `$alias` found. Creating vhost configuration file.", 'notice');
+          parent::write();
+        }
       }
     }
   }
