@@ -44,7 +44,7 @@ server {
     if (!$this->redirection && is_array($this->aliases)) {
       foreach ($this->aliases as $alias_url) {
         if (trim($alias_url)) {
-          print " " . $alias_url;
+          print " " . str_replace('/', '.', $alias_url);
         }
       }
     } ?>;
