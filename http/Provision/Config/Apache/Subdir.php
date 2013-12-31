@@ -34,14 +34,16 @@ class Provision_Config_Apache_Subdir extends Provision_Config_Http {
    * Guess the URI this subdir alias is related too.
    */
   function uri() {
-    return explode('/', $this->current_alias, 2)[0];
+    $e = explode('/', $this->current_alias, 2);
+    return $e[0];
   }
 
   /**
    * Guess the subdir part of the subdir alias.
    */
   function subdir() {
-    return explode('/', $this->current_alias, 2)[1];
+    $e = explode('/', $this->current_alias, 2);
+    return $e[1];
   }
 
   function process() {
