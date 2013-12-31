@@ -122,6 +122,9 @@ function provision_drush_command() {
 
   $items['provision-import'] = array(
     'description' => dt('Turn an already running site into a provisioned site.'),
+    'options' => array(
+      'client_email' => dt('The email address of the client to use.'),
+    ),
     'examples' => array(
       'drush @site provision-import' => 'Import the site as defined by the site Drush alias generated with provision-save.',
     ),
