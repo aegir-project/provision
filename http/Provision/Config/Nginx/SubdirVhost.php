@@ -35,9 +35,10 @@ class Provision_Config_Nginx_SubdirVhost extends Provision_Config_Http {
     foreach (d()->aliases as $alias) {
       if (strpos($alias, '/')) {
         $this->current_alias = $alias;
-        if (d($this->uri())) {
+        $if_parent_site = $this->data['http_vhostd_path'] . '/' . $this->uri();
+        if (provision_file()->exists($if_parent_site)->status()) {
           $parent_site = TRUE;
-          drush_log(dt('virtual host %vhost already exist for alias %alias, skipping', array('%vhost' => $this->uri(), '%alias' => $alias)), 'notice');
+          drush_log(dt('Parent site %vhost already exists for alias %alias, skipping', array('%vhost' => $this->uri(), '%alias' => $alias)), 'notice');
           $site_name = '@' . $this->uri();
           provision_backend_invoke($site_name, 'provision-verify');
         }
