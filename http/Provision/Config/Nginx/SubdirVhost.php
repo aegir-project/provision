@@ -31,11 +31,20 @@ class Provision_Config_Nginx_SubdirVhost extends Provision_Config_Http {
   }
 
   function write() {
+    $parent_site = FALSE;
     foreach (d()->aliases as $alias) {
       if (strpos($alias, '/')) {
         $this->current_alias = $alias;
-        drush_log("Subdirectory alias `$alias` found. Creating vhost configuration file.", 'notice');
-        parent::write();
+        if (d($this->uri())) {
+          $parent_site = TRUE;
+          drush_log(dt('virtual host %vhost already exist for alias %alias, skipping', array('%vhost' => $this->uri(), '%alias' => $alias)), 'notice');
+          $site_name = '@' . $this->uri();
+          provision_backend_invoke($site_name, 'provision-verify');
+        }
+        else {
+          drush_log("Subdirectory alias `$alias` found. Creating vhost configuration file.", 'notice');
+          parent::write();
+        }
       }
     }
   }
@@ -48,7 +57,8 @@ class Provision_Config_Nginx_SubdirVhost extends Provision_Config_Http {
   }
 
   function filename() {
-    // XXX: this will OVERWRITE existing vhosts!
-    return $this->data['http_vhostd_path'] . '/' . $this->uri();
+    if (!$parent_site) {
+      return $this->data['http_vhostd_path'] . '/' . $this->uri();
+    }
   }
 }
