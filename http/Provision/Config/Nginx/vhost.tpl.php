@@ -37,7 +37,7 @@ server {
     // target as the hostname (if it exists) and not the original URL
     // ($this->uri)
     if ($this->redirection) {
-      print $this->redirection;
+      print str_replace('/', '.', $this->redirection);
     } else {
       print $this->uri;
     }
