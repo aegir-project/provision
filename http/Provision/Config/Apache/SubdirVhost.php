@@ -31,13 +31,16 @@ class Provision_Config_Apache_SubdirVhost extends Provision_Config_Http {
   }
 
   function write() {
+    $parent_site = FALSE;
     foreach (d()->aliases as $alias) {
       if (strpos($alias, '/')) {
         $this->current_alias = $alias;
-        if (d($this->uri())) {
-          drush_log(dt('virtual host %vhost already exist for alias %alias, skipping', array('%vhost' => $this->uri(), '%alias' => $alias)), 'warning');
-          // XXX: we need to verify that vhost here, or at least
-          // generate its configuration file.
+        $if_parent_site = $this->data['http_vhostd_path'] . '/' . $this->uri();
+        if (provision_file()->exists($if_parent_site)->status()) {
+          $parent_site = TRUE;
+          drush_log(dt('Parent site %vhost already exists for alias %alias, skipping', array('%vhost' => $this->uri(), '%alias' => $alias)), 'notice');
+          $site_name = '@' . $this->uri();
+          provision_backend_invoke($site_name, 'provision-verify');
         }
         else {
           drush_log("Subdirectory alias `$alias` found. Creating vhost configuration file.", 'notice');
@@ -55,7 +58,8 @@ class Provision_Config_Apache_SubdirVhost extends Provision_Config_Http {
   }
 
   function filename() {
-    // XXX: this will OVERWRITE existing vhosts!
-    return $this->data['http_vhostd_path'] . '/' . $this->uri();
+    if (!$parent_site) {
+      return $this->data['http_vhostd_path'] . '/' . $this->uri();
+    }
   }
 }

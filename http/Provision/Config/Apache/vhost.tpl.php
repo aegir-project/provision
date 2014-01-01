@@ -84,6 +84,12 @@ if ($this->redirection || $ssl_redirection) {
       </IfModule>
     </Directory>
     
+<?php
+$if_subsite = $this->data['http_subdird_path'] . '/' . $this->uri;
+if (subdirs_drush_load() && provision_file()->exists($if_subsite)->status()) {
+  print "  Include " . $if_subsite . "/*.conf\n";
+}
+?>
 
 </VirtualHost>
 
