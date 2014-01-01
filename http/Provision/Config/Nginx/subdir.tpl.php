@@ -477,6 +477,13 @@ location ^~ /<?php print $subdir; ?> {
 <?php endif; ?>
 
   ###
+  ### Redirect to working homepage.
+  ###
+  location = /<?php print $subdir; ?> {
+    rewrite ^ $scheme://$host/<?php print $subdir; ?>/? permanent;
+  }
+
+  ###
   ### Catch all unspecified requests.
   ###
   location /<?php print $subdir; ?>/ {
