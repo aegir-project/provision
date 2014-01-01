@@ -30,14 +30,23 @@ class Provision_Config_Apache_SubdirVhost extends Provision_Config_Http {
     return $e[1];
   }
 
+  /**
+   * Check if the parent (domain) site (vhost) exists.
+   */
+  function parent_site() {
+    $vhost_parent_site = $this->data['http_vhostd_path'] . '/' . $this->uri();
+    if (provision_file()->exists($vhost_parent_site)->status()) {
+      $e = TRUE;
+    }
+    return $e;
+  }
+
   function write() {
-    $parent_site = FALSE;
     foreach (d()->aliases as $alias) {
       if (strpos($alias, '/')) {
         $this->current_alias = $alias;
-        $if_parent_site = $this->data['http_vhostd_path'] . '/' . $this->uri();
-        if (provision_file()->exists($if_parent_site)->status()) {
-          $parent_site = TRUE;
+        if ($this->parent_site()) {
+          $site_parent = TRUE;
           drush_log(dt('Parent site %vhost already exists for alias %alias, skipping', array('%vhost' => $this->uri(), '%alias' => $alias)), 'notice');
           $site_name = '@' . $this->uri();
           provision_backend_invoke($site_name, 'provision-verify');
@@ -58,7 +67,7 @@ class Provision_Config_Apache_SubdirVhost extends Provision_Config_Http {
   }
 
   function filename() {
-    if (!$parent_site) {
+    if (!$site_parent) {
       return $this->data['http_vhostd_path'] . '/' . $this->uri();
     }
   }
