@@ -31,25 +31,31 @@ class Provision_Config_Apache_SubdirVhost extends Provision_Config_Http {
   }
 
   /**
-   * Check if the parent (domain) site (vhost) exists.
+   * Check if the (real) parent site (drushrc) exists.
    */
   function parent_site() {
-    $vhost_parent_site = $this->data['http_vhostd_path'] . '/' . $this->uri();
-    if (provision_file()->exists($vhost_parent_site)->status()) {
+    $u = explode('/', $this->data['http_vhostd_path'], 6);
+    $p = '/' . $u[1] . '/' . $u[2] . '/.drush/';
+    $parent_site_drushrc = $p . $this->uri() . '.alias.drushrc.php';
+    if (provision_file()->exists($parent_site_drushrc)->status()) {
       $e = TRUE;
     }
     return $e;
   }
 
   function write() {
+    $count = "0";
     foreach (d()->aliases as $alias) {
       if (strpos($alias, '/')) {
         $this->current_alias = $alias;
         if ($this->parent_site()) {
-          $site_parent = TRUE;
+          $site_is_parent = TRUE;
           drush_log(dt('Parent site %vhost already exists for alias %alias, skipping', array('%vhost' => $this->uri(), '%alias' => $alias)), 'notice');
-          $site_name = '@' . $this->uri();
-          provision_backend_invoke($site_name, 'provision-verify');
+          if ($count == "0") {
+            $site_name = '@' . $this->uri();
+            provision_backend_invoke($site_name, 'provision-verify');
+          }
+          $count++;
         }
         else {
           drush_log("Subdirectory alias `$alias` found. Creating vhost configuration file.", 'notice');
@@ -67,7 +73,7 @@ class Provision_Config_Apache_SubdirVhost extends Provision_Config_Http {
   }
 
   function filename() {
-    if (!$site_parent) {
+    if (!$site_is_parent) {
       return $this->data['http_vhostd_path'] . '/' . $this->uri();
     }
   }
