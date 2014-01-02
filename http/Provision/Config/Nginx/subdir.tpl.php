@@ -444,7 +444,7 @@ location ^~ /<?php print $subdir; ?> {
     add_header X-Header "Boost Citrus 2.4";
     charset    utf-8;
     types { }
-    default_type application/rss+xml;
+    default_type text/xml;
     try_files /cache/normal/$host${uri}_.xml /cache/normal/$host${uri}_.html /$1 $uri @drupal_<?php print $subdir; ?>;
   }
 
