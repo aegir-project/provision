@@ -105,7 +105,7 @@ else {
   gzip_comp_level   5;
   gzip_http_version 1.0;
   gzip_min_length   10;
-  gzip_types        text/plain text/css application/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascript application/x-font-ttf font/opentype application/vnd.ms-fontobject image/svg+xml;
+  gzip_types        text/plain text/css application/javascript application/x-javascript text/xml application/xml application/xml+rss application/rss+xml application/atom+xml text/javascript application/x-font-ttf font/opentype application/vnd.ms-fontobject image/svg+xml;
   gzip_vary         on;
   gzip_proxied      any;
 <?php
