@@ -1,6 +1,4 @@
-#! /bin/sh
-
-# $Id$
+#!/bin/sh
 
 ########################################################################
 # Aegir quick upgrade script
@@ -36,19 +34,32 @@ else
   exit 1
 fi
 
-TEMPFILE=`mktemp`
-$DRUSH --pipe @hostmaster status | egrep "site_uri|drupal_root" >> $TEMPFILE || true
-if grep -q 'site_uri' $TEMPFILE; then
-    # this sources the result of drush --pipe so we initialise shell variables used later
-    . $TEMPFILE
-else
-    msg 'could not find running hostmaster site'
-    msg 'try running "drush @hostmaster status" to diagnose and repair'
-    exit 1
-fi
+# Detect the current Drush version to work with
+DRUSH_VERSION=`drush --version --pipe`
 
-AEGIR_DOMAIN="$site_uri"
-OLD_DRUPAL_DIR="$drupal_root"
+case "$DRUSH_VERSION" in
+  5*)
+  TEMPFILE=`mktemp`
+  $DRUSH --pipe @hostmaster status | egrep "site_uri|drupal_root" >> $TEMPFILE || true
+  if grep -q 'site_uri' $TEMPFILE; then
+      # this sources the result of drush --pipe so we initialise shell variables used later
+      . $TEMPFILE
+  else
+      msg 'could not find running hostmaster site'
+      msg 'try running "drush @hostmaster status" to diagnose and repair'
+      exit 1
+  fi
+  AEGIR_DOMAIN="$site_uri"
+  OLD_DRUPAL_DIR="$drupal_root"
+  ;;
+
+  [67]*)
+
+  AEGIR_DOMAIN=`drush @hostmaster status --fields="uri" --field-labels=0`
+  OLD_DRUPAL_DIR=`drush @hostmaster status --fields="root" --field-labels=0`
+
+esac
+
 HOME="$HOME"
 DRUPAL_DIR=$HOME/hostmaster-$AEGIR_VERSION
 DRUSH_VERSION=5.10.0
