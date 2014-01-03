@@ -73,7 +73,7 @@ class Provision_Config_Nginx_SubdirVhost extends Provision_Config_Http {
           drush_log(dt('Parent site %vhost exists for alias %alias, skipping', array('%vhost' => $this->uri(), '%alias' => $alias)), 'notice');
           if ($count == "0" && $this->uri() && $mode_is_install) {
             $site_name = '@' . $this->uri();
-            drush_log(dt('Parent site %vhost re-verify required to include subdir config for %alias', array('%vhost' => $site_name, '%alias' => $alias)), 'notice');
+            drush_log(dt('Parent site %vhost re-verify required to include subdir config for %alias', array('%vhost' => $site_name, '%alias' => $alias)), 'warning');
             //
             //   drush_invoke_process('@none', 'cache-clear', array('drush'));
             //   provision_backend_invoke($site_name, 'provision-verify');
