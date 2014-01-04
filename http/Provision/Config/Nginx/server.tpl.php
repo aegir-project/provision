@@ -102,10 +102,28 @@ else {
 
  ## Compression
   gzip_buffers      16 8k;
-  gzip_comp_level   5;
+  gzip_comp_level   8;
   gzip_http_version 1.0;
-  gzip_min_length   10;
-  gzip_types        text/plain text/css application/javascript application/x-javascript text/xml application/xml application/xml+rss application/rss+xml application/atom+xml text/javascript application/x-font-ttf font/opentype application/vnd.ms-fontobject image/svg+xml;
+  gzip_min_length   50;
+  gzip_types
+    application/atom+xml
+    application/javascript
+    application/json
+    application/rss+xml
+    application/vnd.ms-fontobject
+    application/x-font-opentype
+    application/x-font-ttf
+    application/x-javascript
+    application/xhtml+xml
+    application/xml
+    application/xml+rss
+    font/opentype
+    image/svg+xml
+    image/x-icon
+    text/css
+    text/javascript
+    text/plain
+    text/xml;
   gzip_vary         on;
   gzip_proxied      any;
 <?php
