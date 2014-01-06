@@ -248,7 +248,16 @@ else {
 }
 
 server {
-  listen 127.0.0.1:80;
+<?php
+if ($ip_address == '*') {
+  print "  listen       {$ip_address}:{$http_port};\n";
+}
+else {
+  foreach ($server->ip_addresses as $ip) {
+    print "  listen       {$ip}:{$http_port};\n";
+  }
+}
+?>
   server_name 127.0.0.1;
   location /nginx_status {
     stub_status on;
