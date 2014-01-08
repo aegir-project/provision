@@ -1,3 +1,12 @@
+aegir2-provision (2.0) unstable; urgency=low
+
+  * stable 2.0 release
+  * significant stability improvements, Drush 5 and 6 support,
+    subdirectory multisite support, improved nginx support, native views
+    and more: http://community.aegirproject.org/2.0
+
+ -- Antoine Beaupré <anarcat@debian.org>  Wed, 08 Jan 2014 15:05:24 -0500
+
 aegir2-provision (2.0~rc5.1) testing; urgency=low
 
   * rebuild package with all makefiles and modules
