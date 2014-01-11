@@ -1,7 +1,7 @@
 core = 6.x
 api = 2
 
-; BOA-2.1.4-dev
+; BOA-2.2.0-dev
 
 projects[pressflow][type] = "core"
 projects[pressflow][download][type] = "get"
