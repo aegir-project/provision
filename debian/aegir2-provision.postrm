@@ -23,7 +23,7 @@ if [ "$DPKG_DEBUG" = "developer" ]; then
 fi
 
 case "$1" in
-    purge)
+    purge|abort-install|disappear)
         # delete the aegir user
         # http://wiki.debian.org/AccountHandlingInMaintainerScripts
         if which deluser >/dev/null 2>&1 ; then
@@ -35,14 +35,13 @@ case "$1" in
         # unregister sudo config file
         ucf --purge /etc/sudoers.d/aegir
         rm -f /etc/sudoers.d/aegir
-        ;;
-    remove|upgrade|abort-install|disappear)
+
         # unregister apache config
         ( rm /etc/apache/conf.d/aegir.conf > /dev/null 2>&1 && invoke-rc.d apache force-reload ) || true
         ( rm /etc/apache2/conf.d/aegir.conf > /dev/null 2>&1 && invoke-rc.d apache2 force-reload ) || true
     ;;
 
-    abort-upgrade|failed-upgrade)
+    remove|upgrade|abort-upgrade|failed-upgrade)
         # nothing to do here, especially: don't remove the configs!!
         true
     ;;

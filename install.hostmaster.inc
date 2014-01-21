@@ -4,6 +4,29 @@
  * @file install the hostmaster system
  */
 
+/**
+ * Implements drush_COMMAND_pre_validate().
+ *
+ * Ensure the database cannot be accessed by anonymous users, as it will
+ * otherwise fail later in the install, and thus be harder to recover from.
+ *
+ * @see Provision_Service_db_mysql::grant_host().
+ */
+function drush_provision_hostmaster_install_pre_validate() {
+  $command = sprintf('mysql -u intntnllyInvalid -h %s -P %s -e "SELECT VERSION()"', drush_get_option('aegir_db_host', 'localhost'), drush_get_option('aegir_db_port', '3306'));
+  drush_shell_exec($command);
+
+  if (preg_match("/Access denied for user 'intntnllyInvalid'@'([^']*)'/", implode('', drush_shell_exec_output()), $match)) {
+    return;
+  }
+  elseif (preg_match("/Host '([^']*)' is not allowed to connect to/", implode('', drush_shell_exec_output()), $match)) {
+    return;
+  }
+  else {
+    return drush_set_error('PROVISION_DB_CONNECT_FAIL', dt('Dummy connection failed to fail. Either your MySQL permissions are too lax, or the response was not understood. See http://is.gd/Y6i4FO for more information. %msg', array('%msg' => join("\n", drush_shell_exec_output()))));
+  }
+}
+
 function drush_provision_hostmaster_install_validate($site = NULL) {
   // set defaults for this whole script
   // those are settings that are not prompted to the user but still overridable
@@ -15,10 +38,21 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   drush_set_default('script_user', provision_current_user());
   drush_set_default('web_group', _provision_default_web_group());
   drush_set_default('http_service_type', 'apache');
+  drush_set_default('http_port', '80');
   drush_set_default('aegir_db_user', 'root');
+  drush_set_default('aegir_db_port', '3306');
   drush_set_default('client_name', 'admin');
   $aegir_db_user = drush_get_option('aegir_db_user');
-  drush_set_default('makefile', dirname(__FILE__) . '/aegir.make');
+
+  $root = drush_get_option(array('r', 'root'));
+  if (is_dir($root) && !drush_get_option('makefile', FALSE)) {
+    // Don't assume we know the makefile used to build an existing platform
+    $makefile_msg = '';
+  }
+  else {
+    drush_set_default('makefile', dirname(__FILE__) . '/aegir.make');
+    $makefile_msg = dt("Aegir makefile: !makefile\n", array('!makefile' => drush_get_option('makefile')));
+  }
 
   drush_print("Aegir $version automated install script");
   drush_print("==============================================================================");
@@ -41,7 +75,7 @@ Don't worry: you will get to review those settings after the final install");
     system('stty -echo');
     drush_set_option('aegir_db_pass', drush_prompt(dt('MySQL privileged user ("!root") password', array('!root' => $aegir_db_user))));
     system('stty echo');
-    print "\n"; // add a newline since the user's didn't print    
+    print "\n"; // add a newline since the user's didn't print
   }
 
   if (drush_get_option('aegir_host') == 'localhost') {
@@ -75,27 +109,32 @@ The following settings will be used:
  Aegir user: !user
  Web group: !web
  Web server: !web_server
+ Web server port: !web_server_port
  Aegir DB host: !db_host
  Aegir DB user: !db_user
  Aegir DB password: !db_pass
+ Aegir DB port: !db_port
  Aegir version: !version
  Aegir platform path: !root
- Aegir makefile: !makefile
  Admin email: !email
-', array('!site' => $site,
-         '!fqdn' => drush_get_option('aegir_host'),
-         '!home' => drush_get_option('aegir_root'),
-         '!user' => drush_get_option('script_user'),
-         '!web' => drush_get_option('web_group'),
-         '!web_server' => drush_get_option('http_service_type'),
-         '!db_host' => drush_get_option('aegir_db_host'),
-         '!db_user' => drush_get_option('aegir_db_user'),
-         '!db_pass' => is_null(drush_get_option('aegir_db_pass', NULL, 'process')) ? '<previously set>' : '<prompted>',
-         '!version' => drush_get_option('version'),
-         '!root' => drush_get_option(array('r', 'root')),
-         '!makefile' => drush_get_option('makefile'),
-         '!email' => drush_get_option('client_email'),
-         )));
+ !makefile',
+  array(
+    '!site' => $site,
+    '!fqdn' => drush_get_option('aegir_host'),
+    '!home' => drush_get_option('aegir_root'),
+    '!user' => drush_get_option('script_user'),
+    '!web' => drush_get_option('web_group'),
+    '!web_server' => drush_get_option('http_service_type'),
+    '!web_server_port' => drush_get_option('http_port'),
+    '!db_host' => drush_get_option('aegir_db_host'),
+    '!db_user' => drush_get_option('aegir_db_user'),
+    '!db_pass' => is_null(drush_get_option('aegir_db_pass', NULL, 'process')) ? '<previously set>' : '<prompted>',
+    '!db_port' => drush_get_option('aegir_db_port'),
+    '!version' => drush_get_option('version'),
+    '!root' => $root,
+    '!makefile' => $makefile_msg,
+    '!email' => drush_get_option('client_email'),
+  )));
 
   if (!drush_confirm(dt('Do you really want to proceed with the install'))) {
     return drush_set_error('PROVISION_CANCEL_INSTALL', dt('Installation aborted'));
@@ -113,34 +152,41 @@ function drush_provision_hostmaster_install($site = NULL) {
   $aegir_root = drush_get_option('aegir_root');
   $platform = drush_get_option(array('r', 'root'));
 
+  $aegir_http_host = drush_get_option('aegir_host');
+  $aegir_http_port = drush_get_option('http_port');
   $aegir_db_user = drush_get_option('aegir_db_user');
   $aegir_db_pass = drush_get_option('aegir_db_pass');
-  
+  $aegir_db_port = drush_get_option('aegir_db_port');
+  $aegir_db_host = drush_get_option('aegir_db_host');
+
   $server = '@server_master';
   $master_context = array(
     'context_type' => 'server',
     // files
-    'remote_host' => drush_get_option('aegir_host'),
+    'remote_host' => $aegir_http_host,
     'aegir_root' => $aegir_root,
     'script_user' => drush_get_option('script_user'),
    // apache or nginx or..
     'http_service_type' => drush_get_option('http_service_type'),
+    'http_port' => $aegir_http_port,
     'web_group' => drush_get_option('web_group'),
     'master_url' => "http://" . $site,
+    'db_port' => $aegir_db_port,
   );
 
-  $master_db = sprintf("mysql://%s:%s@%s", urlencode($aegir_db_user), urlencode($aegir_db_pass), drush_get_option('aegir_db_host'));
-  if (drush_get_option('aegir_host') == drush_get_option('aegir_db_host')) {
+  $master_db = sprintf("mysql://%s:%s@%s:%s", urlencode($aegir_db_user), urlencode($aegir_db_pass), $aegir_db_host, $aegir_db_port);
+  if ($aegir_http_host == $aegir_db_host) {
     $master_context['db_service_type'] = 'mysql';
     $master_context['master_db'] = $master_db;
     $dbserver = $server;
   } else {
-    $dbserver = '@server_' . drush_get_option('aegir_db_host');
+    $dbserver = '@server_' . $aegir_db_host;
     $dbserver_context = array(
-      'remote_host' => drush_get_option('aegir_db_host'),
+      'remote_host' => $aegir_db_host,
       'context_type' => 'server',
       'db_service_type' => 'mysql',
       'master_db' => $master_db,
+      'db_port' => $aegir_db_port,
     );
     drush_invoke_process('@none', "provision-save", array($dbserver), $dbserver_context);
     provision_backend_invoke($dbserver, 'provision-verify');
@@ -148,7 +194,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   drush_invoke_process('@none', "provision-save", array($server), $master_context);
   provision_backend_invoke($server, 'provision-verify');
 
-  // exit if an error has occured. 
+  // exit if an error has occured.
   if (drush_get_error()) {
     return false;
   }
@@ -172,7 +218,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   }
   provision_backend_invoke($platform_name, 'provision-verify', array(), $options);
 
-  // exit if an error has occured. 
+  // exit if an error has occured.
   if (drush_get_error()) {
     return false;
   }
@@ -192,7 +238,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   $data = provision_backend_invoke($site_name, 'provision-install', array(), array('client_email' => drush_get_option('client_email')));
   provision_backend_invoke($site_name, 'provision-verify');
 
-  // exit if an error has occured. 
+  // exit if an error has occured.
   if (drush_get_error()) {
     return false;
   }

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file Provision named context server class.

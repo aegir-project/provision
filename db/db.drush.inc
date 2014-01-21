@@ -1,5 +1,5 @@
 <?php
-// $Id$
+
 /**
  * @file
  *    Mysql provisioning module.

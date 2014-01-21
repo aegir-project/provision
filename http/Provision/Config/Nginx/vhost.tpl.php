@@ -2,7 +2,7 @@
 if ($ssl_redirection || $this->redirection) {
   // Redirect all aliases to the main http url using separate vhosts blocks to avoid if{} in Nginx.
   foreach ($this->aliases as $alias_url) {
-    print "# alias redirection virtual host";
+    print "# alias redirection virtual host\n";
     print "server {\n";
     print "  limit_conn   gulag 32;\n";
     print "  listen       *:{$http_port};\n";
@@ -10,8 +10,10 @@ if ($ssl_redirection || $this->redirection) {
     // target to be the original site URL ($this->uri instead of
     // $alias_url)
     if ($this->redirection && $alias_url == $this->redirection) {
+      $this->uri = str_replace('/', '.', $this->uri);
       print "  server_name  {$this->uri};\n";
     } else {
+      $alias_url = str_replace('/', '.', $alias_url);
       print "  server_name  {$alias_url};\n";
     }
     print "  access_log   off;\n";
@@ -37,14 +39,14 @@ server {
     // target as the hostname (if it exists) and not the original URL
     // ($this->uri)
     if ($this->redirection) {
-      print $this->redirection;
+      print str_replace('/', '.', $this->redirection);
     } else {
       print $this->uri;
     }
     if (!$this->redirection && is_array($this->aliases)) {
       foreach ($this->aliases as $alias_url) {
         if (trim($alias_url)) {
-          print " " . $alias_url;
+          print " " . str_replace('/', '.', $alias_url);
         }
       }
     } ?>;
@@ -66,6 +68,10 @@ if ($this->redirection || $ssl_redirection) {
 }
 else {
   print "  include       " . $server->include_path . "/nginx_vhost_common.conf;\n";
+}
+$if_subsite = $this->data['http_subdird_path'] . '/' . $this->uri;
+if (subdirs_drush_load() && provision_file()->exists($if_subsite)->status()) {
+  print "  include       " . $if_subsite . "/*.conf;\n";
 }
 ?>
 }

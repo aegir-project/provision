@@ -123,7 +123,8 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
     $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 --single-transaction --quick %s | sed 's|/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/|/\\*!50001 CREATE \\*/|g; s|/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/||g' | sed '/\\*!50013 DEFINER=.*/ d' > %s/database.sql", escapeshellcmd(drush_get_option('db_name')), escapeshellcmd(d()->site_path));
     $success = $this->safe_shell_exec($cmd, drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
 
-    if (!$success && !drush_get_option('force', FALSE)) {
+    $dump_size_too_small = filesize(d()->site_path . '/database.sql') < 1024;
+    if ((!$success || $dump_size_too_small) && !drush_get_option('force', FALSE)) {
       drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not generate database backup from mysqldump. (error: %msg)', array('%msg' => $this->safe_shell_exec_output)));
     }
     // Reset the umask to normal permissions.

@@ -113,11 +113,7 @@ function install_main() {
     drush_log(dt('Error setting UID username to `!user`: ', array('!user' => $name)) . $error . dt(' Using default (!default) instead.', array('!default' => PROVISION_DEFAULT_ADMIN_USER)) , 'warning');
     $name = PROVISION_DEFAULT_ADMIN_USER;
   }
-  $client_email = drush_get_option('client_email', PROVISION_DEFAULT_ADMIN_EMAIL);
-  if (!filter_var($client_email, FILTER_VALIDATE_EMAIL)) {
-    drush_log(dt('Error validating client email `!email`. Please check your user account email. Using default (!default) instead.', array('!email' => $client_email, '!default' => PROVISION_DEFAULT_ADMIN_EMAIL)) , 'warning');
-    $client_email = PROVISION_DEFAULT_ADMIN_EMAIL;
-  }
+  $client_email = install_validate_client_email(drush_get_option('client_email', FALSE));
   $settings = array(
     'parameters' => array(
       'profile' => $profile,

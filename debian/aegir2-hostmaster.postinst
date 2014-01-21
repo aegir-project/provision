@@ -24,7 +24,7 @@ if [ "$DPKG_DEBUG" = "developer" ]; then
     set -x
 fi
 
-VARLIB="/var/aegir"
+AEGIRHOME="$(su aegir -s /bin/sh -c 'echo $HOME')"
 
 case "$1" in
     configure)
@@ -51,9 +51,9 @@ case "$1" in
         fi
 
         # make sure the configuration file exists before symlinking it in place (below)
-        touch $VARLIB/config/$WEBSERVER.conf
+        touch $AEGIRHOME/config/$WEBSERVER.conf
         # fix permissions on installed directories
-        chown aegir:aegir "$VARLIB" "$VARLIB/config" "$VARLIB/config/$WEBSERVER.conf"
+        chown aegir:aegir "$AEGIRHOME" "$AEGIRHOME/config" "$AEGIRHOME/config/$WEBSERVER.conf"
 
         # flush the drush cache to find new commands
         su -s /bin/sh aegir -c 'drush cc drush'
@@ -65,7 +65,7 @@ case "$1" in
             . $TEMPFILE
             echo "Aegir frontend (@hostmaster) site detected in $drupal_root"
             # make those paths canonical to make sure we can compare correctly
-            NEW_PLATFORM=`readlink -f "$VARLIB/hostmaster-$VERSION"`
+            NEW_PLATFORM=`readlink -f "$AEGIRHOME/hostmaster-$VERSION"`
             drupal_root=`readlink -f $drupal_root`
             # we upgrade only if the target platform doesn't exit *OR*
             # if it's not the current platform
@@ -106,8 +106,8 @@ case "$1" in
             db_fset aegir/db_password "seen" "true" || true
             db_stop
             
-            if [ -d $VARLIB/.drush/provision ]; then
-                echo "existing provision in $VARLIB/.drush/provision detected, move away and try again"
+            if [ -d $AEGIRHOME/.drush/provision ]; then
+                echo "existing provision in $AEGIRHOME/.drush/provision detected, move away and try again"
                 exit 1
             fi
             echo "installing the Aegir frontend (Drupal with the hostmaster profile), please wait..."
@@ -116,7 +116,7 @@ case "$1" in
             fi
 
             # pass data through JSON for extra security
-            su -s /bin/sh aegir -c "cd $VARLIB && drush hostmaster-install $FLAGS --backend $site_uri 2>&1 | drush backend-parse $DEBUG" <<EOF
+            su -s /bin/sh aegir -c "cd $AEGIRHOME && drush hostmaster-install $FLAGS --backend $site_uri 2>&1 | drush backend-parse $DEBUG" <<EOF
 { "yes": 1,
   "version": "$VERSION",
   "aegir_db_host": "$AEGIR_DB_HOST",
@@ -134,12 +134,12 @@ EOF
 
         case $WEBSERVER in
             apache)
-                ln -sf $VARLIB/config/$WEBSERVER.conf /etc/apache2/conf.d/aegir.conf
+                ln -sf $AEGIRHOME/config/$WEBSERVER.conf /etc/apache2/conf.d/aegir.conf
                 a2enmod ssl rewrite
                 apache2ctl graceful
                 ;;
             nginx)
-                ln -sf $VARLIB/config/$WEBSERVER.conf /etc/nginx/conf.d/aegir.conf
+                ln -sf $AEGIRHOME/config/$WEBSERVER.conf /etc/nginx/conf.d/aegir.conf
                 service nginx reload
                 ;;
         esac

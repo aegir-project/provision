@@ -67,6 +67,8 @@ class Provision_Service_http_pack extends Provision_Service_http {
   function delete_config($config) { 
     $this->_each_server($this->server->master_web_servers, __FUNCTION__, array($config));
     $this->_each_server($this->server->slave_web_servers, __FUNCTION__, array($config));
+
+    return $this;
   }
 
   function restart() {

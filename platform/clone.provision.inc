@@ -71,4 +71,6 @@ function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
     provision_backend_invoke($new_uri, 'provision-verify');
   }
 
+  provision_reload_config('site', d()->site_path . '/drushrc.php');
+
 }

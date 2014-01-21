@@ -74,8 +74,6 @@ function provision_drupal_drush_exit() {
 /**
  * Test to see if the site settings.php exists
  *
- * @param url
- *   The url of the site to check
  * @return
  *   If the file exists, return TRUE, else return FALSE.
  */
@@ -159,12 +157,6 @@ function provision_drupal_fetch_site() {
 
 /**
  * Generate a settings file for the site.
- *
- * @param url
- *   The url of the site being invoked.
- * @param data
- *   A reference to the associated array containing the data for the site. This needs to be a reference,
- *   because the modules might provide additional information about the site.
  */
 function _provision_drupal_create_settings_file() {
   $config = new Provision_Config_Drupal_Settings(d()->name, drush_get_context('site'));
@@ -175,8 +167,11 @@ function _provision_drupal_create_settings_file() {
  * Create the directories needed to host a drupal site
  *
  * Also maintains permissions on existing directories.
- */
-function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
+ *
+ * @param $url
+ *   The url of the site being invoked.
+  */
+function _provision_drupal_create_directories($url = NULL) {
   if (is_null($url)) {
     if (d()->type == 'site') {
       $url = d()->uri;
@@ -252,6 +247,10 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     "sites/$url/private/temp"
   );
 
+  // Allow other commands to add or alter the directories to be created.
+  drush_command_invoke_all_ref('provision_drupal_create_directories_alter', $mkdir, $url);
+  drush_command_invoke_all_ref('provision_drupal_chgrp_directories_alter', $chgrp, $url);
+
   foreach ($mkdir as $path => $perm) {
     if (!is_dir($path)) {
       provision_file()->mkdir($path)
@@ -259,14 +258,81 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
         ->fail('Could not create <code>@path</code>', 'DRUSH_PERM_ERROR');
     }
 
-    provision_file()->chmod($path, $perm, !in_array($path, $not_recursive))
-      ->succeed('Changed permissions of <code>@path</code> to @perm')
-      ->fail('Could not change permissions <code>@path</code> to @perm');
+    if ($perm !== FALSE) {
+      provision_file()->chmod($path, $perm, !in_array($path, $not_recursive))
+        ->succeed('Changed permissions of <code>@path</code> to @perm')
+        ->fail('Could not change permissions <code>@path</code> to @perm');
+    }
   }
   foreach ($chgrp as $path => $group) {
-    provision_file()->chgrp($path, $group, !in_array($path, $not_recursive))
-      ->succeed('Changed group ownership of <code>@path</code> to @gid')
-      ->fail('Could not change group ownership <code>@path</code> to @gid');
+    if ($group !== FALSE) {
+      provision_file()->chgrp($path, $group, !in_array($path, $not_recursive))
+        ->succeed('Changed group ownership of <code>@path</code> to @gid')
+        ->fail('Could not change group ownership <code>@path</code> to @gid');
+    }
+  }
+}
+
+/**
+ * Call the core file_create_htaccess() functions.
+ *
+ * Unlink the files first to avoid permission issues.
+ * If drupal already created the file then it's owned by e.g. www-data and aegir can not chmod those.
+ *
+ * @see https://drupal.org/SA-CORE-2013-003
+ */
+function _provision_drupal_ensure_htaccess_update() {
+
+  if (drush_drupal_major_version() == 7) {
+
+    // Copied from modules/system/system.install system_requirements()
+    $htaccess_files['public://.htaccess'] = array(
+      'directory' => variable_get('file_public_path', conf_path() . '/files'),
+    );
+    if ($private_files_directory = variable_get('file_private_path')) {
+      $htaccess_files['private://.htaccess'] = array(
+        'directory' => $private_files_directory,
+      );
+    }
+    $htaccess_files['temporary://.htaccess'] = array(
+      'directory' => variable_get('file_temporary_path', file_directory_temp()),
+    );
+    foreach ($htaccess_files as $htaccess_file => $info) {
+      // Check for the string which was added to the recommended .htaccess file
+      // in the latest security update.
+      if (!file_exists($htaccess_file) || !($contents = @file_get_contents($htaccess_file)) || strpos($contents, 'Drupal_Security_Do_Not_Remove_See_SA_2013_003') === FALSE) {
+
+        // Aegir specific
+        @unlink($htaccess_file);
+        file_create_htaccess($info['directory'], FALSE);
+        drush_log(dt('Updated @file to match http://drupal.org/SA-CORE-2013-003', array('@file' => $info['directory'] . '/.htaccess')), 'notice');
+        $path = file_stream_wrapper_get_instance_by_uri($htaccess_file)->getDirectoryPath();
+        d()->service('http')->sync(d()->root . '/' . $info['directory'] . '/.htaccess');
+      }
+    }
+  }
+  elseif (drush_drupal_major_version() == 6 && function_exists('file_create_htaccess')) {
+
+    // Copied from modules/system/system.install system_requirements()
+    $htaccess_files['files_htaccess'] = array(
+      'directory' => file_directory_path(),
+    );
+    $htaccess_files['temporary_files_htaccess'] = array(
+      'directory' => file_directory_temp(),
+    );
+    foreach ($htaccess_files as $key => $info) {
+      // Check for the string which was added to the recommended .htaccess file
+      // in the latest security update.
+      $htaccess_file = $info['directory'] . '/.htaccess';
+      if (!file_exists($htaccess_file) || !($contents = @file_get_contents($htaccess_file)) || strpos($contents, 'Drupal_Security_Do_Not_Remove_See_SA_2013_003') === FALSE) {
+
+        // Aegir specific
+        @unlink($info['directory'] . '/.htaccess');
+        file_create_htaccess($info['directory'], NULL);
+        drush_log(dt('Updated @file to match http://drupal.org/SA-CORE-2013-003', array('@file' => $info['directory'] . '/.htaccess')), 'notice');
+        d()->service('http')->sync(d()->root . '/' . $info['directory'] . '/.htaccess');
+      }
+    }
   }
 }
 
@@ -431,7 +497,7 @@ function _provision_drupal_maintain_aliases() {
       if (!d()->redirection) {
         foreach (d()->aliases as $alias) {
           if ($alias = trim($alias)) {
-            provision_file()->symlink(d()->uri, d()->root . '/sites/' . $alias)
+            provision_file()->symlink(d()->uri, d()->root . '/sites/' . str_replace('/', '.', $alias))
               ->succeed('Created symlink for alias @target')
               ->fail('Could not create symlink for alias @target');
             d()->service('http')->sync(d()->root . '/sites/' . $alias);

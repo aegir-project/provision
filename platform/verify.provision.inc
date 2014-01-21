@@ -85,9 +85,17 @@ function drush_provision_drupal_pre_provision_verify() {
     // This is the actual drupal provisioning requirements. 
     _provision_drupal_create_directories();
     _provision_drupal_maintain_aliases();
+    _provision_drupal_ensure_htaccess_update();
     // Requires at least the database settings to complete.
 
     _provision_drupal_create_settings_file();
+
+    if (function_exists('hosting_get_features')) {
+      // We're verifying the hostmaster site, so record a list of enabled
+      // Hosting Features.
+      $aegir_drushrc = new Provision_Config_Drushrc_Aegir();
+      $aegir_drushrc->write();
+    }
 
     provision_drupal_push_site();
   }

@@ -47,18 +47,11 @@ function install_verify_settings() {
   return FALSE;
 }
 
-function install_create_admin_user($client_email = NULL) {
+function install_create_admin_user($client_email) {
   $name = drush_get_option('admin_user', PROVISION_DEFAULT_ADMIN_USER);
   if ($error = user_validate_name($name)) {
     drush_log(dt('Error setting UID username to `!user`: ', array('!user' => $name)) . $error . dt(' Using default (!default) instead.', array('!default' => PROVISION_DEFAULT_ADMIN_USER)), 'warning');
     $name = PROVISION_DEFAULT_ADMIN_USER;
-  }
-  if (!isset($client_email)) {
-    $client_email = drush_get_option('client_email', PROVISION_DEFAULT_ADMIN_EMAIL);
-    if (!filter_var($client_email, FILTER_VALIDATE_EMAIL)) {
-      drush_log(dt('Error validating client email `!email`. Please check your user account email. Using default (!default) instead.', array('!email' => $client_email, '!default' => PROVISION_DEFAULT_ADMIN_EMAIL)) , 'warning');
-      $client_email = PROVISION_DEFAULT_ADMIN_EMAIL;
-    }
   }
 
   // create the admin account
@@ -361,11 +354,7 @@ function install_main() {
   cache_clear_all();
   variable_set('install_profile', $profile);
 
-  $client_email = drush_get_option('client_email', PROVISION_DEFAULT_ADMIN_EMAIL);
-  if (!filter_var($client_email, FILTER_VALIDATE_EMAIL)) {
-    drush_log(dt('Error validating client email `!email`. Please check your user account email. Using default (!default) instead.', array('!email' => $client_email, '!default' => PROVISION_DEFAULT_ADMIN_EMAIL)) , 'warning');
-    $client_email = PROVISION_DEFAULT_ADMIN_EMAIL;
-  }
+  $client_email = install_validate_client_email(drush_get_option('client_email', FALSE));
 
   $account = install_create_admin_user($client_email);
   $onetime = user_pass_reset_url($account);

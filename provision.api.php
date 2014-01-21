@@ -9,6 +9,19 @@
 
 
 /**
+ * Implements hook_drush_load().
+ *
+ * In a drush contrib check if the frontend part (hosting_hook variant) is enabled.
+ */
+function hook_drush_load() {
+  $features = drush_get_option('hosting_features', array());
+  $hook_feature_name = 'something';
+
+  return array_key_exists($hook_feature_name, $features) // Front-end module is installed...
+    && $features[$hook_feature_name];                    // ... and enabled.
+}
+
+/**
  * Advertise what service types are available and their default
  * implementations. Services are class Provision_Service_{type}_{service} in
  * {type}/{service}/{service}_service.inc files.
@@ -37,7 +50,7 @@ function drush_hook_provision_services() {
  *
  * @see Provision_Config_Drupal_Settings
  */
-function drush_hook_provision_drupal_config($uri, $data) {
+function hook_provision_drupal_config($uri, $data) {
   return '$conf[\'reverse_proxy\'] = TRUE;';
 }
 
@@ -172,4 +185,30 @@ function hook_provision_config_load_templates($config) {
 function hook_provision_config_load_templates_alter(&$templates, $config) {
   // Don't let any custom templates be used.
   $templates = array();
+}
+
+/**
+ * Alter the array of directories to create.
+ *
+ * @param $mkdir
+ *    The array of directories to create.
+ * @param string $url
+ *    The url of the site being invoked.
+ */
+function hook_provision_drupal_create_directories_alter(&$mkdir, $url) {
+  $mkdir["sites/$url/my_special_dir"] = 02770;
+  $mkdir["sites/$url/my_other_dir"] = FALSE; // Skip the chmod on this directory.
+}
+
+/**
+ * Alter the array of directories to change group ownership of.
+ *
+ * @param $chgrp
+ *    The array of directories to change group ownership of.
+ * @param string $url
+ *    The url of the site being invoked.
+ */
+function hook_provision_drupal_chgrp_directories_alter(&$chgrp, $url) {
+  $chgrp["sites/$url/my_special_dir"] = d('@server_master')->web_group;
+  $chgrp["sites/$url/my_other_dir"] = FALSE; // Skip the chgrp on this directory.
 }

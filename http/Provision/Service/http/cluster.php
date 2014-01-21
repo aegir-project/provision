@@ -39,6 +39,8 @@ class Provision_Service_http_cluster extends Provision_Service_http {
 
   function delete_config($config) {
     $this->_each_server(__FUNCTION__, array($config));
+
+    return $this;
   }
 
   function restart() {

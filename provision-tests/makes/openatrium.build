@@ -2,6 +2,9 @@ api = 2
 
 core = 6.x
 
-projects[atrium-1-0][type] = "core"
-projects[atrium-1-0][download][type] = "get"
-projects[atrium-1-0][download][url] = "http://openatrium.com/sites/openatrium.com/files/atrium_releases/atrium-1-0.tgz"
+projects[drupal][type] = "core"
+projects[drupal][version] = "6.28"
+projects[drupal][patch][] = "https://drupal.org/files/common.inc_6.28.patch"
+
+projects[openatrium][type] = "profile"
+projects[openatrium][version] = "1.7"
