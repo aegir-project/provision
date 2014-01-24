@@ -140,7 +140,7 @@ function provision_drupal_drush_exit() {
         // Revert civicrm.settings.php permissions to default.
         $local_settings = d()->site_path . '/civicrm.settings.php';
         if (provision_file()->exists($local_settings)->status()) {
-          provision_file()->chmod($local_settings, 0440)
+          provision_file()->chmod($local_settings, 0640)
             ->succeed('Changed permissions of <code>@path</code> to @perm')
             ->fail('Could not change permissions of <code>@path</code> to @perm');
         }
