@@ -109,6 +109,7 @@ function provision_drush_command() {
     ),
     'options' => array(
       'client_email' => dt('The email address of the client to use.'),
+      'profile' => dt('The profile to use when installing the site.'),
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
