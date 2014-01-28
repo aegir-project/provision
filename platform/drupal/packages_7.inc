@@ -117,3 +117,67 @@ function _provision_system_query($type) {
   }
   return $entries;
 }
+
+
+/**
+ * Map the system table to a packages multi-dimensional array component
+ */
+function _provision_drupal_system_map() {
+  $profiles = _provision_find_profiles();
+  foreach ($profiles as $profile => $info) {
+    _provision_cvs_deploy($info);
+    if (!$info->version) {
+      $info->version = drush_drupal_version();
+    }
+    $profiles[$profile] = $info;
+  }
+  $packages['platforms'] = _provision_find_platforms();
+
+  $profile = drush_get_option('profile');
+  $packages['profiles'][$profile] = $profiles[$profile];
+  $packages['profiles'][$profile]->status = 1;
+
+  foreach (_provision_system_query("module") as $module) {
+    $info_file = sprintf("%s/%s.info", dirname($module->filename), $module->name);
+    $module->info = provision_parse_info_file($info_file);
+    // Skip hidden modules
+    if (isset($module->info['hidden']) && $module->info['hidden'] == 1) {
+      continue;
+    }
+    $frags = explode("/", $module->filename);
+    // flag site-specific modules
+    if ($frags[0] == 'sites' && $frags[1] != 'all') {
+      $module->platform = -1;
+    }
+
+    _provision_cvs_deploy($module);
+    $module->filename = realpath($module->filename);
+    if ($module->schema_version == -1) {
+      $module->schema_version = 0;
+    }
+    $packages['modules'][$module->name] = $module;
+  }
+
+  drush_log(dt("Found !count modules", array('!count' => sizeof($packages['modules']))));
+
+  // XXX: mostly a copy-paste from above
+  foreach (_provision_system_query("theme") as $theme) {
+    $frags = explode("/", $theme->filename);
+    // flag site-specific themes
+    if ($frags[0] == 'sites' && $frags[1] != 'all') {
+      $theme->platform = -1;
+    }
+    $info_file = sprintf("%s/%s.info", dirname($theme->filename), $theme->name);
+    $theme->info = provision_parse_info_file($info_file);
+    _provision_cvs_deploy($theme);
+    $theme->filename = realpath($theme->filename);
+
+    if ($theme->schema_version == -1) {
+      $theme->schema_version = 0;
+    }
+
+    $packages['themes'][$theme->name] = $theme;
+  }
+  drush_log(dt("Found !count themes", array('!count' => sizeof($packages['themes']))));
+  return $packages;
+}
