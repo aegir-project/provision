@@ -15,10 +15,10 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
   global $base_url;
   if ($client_email) {
     // Mail one time login URL and instructions.
-    $from = variable_get('site_mail', ini_get('sendmail_from'));
+    $from = \Drupal::config('system.site')->get('mail');
 
     $username = $account->getUsername();
-    $site = variable_get('site_name', 'Drupal');
+    $site = \Drupal::config('system.site')->get('name');
     $uri_brief = preg_replace('!^https?://!', '', $base_url);
     $mailto = $account->getEmail();
     $date = format_date(time());
@@ -164,10 +164,10 @@ function install_main() {
   $account->status = 1;
 
   // temporarily disable drupal's default mail notification
-  $prev = variable_get('user_mail_status_activated_notify', TRUE);
-  variable_set('user_mail_status_activated_notify', FALSE);
+  $prev = \Drupal::config('user.settings')->get('notify:status_activated');
+  \Drupal::config('user.settings')->set('notify:status_activated', FALSE);
   $account->save();
-  variable_set('user_mail_status_activated_notify', $prev);
+  \Drupal::config('user.settings')->set('notify:status_activated', $prev);
 
   $onetime = user_pass_reset_url($account);
   // Store the one time login link in an option so the front end can direct the user to their new site.
