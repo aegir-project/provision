@@ -431,7 +431,7 @@ location ~* files/advagg_(?:css|js)/ {
   etag       off;
   limit_conn limreq 88;
   rewrite    ^/<?php print $subdir; ?>/files/advagg_(.*)/(.*)$ /<?php print $subdir; ?>/sites/$server_name/files/advagg_$1/$2 last;
-  add_header Cache-Control "max-age=290304000, no-transform, public";
+  add_header Cache-Control "max-age=31449600, no-transform, public";
   add_header Access-Control-Allow-Origin *;
   add_header X-Header "AdvAgg Generator 2.0";
   set $nocache_details "Skip";
