@@ -278,6 +278,7 @@ location ^~ /<?php print $subdir; ?>/audio/download {
 ### Deny listed requests for security reasons.
 ###
 location ~* (/\..*|settings\.php$|\.(?:git|htaccess|engine|make|config|inc|ini|info|install|module|profile|pl|po|sh|.*sql|theme|tpl(?:\.php)?|xtmpl)$|^(?:Entries.*|Repository|Root|Tag|Template))$ {
+  access_log off;
   return 404;
 }
 
@@ -285,6 +286,15 @@ location ~* (/\..*|settings\.php$|\.(?:git|htaccess|engine|make|config|inc|ini|i
 ### Deny listed requests for security reasons.
 ###
 location ~* /(?:modules|themes|libraries)/.*\.(?:txt|md)$ {
+  access_log off;
+  return 404;
+}
+
+###
+### Deny listed requests for security reasons.
+###
+location ~* ^/sites/.*/files/civicrm/(?:ConfigAndLog|upload|templates_c) {
+  access_log off;
   return 404;
 }
 
