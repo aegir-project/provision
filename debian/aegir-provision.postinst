@@ -53,7 +53,9 @@ case "$1" in
         # make sure we have apache configs settled in, for remote headless aegir servers
         touch $VARLIB/config/apache.conf
         chown aegir:aegir "$VARLIB/config/apache.conf"
-        ln -sf $VARLIB/config/apache.conf /etc/apache2/conf.d/aegir.conf
+        # apache 2.2 || 2.4
+        ln -sf $VARLIB/config/apache.conf /etc/apache2/conf.d/aegir.conf \
+          || ln -sf $VARLIB/config/apache.conf /etc/apache2/conf-enabled/aegir.conf
         a2enmod ssl rewrite
         apache2ctl graceful
     ;;
