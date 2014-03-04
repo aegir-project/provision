@@ -1,6 +1,9 @@
 <Directory <?php print $this->root; ?>>
     Order allow,deny
     Allow from all
+    Satisfy any
+    Require all granted
+
 <?php print $extra_config; ?>
 
 
