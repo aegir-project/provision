@@ -37,6 +37,11 @@ function drush_provision_drupal_pre_provision_install() {
 function drush_provision_drupal_pre_provision_install_rollback() {
   _provision_recursive_delete( d()->site_path );
   drush_invoke_process('@none', 'provision-save', array(d()->name), array('delete' => TRUE));
+  foreach (d()->drush_aliases as $alias) {
+    drush_invoke_process('@none', 'provision-save', array($alias), array('delete' => TRUE));
+  }
+
+
 }
 
 

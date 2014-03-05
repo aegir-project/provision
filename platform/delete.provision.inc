@@ -21,6 +21,9 @@ function drush_provision_drupal_provision_delete() {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
 
     drush_invoke_process('@none', 'provision-save', array(d()->name), array('delete' => TRUE));
+    foreach (d()->drush_aliases as $alias) {
+      drush_invoke_process('@none', 'provision-save', array($alias), array('delete' => TRUE));
+    }
 
     // Do not automatically save the drushrc at the end of the command.
     drush_set_option('provision_save_config', false);

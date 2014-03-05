@@ -127,6 +127,7 @@ We are making the following assumptions:
       'db_server' => $server,
       'uri' => $site,
       'profile' => 'hostmaster',
+      'drush_aliases' => 'hm',
     ));
     provision_backend_invoke($site_name, 'provision-verify');
     drush_set_option('site_name', $site_name);

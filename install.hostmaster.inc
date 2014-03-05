@@ -234,6 +234,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'uri' => $site,
     'client_name' => drush_get_option('client_name'),
     'profile' => $profile,
+    'drush_aliases' => 'hm',
   ));
   $data = provision_backend_invoke($site_name, 'provision-install', array(), array('client_email' => drush_get_option('client_email')));
   provision_backend_invoke($site_name, 'provision-verify');
