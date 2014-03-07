@@ -36,17 +36,18 @@
   client_body_buffer_size        64k;
   client_header_buffer_size      32k;
   client_max_body_size          100m;
-  large_client_header_buffers 32 32k;
   connection_pool_size           256;
-  request_pool_size               4k;
-  server_names_hash_bucket_size  512;
-  server_names_hash_max_size    8192;
-  types_hash_bucket_size         512;
-  map_hash_bucket_size           192;
   fastcgi_buffer_size           128k;
   fastcgi_buffers             256 4k;
   fastcgi_busy_buffers_size     256k;
   fastcgi_temp_file_write_size  256k;
+  large_client_header_buffers 32 32k;
+  map_hash_bucket_size           192;
+  request_pool_size               4k;
+  server_names_hash_bucket_size  512;
+  server_names_hash_max_size    8192;
+  types_hash_bucket_size         512;
+  variables_hash_max_size       1024;
 
  ## Timeouts
   client_body_timeout             60;
