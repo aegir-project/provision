@@ -142,17 +142,20 @@ function provision_drupal_push_site($override_slave_authority = FALSE) {
  * running operations that need files where the slave is authoritative.
  *
  * E.g. before a backup is made.
+ *
+ * @param string $alias The site alias to work on, defaults to the current site.
  */
-function provision_drupal_fetch_site() {
+function provision_drupal_fetch_site($alias = NULL) {
 
+  $site = d($alias);
   // synch filesystem changes back from the remote server.
-  d()->service('http')->fetch(d()->site_path . '/files/');
-  d()->service('http')->fetch(d()->site_path . '/private/');
-  d()->service('http')->fetch(d()->site_path . '/modules/');
-  d()->service('http')->fetch(d()->site_path . '/themes/');
-  d()->service('http')->fetch(d()->site_path . '/libraries/');
+  $site->service('http')->fetch($site->site_path . '/files/');
+  $site->service('http')->fetch($site->site_path . '/private/');
+  $site->service('http')->fetch($site->site_path . '/modules/');
+  $site->service('http')->fetch($site->site_path . '/themes/');
+  $site->service('http')->fetch($site->site_path . '/libraries/');
   // Questionable... who is authoritive?
-  d()->service('http')->fetch(d()->site_path . '/local.settings.php');
+  $site->service('http')->fetch($site->site_path . '/local.settings.php');
 }
 
 /**
