@@ -6,7 +6,7 @@ api = 2
 ; the branch will change
 projects[drupal][type] = "core"
 ; hardcode the version number so we survive core releases
-projects[drupal][version] = "6.28"
+projects[drupal][version] = "6.30"
 ; fix for issue #2060727, patch from https://drupal.org/node/1954296
 projects[drupal][patch][] = "http://drupal.org/files/common.inc_6.28.patch"
 
