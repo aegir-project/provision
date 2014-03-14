@@ -44,9 +44,9 @@ if (sizeof($this->aliases)) {
   RewriteEngine on
 <?php
 if ($this->redirection) {
-  // Redirect to the selected alias.
-  print " RewriteCond %{HTTP_HOST} !^{$this->redirection}$ [NC]\n";
-  print " RewriteRule ^/*(.*)$ https://{$this->redirection}/$1 [NE,L,R=301]\n";
+  // Redirect all aliases to the main https url.
+  print " RewriteCond %{HTTP_HOST} !^{$this->uri}$ [NC]\n";
+  print " RewriteRule ^/*(.*)$ https://{$this->uri}/$1 [NE,L,R=301]\n";
 }
 ?>
   RewriteRule ^/files/(.*)$ /sites/<?php print $this->uri; ?>/files/$1 [L]
@@ -58,33 +58,17 @@ if ($this->redirection) {
 
       # Error handler for Drupal > 4.6.7
       <Directory "<?php print $this->site_path; ?>/files">
-        <Files *>
-          SetHandler This_is_a_Drupal_security_line_do_not_remove
-        </Files>
-        Options None
-        Options +FollowSymLinks
-
-        # If we know how to do it safely, disable the PHP engine entirely.
-        <IfModule mod_php5.c>
-          php_flag engine off
-        </IfModule>
+        SetHandler This_is_a_Drupal_security_line_do_not_remove
       </Directory>
 
     # Prevent direct reading of files in the private dir.
     # This is for Drupal7 compatibility, which would normally drop
     # a .htaccess in those directories, but we explicitly ignore those
     <Directory "<?php print $this->site_path; ?>/private/" >
-      <Files *>
-        SetHandler This_is_a_Drupal_security_line_do_not_remove
-      </Files>
-      Deny from all
-      Options None
-      Options +FollowSymLinks
-
-      # If we know how to do it safely, disable the PHP engine entirely.
-      <IfModule mod_php5.c>
-        php_flag engine off
-      </IfModule>
+       SetHandler This_is_a_Drupal_security_line_do_not_remove
+       Deny from all
+       Options None
+       Options +FollowSymLinks
     </Directory>
 
   </VirtualHost>
