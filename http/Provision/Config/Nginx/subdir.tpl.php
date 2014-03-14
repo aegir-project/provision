@@ -402,8 +402,8 @@ location ~* /<?php print $subdir; ?>/(?:cross-?domain)\.xml$ {
 ###
 ### Allow some known php files (like serve.php in the ad module).
 ###
-location ~* ^/<?php print $subdir; ?>/(.*/(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tinymce|wysiwyg_spellcheck|ecc|civicrm|fbconnect|radioactivity)/.*\.php)$ {
-  set $real_fastcgi_script_name $1;
+location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tinymce|wysiwyg_spellcheck|ecc|civicrm|fbconnect|radioactivity)/.*([a-z-])\.php$ {
+  set $real_fastcgi_script_name $1.php;
   tcp_nopush   off;
   keepalive_requests 0;
   access_log   off;
