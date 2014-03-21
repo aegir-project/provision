@@ -110,7 +110,7 @@ function _provision_drupal_parse_info_file($filename) {
 function _provision_system_query($type) {
   $entries = array();
   $result = db_query("SELECT * FROM {system} WHERE type='%s'", $type);
-  while ($entry = $result->fetch()) {
+  while ($entry = db_fetch_object($result)) {
     $entries[] = $entry;
   }
   return $entries;
