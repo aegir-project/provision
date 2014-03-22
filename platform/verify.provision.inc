@@ -81,7 +81,7 @@ function drush_provision_drupal_pre_provision_verify() {
 
     // Determine latest BOA contrib directory name.
     $pathAll = '/data/all/';
-    if (provision_file()->exists($pathAll)->status()) {
+    if (provision_file()->exists($pathAll)->status() && preg_match("/\/static\//", d()->root)) {
       $sortedDirs = array();
       foreach(scandir($pathAll) as $dir) {
         if(is_dir($pathAll . $dir)) {
