@@ -257,6 +257,7 @@ else {
   foreach ($server->ip_addresses as $ip) {
     print "  listen       {$ip}:{$http_port};\n";
   }
+  print "  listen       127.0.0.1:{$http_port};\n";
 }
 ?>
   server_name 127.0.0.1;
