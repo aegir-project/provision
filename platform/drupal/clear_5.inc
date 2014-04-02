@@ -5,17 +5,17 @@
  */
 
 cache_clear_all();
-drush_log(t('Cleared all caches'));
+drush_log(dt('Cleared all caches'));
 
 node_types_rebuild();
-drush_log(t('Rebuilt node type cache'));
+drush_log(dt('Rebuilt node type cache'));
 
 module_list(TRUE, FALSE);
 module_rebuild_cache();
-drush_log(t('Rebuilt module cache'));
+drush_log(dt('Rebuilt module cache'));
 
 system_theme_data();
-drush_log(t('Rebuilt theme cache'));
+drush_log(dt('Rebuilt theme cache'));
 
 menu_rebuild();
-drush_log(t('Rebuilt menu cache'));
+drush_log(dt('Rebuilt menu cache'));

@@ -5,7 +5,7 @@
  */
 
 drupal_flush_all_caches();
-drush_log(t('All caches flushed'));
+drush_log(dt('All caches flushed'));
 
 // function drupal_flush_all_caches() {
 //   $module_handler = \Drupal::moduleHandler();

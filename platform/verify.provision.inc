@@ -89,7 +89,7 @@ function drush_provision_drupal_pre_provision_verify() {
         }
       }
       $latestDir = max($sortedDirs);
-      drush_log(t('Contrib latestDir: !latest', array('!latest' => $latestDir)), 'message');
+      drush_log(dt('Contrib latestDir: !latest', array('!latest' => $latestDir)), 'message');
 
       if (is_numeric($latestDir)) {
         $core6_contrib_dir = '/data/all/' . $latestDir . '/o_contrib';

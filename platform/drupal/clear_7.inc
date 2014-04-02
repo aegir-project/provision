@@ -8,7 +8,7 @@ cache_clear_all('*', 'cache_form', TRUE); // This bin is excluded in drupal_flus
                                           // but if not purged, it may break tasks with
                                           // mysterious errors thanks to garbage collected.
 drupal_flush_all_caches();
-drush_log(t('All caches flushed'));
+drush_log(dt('All caches flushed'));
 
 // function drupal_flush_all_caches() {
 //   // Change query-strings on css/js files to enforce reload for all users.
