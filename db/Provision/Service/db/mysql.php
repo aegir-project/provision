@@ -56,11 +56,11 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
 
   function grant($name, $username, $password, $host = '') {
     $host = ($host) ? $host : '%';
-    return $this->query("GRANT ALL PRIVILEGES ON `%s`.* TO `%s`@`%s` IDENTIFIED BY '%s'", $name, $username, $host, $password);
     if ($host != "127.0.0.1") {
       $extra_host = "127.0.0.1";
       $success_extra_host = $this->query("GRANT ALL PRIVILEGES ON `%s`.* TO `%s`@`%s` IDENTIFIED BY '%s'", $name, $username, $extra_host, $password);
     }
+    return $this->query("GRANT ALL PRIVILEGES ON `%s`.* TO `%s`@`%s` IDENTIFIED BY '%s'", $name, $username, $host, $password);
   }
 
   function revoke($name, $username, $host = '') {
