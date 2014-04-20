@@ -227,7 +227,7 @@ map $args $is_denied {
 $ip_address = !empty($ip_address) ? $ip_address : '*';
 ?>
 server {
-  limit_conn   limreq 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
+  limit_conn   limreq 555; # like mod_evasive - this allows max 555 simultaneous connections from one IP address
 <?php
 if ($ip_address == '*') {
   print "  listen       {$ip_address}:{$http_port};\n";
