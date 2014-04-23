@@ -1,3 +1,10 @@
+aegir-provision (1.12) testing; urgency=low
+
+  * modal frame was updated to cover for SA-CONTRIB-2014-012 (#2191827)
+  * the jQuery download URL was fixed
+
+ -- Antoine Beaupré <anarcat@debian.org>  Wed, 23 Apr 2014 14:04:20 -0400
+
 aegir-provision (1.11) testing; urgency=high
 
   * fix mild security issue with login-reset links (#1220062)
