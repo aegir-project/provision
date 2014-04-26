@@ -50,18 +50,18 @@
   variables_hash_max_size       1024;
 
  ## Timeouts
-  client_body_timeout             60;
-  client_header_timeout           60;
-  send_timeout                    60;
+  client_body_timeout            180;
+  client_header_timeout          180;
+  send_timeout                   180;
   lingering_time                  30;
   lingering_timeout                5;
   fastcgi_connect_timeout        10s;
-  fastcgi_send_timeout           60s;
-  fastcgi_read_timeout           60s;
+  fastcgi_send_timeout          180s;
+  fastcgi_read_timeout          180s;
 
  ## Open File Performance
   open_file_cache max=8000 inactive=30s;
-  open_file_cache_valid          60s;
+  open_file_cache_valid          99s;
   open_file_cache_min_uses         3;
   open_file_cache_errors          on;
 
@@ -240,7 +240,7 @@ else {
 ?>
   server_name  _;
   location / {
-     expires 60s;
+     expires 99s;
      add_header Cache-Control "public, must-revalidate, proxy-revalidate";
      add_header Access-Control-Allow-Origin *;
      root   /var/www/nginx-default;
