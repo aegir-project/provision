@@ -273,7 +273,6 @@ location ^~ /<?php print $subdir; ?> {
   location ~* ^/<?php print $subdir; ?>/(.*/files/advagg_(?:css|js).*) {
     access_log off;
     expires    max;
-    limit_conn limreq 88;
     add_header ETag "";
     add_header Cache-Control "max-age=290304000, no-transform, public";
     add_header Last-Modified "Wed, 20 Jan 1988 04:20:42 GMT";

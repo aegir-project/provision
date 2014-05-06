@@ -4,7 +4,6 @@ if ($ssl_redirection || $this->redirection) {
   foreach ($this->aliases as $alias_url) {
     print "# alias redirection virtual host\n";
     print "server {\n";
-    print "  limit_conn   gulag 32;\n";
     print "  listen       *:{$http_port};\n";
     // if we use redirections, we need to change the redirection
     // target to be the original site URL ($this->uri instead of
@@ -32,7 +31,6 @@ server {
   fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
   fastcgi_param db_host   <?php print urlencode($db_host); ?>;
   fastcgi_param db_port   <?php print urlencode($db_port); ?>;
-  limit_conn    gulag 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
   listen        *:<?php print $http_port; ?>;
   server_name   <?php
     // this is the main vhost, so we need to put the redirection

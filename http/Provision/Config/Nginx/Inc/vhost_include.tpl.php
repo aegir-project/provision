@@ -265,7 +265,6 @@ location ~* wysiwyg_fields/(?:plugins|scripts)/.*\.(?:js|css) {
 location ~* files/advagg_(?:css|js)/ {
   access_log off;
   expires    max;
-  limit_conn gulag 88;
   rewrite    ^/files/advagg_(.*)/(.*)$ /sites/$server_name/files/advagg_$1/$2 last;
   add_header ETag "";
   add_header Cache-Control "max-age=290304000, no-transform, public";
