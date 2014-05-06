@@ -162,7 +162,6 @@ map $args $is_denied {
 #######################################################
 
 server {
-  limit_conn   gulag 32; # like mod_evasive - this allows max 32 simultaneous connections from one IP address
   listen       *:<?php print $http_port; ?>;
   server_name  _;
   location / {
