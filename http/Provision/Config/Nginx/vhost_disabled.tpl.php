@@ -2,7 +2,7 @@
 $ip_address = !empty($ip_address) ? $ip_address : '*';
 ?>
 server {
-  limit_conn   limreq 555;
+  limit_conn   limreq 5555;
 <?php
 if ($ip_address == '*') {
   print "  listen       {$ip_address}:{$http_port};\n";

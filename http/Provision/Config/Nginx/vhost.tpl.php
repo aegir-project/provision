@@ -4,7 +4,7 @@ if ($ssl_redirection || $this->redirection) {
   // Redirect all aliases to the main http url using separate vhosts blocks to avoid if{} in Nginx.
   foreach ($this->aliases as $alias_url) {
     print "server {\n";
-    print "  limit_conn   limreq 555;\n";
+    print "  limit_conn   limreq 5555;\n";
     if ($ip_address == '*') {
       print "  listen       {$ip_address}:{$http_port};\n";
     }
@@ -23,7 +23,7 @@ if ($ssl_redirection || $this->redirection) {
 
 server {
   include      <?php print "{$server->include_path}"; ?>/fastcgi_params.conf;
-  limit_conn   limreq 555; # like mod_evasive - this allows max 555 simultaneous connections from one IP address
+  limit_conn   limreq 5555; # like mod_evasive - this allows max 5555 simultaneous connections from one IP address
 <?php
 if ($ip_address == '*') {
   print "  listen       {$ip_address}:{$http_port};\n";
