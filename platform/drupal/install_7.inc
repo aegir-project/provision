@@ -120,8 +120,8 @@ function install_main() {
           ),
         ),
         'update_status_module' => array(
-          1 => TRUE,
-          2 => TRUE,
+          1 => FALSE,
+          2 => FALSE,
         ),
         'clean_url' => drush_get_option('clean_url', TRUE),
       ),
