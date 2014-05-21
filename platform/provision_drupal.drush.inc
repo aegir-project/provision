@@ -296,79 +296,79 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
   $chgrp = array();
   // special case: platform. do not handle files dir
   if ($url != 'all') {
-    $mkdir["sites/$url/files"]            = 02770;
+    $mkdir["sites/$url/files"]            = 02775;
     $chgrp["sites/$url/files"]            = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/tmp"]        = 02770;
+    $mkdir["sites/$url/files/tmp"]        = 02775;
     $chgrp["sites/$url/files/tmp"]        = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/images"]     = 02770;
+    $mkdir["sites/$url/files/images"]     = 02775;
     $chgrp["sites/$url/files/images"]     = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/pictures"]   = 02770;
+    $mkdir["sites/$url/files/pictures"]   = 02775;
     $chgrp["sites/$url/files/pictures"]   = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/css"]        = 02770;
+    $mkdir["sites/$url/files/css"]        = 02775;
     $chgrp["sites/$url/files/css"]        = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/js"]         = 02770;
+    $mkdir["sites/$url/files/js"]         = 02775;
     $chgrp["sites/$url/files/js"]         = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/advagg_css"] = 02770;
+    $mkdir["sites/$url/files/advagg_css"] = 02775;
     $chgrp["sites/$url/files/advagg_css"] = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/advagg_js"]  = 02770;
+    $mkdir["sites/$url/files/advagg_js"]  = 02775;
     $chgrp["sites/$url/files/advagg_js"]  = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/ctools"]     = 02770;
+    $mkdir["sites/$url/files/ctools"]     = 02775;
     $chgrp["sites/$url/files/ctools"]     = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/ctools/css"] = 02770;
+    $mkdir["sites/$url/files/ctools/css"] = 02775;
     $chgrp["sites/$url/files/ctools/css"] = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/imagecache"] = 02770;
+    $mkdir["sites/$url/files/imagecache"] = 02775;
     $chgrp["sites/$url/files/imagecache"] = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/locations"]  = 02770;
+    $mkdir["sites/$url/files/locations"]  = 02775;
     $chgrp["sites/$url/files/locations"]  = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/xmlsitemap"] = 02770;
+    $mkdir["sites/$url/files/xmlsitemap"] = 02775;
     $chgrp["sites/$url/files/xmlsitemap"] = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/deployment"] = 02770;
+    $mkdir["sites/$url/files/deployment"] = 02775;
     $chgrp["sites/$url/files/deployment"] = d('@server_master')->web_group;
 
     // d7 support
-    $mkdir["sites/$url/private"]          = 02770;
+    $mkdir["sites/$url/private"]          = 02775;
     $chgrp["sites/$url/private"]          = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/private/files"]    = 02770;
+    $mkdir["sites/$url/private/files"]    = 02775;
     $chgrp["sites/$url/private/files"]    = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/private/temp"]     = 02770;
+    $mkdir["sites/$url/private/temp"]     = 02775;
     $chgrp["sites/$url/private/temp"]     = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/styles"]     = 02770;
+    $mkdir["sites/$url/files/styles"]     = 02775;
     $chgrp["sites/$url/files/styles"]     = d('@server_master')->web_group;
 
     // backup_migrate support
-    $mkdir["sites/$url/private/files/backup_migrate"] = 02770;
+    $mkdir["sites/$url/private/files/backup_migrate"] = 02775;
     $chgrp["sites/$url/private/files/backup_migrate"] = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/private/files/backup_migrate/manual"] = 02770;
+    $mkdir["sites/$url/private/files/backup_migrate/manual"] = 02775;
     $chgrp["sites/$url/private/files/backup_migrate/manual"] = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/private/files/backup_migrate/scheduled"] = 02770;
+    $mkdir["sites/$url/private/files/backup_migrate/scheduled"] = 02775;
     $chgrp["sites/$url/private/files/backup_migrate/scheduled"] = d('@server_master')->web_group;
 
     // d8 support
-    $mkdir["sites/$url/private/config"]   = 02770;
+    $mkdir["sites/$url/private/config"]   = 02775;
     $chgrp["sites/$url/private/config"]   = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/private/config/active"] = 02770;
+    $mkdir["sites/$url/private/config/active"] = 02775;
     $chgrp["sites/$url/private/config/active"] = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/private/config/staging"] = 02770;
+    $mkdir["sites/$url/private/config/staging"] = 02775;
     $chgrp["sites/$url/private/config/staging"] = d('@server_master')->web_group;
   }
 
