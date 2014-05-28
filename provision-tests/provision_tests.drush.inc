@@ -220,7 +220,7 @@ function drush_provision_tests_migrate_site($site, $target) {
  */
 function drush_provision_tests_run_remaining_tasks() {
   $tasks = array();
-  $result = db_query("SELECT t.nid FROM {hosting_task} t INNER JOIN {node} n ON t.vid = n.vid WHERE t.task_status = %d ORDER BY n.changed, n.nid ASC", 0);
+  $result = db_query("SELECT t.nid FROM {hosting_task} t INNER JOIN {node} n ON t.vid = n.vid WHERE t.task_status = :status ORDER BY n.changed, n.nid ASC", array(':status' => 0));
   while ($node = $result->fetch()) {
     $tasks[$node->nid] =  node_load($node->nid);
   }
