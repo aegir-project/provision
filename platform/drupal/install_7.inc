@@ -141,6 +141,10 @@ function install_main() {
       ),
     ),
   );
+
+  // Allow other commands to alter the installation settings.
+  drush_command_invoke_all_ref('provision_drupal_install_settings_alter', $settings, $url);
+
   try {
     install_drupal($settings);
   }
