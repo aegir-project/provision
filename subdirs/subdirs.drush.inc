@@ -43,14 +43,14 @@ function drush_subdirs_pre_provision_verify() {
 }
 
 /**
- * Implementation of drush_hook_post_provision_deploy()
+ * Implementation of drush_hook_pre_provision_deploy()
  */
 function drush_subdirs_pre_provision_deploy() {
   _subdirs_create_symlinks();
 }
 
 /**
- * Implementation of drush_hook_provision_delete()
+ * Implementation of drush_hook_pre_provision_delete()
  */
 function drush_subdirs_pre_provision_delete() {
   _subdirs_remove_symlinks();
