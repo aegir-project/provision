@@ -86,7 +86,7 @@ if ($this->redirection || $ssl_redirection) {
     
 <?php
 $if_subsite = $this->data['http_subdird_path'] . '/' . $this->uri;
-if (subdirs_drush_load() && provision_file()->exists($if_subsite)->status()) {
+if (hosting_feature_enabled('subdirs') && provision_file()->exists($if_subsite)->status()) {
   print "  Include " . $if_subsite . "/*.conf\n";
 }
 ?>

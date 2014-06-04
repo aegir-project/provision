@@ -9,7 +9,7 @@
 
 
 /**
- * Implements hook_drush_load().
+ * Implements hook_drush_load(). Deprecated. Removed in Drush 7.x.
  *
  * In a drush contrib check if the frontend part (hosting_hook variant) is enabled.
  */

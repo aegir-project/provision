@@ -22,7 +22,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     $this->server->setProperty('nginx_has_gzip', FALSE);
     $this->server->setProperty('provision_db_cloaking', TRUE);
     $this->server->setProperty('phpfpm_mode', 'port');
-    if (subdirs_drush_load()) {
+    if (hosting_feature_enabled('subdirs')) {
       $this->configs['site'][] = 'Provision_Config_Nginx_Subdir';
       $this->configs['site'][] = 'Provision_Config_Nginx_SubdirVhost';
     }

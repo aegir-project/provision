@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Implements hook_drush_load().
+ * Implements hook_drush_load(). Deprecated. Removed in Drush 7.x.
  *
  * Checks if the corresponsing Hosting Feature is enabled.
  */
