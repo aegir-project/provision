@@ -410,6 +410,9 @@ function provision_count_cpus() {
   return $ncpus;
 }
 
+define('CRITICAL_LOAD_MULTIPLIER', 5);
+define('CRITICAL_LOAD_THRESHOLD', 10);
+
 /**
  * determine if overall load of the machine is critical
  *
@@ -433,11 +436,11 @@ function provision_load_critical($load = NULL, $threshold = NULL) {
   }
   if (is_null($threshold)) {
     if ($ncpus = provision_count_cpus()) {
-      $threshold = $ncpus * 5;
+      $threshold = $ncpus * drush_get_option('critical_load_multiplier', CRITICAL_LOAD_MULTIPLIER);
     }
     else {
       // can't determine the number of CPU, we hardcode at load 10
-      $threshold = 10;
+      $threshold = drush_get_option('critical_load_threshold', CRITICAL_LOAD_THRESHOLD);
     }
   }
   return ($load[0] > $threshold);
