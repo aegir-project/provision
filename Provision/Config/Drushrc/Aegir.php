@@ -25,6 +25,13 @@ class Provision_Config_Drushrc_Aegir extends Provision_Config_Drushrc {
     }
 
     $this->data['hosting_features'] = $enabled_features;
+
+    $this->data['drush_exclude'] = array();
+    foreach($enabled_features as $feature => $status) {
+      if ($status === '0') {
+        $this->data['drush_exclude'][] = $feature;
+      }
+    }
   }
 
 }
