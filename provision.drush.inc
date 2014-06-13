@@ -392,7 +392,7 @@ function provision_count_cpus() {
  *
  * We base our evaluation on the number of CPUs on the servers. If there are
  * more than 5 processes waiting per CPU, we abort completely. If we ignore the
- * number of available CPUs, we assume a critical limit is a load of 10.
+ * number of available CPUs, we assume a critical limit is a load of 50.
  *
  * @see sys_getloadavg()
  */
@@ -405,8 +405,8 @@ function provision_load_critical($load = NULL, $threshold = NULL) {
       $threshold = $ncpus * 5;
     }
     else {
-      // can't determine the number of CPU, we hardcode at load 10
-      $threshold = 10;
+      // can't determine the number of CPU, we hardcode at load 50
+      $threshold = 50;
     }
   }
   return ($load[0] > $threshold);
