@@ -86,7 +86,8 @@ function drush_provision_tests_run() {
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
 
   if (drush_get_error() != DRUSH_SUCCESS) {
-    return drush_set_error(drush_get_error(), 'Running tests failed');
+    drush_set_error(drush_get_error(), 'Running tests failed');
+    exit(1);
   }
 
   drush_log(dt('Tests completed successfully'), 'success');
