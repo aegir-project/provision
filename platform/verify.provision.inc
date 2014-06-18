@@ -79,8 +79,15 @@ function drush_provision_drupal_pre_provision_verify() {
     drush_log(dt("This platform is running @short_name @version", array('@short_name' => 'drupal', '@version' => VERSION)));
     drush_set_option('packages', _scrub_object(provision_find_packages()), 'drupal');
 
-    // Determine latest BOA contrib directory name.
+    // Determine latest BOA contrib directory name and add INI template if missing.
     $pathAll = '/data/all/';
+    $iniFile = d()->root . '/sites/all/modules/default.boa_platform_control.ini';
+    $iniTpl = '/data/conf/default.boa_platform_control.ini';
+
+    if (!provision_file()->exists($iniFile)->status() && provision_file()->exists($iniTpl)->status()) {
+      provision_file()->copy($iniTpl, $iniFile);
+    }
+
     if (provision_file()->exists($pathAll)->status() && preg_match("/\/static\//", d()->root)) {
       $sortedDirs = array();
       foreach(scandir($pathAll) as $dir) {
@@ -148,6 +155,13 @@ function drush_provision_drupal_post_provision_verify() {
 
     _provision_client_create_symlink();
     drush_include_engine('drupal', 'cron_key');
+
+    $iniFile = d()->root . '/sites/' . d()->uri . '/modules/default.boa_site_control.ini';
+    $iniTpl = '/data/conf/default.boa_site_control.ini';
+
+    if (!provision_file()->exists($iniFile)->status() && provision_file()->exists($iniTpl)->status()) {
+      provision_file()->copy($iniTpl, $iniFile);
+    }
   }
 }
 
