@@ -142,9 +142,15 @@ function drush_provision_tests_install_site($platform_name, $site, $profile_name
     'profile' => $profile_name,
     'db_server' => '@server_localhost',
     'root' => "/var/aegir/platforms/$platform_name",
+    'client_email' => 'this.email@is.invalid',
   );
   drush_invoke_process('@none', 'provision-save', $args, $options);
-  provision_backend_invoke("@$site.aegir.example.com", 'provision-install');
+
+  $args = array();
+  $options = array(
+    'client_email' => 'this.email@is.invalid',
+  );
+  provision_backend_invoke("@$site.aegir.example.com", 'provision-install', $args, $options);
   provision_backend_invoke('@hostmaster', 'hosting-task', array("@platform_$platform_name", 'verify'), array('force' => TRUE));
   drush_provision_tests_run_remaining_tasks();
 }
