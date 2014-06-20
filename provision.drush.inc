@@ -49,6 +49,11 @@ include_once('provision.inc');
  * Implements hook_drush_init().
  */
 function provision_drush_init() {
+  // try to load the drush siterecoard (the "alias") into d
+  // if a name is provided, it's because we're in provision-save so we
+  // need to specify it because it's not loaded by drush
+  $hash_name = drush_get_option('#name') ? '#name' : 'name';
+  d(drush_get_option($hash_name, '@self', 'alias'), TRUE);
   // Make sure that the provision command is not being run as the root user.
   _provision_drush_check_user();
   // Abort the process if the load is too high.
@@ -73,8 +78,6 @@ function _provision_drush_check_user() {
  * @see provision_load_critical()
  */
 function _provision_drush_check_load() {
-  $hash_name = drush_get_option('#name') ? '#name' : 'name';
-  d(drush_get_option($hash_name, '@self', 'alias'), TRUE);
   $load = sys_getloadavg();
   if (provision_load_critical($load)) {
     drush_set_error('PROVISION_OVERLOAD', dt("load on system too heavy (@load), aborting", array('@load' => join(" ", $load))));
