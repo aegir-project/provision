@@ -361,6 +361,13 @@ function _provision_drupal_create_directories($url = NULL, $profile = NULL) {
     $mkdir["sites/$url/private/files/backup_migrate/scheduled"] = 02775;
     $chgrp["sites/$url/private/files/backup_migrate/scheduled"] = d('@server_master')->web_group;
 
+    // feeds support
+    $mkdir["sites/$url/files/feeds"] = 02775;
+    $chgrp["sites/$url/files/feeds"] = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/private/files/feeds"] = 02775;
+    $chgrp["sites/$url/private/files/feeds"] = d('@server_master')->web_group;
+
     // d8 support
     $mkdir["sites/$url/private/config"]   = 02775;
     $chgrp["sites/$url/private/config"]   = d('@server_master')->web_group;
