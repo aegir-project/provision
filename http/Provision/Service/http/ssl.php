@@ -54,7 +54,7 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
         }
       }
       if (!isset($data['ip_address'])) {
-        drush_log(dt('No proper IP provided by the frontend for server %servername, using wildcard', array('%servername' => $this->server->name)), 'warning');
+        drush_log(dt('No proper IP provided by the frontend for server %servername, using wildcard', array('%servername' => $this->server->name)), 'info');
         $data['ip_address'] = '*';
       }
       if ($this->context->ssl_enabled == 2) {
