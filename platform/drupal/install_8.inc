@@ -156,18 +156,7 @@ function install_main() {
   }
   _provision_drupal_create_directories();
 
-  // create the admin account
   $account = user_load(1);
-  $account->name = 'admin';
-  $account->pass = $account_pass;
-  $account->mail = $client_email;
-  $account->status = 1;
-
-  // temporarily disable drupal's default mail notification
-  $prev = \Drupal::config('user.settings')->get('notify:status_activated');
-  \Drupal::config('user.settings')->set('notify:status_activated', FALSE);
-  $account->save();
-  \Drupal::config('user.settings')->set('notify:status_activated', $prev);
 
   $onetime = user_pass_reset_url($account);
   // Store the one time login link in an option so the front end can direct the user to their new site.
