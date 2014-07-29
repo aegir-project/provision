@@ -154,7 +154,7 @@ if ($nginx_has_upload_progress) {
 #######################################################
 
 ###
-### Support separate Boost and Speed Booster caches for various mobile devices.
+### Support separate Speed Booster caches for various mobile devices.
 ###
 map $http_user_agent $device {
   default                                                                normal;
