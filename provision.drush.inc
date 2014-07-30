@@ -349,11 +349,13 @@ function drush_provision_verify() {
 function _provision_default_web_group() {
   $info = posix_getgrgid(posix_getgid());
   $common_groups = array(
-    'www',
-    'httpd',
     'www-data',
     'apache',
+    'nginx',
+    'www',
+    '_www',
     'webservd',
+    'httpd',
     'nogroup',
     'nobody',
     $info['name']);
