@@ -63,6 +63,9 @@ function drush_provision_drupal_pre_provision_deploy($backup_file) {
     provision_file()->chgrp(drush_get_option('extract_path') . '/private/files', d('@server_master')->web_group, TRUE)
       ->succeed('Changed group ownership of private files in <code>@path</code> to @gid')
       ->fail('Could not change group ownership of private files in <code>@path</code> to @gid');
+    provision_file()->chgrp(drush_get_option('extract_path') . '/private/temp', d('@server_master')->web_group, TRUE)
+      ->succeed('Changed group ownership of temp files in <code>@path</code> to @gid')
+      ->fail('Could not change group ownership of temp files in <code>@path</code> to @gid');
 
 
     if (drush_get_option('deploy_replace_site', FALSE)) {
