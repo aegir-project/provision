@@ -88,6 +88,26 @@ function drush_provision_drupal_pre_provision_verify() {
       provision_file()->copy($iniTpl, $iniFile);
     }
 
+    if (!preg_match("/\/static\//", d()->root)) {
+      if (d()->profile != 'hostmaster') {
+        provision_file()->chmod(d()->root . '/sites/all/modules', 02775)
+          ->succeed('Changed permissions of <code>@path</code> to @perm')
+          ->fail('Could not change permissions of <code>@path</code> to @perm');
+        provision_file()->chmod(d()->root . '/sites/all/themes', 02775)
+          ->succeed('Changed permissions of <code>@path</code> to @perm')
+          ->fail('Could not change permissions of <code>@path</code> to @perm');
+        provision_file()->chmod(d()->root . '/sites/all/libraries', 02775)
+          ->succeed('Changed permissions of <code>@path</code> to @perm')
+          ->fail('Could not change permissions of <code>@path</code> to @perm');
+      }
+      provision_file()->chmod(d()->root . '/sites/all', 0751)
+        ->succeed('Changed permissions of <code>@path</code> to @perm')
+        ->fail('Could not change permissions of <code>@path</code> to @perm');
+      provision_file()->chmod(d()->root . '/sites', 0751)
+        ->succeed('Changed permissions of <code>@path</code> to @perm')
+        ->fail('Could not change permissions of <code>@path</code> to @perm');
+    }
+
     if (provision_file()->exists($pathAll)->status() && preg_match("/\/static\//", d()->root)) {
       $sortedDirs = array();
       foreach(scandir($pathAll) as $dir) {
