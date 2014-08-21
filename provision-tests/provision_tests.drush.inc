@@ -41,13 +41,13 @@ function drush_provision_tests_run() {
 
   drush_provision_tests_install_platform('drupal6');
   drush_provision_tests_install_platform('drupal7');
-  drush_provision_tests_install_platform('openatrium');
+  drush_provision_tests_install_platform('openatrium2');
 
   // Install some sites.
   drush_provision_tests_install_site('drupal6', 'drupal6-default', 'default');
   drush_provision_tests_install_site('drupal7', 'drupal7-standard', 'standard');
   drush_provision_tests_install_site('drupal7', 'drupal7-minimal', 'minimal');
-  drush_provision_tests_install_site('openatrium', 'openatrium-openatrium', 'openatrium');
+  drush_provision_tests_install_site('openatrium2', 'openatrium2-openatrium', 'openatrium');
 
   // Remove the sites.
   drush_provision_tests_remove_site('drupal6-default');
