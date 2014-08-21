@@ -23,6 +23,15 @@ function provision_tests_drush_command() {
       'hosting',
     ),
   );
+  $items['provision-demo-content'] = array(
+    'description' => dt('Setup some demo content on a fresh Aegir install'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    // Although we're a provision command, we require hostmaster to be around to
+    // run the tests correctly
+    'drupal dependencies' => array(
+      'hosting',
+    ),
+  );
 
   return $items;
 }
@@ -91,6 +100,42 @@ function drush_provision_tests_run() {
   }
 
   drush_log(dt('Tests completed successfully'), 'success');
+}
+
+/**
+ * Drush command to setup some demo platforms and sites.
+ *
+ * To use these demo sites let names like drupal7-standard.aegir.example.com
+ * resolve to the IP of this Aegir server. E.g. in your hosts file.
+ */
+function drush_provision_tests_provision_demo_content() {
+  if (!drush_confirm(dt('This command should only be run on a clean Aegir install, and data may be lost! Do you want to continue?'))) {
+    return drush_user_abort();
+  }
+
+  // Disable the tasks queue, we run them manually instead.
+  $queue_status_initial = variable_get('hosting_queue_tasks_enabled', '0');
+  variable_set('hosting_queue_tasks_enabled', '0');
+
+  drush_provision_tests_install_platform('drupal6');
+  drush_provision_tests_install_platform('drupal7');
+  drush_provision_tests_install_platform('openatrium');
+
+  // Install some sites.
+  drush_provision_tests_install_site('drupal6', 'drupal6-default', 'default');
+  drush_provision_tests_install_site('drupal7', 'drupal7-standard', 'standard');
+  drush_provision_tests_install_site('drupal7', 'drupal7-minimal', 'minimal');
+  drush_provision_tests_install_site('openatrium2', 'openatrium2-openatrium', 'openatrium');
+
+  // Restore the tasks queue status:
+  variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
+
+  if (drush_get_error() != DRUSH_SUCCESS) {
+    drush_set_error(drush_get_error(), 'Settingi up demo content failed');
+    exit(1);
+  }
+
+  drush_log(dt('Demo content setup successfully'), 'success');
 }
 
 /**
