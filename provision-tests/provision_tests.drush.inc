@@ -62,7 +62,7 @@ function drush_provision_tests_run() {
   drush_provision_tests_remove_site('drupal6-default');
   drush_provision_tests_remove_site('drupal7-standard');
   drush_provision_tests_remove_site('drupal7-minimal');
-  drush_provision_tests_remove_site('openatrium-openatrium');
+  drush_provision_tests_remove_site('openatrium2-openatrium');
 
   // Create some sites and migrate them.
   drush_provision_tests_install_platform('drupal6', 'drupal6_other');
@@ -89,7 +89,7 @@ function drush_provision_tests_run() {
   // Clean up a little.
   drush_provision_tests_remove_platform('drupal6');
   drush_provision_tests_remove_platform('drupal7');
-  drush_provision_tests_remove_platform('openatrium');
+  drush_provision_tests_remove_platform('openatrium2');
 
   // Restore the tasks queue status:
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
