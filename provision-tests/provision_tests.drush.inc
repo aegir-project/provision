@@ -117,6 +117,10 @@ function drush_provision_tests_provision_demo_content() {
   $queue_status_initial = variable_get('hosting_queue_tasks_enabled', '0');
   variable_set('hosting_queue_tasks_enabled', '0');
 
+  // Start with D8 as it needs the most work/testing.
+  drush_provision_tests_install_platform('drupal8');
+  drush_provision_tests_install_site('drupal8', 'drupal8-minimal', 'minimal');
+
   drush_provision_tests_install_platform('drupal6');
   drush_provision_tests_install_platform('drupal7');
   drush_provision_tests_install_platform('openatrium');
