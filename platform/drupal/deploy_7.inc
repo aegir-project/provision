@@ -39,7 +39,9 @@ function _provision_platform_drupal_deploy_7_replace($old_url, $new_url) {
     ':new' => 'sites/' . $new_url,
   );
 
-  db_query("UPDATE {block_custom} SET body     = REPLACE(body,     :old, :new)", $replace_patterns);
+  if(db_table_exists('block_custom')) {
+    db_query("UPDATE {block_custom} SET body     = REPLACE(body,     :old, :new)", $replace_patterns);
+  }
   db_query("UPDATE {system}       SET filename = REPLACE(filename, :old, :new)", $replace_patterns);
 
   $field_map = field_info_field_map();
