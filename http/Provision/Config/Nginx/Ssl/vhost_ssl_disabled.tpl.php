@@ -12,7 +12,7 @@ server {
   ssl_prefer_server_ciphers  on;
   keepalive_timeout          70;
   return                     404;
-  ### Dont't reveal Aegir front-end URL here.
+  ### Do not reveal Aegir front-end URL here.
 }
 
 <?php endif; ?>

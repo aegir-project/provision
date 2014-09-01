@@ -1,4 +1,4 @@
 location ^~ /<?php print $subdir; ?>/ {
   return       404;
-  ### Dont't reveal Aegir front-end URL here.
+  ### Do not reveal Aegir front-end URL here.
 }
