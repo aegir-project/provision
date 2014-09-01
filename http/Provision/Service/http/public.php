@@ -20,6 +20,19 @@ class Provision_Service_http_public extends Provision_Service_http {
 
     $data['http_port'] = $this->server->http_port;
 
+    // We assign this generic catch all for standard http.
+    // The SSL based services will override this with the
+    // correct ip address.
+    if (sizeof($this->server->ip_addresses)) {
+      // Use the first IP address for all standard virtual hosts.
+      $data['ip_address'] = $this->server->ip_addresses[0];
+    }
+    else {
+      // If no external ip addresses are defined, we fall back on *:port
+      // There will be no SSL , so that's fine.
+      $data['ip_address'] = '*';
+    }
+
     // TODO: move away from drush_get_context entirely.
     if ($config == 'site') {
 

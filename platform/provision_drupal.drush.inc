@@ -55,6 +55,96 @@ function provision_drupal_drush_exit() {
 
   if (preg_match("/^provision-/", $command[0]) && drush_get_option('provision_save_config', TRUE)) {
     if (d()->type === 'site') {
+      if (preg_match("/^provision-login-reset/", $command[0])) {
+        // Make site and platform directories world writable temporarily,
+        // until the next site verify, but only if apps module and
+        // control file both exist.
+        $ctrl_modules_apps = d()->root . '/sites/all/modules/apps-allow.info';
+        if (provision_file()->exists($ctrl_modules_apps)->status()) {
+          $profile = drush_get_option('profile');
+          $site_modules_apps = d()->site_path . '/modules/apps/apps.module';
+          $allp_modules_apps = d()->root . '/sites/all/modules/apps/apps.module';
+          $dist_modules_apps = d()->root . '/profiles/' . $profile . '/modules/apps/apps.module';
+          $dist_contrib_apps = d()->root . '/profiles/' . $profile . '/modules/contrib/apps/apps.module';
+          if (provision_file()->exists($site_modules_apps)->status() ||
+              provision_file()->exists($allp_modules_apps)->status() ||
+              provision_file()->exists($dist_modules_apps)->status() ||
+              provision_file()->exists($dist_contrib_apps)->status()) {
+            provision_file()->chmod(d()->site_path, 0777)
+              ->succeed('Changed permissions of <code>@path</code> to @perm')
+              ->fail('Could not change permissions of <code>@path</code> to @perm');
+            provision_file()->chmod(d()->root . '/sites/all/modules', 0777)
+              ->succeed('Changed permissions of <code>@path</code> to @perm')
+              ->fail('Could not change permissions of <code>@path</code> to @perm');
+            provision_file()->chmod(d()->root . '/sites/all/themes', 0777)
+              ->succeed('Changed permissions of <code>@path</code> to @perm')
+              ->fail('Could not change permissions of <code>@path</code> to @perm');
+            provision_file()->chmod(d()->root . '/sites/all/libraries', 0777)
+              ->succeed('Changed permissions of <code>@path</code> to @perm')
+              ->fail('Could not change permissions of <code>@path</code> to @perm');
+            provision_file()->chmod(d()->root . '/sites/all', 0777)
+              ->succeed('Changed permissions of <code>@path</code> to @perm')
+              ->fail('Could not change permissions of <code>@path</code> to @perm');
+          }
+        }
+        // Make local.settings.php file group writable temporarily,
+        // until the next site verify, but only if control file exists.
+        $ctrl_local_settings = d()->site_path . '/modules/local-allow.info';
+        $local_settings = d()->site_path . '/local.settings.php';
+        if (provision_file()->exists($ctrl_local_settings)->status() &&
+            provision_file()->exists($local_settings)->status()) {
+          provision_file()->chmod($local_settings, 0660)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+        }
+        // Make civicrm.settings.php file group writable temporarily,
+        // until the next site verify, but only if control file exists.
+        $ctrl_local_settings = d()->site_path . '/modules/local-allow.info';
+        $local_settings = d()->site_path . '/civicrm.settings.php';
+        if (provision_file()->exists($ctrl_local_settings)->status() &&
+            provision_file()->exists($local_settings)->status()) {
+          provision_file()->chmod($local_settings, 0660)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+        }
+      }
+      elseif (preg_match("/^provision-verify/", $command[0])) {
+        // Revert site and platform directories permissions to default.
+        provision_file()->chmod(d()->site_path, 0755)
+          ->succeed('Changed permissions of <code>@path</code> to @perm')
+          ->fail('Could not change permissions of <code>@path</code> to @perm');
+        if (d()->profile != 'hostmaster') {
+          provision_file()->chmod(d()->root . '/sites/all/modules', 02775)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+          provision_file()->chmod(d()->root . '/sites/all/themes', 02775)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+          provision_file()->chmod(d()->root . '/sites/all/libraries', 02775)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+        }
+        provision_file()->chmod(d()->root . '/sites/all', 0751)
+          ->succeed('Changed permissions of <code>@path</code> to @perm')
+          ->fail('Could not change permissions of <code>@path</code> to @perm');
+        provision_file()->chmod(d()->root . '/sites', 0751)
+          ->succeed('Changed permissions of <code>@path</code> to @perm')
+          ->fail('Could not change permissions of <code>@path</code> to @perm');
+        // Revert local.settings.php permissions to default.
+        $local_settings = d()->site_path . '/local.settings.php';
+        if (provision_file()->exists($local_settings)->status()) {
+          provision_file()->chmod($local_settings, 0440)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+        }
+        // Revert civicrm.settings.php permissions to default.
+        $local_settings = d()->site_path . '/civicrm.settings.php';
+        if (provision_file()->exists($local_settings)->status()) {
+          provision_file()->chmod($local_settings, 0640)
+            ->succeed('Changed permissions of <code>@path</code> to @perm')
+            ->fail('Could not change permissions of <code>@path</code> to @perm');
+        }
+      }
       if (drush_get_option('installed')) {
         // Don't generate the drushrc.php on provision-save/delete commands.
         if (!preg_match("/^provision-(save|delete)/", $command[0])) {
@@ -192,42 +282,87 @@ function _provision_drupal_create_directories($url = NULL) {
   $chgrp = array();
   // special case: platform. do not handle files dir
   if ($url != 'all') {
-    $mkdir["sites/$url/files"]            = 02770;
+    $mkdir["sites/$url/files"]            = 02775;
     $chgrp["sites/$url/files"]            = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/tmp"]        = 02770;
+    $mkdir["sites/$url/files/tmp"]        = 02775;
     $chgrp["sites/$url/files/tmp"]        = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/images"]     = 02770;
+    $mkdir["sites/$url/files/images"]     = 02775;
     $chgrp["sites/$url/files/images"]     = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/pictures"]   = 02770;
+    $mkdir["sites/$url/files/pictures"]   = 02775;
     $chgrp["sites/$url/files/pictures"]   = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/css"]        = 02770;
+    $mkdir["sites/$url/files/css"]        = 02775;
     $chgrp["sites/$url/files/css"]        = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/js"]         = 02770;
+    $mkdir["sites/$url/files/js"]         = 02775;
     $chgrp["sites/$url/files/js"]         = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/ctools"]     = 02770;
+    $mkdir["sites/$url/files/advagg_css"] = 02775;
+    $chgrp["sites/$url/files/advagg_css"] = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/files/advagg_js"]  = 02775;
+    $chgrp["sites/$url/files/advagg_js"]  = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/files/ctools"]     = 02775;
     $chgrp["sites/$url/files/ctools"]     = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/imagecache"] = 02770;
+    $mkdir["sites/$url/files/ctools/css"] = 02775;
+    $chgrp["sites/$url/files/ctools/css"] = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/files/imagecache"] = 02775;
     $chgrp["sites/$url/files/imagecache"] = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/locations"]  = 02770;
+    $mkdir["sites/$url/files/locations"]  = 02775;
     $chgrp["sites/$url/files/locations"]  = d('@server_master')->web_group;
 
+    $mkdir["sites/$url/files/xmlsitemap"] = 02775;
+    $chgrp["sites/$url/files/xmlsitemap"] = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/files/deployment"] = 02775;
+    $chgrp["sites/$url/files/deployment"] = d('@server_master')->web_group;
+
     // d7 support
-    $mkdir["sites/$url/private"]          = 02770;
+    $mkdir["sites/$url/private"]          = 02775;
     $chgrp["sites/$url/private"]          = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/private/files"]    = 02770;
+    $mkdir["sites/$url/private/files"]    = 02775;
     $chgrp["sites/$url/private/files"]    = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/private/temp"]     = 02770;
+    $mkdir["sites/$url/private/temp"]     = 02775;
     $chgrp["sites/$url/private/temp"]     = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/files/styles"]     = 02775;
+    $chgrp["sites/$url/files/styles"]     = d('@server_master')->web_group;
+
+    // backup_migrate support
+    $mkdir["sites/$url/private/files/backup_migrate"] = 02775;
+    $chgrp["sites/$url/private/files/backup_migrate"] = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/private/files/backup_migrate/manual"] = 02775;
+    $chgrp["sites/$url/private/files/backup_migrate/manual"] = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/private/files/backup_migrate/scheduled"] = 02775;
+    $chgrp["sites/$url/private/files/backup_migrate/scheduled"] = d('@server_master')->web_group;
+
+    // feeds support
+    $mkdir["sites/$url/files/feeds"] = 02775;
+    $chgrp["sites/$url/files/feeds"] = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/private/files/feeds"] = 02775;
+    $chgrp["sites/$url/private/files/feeds"] = d('@server_master')->web_group;
+
+    // d8 support
+    $mkdir["sites/$url/private/config"]   = 02775;
+    $chgrp["sites/$url/private/config"]   = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/private/config/active"] = 02775;
+    $chgrp["sites/$url/private/config/active"] = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/private/config/staging"] = 02775;
+    $chgrp["sites/$url/private/config/staging"] = d('@server_master')->web_group;
   }
 
   // These paths should not have recursive operations performed on them.
@@ -239,12 +374,25 @@ function _provision_drupal_create_directories($url = NULL) {
     "sites/$url/files/pictures",
     "sites/$url/files/css",
     "sites/$url/files/js",
+    "sites/$url/files/advagg_css",
+    "sites/$url/files/advagg_js",
     "sites/$url/files/ctools",
+    "sites/$url/files/ctools/css",
     "sites/$url/files/imagecache",
     "sites/$url/files/locations",
+    "sites/$url/modules",
+    "sites/$url/libraries",
+    "sites/$url/themes",
+    "sites/$url/files/xmlsitemap",
+    "sites/$url/files/deployment",
     "sites/$url/private",
     "sites/$url/private/files",
-    "sites/$url/private/temp"
+    "sites/$url/private/temp",
+    "sites/$url/files/styles",
+    "sites/$url/files/private",
+    "sites/$url/private/config",
+    "sites/$url/private/config/active",
+    "sites/$url/private/config/staging"
   );
 
   // Allow other commands to add or alter the directories to be created.
@@ -397,14 +545,34 @@ function _provision_find_profiles() {
     }
     $profile->info['languages'] = array_keys($languages);
 
-    // Drupal 7 renamed the default install profile to 'standard'
+    // Drupal 7 renamed the default installation profile to 'standard'
     // Aegir now allows projects to specify an "old short name" to provide an upgrade path when projects get renamed.
+    if (empty($profile->info['old_short_name'])) {
     if ($profile->name == 'standard') {
       $profile->info['old_short_name'] = 'default';
     }
+      elseif ($profile->name == 'minimal') {
+        $profile->info['old_short_name'] = 'acquia';
+      }
+      elseif ($profile->name == 'testing') {
+        $profile->info['old_short_name'] = 'uberdrupal';
+      }
+      elseif ($profile->name == 'default') {
+        $profile->info['old_short_name'] = 'acquia';
+      }
+      elseif ($profile->name == 'acquia') {
+        $profile->info['old_short_name'] = 'default';
+      }
+      elseif ($profile->name == 'commons') {
+        $profile->info['old_short_name'] = 'drupal_commons';
+      }
+      elseif ($profile->name == 'commerce_kickstart') {
+        $profile->info['old_short_name'] = 'commercedev';
+      }
+    }
 
     $return[$name] = $profile;
-    drush_log(dt('Found install profile %name', array('%name' => $name)));
+    drush_log(dt('Found installation profile %name', array('%name' => $name)));
   }
 
   return $return;
@@ -546,11 +714,11 @@ function provision_find_packages() {
   // Create a package for the Drupal release
   $packages['base']['platforms'] = _provision_find_platforms();
 
-  // Find install profiles.
+  // Find installation profiles.
   $profiles = _provision_find_profiles();
   drush_set_option('profiles', array_keys((array) $profiles), 'drupal');
 
-  // Iterate through the install profiles, finding the profile specific packages
+  // Iterate through the installation profiles, finding the profile specific packages
   foreach ($profiles as $profile => $info) {
     _provision_cvs_deploy($info);
     if (!$info->version) {

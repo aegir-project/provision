@@ -109,11 +109,9 @@ if (isset($_SERVER['db_name'])) {
   @ini_set('arg_separator.output',     '&amp;');
   @ini_set('magic_quotes_runtime',     0);
   @ini_set('magic_quotes_sybase',      0);
-  @ini_set('session.cache_expire',     200000);
   @ini_set('session.cache_limiter',    'none');
-  @ini_set('session.cookie_lifetime',  0);
-  @ini_set('session.gc_maxlifetime',   200000);
   @ini_set('session.save_handler',     'user');
+  @ini_set('session.use_cookies',      1);
   @ini_set('session.use_only_cookies', 1);
   @ini_set('session.use_trans_sid',    0);
   @ini_set('url_rewriter.tags',        '');
@@ -128,18 +126,29 @@ if (isset($_SERVER['db_name'])) {
   $conf['install_profile'] = '<?php print $this->profile ?>';
   $conf['<?php print $file_directory_path_var ?>'] = 'sites/<?php print $this->uri ?>/files';
   $conf['<?php print $file_directory_temp_var ?>'] = 'sites/<?php print $this->uri ?>/private/temp';
-  <?php if (isset($file_directory_private_var)): ?>
+<?php if (isset($file_directory_private_var)): ?>
   $conf['<?php print $file_directory_private_var ?>'] = 'sites/<?php print $this->uri ?>/private/files';
-  <?php endif; ?>
+<?php endif; ?>
+<?php if (isset($drupal_hash_salt_var)): ?>
+  $drupal_hash_salt = '';
+<?php endif; ?>
+<?php if (isset($config_directories_active_var)): ?>
+  $config_directories['active']['path'] = 'sites/<?php print $this->uri ?>/private/config/active';
+  $config_directories['active']['absolute'] = TRUE;
+<?php endif; ?>
+<?php if (isset($config_directories_staging_var)): ?>
+  $config_directories['staging']['path'] = 'sites/<?php print $this->uri ?>/private/config/staging';
+  $config_directories['staging']['absolute'] = TRUE;
+<?php endif; ?>
   $conf['clean_url'] = 1;
   $conf['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
 
-  <?php if (!$this->site_enabled) : ?>
+<?php if (!$this->site_enabled) : ?>
     // This is for Drupal 6 and below.
     $conf['site_offline'] = 1;
     // And this is for Drupal 7 and above.
     $conf['maintenance_mode'] = 1;
-  <?php endif ?>
+<?php endif ?>
 
 <?php print $extra_config; ?>
 

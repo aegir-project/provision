@@ -4,6 +4,8 @@
 server {
   listen       <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
   server_name  <?php print $this->uri . ' ' . implode(' ', $this->aliases); ?>;
+  root         /var/www/nginx-default;
+  index        index.html index.htm;
   ssl                        on;
   ssl_certificate            <?php print $ssl_cert; ?>;
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
@@ -11,7 +13,6 @@ server {
   ssl_ciphers                RC4:HIGH:!aNULL:!MD5;
   ssl_prefer_server_ciphers  on;
   keepalive_timeout          70;
-  return                     404;
   ### Do not reveal Aegir front-end URL here.
 }
 

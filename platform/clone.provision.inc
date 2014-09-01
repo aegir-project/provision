@@ -38,6 +38,19 @@ function drush_provision_drupal_pre_provision_clone_rollback($new_uri, $platform
 function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
   drush_set_option('old_platform', d()->platform->name);
 
+  // If the site is cloned between platforms and not just in the same platform,
+  // we should update the info collected about source and target platform first.
+  if (!is_null(d($platform)->name) && (d($platform)->name != d()->platform->name)) {
+    provision_backend_invoke('@hostmaster', 'hosting-task', array(d()->platform->name, 'verify'), array('force' => TRUE));
+    sleep(5); // A small trick to avoid high load and race conditions.
+    provision_backend_invoke('@hostmaster', 'hosting-task', array(d($platform)->name, 'verify'), array('force' => TRUE));
+    sleep(5); // A small trick to avoid high load and race conditions.
+  }
+  // We should update also the info collected about the site before running clone.
+  $local_uri_verify = '@' . d()->uri;
+  provision_backend_invoke('@hostmaster', 'hosting-task', array($local_uri_verify, 'verify'), array('force' => TRUE));
+  sleep(5); // A small trick to avoid high load and race conditions.
+
   $options = d()->options;
   $options['uri'] = ltrim($new_uri, '@');
   $hash_name = drush_get_option('#name') ? '#name' : 'name';
@@ -54,6 +67,10 @@ function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
   $options['ssl_enabled'] = 0;
   unset($options['ssl_key']);
 
+  // Do not copy CDN aliases to the cloned site --CDN vhost
+  $options['cdn'] = 0;
+  unset($options['cdn']);
+
   if ($profile = drush_get_option('profile', FALSE)) {
     $options['profile'] = $profile;
   }
@@ -68,7 +85,11 @@ function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
   provision_backend_invoke($new_uri, 'provision-deploy', array(drush_get_option('backup_file')), array('old_uri' => d()->uri));
 
   if (!drush_get_error()) {
+    // Verify the newly cloned site.
     provision_backend_invoke($new_uri, 'provision-verify');
+    sleep(5); // A small trick to avoid high load and race conditions.
+    // Verify again also original site via frontend to avoid issue #1004526
+    provision_backend_invoke('@hostmaster', 'hosting-task', array($local_uri_verify, 'verify'), array('force' => TRUE));
   }
 
   provision_reload_config('site', d()->site_path . '/drushrc.php');

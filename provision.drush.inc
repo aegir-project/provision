@@ -395,7 +395,15 @@ function _provision_default_web_group() {
  */
 function provision_count_cpus() {
   $ncpus = FALSE;
-  if (file_exists("/proc/cpuinfo")) {
+  if (file_exists("/data/all/cpuinfo")) {
+    # this should work on BOA with a /data/all/cpuinfo generated daily
+    $cpuinfo = file_get_contents("/data/all/cpuinfo");
+    $cpuinfo = str_replace('\n', '', $cpuinfo);
+    if ($cpuinfo !== FALSE && is_numeric($cpuinfo)) {
+      $ncpus = $cpuinfo;
+    }
+  }
+  elseif (file_exists("/proc/cpuinfo")) {
     # this should work on Linux with a /proc filesystem
     $cpuinfo = file_get_contents("/proc/cpuinfo");
     if ($cpuinfo !== FALSE) {
@@ -420,7 +428,7 @@ function provision_count_cpus() {
  *
  * We base our evaluation on the number of CPUs on the servers. If there are
  * more than 5 processes waiting per CPU, we abort completely. If we ignore the
- * number of available CPUs, we assume a critical limit is a load of 10.
+ * number of available CPUs, we assume a critical limit is a load of 50.
  *
  * @see sys_getloadavg()
  */
@@ -433,8 +441,8 @@ function provision_load_critical($load = NULL, $threshold = NULL) {
       $threshold = $ncpus * 5;
     }
     else {
-      // can't determine the number of CPU, we hardcode at load 10
-      $threshold = 10;
+      // can't determine the number of CPU, we hardcode at load 50
+      $threshold = 50;
     }
   }
   return ($load[0] > $threshold);

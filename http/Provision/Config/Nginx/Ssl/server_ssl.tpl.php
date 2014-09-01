@@ -10,6 +10,7 @@ server {
 <?php endforeach; ?>
   server_name  _;
   location / {
-    return 404;
+    root   /var/www/nginx-default;
+    index  index.html index.htm;
   }
 }

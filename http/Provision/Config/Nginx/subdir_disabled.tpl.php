@@ -1,4 +1,5 @@
 location ^~ /<?php print $subdir; ?>/ {
-  return       404;
+  root         /var/www/nginx-default;
+  index        index.html index.htm;
   ### Do not reveal Aegir front-end URL here.
 }

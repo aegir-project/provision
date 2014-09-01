@@ -45,7 +45,7 @@ Description: mass Drupal hosting system - frontend
  .
  This package provides the frontend web interface that users generally
  interact with. It's made up of a regular Drupal site with a custom
- install profile, module and theme.
+ installation profile, module and theme.
  .
  This meta-package will dynamically install the frontend using drush
  and provision and as such doesn't bundle any files itself. Everything
