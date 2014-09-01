@@ -26,10 +26,10 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
     $mail_success = drupal_mail('install', 'welcome-admin', $account->mail, user_preferred_language($account), $mail_params, $from, TRUE);
 
     if ($mail_success) {
-      drush_log(t('Sent welcome mail to @client', array('@client' => $client_email)), 'success');
+      drush_log(dt('Sent welcome mail to @client', array('@client' => $client_email)), 'success');
     }
     else {
-      drush_log(t('Could not send welcome mail to @client', array('@client' => $client_email)), 'warning');
+      drush_log(dt('Could not send welcome mail to @client', array('@client' => $client_email)), 'warning');
     }
   }
 }
@@ -158,7 +158,7 @@ function install_main() {
   $onetime = user_pass_reset_url($account);
   // Store the one time login link in an option so the front end can direct the user to their new site.
   drush_set_option('login_link', $onetime . '/login');
-  drush_log(t('Login url: !onetime', array('!onetime' => $onetime . '/login')), 'success');
+  drush_log(dt('Login url: !onetime', array('!onetime' => $onetime . '/login')), 'success');
 
   if (drush_get_option('client_email', FALSE)) {
     install_send_welcome_mail($url, $account, $install_locale, $client_email, $onetime);
