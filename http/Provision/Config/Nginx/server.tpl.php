@@ -241,20 +241,8 @@ map $args $is_denied {
 ###  nginx default server
 #######################################################
 
-<?php
-$ip_address = !empty($ip_address) ? $ip_address : '*';
-?>
 server {
-<?php
-if ($ip_address == '*') {
-  print "  listen       {$ip_address}:{$http_port};\n";
-}
-else {
-  foreach ($server->ip_addresses as $ip) {
-    print "  listen       {$ip}:{$http_port};\n";
-  }
-}
-?>
+  listen       *:<?php print $http_port; ?>;
   server_name  _;
   location / {
      expires 99s;
@@ -266,18 +254,8 @@ else {
 }
 
 server {
-<?php
-if ($ip_address == '*') {
-  print "  listen       {$ip_address}:{$http_port};\n";
-}
-else {
-  foreach ($server->ip_addresses as $ip) {
-    print "  listen       {$ip}:{$http_port};\n";
-  }
-  print "  listen       127.0.0.1:{$http_port};\n";
-}
-?>
-  server_name 127.0.0.1;
+  listen       *:<?php print $http_port; ?>;
+  server_name  127.0.0.1;
   location /nginx_status {
     stub_status on;
     access_log off;
