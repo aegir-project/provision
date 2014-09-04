@@ -127,7 +127,7 @@ class Provision_Config {
     if (!empty($templates) && is_array($templates)) {
       foreach ($templates as $file) {
         if (file_exists($file) && is_readable($file)) {
-          drush_log("Template loaded: $file");
+          drush_log("Template loaded A: $file");
           return file_get_contents($file);
         }
       }
@@ -145,7 +145,7 @@ class Provision_Config {
         $file = $base_dir . '/' . $this->template;
 
         if (file_exists($file) && is_readable($file)) {
-          drush_log("Template loaded: $file");
+          drush_log("Template loaded B: $file");
           return file_get_contents($file);
         }
 
@@ -184,11 +184,19 @@ class Provision_Config {
    */
   function write() {
     $filename = $this->filename();
+
+    // Debug tmp
+    drush_log("DEBUG A: filename is $filename");
+
     // Make directory structure if it does not exist.
     if (!provision_file()->exists(dirname($filename))->status()) {
       provision_file()->mkdir(dirname($filename))
         ->succeed('Created directory @path.')
         ->fail('Could not create directory @path.');
+
+      // Debug tmp
+      $this_dirname = dirname($filename);
+      drush_log("DEBUG B: this_dirname is $this_dirname");
     }
 
     $status = FALSE;
