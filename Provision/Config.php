@@ -213,8 +213,8 @@ class Provision_Config {
         }
 
         $status = provision_file()->file_put_contents($filename, $this->render_template($template, $this->data))
-          ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description), 'success')
-          ->fail('Could not generate ' . (empty($this->description) ? $filename : $this->description))->status();
+          ->succeed('Generated config A ' . (empty($this->description) ? $filename : $this->description), 'success')
+          ->fail('Could not generate A ' . (empty($this->description) ? $filename : $this->description))->status();
 
         // Change the permissions of the file if needed
         if (!is_null($this->mode)) {
@@ -235,7 +235,7 @@ class Provision_Config {
   // allow overriding w.r.t locking
   function file_put_contents($filename, $text) {
     provision_file()->file_put_contents($filename, $text)
-      ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description), 'success');
+      ->succeed('Generated config B ' . (empty($this->description) ? $filename : $this->description), 'success');
   }
 
   /**
