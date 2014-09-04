@@ -184,16 +184,13 @@ class Provision_Config {
    */
   function write() {
     $filename = $this->filename();
-
     // Debug tmp
     drush_log("DEBUG A: filename is $filename");
-
     // Make directory structure if it does not exist.
     if (!provision_file()->exists(dirname($filename))->status()) {
       provision_file()->mkdir(dirname($filename))
         ->succeed('Created directory @path.')
         ->fail('Could not create directory @path.');
-
       // Debug tmp
       $this_dirname = dirname($filename);
       drush_log("DEBUG B: this_dirname is $this_dirname");
