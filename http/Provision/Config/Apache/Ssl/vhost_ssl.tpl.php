@@ -3,11 +3,11 @@
 
   <VirtualHost <?php print "{$ip_address}:{$http_ssl_port}"; ?>>
   <?php if ($this->site_mail) : ?>
-    ServerAdmin <?php  print $this->site_mail; ?> 
+    ServerAdmin <?php  print $this->site_mail; ?>
   <?php endif;?>
 
-    DocumentRoot <?php print $this->root; ?> 
-      
+    DocumentRoot <?php print $this->root; ?>
+
     ServerName <?php print $this->uri; ?>
 
     SetEnv db_type  <?php print urlencode($db_type); ?>
@@ -23,7 +23,7 @@
     SetEnv db_port  <?php print urlencode($db_port); ?>
 
     # Enable SSL handling.
-     
+
     SSLEngine on
 
     SSLCertificateFile <?php print $ssl_cert; ?>
@@ -36,7 +36,7 @@
 
 <?php
 if (sizeof($this->aliases)) {
-  print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
+  print "\n  ServerAlias " . implode("\n  ServerAlias ", $this->aliases) . "\n";
 }
 ?>
 
@@ -90,7 +90,7 @@ if ($this->redirection) {
   </VirtualHost>
 <?php endif; ?>
 
-<?php 
+<?php
   include(provision_class_directory('Provision_Config_Apache_Site') . '/vhost.tpl.php');
 ?>
 
