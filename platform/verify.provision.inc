@@ -82,6 +82,7 @@ function drush_provision_drupal_pre_provision_verify() {
 
     // Determine latest BOA contrib directory name and add INI template if missing.
     $pathAll = '/data/all/';
+    $pathDrc = d()->root . '/sites/all/drush';
     $iniFile = d()->root . '/sites/all/modules/default.boa_platform_control.ini';
     $iniTpl = '/data/conf/default.boa_platform_control.ini';
 
@@ -105,6 +106,12 @@ function drush_provision_drupal_pre_provision_verify() {
         ->succeed('Changed permissions of <code>@path</code> to @perm')
         ->fail('Could not change permissions of <code>@path</code> to @perm');
       provision_file()->chmod(d()->root . '/sites', 0751)
+        ->succeed('Changed permissions of <code>@path</code> to @perm')
+        ->fail('Could not change permissions of <code>@path</code> to @perm');
+    }
+
+    if (provision_file()->exists($pathDrc)->status()) {
+      provision_file()->chmod(d()->root . '/sites/all/drush', 0700)
         ->succeed('Changed permissions of <code>@path</code> to @perm')
         ->fail('Could not change permissions of <code>@path</code> to @perm');
     }
