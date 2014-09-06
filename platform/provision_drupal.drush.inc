@@ -806,7 +806,7 @@ function _provision_client_create_symlink() {
 function _provision_client_delete_old_symlink() {
   $previous = d()->server->clients_path . '/' . d()->client_name . '/' . d()->uri;
   // this is necessary because unlink doesn't fail on missing files (!)
-  $found = (file_exists($previous) || is_link($previous));
+  $found = (is_file($previous) || is_link($previous));
   provision_file()->unlink($previous);
   if (!$found) {
     drush_log(dt("couldn't find previous client symlink, iterating through all sites"));
@@ -815,7 +815,7 @@ function _provision_client_delete_old_symlink() {
       while (($file = readdir($dh)) !== false) {
         if ($file != '.' && $file != '..') {
           $path = d()->server->clients_path . '/' . $file . '/' . d()->uri;
-          if (file_exists($path) || is_link($path)) {
+          if (is_file($path) || is_link($path)) {
             provision_file()->unlink($path);
             drush_log(dt("removed previous symlink in @path", array("@path" => $path)), 'success');
             break; // found it
