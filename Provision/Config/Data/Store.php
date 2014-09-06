@@ -105,7 +105,7 @@ class Provision_Config_Data_Store extends Provision_Config {
     if (!$this->locked) {
       // Once we have the lock we dont need to worry about it changing
       // from under us.
-      if (file_exists($this->filename()) && is_readable($this->filename())) {
+      if (is_readable($this->filename())) {
         include($this->filename());
         $data_key = $this->key;
         if (isset(${$data_key}) && is_array(${$data_key})) {
