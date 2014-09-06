@@ -25,13 +25,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     $this->server->setProperty('phpfpm_mode', 'port');
     $this->server->setProperty('subdirs_support', FALSE);
     $if_subdirs = drush_get_option('hosting_features', array());
-    if ((array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs'])) {
-      $subdirs_support = TRUE;
-    }
-    else {
-      $subdirs_support = FALSE;
-    }
-    if ($subdirs_support) {
+    if (array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs']) {
       $this->server->subdirs_support = TRUE;
       $this->configs['site'][] = 'Provision_Config_Nginx_Subdir';
       $this->configs['site'][] = 'Provision_Config_Nginx_SubdirVhost';
@@ -86,13 +80,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
 
     // Set correct subdirs_support value on server save
     $if_subdirs = drush_get_option('hosting_features', array());
-    if ((array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs'])) {
-      $subdirs_support = TRUE;
-    }
-    else {
-      $subdirs_support = FALSE;
-    }
-    if ($subdirs_support) {
+    if (array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs']) {
       $this->server->subdirs_support = TRUE;
     }
   }
@@ -144,13 +132,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
 
     // Set correct subdirs_support value on server verify
     $if_subdirs = drush_get_option('hosting_features', array());
-    if ((array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs'])) {
-      $subdirs_support = TRUE;
-    }
-    else {
-      $subdirs_support = FALSE;
-    }
-    if ($subdirs_support) {
+    if (array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs']) {
       $this->server->subdirs_support = TRUE;
     }
 

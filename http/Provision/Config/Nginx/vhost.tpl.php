@@ -69,13 +69,7 @@ else {
 }
 $if_subsite = $this->data['http_subdird_path'] . '/' . $this->uri;
 $if_subdirs = drush_get_option('hosting_features', array());
-if ((array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs'])) {
-  $subdirs_support = TRUE;
-}
-else {
-  $subdirs_support = FALSE;
-}
-if ($subdirs_support && provision_file()->exists($if_subsite)->status()) {
+if (array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs'] && provision_file()->exists($if_subsite)->status()) {
   print "  include       " . $if_subsite . "/*.conf;\n";
 }
 ?>
