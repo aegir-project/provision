@@ -127,7 +127,7 @@ class Provision_Config {
     if (!empty($templates) && is_array($templates)) {
       foreach ($templates as $file) {
         if (file_exists($file) && is_readable($file)) {
-          drush_log("Template loaded: $file");
+          drush_log("Template loaded A: $file");
           return file_get_contents($file);
         }
       }
@@ -145,7 +145,7 @@ class Provision_Config {
         $file = $base_dir . '/' . $this->template;
 
         if (file_exists($file) && is_readable($file)) {
-          drush_log("Template loaded: $file");
+          drush_log("Template loaded B: $file");
           return file_get_contents($file);
         }
 
@@ -205,8 +205,8 @@ class Provision_Config {
         }
 
         $status = provision_file()->file_put_contents($filename, $this->render_template($template, $this->data))
-          ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description . ' (' . $filename. ')'), 'success')
-          ->fail('Could not generate ' . (empty($this->description) ? $filename : $this->description . ' (' . $filename. ')'))->status();
+          ->succeed('Generated config A ' . (empty($this->description) ? $filename : $this->description . ' (' . $filename. ')'), 'success')
+          ->fail('Could not generate A ' . (empty($this->description) ? $filename : $this->description . ' (' . $filename. ')'))->status();
 
         // Change the permissions of the file if needed
         if (!is_null($this->mode)) {
@@ -227,7 +227,7 @@ class Provision_Config {
   // allow overriding w.r.t locking
   function file_put_contents($filename, $text) {
     provision_file()->file_put_contents($filename, $text)
-      ->succeed('Generated config ' . (empty($this->description) ? $filename : $this->description), 'success');
+      ->succeed('Generated config B ' . (empty($this->description) ? $filename : $this->description), 'success');
   }
 
   /**
