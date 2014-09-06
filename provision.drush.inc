@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Provisoon Drush commands.
+ * Provision Drush commands.
  *
  *
  * This module provides a framework for a Drupal site to manage and install new Drupal sites, using the command line
@@ -447,3 +447,12 @@ function provision_load_critical($load = NULL, $threshold = NULL) {
   }
   return ($load[0] > $threshold);
 }
+
+/**
+ * Check whether a Hosting feature is enabled.
+ */
+function provision_hosting_feature_enabled($feature) {
+  $features = drush_get_option('hosting_features', array());
+  return array_key_exists($feature, $features) && $features[$feature];
+}
+

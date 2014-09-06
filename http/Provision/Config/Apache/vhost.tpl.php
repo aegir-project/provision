@@ -22,7 +22,7 @@
 
 <?php
 if (sizeof($this->aliases)) {
-  print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
+  print "\n  ServerAlias " . implode("\n  ServerAlias ", $this->aliases) . "\n";
 }
 ?>
 
@@ -86,8 +86,7 @@ if ($this->redirection || $ssl_redirection) {
 
 <?php
 $if_subsite = $this->data['http_subdird_path'] . '/' . $this->uri;
-$if_subdirs = drush_get_option('hosting_features', array());
-if (array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs'] && provision_file()->exists($if_subsite)->status()) {
+if (provision_hosting_feature_enabled('subdirs') && provision_file()->exists($if_subsite)->status()) {
   print "  Include " . $if_subsite . "/*.conf\n";
 }
 ?>
