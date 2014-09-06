@@ -36,7 +36,7 @@ We are making the following assumptions:
   }
 
   // If the alias file exists, it means we are migrating from a post alpha9 release.
-  if (file_exists($alias_file)) {
+  if (is_readable($alias_file)) {
     provision_backend_invoke('@server_master', 'provision-verify');
     provision_backend_invoke('@hostmaster', 'provision-verify');
 
