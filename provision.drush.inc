@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Provisoon Drush commands.
+ * Provision Drush commands.
  *
  *
  * This module provides a framework for a Drupal site to manage and install new Drupal sites, using the command line
