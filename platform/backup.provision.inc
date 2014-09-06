@@ -20,7 +20,7 @@ function drush_provision_drupal_provision_backup_validate($backup_file = NULL) {
      drush_set_error('PROVISION_DRUPAL_SITE_NOT_FOUND');
    }
 
-  // This is the actual drupal provisioning requirements. 
+  // This is the actual drupal provisioning requirements.
   if (!is_dir(d()->platform->server->backup_path)) {
     drush_set_error('PROVISION_BACKUP_PATH_NOT_FOUND');
   }
@@ -126,7 +126,7 @@ function drush_provision_drupal_post_provision_backup() {
  */
 function drush_provision_drupal_provision_backup_rollback() {
   $backup_file = drush_get_option('backup_file');
-  if (file_exists($backup_file)) {
+  if (is_readable($backup_file) && is_file($backup_file)) {
     provision_file()->unlink($backup_file)
       ->succeed('Removed stale backup file @path')
       ->fail('Failed deleting backup file @path');
