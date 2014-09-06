@@ -288,7 +288,7 @@ class Provision_FileSystem extends Provision_ChainedState {
 
     $this->tokens = array('@path' => $path, '@target' => $target);
 
-    if (file_exists($path) && is_readable($path)) {
+    if (is_readable($path)) {
       if (is_writeable(dirname($target)) && !file_exists($target) && !is_dir($target)) {
         $this->mkdir($target);
         $oldcwd = getcwd();

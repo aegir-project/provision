@@ -126,7 +126,7 @@ class Provision_Config {
     drush_command_invoke_all_ref('provision_config_load_templates_alter', $templates, $this);
     if (!empty($templates) && is_array($templates)) {
       foreach ($templates as $file) {
-        if (file_exists($file) && is_readable($file)) {
+        if (is_readable($file)) {
           drush_log("Template loaded A: $file");
           return file_get_contents($file);
         }
@@ -144,7 +144,7 @@ class Provision_Config {
 
         $file = $base_dir . '/' . $this->template;
 
-        if (file_exists($file) && is_readable($file)) {
+        if (is_readable($file)) {
           drush_log("Template loaded B: $file");
           return file_get_contents($file);
         }
