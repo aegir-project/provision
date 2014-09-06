@@ -22,13 +22,19 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     $this->server->setProperty('nginx_has_gzip', FALSE);
     $this->server->setProperty('provision_db_cloaking', TRUE);
     $this->server->setProperty('phpfpm_mode', 'port');
+    $this->server->setProperty('subdirs_support', FALSE);
     if (provision_hosting_feature_enabled('subdirs')) {
+      $this->server->subdirs_support = TRUE;
       $this->configs['site'][] = 'Provision_Config_Nginx_Subdir';
       $this->configs['site'][] = 'Provision_Config_Nginx_SubdirVhost';
     }
   }
 
   function save_server() {
+
+    // Set correct provision_db_cloaking value on server save.
+    $this->server->provision_db_cloaking = TRUE;
+
     // Find nginx executable.
     if (provision_file()->exists('/usr/local/sbin/nginx')->status()) {
       $path = "/usr/local/sbin/nginx";
@@ -70,14 +76,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     }
 
     // Set correct subdirs_support value on server save
-    $if_subdirs = drush_get_option('hosting_features', array());
-    if ((array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs'])) {
-      $subdirs_support = TRUE;
-    }
-    else {
-      $subdirs_support = FALSE;
-    }
-    if ($subdirs_support) {
+    if (provision_hosting_feature_enabled('subdirs')) {
       $this->server->subdirs_support = TRUE;
     }
   }
@@ -127,14 +126,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     }
 
     // Set correct subdirs_support value on server verify
-    $if_subdirs = drush_get_option('hosting_features', array());
-    if ((array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs'])) {
-      $subdirs_support = TRUE;
-    }
-    else {
-      $subdirs_support = FALSE;
-    }
-    if ($subdirs_support) {
+    if (provision_hosting_feature_enabled('subdirs')) {
       $this->server->subdirs_support = TRUE;
     }
 
