@@ -23,13 +23,26 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     $this->server->setProperty('nginx_has_upload_progress', FALSE);
     $this->server->setProperty('provision_db_cloaking', TRUE);
     $this->server->setProperty('phpfpm_mode', 'port');
-    if (subdirs_drush_load()) {
+    $this->server->setProperty('subdirs_support', FALSE);
+    $if_subdirs = drush_get_option('hosting_features', array());
+    if ((array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs'])) {
+      $subdirs_support = TRUE;
+    }
+    else {
+      $subdirs_support = FALSE;
+    }
+    if ($subdirs_support) {
+      $this->server->subdirs_support = TRUE;
       $this->configs['site'][] = 'Provision_Config_Nginx_Subdir';
       $this->configs['site'][] = 'Provision_Config_Nginx_SubdirVhost';
     }
   }
 
   function save_server() {
+
+    // Set correct provision_db_cloaking value on server save.
+    $this->server->provision_db_cloaking = TRUE;
+
     // Find nginx executable.
     if (provision_file()->exists('/usr/local/sbin/nginx')->status()) {
       $path = "/usr/local/sbin/nginx";
@@ -43,6 +56,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     else {
       return;
     }
+
     // Check if some nginx features are supported and save them for later.
     $this->server->shell_exec($path . ' -V');
     $this->server->nginx_is_modern = preg_match("/nginx\/1\.((1\.(8|9|(1[0-9]+)))|((2|3|4|5|6|7|8|9)\.))/", implode('', drush_shell_exec_output()), $match);
@@ -69,9 +83,25 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
       $this->server->phpfpm_mode = 'port';
       drush_log(dt('PHP-FPM port mode detected -SAVE- NO socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
     }
+
+    // Set correct subdirs_support value on server save
+    $if_subdirs = drush_get_option('hosting_features', array());
+    if ((array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs'])) {
+      $subdirs_support = TRUE;
+    }
+    else {
+      $subdirs_support = FALSE;
+    }
+    if ($subdirs_support) {
+      $this->server->subdirs_support = TRUE;
+    }
   }
 
   function verify_server_cmd() {
+
+    // Set correct provision_db_cloaking value on server verify.
+    $this->server->provision_db_cloaking = TRUE;
+
     // Find nginx executable.
     if (provision_file()->exists('/usr/local/sbin/nginx')->status()) {
       $path = "/usr/local/sbin/nginx";
@@ -110,6 +140,18 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     else {
       $this->server->phpfpm_mode = 'port';
       drush_log(dt('PHP-FPM port mode detected -VERIFY- NO socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
+    }
+
+    // Set correct subdirs_support value on server verify
+    $if_subdirs = drush_get_option('hosting_features', array());
+    if ((array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs'])) {
+      $subdirs_support = TRUE;
+    }
+    else {
+      $subdirs_support = FALSE;
+    }
+    if ($subdirs_support) {
+      $this->server->subdirs_support = TRUE;
     }
 
     // Call the parent at the end. it will restart the server when it finishes.

@@ -48,8 +48,12 @@ print "<?php \n"; ?>
   $aliases = d()->aliases;
   // Fix our subdir aliases.
   foreach ($aliases as $alias) {
-    $records[str_replace('/', '.', $alias)] = $records[$alias];
-    unset($records[$alias]);
+    // Only replace the records[] array key if the alias is a subdir alias
+    // Patch for https://drupal.org/node/2213387
+    if(strpos($alias, "/")) {
+      $records[str_replace('/', '.', $alias)] = $records[$alias];
+      unset($records[$alias]);
+    }
   }
 ?>
 $sites = <?php print var_export($records, TRUE) ?>;

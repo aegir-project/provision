@@ -68,7 +68,14 @@ else {
   print "  include       " . $server->include_path . "/nginx_vhost_common.conf;\n";
 }
 $if_subsite = $this->data['http_subdird_path'] . '/' . $this->uri;
-if (subdirs_drush_load() && provision_file()->exists($if_subsite)->status()) {
+$if_subdirs = drush_get_option('hosting_features', array());
+if ((array_key_exists('subdirs', $if_subdirs) && $if_subdirs['subdirs'])) {
+  $subdirs_support = TRUE;
+}
+else {
+  $subdirs_support = FALSE;
+}
+if ($subdirs_support && provision_file()->exists($if_subsite)->status()) {
   print "  include       " . $if_subsite . "/*.conf;\n";
 }
 ?>
