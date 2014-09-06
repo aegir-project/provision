@@ -29,7 +29,7 @@ We are making the following assumptions:
 
   if (!file_exists($platform)) {
     $dir = realpath(dirname($platform));
-    if (file_exists($dir)) {
+    if (is_dir($dir)) {
       $platform = $dir . '/' . basename($platform);
       drush_log("changed relative platform path to absolute");
     }
