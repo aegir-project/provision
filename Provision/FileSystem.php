@@ -118,7 +118,7 @@ class Provision_FileSystem extends Provision_ChainedState {
   function unlink($path) {
     $this->_clear_state();
 
-    if (file_exists($path) || is_link($path)) {
+    if (is_file($path) || is_link($path)) {
       $this->last_status = unlink($path);
     }
     else {
