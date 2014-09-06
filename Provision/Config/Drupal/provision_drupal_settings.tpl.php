@@ -157,11 +157,11 @@ if (isset($_SERVER['db_name'])) {
 <?php print $extra_config; ?>
 
   # Additional host wide configuration settings. Useful for safely specifying configuration settings.
-  if (file_exists('<?php print $this->platform->server->include_path  ?>/global.inc')) {
+  if (is_readable('<?php print $this->platform->server->include_path  ?>/global.inc')) {
     include_once('<?php print $this->platform->server->include_path  ?>/global.inc');
   }
 
   # Additional site configuration settings.
-  if (file_exists('<?php print $this->site_path  ?>/local.settings.php')) {
+  if (is_readable('<?php print $this->site_path  ?>/local.settings.php')) {
     include_once('<?php print $this->site_path  ?>/local.settings.php');
   }
