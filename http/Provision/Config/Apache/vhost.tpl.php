@@ -1,10 +1,10 @@
 <VirtualHost *:<?php print $http_port; ?>>
 <?php if ($this->site_mail) : ?>
-  ServerAdmin <?php  print $this->site_mail; ?> 
+  ServerAdmin <?php  print $this->site_mail; ?>
 <?php endif;?>
 
-  DocumentRoot <?php print $this->root; ?> 
-    
+  DocumentRoot <?php print $this->root; ?>
+
   ServerName <?php print $this->uri; ?>
 
   SetEnv db_type  <?php print urlencode($db_type); ?>
@@ -20,7 +20,7 @@
   SetEnv db_port  <?php print urlencode($db_port); ?>
 
 
-<?php 
+<?php
 if (sizeof($this->aliases)) {
   print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
 }
@@ -83,7 +83,7 @@ if ($this->redirection || $ssl_redirection) {
         php_flag engine off
       </IfModule>
     </Directory>
-    
+
 <?php
 $if_subsite = $this->data['http_subdird_path'] . '/' . $this->uri;
 if (subdirs_drush_load() && provision_file()->exists($if_subsite)->status()) {
