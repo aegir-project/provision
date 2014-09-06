@@ -395,7 +395,7 @@ function _provision_default_web_group() {
  */
 function provision_count_cpus() {
   $ncpus = FALSE;
-  if (file_exists("/data/all/cpuinfo")) {
+  if (is_readable("/data/all/cpuinfo")) {
     # this should work on BOA with a /data/all/cpuinfo generated daily
     $cpuinfo = file_get_contents("/data/all/cpuinfo");
     $cpuinfo = str_replace('\n', '', $cpuinfo);
@@ -403,7 +403,7 @@ function provision_count_cpus() {
       $ncpus = $cpuinfo;
     }
   }
-  elseif (file_exists("/proc/cpuinfo")) {
+  elseif (is_readable("/proc/cpuinfo")) {
     # this should work on Linux with a /proc filesystem
     $cpuinfo = file_get_contents("/proc/cpuinfo");
     if ($cpuinfo !== FALSE) {
