@@ -78,7 +78,7 @@ function provision_drupal_drush_exit() {
  *   If the file exists, return TRUE, else return FALSE.
  */
 function _provision_drupal_site_exists() {
-  return file_exists(d()->site_path . '/settings.php');
+  return is_readable(d()->site_path . '/settings.php');
 }
 
 /**
