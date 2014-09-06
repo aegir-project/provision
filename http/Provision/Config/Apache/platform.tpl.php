@@ -8,7 +8,7 @@
 
 
 <?php
-  if (file_exists("{$this->root}/.htaccess")) {
+  if (is_readable("{$this->root}/.htaccess")) {
     print "\n# Include the platform's htaccess file\n";
     print "Include {$this->root}/.htaccess\n";
   }
