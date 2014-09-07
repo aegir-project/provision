@@ -1,9 +1,37 @@
+<?php
+$nginx_config_mode = drush_get_option('nginx_config_mode');
+if (!$nginx_config_mode && $server->nginx_config_mode) {
+  $nginx_config_mode = $server->nginx_config_mode;
+}
+$phpfpm_mode = drush_get_option('phpfpm_mode');
+if (!$phpfpm_mode && $server->phpfpm_mode) {
+  $phpfpm_mode = $server->phpfpm_mode;
+}
+$nginx_is_modern = drush_get_option('nginx_is_modern');
+if (!$nginx_is_modern && $server->nginx_is_modern) {
+  $nginx_is_modern = $server->nginx_is_modern;
+}
+$nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
+if (!$nginx_has_upload_progress && $server->nginx_has_upload_progress) {
+  $nginx_has_upload_progress = $server->nginx_has_upload_progress;
+}
+$satellite_mode = drush_get_option('satellite_mode');
+if (!$satellite_mode && $server->satellite_mode) {
+  $satellite_mode = $server->satellite_mode;
+}
+?>
 #######################################################
-###  nginx.conf site standard vhost include start
+<?php if ($nginx_config_mode == 'extended'): ?>
+###  nginx.conf site level extended vhost include start
+<?php else: ?>
+###  nginx.conf site level basic vhost include start
+<?php endif; ?>
 #######################################################
 
+<?php if ($nginx_config_mode == 'extended'): ?>
 set $nocache_details "Cache";
 
+<?php if ($satellite_mode == 'boa'): ?>
 ###
 ### Deny crawlers.
 ###
@@ -15,6 +43,7 @@ if ($is_crawler) {
 ### Include high load protection config if exists.
 ###
 include /data/conf/nginx_high_load.c*;
+<?php endif; ?>
 
 ###
 ### Deny not compatible request methods without 405 response.
@@ -30,10 +59,12 @@ if ($is_denied) {
   return 403;
 }
 
+<?php if ($satellite_mode == 'boa'): ?>
 ###
 ### Include high level local configuration override if exists.
 ###
 include /data/disk/EDIT_USER/config/server_master/nginx/post.d/nginx_force_include*;
+<?php endif; ?>
 
 ###
 ### HTTPRL standard support.
@@ -89,6 +120,7 @@ location ^~ /cdn/farfuture/ {
   }
   try_files $uri @nobots;
 }
+<?php endif; ?>
 
 ###
 ### If favicon else return error 204.
@@ -108,9 +140,14 @@ location = /favicon.ico {
 location = /robots.txt {
   access_log    off;
   log_not_found off;
+<?php if ($nginx_config_mode == 'extended'): ?>
   try_files /sites/$server_name/files/$host.robots.txt /sites/$server_name/files/robots.txt $uri @cache;
+<?php else: ?>
+  try_files /sites/$server_name/files/$host.robots.txt /sites/$server_name/files/robots.txt $uri @drupal;
+<?php endif; ?>
 }
 
+<?php if ($satellite_mode == 'boa'): ?>
 ###
 ### Allow local access to the FPM status page.
 ###
@@ -118,7 +155,11 @@ location = /fpm-status {
   access_log   off;
   allow        127.0.0.1;
   deny         all;
-  fastcgi_pass 127.0.0.1:9090;
+<?php if ($phpfpm_mode == 'port'): ?>
+  fastcgi_pass 127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
 }
 
 ###
@@ -128,9 +169,15 @@ location = /fpm-ping {
   access_log   off;
   allow        127.0.0.1;
   deny         all;
-  fastcgi_pass 127.0.0.1:9090;
+<?php if ($phpfpm_mode == 'port'): ?>
+  fastcgi_pass 127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
 }
+<?php endif; ?>
 
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Allow local access to support wget method in Aegir settings
 ### for running sites cron.
@@ -139,10 +186,16 @@ location = /cron.php {
   tcp_nopush   off;
   keepalive_requests 0;
   access_log   off;
+<?php if ($satellite_mode == 'boa'): ?>
   allow        127.0.0.1;
   deny         all;
+<?php endif; ?>
   try_files    $uri =404;
-  fastcgi_pass unix:cron:fastcgi.socket;
+<?php if ($phpfpm_mode == 'port'): ?>
+  fastcgi_pass 127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
 }
 
 ###
@@ -153,10 +206,16 @@ location = /core/cron.php {
   tcp_nopush   off;
   keepalive_requests 0;
   access_log   off;
+<?php if ($satellite_mode == 'boa'): ?>
   allow        127.0.0.1;
   deny         all;
+<?php endif; ?>
   try_files    $uri =404;
-  fastcgi_pass unix:cron:fastcgi.socket;
+<?php if ($phpfpm_mode == 'port'): ?>
+  fastcgi_pass 127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
 }
 
 ###
@@ -184,6 +243,7 @@ location ^~ /js/ {
   }
 }
 
+<?php if ($nginx_has_upload_progress): ?>
 ###
 ### Upload progress support.
 ### https://drupal.org/project/filefield_nginx_progress
@@ -198,7 +258,9 @@ location ^~ /progress {
   upload_progress_json_output;
   report_uploads uploads;
 }
+<?php endif; ?>
 
+<?php if ($satellite_mode == 'boa'): ?>
 ###
 ### Deny access to Hostmaster web/db server node.
 ### It is still possible to edit or break web/db server
@@ -230,6 +292,7 @@ location ^~ /hosting/c/server_localhost {
   access_log off;
   rewrite ^ $scheme://$host/hosting/sites permanent;
 }
+<?php endif; ?>
 
 ###
 ### Fix for #2005116
@@ -255,6 +318,7 @@ location ^~ /hosting {
   try_files $uri @cache;
 }
 
+<?php if ($satellite_mode == 'boa'): ?>
 ###
 ### Deny cache details display.
 ###
@@ -270,6 +334,7 @@ location ^~ /admin/config/development/performance/redis {
   access_log off;
   rewrite ^ $scheme://$host/admin/config/development/performance permanent;
 }
+<?php endif; ?>
 
 ###
 ### Support for backup_migrate module download/restore/delete actions.
@@ -309,6 +374,7 @@ location ^~ /audio/download {
     try_files $uri @drupal;
   }
 }
+<?php endif; ?>
 
 ###
 ### Deny listed requests for security reasons.
@@ -334,6 +400,7 @@ location ~* ^/sites/.*/files/civicrm/(?:ConfigAndLog|upload|templates_c) {
   return 404;
 }
 
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Deny some not supported URI like cgi-bin on the Nginx level.
 ###
@@ -381,6 +448,7 @@ location ~* /(?:.+)/files/styles/adaptive/(?:.+)$ {
   set $nocache_details "Skip";
   try_files  $uri @drupal;
 }
+<?php endif; ?>
 
 ###
 ### Imagecache and imagecache_external support.
@@ -389,6 +457,7 @@ location ~* /(?:external|system|files/imagecache|files/styles)/ {
   access_log off;
   log_not_found off;
   expires    30d;
+<?php if ($nginx_config_mode == 'extended'): ?>
   # fix common problems with old paths after import from standalone to Aegir multisite
   rewrite    ^/sites/(.*)/files/imagecache/(.*)/sites/default/files/(.*)$  /sites/$server_name/files/imagecache/$2/$3 last;
   rewrite    ^/sites/(.*)/files/imagecache/(.*)/files/(.*)$                /sites/$server_name/files/imagecache/$2/$3 last;
@@ -396,6 +465,10 @@ location ~* /(?:external|system|files/imagecache|files/styles)/ {
   rewrite    ^/files/styles/(.*)$                                          /sites/$server_name/files/styles/$1 last;
   add_header X-Header "IC Generator 1.0";
   set $nocache_details "Skip";
+<?php else: ?>
+  rewrite    ^/files/imagecache/(.*)$  /sites/$server_name/files/imagecache/$1 last;
+  rewrite    ^/files/styles/(.*)$  /sites/$server_name/files/styles/$1 last;
+<?php endif; ?>
   try_files  $uri @drupal;
 }
 
@@ -415,11 +488,14 @@ location ~* ^/sites/.*/files/config_.* {
   deny all;
 }
 
+<?php if ($satellite_mode == 'boa'): ?>
 ###
 ### Include local configuration override if exists.
 ###
 include /data/disk/EDIT_USER/config/server_master/nginx/post.d/nginx_vhost_include*;
+<?php endif; ?>
 
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Private downloads are always sent to the drupal backend.
 ### Note: this location doesn't work with X-Accel-Redirect.
@@ -434,6 +510,7 @@ location ~* ^/sites/.*/files/private/ {
   set $nocache_details "Skip";
   try_files  $uri @drupal;
 }
+<?php endif; ?>
 
 ###
 ### Deny direct access to private downloads in sites/domain/private.
@@ -441,12 +518,15 @@ location ~* ^/sites/.*/files/private/ {
 ###
 location ~* ^/sites/.*/private/ {
   internal;
+<?php if ($nginx_config_mode == 'extended'): ?>
   if ($is_bot) {
     return 403;
   }
+<?php endif; ?>
   access_log off;
 }
 
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Deny direct access to private downloads also for short, rewritten URLs.
 ### Note: this location works with X-Accel-Redirect.
@@ -474,7 +554,11 @@ location ~* wysiwyg_fields/(?:plugins|scripts)/.*\.(?:js|css) {
 location ~* files/advagg_(?:css|js)/ {
   expires    max;
   access_log off;
+<?php if ($nginx_is_modern): ?>
   etag       off;
+<?php else: ?>
+  add_header ETag "";
+<?php endif; ?>
   rewrite    ^/files/advagg_(.*)/(.*)$ /sites/$server_name/files/advagg_$1/$2 last;
   add_header Cache-Control "max-age=31449600, no-transform, public";
   add_header Access-Control-Allow-Origin *;
@@ -549,6 +633,7 @@ location @uncached {
   access_log off;
   expires max; # max if using aggregator, otherwise sane expire time
 }
+<?php endif; ?>
 
 ###
 ### Map /files/ shortcut early to avoid overrides in other locations.
@@ -563,7 +648,11 @@ location ^~ /files/ {
     rewrite  ^/files/(.*)$  /sites/$server_name/files/$1 last;
     try_files   $uri =404;
   }
+<?php if ($nginx_config_mode == 'extended'): ?>
   try_files $uri @cache;
+<?php else: ?>
+  try_files $uri @drupal;
+<?php endif; ?>
 }
 
 ###
@@ -579,7 +668,11 @@ location ^~ /downloads/ {
     rewrite  ^/downloads/(.*)$  /sites/$server_name/files/downloads/$1 last;
     try_files   $uri =404;
   }
+<?php if ($nginx_config_mode == 'extended'): ?>
   try_files $uri @cache;
+<?php else: ?>
+  try_files $uri @drupal;
+<?php endif; ?>
 }
 
 ###
@@ -594,7 +687,6 @@ location ~* ^.+\.(?:jpe?g|gif|png|ico|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rt
   add_header  Access-Control-Allow-Origin *;
   rewrite     ^/images/(.*)$  /sites/$server_name/files/images/$1 last;
   rewrite     ^/.+/sites/.+/files/(.*)$  /sites/$server_name/files/$1 last;
-  rewrite     ^/odules/civicrm/(.*)$     /sites/all/modules/civicrm/$1 last;
   try_files   $uri =404;
 }
 
@@ -626,6 +718,7 @@ location ~* ^/sites/.+/files/.+\.(?:pdf|aspx?)$ {
   try_files   $uri =404;
 }
 
+<?php if ($satellite_mode == 'boa'): ?>
 ###
 ### Pseudo-streaming server-side support for Flash Video (FLV) files.
 ###
@@ -651,6 +744,7 @@ location ~* ^.+\.(?:mp4|m4a)$ {
   expires 30d;
   try_files $uri =404;
 }
+<?php endif; ?>
 
 ###
 ### Serve & no-log some static files as is, without forcing default_type.
@@ -663,11 +757,14 @@ location ~* /(?:cross-?domain)\.xml$ {
   try_files   $uri =404;
 }
 
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Allow some known php files (like serve.php in the ad module).
 ###
 location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tinymce|wysiwyg_spellcheck|ecc|civicrm|fbconnect|radioactivity)/.*\.php$ {
+<?php if ($satellite_mode == 'boa'): ?>
   limit_conn   limreq 88;
+<?php endif; ?>
   tcp_nopush   off;
   keepalive_requests 0;
   access_log   off;
@@ -675,7 +772,11 @@ location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tin
     return 403;
   }
   try_files    $uri =404;
-  fastcgi_pass 127.0.0.1:9090;
+<?php if ($phpfpm_mode == 'port'): ?>
+  fastcgi_pass 127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
 }
 
 ###
@@ -687,8 +788,12 @@ location ~* /(?:ahah|ajax|batch|autocomplete|webform|done|progress/|x-progress-i
   }
   access_log off;
   log_not_found off;
+<?php if ($nginx_config_mode == 'extended'): ?>
   set $nocache_details "Skip";
   try_files $uri @nobots;
+<?php else: ?>
+  try_files $uri @drupal;
+<?php endif; ?>
 }
 
 ###
@@ -735,6 +840,7 @@ location ~* \.xml$ {
   try_files /cache/normal/$host${uri}_.xml /cache/normal/$host${uri}_.html $uri @drupal;
 }
 
+<?php if ($satellite_mode == 'boa'): ?>
 ###
 ### Deny bots on never cached uri.
 ###
@@ -809,7 +915,7 @@ location ~ ^/(?<esi>esi/.*)"$ {
   ###
   fastcgi_param QUERY_STRING q=$esi;
   fastcgi_param SCRIPT_FILENAME $document_root/index.php;
-  fastcgi_pass  127.0.0.1:9090;
+  fastcgi_pass  127.0.0.1:9000;
   ###
   ### Use Nginx cache for all visitors.
   ###
@@ -841,17 +947,26 @@ location ~ ^/(?<esi>esi/.*)"$ {
 if ( $args ~* "^q=(?<query_value>.*)" ) {
   rewrite ^/index.php$ $scheme://$host/?q=$query_value? permanent;
 }
+<?php endif; ?>
+<?php endif; ?>
 
 ###
 ### Catch all unspecified requests.
 ###
 location / {
+<?php if ($nginx_config_mode == 'extended'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
   if ( $http_user_agent ~* wget ) {
     return 403;
   }
+<?php endif; ?>
   try_files $uri @cache;
+<?php else: ?>
+  try_files $uri @drupal;
+<?php endif; ?>
 }
 
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Boost compatible cache check.
 ###
@@ -883,18 +998,22 @@ location @cache {
   charset    utf-8;
   try_files  /cache/normal/$host${uri}_$args.html @drupal;
 }
+<?php endif; ?>
 
 ###
 ### Send all not cached requests to drupal with clean URLs support.
 ###
 location @drupal {
+<?php if ($nginx_config_mode == 'extended'): ?>
   error_page 418 = @nobots;
   if ($args) {
     return 418;
   }
+<?php endif; ?>
   rewrite ^/(.*)$  /index.php?q=$1 last;
 }
 
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Send all known bots to $args free URLs.
 ###
@@ -916,23 +1035,33 @@ location @nobots {
 ### Send all non-static requests to php-fpm, restricted to known php file.
 ###
 location = /index.php {
+<?php if ($satellite_mode == 'boa'): ?>
   internal;
   limit_conn    limreq 88;
   add_header    X-Device "$device";
+<?php endif; ?>
   add_header    X-Speed-Cache "$upstream_cache_status";
   add_header    X-Speed-Cache-UID "$cache_uid";
   add_header    X-Speed-Cache-Key "$key_uri";
   add_header    X-NoCache "$nocache_details";
+<?php if ($satellite_mode == 'boa'): ?>
   add_header    X-GeoIP-Country-Code "$geoip_country_code";
   add_header    X-GeoIP-Country-Name "$geoip_country_name";
   add_header    X-This-Proto "$http_x_forwarded_proto";
   add_header    X-Server-Name "$server_name";
+<?php endif; ?>
   add_header    Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   tcp_nopush    off;
   keepalive_requests 0;
   try_files     $uri =404; ### check for existence of php file first
-  fastcgi_pass  127.0.0.1:9090;
+<?php if ($phpfpm_mode == 'port'): ?>
+  fastcgi_pass  127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass  unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
+<?php if ($nginx_has_upload_progress): ?>
   track_uploads uploads 60s; ### required for upload progress
+<?php endif; ?>
   ###
   ### Use Nginx cache for all visitors.
   ###
@@ -956,22 +1085,35 @@ location = /index.php {
   fastcgi_cache_bypass $cookie_NoCacheID $http_authorization $http_pragma $nocache;
   fastcgi_cache_use_stale error http_500 http_503 invalid_header timeout updating;
 }
+<?php endif; ?>
 
 ###
 ### Send other known php requests/files to php-fpm without any caching.
 ###
+<?php if ($nginx_config_mode == 'extended'): ?>
 location ~* ^/(?:core/)?(?:boost_stats|rtoc|js)\.php$ {
+<?php else: ?>
+location ~* ^/(?:index|cron|boost_stats|update|authorize)\.php$ {
+  add_header   X-Engine "Aegir";
+<?php endif; ?>
+<?php if ($satellite_mode == 'boa'): ?>
   limit_conn   limreq 88;
   if ($is_bot) {
     return 404;
   }
+<?php endif; ?>
   tcp_nopush   off;
   keepalive_requests 0;
   access_log   off;
   try_files    $uri =404; ### check for existence of php file first
-  fastcgi_pass 127.0.0.1:9090;
+<?php if ($phpfpm_mode == 'port'): ?>
+  fastcgi_pass 127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
 }
 
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Allow access to /authorize.php and /update.php only for logged in admin user.
 ###
@@ -992,8 +1134,13 @@ location @allowupdate {
   keepalive_requests 0;
   access_log   off;
   try_files    $uri =404; ### check for existence of php file first
-  fastcgi_pass 127.0.0.1:9090;
+<?php if ($phpfpm_mode == 'port'): ?>
+  fastcgi_pass 127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
 }
+<?php endif; ?>
 
 ###
 ### Deny access to any not listed above php files with 404 error.
@@ -1003,5 +1150,9 @@ location ~* ^.+\.php$ {
 }
 
 #######################################################
-###  nginx.conf site standard vhost include end
+<?php if ($nginx_config_mode == 'extended'): ?>
+###  nginx.conf site level extended vhost include end
+<?php else: ?>
+###  nginx.conf site level basic vhost include end
+<?php endif; ?>
 #######################################################

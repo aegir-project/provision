@@ -25,6 +25,11 @@ if (!$nginx_has_upload_progress && $server->nginx_has_upload_progress) {
   $nginx_has_upload_progress = $server->nginx_has_upload_progress;
 }
 
+$satellite_mode = drush_get_option('satellite_mode');
+if (!$satellite_mode && $server->satellite_mode) {
+  $satellite_mode = $server->satellite_mode;
+}
+
 if ($nginx_is_modern) {
   print "  limit_conn_zone \$binary_remote_addr zone=limreq:10m;\n";
 }
@@ -42,6 +47,7 @@ if ($nginx_has_upload_progress) {
 ?>
 
 <?php if ($nginx_config_mode == 'extended'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
  ## FastCGI params
   fastcgi_param  SCRIPT_FILENAME     $document_root$fastcgi_script_name;
   fastcgi_param  QUERY_STRING        $query_string;
@@ -66,6 +72,7 @@ if ($nginx_has_upload_progress) {
   fastcgi_param  GEOIP_COUNTRY_NAME  $geoip_country_name;
   fastcgi_param  REDIRECT_STATUS     200;
   fastcgi_index  index.php;
+<?php endif; ?>
 
  ## Default index files
   index         index.php index.html;
@@ -116,19 +123,21 @@ if ($nginx_has_upload_progress) {
   reset_timedout_connection       on;
   fastcgi_intercept_errors        on;
   server_tokens                  off;
+<?php if ($satellite_mode == 'boa'): ?>
   fastcgi_hide_header         'Link';
   fastcgi_hide_header  'X-Generator';
   fastcgi_hide_header 'X-Powered-By';
   fastcgi_hide_header 'X-Drupal-Cache';
-
- ## TCP options moved to /etc/nginx/nginx.conf
+<?php endif; ?>
 
  ## SSL performance
   ssl_session_cache   shared:SSL:10m;
   ssl_session_timeout            10m;
 
+<?php if ($satellite_mode == 'boa'): ?>
  ## GeoIP support
   geoip_country /usr/share/GeoIP/GeoIP.dat;
+<?php endif; ?>
 
  ## Compression
   gzip_buffers      16 8k;
@@ -172,8 +181,9 @@ if ($nginx_has_upload_progress) {
 
 <?php print $extra_config; ?>
 <?php if ($nginx_config_mode == 'extended'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
   error_log              /var/log/nginx/error.log crit;
-
+<?php endif; ?>
 #######################################################
 ###  nginx default maps
 #######################################################
@@ -245,14 +255,19 @@ server {
   listen       *:<?php print $http_port; ?>;
   server_name  _;
   location / {
-     expires 99s;
-     add_header Cache-Control "public, must-revalidate, proxy-revalidate";
-     add_header Access-Control-Allow-Origin *;
-     root   /var/www/nginx-default;
-     index  index.html index.htm;
+<?php if ($satellite_mode == 'boa'): ?>
+    expires 99s;
+    add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+    add_header Access-Control-Allow-Origin *;
+    root   /var/www/nginx-default;
+    index  index.html index.htm;
+<?php else: ?>
+    return 404;
+<?php endif; ?>
   }
 }
 
+<?php if ($satellite_mode == 'boa'): ?>
 server {
   listen       *:<?php print $http_port; ?>;
   server_name  127.0.0.1;
@@ -263,6 +278,7 @@ server {
     deny all;
   }
 }
+<?php endif; ?>
 
 #######################################################
 ###  nginx virtual domains

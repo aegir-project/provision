@@ -42,6 +42,7 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     $this->server->setProperty('nginx_has_upload_progress', FALSE);
     $this->server->setProperty('provision_db_cloaking', TRUE);
     $this->server->setProperty('phpfpm_mode', 'port');
+    $this->server->setProperty('satellite_mode', 'vanilla');
   }
 
   function save_server() {
@@ -84,6 +85,16 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
       $this->server->phpfpm_mode = 'port';
       drush_log(dt('PHP-FPM port mode detected -SAVE- NO socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
     }
+
+    // Check if there is BOA specific global.inc file to enable extra Nginx locations
+    if (provision_file()->exists('/data/conf/global.inc')->status()) {
+      $this->server->satellite_mode = 'boa';
+      drush_log(dt('BOA mode detected -SAVE- YES file found @path.', array('@path' => '/data/conf/global.inc')));
+    }
+    else {
+      $this->server->satellite_mode = 'vanilla';
+      drush_log(dt('Vanilla mode detected -SAVE- NO file found @path.', array('@path' => '/data/conf/global.inc')));
+    }
   }
 
   function verify_server_cmd() {
@@ -125,6 +136,16 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     else {
       $this->server->phpfpm_mode = 'port';
       drush_log(dt('PHP-FPM port mode detected -VERIFY- NO socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
+    }
+
+    // Check if there is BOA specific global.inc file to enable extra Nginx locations
+    if (provision_file()->exists('/data/conf/global.inc')->status()) {
+      $this->server->satellite_mode = 'boa';
+      drush_log(dt('BOA mode detected -VERIFY- YES file found @path.', array('@path' => '/data/conf/global.inc')));
+    }
+    else {
+      $this->server->satellite_mode = 'vanilla';
+      drush_log(dt('Vanilla mode detected -VERIFY- NO file found @path.', array('@path' => '/data/conf/global.inc')));
     }
 
     // Call the parent at the end. it will restart the server when it finishes.
