@@ -94,6 +94,8 @@ location ^~ /<?php print $subdir; ?> {
     tcp_nopush   off;
     keepalive_requests 0;
     access_log   off;
+    allow        127.0.0.1;
+    deny         all;
     try_files    /cron.php $uri =404;
 <?php if ($phpfpm_mode == 'port'): ?>
     fastcgi_pass 127.0.0.1:9000;
