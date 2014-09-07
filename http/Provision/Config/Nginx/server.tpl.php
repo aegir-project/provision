@@ -74,25 +74,28 @@ if ($nginx_has_upload_progress) {
   fastcgi_index  index.php;
 <?php endif; ?>
 
- ## Default index files
-  index         index.php index.html;
-
  ## Size Limits
   client_body_buffer_size        64k;
   client_header_buffer_size      32k;
+<?php if ($satellite_mode == 'boa'): ?>
   client_max_body_size          100m;
+<?php endif; ?>
   connection_pool_size           256;
   fastcgi_buffer_size           128k;
   fastcgi_buffers             256 4k;
   fastcgi_busy_buffers_size     256k;
   fastcgi_temp_file_write_size  256k;
   large_client_header_buffers 32 32k;
+<?php if ($satellite_mode == 'boa'): ?>
   map_hash_bucket_size           192;
+<?php endif; ?>
   request_pool_size               4k;
   server_names_hash_bucket_size  512;
+<?php if ($satellite_mode == 'boa'): ?>
   server_names_hash_max_size    8192;
   types_hash_bucket_size         512;
   variables_hash_max_size       1024;
+<?php endif; ?>
 
  ## Timeouts
   client_body_timeout            180;
@@ -122,8 +125,8 @@ if ($nginx_has_upload_progress) {
   recursive_error_pages           on;
   reset_timedout_connection       on;
   fastcgi_intercept_errors        on;
-  server_tokens                  off;
 <?php if ($satellite_mode == 'boa'): ?>
+  server_tokens                  off;
   fastcgi_hide_header         'Link';
   fastcgi_hide_header  'X-Generator';
   fastcgi_hide_header 'X-Powered-By';
