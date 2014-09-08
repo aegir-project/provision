@@ -33,9 +33,11 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
     $this->version = provision_version();
     $this->api_version = provision_api_version();
     $this->cloaked = drush_get_option('provision_db_cloaking', $this->context->service('http')->cloaked_db_creds());
-    $this->subdirs_support = drush_get_option('subdirs_support');
-    if (!$this->subdirs_support) {
-      this->subdirs_support = provision_hosting_feature_enabled('subdirs');
+    if (provision_hosting_feature_enabled('subdirs')) {
+      $this->subdirs_support = TRUE;
+    }
+    else {
+      $this->subdirs_support = drush_get_option('subdirs_support');
     }
 
     foreach (array('db_type', 'db_user', 'db_passwd', 'db_host', 'db_name', 'db_port') as $key) {
