@@ -17,6 +17,13 @@ print '<?php' ?>
  * to avoid further confusion.
  */
 
+<?php if ($this->subdirs_support): ?>
+// Detecting subdirectory mode
+if (isset($_SERVER['SITE_SUBDIR']) && isset($_SERVER['RAW_HOST'])) {
+  $base_url = 'http://' . $_SERVER['RAW_HOST'] . '/' . $_SERVER['SITE_SUBDIR'];
+}
+<?php else: ?>
+
 <?php if ($this->cloaked): ?>
 if (isset($_SERVER['db_name'])) {
   /**

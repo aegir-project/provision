@@ -840,7 +840,6 @@ location ~* \.xml$ {
   try_files /cache/normal/$host${uri}_.xml /cache/normal/$host${uri}_.html $uri @drupal;
 }
 
-<?php if ($satellite_mode == 'boa'): ?>
 ###
 ### Deny bots on never cached uri.
 ###
@@ -880,6 +879,7 @@ location ~* ^/(?:.*/)?(?:node/[0-9]+/delete|approve) {
   try_files $uri @drupal;
 }
 
+<?php if ($satellite_mode == 'boa'): ?>
 ###
 ### Support for ESI microcaching: http://groups.drupal.org/node/197478.
 ###
@@ -1039,14 +1039,14 @@ location = /index.php {
   internal;
   limit_conn    limreq 88;
   add_header    X-Device "$device";
+  add_header    X-GeoIP-Country-Code "$geoip_country_code";
+  add_header    X-GeoIP-Country-Name "$geoip_country_name";
 <?php endif; ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
   add_header    X-Speed-Cache "$upstream_cache_status";
   add_header    X-Speed-Cache-UID "$cache_uid";
   add_header    X-Speed-Cache-Key "$key_uri";
   add_header    X-NoCache "$nocache_details";
-<?php if ($satellite_mode == 'boa'): ?>
-  add_header    X-GeoIP-Country-Code "$geoip_country_code";
-  add_header    X-GeoIP-Country-Name "$geoip_country_name";
   add_header    X-This-Proto "$http_x_forwarded_proto";
   add_header    X-Server-Name "$server_name";
 <?php endif; ?>
@@ -1094,7 +1094,6 @@ location = /index.php {
 location ~* ^/(?:core/)?(?:boost_stats|rtoc|js)\.php$ {
 <?php else: ?>
 location ~* ^/(?:index|cron|boost_stats|update|authorize)\.php$ {
-  add_header   X-Engine "Aegir";
 <?php endif; ?>
 <?php if ($satellite_mode == 'boa'): ?>
   limit_conn   limreq 88;

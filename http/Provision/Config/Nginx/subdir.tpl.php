@@ -7,6 +7,18 @@ $phpfpm_mode = drush_get_option('phpfpm_mode');
 if (!$phpfpm_mode && $server->phpfpm_mode) {
   $phpfpm_mode = $server->phpfpm_mode;
 }
+$nginx_is_modern = drush_get_option('nginx_is_modern');
+if (!$nginx_is_modern && $server->nginx_is_modern) {
+  $nginx_is_modern = $server->nginx_is_modern;
+}
+$nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
+if (!$nginx_has_upload_progress && $server->nginx_has_upload_progress) {
+  $nginx_has_upload_progress = $server->nginx_has_upload_progress;
+}
+$satellite_mode = drush_get_option('satellite_mode');
+if (!$satellite_mode && $server->satellite_mode) {
+  $satellite_mode = $server->satellite_mode;
+}
 ?>
 #######################################################
 <?php if ($nginx_config_mode == 'extended'): ?>
@@ -26,6 +38,20 @@ location ^~ /<?php print $subdir; ?> {
 <?php if ($nginx_config_mode == 'extended'): ?>
   set $nocache_details "Cache";
 
+<?php if ($satellite_mode == 'boa'): ?>
+  ###
+  ### Deny crawlers.
+  ###
+  if ($is_crawler) {
+    return 403;
+  }
+
+  ###
+  ### Include high load protection config if exists.
+  ###
+  include /data/conf/nginx_high_load.c*;
+<?php endif; ?>
+
   ###
   ### Deny not compatible request methods without 405 response.
   ###
@@ -39,6 +65,61 @@ location ^~ /<?php print $subdir; ?> {
   if ($is_denied) {
     return 403;
   }
+
+###
+### HTTPRL standard support.
+###
+location ^~ /<?php print $subdir; ?>/httprl_async_function_callback {
+  location ~* ^/<?php print $subdir; ?>/httprl_async_function_callback {
+    access_log off;
+    add_header X-Header "HTTPRL 2.0";
+    set $nocache_details "Skip";
+    try_files /httprl_async_function_callback $uri @nobots_<?php print $subdir; ?>;
+  }
+}
+
+###
+### HTTPRL test mode support.
+###
+location ^~ /<?php print $subdir; ?>/admin/httprl-test {
+  location ~* ^/<?php print $subdir; ?>/admin/httprl-test {
+    access_log off;
+    add_header X-Header "HTTPRL 2.1";
+    set $nocache_details "Skip";
+    try_files /admin/httprl-test $uri @nobots_<?php print $subdir; ?>;
+  }
+}
+
+###
+### CDN Far Future expiration support.
+###
+location ^~ /<?php print $subdir; ?>/cdn/farfuture/ {
+  tcp_nodelay   off;
+  access_log    off;
+  log_not_found off;
+  etag          off;
+  gzip_http_version 1.0;
+  if_modified_since exact;
+  set $nocache_details "Skip";
+  location ~* ^/<?php print $subdir; ?>/cdn/farfuture/.+\.(?:css|js|jpe?g|gif|png|ico|bmp|svg|swf|pdf|docx?|xlsx?|pptx?|tiff?|txt|rtf|class|otf|ttf|woff|eot|less)$ {
+    expires max;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Header "CDN Far Future Generator 1.0";
+    add_header Cache-Control "no-transform, public";
+    add_header Last-Modified "Wed, 20 Jan 1988 04:20:42 GMT";
+    rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
+    try_files $uri @nobots_<?php print $subdir; ?>;
+  }
+  location ~* ^/<?php print $subdir; ?>/cdn/farfuture/ {
+    expires epoch;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Header "CDN Far Future Generator 1.1";
+    add_header Cache-Control "private, must-revalidate, proxy-revalidate";
+    rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
+    try_files $uri @nobots_<?php print $subdir; ?>;
+  }
+  try_files $uri @nobots_<?php print $subdir; ?>;
+}
 <?php endif; ?>
 
   ###
@@ -59,11 +140,41 @@ location ^~ /<?php print $subdir; ?> {
     access_log    off;
     log_not_found off;
 <?php if ($nginx_config_mode == 'extended'): ?>
-    try_files /sites/$server_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @cache_<?php print $subdir; ?>;
+    try_files /sites/$server_name/files/$host.robots.txt /sites/$server_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @cache_<?php print $subdir; ?>;
 <?php else: ?>
-    try_files /sites/$server_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @drupal_<?php print $subdir; ?>;
+    try_files /sites/$server_name/files/$host.robots.txt /sites/$server_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @drupal_<?php print $subdir; ?>;
 <?php endif; ?>
   }
+
+<?php if ($satellite_mode == 'boa'): ?>
+###
+### Allow local access to the FPM status page.
+###
+location = /<?php print $subdir; ?>/fpm-status {
+  access_log   off;
+  allow        127.0.0.1;
+  deny         all;
+<?php if ($phpfpm_mode == 'port'): ?>
+  fastcgi_pass 127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
+}
+
+###
+### Allow local access to the FPM ping URI.
+###
+location = /<?php print $subdir; ?>/fpm-ping {
+  access_log   off;
+  allow        127.0.0.1;
+  deny         all;
+<?php if ($phpfpm_mode == 'port'): ?>
+  fastcgi_pass 127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
+}
+<?php endif; ?>
 
 <?php if ($nginx_config_mode == 'extended'): ?>
   ###
@@ -93,9 +204,11 @@ location ^~ /<?php print $subdir; ?> {
 
     tcp_nopush   off;
     keepalive_requests 0;
+<?php if ($satellite_mode == 'boa'): ?>
     access_log   off;
     allow        127.0.0.1;
     deny         all;
+<?php endif; ?>
     try_files    /cron.php $uri =404;
 <?php if ($phpfpm_mode == 'port'): ?>
     fastcgi_pass 127.0.0.1:9000;
@@ -116,6 +229,53 @@ location ^~ /<?php print $subdir; ?> {
       try_files /search $uri @cache_<?php print $subdir; ?>;
     }
   }
+
+  ###
+  ### Support for https://drupal.org/project/js module.
+  ###
+  location ^~ /<?php print $subdir; ?>/js/ {
+    location ~* ^/<?php print $subdir; ?>/js/ {
+      if ($is_bot) {
+        return 403;
+      }
+      rewrite ^/<?php print $subdir; ?>/(.*)$ /js.php?q=$1 last;
+    }
+  }
+
+<?php if ($nginx_has_upload_progress): ?>
+  ###
+  ### Upload progress support.
+  ### https://drupal.org/project/filefield_nginx_progress
+  ### http://github.com/masterzen/nginx-upload-progress-module
+  ###
+  location ~ (?<upload_form_uri>.*)/x-progress-id:(?<upload_id>\d*) {
+    access_log off;
+    rewrite ^ $upload_form_uri?X-Progress-ID=$upload_id;
+  }
+  location ^~ /<?php print $subdir; ?>/progress {
+    access_log off;
+    upload_progress_json_output;
+    report_uploads uploads;
+  }
+<?php endif; ?>
+
+<?php if ($satellite_mode == 'boa'): ?>
+  ###
+  ### Deny cache details display.
+  ###
+  location ^~ /<?php print $subdir; ?>/admin/settings/performance/cache-backend {
+    access_log off;
+    rewrite ^ $scheme://$host/<?php print $subdir; ?>/admin/settings/performance permanent;
+  }
+
+  ###
+  ### Deny cache details display.
+  ###
+  location ^~ /<?php print $subdir; ?>/admin/config/development/performance/redis {
+    access_log off;
+    rewrite ^ $scheme://$host/<?php print $subdir; ?>/admin/config/development/performance permanent;
+  }
+<?php endif; ?>
 
   ###
   ### Support for backup_migrate module download/restore/delete actions.
@@ -159,11 +319,47 @@ location ^~ /<?php print $subdir; ?> {
   ###
   ### Deny listed requests for security reasons.
   ###
-  location ~* (/\..*|settings\.php$|\.(?:git|htaccess|engine|inc|info|install|module|profile|pl|po|sh|.*sql|theme|tpl(?:\.php)?|xtmpl)$|^(?:Entries.*|Repository|Root|Tag|Template))$ {
-    return 403;
+  location ~* (/\..*|settings\.php$|\.(?:git|htaccess|engine|make|config|inc|ini|info|install|module|profile|pl|po|sh|.*sql|theme|tpl(?:\.php)?|xtmpl)$|^(?:Entries.*|Repository|Root|Tag|Template))$ {
+    access_log off;
+    return 404;
+  }
+
+  ###
+  ### Deny listed requests for security reasons.
+  ###
+  location ~* /(?:modules|themes|libraries)/.*\.(?:txt|md)$ {
+    access_log off;
+    return 404;
+  }
+
+  ###
+  ### Deny listed requests for security reasons.
+  ###
+  location ~* /files/civicrm/(?:ConfigAndLog|upload|templates_c) {
+    access_log off;
+    return 404;
   }
 
 <?php if ($nginx_config_mode == 'extended'): ?>
+  ###
+  ### Deny some not supported URI like cgi-bin on the Nginx level.
+  ###
+  location ~* (?:cgi-bin|vti-bin) {
+    access_log off;
+    return 404;
+  }
+
+  ###
+  ### Deny bots on some weak modules uri.
+  ###
+  location ~* (?:validation|aggregator|vote_up_down|captcha|vbulletin|glossary/) {
+    if ($is_bot) {
+      return 403;
+    }
+    access_log off;
+    try_files $uri @cache_<?php print $subdir; ?>;
+  }
+
   ###
   ### Responsive Images support.
   ### http://drupal.org/project/responsive_images
@@ -212,6 +408,14 @@ location ^~ /<?php print $subdir; ?> {
   ### Deny direct access to backups.
   ###
   location ~* ^/<?php print $subdir; ?>/sites/.*/files/backup_migrate/ {
+    access_log off;
+    deny all;
+  }
+
+  ###
+  ### Deny direct access to config files in Drupal 8.
+  ###
+  location ~* ^/<?php print $subdir; ?>/sites/.*/files/config_.* {
     access_log off;
     deny all;
   }
@@ -273,22 +477,31 @@ location ^~ /<?php print $subdir; ?> {
   ### Advagg_css and Advagg_js support.
   ###
   location ~* ^/<?php print $subdir; ?>/(.*/files/advagg_(?:css|js).*) {
-    access_log off;
     expires    max;
+    access_log off;
+<?php if ($nginx_is_modern): ?>
+    etag       off;
+<?php else: ?>
     add_header ETag "";
-    add_header Cache-Control "max-age=290304000, no-transform, public";
-    add_header Last-Modified "Wed, 20 Jan 1988 04:20:42 GMT";
+<?php endif; ?>
+    add_header Cache-Control "max-age=31449600, no-transform, public";
     add_header Access-Control-Allow-Origin *;
-    add_header X-Header "AdvAgg Generator 1.0";
+    add_header X-Header "AdvAgg Generator 2.0";
     set $nocache_details "Skip";
     try_files /$1 $uri @nobots_<?php print $subdir; ?>;
   }
-<?php endif; ?>
 
   ###
   ### Make css files compatible with boost caching.
   ###
   location ~* ^/<?php print $subdir; ?>/(.*\.css)$ {
+    if ( $request_method = POST ) {
+      return 405;
+    }
+    if ( $cache_uid ) {
+      return 405;
+    }
+    error_page  405 = @uncached_<?php print $subdir; ?>;
     access_log  off;
     tcp_nodelay off;
     expires     max; #if using aggregator
@@ -300,6 +513,13 @@ location ^~ /<?php print $subdir; ?> {
   ### Make js files compatible with boost caching.
   ###
   location ~* ^/<?php print $subdir; ?>/(.*\.(?:js|htc))$ {
+    if ( $request_method = POST ) {
+      return 405;
+    }
+    if ( $cache_uid ) {
+      return 405;
+    }
+    error_page  405 = @uncached_<?php print $subdir; ?>;
     access_log  off;
     tcp_nodelay off;
     expires     max; # if using aggregator
@@ -307,24 +527,27 @@ location ^~ /<?php print $subdir; ?> {
     try_files   /cache/perm/$host${uri}_.js /$1 $uri =404;
   }
 
-<?php if ($nginx_config_mode == 'extended'): ?>
   ###
-  ### Make json compatible with boost caching but dynamic for POST requests.
+  ### Support for static .json files with fast 404 +Boost compatibility.
   ###
-  location ~* ^/<?php print $subdir; ?>/(.*\.json)$ {
-    if ( $request_method = POST ) {
-      return 418;
-    }
+  location ~* ^/<?php print $subdir; ?>/sites/.*/files/(.*\.json)$ {
     if ( $cache_uid ) {
       return 405;
     }
     error_page  405 = @uncached_<?php print $subdir; ?>;
-    error_page  418 = @drupal_<?php print $subdir; ?>;
     access_log  off;
     tcp_nodelay off;
     expires     max; ### if using aggregator
     add_header  X-Header "Boost Citrus 2.3";
+    add_header  Access-Control-Allow-Origin *;
     try_files   /cache/normal/$host${uri}_.json /$1 $uri =404;
+  }
+
+  ###
+  ### Support for dynamic .json requests.
+  ###
+  location ~* (.*\.json)$ {
+    try_files /$1 $uri @cache_<?php print $subdir; ?>;
   }
 <?php endif; ?>
 
@@ -370,6 +593,10 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ~* ^/<?php print $subdir; ?>/(.*/(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tinymce|wysiwyg_spellcheck|ecc|civicrm|fbconnect|radioactivity)/.*\.php)$ {
 
+<?php if ($satellite_mode == 'boa'): ?>
+    limit_conn   limreq 88;
+<?php endif; ?>
+
     include       fastcgi_params;
 
     fastcgi_param db_type   <?php print urlencode($db_type); ?>;
@@ -404,9 +631,26 @@ location ^~ /<?php print $subdir; ?> {
   }
 
   ###
+  ### Deny crawlers and never cache known AJAX and webform requests.
+  ###
+  location ~* ^/<?php print $subdir; ?>/(.*(?:ahah|ajax|batch|autocomplete|webform|done|progress/|x-progress-id|js/.*).*)$ {
+    if ($is_bot) {
+      return 403;
+    }
+    access_log off;
+    log_not_found off;
+<?php if ($nginx_config_mode == 'extended'): ?>
+    set $nocache_details "Skip";
+    try_files /$1 $uri @nobots_<?php print $subdir; ?>;
+<?php else: ?>
+    try_files /$1 $uri @drupal_<?php print $subdir; ?>;
+<?php endif; ?>
+  }
+
+  ###
   ### Serve & no-log static helper files used in some wysiwyg editors.
   ###
-  location ~* ^/<?php print $subdir; ?>/(sites/.*/(?:modules|libraries)/(?:contrib/)?(?:tinybrowser|f?ckeditor|tinymce)/.*\.(?:html?|xml))$ {
+  location ~* ^/<?php print $subdir; ?>/(sites/.*/(?:modules|libraries)/(?:contrib/)?(?:tinybrowser|f?ckeditor|tinymce|flowplayer|jwplayer|videomanager)/.*\.(?:html?|xml))$ {
     if ($is_bot) {
       return 403;
     }
@@ -452,7 +696,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   ### Deny bots on never cached uri.
   ###
-  location ~* ^/<?php print $subdir; ?>/((?:.*/)?(?:admin|user|cart|checkout|logout|flag|comment/reply)) {
+  location ~* ^/<?php print $subdir; ?>/((?:.*/)?(?:admin|user|cart|checkout|logout|comment/reply)) {
     if ($is_bot) {
       return 403;
     }
@@ -462,9 +706,21 @@ location ^~ /<?php print $subdir; ?> {
   }
 
   ###
-  ### Protect from DoS attempts and not logged in visitors on never cached uri.
+  ### Protect from DoS attempts on never cached uri.
   ###
-  location ~* ^/<?php print $subdir; ?>/(?:.*/)?(?:node/[0-9]+/edit|node/add|approve) {
+  location ~* ^/<?php print $subdir; ?>/((?:.*/)?(?:node/[0-9]+/edit|node/add)) {
+    if ($is_bot) {
+      return 403;
+    }
+    access_log off;
+    set $nocache_details "Skip";
+    try_files /$1 $uri @drupal_<?php print $subdir; ?>;
+  }
+
+  ###
+  ### Protect from DoS attempts on never cached uri.
+  ###
+  location ~* ^/<?php print $subdir; ?>/((?:.*/)?(?:node/[0-9]+/delete|approve)) {
     if ($cache_uid = '') {
       return 403;
     }
@@ -472,8 +728,17 @@ location ^~ /<?php print $subdir; ?> {
       return 403;
     }
     access_log off;
+    set $nocache_details "Skip";
+    try_files /$1 $uri @drupal_<?php print $subdir; ?>;
+  }
+<?php endif; ?>
 
-    try_files $uri @drupal_<?php print $subdir; ?>;
+<?php if ($satellite_mode == 'boa'): ?>
+  ###
+  ### Rewrite legacy requests with /index.php to extension-free URL.
+  ###
+  if ( $args ~* "^q=(?<query_value>.*)" ) {
+    rewrite ^/<?php print $subdir; ?>/index.php$ $scheme://$host/<?php print $subdir; ?>/?q=$query_value? permanent;
   }
 <?php endif; ?>
 
@@ -489,6 +754,11 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location /<?php print $subdir; ?>/ {
 <?php if ($nginx_config_mode == 'extended'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
+  if ( $http_user_agent ~* wget ) {
+    return 403;
+  }
+<?php endif; ?>
     try_files $uri @cache_<?php print $subdir; ?>;
 <?php else: ?>
     try_files $uri @drupal_<?php print $subdir; ?>;
@@ -498,7 +768,17 @@ location ^~ /<?php print $subdir; ?> {
   ###
   ### Send other known php requests/files to php-fpm without any caching.
   ###
-  location ~* ^/<?php print $subdir; ?>/(boost_stats|update|authorize|xmlrpc)\.php$ {
+<?php if ($nginx_config_mode == 'extended'): ?>
+  location ~* ^/<?php print $subdir; ?>/((core/)?(boost_stats|rtoc|js))\.php$ {
+<?php else: ?>
+  location ~* ^/<?php print $subdir; ?>/(cron|boost_stats|update|authorize)\.php$ {
+<?php endif; ?>
+<?php if ($satellite_mode == 'boa'): ?>
+    limit_conn   limreq 88;
+    if ($is_bot) {
+      return 404;
+    }
+<?php endif; ?>
 
     include       fastcgi_params;
 
@@ -530,6 +810,20 @@ location ^~ /<?php print $subdir; ?> {
 <?php endif; ?>
   }
 
+<?php if ($nginx_config_mode == 'extended'): ?>
+  ###
+  ### Allow access to /authorize.php and /update.php only for logged in admin user.
+  ###
+  location ~* ^/<?php print $subdir; ?>/((?:core/)?(authorize|update))\.php$ {
+    set $real_fastcgi_script_name $1.php;
+    error_page 418 = @allowupdate_<?php print $subdir; ?>;
+    if ( $cache_uid ) {
+      return 418;
+    }
+    return 404;
+  }
+<?php endif; ?>
+
   ###
   ### Rewrite legacy requests with /<?php print $subdir; ?>/index.php to extension-free URL.
   ###
@@ -541,7 +835,22 @@ location ^~ /<?php print $subdir; ?> {
   ### Send all non-static requests to php-fpm, restricted to known php file.
   ###
   location = /<?php print $subdir; ?>/index.php {
+<?php if ($satellite_mode == 'boa'): ?>
     internal;
+    limit_conn    limreq 88;
+    add_header    X-Device "$device";
+    add_header    X-GeoIP-Country-Code "$geoip_country_code";
+    add_header    X-GeoIP-Country-Name "$geoip_country_name";
+<?php endif; ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
+    add_header    X-Speed-Cache "$upstream_cache_status";
+    add_header    X-Speed-Cache-UID "$cache_uid";
+    add_header    X-Speed-Cache-Key "$key_uri";
+    add_header    X-NoCache "$nocache_details";
+    add_header    X-This-Proto "$http_x_forwarded_proto";
+    add_header    X-Server-Name "$server_name";
+<?php endif; ?>
+
     root          <?php print "{$this->root}"; ?>;
 
     include       fastcgi_params;
@@ -563,15 +872,7 @@ location ^~ /<?php print $subdir; ?> {
     set $real_fastcgi_script_name index.php;
     fastcgi_param  SCRIPT_FILENAME     <?php print "{$this->root}"; ?>/$real_fastcgi_script_name;
 
-    add_header    X-Engine "Aegir";
-<?php if ($nginx_config_mode == 'extended'): ?>
-    add_header    X-Speed-Cache "$upstream_cache_status";
-    add_header    X-Speed-Cache-UID "$cache_uid";
-    add_header    X-Speed-Cache-Key "$key_uri";
-    add_header    X-NoCache "$nocache_details";
-    add_header    X-This-Proto "$http_x_forwarded_proto";
-    add_header    X-Server-Name "$server_name";
-<?php endif; ?>
+    add_header    Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
     tcp_nopush    off;
     keepalive_requests 0;
     try_files     /index.php =404; ### check for existence of php file first
@@ -580,18 +881,21 @@ location ^~ /<?php print $subdir; ?> {
 <?php else: ?>
     fastcgi_pass  unix:/var/run/php5-fpm.sock;
 <?php endif; ?>
+<?php if ($nginx_has_upload_progress): ?>
+    track_uploads uploads 60s; ### required for upload progress
+<?php endif; ?>
 <?php if ($nginx_config_mode == 'extended'): ?>
     ###
     ### Use Nginx cache for all visitors.
     ###
     set $nocache "";
-    if ( $nocache_details ~ (?:Args|Skip) ) {
+    if ( $nocache_details ~ (?:AegirCookie|Args|Skip) ) {
       set $nocache "NoCache";
     }
     fastcgi_cache speed;
     fastcgi_cache_methods GET HEAD; ### Nginx default, but added for clarity
     fastcgi_cache_min_uses 1;
-    fastcgi_cache_key "$is_bot$host$request_method$key_uri$cache_uid$http_x_forwarded_proto$cookie_respimg";
+    fastcgi_cache_key "$is_bot$device$host$request_method$key_uri$cache_uid$http_x_forwarded_proto$sent_http_x_local_proto$cookie_respimg";
     fastcgi_cache_valid 200 10s;
     fastcgi_cache_valid 302 1m;
     fastcgi_cache_valid 301 403 404 5s;
@@ -600,17 +904,17 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_pass_header Set-Cookie;
     fastcgi_pass_header X-Accel-Expires;
     fastcgi_pass_header X-Accel-Redirect;
-    fastcgi_no_cache $http_authorization $http_pragma $nocache;
-    fastcgi_cache_bypass $http_authorization $http_pragma $nocache;
+    fastcgi_no_cache $cookie_NoCacheID $http_authorization $http_pragma $nocache;
+    fastcgi_cache_bypass $cookie_NoCacheID $http_authorization $http_pragma $nocache;
     fastcgi_cache_use_stale error http_500 http_503 invalid_header timeout updating;
 <?php endif; ?>
   }
 
   ###
-  ### Deny access to any not listed above php files.
+  ### Deny access to any not listed above php files with 404 error.
   ###
   location ~* ^.+\.php$ {
-    deny all;
+    return 404;
   }
 
 }
@@ -639,13 +943,21 @@ location @cache_<?php print $subdir; ?> {
     set $nocache_details "Args";
     return 405;
   }
+  if ( $sent_http_x_force_nocache = "YES" ) {
+    set $nocache_details "Skip";
+    return 405;
+  }
+  if ( $http_cookie ~* "NoCacheID" ) {
+    set $nocache_details "AegirCookie";
+    return 405;
+  }
   if ( $cache_uid ) {
     set $nocache_details "DrupalCookie";
     return 405;
   }
   error_page 405 = @drupal_<?php print $subdir; ?>;
   add_header Expires "Tue, 24 Jan 1984 08:00:00 GMT";
-  add_header Cache-Control "must-revalidate, post-check=0, pre-check=0";
+  add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   add_header X-Header "Boost Citrus 1.9";
   charset    utf-8;
   try_files  /cache/normal/$host${uri}_$args.html @drupal_<?php print $subdir; ?>;
@@ -673,7 +985,51 @@ location @nobots_<?php print $subdir; ?> {
   if ($is_bot) {
     rewrite ^ $scheme://$host$uri? permanent;
   }
+  ###
+  ### Return 404 on special PHP URLs to avoid revealing version used,
+  ### even indirectly. See also: https://drupal.org/node/2116387
+  ###
+  if ( $args ~* "=PHP[A-Z0-9]{8}-" ) {
+    return 404;
+  }
   rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
+}
+
+###
+### Internal location for /authorize.php and /update.php restricted access.
+###
+location @allowupdate_<?php print $subdir; ?> {
+<?php if ($satellite_mode == 'boa'): ?>
+  limit_conn   limreq 88;
+<?php endif; ?>
+  include       fastcgi_params;
+
+  fastcgi_param db_type   <?php print urlencode($db_type); ?>;
+  fastcgi_param db_name   <?php print urlencode($db_name); ?>;
+  fastcgi_param db_user   <?php print urlencode($db_user); ?>;
+  fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
+  fastcgi_param db_host   <?php print urlencode($db_host); ?>;
+  fastcgi_param db_port   <?php print urlencode($db_port); ?>;
+
+  fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
+  fastcgi_param  RAW_HOST            $host;
+  fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
+
+  fastcgi_param  REDIRECT_STATUS     200;
+  fastcgi_index  index.php;
+
+  fastcgi_param SCRIPT_FILENAME <?php print "{$this->root}"; ?>/$real_fastcgi_script_name;
+
+  tcp_nopush   off;
+  keepalive_requests 0;
+  access_log   off;
+  try_files    /$real_fastcgi_script_name =404; ### check for existence of php file first
+
+<?php if ($phpfpm_mode == 'port'): ?>
+  fastcgi_pass 127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
 }
 <?php endif; ?>
 
