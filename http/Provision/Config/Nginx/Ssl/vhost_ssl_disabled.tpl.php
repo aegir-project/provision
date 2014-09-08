@@ -3,7 +3,7 @@
 
 server {
   listen       <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
-  server_name  <?php print $this->uri . ' ' . implode(' ', $this->aliases); ?>;
+  server_name  <?php print $this->uri . ' ' . implode(' ', str_replace('/', '.', $this->aliases)); ?>;
   ssl                        on;
   ssl_certificate            <?php print $ssl_cert; ?>;
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
