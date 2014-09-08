@@ -146,36 +146,6 @@ location ^~ /<?php print $subdir; ?>/cdn/farfuture/ {
 <?php endif; ?>
   }
 
-<?php if ($satellite_mode == 'boa'): ?>
-###
-### Allow local access to the FPM status page.
-###
-location = /<?php print $subdir; ?>/fpm-status {
-  access_log   off;
-  allow        127.0.0.1;
-  deny         all;
-<?php if ($phpfpm_mode == 'port'): ?>
-  fastcgi_pass 127.0.0.1:9000;
-<?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
-<?php endif; ?>
-}
-
-###
-### Allow local access to the FPM ping URI.
-###
-location = /<?php print $subdir; ?>/fpm-ping {
-  access_log   off;
-  allow        127.0.0.1;
-  deny         all;
-<?php if ($phpfpm_mode == 'port'): ?>
-  fastcgi_pass 127.0.0.1:9000;
-<?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
-<?php endif; ?>
-}
-<?php endif; ?>
-
 <?php if ($nginx_config_mode == 'extended'): ?>
   ###
   ### Allow local access to support wget method in Aegir settings
@@ -476,13 +446,6 @@ location = /<?php print $subdir; ?>/fpm-ping {
   ### Make css files compatible with boost caching.
   ###
   location ~* ^/<?php print $subdir; ?>/(.*\.css)$ {
-    if ( $request_method = POST ) {
-      return 405;
-    }
-    if ( $cache_uid ) {
-      return 405;
-    }
-    error_page  405 = @uncached_<?php print $subdir; ?>;
     access_log  off;
     tcp_nodelay off;
     expires     max; #if using aggregator
@@ -494,13 +457,6 @@ location = /<?php print $subdir; ?>/fpm-ping {
   ### Make js files compatible with boost caching.
   ###
   location ~* ^/<?php print $subdir; ?>/(.*\.(?:js|htc))$ {
-    if ( $request_method = POST ) {
-      return 405;
-    }
-    if ( $cache_uid ) {
-      return 405;
-    }
-    error_page  405 = @uncached_<?php print $subdir; ?>;
     access_log  off;
     tcp_nodelay off;
     expires     max; # if using aggregator
@@ -512,10 +468,6 @@ location = /<?php print $subdir; ?>/fpm-ping {
   ### Support for static .json files with fast 404 +Boost compatibility.
   ###
   location ~* ^/<?php print $subdir; ?>/sites/.*/files/(.*\.json)$ {
-    if ( $cache_uid ) {
-      return 405;
-    }
-    error_page  405 = @uncached_<?php print $subdir; ?>;
     access_log  off;
     tcp_nodelay off;
     expires     max; ### if using aggregator
@@ -904,14 +856,6 @@ location = /<?php print $subdir; ?>/fpm-ping {
 ###
 
 <?php if ($nginx_config_mode == 'extended'): ?>
-###
-### Helper location to bypass boost static files cache for logged in users.
-###
-location @uncached_<?php print $subdir; ?> {
-  access_log off;
-  expires max; # max if using aggregator, otherwise sane expire time
-}
-
 ###
 ### Boost compatible cache check.
 ###
