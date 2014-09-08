@@ -1,9 +1,22 @@
 
 <?php if ($this->ssl_enabled && $this->ssl_key) : ?>
 
+<?php
+$satellite_mode = drush_get_option('satellite_mode');
+if (!$satellite_mode && $server->satellite_mode) {
+  $satellite_mode = $server->satellite_mode;
+}
+?>
+
 server {
   listen       <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
   server_name  <?php print $this->uri . ' ' . implode(' ', str_replace('/', '.', $this->aliases)); ?>;
+<?php if ($satellite_mode == 'boa'): ?>
+  root         /var/www/nginx-default;
+  index        index.html index.htm;
+<?php else: ?>
+  return       404;
+<?php endif; ?>
   ssl                        on;
   ssl_certificate            <?php print $ssl_cert; ?>;
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
@@ -11,7 +24,6 @@ server {
   ssl_ciphers                RC4:HIGH:!aNULL:!MD5;
   ssl_prefer_server_ciphers  on;
   keepalive_timeout          70;
-  return                     404;
   ### Do not reveal Aegir front-end URL here.
 }
 
