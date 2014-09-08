@@ -101,22 +101,22 @@ location ^~ /<?php print $subdir; ?>/cdn/farfuture/ {
   gzip_http_version 1.0;
   if_modified_since exact;
   set $nocache_details "Skip";
-  location ~* ^/<?php print $subdir; ?>/cdn/farfuture/.+\.(?:css|js|jpe?g|gif|png|ico|bmp|svg|swf|pdf|docx?|xlsx?|pptx?|tiff?|txt|rtf|class|otf|ttf|woff|eot|less)$ {
+  location ~* ^/<?php print $subdir; ?>/(cdn/farfuture/.+\.(?:css|js|jpe?g|gif|png|ico|bmp|svg|swf|pdf|docx?|xlsx?|pptx?|tiff?|txt|rtf|class|otf|ttf|woff|eot|less))$ {
     expires max;
     add_header Access-Control-Allow-Origin *;
     add_header X-Header "CDN Far Future Generator 1.0";
     add_header Cache-Control "no-transform, public";
     add_header Last-Modified "Wed, 20 Jan 1988 04:20:42 GMT";
     rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
-    try_files $uri @nobots_<?php print $subdir; ?>;
+    try_files /$1 $uri @nobots_<?php print $subdir; ?>;
   }
-  location ~* ^/<?php print $subdir; ?>/cdn/farfuture/ {
+  location ~* ^/<?php print $subdir; ?>/(cdn/farfuture/) {
     expires epoch;
     add_header Access-Control-Allow-Origin *;
     add_header X-Header "CDN Far Future Generator 1.1";
     add_header Cache-Control "private, must-revalidate, proxy-revalidate";
     rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
-    try_files $uri @nobots_<?php print $subdir; ?>;
+    try_files /$1 $uri @nobots_<?php print $subdir; ?>;
   }
   try_files $uri @nobots_<?php print $subdir; ?>;
 }
@@ -341,25 +341,6 @@ location = /<?php print $subdir; ?>/fpm-ping {
   }
 
 <?php if ($nginx_config_mode == 'extended'): ?>
-  ###
-  ### Deny some not supported URI like cgi-bin on the Nginx level.
-  ###
-  location ~* (?:cgi-bin|vti-bin) {
-    access_log off;
-    return 404;
-  }
-
-  ###
-  ### Deny bots on some weak modules uri.
-  ###
-  location ~* (?:validation|aggregator|vote_up_down|captcha|vbulletin|glossary/) {
-    if ($is_bot) {
-      return 403;
-    }
-    access_log off;
-    try_files $uri @cache_<?php print $subdir; ?>;
-  }
-
   ###
   ### Responsive Images support.
   ### http://drupal.org/project/responsive_images
