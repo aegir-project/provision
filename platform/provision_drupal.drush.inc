@@ -370,6 +370,9 @@ function _provision_drupal_create_directories($url = NULL) {
 
     $mkdir["sites/$url/files/civicrm/ConfigAndLog"] = 02775;
     $chgrp["sites/$url/files/civicrm/ConfigAndLog"] = d('@server_master')->web_group;
+
+    $mkdir["sites/$url/files/civicrm/custom"] = 02775;
+    $chgrp["sites/$url/files/civicrm/custom"] = d('@server_master')->web_group;
   }
 
   // These paths should not have recursive operations performed on them.
