@@ -23,7 +23,7 @@ prompt_yes_no() {
 }
 
 version=$1
-major="6.x"
+major="7.x"
 
 if [ $# -lt 1 -o "$version" = "-h" ]; then
     cat <<EOF 
