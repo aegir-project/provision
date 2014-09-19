@@ -56,9 +56,10 @@ The following operations will be done:
  4. commit those changes to git
  5. lay down the tag
  6. revert the commit
- 7. (optionally) push those changes
+ 7. clone fresh copies of hosting/hostmaster and eldir to lay down the tag
+ 8. (optionally) push those changes
 
-The operation can be aborted before step 7. Don't forget that as
+The operation can be aborted before step 8. Don't forget that as
 long as changes are not pushed upstream, this can all be reverted (see
 git-reset(1) and git-revert(1) ).
 
@@ -98,6 +99,8 @@ else
     exit 1
 fi
 
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+NEW_TAG="$major-$version"
 commitmsg=`git commit -m"change version information for release $version"`
 echo $commitmsg
 commitid=`echo $commitmsg | sed 's/^\[[^ ]* \([a-z0-9]*\)\].*$/\1/'`
@@ -110,7 +113,37 @@ git reset --quiet HEAD 'debian/changelog'
 git checkout -- 'debian/changelog'
 git commit
 
+
+echo "Work on the other project repositories."
+mkdir -p build-area;
+
+# Hostmaster
+rm -rf build-area/hostmaster
+git clone --branch $CURRENT_BRANCH `git config remote.origin.url | sed 's/provision/hostmaster/'` build-area/hostmaster
+
+echo "Setting the tag $NEW_TAG in a clean hostmaster clone."
+git --work-tree=build-area/hostmaster --git-dir=build-area/hostmaster/.git tag -a $NEW_TAG -m 'Add a new release tag.'
+
+# Hosting
+rm -rf build-area/hosting
+git clone --branch $CURRENT_BRANCH `git config remote.origin.url | sed 's/provision/hosting/'` build-area/hosting
+
+echo "Setting the tag $NEW_TAG in a clean hosting clone."
+git --work-tree=build-area/hosting --git-dir=build-area/hosting/.git tag -a $NEW_TAG -m 'Add a new release tag.'
+
+# Eldir
+rm -rf build-area/eldir
+git clone --branch $CURRENT_BRANCH `git config remote.origin.url | sed 's/provision/eldir/'` build-area/eldir
+
+echo "Setting the tag $NEW_TAG in a clean eldir clone."
+git --work-tree=build-area/eldir --git-dir=build-area/eldir/.git tag -a $NEW_TAG -m 'Add a new release tag.'
+
+
+# Can we push?
 if prompt_yes_no "push tags and commits upstream? "; then
     # this makes sure we push the commit *and* the tag
     git push --tags origin HEAD
+    git --work-tree=build-area/hostmaster --git-dir=build-area/hostmaster/.git push --tags origin HEAD
+    git --work-tree=build-area/hosting --git-dir=build-area/hosting/.git push --tags origin HEAD
+    git --work-tree=build-area/eldir --git-dir=build-area/eldir/.git push --tags origin HEAD
 fi
