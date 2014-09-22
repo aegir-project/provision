@@ -1,3 +1,10 @@
+aegir2-provision (3.0~alpha1) unstable; urgency=medium
+
+  * first alpha release of the 3.x branch, release notes too long to
+    document here: http://community.aegirproject.org/3.0-alpha1
+
+ -- Herman van Rink <helmo@initfour.nl>  Mon, 22 Sep 2014 10:47:08 +0200
+
 aegir2-provision (2.0) unstable; urgency=low
 
   * stable 2.0 release
