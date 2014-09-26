@@ -180,7 +180,9 @@ location ^~ /<?php print $subdir; ?>/cdn/farfuture/ {
     deny         all;
 <?php endif; ?>
     try_files    /cron.php $uri =404;
-<?php if ($phpfpm_mode == 'port'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
+    fastcgi_pass unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
     fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
     fastcgi_pass unix:/var/run/php5-fpm.sock;
@@ -556,7 +558,9 @@ location ^~ /<?php print $subdir; ?>/cdn/farfuture/ {
       return 403;
     }
     try_files    /$1 $uri =404;
-<?php if ($phpfpm_mode == 'port'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
+    fastcgi_pass unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
     fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
     fastcgi_pass unix:/var/run/php5-fpm.sock;
@@ -736,10 +740,12 @@ location ^~ /<?php print $subdir; ?>/cdn/farfuture/ {
     keepalive_requests 0;
     access_log   off;
     try_files    /$1.php =404; ### check for existence of php file first
-<?php if ($phpfpm_mode == 'port'): ?>
-    fastcgi_pass  127.0.0.1:9000;
+<?php if ($satellite_mode == 'boa'): ?>
+    fastcgi_pass unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
+    fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-    fastcgi_pass  unix:/var/run/php5-fpm.sock;
+    fastcgi_pass unix:/var/run/php5-fpm.sock;
 <?php endif; ?>
   }
 
@@ -809,7 +815,9 @@ location ^~ /<?php print $subdir; ?>/cdn/farfuture/ {
     tcp_nopush    off;
     keepalive_requests 0;
     try_files     /index.php =404; ### check for existence of php file first
-<?php if ($phpfpm_mode == 'port'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
+    fastcgi_pass  unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
     fastcgi_pass  127.0.0.1:9000;
 <?php else: ?>
     fastcgi_pass  unix:/var/run/php5-fpm.sock;
@@ -950,7 +958,9 @@ location @allowupdate_<?php print $subdir; ?> {
   access_log   off;
   try_files    /$real_fastcgi_script_name =404; ### check for existence of php file first
 
-<?php if ($phpfpm_mode == 'port'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
+  fastcgi_pass unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
   fastcgi_pass unix:/var/run/php5-fpm.sock;
