@@ -146,6 +146,8 @@ if (isset($_SERVER['db_name'])) {
   $settings['clean_url'] = 1;
   $settings['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
 
+  $settings['allow_authorize_operations'] = FALSE;
+
   <?php if (!$this->site_enabled) : ?>
     // This is for Drupal 6 and below.
     $settings['site_offline'] = 1;
