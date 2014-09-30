@@ -15,10 +15,6 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
   }
 
   function process() {
-    if (drush_drupal_major_version() >= 8) {
-      $this->data['config_directories_active_var'] = 'config_directories_active';
-      $this->data['config_directories_staging_var'] = 'config_directories_staging';
-    }
     if (drush_drupal_major_version() >= 7) {
       $this->data['db_type'] = ($this->data['db_type'] == 'mysqli') ? 'mysql' : $this->data['db_type'];
       $this->data['file_directory_path_var'] = 'file_public_path';
@@ -29,6 +25,16 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
     else {
       $this->data['file_directory_path_var'] = 'file_directory_path';
       $this->data['file_directory_temp_var'] = 'file_directory_temp';
+    }
+    if (drush_drupal_major_version() >= 8) {
+      $this->template = 'provision_drupal_settings_8.tpl.php';
+
+      $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
+      require_once $drupal_root . '/core/lib/Drupal/Component/Utility/Crypt.php';
+      $this->data['drupal_hash_salt_var'] = Drupal\Component\Utility\Crypt::randomBytesBase64(55);
+
+      $this->data['config_directories_active_var'] = 'config_directories_active';
+      $this->data['config_directories_staging_var'] = 'config_directories_staging';
     }
     $this->version = provision_version();
     $this->api_version = provision_api_version();

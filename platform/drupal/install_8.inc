@@ -97,16 +97,10 @@ function install_main() {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
 
   // We have an existing settings.php.
+  require_once DRUSH_BASE_PATH . '/commands/sql/sql.drush.inc';
 
-  if (function_exists('drush_sql_read_db_spec')) {
-    $db_spec = drush_sql_read_db_spec();
-  }
-  else if (function_exists('_drush_sql_get_db_spec')) {
-    $db_spec = _drush_sql_get_db_spec();
-  }
-  else {
-    $db_spec = drush_core_site_install_db_spec();
-  }
+  $sql = drush_sql_get_class();
+  $db_spec = $sql->db_spec();
 
   $db_spec['db_prefix'] = $GLOBALS['db_prefix'];
 
