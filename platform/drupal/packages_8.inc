@@ -4,6 +4,47 @@
  */
 
 /**
+ * Find themes in a certain scope
+ *
+ * This function is based on _system_theme_data in Drupal 6 and Drupal 7.
+ * We do not support, nor need information on subthemes at this point.
+ */
+function _provision_drupal_find_themes($scope, $key = '') {
+  $paths = _provision_drupal_search_paths($scope, $key, 'themes');
+  $files = array();
+  $engines = array();
+  foreach ($paths as $path) {
+    $files = array_merge($files, drush_scan_directory($path, "/\.info\.yml$/", array('.', '..', 'CVS', '.svn'), 0, true, 'name'));
+    $engines = array_merge($engines, drush_scan_directory($path . "/engines", "/\.engine$/", array('.', '..', 'CVS', '.svn'), 0, true, 'name'));
+  }
+  foreach ($files as $name => $file) {
+    $files[$name]->info = Symfony\Component\Yaml\Yaml::parse($file->filename);
+    if (!empty($files[$name]->info['name'])) {
+      $files[$name]->name = $files[$name]->info['name'];
+    }
+    // @TODO: This is copied from the D7 implementation and I'm almost certain
+    // that is doesn't even do anything in D7.
+    if (empty($files[$name]->info['engine'])) {
+      $filename = dirname($files[$name]->filename) .'/'. $files[$name]->name .'.theme';
+      if (file_exists($filename)) {
+        $files[$name]->owner = $filename;
+        $files[$name]->prefix = $name;
+      }
+    }
+    else {
+      $engine = $files[$name]->info['engine'];
+      if (isset($engines[$engine])) {
+        $files[$name]->owner = $engines[$engine]->filename;
+        $files[$name]->prefix = $engines[$engine]->name;
+        $files[$name]->template = TRUE;
+      }
+    }
+    _provision_cvs_deploy($files[$name]);
+  }
+  return $files;
+}
+
+/**
  * Map the system table to a packages multi-dimensional array component
  */
 function _provision_drupal_system_map() {

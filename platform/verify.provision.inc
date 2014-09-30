@@ -75,14 +75,22 @@ function drush_provision_drupal_pre_provision_verify() {
       ->succeed('Drupal sites directory @path is writable by the provisioning script')
       ->fail('Drupal sites directory @path is not writable by the provisioning script', 'PROVISION_SITES_DIR_NOT_WRITABLE');
 
-    drush_set_option('sites', array_keys((array) provision_drupal_find_sites()), 'drupal'); 
+    // Ensure sites.php file exists for Drupal 8 and above.
+    $sitesfile = "sites/sites.php";
+    if (drush_drupal_major_version() >= 8 && !file_exists($sitesfile)) {
+      if (!drush_op('copy', 'sites/example.sites.php', $sitesfile) && !drush_get_context('DRUSH_SIMULATE')) {
+        return drush_set_error(dt('Failed to copy sites/sites.php to @sitesfile', array('@sitesfile' => $sitesfile)));
+      }
+    }
+
+    drush_set_option('sites', array_keys((array) provision_drupal_find_sites()), 'drupal');
     drush_log(dt("This platform is running @short_name @version", array('@short_name' => 'drupal', '@version' => drush_drupal_version())));
     drush_set_option('packages', _scrub_object(provision_find_packages()), 'drupal');
     provision_drupal_push_site();
   }
   elseif (d()->type === 'site') {
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
-    // This is the actual drupal provisioning requirements. 
+    // This is the actual drupal provisioning requirements.
     _provision_drupal_create_directories();
     _provision_drupal_maintain_aliases();
     _provision_drupal_ensure_htaccess_update();
