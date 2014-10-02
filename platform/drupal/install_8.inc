@@ -4,6 +4,8 @@
  *    Rebuild all the caches
  */
 
+use Drupal\Core\Url;
+
 $GLOBALS['url'] = d()->uri;
 $GLOBALS['profile'] = d()->profile;
 $GLOBALS['install_locale'] = d()->language;
@@ -22,8 +24,8 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
     $uri_brief = preg_replace('!^https?://!', '', $base_url);
     $mailto = $account->getEmail();
     $date = format_date(time());
-    $login_uri = url('user', array('absolute' => TRUE));
-    $edit_uri = url('user/'. $account->id() .'/edit', array('absolute' => TRUE));
+    $login_uri = Url::fromRoute('user', array(), array('absolute' => TRUE));
+    $edit_uri = Url::fromRoute('user/'. $account->id() .'/edit', array(), array('absolute' => TRUE));
 
     $mail_params['variables'] = array(
       '!username' => $username,
