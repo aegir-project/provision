@@ -38,7 +38,7 @@ function install_verify_settings() {
     $db_user = urldecode($url['user']);
     $db_pass = urldecode($url['pass']);
     $db_host = urldecode($url['host']);
-    $db_port = isset($url['port']) ? urldecode($url['port']) : '';
+    $db_port = isset($url['port']) ? urldecode($url['port']) : '3306';
     $db_path = ltrim(urldecode($url['path']), '/');
     $settings_file = './'. conf_path() .'/settings.php';
 
