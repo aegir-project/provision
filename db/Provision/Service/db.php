@@ -80,7 +80,7 @@ class Provision_Service_db extends Provision_Service {
     }
     extract($creds);
     
-    if (!$this->can_create_database()) {
+    if (drush_get_error() || !$this->can_create_database()) {
       drush_set_error('PROVISION_CREATE_DB_FAILED');
       drush_log("Database could not be created.", 'error');
       return FALSE;
