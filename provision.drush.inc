@@ -343,6 +343,7 @@ function drush_provision_save($alias = NULL) {
 }
 
 function drush_provision_verify() {
+  provision_backend_invoke(d()->name, 'provision-save');
   d()->command_invoke('verify');
 }
 
