@@ -213,6 +213,19 @@ function hook_provision_drupal_chgrp_directories_alter(&$chgrp, $url) {
   $chgrp["sites/$url/my_other_dir"] = FALSE; // Skip the chgrp on this directory.
 }
 
+/**
+ * Alter the array of directories to not to recurse into in mkdir and chgrp
+ * operations.
+ *
+ * @param $not_recursive
+ *    The array of directories not to resurces into.
+ * @param string $url
+ *    The url of the site being invoked.
+ */
+function hook_provision_drupal_non_recursive_directories_alter($not_recursive, $url) {
+  $not_recursive[] = "sites/$url/my_special_dir";
+  unset($not_recursive["sites/$url"]); // Allow recursion where we otherwise wouldn't.
+}
 
 /**
  * Alter the settings array just before starting the provision install.
