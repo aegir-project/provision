@@ -212,3 +212,16 @@ function hook_provision_drupal_chgrp_directories_alter(&$chgrp, $url) {
   $chgrp["sites/$url/my_special_dir"] = d('@server_master')->web_group;
   $chgrp["sites/$url/my_other_dir"] = FALSE; // Skip the chgrp on this directory.
 }
+
+
+/**
+ * Alter the settings array just before starting the provision install.
+ *
+ * @param $settings
+ *    The array with settings.
+ * @param $url
+ *    The site url.
+ */
+function hook_provision_drupal_install_settings_alter(&$settings, $url) {
+  $settings['forms']['install_configure_form']['update_status_module'] = array();
+}

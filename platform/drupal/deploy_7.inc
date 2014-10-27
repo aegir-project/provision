@@ -44,21 +44,23 @@ function _provision_platform_drupal_deploy_7_replace($old_url, $new_url) {
   }
   db_query("UPDATE {system}       SET filename = REPLACE(filename, :old, :new)", $replace_patterns);
 
-  $field_map = field_info_field_map();
-  foreach ($field_map as $key => $info) {
-    $tablekey = db_escape_table($key);
-    // Replace in all known text fields.
-    if (in_array($info['type'], array('text_long', 'text_with_summary'))) {
-      drush_log('Replacing in ' . $key, 'debug');
-      db_query("UPDATE {field_data_${tablekey}} SET ${tablekey}_value     = REPLACE(${tablekey}_value,   :old, :new)", $replace_patterns);
-      db_query("UPDATE {field_revision_${tablekey}} SET ${tablekey}_value = REPLACE(${tablekey}_value,   :old, :new)", $replace_patterns);
-    }
+  if (function_exists('field_info_field_map')) {
+    $field_map = field_info_field_map();
+    foreach ($field_map as $key => $info) {
+      $tablekey = db_escape_table($key);
+      // Replace in all known text fields.
+      if (in_array($info['type'], array('text_long', 'text_with_summary'))) {
+        drush_log('Replacing in ' . $key, 'debug');
+        db_query("UPDATE {field_data_${tablekey}} SET ${tablekey}_value     = REPLACE(${tablekey}_value,   :old, :new)", $replace_patterns);
+        db_query("UPDATE {field_revision_${tablekey}} SET ${tablekey}_value = REPLACE(${tablekey}_value,   :old, :new)", $replace_patterns);
+      }
 
-    // Replace in the optional summary.
-    if ($info['type'] == 'text_with_summary') {
-      drush_log('Replacing summary in ' . $key, 'debug');
-      db_query("UPDATE {field_data_${tablekey}} SET ${tablekey}_summary     = REPLACE(${tablekey}_summary, :old, :new)", $replace_patterns);
-      db_query("UPDATE {field_revision_${tablekey}} SET ${tablekey}_summary = REPLACE(${tablekey}_summary, :old, :new)", $replace_patterns);
+      // Replace in the optional summary.
+      if ($info['type'] == 'text_with_summary') {
+        drush_log('Replacing summary in ' . $key, 'debug');
+        db_query("UPDATE {field_data_${tablekey}} SET ${tablekey}_summary     = REPLACE(${tablekey}_summary, :old, :new)", $replace_patterns);
+        db_query("UPDATE {field_revision_${tablekey}} SET ${tablekey}_summary = REPLACE(${tablekey}_summary, :old, :new)", $replace_patterns);
+      }
     }
   }
   drush_log(
