@@ -679,8 +679,22 @@ function _provision_drupal_find_modules($scope, $key = '') {
     $files = array_merge($files, drush_scan_directory($path, "/\.module$/", array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name'));
   }
   foreach ($files as $name => $info) {
-    $info_file = sprintf("%s/%s.info", dirname($info->filename), $name);
-    $files[$name]->info = provision_parse_info_file($info_file);
+    if (drush_drupal_major_version() >= 8) {
+      $yaml_file = sprintf("%s/%s.info.yml", dirname($info->filename), $name);
+      if(!file_exists($yaml_file)) {
+        drush_log(dt("@name.info.yml not found.", array("@name" => $name)), 'notice');
+        unset($files[$name]);
+        continue;
+      }
+      $files[$name]->info = Symfony\Component\Yaml\Yaml::parse($yaml_file);
+      if (!empty($files[$name]->info['name'])) {
+        $files[$name]->name = $files[$name]->info['name'];
+      }
+    }
+    else {
+      $info_file = sprintf("%s/%s.info", dirname($info->filename), $name);
+      $files[$name]->info = provision_parse_info_file($info_file);
+    }
     // Skip hidden modules
     if (isset($files[$name]->info['hidden']) && $files[$name]->info['hidden'] != FALSE) {
       unset($files[$name]);
