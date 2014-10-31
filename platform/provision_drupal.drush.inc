@@ -373,68 +373,84 @@ function _provision_drupal_rebuild_caches() {
 function _provision_find_profiles() {
   if (drush_drupal_major_version() >= 8) {
     include_once('core/includes/install.inc');
-    $profiles_subdir = "./core/profiles";
+    $profiles_subdirs[] = "./core/profiles";
+    $profiles_subdirs[] = "./profiles";
   }
   else {
     include_once('includes/install.inc');
-    $profiles_subdir = "./profiles";
+    $profiles_subdirs[] = "./profiles";
   }
-  if (!$dir = opendir($profiles_subdir)) {
-    drush_log(dt("Cannot find profiles directory"), 'error');
-    return FALSE;
-  }
-  while (FALSE !== ($name = readdir($dir))) {
-    $languages = array();
-    $file = "$profiles_subdir/$name/$name.profile";
-    if ($name == '..' || $name == '.' || !file_exists($file)) {
-      continue;
+  foreach($profiles_subdirs as $profiles_subdir) {
+    if (!$dir = opendir($profiles_subdir)) {
+      drush_log(dt("Cannot find profiles directory"), 'error');
+      return FALSE;
     }
-    $profile = new stdClass();
-    $profile->name = $name;
-    $profile->filename = $file;
-
-    _provision_cvs_deploy($profile);
-
-    $profile->info = array();
-
-    $info_file = "$profiles_subdir/$name/$name.info";
-    if (file_exists($info_file)) {
-      $profile->info = provision_parse_info_file($info_file);
-      // Skip hidden profiles
-      if (isset($profile->info['hidden']) && $profile->info['hidden'] == 1) {
+    while (FALSE !== ($name = readdir($dir))) {
+      $languages = array();
+      $file = "$profiles_subdir/$name/$name.profile";
+      if ($name == '..' || $name == '.' || !file_exists($file)) {
         continue;
       }
-    }
+      $profile = new stdClass();
+      $profile->name = $name;
+      $profile->filename = $file;
 
-    require_once($profile->filename);
-    $func = $profile->name . "_profile_details";
-    if (function_exists($func)) {
-      $profile->info = array_merge($profile->info, $func());
-    }
+      _provision_cvs_deploy($profile);
 
-    $languages['en'] = 1;
-    // Find languages available
-    $files = array_keys(drush_scan_directory($profiles_subdir . '/' . $name . '/translations', '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
-    $files = array_merge($files, array_keys(drush_scan_directory($profiles_subdir . '/' . $name , '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath')));
-    if (is_array($files)) {
-      foreach ($files as $file) {
-        if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
-          $languages[$langcode[2]] = 1; // use the language name as an index to weed out duplicates
+      $profile->info = array();
+
+	  if (drush_drupal_major_version() >= 8) {
+        $yaml_file = "$profiles_subdir/$name/$name.info.yml";
+        if(!file_exists($yaml_file)) {
+          drush_log(dt("@name.info.yml not found.", array("@name" => $name)), 'notice');
+          unset($files[$name]);
+          continue;
+        }
+        $profile->info = Symfony\Component\Yaml\Yaml::parse($yaml_file);
+        if (!empty($profile->info['name'])) {
+          $profile->name = $profile->info['name'];
         }
       }
-    }
-    $profile->info['languages'] = array_keys($languages);
+      else {
+        $info_file = "$profiles_subdir/$name/$name.info";
+        if (file_exists($info_file)) {
+          $profile->info = provision_parse_info_file($info_file);
+          // Skip hidden profiles
+          if (isset($profile->info['hidden']) && $profile->info['hidden'] == 1) {
+            continue;
+          }
+        }
+      }
 
-    // Drupal 7 renamed the default install profile to 'standard'
-    // Aegir now allows projects to specify an "old short name" to provide an upgrade path when projects get renamed.
-    if ($profile->name == 'standard') {
-      $profile->info['old_short_name'] = 'default';
-    }
+      require_once($profile->filename);
+      $func = $profile->name . "_profile_details";
+      if (function_exists($func)) {
+        $profile->info = array_merge($profile->info, $func());
+      }
 
-    $return[$name] = $profile;
-    drush_log(dt('Found install profile %name', array('%name' => $name)));
+      $languages['en'] = 1;
+      // Find languages available
+      $files = array_keys(drush_scan_directory($profiles_subdir . '/' . $name . '/translations', '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
+      $files = array_merge($files, array_keys(drush_scan_directory($profiles_subdir . '/' . $name , '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath')));
+      if (is_array($files)) {
+        foreach ($files as $file) {
+          if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
+            $languages[$langcode[2]] = 1; // use the language name as an index to weed out duplicates
+          }
+        }
+      }
+      $profile->info['languages'] = array_keys($languages);
+
+      // Drupal 7 renamed the default install profile to 'standard'
+      // Aegir now allows projects to specify an "old short name" to provide an upgrade path when projects get renamed.
+      if ($profile->name == 'standard') {
+        $profile->info['old_short_name'] = 'default';
+      }
+
+      $return[$name] = $profile;
+      drush_log(dt('Found install profile %name', array('%name' => $name)));
+    }
   }
-
   return $return;
 
 }
