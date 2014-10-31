@@ -26,9 +26,10 @@ if (db_table_exists('files')) {
   db_query("UPDATE {files} SET filepath = REPLACE(filepath, :old, :new)", array(':old' => 'sites/default', ':new' => 'sites/$new_url'));
 }
 
-variable_set('file_public_path', "sites/$new_url/files");
-variable_set('file_private_path', "sites/$new_url/private/files");
-variable_set('file_temporary_path', "sites/$new_url/private/temp");
+\Drupal::config('system.file')
+  ->set('path.private', "sites/$new_url/private/files")
+  ->set('path.temporary', "sites/$new_url/private/temp")
+  ->save();
 
 drush_log(
   dt('Changed paths from sites/@old_url to sites/@new_url',
