@@ -14,3 +14,5 @@ print "<?php \n"; ?>
 <?php foreach (array('db_type', 'db_port', 'db_host', 'db_user', 'db_passwd', 'db_name') as $key) { ?>
 $_SERVER['<?php print $key; ?>'] = $options['<?php print $key; ?>'];
 <?php } ?>
+# local non-aegir-generated additions
+@include_once('<?php print $this->site_path  ?>/local.drushrc.php');
