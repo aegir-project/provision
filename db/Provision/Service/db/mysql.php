@@ -55,6 +55,9 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
   }
 
   function grant($name, $username, $password, $host = '') {
+    if (provision_file()->exists('/data/conf/clstr.cnf')->status()) {
+      $host = '%';
+    }
     $host = ($host) ? $host : '%';
     if ($host != "127.0.0.1") {
       $extra_host = "127.0.0.1";
@@ -65,6 +68,9 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
   }
 
   function revoke($name, $username, $host = '') {
+    if (provision_file()->exists('/data/conf/clstr.cnf')->status()) {
+      $host = '%';
+    }
     $host = ($host) ? $host : '%';
     $success = $this->query("REVOKE ALL PRIVILEGES ON `%s`.* FROM `%s`@`%s`", $name, $username, $host);
 
