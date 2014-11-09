@@ -35,14 +35,18 @@ function install_verify_settings() {
     // @todo why are we setting those variables if they are not
     // reachable outside this scope?!
     $url = parse_url(is_array($db_url) ? $db_url['default'] : $db_url);
-    $db_user = urldecode($url['user']);
-    $db_pass = urldecode($url['pass']);
-    $db_host = urldecode($url['host']);
-    $db_port = isset($url['port']) ? urldecode($url['port']) : '3306';
-    $db_path = ltrim(urldecode($url['path']), '/');
-    $settings_file = './'. conf_path() .'/settings.php';
-
-    return TRUE;
+    if (!empty($url['user']) && !empty($url['pass']) && !empty($url['host'])) {
+      $db_user = urldecode($url['user']);
+      $db_pass = urldecode($url['pass']);
+      $db_host = urldecode($url['host']);
+      $db_port = isset($url['port']) ? urldecode($url['port']) : '3306';
+      $db_path = ltrim(urldecode($url['path']), '/');
+      $settings_file = './'. conf_path() .'/settings.php';
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
   }
   return FALSE;
 }
