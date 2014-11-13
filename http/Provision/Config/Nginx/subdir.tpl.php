@@ -56,6 +56,13 @@ location ^~ /<?php print $subdir; ?> {
   }
 
   ###
+  ### Block semalt botnet.
+  ###
+  if ($is_botnet) {
+    return 403;
+  }
+
+  ###
   ### Include high load protection config if exists.
   ###
   include /data/conf/nginx_high_load.c*;
