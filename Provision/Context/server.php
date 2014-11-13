@@ -174,11 +174,13 @@ class Provision_Context_server extends Provision_Context {
       }
 
       if (provision_file()->exists($path)->status()) {
-        $options = array_merge(array(
+        $default_options = array(
           'relative' => TRUE,
           'keep-dirlinks' => TRUE,
           'omit-dir-times' => TRUE,
-        ), $additional_options);
+        );
+        $global_extra_options = drush_get_option('global_sync_options', array());
+        $options = array_merge($default_options, $additional_options, $global_extra_options);
 
 
         // We need to do this due to how drush creates the rsync command.
