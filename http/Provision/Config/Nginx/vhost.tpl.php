@@ -62,11 +62,7 @@ if ($this->redirection || $ssl_redirection) {
     // redirect all aliases + main uri to the main https uri.
     print "\n  rewrite ^ https://{$this->uri}\$request_uri? permanent;\n";
   }
-  elseif (!$ssl_redirection && $this->redirection && $this->redirection != $this->uri) {
-    // Redirect all aliases to the main http url.
-    print "\n  rewrite ^ http://{$this->redirection}\$request_uri? permanent;\n";
-  }
-  else {
+  elseif (!$ssl_redirection && $this->redirection) {
     print "  include       " . $server->include_path . "/nginx_vhost_common.conf;\n";
   }
 }
