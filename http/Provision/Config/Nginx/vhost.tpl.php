@@ -1,5 +1,5 @@
 <?php
-if ($this->redirection || $ssl_redirection) {
+if ($ssl_redirection || $this->redirection) {
   // Redirect all aliases to the main http url using separate vhosts blocks to avoid if{} in Nginx.
   foreach ($this->aliases as $alias_url) {
     print "# alias redirection virtual host\n";
@@ -16,18 +16,7 @@ if ($this->redirection || $ssl_redirection) {
       print "  server_name  {$alias_url};\n";
     }
     print "  access_log   off;\n";
-    if ($ssl_redirection && !$this->redirection) {
-      // redirect aliases in non-ssl to the same alias on ssl.
-      print "  rewrite ^ https://\$host\$request_uri? permanent;\n";
-    }
-    elseif ($ssl_redirection && $this->redirection) {
-      // redirect all aliases + main uri to the main https uri.
-      print "  rewrite ^ https://{$this->uri}\$request_uri? permanent;\n";
-    }
-    elseif (!$ssl_redirection && $this->redirection) {
-      // Redirect all aliases to the main http url.
-      print "  rewrite ^ http://{$this->redirection}\$request_uri? permanent;\n";
-    }
+    print "  rewrite ^ \$scheme://{$this->redirection}\$request_uri? permanent;\n";
     print "}\n";
   }
 }
