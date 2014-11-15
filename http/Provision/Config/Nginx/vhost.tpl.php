@@ -24,6 +24,8 @@ if ($ssl_redirection || $this->redirection) {
 
 server {
   include       fastcgi_params;
+  fastcgi_param MAIN_SITE_NAME <?php print $this->uri; ?>;
+  set $main_site_name "<?php print $this->uri; ?>";
   fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
   fastcgi_param db_type   <?php print urlencode($db_type); ?>;
   fastcgi_param db_name   <?php print urlencode($db_name); ?>;
