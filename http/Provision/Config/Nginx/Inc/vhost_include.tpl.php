@@ -28,6 +28,15 @@ if (!$satellite_mode && $server->satellite_mode) {
 <?php endif; ?>
 #######################################################
 
+###
+### Use the main site name if available, instead of
+### potentially virtual server_name when alias is set
+### as redirection target. See #2358977 for details.
+###
+if ($main_site_name = '') {
+  set $main_site_name "$server_name";
+}
+
 <?php if ($nginx_config_mode == 'extended'): ?>
 set $nocache_details "Cache";
 
@@ -130,7 +139,7 @@ location = /favicon.ico {
   log_not_found off;
   expires       30d;
   add_header Access-Control-Allow-Origin *;
-  try_files     /sites/$server_name/files/favicon.ico $uri =204;
+  try_files     /sites/$main_site_name/files/favicon.ico $uri =204;
 }
 
 ###
@@ -141,9 +150,9 @@ location = /robots.txt {
   access_log    off;
   log_not_found off;
 <?php if ($nginx_config_mode == 'extended'): ?>
-  try_files /sites/$server_name/files/$host.robots.txt /sites/$server_name/files/robots.txt $uri @cache;
+  try_files /sites/$main_site_name/files/$host.robots.txt /sites/$main_site_name/files/robots.txt $uri @cache;
 <?php else: ?>
-  try_files /sites/$server_name/files/$host.robots.txt /sites/$server_name/files/robots.txt $uri @drupal;
+  try_files /sites/$main_site_name/files/$host.robots.txt /sites/$main_site_name/files/robots.txt $uri @drupal;
 <?php endif; ?>
 }
 
@@ -460,7 +469,7 @@ location ~* /sites/.*/files/styles/(.*)$ {
 <?php if ($nginx_config_mode == 'extended'): ?>
   set $nocache_details "Skip";
 <?php endif; ?>
-  try_files  /sites/$server_name/files/styles/$1 $uri @drupal;
+  try_files  /sites/$main_site_name/files/styles/$1 $uri @drupal;
 }
 
 ###
@@ -473,7 +482,7 @@ location ~* /sites/.*/files/imagecache/(.*)$ {
 <?php if ($nginx_config_mode == 'extended'): ?>
   set $nocache_details "Skip";
 <?php endif; ?>
-  try_files  /sites/$server_name/files/imagecache/$1 $uri @drupal;
+  try_files  /sites/$main_site_name/files/imagecache/$1 $uri @drupal;
 }
 
 ###
@@ -576,7 +585,7 @@ location ~* files/advagg_(?:css|js)/ {
 <?php else: ?>
   add_header ETag "";
 <?php endif; ?>
-  rewrite    ^/files/advagg_(.*)/(.*)$ /sites/$server_name/files/advagg_$1/$2 last;
+  rewrite    ^/files/advagg_(.*)/(.*)$ /sites/$main_site_name/files/advagg_$1/$2 last;
   add_header Cache-Control "max-age=31449600, no-transform, public";
   add_header Access-Control-Allow-Origin *;
   add_header X-Header "AdvAgg Generator 2.0";
@@ -662,7 +671,7 @@ location ^~ /files/ {
     access_log    off;
     log_not_found off;
     add_header  Access-Control-Allow-Origin *;
-    rewrite  ^/files/(.*)$  /sites/$server_name/files/$1 last;
+    rewrite  ^/files/(.*)$  /sites/$main_site_name/files/$1 last;
     try_files   $uri =404;
   }
 <?php if ($nginx_config_mode == 'extended'): ?>
@@ -682,7 +691,7 @@ location ^~ /downloads/ {
     access_log    off;
     log_not_found off;
     add_header  Access-Control-Allow-Origin *;
-    rewrite  ^/downloads/(.*)$  /sites/$server_name/files/downloads/$1 last;
+    rewrite  ^/downloads/(.*)$  /sites/$main_site_name/files/downloads/$1 last;
     try_files   $uri =404;
   }
 <?php if ($nginx_config_mode == 'extended'): ?>
@@ -702,8 +711,8 @@ location ~* ^.+\.(?:jpe?g|gif|png|ico|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rt
   access_log    off;
   log_not_found off;
   add_header  Access-Control-Allow-Origin *;
-  rewrite     ^/images/(.*)$  /sites/$server_name/files/images/$1 last;
-  rewrite     ^/.+/sites/.+/files/(.*)$  /sites/$server_name/files/$1 last;
+  rewrite     ^/images/(.*)$  /sites/$main_site_name/files/images/$1 last;
+  rewrite     ^/.+/sites/.+/files/(.*)$  /sites/$main_site_name/files/$1 last;
   try_files   $uri =404;
 }
 
@@ -716,7 +725,7 @@ location ~* ^.+\.(?:avi|mpe?g|mov|wmv|ogg|ogv|zip|tar|t?gz|rar|dmg|exe|apk|pxl|i
   tcp_nodelay off;
   tcp_nopush  off;
   add_header  Access-Control-Allow-Origin *;
-  rewrite     ^/.+/sites/.+/files/(.*)$  /sites/$server_name/files/$1 last;
+  rewrite     ^/.+/sites/.+/files/(.*)$  /sites/$main_site_name/files/$1 last;
   try_files   $uri =404;
 }
 
@@ -925,7 +934,7 @@ location ~ ^/(?<esi>esi/.*)"$ {
   add_header    X-GeoIP-Country-Code "$geoip_country_code";
   add_header    X-GeoIP-Country-Name "$geoip_country_name";
   add_header    X-This-Proto "$http_x_forwarded_proto";
-  add_header    X-Server-Name "$server_name";
+  add_header    X-Server-Name "$main_site_name";
   add_header    Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   ###
   ### Set correct, local $uri.
@@ -1065,7 +1074,7 @@ location = /index.php {
   add_header    X-Speed-Cache-Key "$key_uri";
   add_header    X-NoCache "$nocache_details";
   add_header    X-This-Proto "$http_x_forwarded_proto";
-  add_header    X-Server-Name "$server_name";
+  add_header    X-Server-Name "$main_site_name";
 <?php endif; ?>
   add_header    Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   tcp_nopush    off;
