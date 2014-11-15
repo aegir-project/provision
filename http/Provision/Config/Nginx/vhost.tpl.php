@@ -24,6 +24,8 @@ if ($ssl_redirection || $this->redirection) {
 
 server {
   include       fastcgi_params;
+  fastcgi_param MAIN_SITE_NAME <?php print $this->uri; ?>;
+  set $main_site_name "<?php print $this->uri; ?>";
   fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
   fastcgi_param db_type   <?php print urlencode($db_type); ?>;
   fastcgi_param db_name   <?php print urlencode($db_name); ?>;
@@ -61,7 +63,8 @@ if ($this->redirection || $ssl_redirection) {
     print "\n  rewrite ^ https://{$this->uri}\$request_uri? permanent;\n";
   }
   elseif (!$ssl_redirection && $this->redirection) {
-    print "  include       " . $server->include_path . "/nginx_vhost_common.conf;\n";
+    // Redirect all aliases to the main http url.
+    print "\n  rewrite ^ http://{$this->redirection}\$request_uri? permanent;\n";
   }
 }
 else {
