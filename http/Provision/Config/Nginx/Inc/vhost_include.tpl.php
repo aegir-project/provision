@@ -451,23 +451,40 @@ location ~* /(?:.+)/files/styles/adaptive/(?:.+)$ {
 <?php endif; ?>
 
 ###
-### Imagecache and imagecache_external support.
+### The files/styles support.
 ###
-location ~* /(?:external|system|files/imagecache|files/styles)/ {
+location ~* /sites/.*/files/styles/(.*)$ {
   access_log off;
   log_not_found off;
   expires    30d;
 <?php if ($nginx_config_mode == 'extended'): ?>
-  # fix common problems with old paths after import from standalone to Aegir multisite
-  rewrite    ^/sites/(.*)/files/imagecache/(.*)/sites/default/files/(.*)$  /sites/$server_name/files/imagecache/$2/$3 last;
-  rewrite    ^/sites/(.*)/files/imagecache/(.*)/files/(.*)$                /sites/$server_name/files/imagecache/$2/$3 last;
-  rewrite    ^/files/imagecache/(.*)$                                      /sites/$server_name/files/imagecache/$1 last;
-  rewrite    ^/files/styles/(.*)$                                          /sites/$server_name/files/styles/$1 last;
-  add_header X-Header "IC Generator 1.0";
   set $nocache_details "Skip";
-<?php else: ?>
-  rewrite    ^/files/imagecache/(.*)$  /sites/$server_name/files/imagecache/$1 last;
-  rewrite    ^/files/styles/(.*)$  /sites/$server_name/files/styles/$1 last;
+<?php endif; ?>
+  try_files  /sites/$server_name/files/styles/$1 $uri @drupal;
+}
+
+###
+### The files/imagecache support.
+###
+location ~* /sites/.*/files/imagecache/(.*)$ {
+  access_log off;
+  log_not_found off;
+  expires    30d;
+<?php if ($nginx_config_mode == 'extended'): ?>
+  set $nocache_details "Skip";
+<?php endif; ?>
+  try_files  /sites/$server_name/files/imagecache/$1 $uri @drupal;
+}
+
+###
+### Send requests with /external/ and /system/ URI keywords to @drupal.
+###
+location ~* /(?:external|system)/ {
+  access_log off;
+  log_not_found off;
+  expires    30d;
+<?php if ($nginx_config_mode == 'extended'): ?>
+  set $nocache_details "Skip";
 <?php endif; ?>
   try_files  $uri @drupal;
 }
