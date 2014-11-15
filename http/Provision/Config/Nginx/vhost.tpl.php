@@ -62,7 +62,7 @@ if ($this->redirection || $ssl_redirection) {
   }
   elseif (!$ssl_redirection && $this->redirection) {
     // Redirect all aliases to the main http url.
-    print "  rewrite ^ http://{$this->redirection}\$request_uri? permanent;\n";
+    print "\n  rewrite ^ http://{$this->redirection}\$request_uri? permanent;\n";
   }
 }
 else {
