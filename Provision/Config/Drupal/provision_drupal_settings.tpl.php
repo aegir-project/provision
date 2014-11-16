@@ -17,6 +17,15 @@ print '<?php' ?>
  * to avoid further confusion.
  */
 
+<?php if ($subdirs_support_enabled): ?>
+/**
+ * Detecting subdirectory mode
+ */
+if (isset($_SERVER['SITE_SUBDIR']) && isset($_SERVER['RAW_HOST'])) {
+  $base_url = 'http://' . $_SERVER['RAW_HOST'] . '/' . $_SERVER['SITE_SUBDIR'];
+}
+<?php endif; ?>
+
 <?php if ($this->cloaked): ?>
 if (isset($_SERVER['db_name'])) {
   /**
@@ -132,7 +141,7 @@ if (isset($_SERVER['db_name'])) {
   $conf['install_profile'] = '<?php print $this->profile ?>';
   $conf['<?php print $file_directory_path_var ?>'] = 'sites/<?php print $this->uri ?>/files';
   $conf['<?php print $file_directory_temp_var ?>'] = 'sites/<?php print $this->uri ?>/private/temp';
-  <?php if (isset($file_directory_private_var)): ?>
+<?php if (isset($file_directory_private_var)): ?>
   $conf['<?php print $file_directory_private_var ?>'] = 'sites/<?php print $this->uri ?>/private/files';
 <?php endif; ?>
 <?php if (isset($drupal_hash_salt_var)): ?>
@@ -149,12 +158,12 @@ if (isset($_SERVER['db_name'])) {
 
   $settings['allow_authorize_operations'] = FALSE;
 
-  <?php if (!$this->site_enabled) : ?>
+<?php if (!$this->site_enabled) : ?>
     // This is for Drupal 6 and below.
     $conf['site_offline'] = 1;
     // And this is for Drupal 7 and above.
     $conf['maintenance_mode'] = 1;
-  <?php endif ?>
+<?php endif ?>
 
 <?php print $extra_config; ?>
 
