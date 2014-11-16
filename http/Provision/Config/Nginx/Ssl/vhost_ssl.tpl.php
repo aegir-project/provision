@@ -5,7 +5,19 @@
 <?php foreach ($this->aliases as $alias_url): ?>
 server {
   listen       <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
-  server_name  <?php print $alias_url; ?>;
+<?php
+  // if we use redirections, we need to change the redirection
+  // target to be the original site URL ($this->uri instead of
+  // $alias_url)
+  if ($this->redirection && $alias_url == $this->redirection) {
+    $this->uri = str_replace('/', '.', $this->uri);
+    print "  server_name  {$this->uri};\n";
+  }
+  else {
+    $alias_url = str_replace('/', '.', $alias_url);
+    print "  server_name  {$alias_url};\n";
+  }
+?>
   ssl                        on;
   ssl_certificate            <?php print $ssl_cert; ?>;
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
@@ -13,13 +25,15 @@ server {
   ssl_ciphers                RC4:HIGH:!aNULL:!MD5;
   ssl_prefer_server_ciphers  on;
   keepalive_timeout          70;
-  rewrite ^ $scheme://<?php print $this->uri; ?>$request_uri? permanent;
+  rewrite ^ $scheme://<?php print $this->redirection; ?>$request_uri? permanent;
 }
 <?php endforeach; ?>
 <?php endif ?>
 
 server {
   include       fastcgi_params;
+  fastcgi_param MAIN_SITE_NAME <?php print $this->uri; ?>;
+  set $main_site_name "<?php print $this->uri; ?>";
   fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
   fastcgi_param HTTPS on;
   fastcgi_param db_type   <?php print urlencode($db_type); ?>;
@@ -29,7 +43,22 @@ server {
   fastcgi_param db_host   <?php print urlencode($db_host); ?>;
   fastcgi_param db_port   <?php print urlencode($db_port); ?>;
   listen        <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
-  server_name   <?php print $this->uri; ?><?php if (!$this->redirection && is_array($this->aliases)) : foreach ($this->aliases as $alias_url) : if (trim($alias_url)) : ?> <?php print $alias_url; ?><?php endif; endforeach; endif; ?>;
+  server_name   <?php
+    // this is the main vhost, so we need to put the redirection
+    // target as the hostname (if it exists) and not the original URL
+    // ($this->uri)
+    if ($this->redirection) {
+      print str_replace('/', '.', $this->redirection);
+    } else {
+      print $this->uri;
+    }
+    if (!$this->redirection && is_array($this->aliases)) {
+      foreach ($this->aliases as $alias_url) {
+        if (trim($alias_url)) {
+          print " " . str_replace('/', '.', $alias_url);
+        }
+      }
+    } ?>;
   root          <?php print "{$this->root}"; ?>;
   ssl                        on;
   ssl_certificate            <?php print $ssl_cert; ?>;
