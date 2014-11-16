@@ -29,6 +29,15 @@ if (!$satellite_mode && $server->satellite_mode) {
 #######################################################
 
 ###
+### Use the main site name if available, instead of
+### potentially virtual server_name when alias is set
+### as redirection target. See #2358977 for details.
+###
+if ($main_site_name = '') {
+  set $main_site_name "$server_name";
+}
+
+###
 ### Master location for subdir support (start)
 ###
 location ^~ /<?php print $subdir; ?> {
@@ -129,7 +138,7 @@ location ^~ /<?php print $subdir; ?>/cdn/farfuture/ {
     access_log    off;
     log_not_found off;
     expires       30d;
-    try_files     /sites/$server_name/files/favicon.ico /sites/$host/files/favicon.ico /favicon.ico $uri =204;
+    try_files     /sites/$main_site_name/files/favicon.ico /sites/$host/files/favicon.ico /favicon.ico $uri =204;
   }
 
   ###
@@ -140,9 +149,9 @@ location ^~ /<?php print $subdir; ?>/cdn/farfuture/ {
     access_log    off;
     log_not_found off;
 <?php if ($nginx_config_mode == 'extended'): ?>
-    try_files /sites/$server_name/files/$host.robots.txt /sites/$server_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @cache_<?php print $subdir; ?>;
+    try_files /sites/$main_site_name/files/$host.robots.txt /sites/$main_site_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @cache_<?php print $subdir; ?>;
 <?php else: ?>
-    try_files /sites/$server_name/files/$host.robots.txt /sites/$server_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @drupal_<?php print $subdir; ?>;
+    try_files /sites/$main_site_name/files/$host.robots.txt /sites/$main_site_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @drupal_<?php print $subdir; ?>;
 <?php endif; ?>
   }
 
@@ -598,7 +607,7 @@ location ^~ /<?php print $subdir; ?>/cdn/farfuture/ {
   ###
   location ~* ^/<?php print $subdir; ?>/(sites/.*/files/.*) {
     root  <?php print "{$this->root}"; ?>;
-    rewrite     ^/<?php print $subdir; ?>/sites/(.*)$ /sites/$server_name/$1 last;
+    rewrite     ^/<?php print $subdir; ?>/sites/(.*)$ /sites/$main_site_name/$1 last;
     access_log      off;
     tcp_nodelay     off;
     expires         30d;
@@ -781,7 +790,7 @@ location ^~ /<?php print $subdir; ?>/cdn/farfuture/ {
     add_header    X-Speed-Cache-Key "$key_uri";
     add_header    X-NoCache "$nocache_details";
     add_header    X-This-Proto "$http_x_forwarded_proto";
-    add_header    X-Server-Name "$server_name";
+    add_header    X-Server-Name "$main_site_name";
 <?php endif; ?>
 
     root          <?php print "{$this->root}"; ?>;
