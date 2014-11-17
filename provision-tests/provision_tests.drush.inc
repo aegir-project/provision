@@ -151,7 +151,7 @@ function drush_provision_tests_install_platform($platform_name, $platform_alias 
   }
   drush_log(dt('Building platform: @platform and adding to hostmaster.', array('@platform' => $platform_alias)), 'ok');
   $args = array(
-    PROVISION_TESTS_BUILDS_REPO . "/$platform_name.build",
+    PROVISION_TESTS_BUILDS_REPO . "/$platform_name.make",
     "/var/aegir/platforms/$platform_alias"
   );
   drush_invoke_process('@none', 'make', $args);
