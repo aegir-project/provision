@@ -495,6 +495,9 @@ location ~* /sites/.*/files/imagecache/(.*)$ {
   log_not_found off;
   expires    30d;
 <?php if ($nginx_config_mode == 'extended'): ?>
+  # fix common problems with old paths after import from standalone to Aegir multisite
+  rewrite ^/sites/(.*)/files/imagecache/(.*)/sites/default/files/(.*)$ /sites/$main_site_name/files/imagecache/$2/$3 last;
+  rewrite ^/sites/(.*)/files/imagecache/(.*)/files/(.*)$               /sites/$main_site_name/files/imagecache/$2/$3 last;
   set $nocache_details "Skip";
 <?php endif; ?>
   try_files  /sites/$main_site_name/files/imagecache/$1 $uri @drupal;
