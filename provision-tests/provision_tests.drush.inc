@@ -119,7 +119,7 @@ function drush_provision_tests_provision_demo_content() {
 
   drush_provision_tests_install_platform('drupal6');
   drush_provision_tests_install_platform('drupal7');
-  drush_provision_tests_install_platform('openatrium');
+  drush_provision_tests_install_platform('openatrium2');
 
   // Install some sites.
   drush_provision_tests_install_site('drupal6', 'drupal6-default', 'default');
