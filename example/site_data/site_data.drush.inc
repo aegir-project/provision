@@ -4,7 +4,6 @@
  * Implements hook_drush_init().
  */
 function site_data_drush_init() {
-  drush_log('site_data example backend module initialing');
   site_data_provision_register_autoload();
 }
 
@@ -27,7 +26,6 @@ function site_data_provision_register_autoload() {
  */
 function site_data_provision_services() {
   site_data_provision_register_autoload();
-  drush_log('registering site_data service');
   return array('site_data' => NULL);
 }
 
