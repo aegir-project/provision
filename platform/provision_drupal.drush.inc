@@ -247,7 +247,7 @@ function _provision_drupal_create_directories($url = NULL) {
   }
 
   // These paths should not have recursive operations performed on them.
-  $not_recursive = array(
+  $chmod_not_recursive = $chgrp_not_recursive = array(
     "sites/$url",
     "sites/$url/files",
     "sites/$url/files/tmp",
@@ -268,10 +268,13 @@ function _provision_drupal_create_directories($url = NULL) {
     "sites/$url/private/config/staging"
   );
 
-  // Allow other commands to add or alter the directories to be created.
+  // Allow other commands to add or alter the directories to be created,
+  // chmod'd or chgrp'd.
+  // TODO: Figure out a better way to do this.
   drush_command_invoke_all_ref('provision_drupal_create_directories_alter', $mkdir, $url);
   drush_command_invoke_all_ref('provision_drupal_chgrp_directories_alter', $chgrp, $url);
-  drush_command_invoke_all_ref('provision_drupal_non_recursive_directories_alter', $not_recursive, $url);
+  drush_command_invoke_all_ref('provision_drupal_chgrp_not_recursive_alter', $chgrp_not_recursive, $url);
+  drush_command_invoke_all_ref('provision_drupal_chmod_not_recursive_alter', $chmod_not_recursive, $url);
 
   foreach ($mkdir as $path => $perm) {
     if (!is_dir($path)) {
@@ -281,14 +284,14 @@ function _provision_drupal_create_directories($url = NULL) {
     }
 
     if ($perm !== FALSE) {
-      provision_file()->chmod($path, $perm, !in_array($path, $not_recursive))
+      provision_file()->chmod($path, $perm, !in_array($path, $chmod_not_recursive))
         ->succeed('Changed permissions of <code>@path</code> to @perm')
         ->fail('Could not change permissions <code>@path</code> to @perm');
     }
   }
   foreach ($chgrp as $path => $group) {
     if ($group !== FALSE) {
-      provision_file()->chgrp($path, $group, !in_array($path, $not_recursive))
+      provision_file()->chgrp($path, $group, !in_array($path, $chgrp_not_recursive))
         ->succeed('Changed group ownership of <code>@path</code> to @gid')
         ->fail('Could not change group ownership <code>@path</code> to @gid');
     }

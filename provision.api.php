@@ -217,14 +217,27 @@ function hook_provision_drupal_chgrp_directories_alter(&$chgrp, $url) {
  * Alter the array of directories to not to recurse into in mkdir and chgrp
  * operations.
  *
- * @param $not_recursive
- *    The array of directories not to resurces into.
+ * @param $chgrp_not_recursive
+ *    The array of directories not to recurse into.
  * @param string $url
  *    The url of the site being invoked.
  */
-function hook_provision_drupal_non_recursive_directories_alter($not_recursive, $url) {
-  $not_recursive[] = "sites/$url/my_special_dir";
-  unset($not_recursive["sites/$url"]); // Allow recursion where we otherwise wouldn't.
+function hook_provision_drupal_chgrp_not_recursive_directories_alter($chgrp_not_recursive, $url) {
+  $chgrp_not_recursive[] = "sites/$url/my_special_dir";
+  unset($chgrp_not_recursive["sites/$url"]); // Allow recursion where we otherwise wouldn't.
+}
+
+/**
+ * Alter the array of directories to not to recurse into in chmod operations.
+ *
+ * @param $chmod_not_recursive
+ *    The array of directories not to recurse into.
+ * @param string $url
+ *    The url of the site being invoked.
+ */
+function hook_provision_drupal_chmod_not_recursive_directories_alter($chmod_not_recursive, $url) {
+  $chmod_not_recursive[] = "sites/$url/my_special_dir";
+  unset($chmod_not_recursive["sites/$url"]); // Allow recursion where we otherwise wouldn't.
 }
 
 /**
