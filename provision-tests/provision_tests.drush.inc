@@ -131,7 +131,7 @@ function drush_provision_tests_provision_demo_content() {
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
 
   if (drush_get_error() != DRUSH_SUCCESS) {
-    drush_set_error(drush_get_error(), 'Settingi up demo content failed');
+    drush_set_error(drush_get_error(), 'Setting up demo content failed');
     exit(1);
   }
 
