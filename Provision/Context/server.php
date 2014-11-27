@@ -84,9 +84,6 @@ class Provision_Context_server extends Provision_Context {
    * Spawn an instance for a specific service type and associate it to the owner.
    */
   function spawn_service($service, $default = null) {
-    $reflect = new reflectionClass('Provision_Service_' . $service);
-    $base_dir = dirname($reflect->getFilename());
-
     $type_option = "{$service}_service_type";
     
     $type = isset($this->options[$type_option]) ? $this->options[$type_option] : $default;
