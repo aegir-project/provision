@@ -23,6 +23,25 @@ function & d($name = NULL, $_root_object = FALSE, $allow_creation = TRUE) {
   static $instances = null;
   static $default_instance = '@self';
 
+  /*
+   * add safety check so that we don't get caught running d() before drush is
+   * fully initialized. otherwise, the proper services hooks may not be
+   * properly declared and found by drush, so the object cache ($instances)
+   * would be initialised with incomplete data.
+   *
+   * it is possible that more initialisation we need happens after
+   * DRUSH_BOOTSTRAP_NONE, but this is already better than nothing.
+   *
+   * if something is weird with d(), it may be that it is being called too
+   * early and that check is failing to detect that, so watch out, it took two
+   * senior Aegir developpers three full days of headbanging on keyboards to
+   * figure that stuff out.
+   */
+  if (drush_get_context('DRUSH_BOOTSTRAP_PHASE') == DRUSH_BOOTSTRAP_NONE) {
+    $ret = drush_set_error('DRUSH_BOOTSTRAPPING', 'drush is still bootstrapping, d() should be ran only within a hook or a function');
+    return $ret;
+  }
+
   if (is_object($name)) {
     return $name;
   }
