@@ -84,60 +84,60 @@ location ^~ /<?php print $subdir; ?> {
     return 403;
   }
 
-###
-### HTTPRL standard support.
-###
-location ^~ /<?php print $subdir; ?>/httprl_async_function_callback {
-  location ~* ^/<?php print $subdir; ?>/httprl_async_function_callback {
-    access_log off;
-    add_header X-Header "HTTPRL 2.0";
-    set $nocache_details "Skip";
-    try_files /httprl_async_function_callback $uri @nobots_<?php print $subdir; ?>;
+  ###
+  ### HTTPRL standard support.
+  ###
+  location ^~ /<?php print $subdir; ?>/httprl_async_function_callback {
+    location ~* ^/<?php print $subdir; ?>/httprl_async_function_callback {
+      access_log off;
+      add_header X-Header "HTTPRL 2.0";
+      set $nocache_details "Skip";
+      try_files /httprl_async_function_callback $uri @nobots_<?php print $subdir; ?>;
+    }
   }
-}
 
-###
-### HTTPRL test mode support.
-###
-location ^~ /<?php print $subdir; ?>/admin/httprl-test {
-  location ~* ^/<?php print $subdir; ?>/admin/httprl-test {
-    access_log off;
-    add_header X-Header "HTTPRL 2.1";
-    set $nocache_details "Skip";
-    try_files /admin/httprl-test $uri @nobots_<?php print $subdir; ?>;
+  ###
+  ### HTTPRL test mode support.
+  ###
+  location ^~ /<?php print $subdir; ?>/admin/httprl-test {
+    location ~* ^/<?php print $subdir; ?>/admin/httprl-test {
+      access_log off;
+      add_header X-Header "HTTPRL 2.1";
+      set $nocache_details "Skip";
+      try_files /admin/httprl-test $uri @nobots_<?php print $subdir; ?>;
+    }
   }
-}
 
-###
-### CDN Far Future expiration support.
-###
-location ^~ /<?php print $subdir; ?>/cdn/farfuture/ {
-  tcp_nodelay   off;
-  access_log    off;
-  log_not_found off;
-  etag          off;
-  gzip_http_version 1.0;
-  if_modified_since exact;
-  set $nocache_details "Skip";
-  location ~* ^/<?php print $subdir; ?>/(cdn/farfuture/.+\.(?:css|js|jpe?g|gif|png|ico|bmp|svg|swf|pdf|docx?|xlsx?|pptx?|tiff?|txt|rtf|class|otf|ttf|woff|eot|less))$ {
-    expires max;
-    add_header Access-Control-Allow-Origin *;
-    add_header X-Header "CDN Far Future Generator 1.0";
-    add_header Cache-Control "no-transform, public";
-    add_header Last-Modified "Wed, 20 Jan 1988 04:20:42 GMT";
-    rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
-    try_files /$1 $uri @nobots_<?php print $subdir; ?>;
+  ###
+  ### CDN Far Future expiration support.
+  ###
+  location ^~ /<?php print $subdir; ?>/cdn/farfuture/ {
+    tcp_nodelay   off;
+    access_log    off;
+    log_not_found off;
+    etag          off;
+    gzip_http_version 1.0;
+    if_modified_since exact;
+    set $nocache_details "Skip";
+    location ~* ^/<?php print $subdir; ?>/(cdn/farfuture/.+\.(?:css|js|jpe?g|gif|png|ico|bmp|svg|swf|pdf|docx?|xlsx?|pptx?|tiff?|txt|rtf|class|otf|ttf|woff|eot|less))$ {
+      expires max;
+      add_header Access-Control-Allow-Origin *;
+      add_header X-Header "CDN Far Future Generator 1.0";
+      add_header Cache-Control "no-transform, public";
+      add_header Last-Modified "Wed, 20 Jan 1988 04:20:42 GMT";
+      rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
+      try_files /$1 $uri @nobots_<?php print $subdir; ?>;
+    }
+    location ~* ^/<?php print $subdir; ?>/(cdn/farfuture/) {
+      expires epoch;
+      add_header Access-Control-Allow-Origin *;
+      add_header X-Header "CDN Far Future Generator 1.1";
+      add_header Cache-Control "private, must-revalidate, proxy-revalidate";
+      rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
+      try_files /$1 $uri @nobots_<?php print $subdir; ?>;
+    }
+    try_files $uri @nobots_<?php print $subdir; ?>;
   }
-  location ~* ^/<?php print $subdir; ?>/(cdn/farfuture/) {
-    expires epoch;
-    add_header Access-Control-Allow-Origin *;
-    add_header X-Header "CDN Far Future Generator 1.1";
-    add_header Cache-Control "private, must-revalidate, proxy-revalidate";
-    rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
-    try_files /$1 $uri @nobots_<?php print $subdir; ?>;
-  }
-  try_files $uri @nobots_<?php print $subdir; ?>;
-}
 <?php endif; ?>
 
   ###
