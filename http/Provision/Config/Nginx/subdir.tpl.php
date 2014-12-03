@@ -39,6 +39,40 @@ if ($main_site_name = '') {
   set $main_site_name "$server_name";
 }
 
+<?php if ($nginx_config_mode == 'extended'): ?>
+###
+### Helper locations to avoid 404 on legacy images paths
+###
+location ^~ /<?php print $subdir; ?>/sites/default/files {
+
+  root  <?php print "{$this->root}"; ?>;
+
+  location ~* ^/<?php print $subdir; ?>/sites/default/files/imagecache {
+    access_log off;
+    log_not_found off;
+    expires    30d;
+    set $nocache_details "Skip";
+    rewrite ^/<?php print $subdir; ?>/sites/default/files/imagecache/(.*)$ /<?php print $subdir; ?>/sites/$main_site_name/files/imagecache/$1 last;
+    try_files  $uri @drupal_<?php print $subdir; ?>;
+  }
+  location ~* ^/<?php print $subdir; ?>/sites/default/files/styles {
+    access_log off;
+    log_not_found off;
+    expires    30d;
+    set $nocache_details "Skip";
+    rewrite ^/<?php print $subdir; ?>/sites/default/files/styles/(.*)$ /<?php print $subdir; ?>/sites/$main_site_name/files/styles/$1 last;
+    try_files  $uri @drupal_<?php print $subdir; ?>;
+  }
+  location ~* ^/<?php print $subdir; ?>/sites/default/files {
+    access_log off;
+    log_not_found off;
+    expires    30d;
+    rewrite ^/<?php print $subdir; ?>/sites/default/files/(.*)$ /<?php print $subdir; ?>/sites/$main_site_name/files/$1 last;
+    try_files /$1 $uri =404;
+  }
+}
+<?php endif; ?>
+
 ###
 ### Master location for subdir support (start)
 ###
