@@ -127,7 +127,9 @@ class Provision_Config {
     if (!empty($templates) && is_array($templates)) {
       foreach ($templates as $file) {
         if (is_readable($file)) {
-          drush_log("Template loaded from hooks: $file");
+          drush_log(dt('Template loaded from hook(s): :file'), array(
+            ':file' => $file,
+          ));
           return file_get_contents($file);
         }
       }
@@ -141,11 +143,13 @@ class Provision_Config {
         // Iterate through the config file's parent classes until we
         // find the template file to use.
         $base_dir = provision_class_directory($class_name);
-
         $file = $base_dir . '/' . $this->template;
 
         if (is_readable($file)) {
-          drush_log("Template loaded from class: $file");
+          drush_log(dt('Template loaded from Provision Config class :class_name: :file', array(
+            ':class_name' => $class_name,
+            ':file' => $file,
+          )));
           return file_get_contents($file);
         }
 
@@ -154,6 +158,7 @@ class Provision_Config {
     }
 
     // We've failed to find a template if we've reached this far.
+    drush_log(dt('No template found for Provision Config class: ', array(':class' => get_class($this))), 'warning');
     return FALSE;
   }
 
