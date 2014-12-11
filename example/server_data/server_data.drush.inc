@@ -33,9 +33,9 @@ function server_data_provision_services() {
  * Implements drush_hook_post_COMMAND().
  */
 function drush_server_data_post_provision_install() {
-  drush_log('server_data received from the frontend (d()->server_data): ' . d()->server_data, 'warning');
+  drush_log('server_data received from the frontend (d()->server_data): ' . d()->server_data);
 }
 
 function drush_server_data_post_provision_verify() {
-  drush_log('server_data received from the frontend (d()->server_data): ' . d()->server_data, 'warning');
+  drush_log('server_data received from the frontend (d()->server_data): ' . d()->server_data);
 }
