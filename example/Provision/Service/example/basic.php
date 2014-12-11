@@ -51,9 +51,9 @@ class Provision_Service_example_basic extends Provision_Service_example {
   /**
    * Initialize this class, including option handling.
    */
-  function init() {
+  function init_server() {
     // REMEMBER TO CALL THE PARENT!
-    parent::init();
+    parent::init_server();
 
     /**
      * Register configuration classes for the create_config / delete_config methods.
