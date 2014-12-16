@@ -94,6 +94,7 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = NULL) {
   }
 
   if (!is_null($new_uri) && ($new_uri != d()->uri)) {
+    $reverify_via_frontend = TRUE;
     $options = d()->options;
     $options['uri'] = ltrim($new_uri, '@');
     $hash_name = drush_get_option('#name') ? '#name' : 'name';
@@ -160,6 +161,16 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = NULL) {
     d()->site_enabled = TRUE;
     drush_set_option('provision_save_config', FALSE);
     provision_backend_invoke($target, 'provision-verify');
+    // If the site has been renamed with Migrate task within the same platform
+    // it has to be re-verified via front-end task or no aliases will be written
+    // in the new vhost.
+    if ($reverify_via_frontend) {
+      // We have to exclude Hostmaster site from any extra verify steps.
+      if (d()->profile != 'hostmaster') {
+        provision_backend_invoke('@hostmaster', 'hosting-task', array($target, 'verify'), array('force' => TRUE));
+        sleep(5); // A small trick to avoid high load and race conditions.
+      }
+    }
   }
 }
 
