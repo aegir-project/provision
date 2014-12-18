@@ -210,8 +210,8 @@ class Provision_Config {
         }
 
         $status = provision_file()->file_put_contents($filename, $this->render_template($template, $this->data))
-          ->succeed('Generated config in write()' . (empty($this->description) ? $filename : $this->description . ' (' . $filename. ')'), 'success')
-          ->fail('Could not generate in write()' . (empty($this->description) ? $filename : $this->description . ' (' . $filename. ')'))->status();
+          ->succeed('Generated config in write(): ' . (empty($this->description) ? $filename : $this->description . ' (' . $filename. ')'), 'success')
+          ->fail('Could not generate in write(): ' . (empty($this->description) ? $filename : $this->description . ' (' . $filename. ')'))->status();
 
         // Change the permissions of the file if needed
         if (!is_null($this->mode)) {
