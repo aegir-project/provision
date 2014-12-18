@@ -24,8 +24,6 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
     $uri_brief = preg_replace('!^https?://!', '', $base_url);
     $mailto = $account->getEmail();
     $date = format_date(time());
-    $login_uri = Url::fromRoute('user', array(), array('absolute' => TRUE));
-    $edit_uri = Url::fromRoute('user/'. $account->id() .'/edit', array(), array('absolute' => TRUE));
 
     $mail_params['variables'] = array(
       '!username' => $username,
@@ -35,8 +33,6 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
       '!uri_brief' => $uri_brief,
       '!mailto' => $mailto,
       '!date' => $date,
-      '!login_uri' => $login_uri,
-      '!edit_uri' => $edit_uri,
     );
 
     $langcode = $account->getPreferredLangcode();
