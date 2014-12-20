@@ -18,7 +18,7 @@ function drush_provision_drupal_provision_migrate_validate($platform = NULL) {
  *
  * Implementation of drush_hook_pre_COMMAND().
  */
-function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = NULL) {
+function drush_provision_drupal_pre_provision_migrate($platform, $new_name = NULL) {
   /* Set offline mode to true and re-generate the settings.php. This will write a
    * $conf['site_offline'] = 1; to the settings.php
    */
@@ -31,8 +31,8 @@ function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = NULL
   drush_set_option('old_platform', d()->platform->name);
 
   // If we are renaming the site, pick this up early.
-  if (!is_null($new_uri) && ($new_uri != d()->name)) {
-    drush_set_option('target_name', $new_uri);
+  if (!is_null($new_name) && ($new_name != d()->name)) {
+    drush_set_option('target_name', $new_name);
   }
   else {
     // the site url stays the same
@@ -53,7 +53,7 @@ function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = NULL
  *
  * Implementation of drush_hook_pre_COMMAND_rollback().
  */
-function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_uri = NULL) {
+function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_name = NULL) {
   // Set site_offline to false and regenerate the config
   drush_log(dt("Bringing site out of maintenance"));
   d()->site_enabled = true;
@@ -73,7 +73,7 @@ function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_u
  *
  * Implementation of drush_hook_COMMAND().
  */
-function drush_provision_drupal_provision_migrate($platform, $new_uri = NULL) {
+function drush_provision_drupal_provision_migrate($platform, $new_name = NULL) {
 
   $target = drush_get_option('target_name');
 
@@ -81,11 +81,11 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = NULL) {
 
   $options['uri'] = d()->uri;
 
-  if (!is_null($new_uri) && ($new_uri != d()->name)) {
+  if (!is_null($new_name) && ($new_name != d()->name)) {
     $options = d()->options;
-    $options['uri'] = ltrim($new_uri, '@');
+    $options['uri'] = ltrim($new_name, '@');
     $hash_name = drush_get_option('#name') ? '#name' : 'name';
-    $options[$hash_name] = $new_uri;
+    $options[$hash_name] = $new_name;
   }
   $options['platform'] = $platform;
   $options['root'] = d($platform)->root;
@@ -124,7 +124,7 @@ function drush_provision_drupal_provision_migrate_rollback($platform) {
  *
  * Implementation of drush_hook_post_COMMAND().
  */
-function drush_provision_drupal_post_provision_migrate($platform, $new_uri = NULL) {
+function drush_provision_drupal_post_provision_migrate($platform, $new_name = NULL) {
   drush_set_option('installed', FALSE);
 
   if (!drush_get_option('deploy_replace_site', FALSE)) {
@@ -137,7 +137,7 @@ function drush_provision_drupal_post_provision_migrate($platform, $new_uri = NUL
 
 
 
-  if (!is_null($new_uri) && ($new_uri != d()->name)) {
+  if (!is_null($new_name) && ($new_name != d()->name)) {
     // remove the existing alias
     $config = new Provision_Config_Drushrc_Alias(d()->name);
     $config->unlink();
