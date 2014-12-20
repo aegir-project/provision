@@ -19,9 +19,8 @@ function drush_provision_drupal_provision_migrate_validate($platform = NULL) {
  * Implementation of drush_hook_pre_COMMAND().
  */
 function drush_provision_drupal_pre_provision_migrate($platform, $new_name = NULL) {
-  /* Set offline mode to true and re-generate the settings.php. This will write a
-   * $conf['site_offline'] = 1; to the settings.php
-   */
+  // Set offline mode to true and re-generate the settings.php file.
+  // This will write a $conf['site_offline'] = 1; to the settings.php file.
   drush_log(dt("Putting site under maintenance"));
   d()->site_enabled = FALSE;
   _provision_drupal_create_settings_file();
