@@ -12,21 +12,21 @@
 /**
  * Make sure we have a valid site being cloned, and that the file being cloned from exists
  */
-function drush_provision_drupal_provision_clone_validate($new_uri = null, $platform = null) {
+function drush_provision_drupal_provision_clone_validate($new_name = null, $platform = null) {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 }
 
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from
  */
-function drush_provision_drupal_pre_provision_clone($new_uri, $platform = null) {
+function drush_provision_drupal_pre_provision_clone($new_name, $platform = null) {
   drush_invoke('provision-backup');
 }
 
 /**
  * Remove the extracted site directory
  */
-function drush_provision_drupal_pre_provision_clone_rollback($new_uri, $platform = null) {
+function drush_provision_drupal_pre_provision_clone_rollback($new_name, $platform = null) {
   $success =  provision_file()->unlink(drush_get_option('backup_file'))
     ->succeed('Removed unused clone site package')
     ->fail('Could not remove unused clone site package');
@@ -35,7 +35,7 @@ function drush_provision_drupal_pre_provision_clone_rollback($new_uri, $platform
 /**
  * Switch the clone directories around now that we have the new db installed
  */
-function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
+function drush_provision_drupal_provision_clone($new_name, $platform = null) {
   drush_set_option('old_platform', d()->platform->name);
 
   // If the site is cloned between platforms and not just in the same platform,
@@ -52,9 +52,9 @@ function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
   sleep(5); // A small trick to avoid high load and race conditions.
 
   $options = d()->options;
-  $options['uri'] = ltrim($new_uri, '@');
+  $options['uri'] = ltrim($new_name, '@');
   $hash_name = drush_get_option('#name') ? '#name' : 'name';
-  $options[$hash_name] = $new_uri;
+  $options[$hash_name] = $new_name;
   $options['platform'] = (isset($platform)) ? $platform : $options['platform'];
   $options['root'] = d($options['platform'])->root;
   $options['aliases'] = array();
@@ -79,14 +79,14 @@ function drush_provision_drupal_provision_clone($new_uri, $platform = null) {
     $options['db_server'] = $db_server;
   }
 
-  drush_invoke_process('@none', 'provision-save', array($new_uri), $options);
+  drush_invoke_process('@none', 'provision-save', array($new_name), $options);
   # note that we reset the aliases so they don't conflict with the original site
 
-  provision_backend_invoke($new_uri, 'provision-deploy', array(drush_get_option('backup_file')), array('old_uri' => d()->uri));
+  provision_backend_invoke($new_name, 'provision-deploy', array(drush_get_option('backup_file')), array('old_uri' => d()->uri));
 
   if (!drush_get_error()) {
     // Verify the newly cloned site.
-    provision_backend_invoke($new_uri, 'provision-verify');
+    provision_backend_invoke($new_name, 'provision-verify');
     sleep(5); // A small trick to avoid high load and race conditions.
     // Verify again also original site via frontend to avoid issue #1004526
     provision_backend_invoke('@hostmaster', 'hosting-task', array($local_uri_verify, 'verify'), array('force' => TRUE));
