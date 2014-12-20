@@ -30,7 +30,7 @@ function drush_provision_drupal_pre_provision_migrate($platform, $new_uri = NULL
   drush_set_option('old_platform', d()->platform->name);
 
   // If we are renaming the site, pick this up early.
-  if (!is_null($new_uri) && ($new_uri != d()->uri)) {
+  if (!is_null($new_uri) && ($new_uri != d()->name)) {
     drush_set_option('target_name', $new_uri);
     drush_set_option('source_name', d()->uri);
 
@@ -91,7 +91,7 @@ function drush_provision_drupal_provision_migrate($platform, $new_uri = NULL) {
     }
   }
 
-  if (!is_null($new_uri) && ($new_uri != d()->uri)) {
+  if (!is_null($new_uri) && ($new_uri != d()->name)) {
     $options = d()->options;
     $options['uri'] = ltrim($new_uri, '@');
     $hash_name = drush_get_option('#name') ? '#name' : 'name';
@@ -205,7 +205,7 @@ function drush_provision_drupal_post_provision_migrate($platform, $new_uri = NUL
     d()->service('http')->sync(d()->site_path);
   }
 
-  if (!is_null($new_uri) && ($new_uri != d()->uri)) {
+  if (!is_null($new_uri) && ($new_uri != d()->name)) {
     // Use correct context for cleanup operations.
     $source_name = drush_get_option('source_name');
     drush_log(dt("DEBUG RENAME source_name is @this", array('@this' => $source_name)));
