@@ -9,9 +9,15 @@
  */
 
 $mail = array();
+if (drush_drupal_major_version() >= 8) {
+  $t = 't';
+}
+else {
+ $t = 'st';
+}
 
-$mail['subject'] = st('Your new site !site has been created.');
-$mail['body'] = st("!username,
+$mail['subject'] = $t('Your new site !site has been created.');
+$mail['body'] = $t("!username,
 
 Your new site !site has been created.
 
