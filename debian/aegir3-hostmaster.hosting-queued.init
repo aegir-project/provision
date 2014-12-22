@@ -25,6 +25,7 @@ USER="aegir"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 NICE=10
+IONICE=idle
 
 # Exit if the package is not installed
 [ -x $DAEMON ] || exit 0
@@ -52,7 +53,7 @@ do_start()
                 --make-pidfile --pidfile $PIDFILE --startas $DAEMON \
                 --test > /dev/null \
 		|| return 1
-	start-stop-daemon --nice $NICE --start --quiet -c $USER --background \
+	start-stop-daemon --nice $NICE --iosched $IONICE --start --quiet -c $USER --background \
                 --make-pidfile --pidfile $PIDFILE --startas $DAEMON -- \
 		$DAEMON_ARGS \
 		|| return 2

@@ -1,11 +1,9 @@
-aegir2-provision (2.1) unstable; urgency=medium
+aegir3-provision (3.0~alpha1) unstable; urgency=medium
 
-  * This release ships with support for Apache 2.4, along with updates
-    to Drupal core and ModalframeAPI. A number of bug-fixes are included
-    affecting deployment of Drupal 7 sites, aliases with sub-directory
-    installs, backups, and more: http://community.aegirproject.org/2.1
+  * first alpha release of the 3.x branch, release notes too long to
+    document here: http://community.aegirproject.org/3.0-alpha1
 
- -- Christopher Gervais <chris@ergonlogic.com>  Wed, 23 Apr 2014 17:06:21 -0400
+ -- Herman van Rink <helmo@initfour.nl>  Mon, 22 Sep 2014 10:47:08 +0200
 
 aegir2-provision (2.0) unstable; urgency=low
 
