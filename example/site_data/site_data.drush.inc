@@ -39,4 +39,3 @@ function drush_site_data_post_provision_install() {
 function drush_site_data_post_provision_verify() {
   drush_log('site_data received from the frontend (d()->site_data): ' . d()->site_data);
 }
-
