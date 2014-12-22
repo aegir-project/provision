@@ -9,8 +9,10 @@ function drush_provision_drupal_provision_verify_validate() {
   if (d()->type === 'site') {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
     provision_prepare_environment();
+
     _provision_drupal_create_settings_file();
     provision_drupal_push_site();
+
     drush_errors_on();
     $rrFile = d()->root . '/sites/all/modules/registry-rebuild.ini';
     if (provision_file()->exists($rrFile)->status()) {
@@ -84,8 +86,16 @@ function drush_provision_drupal_pre_provision_verify() {
       ->succeed('Drupal sites directory @path is writable by the provisioning script')
       ->fail('Drupal sites directory @path is not writable by the provisioning script', 'PROVISION_SITES_DIR_NOT_WRITABLE');
 
+    // Ensure sites.php file exists for Drupal 8 and above.
+    $sitesfile = "sites/sites.php";
+    if (drush_drupal_major_version() >= 8 && !file_exists($sitesfile)) {
+      if (!drush_op('copy', 'sites/example.sites.php', $sitesfile) && !drush_get_context('DRUSH_SIMULATE')) {
+        return drush_set_error(dt('Failed to copy sites/sites.php to @sitesfile', array('@sitesfile' => $sitesfile)));
+      }
+    }
+
     drush_set_option('sites', array_keys((array) provision_drupal_find_sites()), 'drupal');
-    drush_log(dt("This platform is running @short_name @version", array('@short_name' => 'drupal', '@version' => VERSION)));
+    drush_log(dt("This platform is running @short_name @version", array('@short_name' => 'drupal', '@version' => drush_drupal_version())));
     drush_set_option('packages', _scrub_object(provision_find_packages()), 'drupal');
 
     // Determine latest BOA contrib directory name and add INI template if missing.
