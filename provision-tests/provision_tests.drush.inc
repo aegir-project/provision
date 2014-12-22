@@ -23,6 +23,15 @@ function provision_tests_drush_command() {
       'hosting',
     ),
   );
+  $items['provision-demo-content'] = array(
+    'description' => dt('Setup some demo content on a fresh Aegir install'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    // Although we're a provision command, we require hostmaster to be around to
+    // run the tests correctly
+    'drupal dependencies' => array(
+      'hosting',
+    ),
+  );
 
   return $items;
 }
@@ -41,19 +50,16 @@ function drush_provision_tests_run() {
 
   drush_provision_tests_install_platform('drupal6');
   drush_provision_tests_install_platform('drupal7');
-  drush_provision_tests_install_platform('openatrium');
 
   // Install some sites.
   drush_provision_tests_install_site('drupal6', 'drupal6-default', 'default');
   drush_provision_tests_install_site('drupal7', 'drupal7-standard', 'standard');
   drush_provision_tests_install_site('drupal7', 'drupal7-minimal', 'minimal');
-  drush_provision_tests_install_site('openatrium', 'openatrium-openatrium', 'openatrium');
 
   // Remove the sites.
   drush_provision_tests_remove_site('drupal6-default');
   drush_provision_tests_remove_site('drupal7-standard');
   drush_provision_tests_remove_site('drupal7-minimal');
-  drush_provision_tests_remove_site('openatrium-openatrium');
 
   // Create some sites and migrate them.
   drush_provision_tests_install_platform('drupal6', 'drupal6_other');
@@ -80,16 +86,56 @@ function drush_provision_tests_run() {
   // Clean up a little.
   drush_provision_tests_remove_platform('drupal6');
   drush_provision_tests_remove_platform('drupal7');
-  drush_provision_tests_remove_platform('openatrium');
 
   // Restore the tasks queue status:
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
 
   if (drush_get_error() != DRUSH_SUCCESS) {
-    return drush_set_error(drush_get_error(), 'Running tests failed');
+    drush_set_error(drush_get_error(), 'Running tests failed');
+    exit(1);
   }
 
   drush_log(dt('Tests completed successfully'), 'success');
+}
+
+/**
+ * Drush command to setup some demo platforms and sites.
+ *
+ * To use these demo sites let names like drupal7-standard.aegir.example.com
+ * resolve to the IP of this Aegir server. E.g. in your hosts file.
+ */
+function drush_provision_tests_provision_demo_content() {
+  if (!drush_confirm(dt('This command should only be run on a clean Aegir install, and data may be lost! Do you want to continue?'))) {
+    return drush_user_abort();
+  }
+
+  // Disable the tasks queue, we run them manually instead.
+  $queue_status_initial = variable_get('hosting_queue_tasks_enabled', '0');
+  variable_set('hosting_queue_tasks_enabled', '0');
+
+  // Start with D8 as it needs the most work/testing.
+  drush_provision_tests_install_platform('drupal8');
+  drush_provision_tests_install_site('drupal8', 'drupal8-minimal', 'minimal');
+
+  drush_provision_tests_install_platform('drupal6');
+  drush_provision_tests_install_platform('drupal7');
+  drush_provision_tests_install_platform('openatrium2');
+
+  // Install some sites.
+  drush_provision_tests_install_site('drupal6', 'drupal6-default', 'default');
+  drush_provision_tests_install_site('drupal7', 'drupal7-standard', 'standard');
+  drush_provision_tests_install_site('drupal7', 'drupal7-minimal', 'minimal');
+  drush_provision_tests_install_site('openatrium2', 'openatrium2-openatrium', 'openatrium');
+
+  // Restore the tasks queue status:
+  variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
+
+  if (drush_get_error() != DRUSH_SUCCESS) {
+    drush_set_error(drush_get_error(), 'Setting up demo content failed');
+    exit(1);
+  }
+
+  drush_log(dt('Demo content setup successfully'), 'success');
 }
 
 /**
@@ -101,7 +147,7 @@ function drush_provision_tests_install_platform($platform_name, $platform_alias 
   }
   drush_log(dt('Building platform: @platform and adding to hostmaster.', array('@platform' => $platform_alias)), 'ok');
   $args = array(
-    PROVISION_TESTS_BUILDS_REPO . "/$platform_name.build",
+    PROVISION_TESTS_BUILDS_REPO . "/$platform_name.make",
     "/var/aegir/platforms/$platform_alias"
   );
   drush_invoke_process('@none', 'make', $args);
@@ -141,9 +187,15 @@ function drush_provision_tests_install_site($platform_name, $site, $profile_name
     'profile' => $profile_name,
     'db_server' => '@server_localhost',
     'root' => "/var/aegir/platforms/$platform_name",
+    'client_email' => 'this.email@is.invalid',
   );
   drush_invoke_process('@none', 'provision-save', $args, $options);
-  provision_backend_invoke("@$site.aegir.example.com", 'provision-install');
+
+  $args = array();
+  $options = array(
+    'client_email' => 'this.email@is.invalid',
+  );
+  provision_backend_invoke("@$site.aegir.example.com", 'provision-install', $args, $options);
   provision_backend_invoke('@hostmaster', 'hosting-task', array("@platform_$platform_name", 'verify'), array('force' => TRUE));
   drush_provision_tests_run_remaining_tasks();
 }
@@ -220,8 +272,8 @@ function drush_provision_tests_migrate_site($site, $target) {
  */
 function drush_provision_tests_run_remaining_tasks() {
   $tasks = array();
-  $result = db_query("SELECT t.nid FROM {hosting_task} t INNER JOIN {node} n ON t.vid = n.vid WHERE t.task_status = %d ORDER BY n.changed, n.nid ASC", 0);
-  while ($node = db_fetch_object($result)) {
+  $result = db_query("SELECT t.nid FROM {hosting_task} t INNER JOIN {node} n ON t.vid = n.vid WHERE t.task_status = :status ORDER BY n.changed, n.nid ASC", array(':status' => 0));
+  while ($node = $result->fetch()) {
     $tasks[$node->nid] =  node_load($node->nid);
   }
 
