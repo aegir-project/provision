@@ -65,7 +65,7 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
     $profile_msg = '';
   }
   else {
-    $profile_msg = dt("Aegir installation profile: !profile\n", array('!profile' => $profile));
+    $profile_msg = dt("Aegir install profile: !profile\n", array('!profile' => $profile));
   }
 
   drush_print("Aegir $version automated install script");
