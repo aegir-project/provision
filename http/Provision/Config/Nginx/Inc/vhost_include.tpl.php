@@ -171,7 +171,9 @@ location = /fpm-status {
   access_log   off;
   allow        127.0.0.1;
   deny         all;
-<?php if ($phpfpm_mode == 'port'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
+  fastcgi_pass unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
   fastcgi_pass unix:/var/run/php5-fpm.sock;
@@ -185,7 +187,9 @@ location = /fpm-ping {
   access_log   off;
   allow        127.0.0.1;
   deny         all;
-<?php if ($phpfpm_mode == 'port'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
+  fastcgi_pass unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
   fastcgi_pass unix:/var/run/php5-fpm.sock;
@@ -207,7 +211,9 @@ location = /cron.php {
   deny         all;
 <?php endif; ?>
   try_files    $uri =404;
-<?php if ($phpfpm_mode == 'port'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
+  fastcgi_pass unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
   fastcgi_pass unix:/var/run/php5-fpm.sock;
@@ -227,7 +233,9 @@ location = /core/cron.php {
   deny         all;
 <?php endif; ?>
   try_files    $uri =404;
-<?php if ($phpfpm_mode == 'port'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
+  fastcgi_pass unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
   fastcgi_pass unix:/var/run/php5-fpm.sock;
@@ -808,7 +816,9 @@ location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tin
     return 403;
   }
   try_files    $uri =404;
-<?php if ($phpfpm_mode == 'port'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
+  fastcgi_pass unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
   fastcgi_pass unix:/var/run/php5-fpm.sock;
@@ -951,7 +961,13 @@ location ~ ^/(?<esi>esi/.*)"$ {
   ###
   fastcgi_param QUERY_STRING q=$esi;
   fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+<?php if ($satellite_mode == 'boa'): ?>
+  fastcgi_pass  unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass  127.0.0.1:9000;
+<?php else: ?>
+  fastcgi_pass  unix:/var/run/php5-fpm.sock;
+<?php endif; ?>
   ###
   ### Use Nginx cache for all visitors.
   ###
@@ -1090,7 +1106,9 @@ location = /index.php {
   tcp_nopush    off;
   keepalive_requests 0;
   try_files     $uri =404; ### check for existence of php file first
-<?php if ($phpfpm_mode == 'port'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
+  fastcgi_pass  unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass  127.0.0.1:9000;
 <?php else: ?>
   fastcgi_pass  unix:/var/run/php5-fpm.sock;
@@ -1141,7 +1159,9 @@ location ~* ^/(?:index|cron|boost_stats|update|authorize)\.php$ {
   keepalive_requests 0;
   access_log   off;
   try_files    $uri =404; ### check for existence of php file first
-<?php if ($phpfpm_mode == 'port'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
+  fastcgi_pass unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
   fastcgi_pass unix:/var/run/php5-fpm.sock;
@@ -1169,7 +1189,9 @@ location @allowupdate {
   keepalive_requests 0;
   access_log   off;
   try_files    $uri =404; ### check for existence of php file first
-<?php if ($phpfpm_mode == 'port'): ?>
+<?php if ($satellite_mode == 'boa'): ?>
+  fastcgi_pass unix:/var/run/www53.fpm.socket;
+<?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
   fastcgi_pass unix:/var/run/php5-fpm.sock;
