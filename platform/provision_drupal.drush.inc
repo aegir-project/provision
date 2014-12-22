@@ -567,11 +567,13 @@ function _provision_find_profiles() {
           }
         }
       }
+
       require_once($profile->filename);
       $func = $profile->name . "_profile_details";
       if (function_exists($func)) {
         $profile->info = array_merge($profile->info, $func());
       }
+
       $languages['en'] = 1;
       // Find languages available
       $files = array_keys(drush_scan_directory($profiles_subdir . '/' . $name . '/translations', '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
@@ -585,10 +587,10 @@ function _provision_find_profiles() {
       }
       $profile->info['languages'] = array_keys($languages);
 
-      // Drupal 7 renamed the default installation profile to 'standard'
+      // Drupal 7 renamed the default install profile to 'standard'
       // Aegir now allows projects to specify an "old short name" to provide an upgrade path when projects get renamed.
       if ($profile->name == 'standard') {
-         $profile->info['old_short_name'] = 'default';
+        $profile->info['old_short_name'] = 'default';
       }
       elseif ($profile->name == 'minimal') {
         $profile->info['old_short_name'] = 'acquia';
@@ -608,8 +610,9 @@ function _provision_find_profiles() {
       elseif ($profile->name == 'commerce_kickstart') {
         $profile->info['old_short_name'] = 'commercedev';
       }
+
       $return[$name] = $profile;
-      drush_log(dt('Found installation profile %name', array('%name' => $name)));
+      drush_log(dt('Found install profile %name', array('%name' => $name)));
     }
   }
   return $return;
@@ -751,11 +754,11 @@ function provision_find_packages() {
   // Create a package for the Drupal release
   $packages['base']['platforms'] = _provision_find_platforms();
 
-  // Find installation profiles.
+  // Find install profiles.
   $profiles = _provision_find_profiles();
   drush_set_option('profiles', array_keys((array) $profiles), 'drupal');
 
-  // Iterate through the installation profiles, finding the profile specific packages
+  // Iterate through the install profiles, finding the profile specific packages
   foreach ($profiles as $profile => $info) {
     _provision_cvs_deploy($info);
     if (!$info->version) {
@@ -802,63 +805,7 @@ function provision_drupal_system_map() {
   // Load the version specific include files.
   drush_include_engine('drupal', 'packages');
 
-  $profiles = _provision_find_profiles();
-  foreach ($profiles as $profile => $info) {
-    _provision_cvs_deploy($info);
-    if (!$info->version) {
-      $info->version = drush_drupal_version();
-    }
-    $profiles[$profile] = $info;
-  }
-  $packages['platforms'] = _provision_find_platforms();
-
-  $profile = drush_get_option('profile');
-  $packages['profiles'][$profile] = $profiles[$profile];
-  $packages['profiles'][$profile]->status = 1;
-
-  foreach (_provision_system_query("module") as $module) {
-    $info_file = sprintf("%s/%s.info", dirname($module->filename), $module->name);
-    $module->info = provision_parse_info_file($info_file);
-    // Skip hidden modules
-    if (isset($module->info['hidden']) && $module->info['hidden'] == 1) {
-      continue;
-    }
-    $frags = explode("/", $module->filename);
-    // flag site-specific modules
-    if ($frags[0] == 'sites' && $frags[1] != 'all') {
-      $module->platform = -1;
-    }
-
-    _provision_cvs_deploy($module);
-    $module->filename = realpath($module->filename);
-    if ($module->schema_version == -1) {
-      $module->schema_version = 0;
-    }
-    $packages['modules'][$module->name] = $module;
-  }
-
-  drush_log(dt("Found !count modules", array('!count' => sizeof($packages['modules']))));
-
-  // XXX: mostly a copy-paste from above
-  foreach (_provision_system_query("theme") as $theme) {
-    $frags = explode("/", $theme->filename);
-    // flag site-specific themes
-    if ($frags[0] == 'sites' && $frags[1] != 'all') {
-      $theme->platform = -1;
-    }
-    $info_file = sprintf("%s/%s.info", dirname($theme->filename), $theme->name);
-    $theme->info = provision_parse_info_file($info_file);
-    _provision_cvs_deploy($theme);
-    $theme->filename = realpath($theme->filename);
-
-    if ($theme->schema_version == -1) {
-      $theme->schema_version = 0;
-    }
-
-    $packages['themes'][$theme->name] = $theme;
-  }
-  drush_log(dt("Found !count themes", array('!count' => sizeof($packages['themes']))));
-  return $packages;
+  return _provision_drupal_system_map();
 }
 
 /**
@@ -870,6 +817,8 @@ function _provision_drupal_search_paths($scope, $key = '', $type = 'modules') {
   switch ($scope) {
     case 'base' :
       $searchpaths[] = sprintf("%s/%s", $drupal_root, $type);
+      $searchpaths[] = sprintf("%s/core/%s", $drupal_root, $type);
+      $searchpaths[] = sprintf("%s/sites/all/%s", $drupal_root, $type);
       break;
     default :
       if ($key) {
@@ -894,8 +843,22 @@ function _provision_drupal_find_modules($scope, $key = '') {
     $files = array_merge($files, drush_scan_directory($path, "/\.module$/", array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name'));
   }
   foreach ($files as $name => $info) {
-    $info_file = sprintf("%s/%s.info", dirname($info->filename), $name);
-    $files[$name]->info = provision_parse_info_file($info_file);
+    if (drush_drupal_major_version() >= 8) {
+      $yaml_file = sprintf("%s/%s.info.yml", dirname($info->filename), $name);
+      if(!file_exists($yaml_file)) {
+        drush_log(dt("@name.info.yml not found.", array("@name" => $name)), 'notice');
+        unset($files[$name]);
+        continue;
+      }
+      $files[$name]->info = Symfony\Component\Yaml\Yaml::parse($yaml_file);
+      if (!empty($files[$name]->info['name'])) {
+        $files[$name]->name = $files[$name]->info['name'];
+      }
+    }
+    else {
+      $info_file = sprintf("%s/%s.info", dirname($info->filename), $name);
+      $files[$name]->info = provision_parse_info_file($info_file);
+    }
     // Skip hidden modules
     if (isset($files[$name]->info['hidden']) && $files[$name]->info['hidden'] != FALSE) {
       unset($files[$name]);
