@@ -9,7 +9,7 @@
 
 
 /**
- * Implements hook_drush_load().
+ * Implements hook_drush_load(). Deprecated. Removed in Drush 7.x.
  *
  * In a drush contrib check if the frontend part (hosting_hook variant) is enabled.
  */
@@ -213,6 +213,32 @@ function hook_provision_drupal_chgrp_directories_alter(&$chgrp, $url) {
   $chgrp["sites/$url/my_other_dir"] = FALSE; // Skip the chgrp on this directory.
 }
 
+/**
+ * Alter the array of directories to not to recurse into in mkdir and chgrp
+ * operations.
+ *
+ * @param $chgrp_not_recursive
+ *    The array of directories not to recurse into.
+ * @param string $url
+ *    The url of the site being invoked.
+ */
+function hook_provision_drupal_chgrp_not_recursive_directories_alter($chgrp_not_recursive, $url) {
+  $chgrp_not_recursive[] = "sites/$url/my_special_dir";
+  unset($chgrp_not_recursive["sites/$url"]); // Allow recursion where we otherwise wouldn't.
+}
+
+/**
+ * Alter the array of directories to not to recurse into in chmod operations.
+ *
+ * @param $chmod_not_recursive
+ *    The array of directories not to recurse into.
+ * @param string $url
+ *    The url of the site being invoked.
+ */
+function hook_provision_drupal_chmod_not_recursive_directories_alter($chmod_not_recursive, $url) {
+  $chmod_not_recursive[] = "sites/$url/my_special_dir";
+  unset($chmod_not_recursive["sites/$url"]); // Allow recursion where we otherwise wouldn't.
+}
 
 /**
  * Alter the settings array just before starting the provision install.
