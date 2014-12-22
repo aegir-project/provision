@@ -19,8 +19,8 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
     $from = variable_get('site_mail', ini_get('sendmail_from'));
     $mail_params['variables'] = array(
       '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
-      '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail, 
-      '!date' => format_date(time()), '!login_uri' => url('user', array('absolute' => TRUE)), 
+      '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail,
+      '!date' => format_date(time()), '!login_uri' => url('user', array('absolute' => TRUE)),
       '!edit_uri' => url('user/'. $account->uid .'/edit', array('absolute' => TRUE)));
 
     $mail_success = drupal_mail('install', 'welcome-admin', $account->mail, user_preferred_language($account), $mail_params, $from, TRUE);
@@ -44,7 +44,7 @@ function install_mail($key, &$message, $params) {
         require_once "./profiles/$profile/provision_welcome_mail.inc";
         $custom = TRUE;
       }
-      elseif (file_exists(dirname(__FILE__) . '/../provision_welcome_mail.inc')) { 
+      elseif (file_exists(dirname(__FILE__) . '/../provision_welcome_mail.inc')) {
         /** use the module provided welcome email
          * We can not use drupal_get_path here,
          * as we are connected to the provisioned site's database
@@ -82,18 +82,18 @@ function install_main() {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
 
   // We have an existing settings.php.
-  
-  // Drush 5.
-  if (function_exists('_drush_sql_get_db_spec')) {
-    $db_spec = _drush_sql_get_db_spec();
-  }
-  // Drush 4.
-  elseif (function_exists('drush_sql_read_db_spec')) {
-    $db_spec = drush_sql_read_db_spec();
-  }
-  // Drush 3.
-  else {
-    $db_spec = drush_core_site_install_db_spec();
+
+  switch (substr(drush_core_version(), 0, 1)) {
+    case '7':
+      $sql = drush_get_class('Drush\Sql\Sql', array(), array(drush_drupal_major_version()));
+      $db_spec = $sql->get_db_spec();
+      break;
+    case '6':
+    case '5':
+      $db_spec = _drush_sql_get_db_spec();
+      break;
+    default:
+      drush_set_error('DRUSH_UNSUPPORTED_VERSION', dt('Drush !version is not supported'));
   }
 
   $db_spec['db_prefix'] = $GLOBALS['db_prefix'];

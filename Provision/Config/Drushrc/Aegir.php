@@ -25,6 +25,19 @@ class Provision_Config_Drushrc_Aegir extends Provision_Config_Drushrc {
     }
 
     $this->data['hosting_features'] = $enabled_features;
-  }
 
+    $this->data['drush_exclude'] = array();
+    $this->data['drush_include'] = array();
+    foreach($enabled_features as $feature => $status) {
+      if ($status === '0') {
+        $this->data['drush_exclude'][] = $feature;
+      }
+      else {
+        $feature_include_path = DRUPAL_ROOT . '/' . drupal_get_path('module', $features[$feature]['module']) . '/drush';
+        if (file_exists($feature_include_path)) {
+          $this->data['drush_include'][$feature] = $feature_include_path;
+        }
+      }
+    }
+  }
 }

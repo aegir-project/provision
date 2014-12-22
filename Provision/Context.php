@@ -197,18 +197,23 @@ class Provision_Context {
   /**
    * Check the $options property for a field, saving to the properties array.
    */
-  function setProperty($field, $default = NULL, $array = FALSE) {
+  function setProperty($field, $default = NULL, $array = FALSE, $force = FALSE) {
+    // If the options already has the $field...
     if (isset($this->options[$field])) {
-      if ($this->options[$field] === 'null') {
+      // If the options property is null, or property is being forced, used default value.
+      if ($this->options[$field] === 'null' || $force) {
         $this->$field = $default;
       }
+      // If options property is supposed to be an array but has comma separated values, explode it.
       elseif ($array && !is_array($this->options[$field])) {
         $this->$field = explode(',', $this->options[$field]);
       }
+      // Otherwise use options array value for the $field property.
       else {
         $this->$field = $this->options[$field];
       }
     }
+    // If the options doesn't have the field, use default value.
     else {
       $this->$field = $default;
     }

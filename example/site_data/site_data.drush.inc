@@ -33,5 +33,10 @@ function site_data_provision_services() {
  * Implements drush_hook_post_COMMAND().
  */
 function drush_site_data_post_provision_install() {
-  drush_log('[SITE_DATA] d()->site_data: ' . d()->site_data, 'warning');
+  drush_log('site_data received from the frontend (d()->site_data): ' . d()->site_data);
 }
+
+function drush_site_data_post_provision_verify() {
+  drush_log('site_data received from the frontend (d()->site_data): ' . d()->site_data);
+}
+

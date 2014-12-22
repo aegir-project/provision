@@ -23,6 +23,12 @@ class Provision_Config_Http_Site extends Provision_Config_Http {
 
     $this->aliases = array_filter($this->aliases, 'trim');
 
+    if ($this->drush_aliases && !is_array($this->drush_aliases)) {
+      $this->drush_aliases = explode(",", $this->drush_aliases);
+    }
+
+    $this->drush_aliases = array_filter($this->drush_aliases, 'trim');
+
     if (!$this->site_enabled) {
       $this->template = $this->disabled_template;
     }

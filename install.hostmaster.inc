@@ -31,9 +31,14 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   // set defaults for this whole script
   // those are settings that are not prompted to the user but still overridable
   drush_set_default('version', provision_version());
+  drush_set_default('profile', 'hostmaster');
+
+  // Get values needed to set other defaults
   $version = drush_get_option('version');
   $aegir_root = drush_set_default('aegir_root', drush_server_home());
-  drush_set_default('root', $aegir_root . '/' . 'hostmaster-' . $version);
+  $profile = drush_get_option('profile');
+
+  drush_set_default('root', $aegir_root . '/' . $profile . '-' . $version);
   drush_set_default('r', drush_get_option('root'));
   drush_set_default('script_user', provision_current_user());
   drush_set_default('web_group', _provision_default_web_group());
@@ -44,6 +49,7 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   drush_set_default('client_name', 'admin');
   $aegir_db_user = drush_get_option('aegir_db_user');
 
+  // Generate "makefile" message only if there is one set.
   $root = drush_get_option(array('r', 'root'));
   if (is_dir($root) && !drush_get_option('makefile', FALSE)) {
     // Don't assume we know the makefile used to build an existing platform
@@ -52,6 +58,14 @@ function drush_provision_hostmaster_install_validate($site = NULL) {
   else {
     drush_set_default('makefile', dirname(__FILE__) . '/aegir.make');
     $makefile_msg = dt("Aegir makefile: !makefile\n", array('!makefile' => drush_get_option('makefile')));
+  }
+
+  // Generate "profile" message only if there is one set.
+  if (!drush_get_option('profile', FALSE)) {
+    $profile_msg = '';
+  }
+  else {
+    $profile_msg = dt("Aegir installation profile: !profile\n", array('!profile' => $profile));
   }
 
   drush_print("Aegir $version automated install script");
@@ -117,7 +131,8 @@ The following settings will be used:
  Aegir version: !version
  Aegir platform path: !root
  Admin email: !email
- !makefile',
+ !makefile
+ !profile',
   array(
     '!site' => $site,
     '!fqdn' => drush_get_option('aegir_host'),
@@ -133,6 +148,7 @@ The following settings will be used:
     '!version' => drush_get_option('version'),
     '!root' => $root,
     '!makefile' => $makefile_msg,
+    '!profile' => $profile_msg,
     '!email' => drush_get_option('client_email'),
   )));
 
@@ -234,6 +250,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'uri' => $site,
     'client_name' => drush_get_option('client_name'),
     'profile' => $profile,
+    'drush_aliases' => 'hm',
   ));
   $data = provision_backend_invoke($site_name, 'provision-install', array(), array('client_email' => drush_get_option('client_email')));
   provision_backend_invoke($site_name, 'provision-verify');

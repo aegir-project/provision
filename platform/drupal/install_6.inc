@@ -80,8 +80,8 @@ function install_send_welcome_mail($url, $account, $profile, $language, $client_
 
   $mail_params['variables'] = array(
       '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
-      '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail, 
-      '!date' => format_date(time()), '!login_uri' => url('user', array('absolute' => TRUE)), 
+      '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail,
+      '!date' => format_date(time()), '!login_uri' => url('user', array('absolute' => TRUE)),
       '!edit_uri' => url('user/'. $account->uid .'/edit', array('absolute' => TRUE)));
 
   $mail_success = drupal_mail('install', 'welcome-admin', $client_email, user_preferred_language($account), $mail_params, $from, TRUE);
@@ -103,7 +103,7 @@ function install_mail($key, &$message, $params) {
         require_once "./profiles/$profile/provision_welcome_mail.inc";
         $custom = TRUE;
       }
-      elseif (file_exists(dirname(__FILE__) . '/../provision_welcome_mail.inc')) { 
+      elseif (file_exists(dirname(__FILE__) . '/../provision_welcome_mail.inc')) {
         /** use the module provided welcome email
          * We can not use drupal_get_path here,
          * as we are connected to the provisioned site's database
@@ -181,7 +181,7 @@ function install_main() {
   drush_log(st("Installing Drupal schema"), 'install');
   // Load the profile.
   require_once "./profiles/$profile/$profile.profile";
-  drush_log(st("Loading @profile install profile", array("@profile" => $profile)), 'install');
+  drush_log(st("Loading @profile installation profile", array("@profile" => $profile)), 'install');
 
   drush_log(st("Installing translation : @locale", array("@locale" => $install_locale)), 'install');
 
@@ -293,7 +293,7 @@ function install_main() {
   menu_rebuild();
 
   // profile task
-  // @TODO support install profiles with multiple additional tasks
+  // @TODO support installation profiles with multiple additional tasks
   $task = 'profile';
 
   $function = $profile .'_profile_tasks';
@@ -329,7 +329,7 @@ function install_main() {
 
   if ($task == 'profile-finished') {
     // profile-finished task
-    // Secondary locale import 
+    // Secondary locale import
     if (!empty($install_locale) && ($install_locale != 'en')) {
       // Collect files to import for this language. Skip components
       // already covered in the initial batch set.

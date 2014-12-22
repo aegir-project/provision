@@ -382,7 +382,7 @@ function _provision_drupal_create_directories($url = NULL) {
   }
 
   // These paths should not have recursive operations performed on them.
-  $not_recursive = array(
+  $chmod_not_recursive = $chgrp_not_recursive = array(
     "sites/$url",
     "sites/$url/files",
     "sites/$url/files/tmp",
@@ -411,9 +411,13 @@ function _provision_drupal_create_directories($url = NULL) {
     "sites/$url/private/config/staging"
   );
 
-  // Allow other commands to add or alter the directories to be created.
+  // Allow other commands to add or alter the directories to be created,
+  // chmod'd or chgrp'd.
+  // TODO: Figure out a better way to do this.
   drush_command_invoke_all_ref('provision_drupal_create_directories_alter', $mkdir, $url);
   drush_command_invoke_all_ref('provision_drupal_chgrp_directories_alter', $chgrp, $url);
+  drush_command_invoke_all_ref('provision_drupal_chgrp_not_recursive_alter', $chgrp_not_recursive, $url);
+  drush_command_invoke_all_ref('provision_drupal_chmod_not_recursive_alter', $chmod_not_recursive, $url);
 
   foreach ($mkdir as $path => $perm) {
     if (!is_dir($path)) {
@@ -423,14 +427,14 @@ function _provision_drupal_create_directories($url = NULL) {
     }
 
     if ($perm !== FALSE) {
-      provision_file()->chmod($path, $perm, !in_array($path, $not_recursive))
+      provision_file()->chmod($path, $perm, !in_array($path, $chmod_not_recursive))
         ->succeed('Changed permissions of <code>@path</code> to @perm')
         ->fail('Could not change permissions <code>@path</code> to @perm');
     }
   }
   foreach ($chgrp as $path => $group) {
     if ($group !== FALSE) {
-      provision_file()->chgrp($path, $group, !in_array($path, $not_recursive))
+      provision_file()->chgrp($path, $group, !in_array($path, $chgrp_not_recursive))
         ->succeed('Changed group ownership of <code>@path</code> to @gid')
         ->fail('Could not change group ownership <code>@path</code> to @gid');
     }
@@ -513,60 +517,79 @@ function _provision_drupal_rebuild_caches() {
  * Find available profiles on this platform.
  */
 function _provision_find_profiles() {
-  include_once('includes/install.inc');
-
-  if (!$dir = opendir("./profiles")) {
-    drush_log(dt("Cannot find profiles directory"), 'error');
-    return FALSE;
+  if (drush_drupal_major_version() >= 8) {
+    include_once('core/includes/install.inc');
+    $profiles_subdirs[] = "./core/profiles";
+    $profiles_subdirs[] = "./profiles";
   }
-  while (FALSE !== ($name = readdir($dir))) {
-    $languages = array();
-    $file = "./profiles/$name/$name.profile";
-    if ($name == '..' || $name == '.' || !file_exists($file)) {
-      continue;
+  else {
+    include_once('includes/install.inc');
+    $profiles_subdirs[] = "./profiles";
+  }
+  foreach($profiles_subdirs as $profiles_subdir) {
+    if (!$dir = opendir($profiles_subdir)) {
+      drush_log(dt("Cannot find profiles directory"), 'error');
+      return FALSE;
     }
-    $profile = new stdClass();
-    $profile->name = $name;
-    $profile->filename = $file;
-
-    _provision_cvs_deploy($profile);
-
-    $profile->info = array();
-
-    $info_file = "./profiles/$name/$name.info";
-    if (file_exists($info_file)) {
-      $profile->info = provision_parse_info_file($info_file);
-      // Skip hidden profiles
-      if (isset($profile->info['hidden']) && $profile->info['hidden'] == 1) {
+    while (FALSE !== ($name = readdir($dir))) {
+      $languages = array();
+      $file = "$profiles_subdir/$name/$name.profile";
+      if ($name == '..' || $name == '.' || !file_exists($file)) {
         continue;
       }
-    }
+      $profile = new stdClass();
+      $profile->name = $name;
+      $profile->filename = $file;
 
-    require_once($profile->filename);
-    $func = $profile->name . "_profile_details";
-    if (function_exists($func)) {
-      $profile->info = array_merge($profile->info, $func());
-    }
+      _provision_cvs_deploy($profile);
 
-    $languages['en'] = 1;
-    // Find languages available
-    $files = array_keys(drush_scan_directory('./profiles/' . $name . '/translations', '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
-    $files = array_merge($files, array_keys(drush_scan_directory('./profiles/' . $name , '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath')));
-    if (is_array($files)) {
-      foreach ($files as $file) {
-        if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
-          $languages[$langcode[2]] = 1; // use the language name as an index to weed out duplicates
+      $profile->info = array();
+
+      if (drush_drupal_major_version() >= 8) {
+        $yaml_file = "$profiles_subdir/$name/$name.info.yml";
+        if(!file_exists($yaml_file)) {
+          drush_log(dt("@name.info.yml not found.", array("@name" => $name)), 'notice');
+          unset($files[$name]);
+          continue;
+        }
+        $profile->info = Symfony\Component\Yaml\Yaml::parse($yaml_file);
+        if (!empty($profile->info['name'])) {
+          $profile->name = $profile->info['name'];
         }
       }
-    }
-    $profile->info['languages'] = array_keys($languages);
+      else {
+        $info_file = "$profiles_subdir/$name/$name.info";
+        if (file_exists($info_file)) {
+          $profile->info = provision_parse_info_file($info_file);
+          // Skip hidden profiles
+          if (isset($profile->info['hidden']) && $profile->info['hidden'] == 1) {
+            continue;
+          }
+        }
+      }
+      require_once($profile->filename);
+      $func = $profile->name . "_profile_details";
+      if (function_exists($func)) {
+        $profile->info = array_merge($profile->info, $func());
+      }
+      $languages['en'] = 1;
+      // Find languages available
+      $files = array_keys(drush_scan_directory($profiles_subdir . '/' . $name . '/translations', '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
+      $files = array_merge($files, array_keys(drush_scan_directory($profiles_subdir . '/' . $name , '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath')));
+      if (is_array($files)) {
+        foreach ($files as $file) {
+          if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
+            $languages[$langcode[2]] = 1; // use the language name as an index to weed out duplicates
+          }
+        }
+      }
+      $profile->info['languages'] = array_keys($languages);
 
-    // Drupal 7 renamed the default installation profile to 'standard'
-    // Aegir now allows projects to specify an "old short name" to provide an upgrade path when projects get renamed.
-    if (empty($profile->info['old_short_name'])) {
-    if ($profile->name == 'standard') {
-      $profile->info['old_short_name'] = 'default';
-    }
+      // Drupal 7 renamed the default installation profile to 'standard'
+      // Aegir now allows projects to specify an "old short name" to provide an upgrade path when projects get renamed.
+      if ($profile->name == 'standard') {
+         $profile->info['old_short_name'] = 'default';
+      }
       elseif ($profile->name == 'minimal') {
         $profile->info['old_short_name'] = 'acquia';
       }
@@ -585,12 +608,10 @@ function _provision_find_profiles() {
       elseif ($profile->name == 'commerce_kickstart') {
         $profile->info['old_short_name'] = 'commercedev';
       }
+      $return[$name] = $profile;
+      drush_log(dt('Found installation profile %name', array('%name' => $name)));
     }
-
-    $return[$name] = $profile;
-    drush_log(dt('Found installation profile %name', array('%name' => $name)));
   }
-
   return $return;
 
 }
@@ -751,7 +772,7 @@ function _provision_find_platforms() {
   return array(
     'drupal' => array(
     'short_name' => 'drupal', 'version' => drush_drupal_version(),
-    'description' => dt("This platform is running @short_name @version", array('@short_name' => 'Drupal', '@version' => VERSION))));
+    'description' => dt("This platform is running @short_name @version", array('@short_name' => 'Drupal', '@version' => drush_drupal_version()))));
 }
 
 /**

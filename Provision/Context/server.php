@@ -88,7 +88,7 @@ class Provision_Context_server extends Provision_Context {
     $base_dir = dirname($reflect->getFilename());
 
     $type_option = "{$service}_service_type";
-    
+
     $type = isset($this->options[$type_option]) ? $this->options[$type_option] : $default;
     if ($service === 'file') {
       // Force provision-save local
@@ -110,6 +110,7 @@ class Provision_Context_server extends Provision_Context {
       }
     }
     else {
+      drush_log("Driver type not specified for the $service service, provide it with --{$service}_service_type");
       $this->services[$service] = new Provision_Service_null($this->name);
     }
   }
@@ -207,7 +208,7 @@ class Provision_Context_server extends Provision_Context {
       }
     }
   }
-  
+
   /**
    * If necessary, fetch file from a remote server.
    *
@@ -234,15 +235,15 @@ class Provision_Context_server extends Provision_Context {
 
         if (drush_core_call_rsync(escapeshellarg($this->script_user . '@' . $this->remote_host . ':/') . $path, $path, $options, TRUE, FALSE)) {
           drush_log(dt('@path has been fetched from remote server @remote_host.', array(
-            '@path' => $path, 
+            '@path' => $path,
             '@remote_host' => $this->remote_host))
           );
         }
         else {
           drush_set_error('PROVISION_FILE_SYNC_FAILED', dt('@path could not be fetched from remote server @remote_host.' .
             ' Changes might not be available until this has been done. (error: %msg)', array(
-              '@path' => $path, 
-              '@remote_host' => $this->remote_host, 
+              '@path' => $path,
+              '@remote_host' => $this->remote_host,
               '%msg' => join("\n", drush_shell_exec_output())))
           );
         }

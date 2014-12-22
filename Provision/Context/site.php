@@ -17,6 +17,7 @@ class Provision_Context_site extends Provision_Context {
       'redirection' => 'site: boolean for whether --aliases should redirect; default false',
       'client_name' => 'site: machine name of the client that owns this site',
       'profile' => 'site: Drupal profile to use; default default',
+      'drush_aliases' => 'site: Comma-separated list of additional Drush aliases through which this site can be accessed.',
     );
   }
 
@@ -35,8 +36,21 @@ class Provision_Context_site extends Provision_Context {
     $this->setProperty('aliases', array(), TRUE);
     $this->setProperty('redirection', FALSE);
     $this->setProperty('cron_key', '');
+    $this->setProperty('drush_aliases', array(), TRUE);
 
     // this can potentially be handled by a Drupal sub class
     $this->setProperty('profile', 'default');
+  }
+
+  /**
+   * Write out this named context to an alias file.
+   */
+  function write_alias() {
+    $config = new Provision_Config_Drushrc_Alias($this->name, $this->properties);
+    $config->write();
+    foreach ($this->drush_aliases as $drush_alias) {
+      $config = new Provision_Config_Drushrc_Alias($drush_alias, $this->properties);
+      $config->write();
+    }
   }
 }

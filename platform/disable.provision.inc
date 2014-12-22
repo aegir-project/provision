@@ -11,9 +11,6 @@
  */
 function drush_provision_drupal_pre_provision_disable($backup_file = null) {
   if (d()->type == 'site') {
-    drush_set_option('force', true, 'process');
-    drush_invoke('provision-backup', $backup_file);
-    drush_unset_option('force', 'process');
     d()->site_enabled = false;
   }
 }

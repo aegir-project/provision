@@ -127,7 +127,9 @@ class Provision_Config {
     if (!empty($templates) && is_array($templates)) {
       foreach ($templates as $file) {
         if (is_readable($file)) {
-          drush_log("Template loaded A: $file");
+          drush_log(dt('Template loaded from hook(s): :file'), array(
+            ':file' => $file,
+          ));
           return file_get_contents($file);
         }
       }
@@ -141,11 +143,13 @@ class Provision_Config {
         // Iterate through the config file's parent classes until we
         // find the template file to use.
         $base_dir = provision_class_directory($class_name);
-
         $file = $base_dir . '/' . $this->template;
 
         if (is_readable($file)) {
-          drush_log("Template loaded B: $file");
+          drush_log(dt('Template loaded from Provision Config class :class_name: :file', array(
+            ':class_name' => $class_name,
+            ':file' => $file,
+          )));
           return file_get_contents($file);
         }
 
@@ -154,6 +158,7 @@ class Provision_Config {
     }
 
     // We've failed to find a template if we've reached this far.
+    drush_log(dt('No template found for Provision Config class: ', array(':class' => get_class($this))), 'warning');
     return FALSE;
   }
 
@@ -184,16 +189,11 @@ class Provision_Config {
    */
   function write() {
     $filename = $this->filename();
-    // Debug tmp
-    drush_log("DEBUG A: filename is $filename");
     // Make directory structure if it does not exist.
     if ($filename && !provision_file()->exists(dirname($filename))->status()) {
       provision_file()->mkdir(dirname($filename))
         ->succeed('Created directory @path.')
         ->fail('Could not create directory @path.');
-      // Debug tmp
-      $this_dirname = dirname($filename);
-      drush_log("DEBUG B: this_dirname is $this_dirname");
     }
 
     $status = FALSE;
@@ -210,8 +210,8 @@ class Provision_Config {
         }
 
         $status = provision_file()->file_put_contents($filename, $this->render_template($template, $this->data))
-          ->succeed('Generated config A ' . (empty($this->description) ? $filename : $this->description), 'success')
-          ->fail('Could not generate A ' . (empty($this->description) ? $filename : $this->description))->status();
+          ->succeed('Generated config in write(): ' . (empty($this->description) ? $filename : $this->description . ' (' . $filename. ')'), 'success')
+          ->fail('Could not generate in write(): ' . (empty($this->description) ? $filename : $this->description . ' (' . $filename. ')'))->status();
 
         // Change the permissions of the file if needed
         if (!is_null($this->mode)) {
@@ -232,7 +232,7 @@ class Provision_Config {
   // allow overriding w.r.t locking
   function file_put_contents($filename, $text) {
     provision_file()->file_put_contents($filename, $text)
-      ->succeed('Generated config B ' . (empty($this->description) ? $filename : $this->description), 'success');
+      ->succeed('Generated config in file_put_contents()' . (empty($this->description) ? $filename : $this->description), 'success');
   }
 
   /**
