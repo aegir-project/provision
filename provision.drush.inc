@@ -49,6 +49,11 @@ include_once('provision.inc');
  * Implements hook_drush_init().
  */
 function provision_drush_init() {
+  // try to load the drush siterecoard (the "alias") into d
+  // if a name is provided, it's because we're in provision-save so we
+  // need to specify it because it's not loaded by drush
+  $hash_name = drush_get_option('#name') ? '#name' : 'name';
+  d(drush_get_option($hash_name, '@self', 'alias'), TRUE);
   // Make sure that the provision command is not being run as the root user.
   _provision_drush_check_user();
   // Abort the process if the load is too high.
@@ -73,8 +78,6 @@ function _provision_drush_check_user() {
  * @see provision_load_critical()
  */
 function _provision_drush_check_load() {
-  $hash_name = drush_get_option('#name') ? '#name' : 'name';
-  d(drush_get_option($hash_name, '@self', 'alias'), TRUE);
   $load = sys_getloadavg();
   if (provision_load_critical($load)) {
     drush_set_error('PROVISION_OVERLOAD', dt("load on system too heavy (@load), aborting", array('@load' => join(" ", $load))));
@@ -93,8 +96,10 @@ function provision_drush_command() {
     ),
     'options' => array_merge(array(
       'context_type' => 'server, platform, or site; default server',
-      'delete' => 'Remove the alias.',
-    ), Provision_Context_server::option_documentation(), Provision_Context_platform::option_documentation(), Provision_Context_site::option_documentation()),
+      'delete' => 'Remove the alias.'),
+      Provision_Context_server::option_documentation(),
+      Provision_Context_platform::option_documentation(),
+      Provision_Context_site::option_documentation()),
     // we should populate from all known contexts, unfortunately we don't
     // enumerate them yet... see https://drupal.org/node/1972286
     'allow-additional-options' => TRUE,
@@ -107,6 +112,7 @@ function provision_drush_command() {
     ),
     'options' => array(
       'client_email' => dt('The email address of the client to use.'),
+      'profile' => dt('The profile to use when installing the site.'),
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
@@ -187,7 +193,7 @@ function provision_drush_command() {
         'hidden' => TRUE,
       ),
     ),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH 
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
   );
 
   $items['provision-restore'] = array(
@@ -337,6 +343,7 @@ function drush_provision_save($alias = NULL) {
 }
 
 function drush_provision_verify() {
+  provision_backend_invoke(d()->name, 'provision-save');
   d()->command_invoke('verify');
 }
 
@@ -417,6 +424,9 @@ function provision_count_cpus() {
   return $ncpus;
 }
 
+define('CRITICAL_LOAD_MULTIPLIER', 5);
+define('CRITICAL_LOAD_THRESHOLD', 10);
+
 /**
  * determine if overall load of the machine is critical
  *
@@ -430,7 +440,7 @@ function provision_count_cpus() {
  *
  * We base our evaluation on the number of CPUs on the servers. If there are
  * more than 5 processes waiting per CPU, we abort completely. If we ignore the
- * number of available CPUs, we assume a critical limit is a load of 50.
+ * number of available CPUs, we assume a critical limit is a load of 10.
  *
  * @see sys_getloadavg()
  */
@@ -440,11 +450,11 @@ function provision_load_critical($load = NULL, $threshold = NULL) {
   }
   if (is_null($threshold)) {
     if ($ncpus = provision_count_cpus()) {
-      $threshold = $ncpus * 5;
+      $threshold = $ncpus * drush_get_option('critical_load_multiplier', CRITICAL_LOAD_MULTIPLIER);
     }
     else {
-      // can't determine the number of CPU, we hardcode at load 50
-      $threshold = 50;
+      // can't determine the number of CPU, we hardcode at load 10
+      $threshold = drush_get_option('critical_load_threshold', CRITICAL_LOAD_THRESHOLD);
     }
   }
   return ($load[0] > $threshold);
