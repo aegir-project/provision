@@ -120,7 +120,7 @@ function drush_provision_drupal_pre_provision_verify() {
           ->succeed('Changed permissions of <code>@path</code> to @perm')
           ->fail('Could not change permissions of <code>@path</code> to @perm');
       }
-      provision_file()->chmod(d()->root . '/sites/all', 0751)
+      provision_file()->chmod(d()->root . '/sites/all', 0755)
         ->succeed('Changed permissions of <code>@path</code> to @perm')
         ->fail('Could not change permissions of <code>@path</code> to @perm');
       provision_file()->chmod(d()->root . '/sites', 0751)
