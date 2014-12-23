@@ -224,22 +224,13 @@ location = /cron.php {
 ### Allow local access to support wget method in Aegir settings
 ### for running sites cron in Drupal 8.
 ###
-location = /core/cron.php {
-  tcp_nopush   off;
-  keepalive_requests 0;
+location = /index.php/cron/ {
   access_log   off;
 <?php if ($satellite_mode == 'boa'): ?>
   allow        127.0.0.1;
   deny         all;
 <?php endif; ?>
-  try_files    $uri =404;
-<?php if ($satellite_mode == 'boa'): ?>
-  fastcgi_pass unix:/var/run/www53.fpm.socket;
-<?php elseif ($phpfpm_mode == 'port'): ?>
-  fastcgi_pass 127.0.0.1:9000;
-<?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
-<?php endif; ?>
+  try_files    $uri @drupal;
 }
 
 ###

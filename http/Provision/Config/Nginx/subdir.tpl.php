@@ -243,6 +243,19 @@ location ^~ /<?php print $subdir; ?> {
   }
 
   ###
+  ### Allow local access to support wget method in Aegir settings
+  ### for running sites cron in Drupal 8.
+  ###
+  location = /<?php print $subdir; ?>/index.php/cron/ {
+<?php if ($satellite_mode == 'boa'): ?>
+    access_log   off;
+    allow        127.0.0.1;
+    deny         all;
+<?php endif; ?>
+    try_files    $uri @drupal_<?php print $subdir; ?>;
+  }
+
+  ###
   ### Send search to php-fpm early so searching for node.js will work.
   ### Deny bots on search uri.
   ###
