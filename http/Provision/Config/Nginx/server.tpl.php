@@ -131,6 +131,7 @@ if ($nginx_has_upload_progress) {
   fastcgi_hide_header  'X-Generator';
   fastcgi_hide_header 'X-Powered-By';
   fastcgi_hide_header 'X-Drupal-Cache';
+  fastcgi_hide_header 'X-Drupal-Cache-Tags';
 <?php endif; ?>
 
  ## SSL performance
