@@ -77,6 +77,11 @@ if ($is_denied) {
 
 <?php if ($satellite_mode == 'boa'): ?>
 ###
+### Force clean URLs for Drupal 8.
+###
+rewrite ^/index.php/(.*)$ $scheme://$host/$1 permanent;
+
+###
 ### Include high level local configuration override if exists.
 ###
 include /data/disk/EDIT_USER/config/server_master/nginx/post.d/nginx_force_include*;
