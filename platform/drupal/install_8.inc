@@ -136,6 +136,7 @@ function install_main() {
           2 => TRUE,
         ),
         'clean_url' => drush_get_option('clean_url', TRUE),
+        'clean_urls' => drush_get_option('clean_urls', TRUE),
       ),
     ),
   );
