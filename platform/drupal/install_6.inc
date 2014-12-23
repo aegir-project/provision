@@ -301,7 +301,7 @@ function install_main() {
   if (function_exists($function)) {
     while (!in_array($task, array('profile-finished', 'finished'))) {
       drush_log(dt("Running profile specific task : !task", array('!task' => $task)));
-      module_list(TRUE, FALSE);
+      drush_module_list();
       module_rebuild_cache();
       module_load_all();
       // stop batch api from re-directing. ever.
