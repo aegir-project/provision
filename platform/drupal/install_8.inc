@@ -22,7 +22,8 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
     $username = $account->getUsername();
     $site = \Drupal::config('system.site')->get('name');
     $uri_brief = preg_replace('!^https?://!', '', $base_url);
-    $edit_uri = $base_url . '/user/1/edit';
+    //$edit_uri = $base_url . '/user/1/edit';
+    $edit_uri = url('user/'. $account->uid .'/edit', array('absolute' => TRUE)));
     $mailto = $account->getEmail();
     $date = format_date(time());
 
@@ -109,8 +110,8 @@ function install_main() {
   }
 
 
-  unset($conf['site_name']);
-  unset($conf['site_mail']);
+  unset($config['site_name']);
+  unset($config['site_mail']);
   unset($GLOBALS['db_url']);
 
   $account_pass = provision_password();
