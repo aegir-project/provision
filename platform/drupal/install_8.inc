@@ -39,7 +39,7 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
 
     $langcode = $account->getPreferredLangcode();
 
-    $mail_success = drupal_mail('install', 'welcome-admin', $mailto, $langcode, $mail_params, $from, TRUE);
+    $mail_success = \Drupal::service('plugin.manager.mail')->mail('install', 'welcome-admin', $mailto, $langcode, $mail_params, $from, TRUE);
 
     if ($mail_success) {
       drush_log(dt('Sent welcome mail to @client', array('@client' => $client_email)), 'message');
