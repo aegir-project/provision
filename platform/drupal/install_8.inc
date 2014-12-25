@@ -22,7 +22,7 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
     $username = $account->getUsername();
     $site = \Drupal::config('system.site')->get('name');
     $uri_brief = preg_replace('!^https?://!', '', $base_url);
-    $edit_uri = $base_url . '/user';
+    $edit_uri = $base_url . '/user/1/edit';
     $mailto = $account->getEmail();
     $date = format_date(time());
 
