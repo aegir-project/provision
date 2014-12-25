@@ -22,6 +22,7 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
     $username = $account->getUsername();
     $site = \Drupal::config('system.site')->get('name');
     $uri_brief = preg_replace('!^https?://!', '', $base_url);
+    $edit_uri = $base_url . '/user';
     $mailto = $account->getEmail();
     $date = format_date(time());
 
@@ -31,6 +32,7 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
       '!login_url' => $onetime,
       '!uri' => $base_url,
       '!uri_brief' => $uri_brief,
+      '!edit_uri' => $edit_uri,
       '!mailto' => $mailto,
       '!date' => $date,
     );
