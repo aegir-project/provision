@@ -84,7 +84,7 @@ class Provision_FileSystem extends Provision_ChainedState {
   function mkdir($path) {
     $this->_clear_state();
 
-    $this->last_status = mkdir($path, 0770, TRUE);
+    $this->last_status = mkdir($path, 0775, TRUE);
     $this->tokens = array('@path' => $path);
 
     return $this;
