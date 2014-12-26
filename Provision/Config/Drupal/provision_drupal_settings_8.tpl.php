@@ -149,9 +149,7 @@ if (isset($_SERVER['db_name'])) {
   $settings['allow_authorize_operations'] = FALSE;
 
   <?php if (!$this->site_enabled) : ?>
-    // This is for Drupal 6 and below.
-    $settings['site_offline'] = 1;
-    // And this is for Drupal 7 and above.
+    // And this is for Drupal 8 and above.
     $settings['maintenance_mode'] = 1;
   <?php endif ?>
 

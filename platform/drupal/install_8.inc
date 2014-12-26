@@ -109,8 +109,8 @@ function install_main() {
   }
 
 
-  unset($conf['site_name']);
-  unset($conf['site_mail']);
+  unset($config['site_name']);
+  unset($config['site_mail']);
   unset($GLOBALS['db_url']);
 
   $account_pass = provision_password();
