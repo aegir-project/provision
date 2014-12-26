@@ -131,7 +131,7 @@ if (isset($_SERVER['db_name'])) {
   $settings['install_profile'] = '<?php print $this->profile ?>';
   $settings['<?php print $file_directory_path_var ?>'] = 'sites/<?php print $this->uri ?>/files';
   $settings['<?php print $file_directory_temp_var ?>'] = 'sites/<?php print $this->uri ?>/private/temp';
-  <?php if (isset($file_directory_private_var)): ?>
+<?php if (isset($file_directory_private_var)): ?>
   $settings['<?php print $file_directory_private_var ?>'] = 'sites/<?php print $this->uri ?>/private/files';
 <?php endif; ?>
 <?php if (isset($drupal_hash_salt_var)): ?>
@@ -148,10 +148,10 @@ if (isset($_SERVER['db_name'])) {
 
   $settings['allow_authorize_operations'] = FALSE;
 
-  <?php if (!$this->site_enabled) : ?>
+<?php if (!$this->site_enabled) : ?>
     // And this is for Drupal 8 and above.
     $settings['maintenance_mode'] = 1;
-  <?php endif ?>
+<?php endif ?>
 
 <?php print $extra_config; ?>
 
