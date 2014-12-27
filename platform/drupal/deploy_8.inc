@@ -31,6 +31,12 @@ if (db_table_exists('files')) {
   ->set('path.temporary', "sites/$new_url/private/temp")
   ->save();
 
+// Detect and update default site name, if needed
+$old_name = \Drupal::config('system.site')->get('name');
+if ($old_name == $old_url) {
+  \Drupal::config('system.site')->set('name', "$new_url")->save();
+}
+
 drush_log(
   dt('Changed paths from sites/@old_url to sites/@new_url',
   array('@old_url' => $old_url, '@new_url' => $new_url)));
