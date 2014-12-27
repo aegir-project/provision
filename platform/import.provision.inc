@@ -35,7 +35,10 @@ function drush_provision_drupal_post_provision_import() {
     drush_set_option('provision_save_config', false);
 
     // We no longer run this original verify via backend to avoid
-    // breaking site import task for Drupal 8.
+    // breaking site import task for Drupal 8. It is a temporary workaround,
+    // because it breaks packages detection for Drupal 8, so the cloned site
+    // is listed without expected installation profile.
+    //
     // provision_backend_invoke(d()->name, 'provision-verify');
     // sleep(5); // A small trick to avoid high load and race conditions.
 
