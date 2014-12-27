@@ -27,7 +27,7 @@ function drush_provision_drupal_post_provision_import() {
       d()->profile = drush_set_option('profile', drush_get_option('profile', 'standard', 'site'));
     }
     elseif (drush_drupal_major_version() >= 8) {
-      d()->profile = drush_set_option('profile', Settings::get('install_profile', 'standard'), 'site');
+      d()->profile = drush_set_option('profile', \Drupal\Core\Site\Settings::get('install_profile', 'standard'), 'site');
     }
     d()->language = drush_set_option('language', drush_get_option('language', 'en', 'site'));
     d()->aliases = drush_set_option('aliases', provision_drupal_find_aliases());
@@ -42,13 +42,9 @@ function drush_provision_drupal_post_provision_import() {
     // Do not automatically save the drushrc at the end of the command.
     drush_set_option('provision_save_config', false);
 
-    // We no longer run this original verify via backend to avoid
-    // breaking site import task for Drupal 8. It is a temporary workaround,
-    // because it breaks packages detection for Drupal 8, so the cloned site
-    // is listed without expected installation profile.
-    //
-    // provision_backend_invoke(d()->name, 'provision-verify');
-    // sleep(5); // A small trick to avoid high load and race conditions.
+    // We still run this extra backend sub-task to properly register packages etc.
+    provision_backend_invoke(d()->name, 'provision-verify');
+    sleep(5); // A small trick to avoid high load and race conditions.
 
     // We run this extra verify via frontend to avoid issue #1004526.
     provision_backend_invoke('@hostmaster', 'hosting-task', array(d()->name, 'verify'), array('force' => TRUE));
