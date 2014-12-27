@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 $new_url = d()->uri;
 /**
@@ -26,6 +25,7 @@ if (db_table_exists('files')) {
   db_query("UPDATE {files} SET filepath = REPLACE(filepath, :old, :new)", array(':old' => 'sites/default', ':new' => 'sites/$new_url'));
 }
 
+// Update files paths
 \Drupal::config('system.file')
   ->set('path.private', "sites/$new_url/private/files")
   ->set('path.temporary', "sites/$new_url/private/temp")
