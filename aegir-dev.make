@@ -1,8 +1,8 @@
 ; Aegir Provision makefile
 ;
 
+core = 7.x
 api = 2
-core = 6.x
 
 ; BOA-2.4.0-dev
 
@@ -11,8 +11,8 @@ core = 6.x
 ; the branch will change
 projects[drupal][type] = "core"
 
-; chain into hostmaster from git's 2.x branch
+; chain into hostmaster from git's 3.x branch
 projects[hostmaster][type] = "profile"
 projects[hostmaster][download][type] = "git"
 projects[hostmaster][download][url] = "http://git.drupal.org/project/hostmaster.git"
-projects[hostmaster][download][branch] = "6.x-2.x"
+projects[hostmaster][download][branch] = "7.x-3.x"
