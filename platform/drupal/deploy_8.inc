@@ -25,10 +25,17 @@ if (db_table_exists('files')) {
   db_query("UPDATE {files} SET filepath = REPLACE(filepath, :old, :new)", array(':old' => 'sites/default', ':new' => 'sites/$new_url'));
 }
 
+// Update files paths
 \Drupal::config('system.file')
   ->set('path.private', "sites/$new_url/private/files")
   ->set('path.temporary', "sites/$new_url/private/temp")
   ->save();
+
+// Detect and update default site name, if needed
+$old_name = \Drupal::config('system.site')->get('name');
+if ($old_name == $old_url) {
+  \Drupal::config('system.site')->set('name', "$new_url")->save();
+}
 
 drush_log(
   dt('Changed paths from sites/@old_url to sites/@new_url',
