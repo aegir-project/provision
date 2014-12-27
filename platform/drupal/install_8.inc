@@ -150,6 +150,12 @@ function install_main() {
   }
   _provision_drupal_create_directories();
 
+  // Set files paths
+  \Drupal::config('system.file')
+    ->set('path.private', "sites/$url/private/files")
+    ->set('path.temporary', "sites/$url/private/temp")
+    ->save();
+
   $account = user_load(1);
 
   $onetime = user_pass_reset_url($account);
