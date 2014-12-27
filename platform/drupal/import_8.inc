@@ -7,7 +7,7 @@ if ($db = $databases['default']['default']) {
   drush_set_option('db_passwd', urldecode($db['password']), 'site');
   drush_set_option('db_name', urldecode($db['database']), 'site');
 
-  drush_set_option('profile', variable_get('install_profile', 'standard'), 'site');
+  drush_set_option('profile', \Drupal\Core\Site\Settings::get('install_profile', 'standard'), 'site');
   $language = language_default();
   drush_set_option('language', $language->language, 'site');
 }

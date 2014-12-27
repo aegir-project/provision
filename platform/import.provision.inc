@@ -20,7 +20,15 @@ function drush_provision_drupal_provision_import() {
 
 function drush_provision_drupal_post_provision_import() {
   if (d()->type === 'site') {
-    d()->profile = drush_set_option('profile', drush_get_option('profile', 'default', 'site'));
+    if (drush_drupal_major_version() == 6) {
+      d()->profile = drush_set_option('profile', drush_get_option('profile', 'default', 'site'));
+    }
+    elseif (drush_drupal_major_version() == 7) {
+      d()->profile = drush_set_option('profile', drush_get_option('profile', 'standard', 'site'));
+    }
+    elseif (drush_drupal_major_version() >= 8) {
+      d()->profile = drush_set_option('profile', \Drupal\Core\Site\Settings::get('install_profile', 'standard'), 'site');
+    }
     d()->language = drush_set_option('language', drush_get_option('language', 'en', 'site'));
     d()->aliases = drush_set_option('aliases', provision_drupal_find_aliases());
     d()->write_alias();
