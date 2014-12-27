@@ -2,22 +2,22 @@
 
   <VirtualHost <?php print "{$ip_address}:{$http_ssl_port}"; ?>>
   <?php if ($this->site_mail) : ?>
-    ServerAdmin <?php  print $this->site_mail; ?>
+    ServerAdmin <?php  print $this->site_mail; ?> 
   <?php endif;?>
 
-    DocumentRoot <?php print $this->root; ?>
-
+    DocumentRoot <?php print $this->root; ?> 
+      
     ServerName <?php print $this->uri; ?>
 
     # Enable SSL handling.
-
+     
     SSLEngine on
 
     SSLCertificateFile <?php print $ssl_cert; ?>
 
     SSLCertificateKeyFile <?php print $ssl_cert_key; ?>
 
-<?php
+<?php 
   if (sizeof($this->aliases)) {
     print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
   }
@@ -30,7 +30,6 @@
 </VirtualHost>
 <?php endif; ?>
 
-<?php
+<?php 
   include(provision_class_directory('Provision_Config_Apache_Site') . '/vhost_disabled.tpl.php');
 ?>
-

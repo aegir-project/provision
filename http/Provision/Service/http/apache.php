@@ -53,7 +53,7 @@ class Provision_Service_http_apache extends Provision_Service_http_public {
 
   /**
    * Restart apache to pick up the new config files.
-   */ 
+   */
   function parse_configs() {
     return $this->restart();
   }

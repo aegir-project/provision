@@ -16,7 +16,6 @@ function drush_provision_drupal_provision_verify_validate() {
     drush_errors_on();
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   }
-
 }
 
 

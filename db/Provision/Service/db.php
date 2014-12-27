@@ -50,7 +50,7 @@ class Provision_Service_db extends Provision_Service {
 
   /**
    * Find a viable database name, based on the site's uri.
-   */ 
+   */
   function suggest_db_name() {
     $uri = $this->context->uri;
 
@@ -79,7 +79,7 @@ class Provision_Service_db extends Provision_Service {
       $creds = $this->generate_site_credentials();
     }
     extract($creds);
-    
+
     if (drush_get_error() || !$this->can_create_database()) {
       drush_set_error('PROVISION_CREATE_DB_FAILED');
       drush_log("Database could not be created.", 'error');
@@ -102,9 +102,9 @@ class Provision_Service_db extends Provision_Service {
     else {
       drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not create @name database", array("@name" => $db_name)));
     }
-    return $status; 
+    return $status;
   }
-  
+
   /**
    * Remove the database and user account for the supplied credentials
    */
@@ -120,12 +120,12 @@ class Provision_Service_db extends Provision_Service {
         drush_log(dt("Failed to drop database @dbname", array('@dbname' => $db_name)), 'warning');
       }
     }
-    
+
     if ( $this->database_exists($db_name) ) {
      drush_set_error('PROVISION_DROP_DB_FAILED');
      return FALSE;
     }
-    
+
     foreach ($this->grant_host_list() as $db_grant_host) {
       drush_log(dt("Revoking privileges of %user@%client from %database", array('%user' => $db_user, '%client' => $db_grant_host, '%database' => $db_name)));
       if (!$this->revoke($db_name, $db_user, $db_grant_host)) {
@@ -161,7 +161,7 @@ class Provision_Service_db extends Provision_Service {
 
   function generate_site_credentials() {
     $creds = array();
-    // replace with service type 
+    // replace with service type
     $db_type = drush_get_option('db_type', function_exists('mysqli_connect') ? 'mysqli' : 'mysql');
     // As of Drupal 7 there is no more mysqli type
     if (drush_drupal_major_version() >= 7) {

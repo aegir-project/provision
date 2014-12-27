@@ -10,7 +10,7 @@ location ^~ /<?php print $subdir; ?>/ {
   root   /var/www/nginx-default;
   index  index.html index.htm;
 <?php else: ?>
-  return       404;
+  return 404;
 <?php endif; ?>
   ### Do not reveal Aegir front-end URL here.
 }

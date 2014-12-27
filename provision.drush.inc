@@ -193,7 +193,7 @@ function provision_drush_command() {
         'hidden' => TRUE,
       ),
     ),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH 
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
   );
 
   $items['provision-restore'] = array(

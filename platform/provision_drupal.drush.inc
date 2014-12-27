@@ -402,7 +402,7 @@ function _provision_find_profiles() {
 
       $profile->info = array();
 
-	  if (drush_drupal_major_version() >= 8) {
+      if (drush_drupal_major_version() >= 8) {
         $yaml_file = "$profiles_subdir/$name/$name.info.yml";
         if(!file_exists($yaml_file)) {
           drush_log(dt("@name.info.yml not found.", array("@name" => $name)), 'notice');

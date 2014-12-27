@@ -40,5 +40,4 @@ class Provision_Config_Drushrc_Aegir extends Provision_Config_Drushrc {
       }
     }
   }
-
 }

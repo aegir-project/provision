@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @file Package management code for Drupal 7 
+ * @file Package management code for Drupal 7
  */
 
 
@@ -112,7 +112,7 @@ function _provision_drupal_parse_info_file($filename) {
 function _provision_system_query($type) {
   $entries = array();
   $result = db_query("SELECT * FROM {system} WHERE type=:type", array(':type' => $type));
-  foreach ($result as $entry) { 
+  foreach ($result as $entry) {
     $entries[] = $entry;
   }
   return $entries;

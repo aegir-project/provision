@@ -55,7 +55,7 @@ function drush_provision_drupal_pre_provision_migrate($platform, $new_name = NUL
  * Implementation of drush_hook_pre_COMMAND_rollback().
  */
 function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_name = NULL) {
-  // Set site_offline to false and regenerate the config
+  // Set site_offline to false and regenerate the config.
   drush_log(dt("Bringing site out of maintenance"));
   d()->site_enabled = true;
   _provision_drupal_create_settings_file();
@@ -66,7 +66,6 @@ function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_n
     ->fail('Could not remove unused migration site package');
   d()->service('http')->create_config('site');
   d()->service('http')->parse_configs();
-
 }
 
 /**
@@ -77,9 +76,7 @@ function drush_provision_drupal_pre_provision_migrate_rollback($platform, $new_n
 function drush_provision_drupal_provision_migrate($platform, $new_name = NULL) {
 
   $target = drush_get_option('target_name');
-
   $options = array();
-
   $options['uri'] = d()->uri;
 
   if (!is_null($new_name) && ($new_name != d()->name)) {

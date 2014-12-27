@@ -53,7 +53,7 @@ We are making the following assumptions:
     ));
     provision_backend_invoke($new_platform, 'provision-verify');
     drush_set_option('new_platform', $new_platform);
-    // exit if an error has occured. 
+    // exit if an error has occured.
     if (drush_get_error()) {
       return false;
     }
@@ -84,12 +84,12 @@ We are making the following assumptions:
 
     provision_backend_invoke($server, 'provision-verify');
     drush_set_option('server_name', $server);
-    // exit if an error has occured. 
+    // exit if an error has occured.
     if (drush_get_error()) {
       return false;
     }
 
-   
+
     $old_platform = '@platform_' . preg_replace("/[!\W]/", "", basename(rtrim($data['publish_path'], '/')));
     drush_invoke_process('@none', "provision-save", array($old_platform), array(
       'context_type' => 'platform',
@@ -99,7 +99,7 @@ We are making the following assumptions:
     ));
     provision_backend_invoke($old_platform, 'provision-verify');
     drush_set_option('old_platform', $old_platform);
-    // exit if an error has occured. 
+    // exit if an error has occured.
     if (drush_get_error()) {
       return false;
     }
@@ -114,7 +114,7 @@ We are making the following assumptions:
     ));
     provision_backend_invoke($new_platform, 'provision-verify');
     drush_set_option('new_platform', $new_platform);
-    // exit if an error has occured. 
+    // exit if an error has occured.
     if (drush_get_error()) {
       return false;
     }
@@ -131,7 +131,7 @@ We are making the following assumptions:
     ));
     provision_backend_invoke($site_name, 'provision-verify');
     drush_set_option('site_name', $site_name);
-    // exit if an error has occured. 
+    // exit if an error has occured.
     if (drush_get_error()) {
       return false;
     }

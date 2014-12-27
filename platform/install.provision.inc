@@ -27,7 +27,7 @@ function drush_provision_drupal_provision_install_validate() {
  * Set up the directories and settings.php file that we need.
  */
 function drush_provision_drupal_pre_provision_install() {
-  // This is the actual drupal provisioning requirements. 
+  // This is the actual drupal provisioning requirements.
   _provision_drupal_create_directories();
 }
 
@@ -40,8 +40,6 @@ function drush_provision_drupal_pre_provision_install_rollback() {
   foreach (d()->drush_aliases as $alias) {
     drush_invoke_process('@none', 'provision-save', array($alias), array('delete' => TRUE));
   }
-
-
 }
 
 

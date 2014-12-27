@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 $new_url = d()->uri;
 /**

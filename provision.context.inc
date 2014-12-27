@@ -53,11 +53,11 @@ function & d($name = NULL, $_root_object = FALSE, $allow_creation = TRUE) {
   if (is_null($name)) {
     $name = $default_instance;
   }
-  
+
   if ($_root_object) {
     $default_instance = $name;
   }
-  
+
   $name = provision_normalise_context_name($name);
 
   if (isset($instances[$name])) {
@@ -77,13 +77,13 @@ function & d($name = NULL, $_root_object = FALSE, $allow_creation = TRUE) {
  * Simple access layer for drush_sitealias_get_record.
  *
  * Everytime sitealiases are fetched a lot of processing happens, but if the
- * file doesnt exist yet there's a whole lot of unnecesary stuff happening. 
+ * file doesnt exist yet there's a whole lot of unnecesary stuff happening.
  *
  * We cache the result locally here.
  */
 function provision_sitealias_get_record($name) {
   static $cache = array();
-  
+
   $name = provision_normalise_context_name($name);
 
   if (!isset($cache[$name])) {

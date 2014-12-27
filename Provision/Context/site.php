@@ -53,5 +53,4 @@ class Provision_Context_site extends Provision_Context {
       $config->write();
     }
   }
-
 }
