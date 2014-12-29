@@ -229,7 +229,7 @@ location = /cron.php {
 ### Allow local access to support wget method in Aegir settings
 ### for running sites cron in Drupal 8.
 ###
-location = /cron/ {
+location ^~ /cron/ {
   access_log   off;
 <?php if ($satellite_mode == 'boa'): ?>
   allow        127.0.0.1;
