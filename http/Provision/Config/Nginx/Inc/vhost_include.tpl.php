@@ -235,6 +235,9 @@ location ^~ /cron/ {
   allow        127.0.0.1;
   deny         all;
 <?php endif; ?>
+<?php if ($nginx_config_mode == 'extended'): ?>
+  set $nocache_details "Skip";
+<?php endif; ?>
   try_files    $uri @drupal;
 }
 
