@@ -160,7 +160,7 @@ if (isset($_SERVER['db_name'])) {
 <?php if (!$this->site_enabled) : ?>
     // And this is for Drupal 8 and above.
     $settings['maintenance_mode'] = 1;
-<?php endif ?>
+<?php endif; ?>
 
 <?php print $extra_config; ?>
 

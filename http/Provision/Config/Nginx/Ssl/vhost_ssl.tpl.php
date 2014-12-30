@@ -28,7 +28,7 @@ server {
   rewrite ^ $scheme://<?php print $this->redirection; ?>$request_uri? permanent;
 }
 <?php endforeach; ?>
-<?php endif ?>
+<?php endif; ?>
 
 server {
   include       fastcgi_params;

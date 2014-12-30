@@ -161,7 +161,7 @@ if (isset($_SERVER['db_name'])) {
     $conf['site_offline'] = 1;
     // And this is for Drupal 7.
     $conf['maintenance_mode'] = 1;
-<?php endif ?>
+<?php endif; ?>
 
 <?php print $extra_config; ?>
 
