@@ -136,7 +136,6 @@ if (isset($_SERVER['db_name'])) {
   */
   umask(0002);
 
-
   $settings['install_profile'] = '<?php print $this->profile ?>';
   $settings['<?php print $file_directory_path_var ?>'] = 'sites/<?php print $this->uri ?>/files';
   $settings['<?php print $file_directory_temp_var ?>'] = 'sites/<?php print $this->uri ?>/private/temp';
@@ -154,7 +153,6 @@ if (isset($_SERVER['db_name'])) {
 <?php endif; ?>
   $settings['clean_url'] = 1;
   $settings['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
-
   $settings['allow_authorize_operations'] = FALSE;
 
 <?php if (!$this->site_enabled) : ?>
