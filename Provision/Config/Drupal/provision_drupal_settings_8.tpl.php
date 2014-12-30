@@ -151,13 +151,25 @@ if (isset($_SERVER['db_name'])) {
 <?php if (isset($config_directories_staging_var)): ?>
   $config_directories['staging'] = 'sites/<?php print $this->uri ?>/private/config/staging';
 <?php endif; ?>
-  $settings['clean_url'] = 1;
   $settings['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
   $settings['allow_authorize_operations'] = FALSE;
 
+  /**
+   * Useless currently, because it is not used in Drupal 8 anyway.
+   * Instead, Drupal 8 is trying to set the clean URLs mode on the fly,
+   * depending on the request, so we should force this by redirecting
+   * non-clean to clean URLs on the web server level - Nginx example:
+   *
+   *   rewrite ^/index.php/(.*)$ $scheme://$host/$1 permanent;
+   *
+   */
+  $settings['clean_url'] = 1;
+
 <?php if (!$this->site_enabled) : ?>
-    // And this is for Drupal 8 and above.
-    $settings['maintenance_mode'] = 1;
+  /**
+   * Useless currently, because it is ignored in Drupal 8 anyway.
+   */
+  $settings['maintenance_mode'] = 1;
 <?php endif; ?>
 
 <?php print $extra_config; ?>
