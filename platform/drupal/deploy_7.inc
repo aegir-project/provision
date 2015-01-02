@@ -42,7 +42,9 @@ function _provision_platform_drupal_deploy_7_replace($old_url, $new_url) {
   if(db_table_exists('block_custom')) {
     db_query("UPDATE {block_custom} SET body     = REPLACE(body,     :old, :new)", $replace_patterns);
   }
-  db_query("UPDATE {system}       SET filename = REPLACE(filename, :old, :new)", $replace_patterns);
+  if (!file_exists(DRUPAL_ROOT . '/core/includes/drupal.inc')) {
+    db_query("UPDATE {system}       SET filename = REPLACE(filename, :old, :new)", $replace_patterns);
+  }
 
   if (function_exists('field_info_field_map')) {
     $field_map = field_info_field_map();

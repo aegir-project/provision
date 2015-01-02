@@ -109,15 +109,6 @@ function _provision_drupal_parse_info_file($filename) {
   return $info;
 }
 
-function _provision_system_query($type) {
-  $entries = array();
-  $result = db_query("SELECT * FROM {system} WHERE type=:type", array(':type' => $type));
-  foreach ($result as $entry) {
-    $entries[] = $entry;
-  }
-  return $entries;
-}
-
 
 /**
  * Map the system table to a packages multi-dimensional array component
@@ -181,3 +172,34 @@ function _provision_drupal_system_map() {
   drush_log(dt("Found !count themes", array('!count' => sizeof($packages['themes']))));
   return $packages;
 }
+
+
+function _provision_system_query($type) {
+  if (file_exists(DRUPAL_ROOT . '/core/includes/drupal.inc')) {
+    foreach (system_get_info($type) as $name => $package) {
+      $package = (object) $package;
+      $package->filename = drupal_get_filename($type, $name);
+      $frags = explode("/", $package->filename);
+      // flag site-specific packages
+      if ($frags[0] == 'sites' && $frags[1] != 'all') {
+        $packages->platform = -1;
+      }
+      /*_provision_cvs_deploy($module);*/
+      $package->filename = realpath($package->filename);
+      if ($type == 'module') {
+        $package->schema_version = drupal_get_installed_schema_version($name);
+      }
+      $packages[$name] = $package;
+    }
+    return $packages;
+  }
+  else {
+    $entries = array();
+    $result = db_query("SELECT * FROM {system} WHERE type=:type", array(':type' => $type));
+    foreach ($result as $entry) {
+      $entries[] = $entry;
+    }
+    return $entries;
+  }
+}
+
