@@ -280,6 +280,7 @@ function _provision_drupal_create_directories($url = NULL) {
     "sites/$url/themes"          => 02775,
     "sites/$url/modules"         => 02775,
     "sites/$url/libraries"       => 02775, # http://drupal.org/node/496240
+    "sites/$url/vendor"          => 02775, # https://github.com/omega8cc/boa/issues/385
   );
 
   $chgrp = array();
@@ -409,6 +410,7 @@ function _provision_drupal_create_directories($url = NULL) {
     "sites/$url/private/config",
     "sites/$url/private/config/active",
     "sites/$url/private/config/staging"
+    "sites/$url/vendor"
   );
 
   // Allow other commands to add or alter the directories to be created,
