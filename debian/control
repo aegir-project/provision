@@ -13,7 +13,6 @@ Package: aegir3-provision
 Architecture: all
 Depends: ${misc:Depends}, drush (>= 5.10), php5-mysql, mysql-client | mariadb-client, sudo, postfix | mail-transport-agent, apache2 | nginx, adduser, ucf
 Recommends: mysql-server | mariadb-server, rsync
-Suggests: drush-make
 Conflicts: aegir-provision, aegir-provision2, aegir2-provision
 Replaces: aegir-provision, aegir-provision2, aegir2-provision
 Description: mass Drupal hosting system - backend
