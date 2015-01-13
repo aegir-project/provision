@@ -11,8 +11,8 @@ Vcs-browser: http://drupalcode.org/project/provision.git
 
 Package: aegir2-provision
 Architecture: all
-Depends: ${misc:Depends}, drush (>= 5.10), php5-mysql, mysql-client, sudo, postfix | mail-transport-agent, apache2 | nginx, adduser, ucf
-Recommends: mysql-server, rsync
+Depends: ${misc:Depends}, drush (>= 5.10), php5-mysql, mysql-client | mariadb-client, sudo, postfix | mail-transport-agent, apache2 | nginx, adduser, ucf
+Recommends: mysql-server | mariadb-server, rsync
 Suggests: drush-make
 Conflicts: aegir-provision, aegir-provision2
 Replaces: aegir-provision, aegir-provision2
