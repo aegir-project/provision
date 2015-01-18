@@ -393,7 +393,6 @@ function _provision_drupal_create_directories($url = NULL) {
     "sites/$url/files/civicrm/custom",
     "sites/$url/files/civicrm/dynamic",
     "sites/$url/files/css",
-    "sites/$url/files/ctools",
     "sites/$url/files/ctools/css",
     "sites/$url/files/deployment",
     "sites/$url/files/feeds",
