@@ -408,7 +408,6 @@ function _provision_drupal_create_directories($url = NULL) {
     "sites/$url/libraries",
     "sites/$url/modules",
     "sites/$url/private",
-    "sites/$url/private/config",
     "sites/$url/private/config/active",
     "sites/$url/private/config/staging",
     "sites/$url/private/files",
