@@ -212,7 +212,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
     fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
-    fastcgi_param db_port   <?php print urlencode($db_port); ?>;
+    fastcgi_param db_port   <?php print urlencode($this->server->db_port); ?>;
 
     fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
@@ -605,7 +605,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
     fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
-    fastcgi_param db_port   <?php print urlencode($db_port); ?>;
+    fastcgi_param db_port   <?php print urlencode($this->server->db_port); ?>;
 
     fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
@@ -791,7 +791,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
     fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
-    fastcgi_param db_port   <?php print urlencode($db_port); ?>;
+    fastcgi_param db_port   <?php print urlencode($this->server->db_port); ?>;
 
     fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
@@ -867,7 +867,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
     fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
-    fastcgi_param db_port   <?php print urlencode($db_port); ?>;
+    fastcgi_param db_port   <?php print urlencode($this->server->db_port); ?>;
 
     fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
@@ -1011,7 +1011,7 @@ location @allowupdate_<?php print $subdir; ?> {
   fastcgi_param db_user   <?php print urlencode($db_user); ?>;
   fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
   fastcgi_param db_host   <?php print urlencode($db_host); ?>;
-  fastcgi_param db_port   <?php print urlencode($db_port); ?>;
+  fastcgi_param db_port   <?php print urlencode($this->server->db_port); ?>;
 
   fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
   fastcgi_param  RAW_HOST            $host;
