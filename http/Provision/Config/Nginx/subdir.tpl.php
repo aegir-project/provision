@@ -20,6 +20,14 @@ if (!$satellite_mode && $server->satellite_mode) {
   $satellite_mode = $server->satellite_mode;
 }
 ?>
+<?php
+  // Until the real source of this problem is fixed elsewhere, we have to
+  // use this simple fallback to guarantee that empty db_port does not
+  // break Nginx reload which results with downtime for the affected vhosts.
+  if (!$db_port) {
+    $db_port = $this->server->db_port ? $this->server->db_port : '3306';
+  }
+?>
 #######################################################
 <?php if ($nginx_config_mode == 'extended'): ?>
 ###  nginx.conf site level extended vhost include start
@@ -212,7 +220,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
     fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
-    fastcgi_param db_port   <?php print urlencode($this->server->db_port); ?>;
+    fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
     fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
@@ -658,7 +666,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
     fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
-    fastcgi_param db_port   <?php print urlencode($this->server->db_port); ?>;
+    fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
     fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
@@ -844,7 +852,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
     fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
-    fastcgi_param db_port   <?php print urlencode($this->server->db_port); ?>;
+    fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
     fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
@@ -920,7 +928,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
     fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
-    fastcgi_param db_port   <?php print urlencode($this->server->db_port); ?>;
+    fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
     fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
@@ -1064,7 +1072,7 @@ location @allowupdate_<?php print $subdir; ?> {
   fastcgi_param db_user   <?php print urlencode($db_user); ?>;
   fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
   fastcgi_param db_host   <?php print urlencode($db_host); ?>;
-  fastcgi_param db_port   <?php print urlencode($this->server->db_port); ?>;
+  fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
   fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
   fastcgi_param  RAW_HOST            $host;

@@ -32,7 +32,15 @@ server {
   fastcgi_param db_user   <?php print urlencode($db_user); ?>;
   fastcgi_param db_passwd <?php print urlencode($db_passwd); ?>;
   fastcgi_param db_host   <?php print urlencode($db_host); ?>;
-  fastcgi_param db_port   <?php print urlencode($this->server->db_port); ?>;
+<?php
+  // Until the real source of this problem is fixed elsewhere, we have to
+  // use this simple fallback to guarantee that empty db_port does not
+  // break Nginx reload which results with downtime for the affected vhosts.
+  if (!$db_port) {
+    $db_port = $this->server->db_port ? $this->server->db_port : '3306';
+  }
+?>
+  fastcgi_param db_port   <?php print urlencode($db_port); ?>;
   listen        *:<?php print $http_port; ?>;
   server_name   <?php
     // this is the main vhost, so we need to put the redirection
