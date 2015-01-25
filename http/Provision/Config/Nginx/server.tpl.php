@@ -223,8 +223,9 @@ map $request_uri $key_uri {
 ###
 map $http_user_agent $is_crawler {
   default  '';
-  ~*HTTrack|BrokenLinkCheck|2009042316.*Firefox.*3\.0\.10|MJ12|HTMLParser|PECL|Automatic|CCBot  is_crawler;
-  ~*SiteBot|BuzzTrack|Sistrix|Offline|Nutch|Mireo|SWEB|Morfeus|GSLFbot|HiScan|Riddler|DBot      is_crawler;
+  ~*HTTrack|BrokenLinkCheck|2009042316.*Firefox.*3\.0\.10|MJ12|HTMLParser  is_crawler;
+  ~*SiteBot|PECL|Automatic|CCBot|BuzzTrack|Sistrix|Offline|Nutch|Mireo     is_crawler;
+  ~*SWEB|Morfeus|GSLFbot|HiScan|Riddler|DBot|SEOkicks                      is_crawler;
 }
 
 ###
