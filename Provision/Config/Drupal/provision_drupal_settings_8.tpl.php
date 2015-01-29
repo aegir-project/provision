@@ -177,6 +177,23 @@ if (isset($_SERVER['db_name'])) {
    */
   $settings['container_yamls'][] = __DIR__ . '/services.yml';
 
+  /**
+   * Trusted Host Settings support.
+   */
+  $settings['trusted_host_patterns'] = array(
+<?php
+  $esc_uri = str_replace('.', '\.', $this->uri);
+  print "    '^{$esc_uri}\$',\n";
+  foreach ($this->aliases as $alias_url) {
+    $esc_alias = str_replace('.', '\.', $alias_url);
+    print "    '^{$esc_alias}\$',\n";
+  }
+?>
+    '^localhost$',
+    '^localhost\.*',
+    '\.local$',
+  );
+
 <?php print $extra_config; ?>
 
   # Additional host wide configuration settings. Useful for safely specifying configuration settings.
