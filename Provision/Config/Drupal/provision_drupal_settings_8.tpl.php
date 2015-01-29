@@ -172,6 +172,11 @@ if (isset($_SERVER['db_name'])) {
   $settings['maintenance_mode'] = 1;
 <?php endif; ?>
 
+  /**
+   * Load services definition file.
+   */
+  $settings['container_yamls'][] = __DIR__ . '/services.yml';
+
 <?php print $extra_config; ?>
 
   # Additional host wide configuration settings. Useful for safely specifying configuration settings.
