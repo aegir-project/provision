@@ -4,8 +4,6 @@
 core = 7.x
 api = 2
 
-; BOA-2.4.0-dev
-
 ; this makefile fetches the latest Aegir code from git from drupal.org
 ; it shouldn't really change at all apart from major upgrades, where
 ; the branch will change
