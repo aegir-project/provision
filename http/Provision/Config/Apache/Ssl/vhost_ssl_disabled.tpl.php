@@ -17,10 +17,12 @@
 
     SSLCertificateKeyFile <?php print $ssl_cert_key; ?>
 
-<?php 
-  if (sizeof($this->aliases)) {
-    print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
+<?php
+if (sizeof($this->aliases)) {
+  foreach ($this->aliases as $alias) {
+    print "  ServerAlias " . $alias . "\n";
   }
+}
 ?>
 
     RewriteEngine on
