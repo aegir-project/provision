@@ -6,12 +6,13 @@
     
     ServerName <?php print $this->uri; ?>
 
-    <?php if (is_array($this->aliases)) :
-     foreach ($this->aliases as $alias) : ?>
-       ServerAlias <?php print $alias; ?>
-     <?php
-       endforeach;
-     endif; ?>
+    <?php
+    if (sizeof($this->aliases)) {
+      foreach ($this->aliases as $alias) {
+        print "  ServerAlias " . $alias . "\n";
+      }
+    }
+    ?>
 
     RewriteEngine on
     # the ? at the end is to remove any query string in the original url
