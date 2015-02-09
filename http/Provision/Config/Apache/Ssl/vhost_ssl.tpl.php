@@ -36,7 +36,9 @@
 
 <?php
 if (sizeof($this->aliases)) {
-  print "\n ServerAlias " . implode("\n ServerAlias ", $this->aliases) . "\n";
+  foreach ($this->aliases as $alias) {
+    print "  ServerAlias " . $alias . "\n";
+  }
 }
 ?>
 
