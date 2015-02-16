@@ -280,6 +280,7 @@ function provision_drush_command() {
     'options' => array(
       'http_service_type' => dt('Webserver type to configure (default: %webserver)', array('%webserver' => 'apache')),
       'makefile' => dt('The makefile used to create the hostmaster platform (default: %makefile)', array('%makefile' => dirname(__FILE__). '/aegir.make')),
+      'working-copy' => dt('Keep VCS files when building the hostmaster platform using Drush make.')
     ),
   );
 
