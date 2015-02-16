@@ -140,8 +140,6 @@ function provision_drush_command() {
   $items['provision-backup'] = array(
     'optional arguments' => array('backup-file' => dt('The file to save the backup to. This will be a gzipped tarball.')),
     'description' => dt('Generate a back up for the site.'),
-    'options' => array(
-      'profile' => dt('The Drupal profile to use.')),
     'examples' => array(
       'drush @site provision-backup' => 'Back up the site as defined by the site Drush alias generated with provision-save.',
     ),
