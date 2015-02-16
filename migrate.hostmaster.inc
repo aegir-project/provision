@@ -51,7 +51,12 @@ We are making the following assumptions:
       'root' => $platform,
       'makefile' => drush_get_option('makefile', dirname(__FILE__) . '/aegir.make'),
     ));
-    provision_backend_invoke($new_platform, 'provision-verify');
+    // propagate working-copy args downward
+    $options = array();
+    if (drush_get_option('working-copy')) {
+      $options['working-copy'] = 1;
+    }
+    provision_backend_invoke($new_platform, 'provision-verify', array(), $options);
     drush_set_option('new_platform', $new_platform);
     // exit if an error has occured.
     if (drush_get_error()) {
