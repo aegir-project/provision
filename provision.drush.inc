@@ -406,8 +406,7 @@ function provision_count_cpus() {
   $ncpus = FALSE;
   if (is_readable("/data/all/cpuinfo")) {
     # this should work on BOA with a /data/all/cpuinfo generated daily
-    $cpuinfo = file_get_contents("/data/all/cpuinfo");
-    $cpuinfo = str_replace('\n', '', $cpuinfo);
+    $cpuinfo = (int) file_get_contents("/data/all/cpuinfo");
     if ($cpuinfo !== FALSE && is_numeric($cpuinfo)) {
       $ncpus = $cpuinfo;
     }
