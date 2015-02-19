@@ -677,6 +677,38 @@ location @uncached {
 ### Map /files/ shortcut early to avoid overrides in other locations.
 ###
 location ^~ /files/ {
+
+  ###
+  ### Sub-location to support files/styles with short URIs.
+  ###
+  location ~* /files/styles/(.*)$ {
+    access_log off;
+    log_not_found off;
+    expires    30d;
+<?php if ($nginx_config_mode == 'extended'): ?>
+    set $nocache_details "Skip";
+<?php endif; ?>
+    rewrite  ^/files/(.*)$  /sites/$main_site_name/files/$1 last;
+    try_files  /sites/$main_site_name/files/styles/$1 $uri @drupal;
+  }
+
+  ###
+  ### Sub-location to support files/imagecache with short URIs.
+  ###
+  location ~* /files/imagecache/(.*)$ {
+    access_log off;
+    log_not_found off;
+    expires    30d;
+<?php if ($nginx_config_mode == 'extended'): ?>
+    # fix common problems with old paths after import from standalone to Aegir multisite
+    rewrite ^/files/imagecache/(.*)/sites/default/files/(.*)$ /sites/$main_site_name/files/imagecache/$1/$2 last;
+    rewrite ^/files/imagecache/(.*)/files/(.*)$               /sites/$main_site_name/files/imagecache/$1/$2 last;
+    set $nocache_details "Skip";
+<?php endif; ?>
+    rewrite  ^/files/(.*)$  /sites/$main_site_name/files/$1 last;
+    try_files  /sites/$main_site_name/files/imagecache/$1 $uri @drupal;
+  }
+
   location ~* ^.+\.(?:pdf|jpe?g|gif|png|ico|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rtf|cgi|bat|pl|dll|class|otf|ttf|woff|eot|less|avi|mpe?g|mov|wmv|mp3|ogg|ogv|wav|midi|zip|tar|t?gz|rar|dmg|exe|apk|pxl|ipa)$ {
     expires       30d;
     tcp_nodelay   off;

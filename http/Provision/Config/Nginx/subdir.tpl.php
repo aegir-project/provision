@@ -418,6 +418,59 @@ location ^~ /<?php print $subdir; ?> {
 <?php endif; ?>
 
   ###
+  ### Map /<?php print $subdir; ?>/files/ shortcut early to avoid overrides in other locations.
+  ###
+  location ^~ /<?php print $subdir; ?>/files/ {
+
+    ###
+    ### Sub-location to support files/styles with short URIs.
+    ###
+    location ~* /<?php print $subdir; ?>/files/styles/(.*)$ {
+      access_log off;
+      log_not_found off;
+      expires    30d;
+<?php if ($nginx_config_mode == 'extended'): ?>
+      set $nocache_details "Skip";
+<?php endif; ?>
+      rewrite  ^/<?php print $subdir; ?>/files/(.*)$  /<?php print $subdir; ?>/sites/$main_site_name/files/$1 last;
+      try_files  /<?php print $subdir; ?>/sites/$main_site_name/files/styles/$1 $uri @drupal_<?php print $subdir; ?>;
+    }
+
+    ###
+    ### Sub-location to support files/imagecache with short URIs.
+    ###
+    location ~* /<?php print $subdir; ?>/files/imagecache/(.*)$ {
+      access_log off;
+      log_not_found off;
+      expires    30d;
+<?php if ($nginx_config_mode == 'extended'): ?>
+      # fix common problems with old paths after import from standalone to Aegir multisite
+      rewrite ^/<?php print $subdir; ?>/files/imagecache/(.*)/sites/default/files/(.*)$ /<?php print $subdir; ?>/sites/$main_site_name/files/imagecache/$1/$2 last;
+      rewrite ^/<?php print $subdir; ?>/files/imagecache/(.*)/files/(.*)$               /<?php print $subdir; ?>/sites/$main_site_name/files/imagecache/$1/$2 last;
+      set $nocache_details "Skip";
+<?php endif; ?>
+      rewrite  ^/<?php print $subdir; ?>/files/(.*)$  /<?php print $subdir; ?>/sites/$main_site_name/files/$1 last;
+      try_files  /<?php print $subdir; ?>/sites/$main_site_name/files/imagecache/$1 $uri @drupal_<?php print $subdir; ?>;
+    }
+
+    location ~* ^.+\.(?:pdf|jpe?g|gif|png|ico|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rtf|cgi|bat|pl|dll|class|otf|ttf|woff|eot|less|avi|mpe?g|mov|wmv|mp3|ogg|ogv|wav|midi|zip|tar|t?gz|rar|dmg|exe|apk|pxl|ipa)$ {
+      expires       30d;
+      tcp_nodelay   off;
+      access_log    off;
+      log_not_found off;
+      add_header  Access-Control-Allow-Origin *;
+      rewrite  ^/<?php print $subdir; ?>/files/(.*)$  /<?php print $subdir; ?>/sites/$main_site_name/files/$1 last;
+      try_files   $uri =404;
+    }
+<?php if ($nginx_config_mode == 'extended'): ?>
+    try_files $uri @cache_<?php print $subdir; ?>;
+<?php else: ?>
+    try_files $uri @drupal_<?php print $subdir; ?>;
+<?php endif; ?>
+  }
+
+
+  ###
   ### Imagecache and imagecache_external support.
   ###
   location ~* ^/<?php print $subdir; ?>/((?:external|system|files/imagecache|files/styles)/.*) {
