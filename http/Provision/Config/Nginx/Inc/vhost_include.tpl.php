@@ -857,9 +857,9 @@ location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tin
 }
 
 ###
-### Deny crawlers and never cache known AJAX and webform requests.
+### Deny crawlers and never cache known AJAX requests.
 ###
-location ~* /(?:ahah|ajax|batch|autocomplete|webform|done|progress/|x-progress-id|js/.*) {
+location ~* /(?:ahah|ajax|batch|autocomplete|done|progress/|x-progress-id|js/.*) {
   if ($is_bot) {
     return 403;
   }
