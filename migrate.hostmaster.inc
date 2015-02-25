@@ -145,10 +145,15 @@ We are making the following assumptions:
 
 /**
  * Prepare the hostmaster site for migration
+ *
+ * @deprecated most of the stuff here needs to be removed in favor of
+ * hosting-pause, but since that exists only starting with rc3, we
+ * need to copy the content of it here. once 1.0 is released, we can
+ * remove that code and just keep hosting-pause.
  */
 function drush_provision_pre_hostmaster_migrate($site, $platform) {
-  // we ignore errors here through integrate = FALSE
-  provision_backend_invoke(drush_get_option('site_name'), 'hosting-pause', array(), array('#integrate' => FALSE));
+  // wipe out cron entry
+  exec('crontab -r');
 }
 
 function drush_provision_hostmaster_migrate($site, $platform) {
@@ -159,7 +164,7 @@ function drush_provision_post_hostmaster_migrate($site, $platform) {
   provision_backend_invoke(drush_get_option('site_name'), 'cache-clear', array('drush'));
   // we pass the context names we generated to the task so we can enforce that the names
   // stay the same.
-  provision_backend_invoke(drush_get_option('site_name'), 'hosting-resume', array(), array(
+  provision_backend_invoke(drush_get_option('site_name'), 'hostmaster-resume', array(), array(
     'old_platform_name' => drush_get_option('old_platform'),
     'new_platform_name' => drush_get_option('new_platform'),
   ));
