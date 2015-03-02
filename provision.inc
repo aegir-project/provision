@@ -18,7 +18,7 @@ function provision_autoload() {
   static $instance = NULL;
 
   if (is_null($instance)) {
-    require_once(dirname(__FILE__) . '/Symfony/Component/ClassLoader/UniversalClassLoader.php');
+    require_once dirname(__FILE__) . '/Symfony/Component/ClassLoader/UniversalClassLoader.php';
     $instance = new UniversalClassLoader();
     // Activate the autoloader.
     $instance->register();
@@ -30,11 +30,11 @@ function provision_autoload() {
 /**
  * Register a PECL style prefix with the provision autoloader.
  *
- * @param $prefix
+ * @param string $prefix
  *   The class prefix to register.
- * @param $dir
+ * @param string $dir
  *   The directory to search for the classes in.
- * @param $prepend
+ * @param bool $prepend
  *   If the directory should be searched first for the classes in the given
  *   prefix, set this to TRUE, otherwise, the default, FALSE, is fine.
  */
@@ -67,9 +67,10 @@ provision_autoload_register_prefix('Provision_', dirname(__FILE__));
 /**
  * Return the directory containing the file a class is defined in.
  *
- * @param $class_name
+ * @param string $class_name
  *   The class name to search for.
- * @return
+ *
+ * @return string
  *   A directory if the class can be found or an empty string if not.
  */
 function provision_class_directory($class_name) {
@@ -79,9 +80,10 @@ function provision_class_directory($class_name) {
 /**
  * Return the file a class is defined in.
  *
- * @param $class_name
+ * @param string $class_name
  *   The class name to search for.
- * @return
+ *
+ * @return string
  *   A file if the class can be found or an empty string if not.
  */
 function provision_class_file($class_name) {
@@ -103,13 +105,13 @@ function provision_class_file($class_name) {
  */
 
 /**
- * Make a determination whether or not the given
- * host is local or not.
+ * Make a determination whether or not the given host is local or not.
  *
  * We needed to fork this from drush core to handle the case sensitivity in host names.
  *
  * @param host
  *   A hostname, 'localhost' or '127.0.0.1'.
+ *
  * @return
  *   True if the host is local.
  */
