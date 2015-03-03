@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @file Package management code for Drupal 6 
+ * @file Package management code for Drupal 6
  */
 
 /**
