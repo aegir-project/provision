@@ -135,8 +135,13 @@ function _provision_drupal_system_map() {
   $packages['profiles'][$profile]->status = 1;
 
   foreach (_provision_system_query("module") as $module) {
+    // Skip profiles, these have a separate section above.
+    if (preg_match('/\.profile$/', $module->filename)) {
+      continue;
+    }
     $info_file = sprintf("%s/%s.info", dirname($module->filename), $module->name);
     $module->info = provision_parse_info_file($info_file);
+
     // Skip hidden modules
     if (isset($module->info['hidden']) && $module->info['hidden'] == 1) {
       continue;
