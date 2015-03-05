@@ -225,7 +225,8 @@ map $http_user_agent $is_crawler {
   default  '';
   ~*HTTrack|BrokenLinkCheck|2009042316.*Firefox.*3\.0\.10|MJ12|HTMLParser  is_crawler;
   ~*SiteBot|PECL|Automatic|CCBot|BuzzTrack|Sistrix|Offline|Nutch|Mireo     is_crawler;
-  ~*SWEB|Morfeus|GSLFbot|HiScan|Riddler|DBot|SEOkicks|PChomebot            is_crawler;
+  ~*SWEB|Morfeus|GSLFbot|HiScan|Riddler|DBot|SEOkicks|PChomebot|Scraper    is_crawler;
+  ~*rogerbot                                                               is_crawler;
 }
 
 ###
