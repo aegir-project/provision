@@ -313,9 +313,6 @@ function _provision_drupal_create_directories($url = NULL) {
     $mkdir["sites/$url/files/ctools"]     = 02775;
     $chgrp["sites/$url/files/ctools"]     = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/files/ctools/css"] = 02775;
-    $chgrp["sites/$url/files/ctools/css"] = d('@server_master')->web_group;
-
     $mkdir["sites/$url/files/imagecache"] = 02775;
     $chgrp["sites/$url/files/imagecache"] = d('@server_master')->web_group;
 
@@ -398,7 +395,6 @@ function _provision_drupal_create_directories($url = NULL) {
     "sites/$url/files/civicrm/persist",
     "sites/$url/files/css",
     "sites/$url/files/ctools",
-    "sites/$url/files/ctools/css",
     "sites/$url/files/deployment",
     "sites/$url/files/feeds",
     "sites/$url/files/imagecache",
