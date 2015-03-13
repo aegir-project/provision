@@ -27,6 +27,20 @@ server {
   fastcgi_param MAIN_SITE_NAME <?php print $this->uri; ?>;
   set $main_site_name "<?php print $this->uri; ?>";
   fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+<?php
+  // If any of those parameters is empty for any reason, like after an attempt
+  // to import complete platform with sites without importing their databases,
+  // it will break Nginx reload and even shutdown all sites on the system on
+  // Nginx restart, so we need to use dummy placeholders to avoid affecting
+  // other sites on the system if this site is broken.
+  if (!$db_type || !$db_name || !$db_user || !$db_passwd || !$db_host) {
+    $db_type = 'mysqli';
+    $db_name = 'none';
+    $db_user = 'none';
+    $db_passwd = 'none';
+    $db_host = 'localhost';
+  }
+?>
   fastcgi_param db_type   <?php print urlencode($db_type); ?>;
   fastcgi_param db_name   <?php print urlencode($db_name); ?>;
   fastcgi_param db_user   <?php print urlencode($db_user); ?>;
