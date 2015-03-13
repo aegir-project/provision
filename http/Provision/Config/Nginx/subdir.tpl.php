@@ -21,6 +21,20 @@ if (!$satellite_mode && $server->satellite_mode) {
 }
 ?>
 <?php
+  // If any of those parameters is empty for any reason, like after an attempt
+  // to import complete platform with sites without importing their databases,
+  // it will break Nginx reload and even shutdown all sites on the system on
+  // Nginx restart, so we need to use dummy placeholders to avoid affecting
+  // other sites on the system if this site is broken.
+  if (!$db_type || !$db_name || !$db_user || !$db_passwd || !$db_host) {
+    $db_type = 'mysqli';
+    $db_name = 'none';
+    $db_user = 'none';
+    $db_passwd = 'none';
+    $db_host = 'localhost';
+  }
+?>
+<?php
   // Until the real source of this problem is fixed elsewhere, we have to
   // use this simple fallback to guarantee that empty db_port does not
   // break Nginx reload which results with downtime for the affected vhosts.
