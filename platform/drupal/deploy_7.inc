@@ -33,16 +33,20 @@ if ($url_changed) {
 }
 
 function _provision_platform_drupal_deploy_7_replace($old_url, $new_url) {
+  // Update absolute URLs to files for sites cloned/migrated/renamed in the multisite install.
+  $replace_abs_patterns = array(
+    ':old' => '//' . $old_url . '/sites/' . $old_url . '/files',
+    ':new' => '//' . $new_url . '/sites/' . $new_url . '/files',
+  );
+
   // Update paths for sites cloned/migrated/renamed in the multisite install.
   $replace_patterns = array(
-    ':abo' => '//' . $old_url . '/sites/' . $old_url . '/files',
-    ':abn' => '//' . $new_url . '/sites/' . $new_url . '/files',
     ':old' => 'sites/' . $old_url,
     ':new' => 'sites/' . $new_url,
   );
 
   if(db_table_exists('block_custom')) {
-    db_query("UPDATE {block_custom} SET body     = REPLACE(body,     :abo, :abn)", $replace_patterns);
+    db_query("UPDATE {block_custom} SET body     = REPLACE(body,     :old, :new)", $replace_abs_patterns);
     db_query("UPDATE {block_custom} SET body     = REPLACE(body,     :old, :new)", $replace_patterns);
   }
   if (!file_exists(DRUPAL_ROOT . '/core/includes/drupal.inc')) {
@@ -56,8 +60,8 @@ function _provision_platform_drupal_deploy_7_replace($old_url, $new_url) {
       // Replace in all known text fields.
       if (in_array($info['type'], array('text_long', 'text_with_summary'))) {
         drush_log('Replacing in ' . $key, 'debug');
-        db_query("UPDATE {field_data_${tablekey}} SET ${tablekey}_value     = REPLACE(${tablekey}_value,   :abo, :abn)", $replace_patterns);
-        db_query("UPDATE {field_revision_${tablekey}} SET ${tablekey}_value = REPLACE(${tablekey}_value,   :abo, :abn)", $replace_patterns);
+        db_query("UPDATE {field_data_${tablekey}} SET ${tablekey}_value     = REPLACE(${tablekey}_value,   :old, :new)", $replace_abs_patterns);
+        db_query("UPDATE {field_revision_${tablekey}} SET ${tablekey}_value = REPLACE(${tablekey}_value,   :old, :new)", $replace_abs_patterns);
         db_query("UPDATE {field_data_${tablekey}} SET ${tablekey}_value     = REPLACE(${tablekey}_value,   :old, :new)", $replace_patterns);
         db_query("UPDATE {field_revision_${tablekey}} SET ${tablekey}_value = REPLACE(${tablekey}_value,   :old, :new)", $replace_patterns);
       }
@@ -65,8 +69,8 @@ function _provision_platform_drupal_deploy_7_replace($old_url, $new_url) {
       // Replace in the optional summary.
       if ($info['type'] == 'text_with_summary') {
         drush_log('Replacing summary in ' . $key, 'debug');
-        db_query("UPDATE {field_data_${tablekey}} SET ${tablekey}_summary     = REPLACE(${tablekey}_summary, :abo, :abn)", $replace_patterns);
-        db_query("UPDATE {field_revision_${tablekey}} SET ${tablekey}_summary = REPLACE(${tablekey}_summary, :abo, :abn)", $replace_patterns);
+        db_query("UPDATE {field_data_${tablekey}} SET ${tablekey}_summary     = REPLACE(${tablekey}_summary, :old, :new)", $replace_abs_patterns);
+        db_query("UPDATE {field_revision_${tablekey}} SET ${tablekey}_summary = REPLACE(${tablekey}_summary, :old, :new)", $replace_abs_patterns);
         db_query("UPDATE {field_data_${tablekey}} SET ${tablekey}_summary     = REPLACE(${tablekey}_summary, :old, :new)", $replace_patterns);
         db_query("UPDATE {field_revision_${tablekey}} SET ${tablekey}_summary = REPLACE(${tablekey}_summary, :old, :new)", $replace_patterns);
       }
