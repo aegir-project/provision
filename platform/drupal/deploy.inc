@@ -10,6 +10,8 @@
 $new_url = d()->uri;
 $old_url = drush_get_option('old_uri', $new_url, 'cli');
 $old_url_pattern = '/^' . preg_quote('sites/' . $old_url, '/') . '/';
+$old_url_abs = '//' . $old_url . '/sites/' . $old_url . '/files';
+$new_url_abs = '//' . $new_url . '/sites/' . $new_url . '/files';
 
 // Update paths for sites migrated from standalone to the multisite install.
 db_query("UPDATE {files}       SET filepath   = REPLACE(filepath,   'sites/default', 'sites/%s')", $new_url);
@@ -17,6 +19,13 @@ db_query("UPDATE {users}       SET picture    = REPLACE(picture,    'sites/defau
 db_query("UPDATE {boxes}       SET body       = REPLACE(body,       'sites/default', 'sites/%s')", $new_url);
 db_query("UPDATE {node_revisions} SET body    = REPLACE(body,       'sites/default', 'sites/%s')", $new_url);
 db_query("UPDATE {node_revisions} SET teaser  = REPLACE(teaser,     'sites/default', 'sites/%s')", $new_url);
+
+// Update absolute URLs to files for sites cloned/migrated/renamed in the multisite install.
+db_query("UPDATE {files}       SET filepath   = REPLACE(filepath,   '%s', '%s')", $old_url_abs, $new_url_abs);
+db_query("UPDATE {users}       SET picture    = REPLACE(picture,    '%s', '%s')", $old_url_abs, $new_url_abs);
+db_query("UPDATE {boxes}       SET body       = REPLACE(body,       '%s', '%s')", $old_url_abs, $new_url_abs);
+db_query("UPDATE {node_revisions} SET body    = REPLACE(body,       '%s', '%s')", $old_url_abs, $new_url_abs);
+db_query("UPDATE {node_revisions} SET teaser  = REPLACE(teaser,     '%s', '%s')", $old_url_abs, $new_url_abs);
 
 // Update paths for sites cloned/migrated/renamed in the multisite install.
 db_query("UPDATE {files}       SET filepath   = REPLACE(filepath,   'sites/%s', 'sites/%s')", $old_url, $new_url);
