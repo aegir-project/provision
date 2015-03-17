@@ -47,6 +47,19 @@ case "$1" in
             echo "running an older version of sudo"
             echo "copy content of /usr/share/doc/aegir3-provision/examples/example.sudoers into /etc/sudoers for aegir to run properly"
         fi
+
+        # Install composer.
+        curl -sS https://getcomposer.org/installer | php
+        mv composer.phar /usr/local/bin/composer
+
+        # Install Drush.
+        su -c "composer global require drush/drush:6.*" aegir
+
+        # Add composer's bin dir to the $PATH.
+        echo "export PATH=\"\$HOME/.composer/vendor/bin:\$PATH\"" >>  ~aegir/.bashrc
+
+        # Symlink Drush for other users to use.
+        ln -s ~aegir/.composer/vendor/bin/drush /usr/local/bin
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

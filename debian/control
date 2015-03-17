@@ -11,7 +11,7 @@ Vcs-browser: http://drupalcode.org/project/provision.git
 
 Package: aegir3-provision
 Architecture: all
-Depends: ${misc:Depends}, drush (>= 5.10), php5-mysql, mysql-client | mariadb-client, sudo, postfix | mail-transport-agent, apache2 | nginx, adduser, ucf
+Depends: ${misc:Depends}, php5-cli (>= 5.3), php5-mysql, mysql-client | mariadb-client, sudo, postfix | mail-transport-agent, apache2 | nginx, adduser, ucf
 Recommends: mysql-server | mariadb-server, rsync
 Conflicts: aegir-provision, aegir-provision2, aegir2-provision
 Replaces: aegir-provision, aegir-provision2, aegir2-provision
@@ -30,7 +30,7 @@ Description: mass Drupal hosting system - backend
 
 Package: aegir3-hostmaster
 Architecture: all
-Depends: ${misc:Depends}, drush (>= 5.5), php5-mysql, php5-gd, apache2 | nginx, libapache2-mod-php5 | php5-fpm, aegir3-provision (>= ${source:Version}), git-core, unzip, lsb-base (>= 3.0-6)
+Depends: ${misc:Depends}, php5-mysql, php5-gd, apache2 | nginx, libapache2-mod-php5 | php5-fpm, aegir3-provision (>= ${source:Version}), git-core, unzip, lsb-base (>= 3.0-6)
 Recommends: php5
 Conflicts: aegir-hostmaster, aegir-hostmaster2, aegir2-hostmaster
 Replaces: aegir-hostmaster, aegir-hostmaster2, aegir2-hostmaster
