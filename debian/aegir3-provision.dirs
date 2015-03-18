@@ -1,4 +1,3 @@
 usr/share/drush/commands/provision
 var/aegir
-var/aegir/config
 usr/share/lintian/overrides

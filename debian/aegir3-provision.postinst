@@ -48,6 +48,9 @@ case "$1" in
             echo "copy content of /usr/share/doc/aegir3-provision/examples/example.sudoers into /etc/sudoers for aegir to run properly"
         fi
 
+        # fix permissions on installed directories
+        chown aegir:aegir "$VARLIB"
+
         # Install composer.
         curl -sS https://getcomposer.org/installer | php
         mv composer.phar /usr/local/bin/composer
