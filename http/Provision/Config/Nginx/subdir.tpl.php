@@ -755,6 +755,10 @@ location ^~ /<?php print $subdir; ?> {
   ### Make feeds compatible with boost caching and set correct mime type.
   ###
   location ~* ^/<?php print $subdir; ?>/(.*\.xml)$ {
+    location ~* ^/<?php print $subdir; ?>/autodiscover/autodiscover\.xml {
+      access_log off;
+      return 400;
+    }
     if ( $request_method = POST ) {
       return 405;
     }
