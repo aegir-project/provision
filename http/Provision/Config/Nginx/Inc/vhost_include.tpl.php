@@ -900,6 +900,10 @@ location ~* ^/sites/.*/files/ {
 ### Make feeds compatible with boost caching and set correct mime type.
 ###
 location ~* \.xml$ {
+  location ~* ^/autodiscover/autodiscover\.xml {
+    access_log off;
+    return 400;
+  }
   if ( $request_method = POST ) {
     return 405;
   }
