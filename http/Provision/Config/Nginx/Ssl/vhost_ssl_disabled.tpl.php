@@ -20,9 +20,6 @@ server {
   ssl                        on;
   ssl_certificate            <?php print $ssl_cert; ?>;
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
-  ssl_protocols              SSLv3 TLSv1 TLSv1.1 TLSv1.2;
-  ssl_ciphers                RC4:HIGH:!aNULL:!MD5;
-  ssl_prefer_server_ciphers  on;
   keepalive_timeout          70;
   ### Do not reveal Aegir front-end URL here.
 }
