@@ -1,1 +1,1 @@
-aegir-dev.make
+aegir-release.make

@@ -1,3 +1,12 @@
+aegir2-provision (2.2) unstable; urgency=medium
+
+  * This release ships with number of bug fixes, as well as a security fix
+    for nginx users related to the POODLE vulnerability. For more
+    information, see the full release notes:
+    http://community.aegirproject.org/2.2
+
+ -- Christopher Gervais <chris@ergonlogic.com>  Wed, 25 Mar 2015 13:57:15 -0400
+
 aegir2-provision (2.1) unstable; urgency=medium
 
   * This release ships with support for Apache 2.4, along with updates
