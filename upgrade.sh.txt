@@ -14,8 +14,11 @@ msg() {
 
 # basic variables, change before running
 AEGIR_VERSION="7.x-3.x"
+NEW_DRUSH_VERSION=6.5.0
+
 DRUSH_DIR=$HOME/drush
 DRUSH=$DRUSH_DIR/drush.php
+
 if which drush 2> /dev/null > /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
   msg "Drush is in the path, good"
   # we do not set DRUSH to `which drush` because we're not sure how 'which' will behave
@@ -35,9 +38,9 @@ else
 fi
 
 # Detect the current Drush version to work with
-DRUSH_VERSION=`drush --version --pipe`
+CURRENT_DRUSH_VERSION=`drush --version --pipe`
 
-case "$DRUSH_VERSION" in
+case "$CURRENT_DRUSH_VERSION" in
   5*)
   TEMPFILE=`mktemp`
   $DRUSH --pipe @hostmaster status | egrep "site_uri|drupal_root" >> $TEMPFILE || true
@@ -61,7 +64,6 @@ esac
 
 HOME="$HOME"
 DRUPAL_DIR=$HOME/hostmaster-$AEGIR_VERSION
-DRUSH_VERSION=6.5.0
 BACKUP_DIR=$HOME/pre-upgrade-`date '+%F-%H%M'`
 
 ########################################################################
@@ -118,7 +120,7 @@ EOF
 
 if [ -w $DRUSH_DIR ]; then
   cat <<EOF
-The version of Drush will be $DRUSH_VERSION
+The version of Drush will be $NEW_DRUSH_VERSION
 EOF
 else
   echo "Drush will not be upgraded as its directory is not writable: $DRUSH_DIR"
@@ -141,10 +143,10 @@ if [ -w $DRUSH_DIR ]; then
   fi
 
   cd $HOME
-  wget http://github.com/drush-ops/drush/archive/$DRUSH_VERSION.zip
-  unzip $DRUSH_VERSION.zip
-  rm $DRUSH_VERSION.zip
-  mv drush-$DRUSH_VERSION $DRUSH_DIR
+  wget http://github.com/drush-ops/drush/archive/${NEW_DRUSH_VERSION}.zip
+  unzip ${NEW_DRUSH_VERSION}.zip
+  rm ${NEW_DRUSH_VERSION}.zip
+  mv drush-$NEW_DRUSH_VERSION $DRUSH_DIR
 fi
 
 # fetch new version of provision
