@@ -8,11 +8,7 @@
 # the packages provided by their platform.
 ########################################################################
 
-msg() {
-  echo "==> $*"
-}
-
-# basic variables, change before running
+# Basic variables, change before running.
 AEGIR_VERSION="7.x-3.x"
 NEW_DRUSH_VERSION=6.5.0
 
@@ -37,7 +33,7 @@ else
   exit 1
 fi
 
-# Detect the current Drush version to work with
+# Detect the current Drush version to work with.
 CURRENT_DRUSH_VERSION=`drush --version --pipe`
 
 case "$CURRENT_DRUSH_VERSION" in
@@ -68,6 +64,11 @@ BACKUP_DIR=$HOME/pre-upgrade-`date '+%F-%H%M'`
 
 ########################################################################
 # functions
+
+# Indent printed messages.
+msg() {
+  echo "==> $*"
+}
 
 # simple prompt
 prompt_yes_no() {
@@ -135,8 +136,8 @@ fi
 
 mkdir -p $BACKUP_DIR
 
-if [ -w $DRUSH_DIR ]; then
-  # Can we check Drush version?
+# Upgrade drush if desired and writable.
+if [ $NEW_DRUSH_VERSION != $CURRENT_DRUSH_VERSION && -w $DRUSH_DIR ]; then
   if [ -d $DRUSH_DIR ]; then
     msg "Moving existing drush into $BACKUP_DIR"
     mv $DRUSH_DIR $BACKUP_DIR
@@ -149,7 +150,7 @@ if [ -w $DRUSH_DIR ]; then
   mv drush-$NEW_DRUSH_VERSION $DRUSH_DIR
 fi
 
-# fetch new version of provision
+# Fetch new version of provision.
 # move existing provision
 cd $HOME/.drush
 
@@ -166,8 +167,11 @@ else
   rm provision-$AEGIR_VERSION.tar.gz
 fi
 
-# Clear the drush command cache
+# Clear the drush command cache.
 drush cache-clear drush
 
+# Start the actual upgrade of Aegir itself.
 cd $OLD_DRUPAL_DIR
 $DRUSH hostmaster-migrate $AEGIR_DOMAIN $DRUPAL_DIR
+
+# All should be done.
