@@ -12,9 +12,17 @@
 AEGIR_VERSION="7.x-3.x"
 NEW_DRUSH_VERSION=6.5.0
 
+# Extra variables, no changes needed for most use-cases.
 DRUSH_DIR=$HOME/drush
 DRUSH=$DRUSH_DIR/drush.php
 
+BACKUP_DIR=$HOME/pre-upgrade-$(date '+%F-%H%M')
+
+if [ "$AEGIR_VERSION" = "7.x-3.x" ]; then
+  DRUPAL_DIR=$HOME/hostmaster-${AEGIR_VERSION}-$(date +'%F-%H%M')
+else
+  DRUPAL_DIR=$HOME/hostmaster-$AEGIR_VERSION
+fi
 
 ########################################################################
 # Functions
@@ -49,6 +57,7 @@ prompt_yes_no() {
 ########################################################################
 # Preparation
 
+# Test if we have Drush.
 if which drush 2> /dev/null > /dev/null && which drush | grep -v 'no drush in' > /dev/null; then
   msg "Drush is in the path, good"
   # we do not set DRUSH to `which drush` because we're not sure how 'which' will behave
@@ -91,10 +100,6 @@ case "$CURRENT_DRUSH_VERSION" in
   OLD_DRUPAL_DIR=`drush @hostmaster status --fields="root" --field-labels=0 | sed -e 's/^[[:space:]]*//g' -e 's/[[:space:]]*\$//g'`
 
 esac
-
-HOME="$HOME"
-DRUPAL_DIR=$HOME/hostmaster-$AEGIR_VERSION
-BACKUP_DIR=$HOME/pre-upgrade-`date '+%F-%H%M'`
 
 
 ########################################################################
