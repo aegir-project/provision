@@ -23,6 +23,15 @@ function provision_tests_drush_command() {
       'hosting',
     ),
   );
+  $items['provision-tests-new-run'] = array(
+    'description' => dt('Runs NEW provision tests'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    // Although we're a provision command, we require hostmaster to be around to
+    // run the tests correctly
+    'drupal dependencies' => array(
+      'hosting',
+    ),
+  );
   $items['provision-demo-content'] = array(
     'description' => dt('Setup some demo content on a fresh Aegir install'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
@@ -98,6 +107,50 @@ function drush_provision_tests_run() {
   drush_log(dt('Tests completed successfully'), 'success');
 }
 
+
+/**
+ * Drush command to run the provision tests.
+ */
+function drush_provision_tests_new_run() {
+  if (!drush_confirm(dt('This command should only be run on a clean Aegir install, and data may be lost! Do you want to continue?'))) {
+    return drush_user_abort();
+  }
+
+  // Disable the tasks queue, we run them manually instead.
+  $queue_status_initial = variable_get('hosting_queue_tasks_enabled', '0');
+  variable_set('hosting_queue_tasks_enabled', '0');
+
+  // 'Stable' D8 e.g. latest (beta) release.
+  drush_provision_tests_install_platform('drupal8');
+  drush_provision_tests_install_site('drupal8', 'drupal8-minimal', 'minimal');
+
+  // Dev D8 latest git commit.
+  drush_provision_tests_install_platform('drupal8dev');
+  drush_provision_tests_install_site('drupal8dev', 'drupal8-dev-minimal', 'minimal');
+
+  // Migrate a D8 site from the current release to the latest commit.
+  drush_provision_tests_install_site('drupal8', 'drupal8-upgrade-d8', 'minimal');
+  drush_provision_tests_migrate_site('drupal8-upgrade-d8', 'drupal8dev');
+
+  // Cleanup.
+  drush_provision_tests_remove_site('drupal8-upgrade-d8');
+  drush_provision_tests_remove_site('drupal8-minimal');
+  drush_provision_tests_remove_site('drupal8-dev-minimal');
+  drush_provision_tests_remove_platform('drupal8');
+  drush_provision_tests_remove_platform('drupal8dev');
+
+  // Restore the tasks queue status:
+  variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
+
+  if (drush_get_error() != DRUSH_SUCCESS) {
+    drush_set_error(drush_get_error(), 'Running tests failed');
+    exit(1);
+  }
+
+  drush_log(dt('Tests completed successfully'), 'success');
+}
+
+
 /**
  * Drush command to setup some demo platforms and sites.
  *
@@ -117,6 +170,7 @@ function drush_provision_tests_provision_demo_content() {
   drush_provision_tests_install_platform('drupal8');
   drush_provision_tests_install_site('drupal8', 'drupal8-minimal', 'minimal');
 
+  // Prepare some platforms.
   drush_provision_tests_install_platform('drupal6');
   drush_provision_tests_install_platform('drupal7');
   drush_provision_tests_install_platform('openatrium2');
