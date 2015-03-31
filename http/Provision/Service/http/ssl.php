@@ -258,7 +258,7 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
   /**
    * Verify server.
    */
-  function verify() {
+  function verify_server_cmd() {
     if ($this->context->type === 'server') {
       provision_file()->create_dir($this->server->ssld_path, dt("Central SSL certificate repository."), 0700);
 
@@ -272,6 +272,6 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
     }
 
     // Call the parent at the end. it will restart the server when it finishes.
-    parent::verify();
+    parent::verify_server_cmd();
   }
 }
