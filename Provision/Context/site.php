@@ -16,7 +16,7 @@ class Provision_Context_site extends Provision_Context {
       'aliases' => 'site: comma-separated URIs',
       'redirection' => 'site: boolean for whether --aliases should redirect; default false',
       'client_name' => 'site: machine name of the client that owns this site',
-      'profile' => 'site: Drupal profile to use; default default',
+      'profile' => 'site: Drupal profile to use; default standard',
       'drush_aliases' => 'site: Comma-separated list of additional Drush aliases through which this site can be accessed.',
     );
   }
@@ -39,7 +39,7 @@ class Provision_Context_site extends Provision_Context {
     $this->setProperty('drush_aliases', array(), TRUE);
 
     // this can potentially be handled by a Drupal sub class
-    $this->setProperty('profile', 'default');
+    $this->setProperty('profile', 'standard');
   }
 
   /**
