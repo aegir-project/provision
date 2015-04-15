@@ -35,8 +35,15 @@ function drush_provision_drupal_pre_provision_restore_rollback($restore_file) {
  * Switch the restore directories around now that we have the new db installed
  */
 function drush_provision_drupal_provision_restore($restore_file) {
+  // Build an options array to pass to the deploy task. This allows injection
+  // of data into the deploy task. See: https://www.drupal.org/node/2471805
+  $deploy_options = array(
+    'old_uri' => d()->uri,
+    'strict' => 0,
+  );
+  drush_command_invoke_all_ref('provision_deploy_options_alter', $deploy_options, 'restore');
 
-  provision_backend_invoke(d()->name, 'provision-deploy', array(drush_get_option('restore_file')), array('old_uri' => d()->uri));
+  provision_backend_invoke(d()->name, 'provision-deploy', array(drush_get_option('restore_file')), $deploy_options);
   if (!drush_get_error()) {
     provision_backend_invoke(d()->name, 'provision-verify');
     drush_set_option('installed', false);

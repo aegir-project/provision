@@ -251,3 +251,21 @@ function hook_provision_drupal_chmod_not_recursive_directories_alter($chmod_not_
 function hook_provision_drupal_install_settings_alter(&$settings, $url) {
   $settings['forms']['install_configure_form']['update_status_module'] = array();
 }
+
+/**
+ * Alter the options passed to 'provision-deploy' when it is invoked in
+ * restore, clone and migrate tasks.
+ *
+ * @param array $deploy_options
+ *   Options passed to the invocation of provision-deploy.
+ * @param string $context
+ *   The type of task invoking the hook (e.g., 'clone').
+ */
+function hook_provision_deploy_options_alter(&$deploy_options, $context) {
+  // From hosting_s3; see: https://www.drupal.org/node/2412563
+  // Inject the backup bucket name during the 'clone' task, so that it is
+  // available in deploy().
+  if ($bucket = drush_get_option('s3_backup_name', FALSE)) {
+    $deploy_options['s3_backup_name'] = $bucket;
+  }
+}
