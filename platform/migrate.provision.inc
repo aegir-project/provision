@@ -99,7 +99,16 @@ function drush_provision_drupal_provision_migrate($platform, $new_name = NULL) {
   drush_set_option('new_site_path', "{$options['root']}/sites/{$options['uri']}");
 
   drush_invoke_process('@none', 'provision-save', array($target), $options);
-  provision_backend_invoke($target, 'provision-deploy', array(drush_get_option('backup_file')), array('old_uri' => d()->uri));
+
+  // Build an options array to pass to the deploy task. This allows injection
+  // of data into the deploy task. See: https://www.drupal.org/node/2471805
+  $deploy_options = array(
+    'old_uri' => d()->uri,
+    'strict' => 0,
+  );
+  drush_command_invoke_all_ref('provision_deploy_options_alter', $deploy_options, 'migrate');
+
+  provision_backend_invoke($target, 'provision-deploy', array(drush_get_option('backup_file')), $deploy_options);
   if (!drush_get_error()) {
     drush_log(dt("Bringing site out of maintenance"));
     d()->site_enabled = TRUE;
