@@ -124,8 +124,74 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
     // non-readable by the webserver.
     umask(0077);
     // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
-    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 --single-transaction --quick --no-autocommit %s | sed 's|/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/|/\\*!50001 CREATE \\*/|g; s|/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/||g' | sed '/\\*!50013 DEFINER=.*/ d' > %s/database.sql", escapeshellcmd(drush_get_option('db_name')), escapeshellcmd(d()->site_path));
-    $success = $this->safe_shell_exec($cmd, drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
+    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 --single-transaction --quick --no-autocommit %s", escapeshellcmd(drush_get_option('db_name')));
+
+    $db_host = drush_get_option('db_host');
+    $db_user = urldecode(drush_get_option('db_user'));
+    $db_passwd = urldecode(drush_get_option('db_passwd')));
+
+    // duplicate safe_shell_exec() because we want to replace the output
+    // inline
+    $mycnf = sprintf('[client]
+host=%s
+user=%s
+password="%s"
+port=%s
+', $db_host, $db_user, $db_passwd, $this->server->db_port);
+
+
+    // fail if db file already exists
+    $dumpfile = fopen(d()->site_path . '/database.sql', 'x');
+    if ($dump_file === FALSE) {
+      drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump'));
+    }
+    else {
+      $process = proc_open($cmd, $descriptorspec, $pipes);
+      if (is_resource($process)) {
+        fwrite($pipes[3], $mycnf);
+        fclose($pipes[3]);
+
+        // okay, at this point we have opened a pipe to that mysqldump
+        // command, now we want to read it one line at a time and do our
+        // replacement
+        while (($buffer = fgets($pipes[1], 4096)) !== false) {
+          // remove DEFINER entries
+          // XXX: this should be anchored at ^
+          // original sed regex: /\\*!50013 DEFINER=.*/d
+          if (preg_match('#/\\*!50013 DEFINER=.*/#', $buffer)) {
+            continue;
+          }
+          // remove another kind of DEFINER line
+          // original sed regex: s|/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/||g
+          // XXX: should also be anchored
+          // XXX: why the hell is there *another* DEFINER regex here?!
+          $buffer = preg_replace('#/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/#', '', $buffer);
+          if (is_null($buffer)) {
+            // preg exploded in our face, oops.
+            drush_set_error('PROVISION_BACKUP_FAILED', dt('Error while running regular expression'));
+          }
+          // remove broken CREATE ALGORITHM entries
+          // original sed regex: s|/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/|/\\*!50001 CREATE \\*/|g
+          // XXX: should also be anchored
+          $buffer = preg_replace('#/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/#', '/\\*!50001 CREATE \\*/', $buffer);
+          // write the resulting line in the backup file
+          if (fwrite($dumpfile, $buffer) === FALSE) {
+            drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump'));
+          }
+        }
+        // catch errors returned by mysqldump
+        fclose($pipes[1]);
+        // close stderr as well
+        $err = fread($pipes[2], 4096);
+        fclose($pipes[2]);
+        if (proc_close($process) != 0) {
+          drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump (error: %msg)', array('%msg' => $err)));
+        }
+      }
+      else {
+        drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not run mysqldump for backups'));
+      }
+    }
 
     $dump_size_too_small = filesize(d()->site_path . '/database.sql') < 1024;
     if ((!$success || $dump_size_too_small) && !drush_get_option('force', FALSE)) {
