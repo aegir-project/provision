@@ -120,7 +120,7 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
   }
 
   function generate_dump() {
-    // Aet the umask to 077 so that the dump itself is generated so it's
+    // Set the umask to 077 so that the dump itself is generated so it's
     // non-readable by the webserver.
     umask(0077);
     // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
