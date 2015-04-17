@@ -119,17 +119,145 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
     }
   }
 
+  /**
+   * Generate the contents of a mysql config file containing database
+   * credentials.
+   */
+  function generate_mycnf($db_host = NULL, $db_user = NULL, $db_passwd = NULL, $db_host = NULL) {
+    // Look up defaults, if no credentials are provided.
+    if (is_null($db_host)) {
+      $db_host = drush_get_option('db_host');
+    }
+    if (is_null($db_user)) {
+      $db_user = urldecode(drush_get_option('db_user'));
+    }
+    if (is_null($db_passwd)) {
+      $db_passwd = urldecode(drush_get_option('db_passwd'));
+    }
+    if (is_null($db_port)) {
+      $db_port = $this->server->db_port;
+    }
+
+    $mycnf = sprintf('[client]
+host=%s
+user=%s
+password="%s"
+port=%s
+', $db_host, $db_user, $db_passwd, $this->server->db_port);
+
+    return $mycnf;
+  }
+
+  /**
+   * Generate the descriptors necessary to open a process with readable and
+   * writeable pipes.
+   */
+  function generate_descriptorspec($stdin_file = NULL) {
+    $stdin_spec = is_null($stdin_file) ? array("pipe", "r") : array("file", $stdin_file, "r");
+    $descriptorspec = array(
+      0 => $stdin_spec,         // stdin is a pipe that the child will read from
+      1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+      2 => array("pipe", "w"),  // stderr is a file to write to
+      3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials
+    );
+    return $descriptorspec;
+  }
+
+  /**
+   * Return an array of regexes to filter lines of mysqldumps.
+   */
+  function get_regexes() {
+    static $regexes = NULL;
+    if (is_null($regexes)) {
+      $regexes = array(
+        // remove DEFINER entries
+        '#/^\\*!50013 DEFINER=.*/#' => FALSE,
+        // remove another kind of DEFINER line
+        '#/^\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/#' => '',
+        // remove broken CREATE ALGORITHM entries
+        '#/^\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/#' => '/\\*!50001 CREATE \\*/',
+      );
+
+      // Allow regexes to be altered or appended to.
+      drush_command_invoke_all_ref('provision_mysql_regex_alter', $regexes);
+    }
+    return $regexes;
+  }
+
+  function filter_line(&$line) {
+    $regexes = $this->get_regexes();
+    foreach ($regexes as $find => $replace) {
+      if ($replace === FALSE) {
+        if (preg_match($find, $line)) {
+          // Remove this line entirely.
+          $line = FALSE;
+        }
+      }
+      else {
+        $line = preg_replace($find, $replace, $line);
+        if (is_null($line)) {
+          // preg exploded in our face, oops.
+          drush_set_error('PROVISION_BACKUP_FAILED', dt(
+            "Error while running regular expression:\n Pattern: !find\n Replacement: !replace",
+            array(
+              '!find' => $find,
+              '!replace' => $replace,
+          )));
+        }
+      }
+    }
+  }
+
+  /**
+   * Generate a mysqldump for use in backups.
+   */
   function generate_dump() {
-    // Set the umask to 077 so that the dump itself is generated so it's
-    // non-readable by the webserver.
+    // Set the umask to 077 so that the dump itself is non-readable by the
+    // webserver.
     umask(0077);
     // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
-    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 --single-transaction --quick --no-autocommit %s | sed 's|/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/|/\\*!50001 CREATE \\*/|g; s|/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/||g' | sed '/\\*!50013 DEFINER=.*/ d' > %s/database.sql", escapeshellcmd(drush_get_option('db_name')), escapeshellcmd(d()->site_path));
-    $success = $this->safe_shell_exec($cmd, drush_get_option('db_host'), urldecode(drush_get_option('db_user')), urldecode(drush_get_option('db_passwd')));
+    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 --single-transaction --quick --no-autocommit %s", escapeshellcmd(drush_get_option('db_name')));
+
+    // Fail if db file already exists.
+    $dump_file = fopen(d()->site_path . '/database.sql', 'x');
+    if ($dump_file === FALSE) {
+      drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump'));
+    }
+    else {
+      $pipes = array();
+      $descriptorspec = $this->generate_descriptorspec();
+      $process = proc_open($cmd, $descriptorspec, $pipes);
+      if (is_resource($process)) {
+        fwrite($pipes[3], $this->generate_mycnf());
+        fclose($pipes[3]);
+
+        // At this point we have opened a pipe to that mysqldump command. Now
+        // we want to read it one line at a time and do our replacements.
+        while (($buffer = fgets($pipes[1], 4096)) !== FALSE) {
+          $this->filter_line($buffer);
+          // Write the resulting line in the backup file.
+          if ($buffer && fwrite($dump_file, $buffer) === FALSE) {
+            drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump'));
+          }
+        }
+        // Close stdout.
+        fclose($pipes[1]);
+        // Catch errors returned by mysqldump.
+        $err = fread($pipes[2], 4096);
+        // Close stderr as well.
+        fclose($pipes[2]);
+        if (proc_close($process) != 0) {
+          drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump (error: %msg)', array('%msg' => $err)));
+        }
+      }
+      else {
+        drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not run mysqldump for backups'));
+      }
+    }
 
     $dump_size_too_small = filesize(d()->site_path . '/database.sql') < 1024;
-    if ((!$success || $dump_size_too_small) && !drush_get_option('force', FALSE)) {
-      drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not generate database backup from mysqldump. (error: %msg)', array('%msg' => $this->safe_shell_exec_output)));
+    if (($dump_size_too_small) && !drush_get_option('force', FALSE)) {
+      drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not generate database backup from mysqldump. (error: %msg)', array('%msg' => $err)));
     }
     // Reset the umask to normal permissions.
     umask(0022);
@@ -141,28 +269,15 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
    * create conflicts in parallel runs)
    *
    * XXX: this needs to be refactored so it:
-   *  - works even if /dev/fd/3 doesn't exit
+   *  - works even if /dev/fd/3 doesn't exist
    *  - has a meaningful name (we're talking about reading and writing
    * dumps here, really, or at least call mysql and mysqldump, not
    * just any command)
    *  - can be pushed upstream to drush (http://drupal.org/node/671906)
    */
   function safe_shell_exec($cmd, $db_host, $db_user, $db_passwd, $dump_file = NULL) {
-    $mycnf = sprintf('[client]
-host=%s
-user=%s
-password="%s"
-port=%s
-', $db_host, $db_user, $db_passwd, $this->server->db_port);
-
-    $stdin_spec = (!is_null($dump_file)) ? array("file", $dump_file, "r") : array("pipe", "r");
-
-    $descriptorspec = array(
-      0 => $stdin_spec,
-      1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
-      2 => array("pipe", "w"),  // stderr is a file to write to
-      3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials
-    );
+    $mycnf = $this->generate_mycnf($db_host, $db_user, $db_passwd);
+    $descriptorspec = $this->generate_descriptorspec($dump_file);
     $pipes = array();
     $process = proc_open($cmd, $descriptorspec, $pipes);
     $this->safe_shell_exec_output = '';

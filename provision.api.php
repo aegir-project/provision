@@ -269,3 +269,13 @@ function hook_provision_deploy_options_alter(&$deploy_options, $context) {
     $deploy_options['s3_backup_name'] = $bucket;
   }
 }
+
+/**
+ * Alter the array of regexes used to filter mysqldumps.
+ *
+ * @param $regexes
+ *   An array of patterns to match (keys) and replacement patterns (values).
+ *   Setting a value to FALSE will omit the line entirely from the database
+ *   dump.
+ */
+function hook_provision_mysql_regex_alter(&$regexes) {}
