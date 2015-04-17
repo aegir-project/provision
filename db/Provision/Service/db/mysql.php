@@ -119,25 +119,37 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
     }
   }
 
-  function generate_dump() {
-    // Aet the umask to 077 so that the dump itself is generated so it's
-    // non-readable by the webserver.
-    umask(0077);
-    // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
-    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 --single-transaction --quick --no-autocommit %s", escapeshellcmd(drush_get_option('db_name')));
+  function generate_mycnf($db_host = NULL, $db_user = NULL, $db_passwd = NULL, $db_host = NULL) {
+    // Look up defaults, if no credentials are provided.
+    if (is_null($db_host) {
+      $db_host = drush_get_option('db_host');
+    }
+    if (is_null($db_user) {
+      $db_user = urldecode(drush_get_option('db_user'));
+    }
+    if (is_null($db_passwd) {
+      $db_passwd = urldecode(drush_get_option('db_passwd'));
+    }
+    if (is_null($db_port) {
+      $db_port = $this->server->db_port;
+    }
 
-    $db_host = drush_get_option('db_host');
-    $db_user = urldecode(drush_get_option('db_user'));
-    $db_passwd = urldecode(drush_get_option('db_passwd'));
-
-    // duplicate safe_shell_exec() because we want to replace the output
-    // inline
     $mycnf = sprintf('[client]
 host=%s
 user=%s
 password="%s"
 port=%s
 ', $db_host, $db_user, $db_passwd, $this->server->db_port);
+
+    return $mycnf;
+  }
+
+  function generate_dump() {
+    // Set the umask to 077 so that the dump itself is generated so it's
+    // non-readable by the webserver.
+    umask(0077);
+    // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
+    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 --single-transaction --quick --no-autocommit %s", escapeshellcmd(drush_get_option('db_name')));
 
     // fail if db file already exists
     $dump_file = fopen(d()->site_path . '/database.sql', 'x');
@@ -154,7 +166,7 @@ port=%s
       );
       $process = proc_open($cmd, $descriptorspec, $pipes);
       if (is_resource($process)) {
-        fwrite($pipes[3], $mycnf);
+        fwrite($pipes[3], $this->generate_mycnf());
         fclose($pipes[3]);
 
         // okay, at this point we have opened a pipe to that mysqldump
@@ -213,22 +225,15 @@ port=%s
    * create conflicts in parallel runs)
    *
    * XXX: this needs to be refactored so it:
-   *  - works even if /dev/fd/3 doesn't exit
+   *  - works even if /dev/fd/3 doesn't exist
    *  - has a meaningful name (we're talking about reading and writing
    * dumps here, really, or at least call mysql and mysqldump, not
    * just any command)
    *  - can be pushed upstream to drush (http://drupal.org/node/671906)
    */
   function safe_shell_exec($cmd, $db_host, $db_user, $db_passwd, $dump_file = NULL) {
-    $mycnf = sprintf('[client]
-host=%s
-user=%s
-password="%s"
-port=%s
-', $db_host, $db_user, $db_passwd, $this->server->db_port);
-
+    $mycnf = $this->generate_mycnf($db_host, $db_user, $db_passwd);
     $stdin_spec = (!is_null($dump_file)) ? array("file", $dump_file, "r") : array("pipe", "r");
-
     $descriptorspec = array(
       0 => $stdin_spec,
       1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
