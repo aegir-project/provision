@@ -163,23 +163,36 @@ port=%s
     return $descriptorspec;
   }
 
-  function filter_line(&$line) {
-    $regexes = array(
-      // remove DEFINER entries
-      // XXX: this should be anchored at ^
-      // original sed regex: /\\*!50013 DEFINER=.*/d
-      '#/\\*!50013 DEFINER=.*/#' => FALSE,
-      // remove another kind of DEFINER line
-      // original sed regex: s|/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/||g
-      // XXX: should also be anchored
-      // XXX: why the hell is there *another* DEFINER regex here?!
-      '#/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/#' => '',
-      // remove broken CREATE ALGORITHM entries
-      // original sed regex: s|/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/|/\\*!50001 CREATE \\*/|g
-      // XXX: should also be anchored
-      '#/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/#' => '/\\*!50001 CREATE \\*/',
-    );
+  /**
+   * Return an array of regexes to filter lines of mysqldumps.
+   */
+  function get_regexes() {
+    static $regexes = NULL;
+    if (is_null($regexes)) {
+      $regexes = array(
+        // remove DEFINER entries
+        // XXX: this should be anchored at ^
+        // original sed regex: /\\*!50013 DEFINER=.*/d
+        '#/\\*!50013 DEFINER=.*/#' => FALSE,
+        // remove another kind of DEFINER line
+        // original sed regex: s|/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/||g
+        // XXX: should also be anchored
+        // XXX: why the hell is there *another* DEFINER regex here?!
+        '#/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/#' => '',
+        // remove broken CREATE ALGORITHM entries
+        // original sed regex: s|/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/|/\\*!50001 CREATE \\*/|g
+        // XXX: should also be anchored
+        '#/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/#' => '/\\*!50001 CREATE \\*/',
+      );
 
+      // Allow regexes to be altered or appended to.
+      drush_command_invoke_all_ref('provision_mysql_regex_alter', $regexes);
+    }
+    return $regexes;
+  }
+
+  function filter_line(&$line) {
+    $regexes = $this->get_regexes();
     foreach ($regexes as $find => $replace) {
       if ($replace === FALSE) {
         if (preg_match($find, $line)) {

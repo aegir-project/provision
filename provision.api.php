@@ -251,3 +251,14 @@ function hook_provision_drupal_chmod_not_recursive_directories_alter($chmod_not_
 function hook_provision_drupal_install_settings_alter(&$settings, $url) {
   $settings['forms']['install_configure_form']['update_status_module'] = array();
 }
+
+
+/**
+ * Alter the array of regexes used to filter mysqldumps.
+ *
+ * @param $regexes
+ *   An array of patterns to match (keys) and replacement patterns (values).
+ *   Setting a value to FALSE will omit the line entirely from the database
+ *   dump.
+ */
+function hook_provision_mysql_regex_alter(&$regexes) {}
