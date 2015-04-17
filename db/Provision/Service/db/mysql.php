@@ -148,6 +148,21 @@ port=%s
     return $mycnf;
   }
 
+  /**
+   * Generate the descriptors necessary to open a process with readable and
+   * writeable pipes.
+   */
+  function generate_descriptorspec($stdin_file = NULL) {
+    $stdin_spec = is_null($stdin_file) ? array("pipe", "r") : array("file", $stdin_file, "r");
+    $descriptorspec = array(
+      0 => $stdin_spec,         // stdin is a pipe that the child will read from
+      1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+      2 => array("pipe", "w"),  // stderr is a file to write to
+      3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials
+    );
+    return $descriptorspec;
+  }
+
   function generate_dump() {
     // Set the umask to 077 so that the dump itself is generated so it's
     // non-readable by the webserver.
@@ -162,12 +177,7 @@ port=%s
     }
     else {
       $pipes = array();
-      $descriptorspec = array(
-        0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
-        1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
-        2 => array("pipe", "w"),  // stderr is a file to write to
-        3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials
-      );
+      $descriptorspec = $this->generate_descriptorspec();
       $process = proc_open($cmd, $descriptorspec, $pipes);
       if (is_resource($process)) {
         fwrite($pipes[3], $this->generate_mycnf());
@@ -237,13 +247,7 @@ port=%s
    */
   function safe_shell_exec($cmd, $db_host, $db_user, $db_passwd, $dump_file = NULL) {
     $mycnf = $this->generate_mycnf($db_host, $db_user, $db_passwd);
-    $stdin_spec = (!is_null($dump_file)) ? array("file", $dump_file, "r") : array("pipe", "r");
-    $descriptorspec = array(
-      0 => $stdin_spec,
-      1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
-      2 => array("pipe", "w"),  // stderr is a file to write to
-      3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials
-    );
+    $descriptorspec = $this->generate_descriptorspec($dump_file);
     $pipes = array();
     $process = proc_open($cmd, $descriptorspec, $pipes);
     $this->safe_shell_exec_output = '';
