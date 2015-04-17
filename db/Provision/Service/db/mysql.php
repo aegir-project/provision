@@ -128,7 +128,7 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
 
     $db_host = drush_get_option('db_host');
     $db_user = urldecode(drush_get_option('db_user'));
-    $db_passwd = urldecode(drush_get_option('db_passwd')));
+    $db_passwd = urldecode(drush_get_option('db_passwd'));
 
     // duplicate safe_shell_exec() because we want to replace the output
     // inline
@@ -139,13 +139,19 @@ password="%s"
 port=%s
 ', $db_host, $db_user, $db_passwd, $this->server->db_port);
 
-
     // fail if db file already exists
-    $dumpfile = fopen(d()->site_path . '/database.sql', 'x');
+    $dump_file = fopen(d()->site_path . '/database.sql', 'x');
     if ($dump_file === FALSE) {
       drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump'));
     }
     else {
+      $pipes = array();
+      $descriptorspec = array(
+        0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
+        1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+        2 => array("pipe", "w"),  // stderr is a file to write to
+        3 => array("pipe", "r"),  // fd3 is our special file descriptor where we pass credentials
+      );
       $process = proc_open($cmd, $descriptorspec, $pipes);
       if (is_resource($process)) {
         fwrite($pipes[3], $mycnf);
@@ -175,7 +181,7 @@ port=%s
           // XXX: should also be anchored
           $buffer = preg_replace('#/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/#', '/\\*!50001 CREATE \\*/', $buffer);
           // write the resulting line in the backup file
-          if (fwrite($dumpfile, $buffer) === FALSE) {
+          if (fwrite($dump_file, $buffer) === FALSE) {
             drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump'));
           }
         }
@@ -194,8 +200,8 @@ port=%s
     }
 
     $dump_size_too_small = filesize(d()->site_path . '/database.sql') < 1024;
-    if ((!$success || $dump_size_too_small) && !drush_get_option('force', FALSE)) {
-      drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not generate database backup from mysqldump. (error: %msg)', array('%msg' => $this->safe_shell_exec_output)));
+    if (($dump_size_too_small) && !drush_get_option('force', FALSE)) {
+      drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not generate database backup from mysqldump. (error: %msg)', array('%msg' => $err)));
     }
     // Reset the umask to normal permissions.
     umask(0022);
