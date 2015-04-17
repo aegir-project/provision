@@ -119,18 +119,22 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
     }
   }
 
+  /**
+   * Generate the contents of a mysql config file containing database
+   * credentials.
+   */
   function generate_mycnf($db_host = NULL, $db_user = NULL, $db_passwd = NULL, $db_host = NULL) {
     // Look up defaults, if no credentials are provided.
-    if (is_null($db_host) {
+    if (is_null($db_host)) {
       $db_host = drush_get_option('db_host');
     }
-    if (is_null($db_user) {
+    if (is_null($db_user)) {
       $db_user = urldecode(drush_get_option('db_user'));
     }
-    if (is_null($db_passwd) {
+    if (is_null($db_passwd)) {
       $db_passwd = urldecode(drush_get_option('db_passwd'));
     }
-    if (is_null($db_port) {
+    if (is_null($db_port)) {
       $db_port = $this->server->db_port;
     }
 
