@@ -208,14 +208,17 @@ port=%s
     }
   }
 
+  /**
+   * Generate a mysqldump for use in backups.
+   */
   function generate_dump() {
-    // Set the umask to 077 so that the dump itself is generated so it's
-    // non-readable by the webserver.
+    // Set the umask to 077 so that the dump itself is non-readable by the
+    // webserver.
     umask(0077);
     // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
     $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 --single-transaction --quick --no-autocommit %s", escapeshellcmd(drush_get_option('db_name')));
 
-    // fail if db file already exists
+    // Fail if db file already exists.
     $dump_file = fopen(d()->site_path . '/database.sql', 'x');
     if ($dump_file === FALSE) {
       drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump'));
@@ -228,21 +231,20 @@ port=%s
         fwrite($pipes[3], $this->generate_mycnf());
         fclose($pipes[3]);
 
-        // okay, at this point we have opened a pipe to that mysqldump
-        // command, now we want to read it one line at a time and do our
-        // replacement
-        while (($buffer = fgets($pipes[1], 4096)) !== false) {
+        // At this point we have opened a pipe to that mysqldump command. Now
+        // we want to read it one line at a time and do our replacements.
+        while (($buffer = fgets($pipes[1], 4096)) !== FALSE) {
           $this->filter_line($buffer);
-          // write the resulting line in the backup file
+          // Write the resulting line in the backup file.
           if ($buffer && fwrite($dump_file, $buffer) === FALSE) {
             drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump'));
           }
         }
-        // close stdout
+        // Close stdout.
         fclose($pipes[1]);
-        // catch errors returned by mysqldump
+        // Catch errors returned by mysqldump.
         $err = fread($pipes[2], 4096);
-        // close stderr as well
+        // Close stderr as well.
         fclose($pipes[2]);
         if (proc_close($process) != 0) {
           drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump (error: %msg)', array('%msg' => $err)));
