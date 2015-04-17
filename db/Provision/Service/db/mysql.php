@@ -163,6 +163,45 @@ port=%s
     return $descriptorspec;
   }
 
+  function filter_line(&$line) {
+    $regexes = array(
+      // remove DEFINER entries
+      // XXX: this should be anchored at ^
+      // original sed regex: /\\*!50013 DEFINER=.*/d
+      '#/\\*!50013 DEFINER=.*/#' => FALSE,
+      // remove another kind of DEFINER line
+      // original sed regex: s|/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/||g
+      // XXX: should also be anchored
+      // XXX: why the hell is there *another* DEFINER regex here?!
+      '#/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/#' => '',
+      // remove broken CREATE ALGORITHM entries
+      // original sed regex: s|/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/|/\\*!50001 CREATE \\*/|g
+      // XXX: should also be anchored
+      '#/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/#' => '/\\*!50001 CREATE \\*/',
+    );
+
+    foreach ($regexes as $find => $replace) {
+      if ($replace === FALSE) {
+        if (preg_match($find, $line)) {
+          // Remove this line entirely.
+          $line = FALSE;
+        }
+      }
+      else {
+        $line = preg_replace($find, $replace, $line);
+        if (is_null($line)) {
+          // preg exploded in our face, oops.
+          drush_set_error('PROVISION_BACKUP_FAILED', dt(
+            "Error while running regular expression:\n Pattern: !find\n Replacement: !replace",
+            array(
+              '!find' => $find,
+              '!replace' => $replace,
+          )));
+        }
+      }
+    }
+  }
+
   function generate_dump() {
     // Set the umask to 077 so that the dump itself is generated so it's
     // non-readable by the webserver.
@@ -187,27 +226,9 @@ port=%s
         // command, now we want to read it one line at a time and do our
         // replacement
         while (($buffer = fgets($pipes[1], 4096)) !== false) {
-          // remove DEFINER entries
-          // XXX: this should be anchored at ^
-          // original sed regex: /\\*!50013 DEFINER=.*/d
-          if (preg_match('#/\\*!50013 DEFINER=.*/#', $buffer)) {
-            continue;
-          }
-          // remove another kind of DEFINER line
-          // original sed regex: s|/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/||g
-          // XXX: should also be anchored
-          // XXX: why the hell is there *another* DEFINER regex here?!
-          $buffer = preg_replace('#/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/#', '', $buffer);
-          if (is_null($buffer)) {
-            // preg exploded in our face, oops.
-            drush_set_error('PROVISION_BACKUP_FAILED', dt('Error while running regular expression'));
-          }
-          // remove broken CREATE ALGORITHM entries
-          // original sed regex: s|/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/|/\\*!50001 CREATE \\*/|g
-          // XXX: should also be anchored
-          $buffer = preg_replace('#/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/#', '/\\*!50001 CREATE \\*/', $buffer);
+          $this->filter_line($buffer);
           // write the resulting line in the backup file
-          if (fwrite($dump_file, $buffer) === FALSE) {
+          if ($buffer && fwrite($dump_file, $buffer) === FALSE) {
             drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump'));
           }
         }
