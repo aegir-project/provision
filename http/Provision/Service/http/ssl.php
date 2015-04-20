@@ -31,6 +31,8 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
     // SSL certificate store for this server.
     // This server's certificates will be stored here.
     $this->server->http_ssld_path = "{$this->server->config_path}/ssl.d";
+    $this->server->ssl_enabled = 1;
+    $this->server->ssl_key = 'default';
   }
 
   function init_site() {
@@ -45,6 +47,13 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
   function config_data($config = NULL, $class = NULL) {
     $data = parent::config_data($config, $class);
     $data['http_ssl_port'] = $this->server->http_ssl_port;
+
+    if ($config == 'server') {
+      // Generate a certificate for the default SSL vhost, and retrieve the
+      // path to the cert and key files. It will be generated if not found.
+      $certs = $this->get_certificates('default');
+      $data = array_merge($data, $certs);
+    }
 
     if ($config == 'site' && $this->context->ssl_enabled) {
       foreach ($this->context->ip_addresses as $server => $ip_address) {
@@ -141,7 +150,8 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
         || drush_set_error('SSL_KEY_GEN_FAIL', dt('failed to generate SSL key in %path', array('%path' => $path . '/openssl.key')));
 
       // Generate the CSR to make the key certifiable by third parties
-      $ident = "/CN={$this->context->uri}/emailAddress=abuse@{$this->context->uri}";
+      $domain = $ssl_key == 'default' ? 'default.invalid' : $this->context->uri;
+      $ident = "/CN={$domain}/emailAddress=abuse@{$domain}";
       drush_shell_exec("openssl req -new -subj '%s' -key %s/openssl.key -out %s/openssl.csr -batch", $ident, $path, $path)
         || drush_log(dt('failed to generate signing request for certificate in %path', array('%path' => $path . '/openssl.csr')));
 
