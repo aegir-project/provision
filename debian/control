@@ -11,7 +11,7 @@ Vcs-browser: http://drupalcode.org/project/provision.git
 
 Package: aegir3-provision
 Architecture: all
-Depends: ${misc:Depends}, php5-cli (>= 5.3), php5-mysql, mysql-client | mariadb-client, sudo, postfix | mail-transport-agent, apache2 | nginx, adduser, ucf
+Depends: ${misc:Depends}, php5-cli (>= 5.3), php5-mysql, mysql-client | mariadb-client, sudo, postfix | mail-transport-agent, apache2 | nginx, adduser, ucf, curl
 Recommends: mysql-server | mariadb-server, rsync
 Conflicts: aegir-provision, aegir-provision2, aegir2-provision
 Replaces: aegir-provision, aegir-provision2, aegir2-provision
