@@ -119,17 +119,13 @@ if (isset($_SERVER['db_name'])) {
   * settings are used there. Settings defined here should not be
   * duplicated there so as to avoid conflict issues.
   */
-  @ini_set('arg_separator.output',     '&amp;');
-  @ini_set('magic_quotes_runtime',     0);
-  @ini_set('magic_quotes_sybase',      0);
-  @ini_set('session.cache_expire',     200000);
-  @ini_set('session.cache_limiter',    'none');
-  @ini_set('session.cookie_lifetime',  0);
-  @ini_set('session.gc_maxlifetime',   200000);
-  @ini_set('session.save_handler',     'user');
-  @ini_set('session.use_only_cookies', 1);
-  @ini_set('session.use_trans_sid',    0);
-  @ini_set('url_rewriter.tags',        '');
+  ini_set('magic_quotes_runtime',     '0');
+  ini_set('magic_quotes_sybase',      '0');
+  ini_set('session.cache_limiter',     '');
+  ini_set('session.cookie_httponly',  '1');
+  ini_set('session.use_cookies',      '1');
+  ini_set('session.use_only_cookies', '1');
+  ini_set('session.use_trans_sid',    '0');
 
   /**
   * Set the umask so that new directories created by Drupal have the correct permissions
