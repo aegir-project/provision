@@ -210,11 +210,11 @@ port=%s
     if (is_null($regexes)) {
       $regexes = array(
         // remove DEFINER entries
-        '#/^\\*!50013 DEFINER=.*/#' => FALSE,
+        '#^/\\*!50013 DEFINER=.*/#' => FALSE,
         // remove another kind of DEFINER line
-        '#/^\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/#' => '',
+        '#^/\\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\\*/#' => '',
         // remove broken CREATE ALGORITHM entries
-        '#/^\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/#' => '/\\*!50001 CREATE \\*/',
+        '#^/\\*!50001 CREATE ALGORITHM=UNDEFINED \\*/#' => '/\\*!50001 CREATE \\*/',
       );
 
       // Allow regexes to be altered or appended to.
