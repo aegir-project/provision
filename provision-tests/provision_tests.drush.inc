@@ -25,7 +25,7 @@ function provision_tests_drush_command() {
       'hosting',
     ),
     'options' => array(
-      'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+      'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
     ),
   );
   $items['provision-tests-new-run'] = array(
@@ -37,7 +37,7 @@ function provision_tests_drush_command() {
       'hosting',
     ),
     'options' => array(
-      'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+      'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
     ),
   );
   $items['provision-demo-content'] = array(
@@ -49,7 +49,7 @@ function provision_tests_drush_command() {
       'hosting',
     ),
     'options' => array(
-      'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+      'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
     ),
   );
 
@@ -67,9 +67,13 @@ function drush_provision_tests_run() {
   $queue_status_initial = variable_get('hosting_queue_tasks_enabled', '0');
   variable_set('hosting_queue_tasks_enabled', '0');
   $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
-  if ($lock_wait === 0 || !lock_wait('hosting_tasks_running', $lock_wait)) {
-    drush_log('Acquiring lock on task queue.');
-    if (!lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+  if (!lock_wait('hosting_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
+    if (lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+      drush_log('Acquired lock on task queue.');
+    elseif (drush_get_option('force', FALSE)) {
+      drush_log('Bypassing lock on task queue.', 'warning');
+    }
+    else {
       drush_die(dt('Cannot acquire lock on task queue.'));
     }
   }
@@ -142,8 +146,13 @@ function drush_provision_tests_new_run() {
   variable_set('hosting_queue_tasks_enabled', '0');
   drush_log('Acquiring tasks lock.');
   $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
-  if ($lock_wait === 0 || !lock_wait('hosting_tasks_running', $lock_wait)) {
-    if (!lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+  if (!lock_wait('hosting_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
+    if (lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+      drush_log('Acquired lock on task queue.');
+    elseif (drush_get_option('force', FALSE)) {
+      drush_log('Bypassing lock on task queue.', 'warning');
+    }
+    else {
       drush_die(dt('Cannot acquire lock on task queue.'));
     }
   }
@@ -200,8 +209,13 @@ function drush_provision_tests_provision_demo_content() {
   variable_set('hosting_queue_tasks_enabled', '0');
   drush_log('Acquiring tasks lock.');
   $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
-  if ($lock_wait === 0 || !lock_wait('hosting_tasks_running', $lock_wait)) {
-    if (!lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+  if (!lock_wait('hosting_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
+    if (lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+      drush_log('Acquired lock on task queue.');
+    elseif (drush_get_option('force', FALSE)) {
+      drush_log('Bypassing lock on task queue.', 'warning');
+    }
+    else {
       drush_die(dt('Cannot acquire lock on task queue.'));
     }
   }
