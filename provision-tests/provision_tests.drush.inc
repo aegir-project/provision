@@ -70,6 +70,7 @@ function drush_provision_tests_run() {
   if (!lock_wait('hosting_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
     if (lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
       drush_log('Acquired lock on task queue.');
+    }
     elseif (drush_get_option('force', FALSE)) {
       drush_log('Bypassing lock on task queue.', 'warning');
     }
@@ -149,6 +150,7 @@ function drush_provision_tests_new_run() {
   if (!lock_wait('hosting_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
     if (lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
       drush_log('Acquired lock on task queue.');
+    }
     elseif (drush_get_option('force', FALSE)) {
       drush_log('Bypassing lock on task queue.', 'warning');
     }
@@ -212,6 +214,7 @@ function drush_provision_tests_provision_demo_content() {
   if (!lock_wait('hosting_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
     if (lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
       drush_log('Acquired lock on task queue.');
+    }
     elseif (drush_get_option('force', FALSE)) {
       drush_log('Bypassing lock on task queue.', 'warning');
     }
