@@ -67,8 +67,8 @@ function drush_provision_tests_run() {
   $queue_status_initial = variable_get('hosting_queue_tasks_enabled', '0');
   variable_set('hosting_queue_tasks_enabled', '0');
   $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
-  if (!lock_wait('hosting_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
-    if (lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+  if (!lock_wait('hosting_queue_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
+    if (lock_acquire('hosting_queue_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
       drush_log('Acquired lock on task queue.');
     }
     elseif (drush_get_option('force', FALSE)) {
@@ -123,7 +123,7 @@ function drush_provision_tests_run() {
   // Restore the tasks queue status:
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
   drush_log(dt('Releasing lock on task queue.'));
-  lock_release('hosting_tasks_running');
+  lock_release('hosting_queue_tasks_running');
 
   if (drush_get_error() != DRUSH_SUCCESS) {
     drush_set_error(drush_get_error(), 'Running tests failed');
@@ -147,8 +147,8 @@ function drush_provision_tests_new_run() {
   variable_set('hosting_queue_tasks_enabled', '0');
   drush_log('Acquiring tasks lock.');
   $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
-  if (!lock_wait('hosting_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
-    if (lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+  if (!lock_wait('hosting_queue_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
+    if (lock_acquire('hosting_queue_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
       drush_log('Acquired lock on task queue.');
     }
     elseif (drush_get_option('force', FALSE)) {
@@ -184,7 +184,7 @@ function drush_provision_tests_new_run() {
   // Restore the tasks queue status:
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
   drush_log('Releasing tasks lock.');
-  lock_release('hosting_tasks_running');
+  lock_release('hosting_queue_tasks_running');
 
   if (drush_get_error() != DRUSH_SUCCESS) {
     drush_set_error(drush_get_error(), 'Running tests failed');
@@ -211,8 +211,8 @@ function drush_provision_tests_provision_demo_content() {
   variable_set('hosting_queue_tasks_enabled', '0');
   drush_log('Acquiring tasks lock.');
   $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
-  if (!lock_wait('hosting_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
-    if (lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+  if (!lock_wait('hosting_queue_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
+    if (lock_acquire('hosting_queue)tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
       drush_log('Acquired lock on task queue.');
     }
     elseif (drush_get_option('force', FALSE)) {
@@ -244,7 +244,7 @@ function drush_provision_tests_provision_demo_content() {
   // Restore the tasks queue status:
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
   drush_log('Releasing tasks lock.');
-  lock_release('hosting_tasks_running');
+  lock_release('hosting_queue_tasks_running');
 
   if (drush_get_error() != DRUSH_SUCCESS) {
     drush_set_error(drush_get_error(), 'Setting up demo content failed');
