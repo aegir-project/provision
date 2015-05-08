@@ -9,7 +9,8 @@
  */
 
 define('PROVISION_TESTS_BUILDS_REPO', dirname(__FILE__) . '/makes');
-define('PROVISION_TESTS_DEFAULT_LOCK_WAIT', 5);
+define('PROVISION_TESTS_DEFAULT_LOCK_WAIT', 60);
+define('PROVISION_TESTS_LOCK_TIMEOUT', 3600);
 
 /**
  * Implementation of hook_drush_command().
@@ -24,7 +25,7 @@ function provision_tests_drush_command() {
       'hosting',
     ),
     'options' => array(
-      'lock-wait' => dt('Time to wait between attempts to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+      'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
     ),
   );
   $items['provision-tests-new-run'] = array(
@@ -36,7 +37,7 @@ function provision_tests_drush_command() {
       'hosting',
     ),
     'options' => array(
-      'lock-wait' => dt('Time to wait between attempts to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+      'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
     ),
   );
   $items['provision-demo-content'] = array(
@@ -48,7 +49,7 @@ function provision_tests_drush_command() {
       'hosting',
     ),
     'options' => array(
-      'lock-wait' => dt('Time to wait between attempts to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+      'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
     ),
   );
 
@@ -69,13 +70,9 @@ function drush_provision_tests_run() {
 
   drush_log('Acquiring tasks lock.');
   $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
-  while (!lock_acquire('hosting_tasks_running', 3600)) {
-    if ($lock_wait === 0) {
+  if (!lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+    if ($lock_wait === 0 || lock_wait('hosting_tasks_running', $lock_wait)) {
       drush_die(dt('Cannot acquire lock on task queue.'));
-    }
-    else {
-      drush_log(dt('Cannot acquire lock on task queue. Retrying in :wait seconds.', array(':wait'=> $lock_wait)), 'warning');
-      sleep($lock_wait);
     }
   }
 
@@ -145,13 +142,9 @@ function drush_provision_tests_new_run() {
   variable_set('hosting_queue_tasks_enabled', '0');
   drush_log('Acquiring tasks lock.');
   $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
-  while (!lock_acquire('hosting_tasks_running', 3600)) {
-    if ($lock_wait === 0) {
+  if (!lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+    if ($lock_wait === 0 || lock_wait('hosting_tasks_running', $lock_wait)) {
       drush_die(dt('Cannot acquire lock on task queue.'));
-    }
-    else {
-      drush_log(dt('Cannot acquire lock on task queue. Retrying in :wait seconds.', array(':wait'=> $lock_wait)), 'warning');
-      sleep($lock_wait);
     }
   }
 
@@ -204,13 +197,9 @@ function drush_provision_tests_provision_demo_content() {
   variable_set('hosting_queue_tasks_enabled', '0');
   drush_log('Acquiring tasks lock.');
   $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
-  while (!lock_acquire('hosting_tasks_running', 3600)) {
-    if ($lock_wait === 0) {
+  if (!lock_acquire('hosting_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+    if ($lock_wait === 0 || lock_wait('hosting_tasks_running', $lock_wait)) {
       drush_die(dt('Cannot acquire lock on task queue.'));
-    }
-    else {
-      drush_log(dt('Cannot acquire lock on task queue. Retrying in :wait seconds.', array(':wait'=> $lock_wait)), 'warning');
-      sleep($lock_wait);
     }
   }
 
