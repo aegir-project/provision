@@ -9,6 +9,7 @@
  */
 
 define('PROVISION_TESTS_BUILDS_REPO', dirname(__FILE__) . '/makes');
+define('PROVISION_TESTS_DEFAULT_LOCK_WAIT', 5);
 
 /**
  * Implementation of hook_drush_command().
@@ -22,6 +23,9 @@ function provision_tests_drush_command() {
     'drupal dependencies' => array(
       'hosting',
     ),
+    'options' => array(
+      'lock-wait' => dt('Time to wait between attempts to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+    ),
   );
   $items['provision-tests-new-run'] = array(
     'description' => dt('Runs NEW provision tests'),
@@ -31,6 +35,9 @@ function provision_tests_drush_command() {
     'drupal dependencies' => array(
       'hosting',
     ),
+    'options' => array(
+      'lock-wait' => dt('Time to wait between attempts to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+    ),
   );
   $items['provision-demo-content'] = array(
     'description' => dt('Setup some demo content on a fresh Aegir install'),
@@ -39,6 +46,9 @@ function provision_tests_drush_command() {
     // run the tests correctly
     'drupal dependencies' => array(
       'hosting',
+    ),
+    'options' => array(
+      'lock-wait' => dt('Time to wait between attempts to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
     ),
   );
 
@@ -56,6 +66,18 @@ function drush_provision_tests_run() {
   // Disable the tasks queue, we run them manually instead.
   $queue_status_initial = variable_get('hosting_queue_tasks_enabled', '0');
   variable_set('hosting_queue_tasks_enabled', '0');
+
+  drush_log('Acquiring tasks lock.');
+  $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
+  while (!lock_acquire('hosting_tasks_running', 3600)) {
+    if ($lock_wait === 0) {
+      drush_die(dt('Cannot acquire lock on task queue.'));
+    }
+    else {
+      drush_log(dt('Cannot acquire lock on task queue. Retrying in :wait seconds.', array(':wait'=> $lock_wait)), 'warning');
+      sleep($lock_wait);
+    }
+  }
 
   drush_provision_tests_install_platform('drupal6');
   drush_provision_tests_install_platform('drupal7');
@@ -98,6 +120,8 @@ function drush_provision_tests_run() {
 
   // Restore the tasks queue status:
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
+  drush_log('Releasing tasks lock.');
+  lock_release('hosting_tasks_running');
 
   if (drush_get_error() != DRUSH_SUCCESS) {
     drush_set_error(drush_get_error(), 'Running tests failed');
@@ -119,6 +143,17 @@ function drush_provision_tests_new_run() {
   // Disable the tasks queue, we run them manually instead.
   $queue_status_initial = variable_get('hosting_queue_tasks_enabled', '0');
   variable_set('hosting_queue_tasks_enabled', '0');
+  drush_log('Acquiring tasks lock.');
+  $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
+  while (!lock_acquire('hosting_tasks_running', 3600)) {
+    if ($lock_wait === 0) {
+      drush_die(dt('Cannot acquire lock on task queue.'));
+    }
+    else {
+      drush_log(dt('Cannot acquire lock on task queue. Retrying in :wait seconds.', array(':wait'=> $lock_wait)), 'warning');
+      sleep($lock_wait);
+    }
+  }
 
   // 'Stable' D8 e.g. latest (beta) release.
   drush_provision_tests_install_platform('drupal8');
@@ -141,6 +176,8 @@ function drush_provision_tests_new_run() {
 
   // Restore the tasks queue status:
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
+  drush_log('Releasing tasks lock.');
+  lock_release('hosting_tasks_running');
 
   if (drush_get_error() != DRUSH_SUCCESS) {
     drush_set_error(drush_get_error(), 'Running tests failed');
@@ -165,6 +202,17 @@ function drush_provision_tests_provision_demo_content() {
   // Disable the tasks queue, we run them manually instead.
   $queue_status_initial = variable_get('hosting_queue_tasks_enabled', '0');
   variable_set('hosting_queue_tasks_enabled', '0');
+  drush_log('Acquiring tasks lock.');
+  $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
+  while (!lock_acquire('hosting_tasks_running', 3600)) {
+    if ($lock_wait === 0) {
+      drush_die(dt('Cannot acquire lock on task queue.'));
+    }
+    else {
+      drush_log(dt('Cannot acquire lock on task queue. Retrying in :wait seconds.', array(':wait'=> $lock_wait)), 'warning');
+      sleep($lock_wait);
+    }
+  }
 
   // Start with D8 as it needs the most work/testing.
   drush_provision_tests_install_platform('drupal8');
@@ -183,6 +231,8 @@ function drush_provision_tests_provision_demo_content() {
 
   // Restore the tasks queue status:
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
+  drush_log('Releasing tasks lock.');
+  lock_release('hosting_tasks_running');
 
   if (drush_get_error() != DRUSH_SUCCESS) {
     drush_set_error(drush_get_error(), 'Setting up demo content failed');
