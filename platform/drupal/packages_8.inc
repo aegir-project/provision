@@ -39,7 +39,6 @@ function _provision_drupal_find_themes($scope, $key = '') {
         $files[$name]->template = TRUE;
       }
     }
-    _provision_cvs_deploy($files[$name]);
   }
   return $files;
 }
@@ -50,7 +49,6 @@ function _provision_drupal_find_themes($scope, $key = '') {
 function _provision_drupal_system_map() {
   $profiles = _provision_find_profiles();
   foreach ($profiles as $profile => $info) {
-    _provision_cvs_deploy($info);
     if (!$info->version) {
       $info->version = drush_drupal_version();
     }
@@ -82,7 +80,6 @@ function _provision_system_query($type) {
       $packages->platform = -1;
     }
 
-    /*_provision_cvs_deploy($module);*/
     $package->filename = realpath($package->filename);
 
     if ($type == 'module') {

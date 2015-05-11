@@ -398,8 +398,6 @@ function _provision_find_profiles() {
       $profile->name = $name;
       $profile->filename = $file;
 
-      _provision_cvs_deploy($profile);
-
       $profile->info = array();
 
       if (drush_drupal_major_version() >= 8) {
@@ -477,23 +475,6 @@ function provision_drupal_find_sites() {
     $sites = FALSE;
   }
   return $sites;
-}
-
-function _provision_drupal_get_cvs_versions($files) {
-  foreach ($files as $modulename => $file) {
-      $project = array();
-      $project['filename'] = $file->filename;
-      $project['name'] = $file->name;
-      $file->info['description'] = str_replace("\n", "", $file->info['description']);
-      if (!isset($project['project'])) {
-        $project['project'] = cvs_deploy_get_project_name($project);
-      }
-      _cvs_deploy_version_alter($file->info['version'], $project);
-      $name = !empty($project['project']) ? $project['project'] : $modulename;
-      $files[$name] = $file;
-  }
-
-  return $files;
 }
 
 /**
@@ -580,8 +561,6 @@ function _provision_drupal_delete_aliases() {
   }
 }
 
-require_once(dirname(__FILE__) . '/cvs_deploy.inc');
-
 function provision_find_packages() {
   // Load the version specific include files.
   drush_include_engine('drupal', 'packages', drush_drupal_major_version());
@@ -599,7 +578,6 @@ function provision_find_packages() {
 
   // Iterate through the install profiles, finding the profile specific packages
   foreach ($profiles as $profile => $info) {
-    _provision_cvs_deploy($info);
     if (!$info->version) {
       $info->version = drush_drupal_version();
     }
@@ -717,7 +695,6 @@ function _provision_drupal_find_modules($scope, $key = '') {
       }
     }
     $files[$name]->schema_version = $schema_version;
-    _provision_cvs_deploy($files[$name]);
   }
   return $files;
 }
