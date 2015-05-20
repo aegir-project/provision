@@ -1,4 +1,4 @@
 name=Provision
 description="Aegir backend"
 
-version=7.x-3.x
+version=7.x-3.0-beta2
