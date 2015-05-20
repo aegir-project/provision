@@ -1,3 +1,9 @@
+aegir2-provision (2.4) unstable; urgency=medium
+
+  * Fix protection of files dir for multi-site.
+
+ -- Herman van Rink <helmo@initfour.nl>  Wed, 20 May 2015 20:30:12 +0200
+
 aegir2-provision (2.3) unstable; urgency=medium
 
   * The contrib modules shipped with the 2.2 release had not been updated.
