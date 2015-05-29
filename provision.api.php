@@ -276,6 +276,15 @@ function hook_provision_deploy_options_alter(&$deploy_options, $context) {
  * @param $regexes
  *   An array of patterns to match (keys) and replacement patterns (values).
  *   Setting a value to FALSE will omit the line entirely from the database
- *   dump.
+ *   dump. Defaults are set in Provision_Service_db_mysql::get_regexes().
  */
-function hook_provision_mysql_regex_alter(&$regexes) {}
+function hook_provision_mysql_regex_alter(&$regexes) {
+  $regexes = array(
+    // remove these lines entirely.
+    '#/\*!50013 DEFINER=.*/#' => FALSE,
+    // just remove the matched content.
+    '#/\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\*/#' => '',
+    // replace matched content as needed
+    '#/\*!50001 CREATE ALGORITHM=UNDEFINED \*/#' => '/\*!50001 CREATE \*/',
+  );
+}
