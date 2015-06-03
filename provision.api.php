@@ -285,6 +285,6 @@ function hook_provision_mysql_regex_alter(&$regexes) {
     // just remove the matched content.
     '#/\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\*/#' => '',
     // replace matched content as needed
-    '#/\*!50001 CREATE ALGORITHM=UNDEFINED \*/#' => '/\*!50001 CREATE \*/',
+    '#/\*!50001 CREATE ALGORITHM=UNDEFINED \*/#' => "/*!50001 CREATE */",
   );
 }
