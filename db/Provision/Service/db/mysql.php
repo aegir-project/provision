@@ -214,7 +214,7 @@ port=%s
         // remove another kind of DEFINER line
         '#/\*!50017 DEFINER=`[^`]*`@`[^`]*`\s*\*/#' => '',
         // remove broken CREATE ALGORITHM entries
-        '#/\*!50001 CREATE ALGORITHM=UNDEFINED \*/#' => '/\*!50001 CREATE \*/',
+        '#/\*!50001 CREATE ALGORITHM=UNDEFINED \*/#' => "/*!50001 CREATE */",
       );
 
       // Allow regexes to be altered or appended to.
