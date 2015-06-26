@@ -922,7 +922,6 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location = /<?php print $subdir; ?>/index.php {
 <?php if ($satellite_mode == 'boa'): ?>
-    internal;
     limit_conn    limreq 88;
     add_header    X-Device "$device";
     add_header    X-GeoIP-Country-Code "$geoip_country_code";
