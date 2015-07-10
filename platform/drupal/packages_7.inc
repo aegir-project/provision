@@ -124,7 +124,7 @@ function _provision_system_query($type) {
 function _provision_drupal_system_map() {
   $profiles = _provision_find_profiles();
   foreach ($profiles as $profile => $info) {
-    if (!$info->version) {
+    if (!isset($info->version)) {
       $info->version = drush_drupal_version();
     }
     $profiles[$profile] = $info;
@@ -158,6 +158,7 @@ function _provision_drupal_system_map() {
       $module->schema_version = 0;
     }
     $packages['modules'][$module->name] = $module;
+    $module->version = $module->info['version'];
   }
 
   drush_log(dt("Found !count modules", array('!count' => sizeof($packages['modules']))));
@@ -178,6 +179,7 @@ function _provision_drupal_system_map() {
     }
 
     $packages['themes'][$theme->name] = $theme;
+    $theme->version = $theme->info['version'];
   }
   drush_log(dt("Found !count themes", array('!count' => sizeof($packages['themes']))));
   return $packages;
