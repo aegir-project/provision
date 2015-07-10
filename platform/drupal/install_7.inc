@@ -74,41 +74,17 @@ function install_mail($key, &$message, $params) {
 function install_main() {
   global $profile, $install_locale, $conf, $url, $base_url;
 
-  drush_log(dt("DEBUG BACKDROP WTF CMS DRUPAL_ROOT is !this in install_main()", array('!this' => DRUPAL_ROOT)));
-
-  if (defined('DRUPAL_ROOT')) {
-    if (file_exists(DRUPAL_ROOT . '/core/includes/drupal.inc')) {
-      drush_log(dt("DEBUG BACKDROP AAA DRUPAL_ROOT is !this in install_main()", array('!this' => DRUPAL_ROOT)));
-      require_once DRUPAL_ROOT . '/core/includes/bootstrap.inc';
-      require_once DRUPAL_ROOT . '/core/includes/drupal.inc';
-      require_once DRUPAL_ROOT . '/core/includes/install.core.inc';
-      require_once DRUPAL_ROOT . '/core/includes/unicode.inc';
-      require_once DRUPAL_ROOT . '/core/modules/user/user.module';
-    }
-    else {
-      drush_log(dt("DEBUG BACKDROP BBB DRUPAL_ROOT is !this in install_main()", array('!this' => DRUPAL_ROOT)));
-      require_once DRUPAL_ROOT . '/includes/install.core.inc';
-      require_once DRUPAL_ROOT . '/includes/entity.inc';
-      require_once DRUPAL_ROOT . '/includes/unicode.inc';
-      require_once DRUPAL_ROOT . '/modules/user/user.module';
-    }
-  }
-  elseif (defined('BACKDROP_ROOT')) {
-    if (file_exists(BACKDROP_ROOT . '/core/includes/drupal.inc')) {
-      drush_log(dt("DEBUG BACKDROP CCC BACKDROP_ROOT is !this in install_main()", array('!this' => BACKDROP_ROOT)));
-      require_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
-      require_once BACKDROP_ROOT . '/core/includes/drupal.inc';
-      require_once BACKDROP_ROOT . '/core/includes/install.core.inc';
-      require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
-      require_once BACKDROP_ROOT . '/core/modules/user/user.module';
-    }
-  }
+  require_once DRUPAL_ROOT . '/includes/install.core.inc';
+  require_once DRUPAL_ROOT . '/includes/entity.inc';
+  require_once DRUPAL_ROOT . '/includes/unicode.inc';
+  require_once DRUPAL_ROOT . '/modules/user/user.module';
 
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION);
 
   // We have an existing settings.php.
 
   switch (substr(drush_core_version(), 0, 1)) {
+    case '8':
     case '7':
       $sql = drush_get_class('Drush\Sql\Sql', array(), array(drush_drupal_major_version()));
       $db_spec = $sql->get_db_spec();

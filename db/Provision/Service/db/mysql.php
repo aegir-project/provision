@@ -162,7 +162,7 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
    * Generate the contents of a mysql config file containing database
    * credentials.
    */
-  function generate_mycnf($db_host = NULL, $db_user = NULL, $db_passwd = NULL, $db_host = NULL) {
+  function generate_mycnf($db_host = NULL, $db_user = NULL, $db_passwd = NULL, $db_port = NULL) {
     // Look up defaults, if no credentials are provided.
     if (is_null($db_host)) {
       $db_host = drush_get_option('db_host');
@@ -182,7 +182,7 @@ host=%s
 user=%s
 password="%s"
 port=%s
-', $db_host, $db_user, $db_passwd, $this->server->db_port);
+', $db_host, $db_user, $db_passwd, $db_port);
 
     return $mycnf;
   }

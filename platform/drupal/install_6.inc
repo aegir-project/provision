@@ -199,7 +199,7 @@ function install_main() {
   if ($severity == REQUIREMENT_ERROR) {
     foreach ($requirements as $requirement) {
       if (isset($requirement['severity']) && $requirement['severity'] == REQUIREMENT_ERROR) {
-        drupal_set_message($requirement['description'] .' ('. st('Currently using !item !version', array('!item' => $requirement['title'], '!version' => $requirement['value'])) .')', 'error');
+        drush_log($requirement['description'] .' ('. st('Currently using !item !version', array('!item' => $requirement['title'], '!version' => $requirement['value'])) .')', 'error');
       }
     }
     $missing_requirement = TRUE;
@@ -211,7 +211,7 @@ function install_main() {
         if (isset($requirement['value']) && $requirement['value']) {
           $message .= ' ('. st('Currently using !item !version', array('!item' => $requirement['title'], '!version' => $requirement['value'])) .')';
         }
-        drupal_set_message($message, 'warning');
+        drush_log($message, 'warning');
       }
     }
   }

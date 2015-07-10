@@ -9,7 +9,8 @@
  */
 
 define('PROVISION_TESTS_BUILDS_REPO', dirname(__FILE__) . '/makes');
-define('PROVISION_TESTS_DEFAULT_LOCK_WAIT', 5);
+define('PROVISION_TESTS_DEFAULT_LOCK_WAIT', 60);
+define('PROVISION_TESTS_LOCK_TIMEOUT', 3600.0);
 
 /**
  * Implementation of hook_drush_command().
@@ -24,7 +25,7 @@ function provision_tests_drush_command() {
       'hosting',
     ),
     'options' => array(
-      'lock-wait' => dt('Time to wait between attempts to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+      'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
     ),
   );
   $items['provision-tests-new-run'] = array(
@@ -36,7 +37,7 @@ function provision_tests_drush_command() {
       'hosting',
     ),
     'options' => array(
-      'lock-wait' => dt('Time to wait between attempts to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+      'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
     ),
   );
   $items['provision-demo-content'] = array(
@@ -48,7 +49,7 @@ function provision_tests_drush_command() {
       'hosting',
     ),
     'options' => array(
-      'lock-wait' => dt('Time to wait between attempts to acquire a lock on the task queue. Set to 0, if no subsequent attempts should be tried. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+      'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
     ),
   );
 
@@ -62,21 +63,23 @@ function drush_provision_tests_run() {
   if (!drush_confirm(dt('This command should only be run on a clean Aegir install, and data may be lost! Do you want to continue?'))) {
     return drush_user_abort();
   }
-
   // Disable the tasks queue, we run them manually instead.
   $queue_status_initial = variable_get('hosting_queue_tasks_enabled', '0');
   variable_set('hosting_queue_tasks_enabled', '0');
-
-  drush_log('Acquiring tasks lock.');
   $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
-  while (!lock_acquire('hosting_tasks_running', 3600)) {
-    if ($lock_wait === 0) {
-      drush_die(dt('Cannot acquire lock on task queue.'));
+  if (!lock_wait('hosting_queue_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
+    if (lock_acquire('hosting_queue_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+      drush_log('Acquired lock on task queue.');
+    }
+    elseif (drush_get_option('force', FALSE)) {
+      drush_log('Bypassing lock on task queue.', 'warning');
     }
     else {
-      drush_log(dt('Cannot acquire lock on task queue. Retrying in :wait seconds.', array(':wait'=> $lock_wait)), 'warning');
-      sleep($lock_wait);
+      drush_die(dt('Cannot acquire lock on task queue.'));
     }
+  }
+  else {
+    drush_die(dt("Cannot acquire lock on task queue after waiting :wait seconds. A longer wait time can be set with the --lock-wait option.", array(':wait' => $lock_wait)));
   }
 
   drush_provision_tests_install_platform('drupal6');
@@ -108,7 +111,6 @@ function drush_provision_tests_run() {
   drush_provision_tests_remove_site('drupal7-migrate-drupal7-other');
   drush_provision_tests_remove_platform('drupal7_other');
 
-
   // Create some sites, and upgrade them
   drush_provision_tests_install_site('drupal6', 'drupal6-upgrade-drupal7', 'default');
   drush_provision_tests_migrate_site('drupal6-upgrade-drupal7', 'drupal7');
@@ -120,8 +122,8 @@ function drush_provision_tests_run() {
 
   // Restore the tasks queue status:
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
-  drush_log('Releasing tasks lock.');
-  lock_release('hosting_tasks_running');
+  drush_log(dt('Releasing lock on task queue.'));
+  lock_release('hosting_queue_tasks_running');
 
   if (drush_get_error() != DRUSH_SUCCESS) {
     drush_set_error(drush_get_error(), 'Running tests failed');
@@ -145,14 +147,19 @@ function drush_provision_tests_new_run() {
   variable_set('hosting_queue_tasks_enabled', '0');
   drush_log('Acquiring tasks lock.');
   $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
-  while (!lock_acquire('hosting_tasks_running', 3600)) {
-    if ($lock_wait === 0) {
-      drush_die(dt('Cannot acquire lock on task queue.'));
+  if (!lock_wait('hosting_queue_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
+    if (lock_acquire('hosting_queue_tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+      drush_log('Acquired lock on task queue.');
+    }
+    elseif (drush_get_option('force', FALSE)) {
+      drush_log('Bypassing lock on task queue.', 'warning');
     }
     else {
-      drush_log(dt('Cannot acquire lock on task queue. Retrying in :wait seconds.', array(':wait'=> $lock_wait)), 'warning');
-      sleep($lock_wait);
+      drush_die(dt('Cannot acquire lock on task queue.'));
     }
+  }
+  else {
+    drush_die(dt("Cannot acquire lock on task queue after waiting :wait seconds. A longer wait time can be set with the --lock-wait option.", array(':wait' => $lock_wait)));
   }
 
   // 'Stable' D8 e.g. latest (beta) release.
@@ -177,7 +184,7 @@ function drush_provision_tests_new_run() {
   // Restore the tasks queue status:
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
   drush_log('Releasing tasks lock.');
-  lock_release('hosting_tasks_running');
+  lock_release('hosting_queue_tasks_running');
 
   if (drush_get_error() != DRUSH_SUCCESS) {
     drush_set_error(drush_get_error(), 'Running tests failed');
@@ -204,14 +211,19 @@ function drush_provision_tests_provision_demo_content() {
   variable_set('hosting_queue_tasks_enabled', '0');
   drush_log('Acquiring tasks lock.');
   $lock_wait = drush_get_option('lock-wait', PROVISION_TESTS_DEFAULT_LOCK_WAIT);
-  while (!lock_acquire('hosting_tasks_running', 3600)) {
-    if ($lock_wait === 0) {
-      drush_die(dt('Cannot acquire lock on task queue.'));
+  if (!lock_wait('hosting_queue_tasks_running', $lock_wait) || drush_get_option('force', FALSE)) {
+    if (lock_acquire('hosting_queue)tasks_running', PROVISION_TESTS_LOCK_TIMEOUT)) {
+      drush_log('Acquired lock on task queue.');
+    }
+    elseif (drush_get_option('force', FALSE)) {
+      drush_log('Bypassing lock on task queue.', 'warning');
     }
     else {
-      drush_log(dt('Cannot acquire lock on task queue. Retrying in :wait seconds.', array(':wait'=> $lock_wait)), 'warning');
-      sleep($lock_wait);
+      drush_die(dt('Cannot acquire lock on task queue.'));
     }
+  }
+  else {
+    drush_die(dt("Cannot acquire lock on task queue after waiting :wait seconds. A longer wait time can be set with the --lock-wait option.", array(':wait' => $lock_wait)));
   }
 
   // Start with D8 as it needs the most work/testing.
@@ -232,7 +244,7 @@ function drush_provision_tests_provision_demo_content() {
   // Restore the tasks queue status:
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
   drush_log('Releasing tasks lock.');
-  lock_release('hosting_tasks_running');
+  lock_release('hosting_queue_tasks_running');
 
   if (drush_get_error() != DRUSH_SUCCESS) {
     drush_set_error(drush_get_error(), 'Setting up demo content failed');

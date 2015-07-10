@@ -25,7 +25,7 @@ Alias /<?php print $subdir; ?> <?php print $this->root; ?>
 </Location>
 
 # Error handler for Drupal > 4.6.7
-<Directory "<?php print $this->site_path; ?>/files">
+<Directory ~ "sites/.*/files">
   SetHandler This_is_a_Drupal_security_line_do_not_remove
 </Directory>
 
