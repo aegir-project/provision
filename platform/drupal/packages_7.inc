@@ -39,6 +39,7 @@ function _provision_drupal_find_themes($scope, $key = '') {
         $files[$name]->template = TRUE;
       }
     }
+    $files[$name]->version = $files[$name]->info['version'];
   }
   return $files;
 }
