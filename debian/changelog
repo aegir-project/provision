@@ -1,4 +1,11 @@
-aegir3-provision (7.x~3.0-beta2) unstable; urgency=medium
+aegir3-provision (3.0~rc1) unstable; urgency=medium
+
+  * First release candidate of the 3.x branch, release notes too long to
+    document here: http://community.aegirproject.org/3.0-rc1
+
+ -- Herman van Rink <helmo@initfour.nl>  Fri, 17 Jul 2015 14:43:37 +0200
+
+aegir3-provision (3.0~beta2) unstable; urgency=medium
 
   * second beta release of the 3.x branch, release notes too long to
     document here: http://community.aegirproject.org/3.0-beta2

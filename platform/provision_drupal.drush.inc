@@ -866,6 +866,7 @@ function _provision_drupal_find_modules($scope, $key = '') {
       }
     }
     $files[$name]->schema_version = $schema_version;
+    $files[$name]->version = $files[$name]->info['version'];
   }
   return $files;
 }
