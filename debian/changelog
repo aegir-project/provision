@@ -1,3 +1,10 @@
+aegir3-provision (3.0) unstable; urgency=medium
+
+  * First stable release of the 3.x series.
+  * See http://community.aegirproject.org/3.0
+
+ -- Herman van Rink <helmo@initfour.nl>  Sun, 19 Jul 2015 22:16:23 +0200
+
 aegir3-provision (3.0~rc2) unstable; urgency=medium
 
   * Second release candidate of the 3.x branch.
