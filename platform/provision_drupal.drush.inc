@@ -108,8 +108,11 @@ function provision_drupal_push_site($override_slave_authority = FALSE) {
   d()->service('http')->sync(d()->root, array('exclude-sites' => TRUE));
 
   if (d()->type === 'site') {
+    // Check whether we're hosted on a cluster, in which case, the master is
+    // authoritative.
+    $cluster = d()->platform->web_server->http_service_type == 'cluster' ? TRUE : FALSE;
     $options = array();
-    if ($override_slave_authority) {
+    if ($override_slave_authority || $cluster) {
       $exclude = NULL;
     }
     else {
