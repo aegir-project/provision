@@ -56,7 +56,7 @@ case "$1" in
         mv composer.phar /usr/local/bin/composer
 
         # Install Drush.
-        su -c "composer global require drush/drush:7.*" aegir
+        su -c "composer global require drush/drush:6.*" aegir
 
         # Add composer's bin dir to the $PATH.
         echo "export PATH=\"\$HOME/.composer/vendor/bin:\$PATH\"" >>  ~aegir/.bashrc
