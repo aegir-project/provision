@@ -58,8 +58,8 @@ case "$1" in
         # flush the drush cache to find new commands
         su -s /bin/sh aegir -c 'drush cc drush'
 
-        site_uri=`drush @hostmaster status --fields="uri" --field-labels=0 | sed -e 's/^[[:space:]]*//g' -e 's/[[:space:]]*\$//g'`
-        drupal_root=`drush @hostmaster status --fields="root" --field-labels=0 | sed -e 's/^[[:space:]]*//g' -e 's/[[:space:]]*\$//g'`
+        site_uri=`su -s /bin/sh aegir -c 'drush @hostmaster status --fields="uri" --field-labels=0 | tr "\n" " " | sed -e "s/^[[:space:]]*//g" -e "s/[[:space:]]*\$//g"'`
+        drupal_root=`su -s /bin/sh aegir -c 'drush @hostmaster status --fields="root" --field-labels=0 | tr "\n" " " | sed -e "s/^[[:space:]]*//g" -e "s/[[:space:]]*\$//g"'`
 
         if [ -n $drupal_root ]; then
             # upgrade
