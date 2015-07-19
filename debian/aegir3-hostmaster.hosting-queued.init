@@ -19,7 +19,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Aegir queue daemon"  # Introduce a short description here
 NAME="hosting-queued" # Introduce the short server's name here
-DAEMON=/usr/bin/drush      # Introduce the server's location here
+DAEMON=/usr/local/bin/drush      # Introduce the server's location here
 DAEMON_ARGS="@hostmaster $NAME" # Arguments to run the daemon with
 USER="aegir"
 PIDFILE=/var/run/$NAME.pid
