@@ -57,12 +57,13 @@ case "$1" in
 
         # flush the drush cache to find new commands
         su -s /bin/sh aegir -c 'drush cc drush'
-        TEMPFILE=`tempfile`
-        su -s /bin/sh aegir -c 'drush --pipe @hostmaster status 2>/dev/null | egrep "site_uri|drupal_root"' >> $TEMPFILE || true
-        if grep -q 'site_uri' $TEMPFILE; then
+
+        site_uri=`drush @hostmaster status --fields="uri" --field-labels=0 | sed -e 's/^[[:space:]]*//g' -e 's/[[:space:]]*\$//g'`
+        drupal_root=`drush @hostmaster status --fields="root" --field-labels=0 | sed -e 's/^[[:space:]]*//g' -e 's/[[:space:]]*\$//g'`
+
+        if [ -n $drupal_root ]; then
             # upgrade
             db_stop
-            . $TEMPFILE
             echo "Aegir frontend (@hostmaster) site detected in $drupal_root"
             # make those paths canonical to make sure we can compare correctly
             NEW_PLATFORM=`readlink -f "$AEGIRHOME/hostmaster-$VERSION"`
@@ -130,7 +131,6 @@ EOF
             su -s /bin/sh aegir -c 'drush @hostmaster pm-enable -y hosting_queued'
             service hosting-queued start
         fi
-        rm -f $TEMPFILE
 
         case $WEBSERVER in
             apache)
