@@ -56,7 +56,7 @@ case "$1" in
         chown aegir:aegir "$AEGIRHOME" "$AEGIRHOME/config" "$AEGIRHOME/config/$WEBSERVER.conf"
 
         # flush the drush cache to find new commands
-        su -s /bin/sh aegir -c 'drush cc drush'
+        su -s /bin/sh aegir -c 'drush cache-clear drush'
 
         site_uri=`su -s /bin/sh aegir -c 'drush @hostmaster status --fields="uri" --field-labels=0 2>/dev/null | tr "\n" " " | sed -e "s/^[[:space:]]*//g" -e "s/[[:space:]]*\$//g"'`
         drupal_root=`su -s /bin/sh aegir -c 'drush @hostmaster status --fields="root" --field-labels=0 2>/dev/null | tr "\n" " " | sed -e "s/^[[:space:]]*//g" -e "s/[[:space:]]*\$//g"'`
