@@ -58,10 +58,10 @@ case "$1" in
         # flush the drush cache to find new commands
         su -s /bin/sh aegir -c 'drush cc drush'
 
-        site_uri=`su -s /bin/sh aegir -c 'drush @hostmaster status --fields="uri" --field-labels=0 | tr "\n" " " | sed -e "s/^[[:space:]]*//g" -e "s/[[:space:]]*\$//g"'`
-        drupal_root=`su -s /bin/sh aegir -c 'drush @hostmaster status --fields="root" --field-labels=0 | tr "\n" " " | sed -e "s/^[[:space:]]*//g" -e "s/[[:space:]]*\$//g"'`
+        site_uri=`su -s /bin/sh aegir -c 'drush @hostmaster status --fields="uri" --field-labels=0 2>/dev/null | tr "\n" " " | sed -e "s/^[[:space:]]*//g" -e "s/[[:space:]]*\$//g"'`
+        drupal_root=`su -s /bin/sh aegir -c 'drush @hostmaster status --fields="root" --field-labels=0 2>/dev/null | tr "\n" " " | sed -e "s/^[[:space:]]*//g" -e "s/[[:space:]]*\$//g"'`
 
-        if [ -n $drupal_root ]; then
+        if [ -d "$drupal_root" ]; then
             # upgrade
             db_stop
             echo "Aegir frontend (@hostmaster) site detected in $drupal_root"
