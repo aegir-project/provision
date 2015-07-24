@@ -1,3 +1,9 @@
+aegir3-provision (3.0.1) unstable; urgency=medium
+
+  * Fix a bug in the Debian package that prevented new installations.
+
+ -- Herman van Rink <helmo@initfour.nl>  Thu, 23 Jul 2015 23:33:01 +0200
+
 aegir3-provision (3.0) unstable; urgency=medium
 
   * First stable release of the 3.x series.
