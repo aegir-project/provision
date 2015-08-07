@@ -63,8 +63,7 @@ class Provision_Service_http_cluster extends Provision_Service_http {
   }
 
   function fetch() {
-    $args = func_get_args();
-    $this->_each_server(__FUNCTION__, $args);
+    drush_log('Skipping fetch from remote server(s), since master is authoritative in cluster service.');
   }
 
   function grant_server_list() {
