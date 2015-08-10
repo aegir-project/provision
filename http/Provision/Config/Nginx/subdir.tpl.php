@@ -485,6 +485,19 @@ location ^~ /<?php print $subdir; ?> {
 
 
   ###
+  ### The s3/files/styles (s3fs) support.
+  ###
+  location ~* ^/<?php print $subdir; ?>/s3/files/styles/(.*)$ {
+    access_log off;
+    log_not_found off;
+    expires    30d;
+<?php if ($nginx_config_mode == 'extended'): ?>
+    set $nocache_details "Skip";
+<?php endif; ?>
+    try_files  /<?php print $subdir; ?>/sites/$main_site_name/files/styles/$1 $uri @drupal_<?php print $subdir; ?>;
+  }
+
+  ###
   ### Imagecache and imagecache_external support.
   ###
   location ~* ^/<?php print $subdir; ?>/((?:external|system|files/imagecache|files/styles)/.*) {
