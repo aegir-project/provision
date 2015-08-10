@@ -487,6 +487,19 @@ location ~* /sites/.*/files/styles/(.*)$ {
 }
 
 ###
+### The s3/files/styles (s3fs) support.
+###
+location ~* /s3/files/styles/(.*)$ {
+  access_log off;
+  log_not_found off;
+  expires    30d;
+<?php if ($nginx_config_mode == 'extended'): ?>
+  set $nocache_details "Skip";
+<?php endif; ?>
+  try_files  /sites/$main_site_name/files/styles/$1 $uri @drupal;
+}
+
+###
 ### The files/imagecache support.
 ###
 location ~* /sites/.*/files/imagecache/(.*)$ {
