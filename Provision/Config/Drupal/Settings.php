@@ -26,6 +26,7 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
       $this->data['file_directory_path_var'] = 'file_directory_path';
       $this->data['file_directory_temp_var'] = 'file_directory_temp';
     }
+
     if (drush_drupal_major_version() >= 8) {
       $this->template = 'provision_drupal_settings_8.tpl.php';
 
@@ -42,9 +43,11 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
     elseif (drush_drupal_major_version() <= 6) {
       $this->template = 'provision_drupal_settings_6.tpl.php';
     }
+
     $this->version = provision_version();
     $this->api_version = provision_api_version();
     $this->cloaked = drush_get_option('provision_db_cloaking', $this->context->service('http')->cloaked_db_creds());
+
     if (provision_hosting_feature_enabled('subdirs')) {
       $this->data['subdirs_support_enabled'] = TRUE;
     }
