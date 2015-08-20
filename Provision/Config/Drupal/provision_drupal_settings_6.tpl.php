@@ -119,11 +119,17 @@ if (isset($_SERVER['db_name'])) {
   * settings are used there. Settings defined here should not be
   * duplicated there so as to avoid conflict issues.
   */
-  @ini_set('session.gc_probability', 1);
-  @ini_set('session.gc_divisor', 100);
-  @ini_set('session.gc_maxlifetime', 200000);
-  @ini_set('session.cookie_lifetime', 2000000);
-
+  @ini_set('arg_separator.output',     '&amp;');
+  @ini_set('magic_quotes_runtime',     0);
+  @ini_set('magic_quotes_sybase',      0);
+  @ini_set('session.cache_expire',     200000);
+  @ini_set('session.cache_limiter',    'none');
+  @ini_set('session.cookie_lifetime',  0);
+  @ini_set('session.gc_maxlifetime',   200000);
+  @ini_set('session.save_handler',     'user');
+  @ini_set('session.use_only_cookies', 1);
+  @ini_set('session.use_trans_sid',    0);
+  @ini_set('url_rewriter.tags',        '');
 
   /**
   * Set the umask so that new directories created by Drupal have the correct permissions
@@ -143,9 +149,6 @@ if (isset($_SERVER['db_name'])) {
   $conf['clean_url'] = 1;
   $conf['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
   $conf['allow_authorize_operations'] = FALSE;
-
-  // Nginx tries to cache the admin_menu if we don't do this.
-  $conf['admin_menu_cache_client'] = FALSE;
 
 <?php if (!$this->site_enabled) : ?>
 <?php if (isset($drupal_hash_salt_var)): ?>

@@ -36,6 +36,12 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
       $this->data['config_directories_active_var'] = 'config_directories_active';
       $this->data['config_directories_staging_var'] = 'config_directories_staging';
     }
+    elseif (drush_drupal_major_version() == 7) {
+      $this->template = 'provision_drupal_settings.tpl.php';
+    }
+    elseif (drush_drupal_major_version() <= 6) {
+      $this->template = 'provision_drupal_settings_6.tpl.php';
+    }
     $this->version = provision_version();
     $this->api_version = provision_api_version();
     $this->cloaked = drush_get_option('provision_db_cloaking', $this->context->service('http')->cloaked_db_creds());
