@@ -5,7 +5,7 @@
  */
 
 class Provision_Config_Drupal_Settings extends Provision_Config {
-  public $template = 'provision_drupal_settings.tpl.php';
+  public $template = 'provision_drupal_settings_7.tpl.php';
   public $description = 'Drupal settings.php file';
   public $creds = array();
   protected $mode = 0440;
@@ -37,7 +37,7 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
       $this->data['config_directories_staging_var'] = 'config_directories_staging';
     }
     elseif (drush_drupal_major_version() == 7) {
-      $this->template = 'provision_drupal_settings.tpl.php';
+      $this->template = 'provision_drupal_settings_7.tpl.php';
     }
     elseif (drush_drupal_major_version() <= 6) {
       $this->template = 'provision_drupal_settings_6.tpl.php';
