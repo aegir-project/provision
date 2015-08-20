@@ -39,15 +39,6 @@ case "$1" in
         fi
         adduser --quiet aegir www-data
 
-        if [ -d /etc/sudoers.d ]; then
-            ucf --debconf-ok /usr/share/doc/aegir3-provision/examples/example.sudoers /etc/sudoers.d/aegir
-            ucfr aegir-provision /etc/sudoers.d/aegir
-            chmod 440 /etc/sudoers.d/aegir
-        else
-            echo "running an older version of sudo"
-            echo "copy content of /usr/share/doc/aegir3-provision/examples/example.sudoers into /etc/sudoers for aegir to run properly"
-        fi
-
         # fix permissions on installed directories
         chown aegir:aegir "$VARLIB"
 
