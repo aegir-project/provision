@@ -22,7 +22,7 @@ aegir3-provision (3.0~rc2) unstable; urgency=medium
 
   * Second release candidate of the 3.x branch.
 
- -- Herman van Rink <helmo@kirk>  Sun, 19 Jul 2015 20:37:22 +0200
+ -- Herman van Rink <helmo@initfour.nl>  Sun, 19 Jul 2015 20:37:22 +0200
 
 aegir3-provision (3.0~rc1) unstable; urgency=medium
 

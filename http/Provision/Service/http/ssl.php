@@ -279,6 +279,7 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
       $this->sync($this->server->http_ssld_path, array(
         'exclude' => $this->server->http_ssld_path . '/*',  // Make sure remote directory is created
       ));
+      $this->sync($this->server->http_ssld_path . '/default');
     }
 
     // Call the parent at the end. it will restart the server when it finishes.
