@@ -59,6 +59,9 @@ function hook_provision_drupal_config($uri, $data) {
  *
  * To use templating, return an include statement for the template.
  *
+ * The d() function is available to retrieve more information from the aegir
+ * context.
+ *
  * @param $data
  *   Associative array of data from Provision_Config_Apache_Server::data.
  *
@@ -75,6 +78,9 @@ function drush_hook_provision_apache_server_config($data) {
  *
  * To use templating, return an include statement for the template.
  *
+ * The d() function is available to retrieve more information from the aegir
+ * context.
+ *
  * @param $data
  *   Associative array of data from Provision_Config_Apache_Platform::data.
  *
@@ -90,6 +96,9 @@ function drush_hook_provision_apache_dir_config($data) {
  * Append Apache configuration to site vhost configuration.
  *
  * To use templating, return an include statement for the template.
+ *
+ * The d() function is available to retrieve more information from the aegir
+ * context.
  *
  * @param $uri
  *   URI for the site.
@@ -109,6 +118,9 @@ function drush_hook_provision_apache_vhost_config($uri, $data) {
  *
  * To use templating, return an include statement for the template.
  *
+ * The d() function is available to retrieve more information from the aegir
+ * context.
+ *
  * @param $data
  *   Associative array of data from Provision_Config_Nginx_Server::data.
  *
@@ -125,6 +137,9 @@ function drush_hook_provision_nginx_server_config($data) {
  *
  * To use templating, return an include statement for the template.
  *
+ * The d() function is available to retrieve more information from the aegir
+ * context.
+ *
  * @param $data
  *   Associative array of data from Provision_Config_Nginx_Platform::data.
  *
@@ -140,6 +155,9 @@ function drush_hook_provision_nginx_dir_config($data) {
  * Append Nginx configuration to site vhost configuration.
  *
  * To use templating, return an include statement for the template.
+ *
+ * The d() function is available to retrieve more information from the aegir
+ * context.
  *
  * @param $uri
  *   URI for the site.
