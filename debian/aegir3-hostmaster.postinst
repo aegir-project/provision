@@ -65,10 +65,14 @@ case "$1" in
             # upgrade
             db_stop
             echo "Aegir frontend (@hostmaster) site detected in $drupal_root"
-            # make those paths canonical to make sure we can compare correctly
-            NEW_PLATFORM=`readlink -f "$AEGIRHOME/hostmaster-$VERSION"`
+            # determin target directory for the new hostmaster profile.
+            NEW_PLATFORM="$AEGIRHOME/hostmaster-$VERSION"
+
+            # make those paths canonical with readlink to make sure we can compare correctly
+            NEW_PLATFORM=`readlink -f "$NEW_PLATFORM"`
             drupal_root=`readlink -f $drupal_root`
-            # we upgrade only if the target platform doesn't exit *OR*
+
+            # we upgrade only if the target platform doesn't exist *OR*
             # if it's not the current platform
             if [ -d "$NEW_PLATFORM" ] && [ "$drupal_root" = "$NEW_PLATFORM" ]; then
                 echo "it seems to be the same version as the one we're trying to install, not upgrading"
