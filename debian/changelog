@@ -1,3 +1,10 @@
+aegir3-provision (3.1) unstable; urgency=medium
+
+  * Second stable release of the 3.x series.
+  * Bufixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.1-release-notes
+
+ -- Guillaume Boudrias <gboudrias@praxis.coop>  Fri, 21 Aug 2015 11:11:44 -0400
+
 aegir3-provision (3.0.1) unstable; urgency=medium
 
   * Fix a bug in the Debian package that prevented new installations.
@@ -15,7 +22,7 @@ aegir3-provision (3.0~rc2) unstable; urgency=medium
 
   * Second release candidate of the 3.x branch.
 
- -- Herman van Rink <helmo@kirk>  Sun, 19 Jul 2015 20:37:22 +0200
+ -- Herman van Rink <helmo@initfour.nl>  Sun, 19 Jul 2015 20:37:22 +0200
 
 aegir3-provision (3.0~rc1) unstable; urgency=medium
 

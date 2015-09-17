@@ -174,7 +174,7 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
    * @return the path to the receipt file if allocation succeeded
    */
   static function assign_certificate_site($ssl_key, $site) {
-    $path = $site->platform->server->http_ssld_path . "/" . $ssl_key . "/" . $site->uri . ".receipt";
+    $path = $site->data['server']->http_ssld_path . "/" . $ssl_key . "/" . $site->uri . ".receipt";
     drush_log(dt("registering site %site with SSL certificate %key with receipt file %path", array("%site" => $site->uri, "%key" => $ssl_key, "%path" => $path)));
     if (touch($path)) {
       return $path;
@@ -279,6 +279,7 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
       $this->sync($this->server->http_ssld_path, array(
         'exclude' => $this->server->http_ssld_path . '/*',  // Make sure remote directory is created
       ));
+      $this->sync($this->server->http_ssld_path . '/default');
     }
 
     // Call the parent at the end. it will restart the server when it finishes.
