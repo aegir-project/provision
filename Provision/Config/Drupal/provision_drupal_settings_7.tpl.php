@@ -124,7 +124,6 @@ if (isset($_SERVER['db_name'])) {
   //ini_set('session.gc_maxlifetime', 200000);
   //ini_set('session.cookie_lifetime', 2000000);
 
-
   /**
   * Set the umask so that new directories created by Drupal have the correct permissions
   */

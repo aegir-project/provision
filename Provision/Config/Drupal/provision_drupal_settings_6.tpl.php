@@ -110,7 +110,7 @@ if (isset($_SERVER['db_name'])) {
   $install_profile = "<?php print $this->profile ?>";
 
   /**
-  * PHP settings:
+  * PHP settings: (managed in BOA via site and platform level INI files)
   *
   * To see what PHP settings are possible, including whether they can
   * be set at runtime (ie., when ini_set() occurs), read the PHP
