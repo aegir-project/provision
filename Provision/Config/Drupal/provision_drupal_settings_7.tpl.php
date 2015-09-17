@@ -119,10 +119,10 @@ if (isset($_SERVER['db_name'])) {
   * settings are used there. Settings defined here should not be
   * duplicated there so as to avoid conflict issues.
   */
-  @ini_set('session.gc_probability', 1);
-  @ini_set('session.gc_divisor', 100);
-  @ini_set('session.gc_maxlifetime', 200000);
-  @ini_set('session.cookie_lifetime', 2000000);
+  ini_set('session.gc_probability', 1);
+  ini_set('session.gc_divisor', 100);
+  ini_set('session.gc_maxlifetime', 200000);
+  ini_set('session.cookie_lifetime', 2000000);
 
 
   /**

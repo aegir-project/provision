@@ -150,6 +150,9 @@ if (isset($_SERVER['db_name'])) {
   $conf['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
   $conf['allow_authorize_operations'] = FALSE;
 
+  // Nginx tries to cache the admin_menu if we don't do this.
+  $conf['admin_menu_cache_client'] = FALSE;
+
 <?php if (!$this->site_enabled) : ?>
 <?php if (isset($drupal_hash_salt_var)): ?>
   $conf['maintenance_mode'] = 1;
