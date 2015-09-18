@@ -266,7 +266,10 @@ function drush_provision_tests_install_platform($platform_name, $platform_alias 
     PROVISION_TESTS_BUILDS_REPO . "/$platform_name.make",
     "/var/aegir/platforms/$platform_alias"
   );
-  drush_invoke_process('@none', 'make', $args);
+  $opts = array(
+    '--shallow-clone',
+  );
+  drush_invoke_process('@none', 'make', $args, $opts);
   $args = array(
     "@platform_$platform_alias",
   );
