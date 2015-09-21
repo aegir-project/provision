@@ -50,6 +50,11 @@ case "$1" in
             WEBSERVER="$RET"
         fi
 
+        db_get "aegir/working-copy"
+        if [ ! -z "$RET" ]; then
+            FLAGS="$FLAGS --working-copy"
+        fi
+
         # make sure the configuration file exists before symlinking it in place (below)
         touch $AEGIRHOME/config/$WEBSERVER.conf
         # fix permissions on installed directories
