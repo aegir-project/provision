@@ -65,8 +65,13 @@ case "$1" in
             # upgrade
             db_stop
             echo "Aegir frontend (@hostmaster) site detected in $drupal_root"
+
             # determin target directory for the new hostmaster profile.
-            NEW_PLATFORM="$AEGIRHOME/hostmaster-$VERSION"
+            if [ "$VERSION" = "7.x-3.x" ]; then
+                NEW_PLATFORM="$AEGIRHOME/hostmaster-$VERSION-$(date +'%F-%H%M')"
+            else
+                NEW_PLATFORM="$AEGIRHOME/hostmaster-$VERSION"
+            fi
 
             # make those paths canonical with readlink to make sure we can compare correctly
             NEW_PLATFORM=`readlink -f "$NEW_PLATFORM"`
