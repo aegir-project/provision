@@ -73,6 +73,7 @@ location ^~ /<?php print $subdir; ?>/sites/default/files {
     access_log off;
     log_not_found off;
     expires    30d;
+    add_header Access-Control-Allow-Origin *;
     set $nocache_details "Skip";
     rewrite ^/<?php print $subdir; ?>/sites/default/files/imagecache/(.*)$ /<?php print $subdir; ?>/sites/$main_site_name/files/imagecache/$1 last;
     try_files  $uri @drupal_<?php print $subdir; ?>;
@@ -81,6 +82,7 @@ location ^~ /<?php print $subdir; ?>/sites/default/files {
     access_log off;
     log_not_found off;
     expires    30d;
+    add_header Access-Control-Allow-Origin *;
     set $nocache_details "Skip";
     rewrite ^/<?php print $subdir; ?>/sites/default/files/styles/(.*)$ /<?php print $subdir; ?>/sites/$main_site_name/files/styles/$1 last;
     try_files  $uri @drupal_<?php print $subdir; ?>;
@@ -89,6 +91,7 @@ location ^~ /<?php print $subdir; ?>/sites/default/files {
     access_log off;
     log_not_found off;
     expires    30d;
+    add_header Access-Control-Allow-Origin *;
     rewrite ^/<?php print $subdir; ?>/sites/default/files/(.*)$ /<?php print $subdir; ?>/sites/$main_site_name/files/$1 last;
     try_files /$1 $uri =404;
   }
@@ -203,6 +206,7 @@ location ^~ /<?php print $subdir; ?> {
     access_log    off;
     log_not_found off;
     expires       30d;
+    add_header Access-Control-Allow-Origin *;
     try_files     /sites/$main_site_name/files/favicon.ico /sites/$host/files/favicon.ico /favicon.ico $uri =204;
   }
 
@@ -425,6 +429,7 @@ location ^~ /<?php print $subdir; ?> {
       rewrite ^/<?php print $subdir; ?>/(.+)/files/styles/adaptive/(.+)$ /<?php print $subdir; ?>/$1/files/styles/$ais_cookie/$2 last;
     }
     access_log off;
+    add_header Access-Control-Allow-Origin *;
     add_header X-Header "AIS Generator 1.0";
     set $nocache_details "Skip";
     try_files  $uri @drupal_<?php print $subdir; ?>;
@@ -443,6 +448,7 @@ location ^~ /<?php print $subdir; ?> {
       access_log off;
       log_not_found off;
       expires    30d;
+      add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
       set $nocache_details "Skip";
 <?php endif; ?>
@@ -457,6 +463,7 @@ location ^~ /<?php print $subdir; ?> {
       access_log off;
       log_not_found off;
       expires    30d;
+      add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
       # fix common problems with old paths after import from standalone to Aegir multisite
       rewrite ^/<?php print $subdir; ?>/files/imagecache/(.*)/sites/default/files/(.*)$ /<?php print $subdir; ?>/sites/$main_site_name/files/imagecache/$1/$2 last;
@@ -491,6 +498,7 @@ location ^~ /<?php print $subdir; ?> {
     access_log off;
     log_not_found off;
     expires    30d;
+    add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
     set $nocache_details "Skip";
 <?php endif; ?>
@@ -504,6 +512,7 @@ location ^~ /<?php print $subdir; ?> {
     access_log off;
     log_not_found off;
     expires    30d;
+    add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
     add_header X-Header "IC Generator 1.0";
     set $nocache_details "Skip";
@@ -761,6 +770,7 @@ location ^~ /<?php print $subdir; ?> {
     access_log      off;
     tcp_nodelay     off;
     expires         30d;
+    add_header Access-Control-Allow-Origin *;
     try_files /$1 $uri =404;
   }
 
