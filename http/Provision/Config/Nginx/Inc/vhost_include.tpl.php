@@ -467,6 +467,7 @@ location ~* /(?:.+)/files/styles/adaptive/(?:.+)$ {
     rewrite ^/(.+)/files/styles/adaptive/(.+)$ /$1/files/styles/$ais_cookie/$2 last;
   }
   access_log off;
+  add_header Access-Control-Allow-Origin *;
   add_header X-Header "AIS Generator 1.0";
   set $nocache_details "Skip";
   try_files  $uri @drupal;
@@ -480,6 +481,7 @@ location ~* /sites/.*/files/styles/(.*)$ {
   access_log off;
   log_not_found off;
   expires    30d;
+  add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
   set $nocache_details "Skip";
 <?php endif; ?>
@@ -493,6 +495,7 @@ location ~* /s3/files/styles/(.*)$ {
   access_log off;
   log_not_found off;
   expires    30d;
+  add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
   set $nocache_details "Skip";
 <?php endif; ?>
@@ -506,6 +509,7 @@ location ~* /sites/.*/files/imagecache/(.*)$ {
   access_log off;
   log_not_found off;
   expires    30d;
+  add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
   # fix common problems with old paths after import from standalone to Aegir multisite
   rewrite ^/sites/(.*)/files/imagecache/(.*)/sites/default/files/(.*)$ /sites/$main_site_name/files/imagecache/$2/$3 last;
@@ -703,6 +707,7 @@ location ^~ /files/ {
     access_log off;
     log_not_found off;
     expires    30d;
+    add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
     set $nocache_details "Skip";
 <?php endif; ?>
@@ -717,6 +722,7 @@ location ^~ /files/ {
     access_log off;
     log_not_found off;
     expires    30d;
+    add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
     # fix common problems with old paths after import from standalone to Aegir multisite
     rewrite ^/files/imagecache/(.*)/sites/default/files/(.*)$ /sites/$main_site_name/files/imagecache/$1/$2 last;
@@ -906,6 +912,7 @@ location ~* ^/sites/.*/files/ {
   access_log      off;
   tcp_nodelay     off;
   expires         30d;
+  add_header Access-Control-Allow-Origin *;
   try_files $uri =404;
 }
 
