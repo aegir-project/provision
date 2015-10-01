@@ -1126,7 +1126,7 @@ location @drupal {
 ###
 location @nobots {
   if ($is_bot) {
-    rewrite ^ $scheme://$host$uri? permanent;
+    rewrite ^ $scheme://$host$request_uri? permanent;
   }
   ###
   ### Return 404 on special PHP URLs to avoid revealing version used,
