@@ -48,3 +48,10 @@ Description: Webserver type to use:
  other webserver types on remote servers.
 Default: apache2
 Choices: apache2, nginx
+
+Template:aegir/working-copy
+Type: boolean
+Default: false
+Description: Build the hostmaster platform with Git directories included?
+ When developing or patching Aegir itself it can be nice to have all Git
+ information available.
