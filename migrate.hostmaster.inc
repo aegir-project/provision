@@ -161,6 +161,7 @@ function drush_provision_hostmaster_migrate($site, $platform) {
 }
 
 function drush_provision_post_hostmaster_migrate($site, $platform) {
+  drush_invoke_process('@none', 'cache-clear', array('drush'));
   provision_backend_invoke(drush_get_option('site_name'), 'cache-clear', array('drush'));
   // we pass the context names we generated to the task so we can enforce that the names
   // stay the same.
