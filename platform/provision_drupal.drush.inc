@@ -381,10 +381,12 @@ function _provision_find_profiles() {
     include_once('core/includes/install.inc');
     $profiles_subdirs[] = "./core/profiles";
     $profiles_subdirs[] = "./profiles";
+    $profile_search_ext = "info.yml";
   }
   else {
     include_once('includes/install.inc');
     $profiles_subdirs[] = "./profiles";
+    $profile_search_ext = "profile";
   }
   foreach($profiles_subdirs as $profiles_subdir) {
     if (!$dir = opendir($profiles_subdir)) {
@@ -393,7 +395,7 @@ function _provision_find_profiles() {
     }
     while (FALSE !== ($name = readdir($dir))) {
       $languages = array();
-      $file = "$profiles_subdir/$name/$name.profile";
+      $file = "$profiles_subdir/$name/$name.$profile_search_ext";
       if ($name == '..' || $name == '.' || !file_exists($file)) {
         continue;
       }
