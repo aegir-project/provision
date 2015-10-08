@@ -221,7 +221,6 @@ function _provision_recursive_delete($path) {
     }
 
     $rm = provision_file()->rmdir($path)
-      ->succeed('Deleting @path directory successful.')
       ->fail('Deleting @path directory failed.')
       ->status();
 

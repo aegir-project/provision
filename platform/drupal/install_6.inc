@@ -138,6 +138,11 @@ function install_main() {
 
   require_once './modules/system/system.install';
   require_once './includes/file.inc';
+  require_once './includes/database.inc';
+  require_once './includes/lock.inc';
+
+  // Ensure the proper DB is active;
+  db_set_active();
 
   // Ensure correct page headers are sent (e.g. caching)
   drupal_page_header();

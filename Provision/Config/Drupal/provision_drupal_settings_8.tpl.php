@@ -141,8 +141,8 @@ if (isset($_SERVER['db_name'])) {
 <?php if (isset($config_directories_active_var)): ?>
   $config_directories['active'] = 'sites/<?php print $this->uri ?>/private/config/active';
 <?php endif; ?>
-<?php if (isset($config_directories_staging_var)): ?>
-  $config_directories['staging'] = 'sites/<?php print $this->uri ?>/private/config/staging';
+<?php if (isset($config_directories_sync_var)): ?>
+  $config_directories['sync'] = 'sites/<?php print $this->uri ?>/private/config/sync';
 <?php endif; ?>
   $settings['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
   $settings['allow_authorize_operations'] = FALSE;
