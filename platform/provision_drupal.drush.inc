@@ -245,8 +245,8 @@ function _provision_drupal_create_directories($url = NULL) {
     $mkdir["sites/$url/private/config/active"] = 02770;
     $chgrp["sites/$url/private/config/active"] = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/private/config/staging"] = 02770;
-    $chgrp["sites/$url/private/config/staging"] = d('@server_master')->web_group;
+    $mkdir["sites/$url/private/config/sync"] = 02770;
+    $chgrp["sites/$url/private/config/sync"] = d('@server_master')->web_group;
   }
 
   // These paths should not have recursive operations performed on them.
@@ -268,7 +268,7 @@ function _provision_drupal_create_directories($url = NULL) {
     "sites/$url/files/private",
     "sites/$url/private/config",
     "sites/$url/private/config/active",
-    "sites/$url/private/config/staging"
+    "sites/$url/private/config/sync"
   );
 
   // Allow other commands to add or alter the directories to be created,

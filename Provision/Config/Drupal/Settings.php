@@ -35,7 +35,7 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
       $this->data['drupal_hash_salt_var'] = Drupal\Component\Utility\Crypt::randomBytesBase64(55);
 
       $this->data['config_directories_active_var'] = 'config_directories_active';
-      $this->data['config_directories_staging_var'] = 'config_directories_staging';
+      $this->data['config_directories_sync_var'] = 'config_directories_sync';
     }
     elseif (drush_drupal_major_version() == 7) {
       $this->template = 'provision_drupal_settings_7.tpl.php';
