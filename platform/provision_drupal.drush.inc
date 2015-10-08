@@ -365,8 +365,8 @@ function _provision_drupal_create_directories($url = NULL) {
     $mkdir["sites/$url/private/config/active"] = 02775;
     $chgrp["sites/$url/private/config/active"] = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/private/config/staging"] = 02775;
-    $chgrp["sites/$url/private/config/staging"] = d('@server_master')->web_group;
+    $mkdir["sites/$url/private/config/sync"] = 02775;
+    $chgrp["sites/$url/private/config/sync"] = d('@server_master')->web_group;
 
     // civicrm support
     $mkdir["sites/$url/files/civicrm"] = 02775;
@@ -413,7 +413,7 @@ function _provision_drupal_create_directories($url = NULL) {
     "sites/$url/modules",
     "sites/$url/private",
     "sites/$url/private/config/active",
-    "sites/$url/private/config/staging",
+    "sites/$url/private/config/sync",
     "sites/$url/private/files",
     "sites/$url/private/files/backup_migrate",
     "sites/$url/private/files/backup_migrate/manual",
