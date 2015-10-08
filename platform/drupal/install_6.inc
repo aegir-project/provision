@@ -117,8 +117,8 @@ function install_mail($key, &$message, $params) {
       }
 
       if ($custom) {
-        $message['subject'] = st($mail['subject'], $params['variables']);
-        $message['body'] = st($mail['body'], $params['variables']);
+        $message['subject'] = dt($mail['subject'], $params['variables']);
+        $message['body'] = dt($mail['body'], $params['variables']);
       }
       else {
         $message['subject'] = _user_mail_text('pass_subject', $params['variables']);
@@ -183,12 +183,12 @@ function install_main() {
   }
 
 
-  drush_log(st("Installing Drupal schema"), 'install');
+  drush_log(dt("Installing Drupal schema"), 'install');
   // Load the profile.
   require_once "./profiles/$profile/$profile.profile";
-  drush_log(st("Loading @profile install profile", array("@profile" => $profile)), 'install');
+  drush_log(dt("Loading @profile install profile", array("@profile" => $profile)), 'install');
 
-  drush_log(st("Installing translation : @locale", array("@locale" => $install_locale)), 'install');
+  drush_log(dt("Installing translation : @locale", array("@locale" => $install_locale)), 'install');
 
   /**
    * Handles requirement checking
@@ -391,6 +391,6 @@ function _install_module_batch($module, $module_name, &$context) {
   // steps.
   module_enable(array($module));
   $context['results'][] = $module;
-  $context['message'] = st('Installed %module module.', array('%module' => $module_name));
+  $context['message'] = dt('Installed %module module.', array('%module' => $module_name));
 }
 install_main();
