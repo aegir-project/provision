@@ -58,8 +58,8 @@ function install_mail($key, &$message, $params) {
       }
 
       if ($custom) {
-        $message['subject'] = st($mail['subject'], $params['variables']);
-        $message['body'][] = st($mail['body'], $params['variables']);
+        $message['subject'] = dt($mail['subject'], $params['variables']);
+        $message['body'][] = dt($mail['body'], $params['variables']);
       }
       else {
         $message['subject'] = _user_mail_text('pass_subject', $params['variables']);
