@@ -1,3 +1,10 @@
+aegir3-provision (3.1+42.c53e920) unstable; urgency=medium
+
+  * Add some debug output to hostmaster installation automatic jenkins
+    build
+
+ -- root <root@47118a6be4ae>  Thu, 15 Oct 2015 20:41:08 +0000
+
 aegir3-provision (3.1) unstable; urgency=medium
 
   * Second stable release of the 3.x series.
