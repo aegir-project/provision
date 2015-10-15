@@ -212,10 +212,13 @@ function drush_provision_hostmaster_install($site = NULL) {
 
   // exit if an error has occured.
   if (drush_get_error()) {
+    drush_log('Caught drush error, ending drush_provision_hostmaster_install', 'debug');
+    drush_log(print_r(drush_get_error_log(), 1), 'debug');
     return false;
   }
 
   if (drush_get_option('backend-only')) {
+    drush_log('Skipping hostmaster frontend installation, backend-only option set.', 'notice');
     return;
   }
 
