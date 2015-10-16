@@ -212,8 +212,8 @@ function drush_provision_hostmaster_install($site = NULL) {
 
   // exit if an error has occured.
   if (drush_get_error()) {
-    drush_log('Caught drush error, ending drush_provision_hostmaster_install', 'debug');
-    drush_log(print_r(drush_get_error_log(), 1), 'debug');
+    drush_log('Caught drush error, ending drush_provision_hostmaster_install', 'error');
+    drush_log(print_r(drush_get_error_log(), 1), 'error');
     return false;
   }
 
