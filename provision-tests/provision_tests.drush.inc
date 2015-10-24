@@ -164,14 +164,14 @@ function drush_provision_tests_new_run() {
 
   // 'Stable' D8 e.g. latest (beta) release.
   drush_provision_tests_install_platform('drupal8');
-  drush_provision_tests_install_site('drupal8', 'drupal8-minimal', 'minimal');
+  drush_provision_tests_install_site('drupal8', 'drupal8-minimal', 'standard');
 
   // Dev D8 latest git commit.
   drush_provision_tests_install_platform('drupal8dev');
-  drush_provision_tests_install_site('drupal8dev', 'drupal8-dev-minimal', 'minimal');
+  drush_provision_tests_install_site('drupal8dev', 'drupal8-dev-minimal', 'standard');
 
   // Migrate a D8 site from the current release to the latest commit.
-  drush_provision_tests_install_site('drupal8', 'drupal8-upgrade-d8', 'minimal');
+  drush_provision_tests_install_site('drupal8', 'drupal8-upgrade-d8', 'standard');
   drush_provision_tests_migrate_site('drupal8-upgrade-d8', 'drupal8dev');
 
   // Cleanup.
