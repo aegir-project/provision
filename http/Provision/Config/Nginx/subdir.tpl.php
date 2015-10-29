@@ -50,15 +50,15 @@ if (!$satellite_mode && $server->satellite_mode) {
 <?php endif; ?>
 #######################################################
 
-set $main_site_name "<?php print $this->uri; ?>";
+set $subdir_main_site_name "<?php print $this->uri; ?>";
 
 ###
 ### Use the main site name if available, instead of
 ### potentially virtual server_name when alias is set
 ### as redirection target. See #2358977 for details.
 ###
-if ($main_site_name = '') {
-  set $main_site_name "$server_name";
+if ($subdir_main_site_name = '') {
+  set $subdir_main_site_name "$server_name";
 }
 
 <?php if ($nginx_config_mode == 'extended'): ?>
@@ -75,7 +75,7 @@ location ^~ /<?php print $subdir; ?>/sites/default/files {
     expires    30d;
     add_header Access-Control-Allow-Origin *;
     set $nocache_details "Skip";
-    rewrite ^/<?php print $subdir; ?>/sites/default/files/imagecache/(.*)$ /<?php print $subdir; ?>/sites/$main_site_name/files/imagecache/$1 last;
+    rewrite ^/<?php print $subdir; ?>/sites/default/files/imagecache/(.*)$ /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/imagecache/$1 last;
     try_files  $uri @drupal_<?php print $subdir; ?>;
   }
   location ~* ^/<?php print $subdir; ?>/sites/default/files/styles {
@@ -84,7 +84,7 @@ location ^~ /<?php print $subdir; ?>/sites/default/files {
     expires    30d;
     add_header Access-Control-Allow-Origin *;
     set $nocache_details "Skip";
-    rewrite ^/<?php print $subdir; ?>/sites/default/files/styles/(.*)$ /<?php print $subdir; ?>/sites/$main_site_name/files/styles/$1 last;
+    rewrite ^/<?php print $subdir; ?>/sites/default/files/styles/(.*)$ /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/styles/$1 last;
     try_files  $uri @drupal_<?php print $subdir; ?>;
   }
   location ~* ^/<?php print $subdir; ?>/sites/default/files {
@@ -92,7 +92,7 @@ location ^~ /<?php print $subdir; ?>/sites/default/files {
     log_not_found off;
     expires    30d;
     add_header Access-Control-Allow-Origin *;
-    rewrite ^/<?php print $subdir; ?>/sites/default/files/(.*)$ /<?php print $subdir; ?>/sites/$main_site_name/files/$1 last;
+    rewrite ^/<?php print $subdir; ?>/sites/default/files/(.*)$ /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/$1 last;
     try_files /$1 $uri =404;
   }
 }
@@ -207,7 +207,7 @@ location ^~ /<?php print $subdir; ?> {
     log_not_found off;
     expires       30d;
     add_header Access-Control-Allow-Origin *;
-    try_files     /sites/$main_site_name/files/favicon.ico /sites/$host/files/favicon.ico /favicon.ico $uri =204;
+    try_files     /sites/$subdir_main_site_name/files/favicon.ico /sites/$host/files/favicon.ico /favicon.ico $uri =204;
   }
 
   ###
@@ -218,9 +218,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log    off;
     log_not_found off;
 <?php if ($nginx_config_mode == 'extended'): ?>
-    try_files /sites/$main_site_name/files/$host.robots.txt /sites/$main_site_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @cache_<?php print $subdir; ?>;
+    try_files /sites/$subdir_main_site_name/files/$host.robots.txt /sites/$subdir_main_site_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @cache_<?php print $subdir; ?>;
 <?php else: ?>
-    try_files /sites/$main_site_name/files/$host.robots.txt /sites/$main_site_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @drupal_<?php print $subdir; ?>;
+    try_files /sites/$subdir_main_site_name/files/$host.robots.txt /sites/$subdir_main_site_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @drupal_<?php print $subdir; ?>;
 <?php endif; ?>
   }
 
@@ -452,8 +452,8 @@ location ^~ /<?php print $subdir; ?> {
 <?php if ($nginx_config_mode == 'extended'): ?>
       set $nocache_details "Skip";
 <?php endif; ?>
-      rewrite  ^/<?php print $subdir; ?>/files/(.*)$  /<?php print $subdir; ?>/sites/$main_site_name/files/$1 last;
-      try_files  /<?php print $subdir; ?>/sites/$main_site_name/files/styles/$1 $uri @drupal_<?php print $subdir; ?>;
+      rewrite  ^/<?php print $subdir; ?>/files/(.*)$  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/$1 last;
+      try_files  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/styles/$1 $uri @drupal_<?php print $subdir; ?>;
     }
 
     ###
@@ -466,12 +466,12 @@ location ^~ /<?php print $subdir; ?> {
       add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
       # fix common problems with old paths after import from standalone to Aegir multisite
-      rewrite ^/<?php print $subdir; ?>/files/imagecache/(.*)/sites/default/files/(.*)$ /<?php print $subdir; ?>/sites/$main_site_name/files/imagecache/$1/$2 last;
-      rewrite ^/<?php print $subdir; ?>/files/imagecache/(.*)/files/(.*)$               /<?php print $subdir; ?>/sites/$main_site_name/files/imagecache/$1/$2 last;
+      rewrite ^/<?php print $subdir; ?>/files/imagecache/(.*)/sites/default/files/(.*)$ /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/imagecache/$1/$2 last;
+      rewrite ^/<?php print $subdir; ?>/files/imagecache/(.*)/files/(.*)$               /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/imagecache/$1/$2 last;
       set $nocache_details "Skip";
 <?php endif; ?>
-      rewrite  ^/<?php print $subdir; ?>/files/(.*)$  /<?php print $subdir; ?>/sites/$main_site_name/files/$1 last;
-      try_files  /<?php print $subdir; ?>/sites/$main_site_name/files/imagecache/$1 $uri @drupal_<?php print $subdir; ?>;
+      rewrite  ^/<?php print $subdir; ?>/files/(.*)$  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/$1 last;
+      try_files  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/imagecache/$1 $uri @drupal_<?php print $subdir; ?>;
     }
 
     location ~* ^.+\.(?:pdf|jpe?g|gif|png|ico|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rtf|cgi|bat|pl|dll|class|otf|ttf|woff|eot|less|avi|mpe?g|mov|wmv|mp3|ogg|ogv|wav|midi|zip|tar|t?gz|rar|dmg|exe|apk|pxl|ipa)$ {
@@ -480,7 +480,7 @@ location ^~ /<?php print $subdir; ?> {
       access_log    off;
       log_not_found off;
       add_header  Access-Control-Allow-Origin *;
-      rewrite  ^/<?php print $subdir; ?>/files/(.*)$  /<?php print $subdir; ?>/sites/$main_site_name/files/$1 last;
+      rewrite  ^/<?php print $subdir; ?>/files/(.*)$  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/$1 last;
       try_files   $uri =404;
     }
 <?php if ($nginx_config_mode == 'extended'): ?>
@@ -502,7 +502,7 @@ location ^~ /<?php print $subdir; ?> {
 <?php if ($nginx_config_mode == 'extended'): ?>
     set $nocache_details "Skip";
 <?php endif; ?>
-    try_files  /<?php print $subdir; ?>/sites/$main_site_name/files/styles/$1 $uri @drupal_<?php print $subdir; ?>;
+    try_files  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/styles/$1 $uri @drupal_<?php print $subdir; ?>;
   }
 
   ###
@@ -766,7 +766,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ~* ^/<?php print $subdir; ?>/(sites/.*/files/.*) {
     root  <?php print "{$this->root}"; ?>;
-    rewrite     ^/<?php print $subdir; ?>/sites/(.*)$ /sites/$main_site_name/$1 last;
+    rewrite     ^/<?php print $subdir; ?>/sites/(.*)$ /sites/$subdir_main_site_name/$1 last;
     access_log      off;
     tcp_nodelay     off;
     expires         30d;
@@ -956,7 +956,7 @@ location ^~ /<?php print $subdir; ?> {
     add_header    X-Speed-Cache-Key "$key_uri";
     add_header    X-NoCache "$nocache_details";
     add_header    X-This-Proto "$http_x_forwarded_proto";
-    add_header    X-Server-Name "$main_site_name";
+    add_header    X-Server-Sub-Name "$subdir_main_site_name";
 <?php endif; ?>
 
     root          <?php print "{$this->root}"; ?>;
