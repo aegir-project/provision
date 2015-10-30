@@ -244,6 +244,8 @@ function provision_drush_command() {
 
   $items['provision-delete'] = array(
     'description' => 'Delete a site.',
+    'options' => array(
+      'force' => dt('Force deletion.')),
     'examples' => array(
       'drush @site provision-delete' => 'Delete the site as defined by the site Drush alias generated with provision-save.',
     ),
