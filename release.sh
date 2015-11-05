@@ -135,8 +135,8 @@ git --work-tree=build-area/hosting --git-dir=build-area/hosting/.git tag -a $NEW
 rm -rf build-area/eldir
 git clone --branch $CURRENT_BRANCH `git config remote.origin.url | sed 's/provision/eldir/'` build-area/eldir
 
-echo "Setting the tag $NEW_TAG in a clean eldir clone."
-git --work-tree=build-area/eldir --git-dir=build-area/eldir/.git tag -a $NEW_TAG -m 'Add a new release tag.'
+#echo "Setting the tag $NEW_TAG in a clean eldir clone."
+#git --work-tree=build-area/eldir --git-dir=build-area/eldir/.git tag -a $NEW_TAG -m 'Add a new release tag.'
 
 
 # Can we push?
@@ -145,5 +145,5 @@ if prompt_yes_no "push tags and commits upstream? "; then
     git push --tags origin HEAD
     git --work-tree=build-area/hostmaster --git-dir=build-area/hostmaster/.git push --tags origin HEAD
     git --work-tree=build-area/hosting --git-dir=build-area/hosting/.git push --tags origin HEAD
-    git --work-tree=build-area/eldir --git-dir=build-area/eldir/.git push --tags origin HEAD
+#    git --work-tree=build-area/eldir --git-dir=build-area/eldir/.git push --tags origin HEAD
 fi
