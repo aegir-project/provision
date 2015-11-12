@@ -212,12 +212,17 @@ function drush_provision_hostmaster_install($site = NULL) {
 
   // exit if an error has occured.
   if (drush_get_error()) {
+    drush_log('Caught drush error, ending drush_provision_hostmaster_install', 'error');
+    drush_log(print_r(drush_get_error_log(), 1), 'error');
     return false;
   }
 
   if (drush_get_option('backend-only')) {
+    drush_log('Skipping hostmaster frontend installation, backend-only option set.', 'notice');
     return;
   }
+
+  drush_log('Preparing the hostmaster frontend installation.', 'notice');
 
   $platform_name = '@platform_hostmaster';
   drush_invoke_process('@none', "provision-save", array($platform_name), array(
@@ -236,6 +241,8 @@ function drush_provision_hostmaster_install($site = NULL) {
 
   // exit if an error has occured.
   if (drush_get_error()) {
+    drush_log('Caught drush error, ending drush_provision_hostmaster_install - B', 'debug');
+    drush_log(print_r(drush_get_error_log(), 1), 'debug');
     return false;
   }
 
@@ -252,11 +259,15 @@ function drush_provision_hostmaster_install($site = NULL) {
     'profile' => $profile,
     'drush_aliases' => 'hm',
   ));
+
+  drush_log('Starting with the hostmaster frontend installation.', 'notice');
   $data = provision_backend_invoke($site_name, 'provision-install', array(), array('client_email' => drush_get_option('client_email')));
   provision_backend_invoke($site_name, 'provision-verify');
 
   // exit if an error has occured.
   if (drush_get_error()) {
+    drush_log('Caught drush error, ending drush_provision_hostmaster_install - C', 'debug');
+    drush_log(print_r(drush_get_error_log(), 1), 'debug');
     return false;
   }
 

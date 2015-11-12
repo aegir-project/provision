@@ -111,6 +111,9 @@ case "$1" in
             AEGIR_DB_USER="$RET"
             db_get "aegir/db_password"
             AEGIR_DB_PASS="$RET"
+            if [ -z "$AEGIR_DB_PASS" ]; then
+              echo EMPTY database password, can not be good.
+            fi
             db_get "aegir/email"
             EMAIL="$RET"
 
@@ -140,6 +143,9 @@ case "$1" in
   "client_email": "$EMAIL"
 }
 EOF
+            # flush the drush cache to find new commands
+            su -s /bin/sh aegir -c 'drush cache-clear drush'
+
             # on new installs, we default to having the daemon enabled
             echo 'Enabling hosting-queued daemon'
             su -s /bin/sh aegir -c 'drush @hostmaster pm-enable -y hosting_queued'
