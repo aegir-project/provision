@@ -77,20 +77,14 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
       provision_file()->file_put_contents($local_settings, $local_settings_blank)
         ->succeed('Generated blank ' . $local_description)
         ->fail('Could not generate ' . $local_description);
-      provision_file()->chgrp($local_settings, $this->group)
-        ->succeed('Changed group ownership of <code>@path</code> to @gid')
-        ->fail('Could not change group ownership of <code>@path</code> to @gid');
-      provision_file()->chmod($local_settings, $this->mode | 0440)
-        ->succeed('Changed permissions of <code>@path</code> to @perm')
-        ->fail('Could not change permissions of <code>@path</code> to @perm');
     }
-    else {
-      provision_file()->chgrp($local_settings, $this->group)
-        ->succeed('Changed group ownership of <code>@path</code> to @gid')
-        ->fail('Could not change group ownership of <code>@path</code> to @gid');
-      provision_file()->chmod($local_settings, $this->mode | 0440)
-        ->succeed('Changed permissions of <code>@path</code> to @perm')
-        ->fail('Could not change permissions of <code>@path</code> to @perm');
-    }
+
+    // Set permissions on local.settings.php.
+    provision_file()->chgrp($local_settings, $this->group)
+      ->succeed('Changed group ownership of <code>@path</code> to @gid')
+      ->fail('Could not change group ownership of <code>@path</code> to @gid');
+    provision_file()->chmod($local_settings, $this->mode | 0440)
+      ->succeed('Changed permissions of <code>@path</code> to @perm')
+      ->fail('Could not change permissions of <code>@path</code> to @perm');
   }
 }
