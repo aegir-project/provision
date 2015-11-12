@@ -1,3 +1,10 @@
+aegir3-provision (3.2) unstable; urgency=medium
+
+  * Third stable release of the 3.x series.
+  * Bufixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.2-release-notes
+
+ -- GB <guigui@turbowarp>  Thu, 05 Nov 2015 12:42:22 -0500
+
 aegir3-provision (3.1) unstable; urgency=medium
 
   * Second stable release of the 3.x series.
