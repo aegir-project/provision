@@ -1011,6 +1011,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_cache_valid 302 1m;
     fastcgi_cache_valid 301 403 404 5s;
     fastcgi_cache_valid 500 502 503 504 1s;
+    fastcgi_cache_lock on;
     fastcgi_ignore_headers Cache-Control Expires;
     fastcgi_pass_header Set-Cookie;
     fastcgi_pass_header X-Accel-Expires;

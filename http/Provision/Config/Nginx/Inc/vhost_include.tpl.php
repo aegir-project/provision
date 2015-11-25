@@ -1036,6 +1036,7 @@ location ~ ^/(?<esi>esi/.*)"$ {
   fastcgi_cache_key "$is_bot$device$host$request_method$uri$is_args$args$cache_uid$http_x_forwarded_proto";
   fastcgi_cache_valid 200 301 404 5s;
   fastcgi_cache_valid 302 1m;
+  fastcgi_cache_lock on;
   fastcgi_ignore_headers Cache-Control Expires;
   fastcgi_pass_header Set-Cookie;
   fastcgi_pass_header X-Accel-Expires;
@@ -1185,6 +1186,7 @@ location = /index.php {
   fastcgi_cache_valid 302 1m;
   fastcgi_cache_valid 301 403 404 5s;
   fastcgi_cache_valid 500 502 503 504 1s;
+  fastcgi_cache_lock on;
   fastcgi_ignore_headers Cache-Control Expires;
   fastcgi_pass_header Set-Cookie;
   fastcgi_pass_header X-Accel-Expires;
