@@ -11,6 +11,10 @@ class Provision_Service_http_cluster extends Provision_Service_http {
     $this->server->setProperty('cluster_web_servers', array(), TRUE);
   }
 
+  function init_site() {
+    $this->_each_server(__FUNCTION__);
+  }
+
   /**
    * Run a method on each server in the cluster.
    *
