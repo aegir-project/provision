@@ -393,13 +393,11 @@ function _provision_find_profiles() {
     }
     while (FALSE !== ($name = readdir($dir))) {
       $languages = array();
-      $file = "$profiles_subdir/$name/$name.profile";
-      if ($name == '..' || $name == '.' || !file_exists($file)) {
+      if ($name == '..' || $name == '.') {
         continue;
       }
       $profile = new stdClass();
       $profile->name = $name;
-      $profile->filename = $file;
 
       $profile->info = array();
 
@@ -414,6 +412,7 @@ function _provision_find_profiles() {
         if (!empty($profile->info['name'])) {
           $profile->name = $profile->info['name'];
         }
+        $profile->filename = $yaml_file;
       }
       else {
         $info_file = "$profiles_subdir/$name/$name.info";
@@ -424,6 +423,7 @@ function _provision_find_profiles() {
             continue;
           }
         }
+        $profile->filename = $info_file;
       }
 
       require_once($profile->filename);
