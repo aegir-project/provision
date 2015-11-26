@@ -33,6 +33,9 @@ function drush_provision_drupal_pre_provision_migrate($platform, $new_name = NUL
   if (!is_null($new_name) && ($new_name != d()->name)) {
     drush_set_option('target_name', $new_name);
     drush_set_option('source_name', d()->uri);
+  }
+  else {
+    drush_set_option('target_name', d()->name);
 
     // Detect if the platform stays the same.
     if (d()->platform->name == $platform) {
@@ -40,11 +43,6 @@ function drush_provision_drupal_pre_provision_migrate($platform, $new_name = NUL
       // deploying over existing site.
       drush_set_option('deploy_replace_site', TRUE);
     }
-  }
-  else {
-    // The site url stays the same, so the target platform
-    // must be different if we run Migrate task, right?
-    drush_set_option('target_name', d()->name);
   }
 }
 
