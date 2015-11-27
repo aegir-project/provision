@@ -1,5 +1,5 @@
 Template:aegir/drush_version
 Type: string
-Default: 6.*
+Default: 8.*
 Description: Drush version to use.
 
