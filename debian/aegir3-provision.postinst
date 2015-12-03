@@ -55,8 +55,11 @@ case "$1" in
         curl -sS https://getcomposer.org/installer | php
         mv composer.phar /usr/local/bin/composer
 
+        db_get "aegir/drush_version"
+        DRUSH_VERSION="$RET"
+
         # Install Drush.
-        su -c "composer global require drush/drush:6.*" aegir
+        su -c "composer global require drush/drush:$DRUSH_VERSION" aegir
 
         # Add composer's bin dir to the $PATH.
         echo "export PATH=\"\$HOME/.composer/vendor/bin:\$PATH\"" >>  ~aegir/.bashrc
