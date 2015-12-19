@@ -10,7 +10,7 @@
 
 # Basic variables, change before running.
 AEGIR_VERSION="7.x-3.x"
-NEW_DRUSH_VERSION=6.6.0
+NEW_DRUSH_VERSION=8.0.0
 
 # Extra variables, no changes needed for most use-cases.
 DRUSH_DIR=$HOME/drush
@@ -147,7 +147,7 @@ fi
 mkdir -p $BACKUP_DIR
 
 # Upgrade drush if desired and writable.
-if [ $NEW_DRUSH_VERSION != $CURRENT_DRUSH_VERSION ]; then
+if [ "$NEW_DRUSH_VERSION" != "$CURRENT_DRUSH_VERSION" ]; then
   if [ -w $DRUSH_DIR ]; then
     if [ -d $DRUSH_DIR ]; then
       msg "Moving existing drush into $BACKUP_DIR"
@@ -163,7 +163,7 @@ if [ $NEW_DRUSH_VERSION != $CURRENT_DRUSH_VERSION ]; then
     msg "Drush dir($DRUSH_DIR) is not writable, not upgrading Drush."
   fi
 else
-  mgs "Not upgrading Drush, $CURRENT_DRUSH_VERSION will be used."
+  msg "Not upgrading Drush, $CURRENT_DRUSH_VERSION will be used."
 fi
 
 # Fetch new version of provision.
