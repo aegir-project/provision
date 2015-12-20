@@ -14,3 +14,7 @@ projects[hostmaster][type] = "profile"
 projects[hostmaster][download][type] = "git"
 projects[hostmaster][download][url] = "https://github.com/omega8cc/hostmaster.git"
 projects[hostmaster][download][branch] = "feature/3.0.x-profile"
+
+; projects[hostmaster][type] = "profile"
+; projects[hostmaster][download][type] = "get"
+; projects[hostmaster][download][url] = "http://files.aegir.cc/versions/stable/tar/hostmaster-BOA-3.0.0.tar.gz"
