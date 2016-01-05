@@ -190,6 +190,9 @@ function provision_drush_command() {
         'description' => dt('Keep VCS files when building the a platform using Drush make.'),
         'hidden' => TRUE,
       ),
+      'override_slave_authority' => array(
+        'description' => dt('Push the site specific files directory to a slave. This overrides the slaves authority.'),
+      ),
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
   );
