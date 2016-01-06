@@ -204,7 +204,7 @@ function drush_provision_drupal_pre_provision_verify() {
       $aegir_drushrc->write();
     }
 
-    provision_drupal_push_site();
+    provision_drupal_push_site(drush_get_option('override_slave_authority', FALSE));
   }
 }
 
