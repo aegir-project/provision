@@ -78,12 +78,14 @@ function drush_provision_drupal_provision_backup() {
   }
 
   $olddir = getcwd();
+  // we need to do this because some retarded implementations of tar (e.g. SunOS) don't support -C
 
   if (!chdir(d()->site_path)) {
     return drush_set_error('PROVISION_BACKUP_PATH_NOT_FOUND', dt('cannot change directory to %dir', array('%dir' => d()->site_path)));
   }
   if (substr($backup_file, -2) == 'gz') {
-    $command = 'tar cpfz %s .';
+    // same as above: some do not support -z
+    $command = 'tar cpf - . | gzip -c > %s';
   } else {
     $command = 'tar cpf %s .';
   }
