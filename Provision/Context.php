@@ -22,7 +22,7 @@ class Provision_Context {
 
   /**
    * Properties that will be persisted by provision-save. Access as object
-   * members, $envoronment->property_name. __get() and __set handle this. In
+   * members, $evironment->property_name. __get() and __set handle this. In
    * init(), set defaults with setProperty().
    */
   protected $properties = array();

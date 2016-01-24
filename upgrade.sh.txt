@@ -95,7 +95,7 @@ case "$CURRENT_DRUSH_VERSION" in
   OLD_DRUPAL_DIR="$drupal_root"
   ;;
 
-  [67]*)
+  [6789]*)
   AEGIR_DOMAIN=`drush @hostmaster status --fields="uri" --field-labels=0 | sed -e 's/^[[:space:]]*//g' -e 's/[[:space:]]*\$//g'`
   OLD_DRUPAL_DIR=`drush @hostmaster status --fields="root" --field-labels=0 | sed -e 's/^[[:space:]]*//g' -e 's/[[:space:]]*\$//g'`
 

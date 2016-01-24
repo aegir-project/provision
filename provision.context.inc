@@ -1,7 +1,8 @@
 <?php
 
 /**
- * @file Provision named context base classes.
+ * @file
+ * Provision named context base classes and the function d().
  */
 
 /**
