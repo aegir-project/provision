@@ -383,7 +383,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   ### Deny listed requests for security reasons.
   ###
-  location ~* (/\..*|settings\.php$|\.(?:git|htaccess|engine|make|config|inc|ini|info|install|module|profile|pl|po|sh|.*sql|theme|tpl(?:\.php)?|xtmpl)$|^(?:Entries.*|Repository|Root|Tag|Template))$ {
+  location ~* (\.(?:git|htaccess|engine|config|inc|ini|info|install|make|module|profile|test|pl|po|sh|.*sql|theme|tpl(\.php)?|xtmpl)(~|\.sw[op]|\.bak|\.orig|\.save)?$|^(\..*|Entries.*|Repository|Root|Tag|Template|composer\.(json|lock))$|^#.*#$|\.php(~|\.sw[op]|\.bak|\.orig\.save))$ {
     access_log off;
     return 404;
   }
