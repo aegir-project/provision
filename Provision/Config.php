@@ -127,9 +127,9 @@ class Provision_Config {
     if (!empty($templates) && is_array($templates)) {
       foreach ($templates as $file) {
         if (is_readable($file)) {
-          drush_log(dt('Template loaded from hook(s): :file'), array(
+          drush_log(dt('Template loaded from hook(s): :file', array(
             ':file' => $file,
-          ));
+          )));
           return file_get_contents($file);
         }
       }
