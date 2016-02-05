@@ -52,6 +52,7 @@ case "$1" in
         chown aegir:aegir "$VARLIB"
 
         # Install composer.
+        COMPOSER_HOME="$HOME/.composer"
         curl -sS https://getcomposer.org/installer | php
         mv composer.phar /usr/local/bin/composer
 
