@@ -224,7 +224,7 @@ map $http_user_agent $is_crawler {
   ~*HTTrack|BrokenLinkCheck|2009042316.*Firefox.*3\.0\.10   is_crawler;
   ~*SiteBot|PECL|Automatic|CCBot|BuzzTrack|Sistrix|Offline  is_crawler;
   ~*SWEB|Morfeus|GSLFbot|HiScan|Riddler|DBot|SEOkicks|MJ12  is_crawler;
-  ~*Java|MailChimp|PChomebot|Scrap|HTMLParser|Nutch|Mireo   is_crawler;
+  ~*Java/|MailChimp|PChomebot|Scrap|HTMLParser|Nutch|Mireo  is_crawler;
 }
 
 ###
