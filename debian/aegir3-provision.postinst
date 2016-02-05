@@ -52,6 +52,7 @@ case "$1" in
         chown aegir:aegir "$VARLIB"
 
         # Install composer.
+        COMPOSER_HOME="$HOME/.composer"
         curl -sS https://getcomposer.org/installer | php
         mv composer.phar /usr/local/bin/composer
 
@@ -62,7 +63,7 @@ case "$1" in
         su -c "composer global require drush/drush:$DRUSH_VERSION" aegir
 
         # Add composer's bin dir to the $PATH.
-        echo "export PATH=\"\$HOME/.config/composer/vendor/bin:\$PATH\"" >>  ~aegir/.bashrc
+        echo "export PATH=\"\$HOME/.composer/vendor/bin:\$PATH\"" >>  ~aegir/.bashrc
 
         # Rename an old drush executable.
         if [ -f /usr/local/bin/drush ]; then
@@ -70,7 +71,7 @@ case "$1" in
         fi
 
         # Symlink Drush for other users to use.
-        ln -s ~aegir/.config/composer/vendor/bin/drush /usr/local/bin
+        ln -s ~aegir/.composer/vendor/bin/drush /usr/local/bin
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
