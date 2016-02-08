@@ -1,5 +1,7 @@
 Template:aegir/drush_version
 Type: string
-Default: 8.0.0
-Description: Drush version to use.
+Default: stable
+Description: Drush version to use. "stable" will fetch the latest release.
+  "unstable" will fetch the daily dev build. Otherwise, specify a version
+  number, e.g. "8.0.3".
 
