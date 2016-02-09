@@ -1,3 +1,10 @@
+aegir3-provision (3.4) unstable; urgency=medium
+
+  * Fifth stable release of the 3.x series.
+  * Bugfixes related to upgrade to Drush 8, see: http://aegir.readthedocs.org/en/3.x/release-notes/3.4
+
+ -- Christopher Gervais <chris@ergonlogic.com>  Tue, 09 Feb 2016 14:07:01 -0500
+
 aegir3-provision (3.3) unstable; urgency=medium
 
   * Forth stable release of the 3.x series.
