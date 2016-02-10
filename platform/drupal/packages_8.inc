@@ -71,13 +71,14 @@ function _provision_drupal_system_map() {
 }
 
 function _provision_system_query($type) {
+  $packages = array();
   foreach (system_get_info($type) as $name => $package) {
     $package = (object) $package;
     $package->filename = drupal_get_filename($type, $name);
     $frags = explode("/", $package->filename);
     // flag site-specific packages
     if ($frags[0] == 'sites' && $frags[1] != 'all') {
-      $packages->platform = -1;
+      $package->platform = -1;
     }
 
     $package->filename = realpath($package->filename);
