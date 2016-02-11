@@ -26,7 +26,7 @@ function provision_tests_drush_command() {
     ),
     'options' => array(
       'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
-      'force' => dt('Continue even if the task queue is still locked.',
+      'force' => dt('Continue even if the task queue is still locked.'),
     ),
   );
   $items['provision-tests-new-run'] = array(
@@ -52,7 +52,7 @@ function provision_tests_drush_command() {
     ),
     'options' => array(
       'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
-      'force' => dt('Continue even if the task queue is still locked.',
+      'force' => dt('Continue even if the task queue is still locked.'),
     ),
   );
 
