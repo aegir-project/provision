@@ -85,6 +85,8 @@ function drush_provision_tests_run() {
     drush_die(dt("Cannot acquire lock on task queue after waiting :wait seconds. A longer wait time can be set with the --lock-wait option.", array(':wait' => $lock_wait)));
   }
 
+  drush_provision_tests_add_custom_test_task();
+
   drush_provision_tests_install_platform('drupal6');
   drush_provision_tests_install_platform('drupal7');
 
@@ -391,8 +393,40 @@ function drush_provision_tests_migrate_site($site, $target) {
 }
 
 /**
+ * Create a custom verify task for the hostmaster site and place it in the queue.
+ */
+function drush_provision_tests_add_custom_test_task() {
+  drush_log(dt("Create a custom verify task for the hostmaster site and place it in the queue."), 'ok');
+
+  $node = new stdClass();
+
+  // Admin
+  $node->uid = 1;
+
+  $node->type = 'task';
+
+  // The site, platform or server node ID that is subject to the task.
+  // 10 usually is the node ID for the hostmaster site itself.
+  $node->rid = 10;
+
+  // Published status == 1
+  $node->status = 1;
+
+  $node->task_type = 'verify';
+
+  // Setting status to HOSTING_TASK_QUEUED == 0
+  $node->task_status = 0;
+
+  node_save($node);
+
+  drush_provision_tests_run_remaining_tasks(TRUE);
+
+  drush_log(dt("Finished running a custom verify task for the hostmaster site."), 'ok');
+}
+
+/**
  * Run all remaining hosting tasks.
  */
-function drush_provision_tests_run_remaining_tasks() {
-  provision_backend_invoke('@hostmaster', "hosting-tasks", array(), array('force' => TRUE));
+function drush_provision_tests_run_remaining_tasks($debug = FALSE) {
+  provision_backend_invoke('@hostmaster', "hosting-tasks", array(), array('force' => TRUE, 'debug' => $debug));
 }
