@@ -391,13 +391,5 @@ function drush_provision_tests_migrate_site($site, $target) {
  * Run all remaining hosting tasks.
  */
 function drush_provision_tests_run_remaining_tasks() {
-  $tasks = array();
-  $result = db_query("SELECT t.nid FROM {hosting_task} t INNER JOIN {node} n ON t.vid = n.vid WHERE t.task_status = :status ORDER BY n.changed, n.nid ASC", array(':status' => 0));
-  while ($node = $result->fetch()) {
-    $tasks[$node->nid] =  node_load($node->nid);
-  }
-
-  foreach ($tasks as $task) {
-    provision_backend_invoke('@hostmaster', "hosting-task", array($task->nid), array('force' => TRUE));
-  }
+  provision_backend_invoke('@hostmaster', "hosting-tasks", array(), array('force' => TRUE));
 }
