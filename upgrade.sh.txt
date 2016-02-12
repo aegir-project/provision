@@ -129,12 +129,14 @@ Your old hostmaster platform was $OLD_DRUPAL_DIR
 The Drush command is "$DRUSH"
 EOF
 
-if [ -w $DRUSH_DIR ]; then
-  cat <<EOF
-The version of Drush will be $NEW_DRUSH_VERSION
-EOF
+if [ "$NEW_DRUSH_VERSION" != "$CURRENT_DRUSH_VERSION" ]; then
+  if [ -w $DRUSH_DIR ]; then
+    echo "The version of Drush will be $NEW_DRUSH_VERSION"
+  else
+    echo "Drush will not be upgraded as its directory is not writable: $DRUSH_DIR"
+  fi
 else
-  echo "Drush will not be upgraded as its directory is not writable: $DRUSH_DIR"
+  msg "Not upgrading Drush, $CURRENT_DRUSH_VERSION will be used."
 fi
 
 if prompt_yes_no "Do you want to proceed with the upgrade?" ; then

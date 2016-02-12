@@ -1,11 +1,11 @@
 <?php
 /**
  * @file
- *  Some tests for hostmaster and provison.
+ * Some tests for hostmaster and provison.
  *
- *  These could live in Hostmaster or Provision, and there are advantages and
- *  disadvantages to both. But I decided that I'd just get on with it and pop
- *  them into Provision.
+ * These could live in Hostmaster or Provision, and there are advantages and
+ * disadvantages to both. But I decided that I'd just get on with it and pop
+ * them into Provision.
  */
 
 define('PROVISION_TESTS_BUILDS_REPO', dirname(__FILE__) . '/makes');
@@ -13,43 +13,46 @@ define('PROVISION_TESTS_DEFAULT_LOCK_WAIT', 60);
 define('PROVISION_TESTS_LOCK_TIMEOUT', 3600.0);
 
 /**
- * Implementation of hook_drush_command().
+ * Implements hook_drush_command().
  */
 function provision_tests_drush_command() {
   $items['provision-tests-run'] = array(
     'description' => dt('Runs provision tests'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
     // Although we're a provision command, we require hostmaster to be around to
-    // run the tests correctly
+    // run the tests correctly.
     'drupal dependencies' => array(
       'hosting',
     ),
     'options' => array(
       'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+      'force' => dt('Continue even if the task queue is still locked.'),
     ),
   );
   $items['provision-tests-new-run'] = array(
     'description' => dt('Runs NEW provision tests'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
     // Although we're a provision command, we require hostmaster to be around to
-    // run the tests correctly
+    // run the tests correctly.
     'drupal dependencies' => array(
       'hosting',
     ),
     'options' => array(
       'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+      'force' => dt('Continue even if the task queue is still locked.'),
     ),
   );
   $items['provision-demo-content'] = array(
     'description' => dt('Setup some demo content on a fresh Aegir install'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
     // Although we're a provision command, we require hostmaster to be around to
-    // run the tests correctly
+    // run the tests correctly.
     'drupal dependencies' => array(
       'hosting',
     ),
     'options' => array(
       'lock-wait' => dt('Time to wait to acquire a lock on the task queue. Defaults to :wait seconds.', array(':wait' => PROVISION_TESTS_DEFAULT_LOCK_WAIT)),
+      'force' => dt('Continue even if the task queue is still locked.'),
     ),
   );
 
@@ -82,6 +85,8 @@ function drush_provision_tests_run() {
     drush_die(dt("Cannot acquire lock on task queue after waiting :wait seconds. A longer wait time can be set with the --lock-wait option.", array(':wait' => $lock_wait)));
   }
 
+  drush_provision_tests_add_custom_test_task();
+
   drush_provision_tests_install_platform('drupal6');
   drush_provision_tests_install_platform('drupal7');
 
@@ -111,7 +116,7 @@ function drush_provision_tests_run() {
   drush_provision_tests_remove_site('drupal7-migrate-drupal7-other');
   drush_provision_tests_remove_platform('drupal7_other');
 
-  // Create some sites, and upgrade them
+  // Create some sites, and upgrade them.
   drush_provision_tests_install_site('drupal6', 'drupal6-upgrade-drupal7', 'default');
   drush_provision_tests_migrate_site('drupal6-upgrade-drupal7', 'drupal7');
   drush_provision_tests_remove_site('drupal6-upgrade-drupal7');
@@ -120,7 +125,7 @@ function drush_provision_tests_run() {
   drush_provision_tests_remove_platform('drupal6');
   drush_provision_tests_remove_platform('drupal7');
 
-  // Restore the tasks queue status:
+  // Restore the tasks queue status.
   variable_set('hosting_queue_tasks_enabled', $queue_status_initial);
   drush_log(dt('Releasing lock on task queue.'));
   lock_release('hosting_queue_tasks_running');
@@ -264,7 +269,7 @@ function drush_provision_tests_install_platform($platform_name, $platform_alias 
   drush_log(dt('Building platform: @platform and adding to hostmaster.', array('@platform' => $platform_alias)), 'ok');
   $args = array(
     PROVISION_TESTS_BUILDS_REPO . "/$platform_name.make",
-    "/var/aegir/platforms/$platform_alias"
+    "/var/aegir/platforms/$platform_alias",
   );
   $opts = array();
   if (version_compare(drush_core_version(), '7', '>=')) {
@@ -279,7 +284,7 @@ function drush_provision_tests_install_platform($platform_name, $platform_alias 
     'context_type' => 'platform',
   );
   drush_invoke_process('@none', 'provision-save', $args, $options);
-  provision_backend_invoke('@hostmaster', 'hosting-import', array("@platform_$platform_alias",));
+  provision_backend_invoke('@hostmaster', 'hosting-import', array("@platform_$platform_alias"));
   drush_provision_tests_run_remaining_tasks();
 }
 
@@ -368,36 +373,60 @@ function drush_provision_tests_remove_site($site) {
 /**
  * Migrates a site from one platform to another.
  *
- * @param $site
+ * @param string $site
  *   The site to migrate.
- * @param $target
+ * @param string $target
  *   The target platform to migrate to.
  */
 function drush_provision_tests_migrate_site($site, $target) {
   drush_log(dt('Migrating: @site to platform: @platform.', array('@site' => "$site.aegir.example.com", '@platform' => $target)), 'ok');
   // Do the migrate.
-  provision_backend_invoke("@$site.aegir.example.com", 'provision-migrate', array("@platform_$target",));
+  provision_backend_invoke("@$site.aegir.example.com", 'provision-migrate', array("@platform_$target"));
   // Import the site into the frontend.
-  provision_backend_invoke('@hostmaster', 'hosting-import', array("@$site.aegir.example.com",));
+  provision_backend_invoke('@hostmaster', 'hosting-import', array("@$site.aegir.example.com"));
   // Verify the $target platform.
   provision_backend_invoke('@hostmaster', 'hosting-task', array("@platform_$target", 'verify'), array('force' => TRUE));
   // Import and verify the site.
-  provision_backend_invoke('@hostmaster', 'hosting-import', array("@$site.aegir.example.com",));
+  provision_backend_invoke('@hostmaster', 'hosting-import', array("@$site.aegir.example.com"));
   provision_backend_invoke('@hostmaster', 'hosting-task', array("@$site.aegir.example.com", 'verify'), array('force' => TRUE));
   drush_provision_tests_run_remaining_tasks();
 }
 
 /**
+ * Create a custom verify task for the hostmaster site and place it in the queue.
+ */
+function drush_provision_tests_add_custom_test_task() {
+  drush_log(dt("Create a custom verify task for the hostmaster site and place it in the queue."), 'ok');
+
+  $node = new stdClass();
+
+  // Admin
+  $node->uid = 1;
+
+  $node->type = 'task';
+
+  // The site, platform or server node ID that is subject to the task.
+  // 10 usually is the node ID for the hostmaster site itself.
+  $node->rid = 10;
+
+  // Published status == 1
+  $node->status = 1;
+
+  $node->task_type = 'verify';
+
+  // Setting status to HOSTING_TASK_QUEUED == 0
+  $node->task_status = 0;
+
+  node_save($node);
+
+  drush_provision_tests_run_remaining_tasks(TRUE);
+
+  drush_log(dt("Finished running a custom verify task for the hostmaster site."), 'ok');
+}
+
+/**
  * Run all remaining hosting tasks.
  */
-function drush_provision_tests_run_remaining_tasks() {
-  $tasks = array();
-  $result = db_query("SELECT t.nid FROM {hosting_task} t INNER JOIN {node} n ON t.vid = n.vid WHERE t.task_status = :status ORDER BY n.changed, n.nid ASC", array(':status' => 0));
-  while ($node = $result->fetch()) {
-    $tasks[$node->nid] =  node_load($node->nid);
-  }
-
-  foreach ($tasks as $task) {
-    provision_backend_invoke('@hostmaster', "hosting-task", array($task->nid), array('force' => TRUE));
-  }
+function drush_provision_tests_run_remaining_tasks($debug = FALSE) {
+  provision_backend_invoke('@hostmaster', "hosting-tasks", array(), array('force' => TRUE, 'debug' => $debug));
 }
