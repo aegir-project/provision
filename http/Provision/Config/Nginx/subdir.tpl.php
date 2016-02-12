@@ -845,8 +845,8 @@ location ^~ /<?php print $subdir; ?> {
   ###
   if ( $args ~* "/autocomplete/" ) {
     return 405;
-    error_page 405 = @drupal_<?php print $subdir; ?>;
   }
+  error_page 405 = @drupal_<?php print $subdir; ?>;
 
   ###
   ### Rewrite legacy requests with /index.php to extension-free URL.
