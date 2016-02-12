@@ -1051,6 +1051,14 @@ location ~ ^/(?<esi>esi/.*)"$ {
 }
 
 ###
+### Workaround for https://www.drupal.org/node/2599326.
+###
+if ( $args ~* "/autocomplete/" ) {
+  return 405;
+  error_page 405 = @drupal;
+}
+
+###
 ### Rewrite legacy requests with /index.php to extension-free URL.
 ###
 if ( $args ~* "^q=(?<query_value>.*)" ) {
