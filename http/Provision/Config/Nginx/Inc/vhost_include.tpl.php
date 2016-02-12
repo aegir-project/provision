@@ -1055,8 +1055,8 @@ location ~ ^/(?<esi>esi/.*)"$ {
 ###
 if ( $args ~* "/autocomplete/" ) {
   return 405;
-  error_page 405 = @drupal;
 }
+error_page 405 = @drupal;
 
 ###
 ### Rewrite legacy requests with /index.php to extension-free URL.
