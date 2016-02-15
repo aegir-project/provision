@@ -136,12 +136,14 @@ location ^~ /<?php print $subdir; ?> {
     return 403;
   }
 
+<?php if ($nginx_config_mode == 'extended'): ?>
   ###
   ### Deny listed requests for security reasons.
   ###
   if ($is_denied) {
     return 403;
   }
+<?php endif; ?>
 
   ###
   ### HTTPRL standard support.
