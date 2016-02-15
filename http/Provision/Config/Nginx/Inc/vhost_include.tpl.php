@@ -68,12 +68,14 @@ if ( $request_method !~ ^(?:GET|HEAD|POST|PUT|DELETE|OPTIONS)$ ) {
   return 403;
 }
 
+<?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Deny listed requests for security reasons.
 ###
 if ($is_denied) {
   return 403;
 }
+<?php endif; ?>
 
 <?php if ($satellite_mode == 'boa'): ?>
 ###
