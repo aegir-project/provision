@@ -225,6 +225,7 @@ map $http_user_agent $is_crawler {
   ~*SiteBot|PECL|Automatic|CCBot|BuzzTrack|Sistrix|Offline  is_crawler;
   ~*SWEB|Morfeus|GSLFbot|HiScan|Riddler|DBot|SEOkicks|MJ12  is_crawler;
   ~*Java/|PChomebot|Scrap|HTMLParser|Nutch|Mireo|Semrush    is_crawler;
+  ~*Ahrefs is_crawler;
 }
 
 ###
