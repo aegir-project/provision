@@ -154,9 +154,13 @@ EOF
 
         case $WEBSERVER in
             apache)
-                # apache 2.2 || 2.4
-                ln -sf $AEGIRHOME/config/$WEBSERVER.conf /etc/apache2/conf.d/aegir.conf \
-                  || ln -sf $AEGIRHOME/config/$WEBSERVER.conf /etc/apache2/conf-enabled/aegir.conf
+                if [ -d /etc/apache2/conf-enabled ]; then
+                  # Apache 2.4
+                  ln -sf $AEGIRHOME/config/$WEBSERVER.conf /etc/apache2/conf-enabled/aegir.conf
+                else
+                  # Apache 2.2
+                  ln -sf $AEGIRHOME/config/$WEBSERVER.conf /etc/apache2/conf.d/aegir.conf
+                fi
                 a2enmod ssl rewrite
                 apache2ctl graceful
                 ;;
