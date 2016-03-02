@@ -114,6 +114,7 @@ function provision_drush_command() {
       'client_email' => dt('The email address of the client to use.'),
       'profile' => dt('The profile to use when installing the site.'),
     ),
+    'allow-additional-options' => TRUE,
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
   );
 
@@ -122,6 +123,7 @@ function provision_drush_command() {
     'options' => array(
       'client_email' => dt('The email address of the client to use.'),
     ),
+    'allow-additional-options' => TRUE,
     'hidden' => TRUE,
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_SITE
   );
@@ -131,6 +133,7 @@ function provision_drush_command() {
     'options' => array(
       'client_email' => dt('The email address of the client to use.'),
     ),
+    'allow-additional-options' => TRUE,
     'examples' => array(
       'drush @site provision-import' => 'Import the site as defined by the site Drush alias generated with provision-save.',
     ),
@@ -140,6 +143,7 @@ function provision_drush_command() {
   $items['provision-backup'] = array(
     'optional arguments' => array('backup-file' => dt('The file to save the backup to. This will be a gzipped tarball.')),
     'description' => dt('Generate a back up for the site.'),
+    'allow-additional-options' => TRUE,
     'examples' => array(
       'drush @site provision-backup' => 'Back up the site as defined by the site Drush alias generated with provision-save.',
     ),
@@ -148,6 +152,7 @@ function provision_drush_command() {
 
   $items['provision-enable'] = array(
     'description' => 'Enable a disabled site.',
+    'allow-additional-options' => TRUE,
     'examples' => array(
       'drush @site provision-enable' => 'Enable the site as defined by the site Drush alias generated with provision-save.',
     ),
@@ -156,6 +161,7 @@ function provision_drush_command() {
   $items['provision-disable'] = array(
     'arguments' => array('domain.com' => dt('The domain of the site to disable (only if disabled).')),
     'description' => 'Disable a site.',
+    'allow-additional-options' => TRUE,
     'examples' => array(
       'drush @site provision-disable' => 'Disable the site as defined by the site Drush alias generated with provision-save.',
     ),
@@ -194,6 +200,7 @@ function provision_drush_command() {
         'description' => dt('Push the site specific files directory to a slave. This overrides the slaves authority.'),
       ),
     ),
+    'allow-additional-options' => TRUE,
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
   );
 
@@ -201,6 +208,7 @@ function provision_drush_command() {
     'description' => 'Restore the site to a previous backup. This will also generate a backup of the site as it was.',
     'arguments' => array(
       'site_backup.tar.gz' => dt('The backup to restore the site to.')),
+    'allow-additional-options' => TRUE,
     'examples' => array(
       'drush @site provision-restore ~/backups/some_site.tar.gz' => 'Restore the site to the backup in ~/backups/some_site.tar.gz.',
     ),
@@ -214,6 +222,7 @@ function provision_drush_command() {
     'options' => array(
       'old_uri' => dt('Old site uri to replace in references to sites/example.com/files/ in the database content.)'),
     ),
+    'allow-additional-options' => TRUE,
     'examples' => array(
       'drush @site provision-deploy ~/backups/some_site.tar.gz' => 'Deploy the site as defined by the site Drush alias, from the backup in ~/backups/some_site.tar.gz.',
     ),
@@ -226,6 +235,7 @@ function provision_drush_command() {
       '@platform_name' => dt('The Drush alias of the platform.')),
     'options' => array(
       'profile' => dt('The Drupal profile to use.')),
+    'allow-additional-options' => TRUE,
     'examples' => array(
       'drush @site provision-migrate @platform_name' => 'Migrate the site as defined by the Drush alias, to the platform as defined by the platform\'s Drush alias',
     ),
@@ -239,6 +249,7 @@ function provision_drush_command() {
       '@platform_name' => dt('The Drush alias of the platform to clone the site onto.')),
     'options' => array(
       'profile' => dt('The Drupal profile to use.')),
+    'allow-additional-options' => TRUE,
     'examples' => array(
       'drush @site provision-clone @new_site @platform_name' => 'Clone the original site to the new site on a platform',
     ),
@@ -249,6 +260,7 @@ function provision_drush_command() {
     'description' => 'Delete a site or platform.',
     'options' => array(
       'force' => dt('Force deletion.')),
+    'allow-additional-options' => TRUE,
     'examples' => array(
       'drush @site provision-delete' => 'Delete the site as defined by the site Drush alias generated with provision-save.',
     ),
@@ -257,6 +269,7 @@ function provision_drush_command() {
 
   $items['provision-login-reset'] = array(
     'description' => 'Generate a one-time login reset URL.',
+    'allow-additional-options' => TRUE,
     'examples' => array(
       'drush @site provision-login-reset' => 'Generate a one-time login reset URL for the site as defined by the site Drush alias generated with provision-save.',
     ),
@@ -269,6 +282,7 @@ function provision_drush_command() {
     'examples' => array(
       'drush @site provision-backup-delete /path/to/site_backup.tgz' => 'Delete a backup of this site as defined by the site Drush alias generated with provision-save.',
     ),
+    'allow-additional-options' => TRUE,
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
 
   );
