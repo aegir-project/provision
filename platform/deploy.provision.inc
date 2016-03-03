@@ -169,7 +169,7 @@ function drush_provision_drupal_provision_deploy() {
  * Implementation of drush_hook_post_COMMAND().
  */
 function drush_provision_drupal_post_provision_deploy() {
-  // call the drush updatedb command.
+  // Call the drush updatedb command.
   provision_backend_invoke(d()->name, 'updatedb');
   // We should be able to fully load Drupal now.
   if (drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL)) {
