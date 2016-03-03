@@ -169,6 +169,13 @@ function drush_provision_drupal_provision_deploy() {
  * Implementation of drush_hook_post_COMMAND().
  */
 function drush_provision_drupal_post_provision_deploy() {
+  // Run registry-rebuild, if available.
+  if (function_exists('drush_registry_rebuild')) {
+    if (drush_drupal_major_version() < 8 && d()->profile != 'hostmaster') {
+      provision_backend_invoke(d()->name, 'registry-rebuild');
+      drush_log(dt('Registry rebuilt in drush_provision_drupal_post_provision_deploy'));
+    }
+  }
   // Call the drush updatedb command.
   provision_backend_invoke(d()->name, 'updatedb');
   // We should be able to fully load Drupal now.

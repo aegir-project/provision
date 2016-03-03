@@ -14,13 +14,6 @@ function drush_provision_drupal_provision_verify_validate() {
     provision_drupal_push_site();
 
     drush_errors_on();
-    $rrFile = d()->root . '/sites/all/modules/registry-rebuild.ini';
-    if (provision_file()->exists($rrFile)->status()) {
-      if (drush_drupal_major_version() < 8 && d()->profile != 'hostmaster') {
-        provision_backend_invoke(d()->name, 'registry-rebuild');
-        drush_log(dt('Completed registry-rebuild without --no-cache-clear option'));
-      }
-    }
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
   }
 }
