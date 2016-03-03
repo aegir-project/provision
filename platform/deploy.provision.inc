@@ -50,8 +50,8 @@ function drush_provision_drupal_provision_deploy_validate($backup_file = null) {
  * Implementation of drush_hook_pre_COMMAND().
  */
 function drush_provision_drupal_pre_provision_deploy($backup_file) {
-  // the url is likely to have changed in the deployment
-  $extracted = provision_file()->extract($backup_file, drush_get_option('extract_path')) 
+  // The url is likely to have changed in the deployment.
+  $extracted = provision_file()->extract($backup_file, drush_get_option('extract_path'))
     ->succeed('Successfully extracted the contents of @path')
     ->fail('Failed to extract the contents of @path to @target', 'PROVISION_BACKUP_EXTRACTION_FAILED')
     ->status();
@@ -139,7 +139,7 @@ function drush_provision_drupal_pre_provision_deploy_rollback() {
   if (drush_get_option('deploy_replace_site', FALSE)) {
     if (drush_get_option('site_dirs_swapped', FALSE)) {
 
-      // swap the site directories back if necessary.
+      // Swap the site directories back if necessary.
       $old = d()->site_path . '.restore';
       $new = d()->site_path;
 
@@ -177,7 +177,7 @@ function drush_provision_drupal_post_provision_deploy() {
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
     _provision_drupal_rebuild_caches();
 
-    // rebuild the node access tables only if necessary
+    // Rebuild the node access tables only if necessary.
     if (!function_exists("node_access_needs_rebuild") || node_access_needs_rebuild()) {
       node_access_rebuild();
       drush_log(dt('Rebuilt node access table'));
@@ -187,7 +187,7 @@ function drush_provision_drupal_post_provision_deploy() {
   }
 
 
-  // remove the restore directory 
+  // Remove the restore directory.
   if (!drush_get_error() && drush_get_option('deploy_replace_site', FALSE)) {
     _provision_recursive_delete(drush_get_option('extract_path'));
   }
