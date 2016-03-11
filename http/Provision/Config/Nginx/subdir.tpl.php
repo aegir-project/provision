@@ -143,6 +143,13 @@ location ^~ /<?php print $subdir; ?> {
   if ($is_denied) {
     return 403;
   }
+
+  ###
+  ### Support for letsencrypt.org per https://tools.ietf.org/html/rfc5785.
+  ###
+  location ^~ /<?php print $subdir; ?>/.well-known/acme-challenge/ {
+    try_files $uri 404;
+  }
 <?php endif; ?>
 
   ###
