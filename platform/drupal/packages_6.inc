@@ -106,6 +106,15 @@ function _provision_drupal_parse_info_file($filename) {
   return $info;
 }
 
+/**
+ * Query the core system for packages of a certain type.
+ *
+ * @param string $type
+ *   E.g. module or theme.
+ *
+ * @return array
+ *   List of packages.
+ */
 function _provision_system_query($type) {
   $entries = array();
   $result = db_query("SELECT * FROM {system} WHERE type='%s'", $type);

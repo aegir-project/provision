@@ -447,6 +447,9 @@ class Provision_FileSystem extends Provision_ChainedState {
       }
       $status = call_user_func($func, $path, $arg) && $status;
     }
+    if (!$status) {
+      drush_log(dt('Failed calling :func on :path.', array(':func' => $func . '()', ':path' => $path)), 'debug');
+    }
     return $status;
   }
 
