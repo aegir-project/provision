@@ -1213,7 +1213,7 @@ location = /index.php {
 <?php if ($nginx_config_mode == 'extended'): ?>
 location ~* ^/(?:core/)?(?:boost_stats|rtoc|js)\.php$ {
 <?php else: ?>
-location ~* ^/(?:index|cron|boost_stats|update|authorize)\.php$ {
+location ~* ^/(?:index|cron|boost_stats|update|authorize|xmlrpc)\.php$ {
 <?php endif; ?>
 <?php if ($satellite_mode == 'boa'): ?>
   limit_conn   limreq 88;
