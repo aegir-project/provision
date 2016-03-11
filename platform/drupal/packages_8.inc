@@ -1,10 +1,11 @@
 <?php
 /**
- * @file Package management code for Drupal 8
+ * @file
+ * Package management code for Drupal 8.
  */
 
 /**
- * Find themes in a certain scope
+ * Find themes in a certain scope.
  *
  * This function is based on _system_theme_data in Drupal 6 and Drupal 7.
  * We do not support, nor need information on subthemes at this point.
@@ -14,8 +15,8 @@ function _provision_drupal_find_themes($scope, $key = '') {
   $files = array();
   $engines = array();
   foreach ($paths as $path) {
-    $files = array_merge($files, drush_scan_directory($path, "/\.info\.yml$/", array('.', '..', 'CVS', '.svn'), 0, true, 'name'));
-    $engines = array_merge($engines, drush_scan_directory($path . "/engines", "/\.engine$/", array('.', '..', 'CVS', '.svn'), 0, true, 'name'));
+    $files = array_merge($files, drush_scan_directory($path, "/\.info\.yml$/", array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name'));
+    $engines = array_merge($engines, drush_scan_directory($path . "/engines", "/\.engine$/", array('.', '..', 'CVS', '.svn'), 0, TRUE, 'name'));
   }
   foreach ($files as $name => $file) {
     $files[$name]->info = Symfony\Component\Yaml\Yaml::parse($file->filename);
@@ -35,7 +36,7 @@ function _provision_drupal_find_themes($scope, $key = '') {
     // @TODO: This is copied from the D7 implementation and I'm almost certain
     // that is doesn't even do anything in D7.
     if (empty($files[$name]->info['engine'])) {
-      $filename = dirname($files[$name]->filename) .'/'. $files[$name]->name .'.theme';
+      $filename = dirname($files[$name]->filename) . '/' . $files[$name]->name . '.theme';
       if (file_exists($filename)) {
         $files[$name]->owner = $filename;
         $files[$name]->prefix = $name;
@@ -54,7 +55,7 @@ function _provision_drupal_find_themes($scope, $key = '') {
 }
 
 /**
- * Map the system table to a packages multi-dimensional array component
+ * Map the system table to a packages multi-dimensional array component.
  */
 function _provision_drupal_system_map() {
   $profiles = _provision_find_profiles();
@@ -70,23 +71,31 @@ function _provision_drupal_system_map() {
   $packages['profiles'][$profile] = $profiles[$profile];
   $packages['profiles'][$profile]->status = 1;
 
-
   $packages['modules'] = _provision_system_query('module');
-  drush_log(dt("Found !count modules", array('!count' => sizeof($packages['modules']))));
+  drush_log(dt("Found !count modules", array('!count' => count($packages['modules']))));
 
   $packages['themes'] = _provision_system_query('theme');
-  drush_log(dt("Found !count themes", array('!count' => sizeof($packages['themes']))));
+  drush_log(dt("Found !count themes", array('!count' => count($packages['themes']))));
 
   return $packages;
 }
 
+/**
+ * Query the core system for packages of a certain type.
+ *
+ * @param string $type
+ *   E.g. module or theme.
+ *
+ * @return array
+ *   List of packages.
+ */
 function _provision_system_query($type) {
   $packages = array();
   foreach (system_get_info($type) as $name => $package) {
     $package = (object) $package;
     $package->filename = drupal_get_filename($type, $name);
     $frags = explode("/", $package->filename);
-    // flag site-specific packages
+    // Flag site-specific packages.
     if ($frags[0] == 'sites' && $frags[1] != 'all') {
       $package->platform = -1;
     }
