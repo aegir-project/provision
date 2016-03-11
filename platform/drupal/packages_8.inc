@@ -59,7 +59,7 @@ function _provision_drupal_find_themes($scope, $key = '') {
 function _provision_drupal_system_map() {
   $profiles = _provision_find_profiles();
   foreach ($profiles as $profile => $info) {
-    if (!$info->version) {
+    if (empty($info->version)) {
       $info->version = drush_drupal_version();
     }
     $profiles[$profile] = $info;
