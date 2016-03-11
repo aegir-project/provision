@@ -887,7 +887,7 @@ location ^~ /<?php print $subdir; ?> {
 <?php if ($nginx_config_mode == 'extended'): ?>
   location ~* ^/<?php print $subdir; ?>/((core/)?(boost_stats|rtoc|js))\.php$ {
 <?php else: ?>
-  location ~* ^/<?php print $subdir; ?>/(cron|boost_stats|update|authorize)\.php$ {
+  location ~* ^/<?php print $subdir; ?>/(cron|boost_stats|update|authorize|xmlrpc)\.php$ {
 <?php endif; ?>
 <?php if ($satellite_mode == 'boa'): ?>
     limit_conn   limreq 88;
