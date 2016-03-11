@@ -22,6 +22,16 @@ function _provision_drupal_find_themes($scope, $key = '') {
     if (!empty($files[$name]->info['name'])) {
       $files[$name]->name = $files[$name]->info['name'];
     }
+
+    if (!empty($files[$name]->info['version'])) {
+      $files[$name]->version = $files[$name]->info['version'];
+    }
+
+    // Resolve the 'VERSION' constant used in Git checkouts.
+    if ($files[$name]->version == 'VERSION') {
+      $files[$name]->version = drush_drupal_version();
+    }
+
     // @TODO: This is copied from the D7 implementation and I'm almost certain
     // that is doesn't even do anything in D7.
     if (empty($files[$name]->info['engine'])) {
