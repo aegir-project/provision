@@ -3,7 +3,7 @@
 /**
  * Deploy command implementation
  *
- * This command when called will 
+ * This command when called will
  *   1. Extract the backup that is being deployed to the target folder in the sites directory.
  *   2. Import the drushrc.php details.
  *   3. Do some diagnostics to make sure all the needed packages are available.
@@ -115,12 +115,12 @@ function drush_provision_drupal_pre_provision_deploy($backup_file) {
           }
           else {
             if (($merged_modules[$name]['schema_version'] > 0) && ($module['schema_version'] > $merged_modules[$name]['schema_version'])) {
-              drush_set_error('PROVISION_SCHEMA_UPGRADE_FAILURE', 
-                dt("The version of the !name module found on this platform (!versionB) has a lower Schema version than the one the site has installed (!versionA)", 
+              drush_set_error('PROVISION_SCHEMA_UPGRADE_FAILURE',
+                dt("The version of the !name module found on this platform (!versionB) has a lower Schema version than the one the site has installed (!versionA)",
                 array('!name' => $name, '!versionA' => $module['schema_version'], '!versionB' => $merged_modules[$name]['schema_version'])));
             }
             else {
-              drush_log(dt("Found a valid version of the !name module with schema version !schema_version", 
+              drush_log(dt("Found a valid version of the !name module with schema version !schema_version",
                 array('!name' => $name, '!schema_version' => $merged_modules[$name]['schema_version'])));
             }
           }
@@ -151,7 +151,7 @@ function drush_provision_drupal_pre_provision_deploy_rollback() {
        provision_save_site_data();
     }
   }
-      
+
   if (provision_file()->exists(drush_get_option('extract_path'))->status()) {
     _provision_recursive_delete(drush_get_option('extract_path'));
   }
