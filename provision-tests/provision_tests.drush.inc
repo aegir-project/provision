@@ -101,13 +101,6 @@ function drush_provision_tests_run() {
   drush_provision_tests_remove_site('drupal7-minimal');
 
   // Create some sites and migrate them.
-  drush_provision_tests_install_platform('drupal6', 'drupal6_other');
-  drush_provision_tests_install_site('drupal6', 'drupal6-migrate-drupal6-other', 'default');
-  drush_provision_tests_dl_module_to_site('token', 'drupal6-migrate-drupal6-other');
-  drush_provision_tests_migrate_site('drupal6-migrate-drupal6-other', 'drupal6_other');
-  drush_provision_tests_en_module_on_site('token', 'drupal6-migrate-drupal6-other');
-  drush_provision_tests_remove_site('drupal6-migrate-drupal6-other');
-  drush_provision_tests_remove_platform('drupal6_other');
   drush_provision_tests_install_platform('drupal7', 'drupal7_other');
   drush_provision_tests_install_site('drupal7', 'drupal7-migrate-drupal7-other', 'standard');
   drush_provision_tests_dl_module_to_site('token', 'drupal7-migrate-drupal7-other');
