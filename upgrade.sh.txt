@@ -15,6 +15,7 @@ NEW_DRUSH_VERSION=8.0.0
 # Extra variables, no changes needed for most use-cases.
 DRUSH_DIR=$HOME/drush
 DRUSH=$DRUSH_DIR/drush.php
+MIGRATE_OPTIONS="" # Optional: --working-copy
 
 BACKUP_DIR=$HOME/pre-upgrade-$(date '+%F-%H%M')
 
@@ -190,6 +191,6 @@ drush cache-clear drush
 
 # Start the actual upgrade of Aegir itself.
 cd $OLD_DRUPAL_DIR
-$DRUSH hostmaster-migrate $AEGIR_DOMAIN $DRUPAL_DIR
+$DRUSH hostmaster-migrate $MIGRATE_OPTIONS $AEGIR_DOMAIN $DRUPAL_DIR
 
 # All should be done.
