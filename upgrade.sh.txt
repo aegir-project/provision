@@ -10,11 +10,12 @@
 
 # Basic variables, change before running.
 AEGIR_VERSION="7.x-3.x"
-NEW_DRUSH_VERSION=8.0.0
+NEW_DRUSH_VERSION=8.0.5
 
 # Extra variables, no changes needed for most use-cases.
 DRUSH_DIR=$HOME/drush
 DRUSH=$DRUSH_DIR/drush.php
+MIGRATE_OPTIONS="" # Optional: --working-copy
 
 BACKUP_DIR=$HOME/pre-upgrade-$(date '+%F-%H%M')
 
@@ -117,7 +118,7 @@ fi
 
 msg "This script makes the following assumptions: "
 cat <<EOF
- * you have read http://community.aegirproject.org/upgrading and have prepared the server accordingly
+ * you have read http://docs.aegirproject.org/en/3.x/install/upgrade/ and have prepared the server accordingly
  * you are executing this script as your "aegir" user
  * that the following settings are correct
 
@@ -132,11 +133,24 @@ EOF
 if [ "$NEW_DRUSH_VERSION" != "$CURRENT_DRUSH_VERSION" ]; then
   if [ -w $DRUSH_DIR ]; then
     echo "The version of Drush will be $NEW_DRUSH_VERSION"
+    if prompt_yes_no "Do you want to upgrade Drush to the specified PHAR package?" ; then
+      true
+    else
+      echo "If you wish to upgrade Drush manually you can best abort now and start this script again when ready."
+      echo
+
+      # Set the version equal to not upgrade Drush later in this script.
+      NEW_DRUSH_VERSION=$CURRENT_DRUSH_VERSION
+    fi
   else
     echo "Drush will not be upgraded as its directory is not writable: $DRUSH_DIR"
+    # Set the version equal to not upgrade Drush later in this script.
+    NEW_DRUSH_VERSION=$CURRENT_DRUSH_VERSION
   fi
 else
   msg "Not upgrading Drush, $CURRENT_DRUSH_VERSION will be used."
+  # Set the version equal to not upgrade Drush later in this script.
+  NEW_DRUSH_VERSION=$CURRENT_DRUSH_VERSION
 fi
 
 if prompt_yes_no "Do you want to proceed with the upgrade?" ; then
@@ -148,22 +162,25 @@ fi
 
 mkdir -p $BACKUP_DIR
 
-# Upgrade drush if desired and writable.
+# Upgrade drush if desired.
 if [ "$NEW_DRUSH_VERSION" != "$CURRENT_DRUSH_VERSION" ]; then
-  if [ -w $DRUSH_DIR ]; then
-    if [ -d $DRUSH_DIR ]; then
-      msg "Moving existing drush into $BACKUP_DIR"
-      mv $DRUSH_DIR $BACKUP_DIR
-    fi
-
-    cd $HOME
-    wget http://github.com/drush-ops/drush/archive/${NEW_DRUSH_VERSION}.zip
-    unzip ${NEW_DRUSH_VERSION}.zip
-    rm ${NEW_DRUSH_VERSION}.zip
-    mv drush-$NEW_DRUSH_VERSION $DRUSH_DIR
-  else
-    msg "Drush dir($DRUSH_DIR) is not writable, not upgrading Drush."
+  if [ -d $DRUSH_DIR ]; then
+    msg "Moving existing drush into $BACKUP_DIR"
+    mv $DRUSH_DIR/drush $BACKUP_DIR
   fi
+
+  # Cleanup composer Drush (< 8)
+  if [ -f $HOME/.composer/vendor/bin/drush ]; then
+    mv HOME/.composer/vendor/bin/drush HOME/.composer/vendor/bin/drush-old-$(date +'%Y-%m-%d')
+  fi
+
+  DRUSH_PHAR_URL="https://github.com/drush-ops/drush/releases/download/$NEW_DRUSH_VERSION/drush.phar"
+
+  curl -SsL $DRUSH_PHAR_URL -o drush
+  chmod +x drush
+
+  mv drush $DRUSH_DIR
+
 else
   msg "Not upgrading Drush, $CURRENT_DRUSH_VERSION will be used."
 fi
@@ -190,6 +207,6 @@ drush cache-clear drush
 
 # Start the actual upgrade of Aegir itself.
 cd $OLD_DRUPAL_DIR
-$DRUSH hostmaster-migrate $AEGIR_DOMAIN $DRUPAL_DIR
+$DRUSH hostmaster-migrate $MIGRATE_OPTIONS $AEGIR_DOMAIN $DRUPAL_DIR
 
 # All should be done.
