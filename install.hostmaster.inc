@@ -112,7 +112,7 @@ This script will operate the following changes in your system:
 
 We are making the following assumptions:
  * you have read and are following the install instructions at:
-    http://community.aegirproject.org/installing
+    http://docs.aegirproject.org/en/3.x/install/
  * the FQDN of this machine is valid and resolves
  * you are executing this script as your "aegir" user
 

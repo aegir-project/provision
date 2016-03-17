@@ -7,10 +7,10 @@ managing large websites. Aegir makes it easy to install, upgrade,
 deploy, and backup an entire network of Drupal sites.
 
 The most up to date information regarding the project and its goals
-can be found on the Aegir website and the community portal:
+can be found on the Aegir website and the documentation pages:
 
    http://aegirproject.org
-   http://community.aegirproject.org
+   http://docs.aegirproject.org/
 
 This is the backend of the Aegir hosting system. The front end
 (hostmaster) and the backend (provision) are designed to be run
@@ -20,17 +20,17 @@ downloaded alongside this readme file.
 
 To install Aegir, you should follow the instructions at:
 
-   http://community.aegirproject.org/installing
+   http://docs.aegirproject.org/en/3.x/install/
    
 To upgrade Aegir, follow the instructions at:
 
-   http://community.aegirproject.org/upgrading
+   http://docs.aegirproject.org/en/3.x/install/upgrade
 
 If you have further questions or are having trouble with Aegir,
-check out additional documentation at:
+check out how to reach our community at:
 
-   http://community.aegirproject.org/handbook
+   http://docs.aegirproject.org/en/3.x/community/
 
 Other documentation for developers is also available at:
 
-   http://community.aegirproject.org/developing
+   http://docs.aegirproject.org/en/3.x/extend/
