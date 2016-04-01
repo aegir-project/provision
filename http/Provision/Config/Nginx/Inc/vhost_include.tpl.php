@@ -219,7 +219,6 @@ location = /fpm-ping {
 location = /cron.php {
   tcp_nopush   off;
   keepalive_requests 0;
-  access_log   off;
 <?php if ($satellite_mode == 'boa'): ?>
   allow        127.0.0.1;
   deny         all;
@@ -239,7 +238,6 @@ location = /cron.php {
 ### for running sites cron in Drupal 8.
 ###
 location ^~ /cron/ {
-  access_log   off;
 <?php if ($satellite_mode == 'boa'): ?>
   allow        127.0.0.1;
   deny         all;
