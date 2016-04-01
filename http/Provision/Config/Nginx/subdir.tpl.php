@@ -263,7 +263,6 @@ location ^~ /<?php print $subdir; ?> {
     tcp_nopush   off;
     keepalive_requests 0;
 <?php if ($satellite_mode == 'boa'): ?>
-    access_log   off;
     allow        127.0.0.1;
     deny         all;
 <?php endif; ?>
