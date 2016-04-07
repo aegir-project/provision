@@ -103,7 +103,7 @@ class Provision_Context_server extends Provision_Context {
         $this->setProperty($type_option, $type);
       }
       else {
-        drush_log("Unable to load $type driver for the $service service", 'error');
+        drush_log("Unable to load $type driver for the $service service: Expecting class $className", 'error');
       }
     }
     else {
