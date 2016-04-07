@@ -107,7 +107,9 @@ class Provision_Context_server extends Provision_Context {
       }
     }
     else {
-      drush_log("Driver type not specified for the $service service, provide it with --{$service}_service_type");
+      if ($type != NULL) {
+        drush_log("Driver type not specified for the $service service, provide it with --{$service}_service_type");
+      }
       $this->services[$service] = new Provision_Service_null($this->name);
     }
   }
