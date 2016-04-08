@@ -176,10 +176,8 @@ if [ "$NEW_DRUSH_VERSION" != "$CURRENT_DRUSH_VERSION" ]; then
 
   DRUSH_PHAR_URL="https://github.com/drush-ops/drush/releases/download/$NEW_DRUSH_VERSION/drush.phar"
 
-  curl -SsL $DRUSH_PHAR_URL -o drush
-  chmod +x drush
-
-  mv drush $DRUSH_DIR
+  curl -SsL $DRUSH_PHAR_URL -o $DRUSH_DIR/drush
+  chmod +x $DRUSH_DIR/drush
 
 else
   msg "Not upgrading Drush, $CURRENT_DRUSH_VERSION will be used."

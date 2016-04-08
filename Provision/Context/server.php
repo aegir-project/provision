@@ -103,11 +103,13 @@ class Provision_Context_server extends Provision_Context {
         $this->setProperty($type_option, $type);
       }
       else {
-        drush_log("Unable to load $type driver for the $service service", 'error');
+        drush_log("Unable to load $type driver for the $service service: Expecting class $className", 'error');
       }
     }
     else {
-      drush_log("Driver type not specified for the $service service, provide it with --{$service}_service_type");
+      if ($type != NULL) {
+        drush_log("Driver type not specified for the $service service, provide it with --{$service}_service_type");
+      }
       $this->services[$service] = new Provision_Service_null($this->name);
     }
   }
