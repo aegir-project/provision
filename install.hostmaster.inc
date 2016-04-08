@@ -256,6 +256,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'db_server' => $dbserver,
     'uri' => $site,
     'client_name' => drush_get_option('client_name'),
+    'client_email' => drush_get_option('client_email'),
     'profile' => $profile,
     'drush_aliases' => 'hm',
   ));
