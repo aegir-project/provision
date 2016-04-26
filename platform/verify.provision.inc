@@ -1,7 +1,12 @@
 <?php
 
 /**
- * Provision verify command
+ * @file
+ * Code related to verify tasks.
+ */
+
+/**
+ * Provision verify command.
  *
  * Disable an enabled and installed site
  */
@@ -20,7 +25,7 @@ function drush_provision_drupal_provision_verify_validate() {
 
 
 /**
- * implementation of provision_verify
+ * Implements drush_hook_pre_COMMAND().
  */
 function drush_provision_drupal_pre_provision_verify() {
   if (d()->type === 'server') {
@@ -34,7 +39,7 @@ function drush_provision_drupal_pre_provision_verify() {
       provision_file()->create_dir(d()->include_path, dt('Provision PHP configuration'), 0711);
       if (!provision_file()->exists(d()->include_path . '/global.inc')->succeed('Global configuration file exists')->status()) {
         // Create an empty global.inc so the include doesn't fail with
-        // open_basedir restrictions
+        // open_basedir restrictions.
         $config = new Provision_Config_Global_Settings(d()->name);
         $config->write();
       }
@@ -46,12 +51,12 @@ function drush_provision_drupal_pre_provision_verify() {
     }
   }
   elseif (d()->type === 'platform') {
-    // create a platform from a makefile, if it doesnt already exist and the makefile does.
+    // Create a platform from a makefile, if it doesnt already exist and the makefile does.
     if (!provision_file()->exists(d()->root)->status() && !empty(d()->makefile)) {
       drush_log(dt("Platform path does not exist, fetching from drush makefile"));
       $arguments = array();
       $options = array();
-      // propagate working-copy args downward
+      // Propagate working-copy args downward.
       if (drush_get_option('working-copy') || !empty(d()->make_working_copy)) {
         $options[] = '--working-copy';
       }
@@ -71,7 +76,7 @@ function drush_provision_drupal_pre_provision_verify() {
 
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
     // If we couldn't bootstrap, there's no sense in continuing past this point.
-    if(drush_get_error()) {
+    if (drush_get_error()) {
       return drush_set_error("DRUSH_INVALID_DRUPAL_ROOT",
         "Drush could not bootstrap this platform. Please check the platform directory exists and is readable.");
     }
@@ -113,7 +118,7 @@ function drush_provision_drupal_pre_provision_verify() {
 }
 
 /**
- * Implementation of hook_provision_post_verify
+ * Implements drush_hook_provision_post_COMMAND().
  */
 function drush_provision_drupal_post_provision_verify() {
   if (d()->type === 'site') {
@@ -124,4 +129,3 @@ function drush_provision_drupal_post_provision_verify() {
     drush_include_engine('drupal', 'cron_key');
   }
 }
-
