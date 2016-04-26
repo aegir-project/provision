@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @file
  * Deploy command implementation
  *
  * This command when called will
@@ -16,11 +17,11 @@
  */
 
 /**
- * Make sure we have a valid site being deployd, and that the file being deployd from exists
+ * Make sure we have a valid site being deployd, and that the file being deployd from exists.
  *
  * Implementation of drush_hook_COMMAND_validate().
  */
-function drush_provision_drupal_provision_deploy_validate($backup_file = null) {
+function drush_provision_drupal_provision_deploy_validate($backup_file = NULL) {
   $exists = provision_file()->exists($backup_file)
     ->succeed('Deploying site from @path')
     ->fail('Could not find backup file @path', 'PROVISION_BACKUP_NOT_FOUND')
@@ -45,16 +46,16 @@ function drush_provision_drupal_provision_deploy_validate($backup_file = null) {
 }
 
 /**
- * Make a backup before making any changes, and add extract the file we are restoring from
+ * Make a backup before making any changes, and add extract the file we are restoring from.
  *
  * Implementation of drush_hook_pre_COMMAND().
  */
 function drush_provision_drupal_pre_provision_deploy($backup_file) {
-  // The url is likely to have changed in the deployment.
   $extracted = provision_file()->extract($backup_file, drush_get_option('extract_path'))
     ->succeed('Successfully extracted the contents of @path')
     ->fail('Failed to extract the contents of @path to @target', 'PROVISION_BACKUP_EXTRACTION_FAILED')
     ->status();
+
   if ($extracted) {
     // Make sure the files in the files directory are accessible by the web server.
     provision_file()->chgrp(drush_get_option('extract_path') . '/files', d('@server_master')->web_group, TRUE)
@@ -66,7 +67,6 @@ function drush_provision_drupal_pre_provision_deploy($backup_file) {
     provision_file()->chgrp(drush_get_option('extract_path') . '/private/temp', d('@server_master')->web_group, TRUE)
       ->succeed('Changed group ownership of temp files in <code>@path</code> to @gid')
       ->fail('Could not change group ownership of temp files in <code>@path</code> to @gid');
-
 
     if (drush_get_option('deploy_replace_site', FALSE)) {
       $old = d()->site_path . '.restore';
@@ -80,7 +80,7 @@ function drush_provision_drupal_pre_provision_deploy($backup_file) {
         drush_set_option('site_dirs_swapped', TRUE);
       }
       else {
-        return false;
+        return FALSE;
       }
     }
 
@@ -131,7 +131,7 @@ function drush_provision_drupal_pre_provision_deploy($backup_file) {
 }
 
 /**
- * Remove the extracted site directory
+ * Remove the extracted site directory.
  *
  * Implementation of drush_hook_pre_COMMAND_rollback().
  */
@@ -144,8 +144,8 @@ function drush_provision_drupal_pre_provision_deploy_rollback() {
       $new = d()->site_path;
 
        provision_file()->switch_paths($old, $new)
-        ->succeed('Swapping out the @path1 and @path2 directories was successful.')
-        ->fail('Swapping the @path1 and @path2 directories has failed.', 'DRUSH_PERM_ERROR');
+         ->succeed('Swapping out the @path1 and @path2 directories was successful.')
+         ->fail('Swapping the @path1 and @path2 directories has failed.', 'DRUSH_PERM_ERROR');
 
        _provision_drupal_create_settings_file();
        provision_save_site_data();
@@ -189,10 +189,10 @@ function drush_provision_drupal_post_provision_deploy() {
       node_access_rebuild();
       drush_log(dt('Rebuilt node access table'));
     }
-  } else {
+  }
+  else {
     drush_log("could not bootstrap drupal after updatedb");
   }
-
 
   // Remove the restore directory.
   if (!drush_get_error() && drush_get_option('deploy_replace_site', FALSE)) {
