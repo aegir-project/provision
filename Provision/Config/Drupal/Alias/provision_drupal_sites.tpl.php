@@ -43,4 +43,16 @@ print "<?php \n"; ?>
  * Edit the lines below to define directory aliases. Remove the leading hash
  * signs to enable.
  */
+<?php
+$aliases = d()->aliases;
+// Fix our subdir aliases.
+foreach ($aliases as $alias) {
+  // Only replace the records[] array key if the alias is a subdir alias
+  // Patch for https://drupal.org/node/2213387
+  if(strpos($alias, "/")) {
+    $records[str_replace('/', '.', $alias)] = $records[$alias];
+    unset($records[$alias]);
+  }
+}
+?>
 $sites = <?php print var_export($records, TRUE) ?>;
