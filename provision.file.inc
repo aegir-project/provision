@@ -10,7 +10,7 @@
 include_once('provision.inc');
 
 function provision_file() {
-  static $instance = null;
+  static $instance = NULL;
 
   if (is_null($instance)) {
     $instance = new Provision_FileSystem();

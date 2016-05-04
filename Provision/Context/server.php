@@ -38,7 +38,7 @@ class Provision_Context_server extends Provision_Context {
           $options = array_merge($options, call_user_func(array(sprintf('Provision_Service_%s_%s', $service, $match[1]), 'option_documentation')));
         }
       }
-      $options[$service . '_service_type'] = 'server: ' . implode(', ', $types) . ', or null; default ' . (empty($default) ? 'null' : $default);
+      $options[$service . '_service_type'] = 'server: ' . implode(', ', $types) . ', or NULL; default ' . (empty($default) ? 'NULL' : $default);
     }
     return $options;
   }

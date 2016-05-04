@@ -21,7 +21,7 @@
  *   $allow_creation == FALSE.
  */
 function & d($name = NULL, $_root_object = FALSE, $allow_creation = TRUE) {
-  static $instances = null;
+  static $instances = NULL;
   static $default_instance = '@self';
 
   /*

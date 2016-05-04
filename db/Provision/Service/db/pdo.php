@@ -35,7 +35,7 @@ class Provision_Service_db_pdo extends Provision_Service_db {
   }
 
   function close() {
-    $this->conn = null;
+    $this->conn = NULL;
   }
 
   function query($query) {

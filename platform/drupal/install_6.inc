@@ -312,7 +312,7 @@ function install_main() {
       // stop batch api from re-directing. ever.
       $batch =& batch_get();
       $batch['progressive'] = FALSE;
-      $batch['redirect'] = null;
+      $batch['redirect'] = NULL;
       $batch['operations'] = array();
       $batch['url'] = 'batch';
       batch_set($batch);
