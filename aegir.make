@@ -4,8 +4,6 @@
 core = 7.x
 api = 2
 
-; BOA-3.0.0-dev
-
 projects[drupal][type] = "core"
 projects[drupal][download][type] = "copy"
 projects[drupal][download][url] = "/opt/tmp/make_local/drupal"
