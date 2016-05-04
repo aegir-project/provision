@@ -27,7 +27,7 @@ class Provision_Service_db_pdo extends Provision_Service_db {
       return drush_set_error('PROVISION_DB_CONNECT_FAIL', $e->getMessage());
     }
   }
-  
+
   function ensure_connected() {
     if (is_null($this->conn)) {
       $this->connect();
@@ -47,14 +47,14 @@ class Provision_Service_db_pdo extends Provision_Service_db {
     $this->ensure_connected();
     $this->query_callback($args, TRUE);
     $query = preg_replace_callback(PROVISION_QUERY_REGEXP, array($this, 'query_callback'), $query);
-    
+
     try {
       $result = $this->conn->query($query);
     }
     catch (PDOException $e) {
       drush_log($e->getMessage(), 'warning');
       return FALSE;
-    } 
+    }
 
     return $result;
 
@@ -81,7 +81,7 @@ class Provision_Service_db_pdo extends Provision_Service_db {
     }
 
   }
-  
+
   function database_exists($name) {
     $dsn = $this->dsn . ';dbname=' . $name;
     try {
