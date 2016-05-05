@@ -148,7 +148,7 @@ We are making the following assumptions:
  */
 function drush_provision_pre_hostmaster_migrate($site, $platform) {
   // we ignore errors here through integrate = FALSE
-  provision_backend_invoke(drush_get_option('site_name'), 'hosting-pause', array(), array('#integrate' => FALSE));
+  // provision_backend_invoke(drush_get_option('site_name'), 'hosting-pause', array(), array('#integrate' => FALSE));
 }
 
 function drush_provision_hostmaster_migrate($site, $platform) {
