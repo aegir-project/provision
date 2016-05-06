@@ -251,7 +251,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
     fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
-    fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
+    fastcgi_param  HTTP_HOST           <?php print $this->uri; ?>;
     fastcgi_param  RAW_HOST            $host;
     fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
     fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
@@ -714,7 +714,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
     fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
-    fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
+    fastcgi_param  HTTP_HOST           <?php print $this->uri; ?>;
     fastcgi_param  RAW_HOST            $host;
     fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
     fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
@@ -913,7 +913,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
     fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
-    fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
+    fastcgi_param  HTTP_HOST           <?php print $this->uri; ?>;
     fastcgi_param  RAW_HOST            $host;
     fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
     fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
@@ -989,7 +989,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
     fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
-    fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
+    fastcgi_param  HTTP_HOST           <?php print $this->uri; ?>;
     fastcgi_param  RAW_HOST            $host;
     fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
     fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
@@ -1133,7 +1133,7 @@ location @allowupdate_<?php print $subdir_loc; ?> {
   fastcgi_param db_host   <?php print urlencode($db_host); ?>;
   fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
-  fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
+  fastcgi_param  HTTP_HOST           <?php print $this->uri; ?>;
   fastcgi_param  RAW_HOST            $host;
   fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
   fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
