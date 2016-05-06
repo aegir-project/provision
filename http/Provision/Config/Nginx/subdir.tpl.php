@@ -19,6 +19,8 @@ $satellite_mode = drush_get_option('satellite_mode');
 if (!$satellite_mode && $server->satellite_mode) {
   $satellite_mode = $server->satellite_mode;
 }
+$subdir_loc = str_replace('/', '_', $subdir);
+$subdir_dot = str_replace('/', '.', $subdir);
 ?>
 <?php
   // If any of those parameters is empty for any reason, like after an attempt
@@ -76,7 +78,7 @@ location ^~ /<?php print $subdir; ?>/sites/default/files {
     add_header Access-Control-Allow-Origin *;
     set $nocache_details "Skip";
     rewrite ^/<?php print $subdir; ?>/sites/default/files/imagecache/(.*)$ /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/imagecache/$1 last;
-    try_files  $uri @drupal_<?php print $subdir; ?>;
+    try_files  $uri @drupal_<?php print $subdir_loc; ?>;
   }
   location ~* ^/<?php print $subdir; ?>/sites/default/files/styles {
     access_log off;
@@ -85,7 +87,7 @@ location ^~ /<?php print $subdir; ?>/sites/default/files {
     add_header Access-Control-Allow-Origin *;
     set $nocache_details "Skip";
     rewrite ^/<?php print $subdir; ?>/sites/default/files/styles/(.*)$ /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/styles/$1 last;
-    try_files  $uri @drupal_<?php print $subdir; ?>;
+    try_files  $uri @drupal_<?php print $subdir_loc; ?>;
   }
   location ~* ^/<?php print $subdir; ?>/sites/default/files {
     access_log off;
@@ -160,7 +162,7 @@ location ^~ /<?php print $subdir; ?> {
       access_log off;
       add_header X-Header "HTTPRL 2.0";
       set $nocache_details "Skip";
-      try_files /httprl_async_function_callback $uri @nobots_<?php print $subdir; ?>;
+      try_files /httprl_async_function_callback $uri @nobots_<?php print $subdir_loc; ?>;
     }
   }
 
@@ -172,7 +174,7 @@ location ^~ /<?php print $subdir; ?> {
       access_log off;
       add_header X-Header "HTTPRL 2.1";
       set $nocache_details "Skip";
-      try_files /admin/httprl-test $uri @nobots_<?php print $subdir; ?>;
+      try_files /admin/httprl-test $uri @nobots_<?php print $subdir_loc; ?>;
     }
   }
 
@@ -194,7 +196,7 @@ location ^~ /<?php print $subdir; ?> {
       add_header Cache-Control "no-transform, public";
       add_header Last-Modified "Wed, 20 Jan 1988 04:20:42 GMT";
       rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
-      try_files /$1 $uri @nobots_<?php print $subdir; ?>;
+      try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
     }
     location ~* ^/<?php print $subdir; ?>/(cdn/farfuture/) {
       expires epoch;
@@ -202,9 +204,9 @@ location ^~ /<?php print $subdir; ?> {
       add_header X-Header "CDN Far Future Generator 1.1";
       add_header Cache-Control "private, must-revalidate, proxy-revalidate";
       rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
-      try_files /$1 $uri @nobots_<?php print $subdir; ?>;
+      try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
     }
-    try_files $uri @nobots_<?php print $subdir; ?>;
+    try_files $uri @nobots_<?php print $subdir_loc; ?>;
   }
 <?php endif; ?>
 
@@ -227,9 +229,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log    off;
     log_not_found off;
 <?php if ($nginx_config_mode == 'extended'): ?>
-    try_files /sites/$subdir_main_site_name/files/$host.robots.txt /sites/$subdir_main_site_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @cache_<?php print $subdir; ?>;
+    try_files /sites/$subdir_main_site_name/files/$host.robots.txt /sites/$subdir_main_site_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @cache_<?php print $subdir_loc; ?>;
 <?php else: ?>
-    try_files /sites/$subdir_main_site_name/files/$host.robots.txt /sites/$subdir_main_site_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @drupal_<?php print $subdir; ?>;
+    try_files /sites/$subdir_main_site_name/files/$host.robots.txt /sites/$subdir_main_site_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @drupal_<?php print $subdir_loc; ?>;
 <?php endif; ?>
   }
 
@@ -249,7 +251,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
     fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
-    fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
+    fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
     fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
     fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
@@ -286,7 +288,7 @@ location ^~ /<?php print $subdir; ?> {
     allow        127.0.0.1;
     deny         all;
 <?php endif; ?>
-    try_files    $uri @drupal_<?php print $subdir; ?>;
+    try_files    $uri @drupal_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -298,7 +300,7 @@ location ^~ /<?php print $subdir; ?> {
       if ($is_bot) {
         return 403;
       }
-      try_files /search $uri @cache_<?php print $subdir; ?>;
+      try_files /search $uri @cache_<?php print $subdir_loc; ?>;
     }
   }
 
@@ -358,7 +360,7 @@ location ^~ /<?php print $subdir; ?> {
     }
     access_log off;
     set $nocache_details "Skip";
-    try_files /admin $uri @drupal_<?php print $subdir; ?>;
+    try_files /admin $uri @drupal_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -369,7 +371,7 @@ location ^~ /<?php print $subdir; ?> {
       return 403;
     }
     set $nocache_details "Skip";
-    try_files /civicrm $uri @drupal_<?php print $subdir; ?>;
+    try_files /civicrm $uri @drupal_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -383,7 +385,7 @@ location ^~ /<?php print $subdir; ?> {
       tcp_nopush off;
       access_log off;
       set $nocache_details "Skip";
-      try_files /$1 $uri @drupal_<?php print $subdir; ?>;
+      try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
     }
   }
 <?php endif; ?>
@@ -425,7 +427,7 @@ location ^~ /<?php print $subdir; ?> {
     access_log off;
     add_header X-Header "RI Generator 1.0";
     set $nocache_details "Skip";
-    try_files  $uri @drupal_<?php print $subdir; ?>;
+    try_files  $uri @drupal_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -440,7 +442,7 @@ location ^~ /<?php print $subdir; ?> {
     add_header Access-Control-Allow-Origin *;
     add_header X-Header "AIS Generator 1.0";
     set $nocache_details "Skip";
-    try_files  $uri @drupal_<?php print $subdir; ?>;
+    try_files  $uri @drupal_<?php print $subdir_loc; ?>;
   }
 <?php endif; ?>
 
@@ -461,7 +463,7 @@ location ^~ /<?php print $subdir; ?> {
       set $nocache_details "Skip";
 <?php endif; ?>
       rewrite  ^/<?php print $subdir; ?>/files/(.*)$  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/$1 last;
-      try_files  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/styles/$1 $uri @drupal_<?php print $subdir; ?>;
+      try_files  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/styles/$1 $uri @drupal_<?php print $subdir_loc; ?>;
     }
 
     ###
@@ -479,7 +481,7 @@ location ^~ /<?php print $subdir; ?> {
       set $nocache_details "Skip";
 <?php endif; ?>
       rewrite  ^/<?php print $subdir; ?>/files/(.*)$  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/$1 last;
-      try_files  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/imagecache/$1 $uri @drupal_<?php print $subdir; ?>;
+      try_files  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/imagecache/$1 $uri @drupal_<?php print $subdir_loc; ?>;
     }
 
     location ~* ^.+\.(?:pdf|jpe?g|gif|png|ico|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rtf|cgi|bat|pl|dll|class|otf|ttf|woff|eot|less|avi|mpe?g|mov|wmv|mp3|ogg|ogv|wav|midi|zip|tar|t?gz|rar|dmg|exe|apk|pxl|ipa)$ {
@@ -492,9 +494,9 @@ location ^~ /<?php print $subdir; ?> {
       try_files   $uri =404;
     }
 <?php if ($nginx_config_mode == 'extended'): ?>
-    try_files $uri @cache_<?php print $subdir; ?>;
+    try_files $uri @cache_<?php print $subdir_loc; ?>;
 <?php else: ?>
-    try_files $uri @drupal_<?php print $subdir; ?>;
+    try_files $uri @drupal_<?php print $subdir_loc; ?>;
 <?php endif; ?>
   }
 
@@ -510,7 +512,7 @@ location ^~ /<?php print $subdir; ?> {
 <?php if ($nginx_config_mode == 'extended'): ?>
     set $nocache_details "Skip";
 <?php endif; ?>
-    try_files  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/styles/$1 $uri @drupal_<?php print $subdir; ?>;
+    try_files  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/styles/$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -525,7 +527,7 @@ location ^~ /<?php print $subdir; ?> {
     add_header X-Header "IC Generator 1.0";
     set $nocache_details "Skip";
 <?php endif; ?>
-    try_files /$1 $uri @drupal_<?php print $subdir; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -557,7 +559,7 @@ location ^~ /<?php print $subdir; ?> {
     rewrite    ^/<?php print $subdir; ?>/sites/.*/files/private/(.*)$ $scheme://$host/<?php print $subdir; ?>/system/files/private/$1 permanent;
     add_header X-Header "Private Generator 1.0a";
     set $nocache_details "Skip";
-    try_files /$1 $uri @drupal_<?php print $subdir; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
 <?php endif; ?>
 
@@ -594,7 +596,7 @@ location ^~ /<?php print $subdir; ?> {
   location ~* ^/<?php print $subdir; ?>/(.*/wysiwyg_fields/(?:plugins|scripts)/.*\.(?:js|css)) {
     access_log off;
     log_not_found off;
-    try_files /$1 $uri @nobots_<?php print $subdir; ?>;
+    try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -612,7 +614,7 @@ location ^~ /<?php print $subdir; ?> {
     add_header Access-Control-Allow-Origin *;
     add_header X-Header "AdvAgg Generator 2.0";
     set $nocache_details "Skip";
-    try_files /$1 $uri @nobots_<?php print $subdir; ?>;
+    try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -653,7 +655,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Support for dynamic .json requests.
   ###
   location ~* (.*\.json)$ {
-    try_files /$1 $uri @cache_<?php print $subdir; ?>;
+    try_files /$1 $uri @cache_<?php print $subdir_loc; ?>;
   }
 <?php endif; ?>
 
@@ -712,7 +714,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
     fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
-    fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
+    fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
     fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
     fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
@@ -750,9 +752,9 @@ location ^~ /<?php print $subdir; ?> {
     log_not_found off;
 <?php if ($nginx_config_mode == 'extended'): ?>
     set $nocache_details "Skip";
-    try_files /$1 $uri @nobots_<?php print $subdir; ?>;
+    try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
 <?php else: ?>
-    try_files /$1 $uri @drupal_<?php print $subdir; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
 <?php endif; ?>
   }
 
@@ -796,7 +798,7 @@ location ^~ /<?php print $subdir; ?> {
     if ( $cache_uid ) {
       return 405;
     }
-    error_page 405 = @drupal_<?php print $subdir; ?>;
+    error_page 405 = @drupal_<?php print $subdir_loc; ?>;
     access_log off;
     add_header Expires "Tue, 24 Jan 1984 08:00:00 GMT";
     add_header Cache-Control "must-revalidate, post-check=0, pre-check=0";
@@ -804,7 +806,7 @@ location ^~ /<?php print $subdir; ?> {
     charset    utf-8;
     types { }
     default_type text/xml;
-    try_files /cache/normal/$host${uri}_.xml /cache/normal/$host${uri}_.html /$1 $uri @drupal_<?php print $subdir; ?>;
+    try_files /cache/normal/$host${uri}_.xml /cache/normal/$host${uri}_.html /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -816,7 +818,7 @@ location ^~ /<?php print $subdir; ?> {
     }
     access_log off;
     set $nocache_details "Skip";
-    try_files /$1 $uri @drupal_<?php print $subdir; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -828,7 +830,7 @@ location ^~ /<?php print $subdir; ?> {
     }
     access_log off;
     set $nocache_details "Skip";
-    try_files /$1 $uri @drupal_<?php print $subdir; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -843,7 +845,7 @@ location ^~ /<?php print $subdir; ?> {
     }
     access_log off;
     set $nocache_details "Skip";
-    try_files /$1 $uri @drupal_<?php print $subdir; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
 <?php endif; ?>
 
@@ -854,7 +856,7 @@ location ^~ /<?php print $subdir; ?> {
   if ( $args ~* "/autocomplete/" ) {
     return 405;
   }
-  error_page 405 = @drupal_<?php print $subdir; ?>;
+  error_page 405 = @drupal_<?php print $subdir_loc; ?>;
 
   ###
   ### Rewrite legacy requests with /index.php to extension-free URL.
@@ -881,9 +883,9 @@ location ^~ /<?php print $subdir; ?> {
     return 403;
   }
 <?php endif; ?>
-    try_files $uri @cache_<?php print $subdir; ?>;
+    try_files $uri @cache_<?php print $subdir_loc; ?>;
 <?php else: ?>
-    try_files $uri @drupal_<?php print $subdir; ?>;
+    try_files $uri @drupal_<?php print $subdir_loc; ?>;
 <?php endif; ?>
   }
 
@@ -911,7 +913,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
     fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
-    fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
+    fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
     fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
     fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
@@ -941,7 +943,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ~* ^/<?php print $subdir; ?>/((?:core/)?(authorize|update))\.php$ {
     set $real_fastcgi_script_name $1.php;
-    error_page 418 = @allowupdate_<?php print $subdir; ?>;
+    error_page 418 = @allowupdate_<?php print $subdir_loc; ?>;
     if ( $cache_uid ) {
       return 418;
     }
@@ -987,7 +989,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_param db_host   <?php print urlencode($db_host); ?>;
     fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
-    fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
+    fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
     fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
     fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
@@ -1054,7 +1056,7 @@ location ^~ /<?php print $subdir; ?> {
 ###
 ### Boost compatible cache check.
 ###
-location @cache_<?php print $subdir; ?> {
+location @cache_<?php print $subdir_loc; ?> {
   if ( $request_method = POST ) {
     set $nocache_details "Method";
     return 405;
@@ -1075,21 +1077,21 @@ location @cache_<?php print $subdir; ?> {
     set $nocache_details "DrupalCookie";
     return 405;
   }
-  error_page 405 = @drupal_<?php print $subdir; ?>;
+  error_page 405 = @drupal_<?php print $subdir_loc; ?>;
   add_header Expires "Tue, 24 Jan 1984 08:00:00 GMT";
   add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   add_header X-Header "Boost Citrus 1.9";
   charset    utf-8;
-  try_files  /cache/normal/$host${uri}_$args.html @drupal_<?php print $subdir; ?>;
+  try_files  /cache/normal/$host${uri}_$args.html @drupal_<?php print $subdir_loc; ?>;
 }
 <?php endif; ?>
 
 ###
 ### Send all not cached requests to drupal with clean URLs support.
 ###
-location @drupal_<?php print $subdir; ?> {
+location @drupal_<?php print $subdir_loc; ?> {
 <?php if ($nginx_config_mode == 'extended'): ?>
-  error_page 418 = @nobots_<?php print $subdir; ?>;
+  error_page 418 = @nobots_<?php print $subdir_loc; ?>;
   if ($args) {
     return 418;
   }
@@ -1101,7 +1103,7 @@ location @drupal_<?php print $subdir; ?> {
 ###
 ### Send all known bots to $args free URLs.
 ###
-location @nobots_<?php print $subdir; ?> {
+location @nobots_<?php print $subdir_loc; ?> {
   if ($is_bot) {
     rewrite ^ $scheme://$host$request_uri? permanent;
   }
@@ -1118,7 +1120,7 @@ location @nobots_<?php print $subdir; ?> {
 ###
 ### Internal location for /authorize.php and /update.php restricted access.
 ###
-location @allowupdate_<?php print $subdir; ?> {
+location @allowupdate_<?php print $subdir_loc; ?> {
 <?php if ($satellite_mode == 'boa'): ?>
   limit_conn   limreq 88;
 <?php endif; ?>
@@ -1131,7 +1133,7 @@ location @allowupdate_<?php print $subdir; ?> {
   fastcgi_param db_host   <?php print urlencode($db_host); ?>;
   fastcgi_param db_port   <?php print urlencode($db_port); ?>;
 
-  fastcgi_param  HTTP_HOST           <?php print $subdir; ?>.$host;
+  fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
   fastcgi_param  RAW_HOST            $host;
   fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
   fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
