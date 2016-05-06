@@ -56,6 +56,7 @@ class Provision_Config_Nginx_Subdir extends Provision_Config_Http {
   }
 
   function filename() {
-    return $this->data['http_subdird_path'] . '/' . $this->uri() . '/' . $this->subdir() . '.conf';
+    $filename = str_replace('/', '_', $this->subdir());
+    return $this->data['http_subdird_path'] . '/' . $this->uri() . '/' . $filename . '.conf';
   }
 }
