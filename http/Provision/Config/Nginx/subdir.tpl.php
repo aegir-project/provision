@@ -253,7 +253,7 @@ location ^~ /<?php print $subdir; ?> {
 
     fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
-    fastcgi_param  SITE_SUBDIR         <?php print $subdir_dot; ?>;
+    fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
     fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
 
     fastcgi_param  REDIRECT_STATUS     200;
@@ -716,7 +716,7 @@ location ^~ /<?php print $subdir; ?> {
 
     fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
-    fastcgi_param  SITE_SUBDIR         <?php print $subdir_dot; ?>;
+    fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
     fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
 
     fastcgi_param  REDIRECT_STATUS     200;
@@ -915,7 +915,7 @@ location ^~ /<?php print $subdir; ?> {
 
     fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
-    fastcgi_param  SITE_SUBDIR         <?php print $subdir_dot; ?>;
+    fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
     fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
 
     fastcgi_param  REDIRECT_STATUS     200;
@@ -991,7 +991,7 @@ location ^~ /<?php print $subdir; ?> {
 
     fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
     fastcgi_param  RAW_HOST            $host;
-    fastcgi_param  SITE_SUBDIR         <?php print $subdir_dot; ?>;
+    fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
     fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
 
     fastcgi_param  REDIRECT_STATUS     200;
@@ -1136,7 +1136,7 @@ location @allowupdate_<?php print $subdir_loc; ?> {
 
   fastcgi_param  HTTP_HOST           <?php print $subdir_dot; ?>.$host;
   fastcgi_param  RAW_HOST            $host;
-  fastcgi_param  SITE_SUBDIR         <?php print $subdir_dot; ?>;
+  fastcgi_param  SITE_SUBDIR         <?php print $subdir; ?>;
   fastcgi_param  MAIN_SITE_NAME      <?php print $this->uri; ?>;
 
   fastcgi_param  REDIRECT_STATUS     200;
