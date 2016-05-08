@@ -94,6 +94,19 @@ rewrite ^/index.php/(.*)$ $scheme://$host/$1 permanent;
 ### Include high level local configuration override if exists.
 ###
 include /data/disk/EDIT_USER/config/server_master/nginx/post.d/nginx_force_include*;
+
+###
+### Include PHP-FPM version override logic if exists.
+###
+include /data/disk/EDIT_USER/config/server_master/nginx/post.d/fpm_include*;
+
+###
+### Allow to use non-default PHP-FPM version for the site
+### listed in the special include file.
+###
+if ($user_socket = '') {
+  set $user_socket "EDIT_USER";
+}
 <?php endif; ?>
 
 ###
@@ -186,7 +199,7 @@ location = /fpm-status {
   allow        127.0.0.1;
   deny         all;
 <?php if ($satellite_mode == 'boa'): ?>
-  fastcgi_pass unix:/var/run/www56.fpm.socket;
+  fastcgi_pass unix:/var/run/$user_socket.fpm.socket;
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
@@ -202,7 +215,7 @@ location = /fpm-ping {
   allow        127.0.0.1;
   deny         all;
 <?php if ($satellite_mode == 'boa'): ?>
-  fastcgi_pass unix:/var/run/www56.fpm.socket;
+  fastcgi_pass unix:/var/run/$user_socket.fpm.socket;
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
@@ -225,7 +238,7 @@ location = /cron.php {
 <?php endif; ?>
   try_files    $uri =404;
 <?php if ($satellite_mode == 'boa'): ?>
-  fastcgi_pass unix:/var/run/www56.fpm.socket;
+  fastcgi_pass unix:/var/run/$user_socket.fpm.socket;
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
@@ -874,7 +887,7 @@ location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tin
   }
   try_files    $uri =404;
 <?php if ($satellite_mode == 'boa'): ?>
-  fastcgi_pass unix:/var/run/www56.fpm.socket;
+  fastcgi_pass unix:/var/run/$user_socket.fpm.socket;
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
@@ -1025,7 +1038,7 @@ location ~ ^/(?<esi>esi/.*)"$ {
   fastcgi_param QUERY_STRING q=$esi;
   fastcgi_param SCRIPT_FILENAME $document_root/index.php;
 <?php if ($satellite_mode == 'boa'): ?>
-  fastcgi_pass  unix:/var/run/www56.fpm.socket;
+  fastcgi_pass  unix:/var/run/$user_socket.fpm.socket;
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass  127.0.0.1:9000;
 <?php else: ?>
@@ -1179,7 +1192,7 @@ location = /index.php {
   keepalive_requests 0;
   try_files     $uri =404; ### check for existence of php file first
 <?php if ($satellite_mode == 'boa'): ?>
-  fastcgi_pass  unix:/var/run/www56.fpm.socket;
+  fastcgi_pass  unix:/var/run/$user_socket.fpm.socket;
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass  127.0.0.1:9000;
 <?php else: ?>
@@ -1233,7 +1246,7 @@ location ~* ^/(?:index|cron|boost_stats|update|authorize|xmlrpc)\.php$ {
   access_log   off;
   try_files    $uri =404; ### check for existence of php file first
 <?php if ($satellite_mode == 'boa'): ?>
-  fastcgi_pass unix:/var/run/www56.fpm.socket;
+  fastcgi_pass unix:/var/run/$user_socket.fpm.socket;
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
@@ -1263,7 +1276,7 @@ location @allowupdate {
   access_log   off;
   try_files    $uri =404; ### check for existence of php file first
 <?php if ($satellite_mode == 'boa'): ?>
-  fastcgi_pass unix:/var/run/www56.fpm.socket;
+  fastcgi_pass unix:/var/run/$user_socket.fpm.socket;
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
