@@ -129,6 +129,19 @@ location ^~ /<?php print $subdir; ?> {
   ### Include high load protection config if exists.
   ###
   include /data/conf/nginx_high_load.c*;
+
+  ###
+  ### Include PHP-FPM version override logic if exists.
+  ###
+  include /data/disk/EDIT_USER/config/server_master/nginx/post.d/fpm_include*;
+
+  ###
+  ### Allow to use non-default PHP-FPM version for the site
+  ### listed in the special include file.
+  ###
+  if ($user_socket = '') {
+    set $user_socket "EDIT_USER";
+  }
 <?php endif; ?>
 
   ###
@@ -270,7 +283,7 @@ location ^~ /<?php print $subdir; ?> {
 <?php endif; ?>
     try_files    /cron.php $uri =404;
 <?php if ($satellite_mode == 'boa'): ?>
-    fastcgi_pass unix:/var/run/www53.fpm.socket;
+    fastcgi_pass unix:/var/run/$user_socket.fpm.socket;
 <?php elseif ($phpfpm_mode == 'port'): ?>
     fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
@@ -393,7 +406,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   ### Deny listed requests for security reasons.
   ###
-  location ~* (/\..*|settings\.php$|\.(?:git|htaccess|engine|make|config|inc|ini|info|install|module|profile|pl|po|sh|.*sql|theme|tpl(?:\.php)?|xtmpl)$|^(?:Entries.*|Repository|Root|Tag|Template))$ {
+  location ~* (\.(?:git|htaccess|engine|config|inc|ini|info|install|make|module|profile|test|pl|po|sh|.*sql|theme|tpl(\.php)?|xtmpl)(~|\.sw[op]|\.bak|\.orig|\.save)?$|^(\..*|Entries.*|Repository|Root|Tag|Template|composer\.(json|lock))$|^#.*#$|\.php(~|\.sw[op]|\.bak|\.orig\.save))$ {
     access_log off;
     return 404;
   }
@@ -733,7 +746,7 @@ location ^~ /<?php print $subdir; ?> {
     }
     try_files    /$1 $uri =404;
 <?php if ($satellite_mode == 'boa'): ?>
-    fastcgi_pass unix:/var/run/www53.fpm.socket;
+    fastcgi_pass unix:/var/run/$user_socket.fpm.socket;
 <?php elseif ($phpfpm_mode == 'port'): ?>
     fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
@@ -929,7 +942,7 @@ location ^~ /<?php print $subdir; ?> {
     access_log   off;
     try_files    /$1.php =404; ### check for existence of php file first
 <?php if ($satellite_mode == 'boa'): ?>
-    fastcgi_pass unix:/var/run/www53.fpm.socket;
+    fastcgi_pass unix:/var/run/$user_socket.fpm.socket;
 <?php elseif ($phpfpm_mode == 'port'): ?>
     fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
@@ -1005,7 +1018,7 @@ location ^~ /<?php print $subdir; ?> {
     keepalive_requests 0;
     try_files     /index.php =404; ### check for existence of php file first
 <?php if ($satellite_mode == 'boa'): ?>
-    fastcgi_pass  unix:/var/run/www53.fpm.socket;
+    fastcgi_pass  unix:/var/run/$user_socket.fpm.socket;
 <?php elseif ($phpfpm_mode == 'port'): ?>
     fastcgi_pass  127.0.0.1:9000;
 <?php else: ?>
@@ -1030,6 +1043,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_cache_valid 302 1m;
     fastcgi_cache_valid 301 403 404 5s;
     fastcgi_cache_valid 500 502 503 504 1s;
+    fastcgi_cache_lock on;
     fastcgi_ignore_headers Cache-Control Expires;
     fastcgi_pass_header Set-Cookie;
     fastcgi_pass_header X-Accel-Expires;
@@ -1149,7 +1163,7 @@ location @allowupdate_<?php print $subdir_loc; ?> {
   try_files    /$real_fastcgi_script_name =404; ### check for existence of php file first
 
 <?php if ($satellite_mode == 'boa'): ?>
-  fastcgi_pass unix:/var/run/www53.fpm.socket;
+  fastcgi_pass unix:/var/run/$user_socket.fpm.socket;
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
