@@ -35,6 +35,7 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     parent::init_server();
     // Replace the server config with our own. See the class for more info.
     $this->configs['server'][] = 'Provision_Config_Nginx_Ssl_Server';
+    $this->configs['server'][] = 'Provision_Config_Nginx_Inc_Server';
     $this->configs['site'][] = 'Provision_Config_Nginx_Ssl_Site';
     $this->server->setProperty('nginx_config_mode', 'extended');
     $this->server->setProperty('nginx_is_modern', FALSE);
