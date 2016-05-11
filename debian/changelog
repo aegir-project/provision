@@ -1,3 +1,10 @@
+aegir3-provision (3.5~rc1) unstable; urgency=medium
+
+  * Sixth stable release of the 3.x series.
+  * Bugfixes all round, see: http://aegir.readthedocs.org/en/3.x/release-notes/3.5
+
+ -- Herman van Rink <helmo@initfour.nl>  Wed, 11 May 2016 18:38:50 +0200
+
 aegir3-provision (3.4) unstable; urgency=medium
 
   * Fifth stable release of the 3.x series.

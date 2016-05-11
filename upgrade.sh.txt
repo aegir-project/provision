@@ -9,7 +9,7 @@
 ########################################################################
 
 # Basic variables, change before running.
-AEGIR_VERSION="7.x-3.x"
+AEGIR_VERSION="7.x-3.5-rc1"
 NEW_DRUSH_VERSION=8.0.5
 
 # Extra variables, no changes needed for most use-cases.
