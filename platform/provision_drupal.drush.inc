@@ -564,6 +564,12 @@ function _provision_find_profiles() {
           continue;
         }
         $profile->info = Symfony\Component\Yaml\Yaml::parse($yaml_file);
+
+        // Skip hidden profiles.
+        if (isset($profile->info['hidden']) && $profile->info['hidden'] == 1) {
+          continue;
+        }
+
         if (!empty($profile->info['name'])) {
           $profile->name = $profile->info['name'];
         }
