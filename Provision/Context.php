@@ -85,7 +85,7 @@ class Provision_Context {
    * Check the properties array if the property does not exist in the class proper.
    */
   function __isset($name) {
-    return isset($this->properties[$name]) || property_exists($this, $name);
+    return $name === 'options' || isset($this->properties[$name]) || property_exists($this, $name);
   }
 
   /**
