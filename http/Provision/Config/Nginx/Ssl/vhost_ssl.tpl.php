@@ -4,7 +4,7 @@
 <?php if ($this->redirection): ?>
 <?php foreach ($this->aliases as $alias_url): ?>
 server {
-  listen       <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
+  listen       <?php print "*:{$http_ssl_port} ssl http2"; ?>;
 <?php
   // if we use redirections, we need to change the redirection
   // target to be the original site URL ($this->uri instead of
@@ -61,7 +61,7 @@ server {
   }
 ?>
   fastcgi_param db_port   <?php print urlencode($db_port); ?>;
-  listen        <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
+  listen        <?php print "*:{$http_ssl_port} ssl http2"; ?>;
   server_name   <?php
     // this is the main vhost, so we need to put the redirection
     // target as the hostname (if it exists) and not the original URL
