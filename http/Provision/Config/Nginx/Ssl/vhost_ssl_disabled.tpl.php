@@ -14,15 +14,15 @@ server {
 <?php if ($satellite_mode == 'boa'): ?>
   root         /var/www/nginx-default;
   index        index.html index.htm;
+  ### Do not reveal Aegir front-end URL here.
 <?php else: ?>
-  return       404;
+  rewrite ^ <?php print $this->platform->server->web_disable_url . '/' . $this->uri ?>? redirect;
 <?php endif; ?>
   ssl                        on;
   ssl_session_timeout        5m;
   ssl_certificate            <?php print $ssl_chain_cert; ?>;
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
   keepalive_timeout          70;
-  ### Do not reveal Aegir front-end URL here.
 }
 
 <?php endif; ?>
