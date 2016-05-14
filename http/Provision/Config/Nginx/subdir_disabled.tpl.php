@@ -9,8 +9,8 @@ location ^~ /<?php print $subdir; ?>/ {
 <?php if ($satellite_mode == 'boa'): ?>
   root   /var/www/nginx-default;
   index  index.html index.htm;
-<?php else: ?>
-  return 404;
-<?php endif; ?>
   ### Do not reveal Aegir front-end URL here.
+<?php else: ?>
+  rewrite ^ <?php print $this->platform->server->web_disable_url . '/' . $this->uri ?>? permanent;
+<?php endif; ?>
 }
