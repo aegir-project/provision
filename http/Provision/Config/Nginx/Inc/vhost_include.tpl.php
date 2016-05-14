@@ -318,7 +318,7 @@ location ^~ /hosting/c/server_master {
     return 403;
   }
   access_log off;
-  rewrite ^ $scheme://$host/hosting/sites permanent;
+  return 301 $scheme://$host/hosting/sites;
 }
 
 ###
@@ -334,7 +334,7 @@ location ^~ /hosting/c/server_localhost {
     return 403;
   }
   access_log off;
-  rewrite ^ $scheme://$host/hosting/sites permanent;
+  return 301 $scheme://$host/hosting/sites;
 }
 <?php endif; ?>
 
@@ -368,7 +368,7 @@ location ^~ /hosting {
 ###
 location ^~ /admin/settings/performance/cache-backend {
   access_log off;
-  rewrite ^ $scheme://$host/admin/settings/performance permanent;
+  return 301 $scheme://$host/admin/settings/performance;
 }
 
 ###
@@ -376,7 +376,7 @@ location ^~ /admin/settings/performance/cache-backend {
 ###
 location ^~ /admin/config/development/performance/redis {
   access_log off;
-  rewrite ^ $scheme://$host/admin/config/development/performance permanent;
+  return 301 $scheme://$host/admin/config/development/performance;
 }
 <?php endif; ?>
 
@@ -1157,7 +1157,7 @@ location @drupal {
 ###
 location @nobots {
   if ($is_bot) {
-    rewrite ^ $scheme://$host$request_uri? permanent;
+    return 301 $scheme://$host$request_uri;
   }
   ###
   ### Return 404 on special PHP URLs to avoid revealing version used,

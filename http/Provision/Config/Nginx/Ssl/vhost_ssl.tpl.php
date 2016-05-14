@@ -23,7 +23,7 @@ server {
   ssl_certificate            <?php print $ssl_chain_cert; ?>;
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
   keepalive_timeout          70;
-  rewrite ^ $scheme://<?php print $this->redirection; ?>$request_uri? permanent;
+  return 301 $scheme://<?php print $this->redirection; ?>$request_uri;
 }
 <?php endforeach; ?>
 <?php endif; ?>

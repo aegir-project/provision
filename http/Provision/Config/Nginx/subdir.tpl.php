@@ -353,7 +353,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ^~ /<?php print $subdir; ?>/admin/settings/performance/cache-backend {
     access_log off;
-    rewrite ^ $scheme://$host/<?php print $subdir; ?>/admin/settings/performance permanent;
+    return 301 $scheme://$host/<?php print $subdir; ?>/admin/settings/performance;
   }
 
   ###
@@ -361,7 +361,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ^~ /<?php print $subdir; ?>/admin/config/development/performance/redis {
     access_log off;
-    rewrite ^ $scheme://$host/<?php print $subdir; ?>/admin/config/development/performance permanent;
+    return 301 $scheme://$host/<?php print $subdir; ?>/admin/config/development/performance;
   }
 <?php endif; ?>
 
@@ -884,7 +884,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Redirect to working homepage.
   ###
   location = /<?php print $subdir; ?> {
-    rewrite ^ $scheme://$host/<?php print $subdir; ?>/? permanent;
+    return 301 $scheme://$host/<?php print $subdir; ?>/;
   }
 
   ###
@@ -1120,7 +1120,7 @@ location @drupal_<?php print $subdir_loc; ?> {
 ###
 location @nobots_<?php print $subdir_loc; ?> {
   if ($is_bot) {
-    rewrite ^ $scheme://$host$request_uri? permanent;
+    return 301 $scheme://$host$request_uri;
   }
   ###
   ### Return 404 on special PHP URLs to avoid revealing version used,
