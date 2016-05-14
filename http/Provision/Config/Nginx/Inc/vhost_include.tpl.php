@@ -1,4 +1,12 @@
 <?php
+$script_user = drush_get_option('script_user');
+if (!$script_user && $server->script_user) {
+  $script_user = $server->script_user;
+}
+$aegir_root = drush_get_option('aegir_root');
+if (!$aegir_root && $server->aegir_root) {
+  $aegir_root = $server->aegir_root;
+}
 $nginx_config_mode = drush_get_option('nginx_config_mode');
 if (!$nginx_config_mode && $server->nginx_config_mode) {
   $nginx_config_mode = $server->nginx_config_mode;
@@ -80,7 +88,7 @@ if ($is_denied) {
 ### Support for letsencrypt.org per https://tools.ietf.org/html/rfc5785.
 ###
 location ^~ /.well-known/acme-challenge {
-  alias /data/disk/EDIT_USER/tools/le/.acme-challenges;
+  alias <?php print $aegir_root; ?>/tools/le/.acme-challenges;
   try_files $uri 404;
 }
 <?php endif; ?>
@@ -94,19 +102,19 @@ rewrite ^/index.php/(.*)$ $scheme://$host/$1 permanent;
 ###
 ### Include high level local configuration override if exists.
 ###
-include /data/disk/EDIT_USER/config/server_master/nginx/post.d/nginx_force_include*;
+include <?php print $aegir_root; ?>/config/server_master/nginx/post.d/nginx_force_include*;
 
 ###
 ### Include PHP-FPM version override logic if exists.
 ###
-include /data/disk/EDIT_USER/config/server_master/nginx/post.d/fpm_include*;
+include <?php print $aegir_root; ?>/config/server_master/nginx/post.d/fpm_include*;
 
 ###
 ### Allow to use non-default PHP-FPM version for the site
 ### listed in the special include file.
 ###
 if ($user_socket = '') {
-  set $user_socket "EDIT_USER";
+  set $user_socket "<?php print $script_user; ?>";
 }
 <?php endif; ?>
 
@@ -573,7 +581,7 @@ location ~* ^/sites/.*/files/config_.* {
 ###
 ### Include local configuration override if exists.
 ###
-include /data/disk/EDIT_USER/config/server_master/nginx/post.d/nginx_vhost_include*;
+include <?php print $aegir_root; ?>/config/server_master/nginx/post.d/nginx_vhost_include*;
 <?php endif; ?>
 
 <?php if ($nginx_config_mode == 'extended'): ?>
