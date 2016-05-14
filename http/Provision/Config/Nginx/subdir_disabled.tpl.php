@@ -11,6 +11,6 @@ location ^~ /<?php print $subdir; ?>/ {
   index  index.html index.htm;
   ### Do not reveal Aegir front-end URL here.
 <?php else: ?>
-  rewrite ^ <?php print $this->platform->server->web_disable_url . '/' . $this->uri ?>? redirect;
+  return 302 <?php print $this->platform->server->web_disable_url . '/' . $this->uri ?>;
 <?php endif; ?>
 }
