@@ -163,6 +163,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Support for letsencrypt.org per https://tools.ietf.org/html/rfc5785.
   ###
   location ^~ /<?php print $subdir; ?>/.well-known/acme-challenge/ {
+    alias /data/disk/EDIT_USER/tools/le/.acme-challenges;
     try_files $uri 404;
   }
 <?php endif; ?>
