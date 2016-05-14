@@ -19,10 +19,8 @@ server {
   return 302 <?php print $this->platform->server->web_disable_url . '/' . $this->uri ?>;
 <?php endif; ?>
   ssl                        on;
-  ssl_session_timeout        5m;
   ssl_certificate            <?php print $ssl_chain_cert; ?>;
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
-  keepalive_timeout          70;
 }
 
 <?php endif; ?>

@@ -19,10 +19,8 @@ server {
   }
 ?>
   ssl                        on;
-  ssl_session_timeout        5m;
   ssl_certificate            <?php print $ssl_chain_cert; ?>;
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
-  keepalive_timeout          70;
   return 301 $scheme://<?php print $this->redirection; ?>$request_uri;
 }
 <?php endforeach; ?>
@@ -81,10 +79,8 @@ server {
     } ?>;
   root          <?php print "{$this->root}"; ?>;
   ssl                        on;
-  ssl_session_timeout        5m;
   ssl_certificate            <?php print $ssl_chain_cert; ?>;
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
-  keepalive_timeout          70;
   <?php print $extra_config; ?>
   include                    <?php print $server->include_path; ?>/nginx_vhost_common.conf;
 }
