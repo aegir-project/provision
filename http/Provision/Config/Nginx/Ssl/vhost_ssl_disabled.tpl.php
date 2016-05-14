@@ -18,6 +18,7 @@ server {
   return       404;
 <?php endif; ?>
   ssl                        on;
+  ssl_session_timeout        5m;
   ssl_certificate            <?php print $ssl_cert; ?>;
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
   keepalive_timeout          70;
