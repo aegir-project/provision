@@ -19,8 +19,12 @@ server {
   return 302 <?php print $this->platform->server->web_disable_url . '/' . $this->uri ?>;
 <?php endif; ?>
   ssl                        on;
-  ssl_certificate            <?php print $ssl_chain_cert; ?>;
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
+<?php if (!empty($ssl_chain_cert)) : ?>
+  ssl_certificate            <?php print $ssl_chain_cert; ?>;
+<?php else: ?>
+  ssl_certificate            <?php print $ssl_cert; ?>;
+<?php endif; ?>
 }
 
 <?php endif; ?>
