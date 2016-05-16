@@ -25,7 +25,6 @@ server {
 <?php else: ?>
   ssl_certificate            <?php print $ssl_cert; ?>;
 <?php endif; ?>
-
   return 301 $scheme://<?php print $this->redirection; ?>$request_uri;
 }
 <?php endforeach; ?>
