@@ -15,6 +15,11 @@ if (!$nginx_is_modern && $server->nginx_is_modern) {
   $nginx_is_modern = $server->nginx_is_modern;
 }
 
+$nginx_has_http2 = drush_get_option('nginx_has_http2');
+if (!$nginx_has_http2 && $server->nginx_has_http2) {
+  $nginx_has_http2 = $server->nginx_has_http2;
+}
+
 $nginx_has_gzip = drush_get_option('nginx_has_gzip');
 if (!$nginx_has_gzip && $server->nginx_has_gzip) {
   $nginx_has_gzip = $server->nginx_has_gzip;

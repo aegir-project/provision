@@ -3,22 +3,32 @@ $nginx_config_mode = drush_get_option('nginx_config_mode');
 if (!$nginx_config_mode && $server->nginx_config_mode) {
   $nginx_config_mode = $server->nginx_config_mode;
 }
+
 $phpfpm_mode = drush_get_option('phpfpm_mode');
 if (!$phpfpm_mode && $server->phpfpm_mode) {
   $phpfpm_mode = $server->phpfpm_mode;
 }
+
 $nginx_is_modern = drush_get_option('nginx_is_modern');
 if (!$nginx_is_modern && $server->nginx_is_modern) {
   $nginx_is_modern = $server->nginx_is_modern;
 }
+
+$nginx_has_http2 = drush_get_option('nginx_has_http2');
+if (!$nginx_has_http2 && $server->nginx_has_http2) {
+  $nginx_has_http2 = $server->nginx_has_http2;
+}
+
 $nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');
 if (!$nginx_has_upload_progress && $server->nginx_has_upload_progress) {
   $nginx_has_upload_progress = $server->nginx_has_upload_progress;
 }
+
 $satellite_mode = drush_get_option('satellite_mode');
 if (!$satellite_mode && $server->satellite_mode) {
   $satellite_mode = $server->satellite_mode;
 }
+
 $subdir_loc = str_replace('/', '_', $subdir);
 $subdir_dot = str_replace('/', '.', $subdir);
 ?>
