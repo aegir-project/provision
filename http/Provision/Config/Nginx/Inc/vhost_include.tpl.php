@@ -110,19 +110,19 @@ rewrite ^/index.php/(.*)$ $scheme://$host/$1 permanent;
 ###
 ### Include high level local configuration override if exists.
 ###
-include /data/disk/EDIT_USER/config/server_master/nginx/post.d/nginx_force_include*;
+include <?php print $aegir_root; ?>/config/server_master/nginx/post.d/nginx_force_include*;
 
 ###
 ### Include PHP-FPM version override logic if exists.
 ###
-include /data/disk/EDIT_USER/config/server_master/nginx/post.d/fpm_include*;
+include <?php print $aegir_root; ?>/config/server_master/nginx/post.d/fpm_include*;
 
 ###
 ### Allow to use non-default PHP-FPM version for the site
 ### listed in the special include file.
 ###
 if ($user_socket = '') {
-  set $user_socket "EDIT_USER";
+  set $user_socket "<?php print $script_user; ?>";
 }
 <?php endif; ?>
 
@@ -589,7 +589,7 @@ location ~* ^/sites/.*/files/config_.* {
 ###
 ### Include local configuration override if exists.
 ###
-include /data/disk/EDIT_USER/config/server_master/nginx/post.d/nginx_vhost_include*;
+include <?php print $aegir_root; ?>/config/server_master/nginx/post.d/nginx_vhost_include*;
 <?php endif; ?>
 
 <?php if ($nginx_config_mode == 'extended'): ?>
