@@ -1,4 +1,14 @@
 <?php
+$script_user = drush_get_option('script_user');
+if (!$script_user && $server->script_user) {
+  $script_user = $server->script_user;
+}
+
+$aegir_root = drush_get_option('aegir_root');
+if (!$aegir_root && $server->aegir_root) {
+  $aegir_root = $server->aegir_root;
+}
+
 $nginx_config_mode = drush_get_option('nginx_config_mode');
 if (!$nginx_config_mode && $server->nginx_config_mode) {
   $nginx_config_mode = $server->nginx_config_mode;
@@ -17,6 +27,11 @@ if (!$nginx_is_modern && $server->nginx_is_modern) {
 $nginx_has_http2 = drush_get_option('nginx_has_http2');
 if (!$nginx_has_http2 && $server->nginx_has_http2) {
   $nginx_has_http2 = $server->nginx_has_http2;
+}
+
+$nginx_has_gzip = drush_get_option('nginx_has_gzip');
+if (!$nginx_has_gzip && $server->nginx_has_gzip) {
+  $nginx_has_gzip = $server->nginx_has_gzip;
 }
 
 $nginx_has_upload_progress = drush_get_option('nginx_has_upload_progress');

@@ -5,9 +5,24 @@
 #######################################################
 
 <?php
+$script_user = drush_get_option('script_user');
+if (!$script_user && $server->script_user) {
+  $script_user = $server->script_user;
+}
+
+$aegir_root = drush_get_option('aegir_root');
+if (!$aegir_root && $server->aegir_root) {
+  $aegir_root = $server->aegir_root;
+}
+
 $nginx_config_mode = drush_get_option('nginx_config_mode');
 if (!$nginx_config_mode && $server->nginx_config_mode) {
   $nginx_config_mode = $server->nginx_config_mode;
+}
+
+$phpfpm_mode = drush_get_option('phpfpm_mode');
+if (!$phpfpm_mode && $server->phpfpm_mode) {
+  $phpfpm_mode = $server->phpfpm_mode;
 }
 
 $nginx_is_modern = drush_get_option('nginx_is_modern');
