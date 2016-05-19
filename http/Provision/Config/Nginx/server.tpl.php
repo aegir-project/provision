@@ -250,9 +250,10 @@ map $request_uri $key_uri {
 ###
 map $http_user_agent $is_crawler {
   default  '';
-  ~*HTTrack|BrokenLinkCheck|2009042316.*Firefox.*3\.0\.10|MJ12|HTMLParser  is_crawler;
-  ~*SiteBot|PECL|Automatic|CCBot|BuzzTrack|Sistrix|Offline|Nutch|Mireo     is_crawler;
-  ~*SWEB|Morfeus|GSLFbot|HiScan|Riddler|DBot|SEOkicks|PChomebot            is_crawler;
+  ~*HTTrack|BrokenLinkCheck|2009042316.*Firefox.*3\.0\.10   is_crawler;
+  ~*SiteBot|PECL|Automatic|CCBot|BuzzTrack|Sistrix|Offline  is_crawler;
+  ~*SWEB|Morfeus|GSLFbot|HiScan|Riddler|DBot|SEOkicks|MJ12  is_crawler;
+  ~*PChomebot|Scrap|HTMLParser|Nutch|Mireo|Semrush|Ahrefs   is_crawler;
 }
 
 ###
