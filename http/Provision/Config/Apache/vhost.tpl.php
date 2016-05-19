@@ -3,6 +3,15 @@
   ServerAdmin <?php  print $this->site_mail; ?>
 <?php endif;?>
 
+<?php
+$aegir_root = drush_get_option('aegir_root');
+if (!$aegir_root && $server->aegir_root) {
+  $aegir_root = $server->aegir_root;
+}
+?>
+
+  Alias /.well-known/acme-challenge <?php print $aegir_root; ?>/tools/le/.acme-challenges
+
   DocumentRoot <?php print $this->root; ?>
 
   ServerName <?php print $this->uri; ?>
