@@ -46,7 +46,7 @@ if (sizeof($this->aliases)) {
   RewriteEngine on
 <?php
 if ($this->redirection) {
-  // Redirect to the selected alias.
+  print " # Redirect all aliases to the selected alias.\n";
   print " RewriteCond %{HTTP_HOST} !^{$this->redirection}$ [NC]\n";
   print " RewriteRule ^/*(.*)$ https://{$this->redirection}/$1 [NE,L,R=301]\n";
 }
