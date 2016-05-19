@@ -3,11 +3,11 @@
 
   <VirtualHost <?php print "{$ip_address}:{$http_ssl_port}"; ?>>
   <?php if ($this->site_mail) : ?>
-    ServerAdmin <?php  print $this->site_mail; ?> 
+    ServerAdmin <?php  print $this->site_mail; ?>
   <?php endif;?>
 
-    DocumentRoot <?php print $this->root; ?> 
-      
+    DocumentRoot <?php print $this->root; ?>
+
     ServerName <?php print $this->uri; ?>
 
     SetEnv db_type  <?php print urlencode($db_type); ?>
@@ -23,7 +23,7 @@
     SetEnv db_port  <?php print urlencode($db_port); ?>
 
     # Enable SSL handling.
-     
+
     SSLEngine on
 
     SSLCertificateFile <?php print $ssl_cert; ?>
@@ -46,7 +46,7 @@ if (sizeof($this->aliases)) {
   RewriteEngine on
 <?php
 if ($this->redirection) {
-  // Redirect to the selected alias.
+  print " # Redirect all aliases to the selected alias.\n";
   print " RewriteCond %{HTTP_HOST} !^{$this->redirection}$ [NC]\n";
   print " RewriteRule ^/*(.*)$ https://{$this->redirection}/$1 [NE,L,R=301]\n";
 }
@@ -92,7 +92,6 @@ if ($this->redirection) {
   </VirtualHost>
 <?php endif; ?>
 
-<?php 
+<?php
   include(provision_class_directory('Provision_Config_Apache_Site') . '/vhost.tpl.php');
 ?>
-
