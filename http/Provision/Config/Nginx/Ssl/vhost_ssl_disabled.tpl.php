@@ -6,10 +6,29 @@ $satellite_mode = drush_get_option('satellite_mode');
 if (!$satellite_mode && $server->satellite_mode) {
   $satellite_mode = $server->satellite_mode;
 }
+
+$nginx_has_http2 = drush_get_option('nginx_has_http2');
+if (!$nginx_has_http2 && $server->nginx_has_http2) {
+  $nginx_has_http2 = $server->nginx_has_http2;
+}
+
+if ($nginx_has_http2) {
+  $ssl_args = "ssl http2";
+}
+else {
+  $ssl_args = "ssl";
+}
+
+if ($satellite_mode == 'boa') {
+  $ssl_listen_ip = "*";
+}
+else {
+  $ssl_listen_ip = $ip_address;
+}
 ?>
 
 server {
-  listen       <?php print "{$ip_address}:{$http_ssl_port}"; ?>;
+  listen       <?php print "{$ssl_listen_ip}:{$http_ssl_port} {$ssl_args}"; ?>;
   server_name  <?php print $this->uri . ' ' . implode(' ', str_replace('/', '.', $this->aliases)); ?>;
 <?php if ($satellite_mode == 'boa'): ?>
   root         /var/www/nginx-default;
