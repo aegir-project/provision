@@ -59,6 +59,8 @@ The following operations will be done:
  7. clone fresh copies of hosting/hostmaster and eldir to lay down the tag
  8. (optionally) push those changes
 
+ ARE YOU SURE you disabled the D_aegir-debian-build-3x job in Jenkins?
+
 The operation can be aborted before step 8. Don't forget that as
 long as changes are not pushed upstream, this can all be reverted (see
 git-reset(1) and git-revert(1) ).
@@ -138,9 +140,10 @@ git clone --branch $CURRENT_BRANCH `git config remote.origin.url | sed 's/provis
 echo "Setting the tag $NEW_TAG in a clean eldir clone."
 git --work-tree=build-area/eldir --git-dir=build-area/eldir/.git tag -a $NEW_TAG -m 'Add a new release tag.'
 
-
+echo =========
+echo
 # Can we push?
-if prompt_yes_no "push tags and commits upstream? "; then
+if prompt_yes_no "Push tags and commits upstream? "; then
     # this makes sure we push the commit *and* the tag
     git push --tags origin HEAD
     git --work-tree=build-area/hostmaster --git-dir=build-area/hostmaster/.git push --tags origin HEAD
