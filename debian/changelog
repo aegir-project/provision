@@ -1,3 +1,9 @@
+aegir3-provision (3.5.1) unstable; urgency=medium
+
+  *  Fix Debian upgrade error 3.4 to 3.5 (with hosting_git enabled, https://www.drupal.org/node/2729891
+
+ -- Herman van Rink <helmo@initfour.nl>  Fri, 20 May 2016 15:18:43 +0200
+
 aegir3-provision (3.5) unstable; urgency=medium
 
   * Sixth stable release of the 3.x series.
