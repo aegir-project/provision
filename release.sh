@@ -150,3 +150,27 @@ if prompt_yes_no "Push tags and commits upstream? "; then
     git --work-tree=build-area/hosting --git-dir=build-area/hosting/.git push --tags origin HEAD
     git --work-tree=build-area/eldir --git-dir=build-area/eldir/.git push --tags origin HEAD
 fi
+
+
+# Golden Contrib
+
+golden_contribs="hosting_civicrm hosting_git hosting_remote_import hosting_site_backup_manager hosting_tasks_extra"
+for shortname in $golden_contribs; do
+  rm -rf build-area/$shortname
+  git clone --depth 1 --branch $CURRENT_BRANCH `git config remote.origin.url | sed "s/provision/$shortname/"` build-area/$shortname
+
+  echo "Setting the tag $NEW_TAG in a clean $shortname clone."
+  git --work-tree=build-area/$shortname --git-dir=build-area/$shortname/.git tag -a $NEW_TAG -m 'Add a new release tag.'
+
+done
+
+echo =========
+echo
+echo Golden Contribs: $golden_contribs
+echo
+# Can we push?
+if prompt_yes_no "Push tags and commits for GOLDEN CONTRIB upstream? "; then
+  for shortname in $golden_contribs; do
+    git --work-tree=build-area/$shortname --git-dir=build-area/$shortname/.git push --tags origin HEAD
+  done
+fi
