@@ -163,6 +163,19 @@ function drush_provision_drupal_pre_provision_deploy_rollback() {
 function drush_provision_drupal_provision_deploy() {
   _provision_drupal_maintain_aliases();
   _provision_drupal_create_directories();
+
+  // If this is the hostmaster site, save the ~/.drush/drushrc.php file.
+  if (d()->root == d('@hostmaster')->root && d()->uri == d('@hostmaster')->uri) {
+    if (drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL)) {
+      // TODO: Copied from platform/verify.provision.inc... refactor to function.
+      $aegir_drushrc = new Provision_Config_Drushrc_Aegir();
+      $aegir_drushrc->write();
+      drush_log(dt('Regenerated ~aegir/.drush/drushrc.php from drush_provision_drupal_provision_deploy()'));
+    }
+    else {
+      drush_log(dt('Bootstrap to DRUSH_BOOTSTRAP_DRUPAL_FULL on hostmaster site FAILED, updating the ~/.drush/drushrc.php skipped.'), 'warning');
+    }
+  }
 }
 
 /**
