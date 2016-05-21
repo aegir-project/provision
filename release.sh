@@ -59,6 +59,8 @@ The following operations will be done:
  7. clone fresh copies of hosting/hostmaster and eldir to lay down the tag
  8. (optionally) push those changes
 
+ ARE YOU SURE you disabled the D_aegir-debian-build-3x job in Jenkins?
+
 The operation can be aborted before step 8. Don't forget that as
 long as changes are not pushed upstream, this can all be reverted (see
 git-reset(1) and git-revert(1) ).
@@ -138,12 +140,37 @@ git clone --branch $CURRENT_BRANCH `git config remote.origin.url | sed 's/provis
 echo "Setting the tag $NEW_TAG in a clean eldir clone."
 git --work-tree=build-area/eldir --git-dir=build-area/eldir/.git tag -a $NEW_TAG -m 'Add a new release tag.'
 
-
+echo =========
+echo
 # Can we push?
-if prompt_yes_no "push tags and commits upstream? "; then
+if prompt_yes_no "Push tags and commits upstream? "; then
     # this makes sure we push the commit *and* the tag
     git push --tags origin HEAD
     git --work-tree=build-area/hostmaster --git-dir=build-area/hostmaster/.git push --tags origin HEAD
     git --work-tree=build-area/hosting --git-dir=build-area/hosting/.git push --tags origin HEAD
     git --work-tree=build-area/eldir --git-dir=build-area/eldir/.git push --tags origin HEAD
+fi
+
+
+# Golden Contrib
+
+golden_contribs="hosting_civicrm hosting_git hosting_remote_import hosting_site_backup_manager hosting_tasks_extra"
+for shortname in $golden_contribs; do
+  rm -rf build-area/$shortname
+  git clone --depth 1 --branch $CURRENT_BRANCH `git config remote.origin.url | sed "s/provision/$shortname/"` build-area/$shortname
+
+  echo "Setting the tag $NEW_TAG in a clean $shortname clone."
+  git --work-tree=build-area/$shortname --git-dir=build-area/$shortname/.git tag -a $NEW_TAG -m 'Add a new release tag.'
+
+done
+
+echo =========
+echo
+echo Golden Contribs: $golden_contribs
+echo
+# Can we push?
+if prompt_yes_no "Push tags and commits for GOLDEN CONTRIB upstream? "; then
+  for shortname in $golden_contribs; do
+    git --work-tree=build-area/$shortname --git-dir=build-area/$shortname/.git push --tags origin HEAD
+  done
 fi
