@@ -46,3 +46,8 @@ Alias /<?php print $subdir; ?> <?php print $this->root; ?>
    Options None
    Options +FollowSymLinks
 </Directory>
+
+# Allow access to hosting_le challenges directory.
+<Directory "<?php print $aegir_root; ?>/tools/le/.acme-challenges">
+  Require all granted
+</Directory>
