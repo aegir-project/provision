@@ -95,6 +95,11 @@ if ($this->redirection || $ssl_redirection) {
       </IfModule>
     </Directory>
 
+    # Allow access to hosting_le challenges directory.
+    <Directory "<?php print $aegir_root; ?>/tools/le/.acme-challenges">
+      Require all granted
+    </Directory>
+
 <?php
 $if_subsite = $this->data['http_subdird_path'] . '/' . $this->uri;
 if (provision_hosting_feature_enabled('subdirs') && provision_file()->exists($if_subsite)->status()) {
