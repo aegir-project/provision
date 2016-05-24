@@ -38,6 +38,13 @@ server {
   return 302 <?php print $this->platform->server->web_disable_url . '/' . $this->uri ?>;
 <?php endif; ?>
   ssl                        on;
+<?php if ($satellite_mode == 'boa'): ?>
+  ssl_stapling               on;
+  ssl_stapling_verify        on;
+  resolver 8.8.8.8 8.8.4.4 valid=300s;
+  resolver_timeout           5s;
+  ssl_dhparam                /etc/ssl/private/nginx-wild-ssl.dhp;
+<?php endif; ?>
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
 <?php if (!empty($ssl_chain_cert)) : ?>
   ssl_certificate            <?php print $ssl_chain_cert; ?>;
