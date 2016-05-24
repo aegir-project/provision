@@ -5,7 +5,6 @@ if (!$aegir_root && $server->aegir_root) {
 }
 ?>
 
-Alias /<?php print $subdir; ?>/.well-known/acme-challenge <?php print $aegir_root; ?>/tools/le/.acme-challenges
 Alias /<?php print $subdir; ?> <?php print $this->root; ?>
 
 <Location /<?php print $subdir; ?>>
@@ -45,9 +44,4 @@ Alias /<?php print $subdir; ?> <?php print $this->root; ?>
    Deny from all
    Options None
    Options +FollowSymLinks
-</Directory>
-
-# Allow access to hosting_le challenges directory.
-<Directory "<?php print $aegir_root; ?>/tools/le/.acme-challenges">
-  Require all granted
 </Directory>
