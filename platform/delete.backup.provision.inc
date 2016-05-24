@@ -20,7 +20,7 @@ function drush_provision_drupal_provision_backup_delete($backup = NULL) {
     }
   }
   else {
-    drush_set_error(dt('No backup files provided'));
+    drush_log(dt('No backup files provided'), 'warning');
   }
 }
 
