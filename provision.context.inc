@@ -16,7 +16,7 @@
  *   Defaults to TRUE. Allows creating a new context object with the specified
  *   $name.
  *
- * @return
+ * @return provision_Context
  *   provision_Context object (by reference) or NULL if it can't be loaded and
  *   $allow_creation == FALSE.
  */
