@@ -13,8 +13,6 @@ if (!$aegir_root && $server->aegir_root) {
 }
 ?>
 
-    Alias /.well-known/acme-challenge <?php print $aegir_root; ?>/tools/le/.acme-challenges
-
     DocumentRoot <?php print $this->root; ?>
 
     ServerName <?php print $this->uri; ?>
@@ -96,11 +94,6 @@ if ($this->redirection) {
       <IfModule mod_php5.c>
         php_flag engine off
       </IfModule>
-    </Directory>
-
-    # Allow access to hosting_le challenges directory.
-    <Directory "<?php print $aegir_root; ?>/tools/le/.acme-challenges">
-      Require all granted
     </Directory>
 
   </VirtualHost>

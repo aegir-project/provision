@@ -106,14 +106,6 @@ if ($is_denied) {
 add_header X-Frame-Options SAMEORIGIN;
 add_header X-Content-Type-Options nosniff;
 add_header X-XSS-Protection "1; mode=block";
-
-###
-### Support for letsencrypt.org per https://tools.ietf.org/html/rfc5785.
-###
-location ^~ /.well-known/acme-challenge {
-  alias <?php print $aegir_root; ?>/tools/le/.acme-challenges;
-  try_files $uri 404;
-}
 <?php endif; ?>
 
 <?php if ($satellite_mode == 'boa'): ?>

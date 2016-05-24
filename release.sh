@@ -58,6 +58,8 @@ The following operations will be done:
  6. revert the commit
  7. clone fresh copies of hosting/hostmaster and eldir to lay down the tag
  8. (optionally) push those changes
+ 9. clone fresh copies of golden contrib to lay down the tag
+10. (optionally) push those changes
 
  ARE YOU SURE you disabled the D_aegir-debian-build-3x job in Jenkins?
 
