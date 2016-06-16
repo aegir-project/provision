@@ -31,7 +31,7 @@ function hook_drush_load() {
  *
  * @see provision.service.inc
  */
-function drush_hook_provision_services() {
+function hook_provision_services() {
   return array('db' => NULL);
 }
 
