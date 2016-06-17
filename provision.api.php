@@ -70,7 +70,7 @@ function hook_provision_drupal_config($uri, $data) {
  *
  * @see Provision_Config_Apache_Server
  */
-function drush_hook_provision_apache_server_config($data) {
+function hook_provision_apache_server_config($data) {
 }
 
 /**
@@ -129,7 +129,7 @@ function drush_hook_provision_apache_vhost_config($uri, $data) {
  *
  * @see Provision_Config_Nginx_Server
  */
-function drush_hook_provision_nginx_server_config($data) {
+function hook_provision_nginx_server_config($data) {
 }
 
 /**
