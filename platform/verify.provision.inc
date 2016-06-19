@@ -127,7 +127,7 @@ function drush_provision_drupal_pre_provision_verify() {
     }
 
     if (provision_file()->exists($pathDrc)->status()) {
-      provision_file()->chmod(d()->root . '/sites/all/drush', 0700)
+      provision_file()->chmod(d()->root . '/sites/all/drush', 0755)
         ->succeed('Changed permissions of <code>@path</code> to @perm')
         ->fail('Could not change permissions of <code>@path</code> to @perm');
     }
