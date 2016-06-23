@@ -1,3 +1,10 @@
+aegir3-provision (3.6) unstable; urgency=medium
+
+  * Seventh stable release of the 3.x series.
+  * Many bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.6
+
+ -- Herman van Rink <helmo@initfour.nl>  Thu, 23 Jun 2016 15:43:04 +0200
+
 aegir3-provision (3.5.1) unstable; urgency=medium
 
   *  Fix Debian upgrade error 3.4 to 3.5 (with hosting_git enabled, https://www.drupal.org/node/2729891
