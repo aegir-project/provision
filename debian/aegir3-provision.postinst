@@ -53,6 +53,9 @@ case "$1" in
 
         db_get "aegir/drush_version"
         DRUSH_VERSION="$RET"
+
+        if [ "$DRUSH_VERSION" != "ignore" ]; then
+
         DRUSH_MAJOR_VERSION=$(echo $DRUSH_VERSION| cut -d. -f1)
 
         if [ "$DRUSH_VERSION" = "stable" ]; then
@@ -104,6 +107,7 @@ case "$1" in
             # Symlink Drush for other users to use.
             ln -s ~aegir/.composer/vendor/bin/drush /usr/local/bin
 
+        fi
         fi
 
     ;;
