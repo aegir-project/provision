@@ -144,8 +144,6 @@ function drush_provision_drupal_pre_provision_verify() {
  */
 function drush_provision_drupal_provision_verify() {
 
-  drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
-
 
   // START from drush_provision_drupal_provision_install
   // Requires at least the database settings to complete.
@@ -190,10 +188,14 @@ function drush_provision_drupal_provision_verify() {
  */
 function drush_provision_drupal_post_provision_verify() {
   if (d()->type === 'site') {
-    _provision_drupal_rebuild_caches();
-    drush_set_option('installed', TRUE, 'site');
+
+    if (drush_get_option('installed', FALSE)) {
+      _provision_drupal_rebuild_caches();
+      drush_include_engine('drupal', 'cron_key');
+      drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
+    }
+//    drush_set_option('installed', TRUE, 'site');
 
     _provision_client_create_symlink();
-    drush_include_engine('drupal', 'cron_key');
   }
 }
