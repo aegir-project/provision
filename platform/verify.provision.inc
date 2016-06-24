@@ -113,6 +113,10 @@ function drush_provision_drupal_pre_provision_verify() {
     provision_drupal_push_site();
   }
   elseif (d()->type === 'site') {
+
+    // When context is the site, cwd is the sites/DOMAIN folder. Make sure we go
+    // back to root to make sure we are creating directories in the right spot.
+    chdir(d()->root);
     _provision_drupal_create_directories();
     d()->service('db')->create_site_database();
 
@@ -144,6 +148,9 @@ function drush_provision_drupal_pre_provision_verify() {
  */
 function drush_provision_drupal_provision_verify() {
 
+  if (d()->type !== 'site') {
+    return;
+  }
 
   // START from drush_provision_drupal_provision_install
   // Requires at least the database settings to complete.
@@ -156,7 +163,7 @@ function drush_provision_drupal_provision_verify() {
 
   provision_save_site_data();
 
-  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
+//  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
 //  // call a backend task to do the actual installation.
 //  $result = provision_backend_invoke(d()->name, "provision-install-backend", array(), array('client_email' => drush_get_option('client_email')));
@@ -170,7 +177,7 @@ function drush_provision_drupal_provision_verify() {
   // END from drush_provision_drupal_provision_install
 
   // START from drush_provision_drupal_pre_provision_verify()
-  _provision_drupal_ensure_htaccess_update();
+//  _provision_drupal_ensure_htaccess_update();
 
   // If this is the hostmaster site, save the ~/.drush/drushrc.php file.
   if (d()->root == d('@hostmaster')->root && d()->uri == d('@hostmaster')->uri) {
@@ -180,6 +187,7 @@ function drush_provision_drupal_provision_verify() {
 
   provision_drupal_push_site(drush_get_option('override_slave_authority', FALSE));
   // END from drush_provision_drupal_pre_provision_verify()
+
 
 }
 
