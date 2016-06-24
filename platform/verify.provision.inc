@@ -12,14 +12,29 @@
  */
 function drush_provision_drupal_provision_verify_validate() {
   if (d()->type === 'site') {
-    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
-    provision_prepare_environment();
+    d()->service('db')->connect();
 
-    _provision_drupal_create_settings_file();
-    provision_drupal_push_site();
+    // START from drush_provision_drupal_provision_install_validate
+    if (!d()->uri) {
+      return drush_set_error("PROVISION_URL_REQUIRED", dt("You need to specify a valid url to install a site"));
+    }
+    /** From install hook, we obviously don't want to run it.
+    if (_provision_drupal_site_exists()) {
+      return drush_set_error('PROVISION_SITE_INSTALLED');
+    }
+     */
+    // END from drush_provision_drupal_provision_install_validate
 
-    drush_errors_on();
-    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+    // START original
+//    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
+//    provision_prepare_environment();
+//
+//    _provision_drupal_create_settings_file();
+//    provision_drupal_push_site();
+//
+//    drush_errors_on();
+//    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+    // END original
   }
 }
 
@@ -98,23 +113,76 @@ function drush_provision_drupal_pre_provision_verify() {
     provision_drupal_push_site();
   }
   elseif (d()->type === 'site') {
-    drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
-    // This is the actual drupal provisioning requirements.
     _provision_drupal_create_directories();
-    _provision_drupal_maintain_aliases();
-    _provision_drupal_ensure_htaccess_update();
-    // Requires at least the database settings to complete.
+    d()->service('db')->create_site_database();
 
-    _provision_drupal_create_settings_file();
 
-    // If this is the hostmaster site, save the ~/.drush/drushrc.php file.
-    if (d()->root == d('@hostmaster')->root && d()->uri == d('@hostmaster')->uri) {
-      $aegir_drushrc = new Provision_Config_Drushrc_Aegir();
-      $aegir_drushrc->write();
-    }
 
-    provision_drupal_push_site(drush_get_option('override_slave_authority', FALSE));
+    // START original
+//    drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
+//    // This is the actual drupal provisioning requirements.
+//    _provision_drupal_create_directories();
+//    _provision_drupal_maintain_aliases();
+//    _provision_drupal_ensure_htaccess_update();
+//    // Requires at least the database settings to complete.
+//
+//    _provision_drupal_create_settings_file();
+//
+//    // If this is the hostmaster site, save the ~/.drush/drushrc.php file.
+//    if (d()->root == d('@hostmaster')->root && d()->uri == d('@hostmaster')->uri) {
+//      $aegir_drushrc = new Provision_Config_Drushrc_Aegir();
+//      $aegir_drushrc->write();
+//    }
+//
+//    provision_drupal_push_site(drush_get_option('override_slave_authority', FALSE));
+    // END original
   }
+}
+
+/**
+ * Verify command hook
+ */
+function drush_provision_drupal_provision_verify() {
+
+  drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
+
+
+  // START from drush_provision_drupal_provision_install
+  // Requires at least the database settings to complete.
+  provision_prepare_environment();
+  _provision_drupal_create_settings_file();
+
+  $config = new Provision_Config_Drushrc_Site(d()->name, drush_get_context('site'));
+  $config->write();
+//  provision_drupal_push_site($override_slave_authority = TRUE);
+
+  provision_save_site_data();
+
+  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
+
+//  // call a backend task to do the actual installation.
+//  $result = provision_backend_invoke(d()->name, "provision-install-backend", array(), array('client_email' => drush_get_option('client_email')));
+//  // pass the login link back to the front end.
+//  drush_set_option('login_link', $result['context']['login_link']);
+//
+//  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+//  drush_set_option('installed', TRUE, 'site');
+  _provision_drupal_maintain_aliases();
+
+  // END from drush_provision_drupal_provision_install
+
+  // START from drush_provision_drupal_pre_provision_verify()
+  _provision_drupal_ensure_htaccess_update();
+
+  // If this is the hostmaster site, save the ~/.drush/drushrc.php file.
+  if (d()->root == d('@hostmaster')->root && d()->uri == d('@hostmaster')->uri) {
+    $aegir_drushrc = new Provision_Config_Drushrc_Aegir();
+    $aegir_drushrc->write();
+  }
+
+  provision_drupal_push_site(drush_get_option('override_slave_authority', FALSE));
+  // END from drush_provision_drupal_pre_provision_verify()
+
 }
 
 /**
