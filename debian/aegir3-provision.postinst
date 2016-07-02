@@ -53,57 +53,61 @@ case "$1" in
 
         db_get "aegir/drush_version"
         DRUSH_VERSION="$RET"
-        DRUSH_MAJOR_VERSION=$(echo $DRUSH_VERSION| cut -d. -f1)
 
-        if [ "$DRUSH_VERSION" = "stable" ]; then
+        if [ "$DRUSH_VERSION" != "ignore" ]; then
 
-            DRUSH_PHAR_URL="http://files.drush.org/drush.phar"
+          DRUSH_MAJOR_VERSION=$(echo $DRUSH_VERSION| cut -d. -f1)
 
-        elif [ "$DRUSH_VERSION" = "unstable" ]; then
+          if [ "$DRUSH_VERSION" = "stable" ]; then
 
-            DRUSH_PHAR_URL="http://files.drush.org/drush-unstable.phar"
+              DRUSH_PHAR_URL="http://files.drush.org/drush.phar"
 
-        elif [ "$DRUSH_MAJOR_VERSION" -ge "8" ]; then
+          elif [ "$DRUSH_VERSION" = "unstable" ]; then
 
-            DRUSH_PHAR_URL="https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar"
+              DRUSH_PHAR_URL="http://files.drush.org/drush-unstable.phar"
 
-        fi
+          elif [ "$DRUSH_MAJOR_VERSION" -ge "8" ]; then
 
-        if [ -n "$DRUSH_PHAR_URL" ]; then
+              DRUSH_PHAR_URL="https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar"
 
-            curl -SsL $DRUSH_PHAR_URL -o drush
-            chmod +x drush
+          fi
 
-            DRUSH_PATH="/usr/local/bin/drush"
+          if [ -n "$DRUSH_PHAR_URL" ]; then
 
-            # Rename an old drush executable.
-            if [ -f $DRUSH_PATH ]; then
-              mv $DRUSH_PATH $DRUSH_PATH-old-$(date +'%Y-%m-%d')
-            fi
+              curl -SsL $DRUSH_PHAR_URL -o drush
+              chmod +x drush
 
-            mv drush $DRUSH_PATH
+              DRUSH_PATH="/usr/local/bin/drush"
 
-        else  # Drush versions prior to 8 aren't available as .phar's.
+              # Rename an old drush executable.
+              if [ -f $DRUSH_PATH ]; then
+                mv $DRUSH_PATH $DRUSH_PATH-old-$(date +'%Y-%m-%d')
+              fi
 
-            # Install composer.
-            COMPOSER_HOME="$HOME/.composer"
-            curl -sS https://getcomposer.org/installer | php
-            mv composer.phar /usr/local/bin/composer
+              mv drush $DRUSH_PATH
 
-            # Install Drush.
-            su -c "composer global require drush/drush:$DRUSH_VERSION" aegir
+          else  # Drush versions prior to 8 aren't available as .phar's.
 
-            # Add composer's bin dir to the $PATH.
-            echo "export PATH=\"\$HOME/.composer/vendor/bin:\$PATH\"" >>  ~aegir/.bashrc
+              # Install composer.
+              COMPOSER_HOME="$HOME/.composer"
+              curl -sS https://getcomposer.org/installer | php
+              mv composer.phar /usr/local/bin/composer
 
-            # Rename an old drush executable.
-            if [ -f /usr/local/bin/drush ]; then
-              mv /usr/local/bin/drush /usr/local/bin/drush-old-$(date +'%Y-%m-%d')
-            fi
+              # Install Drush.
+              su -c "composer global require drush/drush:$DRUSH_VERSION" aegir
 
-            # Symlink Drush for other users to use.
-            ln -s ~aegir/.composer/vendor/bin/drush /usr/local/bin
+              # Add composer's bin dir to the $PATH.
+              echo "export PATH=\"\$HOME/.composer/vendor/bin:\$PATH\"" >>  ~aegir/.bashrc
 
+              # Rename an old drush executable.
+              if [ -f /usr/local/bin/drush ]; then
+                mv /usr/local/bin/drush /usr/local/bin/drush-old-$(date +'%Y-%m-%d')
+              fi
+
+              # Symlink Drush for other users to use.
+              ln -s ~aegir/.composer/vendor/bin/drush /usr/local/bin
+
+          fi
         fi
 
     ;;
