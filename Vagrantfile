@@ -30,7 +30,7 @@ sudo apt-get install --yes libapache2-mod-php5 mysql-server apache2 php5-mysql p
 #sudo DPKG_DEBUG=developer apt-get install --yes aegir3
 
 echo
-echo "Now install packages with sudo dpkg -i /vagrant/*.deb, copy them from the paretn dir and run with 'vagrant ssh "
+echo "Now install packages with sudo dpkg -i /vagrant/*.deb, copy them from the parent dir and run with 'vagrant ssh'"
 echo "See the docs on http://docs.aegirproject.org/en/3.x/community/release-process/ on how to build the debian packages"
 
 SCRIPT
