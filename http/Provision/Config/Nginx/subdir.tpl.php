@@ -1017,7 +1017,6 @@ location ^~ /<?php print $subdir; ?> {
     add_header    X-NoCache "$nocache_details";
     add_header    X-This-Proto "$http_x_forwarded_proto";
     add_header    X-Server-Sub-Name "$subdir_main_site_name";
-    add_header    X-Response-Status "$status";
 <?php endif; ?>
 
     root          <?php print "{$this->root}"; ?>;
@@ -1067,7 +1066,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_cache speed;
     fastcgi_cache_methods GET HEAD; ### Nginx default, but added for clarity
     fastcgi_cache_min_uses 1;
-    fastcgi_cache_key "$is_bot$device$host$request_method$key_uri$cache_uid$http_x_forwarded_proto$sent_http_x_local_proto$cookie_respimg$status";
+    fastcgi_cache_key "$is_bot$device$host$request_method$key_uri$cache_uid$http_x_forwarded_proto$sent_http_x_local_proto$cookie_respimg";
     fastcgi_cache_valid 200 10s;
     fastcgi_cache_valid 302 1m;
     fastcgi_cache_valid 301 403 404 5s;
