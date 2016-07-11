@@ -18,6 +18,17 @@ function drush_provision_drupal_provision_verify_validate() {
     if (!d()->uri) {
       return drush_set_error("PROVISION_URL_REQUIRED", dt("You need to specify a valid url to install a site"));
     }
+
+    // Set the DRUSH_DRUPAL_ROOT to the root of the site.
+    // @TODO: Figure out why this is not set.
+    // The reason this is required is because, in db.php,
+    // Provision_Service_db::generate_site_credentials() does a check for drush_drupal_major_version()
+    // which checks for this context.
+    if (!drush_get_context('DRUSH_DRUPAL_ROOT', NULL)) {
+      drush_set_context('DRUSH_DRUPAL_ROOT', d()->root);
+    }
+
+
     /** From install hook, we obviously don't want to run it.
     if (_provision_drupal_site_exists()) {
       return drush_set_error('PROVISION_SITE_INSTALLED');
@@ -161,7 +172,8 @@ function drush_provision_drupal_provision_verify() {
   $config->write();
 //  provision_drupal_push_site($override_slave_authority = TRUE);
 
-  provision_save_site_data();
+  // provision_save_site_data() is not needed because we are saving Drushrc file above.
+//  provision_save_site_data();
 
 //  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
