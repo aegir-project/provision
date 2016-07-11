@@ -19,7 +19,7 @@ function drush_provision_drupal_provision_install_validate() {
     return drush_set_error("PROVISION_URL_REQUIRED", dt("You need to specify a valid url to install a site"));
   }
   if (_provision_drupal_site_exists()) {
-    return drush_set_error('PROVISION_SITE_INSTALLED');
+    return drush_set_error('PROVISION_SITE_INSTALLED', dt('This site has already been installed.'));
   }
 }
 
