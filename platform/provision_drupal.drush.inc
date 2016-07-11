@@ -72,13 +72,14 @@ function provision_drupal_drush_exit() {
 }
 
 /**
- * Test to see if the site settings.php exists
+ * Test to see if the site is fully installed by attempting to bootstrap drupal
+ * all the way to a Drupal Login.  This only happens if a site is truly installed.
  *
  * @return
  *   If the file exists, return TRUE, else return FALSE.
  */
 function _provision_drupal_site_exists() {
-  return is_readable(d()->site_path . '/settings.php');
+  return drush_bootstrap_max() == DRUSH_BOOTSTRAP_DRUPAL_LOGIN;
 }
 
 /**
