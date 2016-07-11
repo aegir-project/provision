@@ -223,7 +223,11 @@ location ^~ /<?php print $subdir; ?> {
     tcp_nodelay   off;
     access_log    off;
     log_not_found off;
+<?php if ($nginx_is_modern): ?>
     etag          off;
+<?php else: ?>
+    add_header ETag "";
+<?php endif; ?>
     gzip_http_version 1.0;
     if_modified_since exact;
     set $nocache_details "Skip";
