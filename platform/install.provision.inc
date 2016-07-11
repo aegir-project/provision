@@ -35,11 +35,14 @@ function drush_provision_drupal_pre_provision_install() {
  * If the install went south, and the site is not PROVISION_SITE_INSTALLED, clean up behind ourselves
  */
 function drush_provision_drupal_pre_provision_install_rollback() {
-  _provision_recursive_delete( d()->site_path );
-  drush_invoke_process('@none', 'provision-save', array(d()->name), array('delete' => TRUE));
-  foreach (d()->drush_aliases as $alias) {
-    drush_invoke_process('@none', 'provision-save', array($alias), array('delete' => TRUE));
-  }
+// @TODO: Remove this code.  We must not run the deletion of these on install rollback
+// because it is now the "Verify" task that creates these files.
+
+//  _provision_recursive_delete( d()->site_path );
+//  drush_invoke_process('@none', 'provision-save', array(d()->name), array('delete' => TRUE));
+//  foreach (d()->drush_aliases as $alias) {
+//    drush_invoke_process('@none', 'provision-save', array($alias), array('delete' => TRUE));
+//  }
 }
 
 

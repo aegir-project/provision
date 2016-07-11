@@ -204,6 +204,22 @@ function drush_provision_drupal_provision_verify() {
 }
 
 /**
+ * If the install went south, and the site is not PROVISION_SITE_INSTALLED, clean up behind ourselves
+ */
+//function drush_provision_drupal_pre_provision_install_rollback() {
+function drush_provision_drupal_pre_provision_verify_rollback() {
+
+  // If we cannot fully bootstrap drupal, destroy the files we created.
+  if (drush_bootstrap_max() != DRUSH_BOOTSTRAP_DRUPAL_LOGIN) {
+    _provision_recursive_delete(d()->site_path);
+    drush_invoke_process('@none', 'provision-save', array(d()->name), array('delete' => TRUE));
+    foreach (d()->drush_aliases as $alias) {
+      drush_invoke_process('@none', 'provision-save', array($alias), array('delete' => TRUE));
+    }
+  }
+}
+
+/**
  * Implements drush_hook_provision_post_COMMAND().
  */
 function drush_provision_drupal_post_provision_verify() {
