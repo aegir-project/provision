@@ -76,6 +76,7 @@ server {
 
 server {
   include       fastcgi_params;
+  fastcgi_param HTTP_PROXY "";
   fastcgi_param MAIN_SITE_NAME <?php print $this->uri; ?>;
   set $main_site_name "<?php print $this->uri; ?>";
   fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;

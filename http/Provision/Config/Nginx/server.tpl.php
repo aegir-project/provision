@@ -91,6 +91,7 @@ if ($nginx_has_upload_progress) {
   fastcgi_param  GEOIP_COUNTRY_CODE3 $geoip_country_code3;
   fastcgi_param  GEOIP_COUNTRY_NAME  $geoip_country_name;
   fastcgi_param  REDIRECT_STATUS     200;
+  fastcgi_param  HTTP_PROXY          "";
   fastcgi_index  index.php;
 <?php endif; ?>
 

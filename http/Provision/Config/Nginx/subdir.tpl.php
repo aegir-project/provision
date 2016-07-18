@@ -286,6 +286,7 @@ location ^~ /<?php print $subdir; ?> {
 
     include       fastcgi_params;
 
+    fastcgi_param HTTP_PROXY "";
     fastcgi_param db_type   <?php print urlencode($db_type); ?>;
     fastcgi_param db_name   <?php print urlencode($db_name); ?>;
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
@@ -749,6 +750,7 @@ location ^~ /<?php print $subdir; ?> {
 
     include       fastcgi_params;
 
+    fastcgi_param HTTP_PROXY "";
     fastcgi_param db_type   <?php print urlencode($db_type); ?>;
     fastcgi_param db_name   <?php print urlencode($db_name); ?>;
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
@@ -948,6 +950,7 @@ location ^~ /<?php print $subdir; ?> {
 
     include       fastcgi_params;
 
+    fastcgi_param HTTP_PROXY "";
     fastcgi_param db_type   <?php print urlencode($db_type); ?>;
     fastcgi_param db_name   <?php print urlencode($db_name); ?>;
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
@@ -1023,6 +1026,7 @@ location ^~ /<?php print $subdir; ?> {
 
     include       fastcgi_params;
 
+    fastcgi_param HTTP_PROXY "";
     fastcgi_param db_type   <?php print urlencode($db_type); ?>;
     fastcgi_param db_name   <?php print urlencode($db_name); ?>;
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
@@ -1168,6 +1172,7 @@ location @allowupdate_<?php print $subdir_loc; ?> {
 <?php endif; ?>
   include       fastcgi_params;
 
+  fastcgi_param HTTP_PROXY "";
   fastcgi_param db_type   <?php print urlencode($db_type); ?>;
   fastcgi_param db_name   <?php print urlencode($db_name); ?>;
   fastcgi_param db_user   <?php print urlencode($db_user); ?>;
