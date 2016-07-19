@@ -282,6 +282,9 @@ location ^~ /<?php print $subdir; ?> {
 
     include       fastcgi_params;
 
+    # Block https://httpoxy.org/ attacks.
+    fastcgi_param HTTP_PROXY "";
+
     fastcgi_param db_type   <?php print urlencode($db_type); ?>;
     fastcgi_param db_name   <?php print urlencode($db_name); ?>;
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
@@ -745,6 +748,9 @@ location ^~ /<?php print $subdir; ?> {
 
     include       fastcgi_params;
 
+    # Block https://httpoxy.org/ attacks.
+    fastcgi_param HTTP_PROXY "";
+
     fastcgi_param db_type   <?php print urlencode($db_type); ?>;
     fastcgi_param db_name   <?php print urlencode($db_name); ?>;
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
@@ -944,6 +950,9 @@ location ^~ /<?php print $subdir; ?> {
 
     include       fastcgi_params;
 
+    # Block https://httpoxy.org/ attacks.
+    fastcgi_param HTTP_PROXY "";
+
     fastcgi_param db_type   <?php print urlencode($db_type); ?>;
     fastcgi_param db_name   <?php print urlencode($db_name); ?>;
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
@@ -1019,6 +1028,9 @@ location ^~ /<?php print $subdir; ?> {
     root          <?php print "{$this->root}"; ?>;
 
     include       fastcgi_params;
+
+    # Block https://httpoxy.org/ attacks.
+    fastcgi_param HTTP_PROXY "";
 
     fastcgi_param db_type   <?php print urlencode($db_type); ?>;
     fastcgi_param db_name   <?php print urlencode($db_name); ?>;
@@ -1164,6 +1176,9 @@ location @allowupdate_<?php print $subdir_loc; ?> {
   limit_conn   limreq 88;
 <?php endif; ?>
   include       fastcgi_params;
+
+  # Block https://httpoxy.org/ attacks.
+  fastcgi_param HTTP_PROXY "";
 
   fastcgi_param db_type   <?php print urlencode($db_type); ?>;
   fastcgi_param db_name   <?php print urlencode($db_name); ?>;

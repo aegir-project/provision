@@ -92,6 +92,8 @@ if ($nginx_has_upload_progress) {
   fastcgi_param  GEOIP_COUNTRY_NAME  $geoip_country_name;
   fastcgi_param  REDIRECT_STATUS     200;
   fastcgi_index  index.php;
+  # Block https://httpoxy.org/ attacks.
+  fastcgi_param  HTTP_PROXY          "";
 <?php endif; ?>
 
  ## Size Limits
