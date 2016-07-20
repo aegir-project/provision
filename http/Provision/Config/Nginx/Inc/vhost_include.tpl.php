@@ -19,6 +19,10 @@ if (!$phpfpm_mode && $server->phpfpm_mode) {
   $phpfpm_mode = $server->phpfpm_mode;
 }
 
+// We can use $server here once we have proper inheritance.
+// See Provision_Service_http_nginx_ssl for details.
+$phpfpm_socket_path = Provision_Service_http_nginx::getPhpFpmSocketPath();
+
 $nginx_is_modern = drush_get_option('nginx_is_modern');
 if (!$nginx_is_modern && $server->nginx_is_modern) {
   $nginx_is_modern = $server->nginx_is_modern;
@@ -227,7 +231,7 @@ location = /fpm-status {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
+  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 }
 
@@ -243,7 +247,7 @@ location = /fpm-ping {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
+  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 }
 <?php endif; ?>
@@ -266,7 +270,7 @@ location = /cron.php {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
+  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 }
 
@@ -915,7 +919,7 @@ location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tin
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
+  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 }
 
@@ -1066,7 +1070,7 @@ location ~ ^/(?<esi>esi/.*)"$ {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass  127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass  unix:/var/run/php5-fpm.sock;
+  fastcgi_pass  unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
   ###
   ### Use Nginx cache for all visitors.
@@ -1220,7 +1224,7 @@ location = /index.php {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass  127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass  unix:/var/run/php5-fpm.sock;
+  fastcgi_pass  unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 <?php if ($nginx_has_upload_progress): ?>
   track_uploads uploads 60s; ### required for upload progress
@@ -1274,7 +1278,7 @@ location ~* ^/(?:index|cron|boost_stats|update|authorize|xmlrpc)\.php$ {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
+  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 }
 
@@ -1304,7 +1308,7 @@ location @allowupdate {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
+  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 }
 <?php endif; ?>

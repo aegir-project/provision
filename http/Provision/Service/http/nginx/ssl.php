@@ -80,14 +80,7 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     }
 
     // Check if there is php-fpm listening on unix socket, otherwise use port 9000 to connect
-    if (provision_file()->exists('/var/run/php5-fpm.sock')->status()) {
-      $this->server->phpfpm_mode = 'socket';
-      drush_log(dt('PHP-FPM unix socket mode detected -SAVE- YES socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
-    }
-    else {
-      $this->server->phpfpm_mode = 'port';
-      drush_log(dt('PHP-FPM port mode detected -SAVE- NO socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
-    }
+    $this->server->phpfpm_mode = Provision_Service_http_nginx::getPhpFpmMode('save');
 
     // Check if there is BOA specific global.inc file to enable extra Nginx locations
     if (provision_file()->exists('/data/conf/global.inc')->status()) {
@@ -133,14 +126,7 @@ class Provision_Service_http_nginx_ssl extends Provision_Service_http_ssl {
     }
 
     // Check if there is php-fpm listening on unix socket, otherwise use port 9000 to connect
-    if (provision_file()->exists('/var/run/php5-fpm.sock')->status()) {
-      $this->server->phpfpm_mode = 'socket';
-      drush_log(dt('PHP-FPM unix socket mode detected -VERIFY- YES socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
-    }
-    else {
-      $this->server->phpfpm_mode = 'port';
-      drush_log(dt('PHP-FPM port mode detected -VERIFY- NO socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
-    }
+    $this->server->phpfpm_mode = Provision_Service_http_nginx::getPhpFpmMode('verify');
 
     // Check if there is BOA specific global.inc file to enable extra Nginx locations
     if (provision_file()->exists('/data/conf/global.inc')->status()) {
