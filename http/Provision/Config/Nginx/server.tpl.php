@@ -309,6 +309,9 @@ server {
     expires 99s;
     add_header Cache-Control "public, must-revalidate, proxy-revalidate";
     add_header Access-Control-Allow-Origin *;
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block" always;
     root   /var/www/nginx-default;
     index  index.html index.htm;
 <?php else: ?>

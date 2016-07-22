@@ -112,9 +112,10 @@ if ($is_denied) {
 ###
 ### Add recommended HTTP headers
 ###
+add_header Access-Control-Allow-Origin *;
 add_header X-Frame-Options SAMEORIGIN;
 add_header X-Content-Type-Options nosniff;
-add_header X-XSS-Protection "1; mode=block";
+add_header X-XSS-Protection "1; mode=block" always;
 <?php endif; ?>
 
 <?php if ($satellite_mode == 'boa'): ?>
@@ -148,7 +149,6 @@ if ($user_socket = '') {
 location ^~ /httprl_async_function_callback {
   location ~* ^/httprl_async_function_callback {
     access_log off;
-    add_header X-Header "HTTPRL 2.0";
     set $nocache_details "Skip";
     try_files  $uri @nobots;
   }
@@ -160,7 +160,6 @@ location ^~ /httprl_async_function_callback {
 location ^~ /admin/httprl-test {
   location ~* ^/admin/httprl-test {
     access_log off;
-    add_header X-Header "HTTPRL 2.1";
     set $nocache_details "Skip";
     try_files  $uri @nobots;
   }
@@ -183,18 +182,24 @@ location ^~ /cdn/farfuture/ {
   set $nocache_details "Skip";
   location ~* ^/cdn/farfuture/.+\.(?:css|js|jpe?g|gif|png|ico|bmp|svg|swf|pdf|docx?|xlsx?|pptx?|tiff?|txt|rtf|class|otf|ttf|woff|eot|less)$ {
     expires max;
-    add_header Access-Control-Allow-Origin *;
     add_header X-Header "CDN Far Future Generator 1.0";
     add_header Cache-Control "no-transform, public";
     add_header Last-Modified "Wed, 20 Jan 1988 04:20:42 GMT";
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block" always;
     rewrite ^/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
     try_files $uri @nobots;
   }
   location ~* ^/cdn/farfuture/ {
     expires epoch;
-    add_header Access-Control-Allow-Origin *;
     add_header X-Header "CDN Far Future Generator 1.1";
     add_header Cache-Control "private, must-revalidate, proxy-revalidate";
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block" always;
     rewrite ^/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
     try_files $uri @nobots;
   }
@@ -209,8 +214,7 @@ location = /favicon.ico {
   access_log    off;
   log_not_found off;
   expires       30d;
-  add_header Access-Control-Allow-Origin *;
-  try_files     /sites/$main_site_name/files/favicon.ico $uri =204;
+  try_files  /sites/$main_site_name/files/favicon.ico $uri =204;
 }
 
 ###
@@ -510,7 +514,6 @@ location ~* \.r\.(?:jpe?g|png|gif) {
   }
   rewrite ^/(.*)\.r(\.(?:jpe?g|png|gif))$ /$1$2 last;
   access_log off;
-  add_header X-Header "RI Generator 1.0";
   set $nocache_details "Skip";
   try_files  $uri @drupal;
 }
@@ -524,8 +527,6 @@ location ~* /(?:.+)/files/styles/adaptive/(?:.+)$ {
     rewrite ^/(.+)/files/styles/adaptive/(.+)$ /$1/files/styles/$ais_cookie/$2 last;
   }
   access_log off;
-  add_header Access-Control-Allow-Origin *;
-  add_header X-Header "AIS Generator 1.0";
   set $nocache_details "Skip";
   try_files  $uri @drupal;
 }
@@ -538,7 +539,6 @@ location ~* /sites/.*/files/styles/(.*)$ {
   access_log off;
   log_not_found off;
   expires    30d;
-  add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
   set $nocache_details "Skip";
 <?php endif; ?>
@@ -552,7 +552,6 @@ location ~* /s3/files/styles/(.*)$ {
   access_log off;
   log_not_found off;
   expires    30d;
-  add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
   set $nocache_details "Skip";
 <?php endif; ?>
@@ -566,7 +565,6 @@ location ~* /sites/.*/files/imagecache/(.*)$ {
   access_log off;
   log_not_found off;
   expires    30d;
-  add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
   # fix common problems with old paths after import from standalone to Aegir multisite
   rewrite ^/sites/(.*)/files/imagecache/(.*)/sites/default/files/(.*)$ /sites/$main_site_name/files/imagecache/$2/$3 last;
@@ -623,7 +621,6 @@ location ~* ^/sites/.*/files/private/ {
   }
   access_log off;
   rewrite    ^/sites/.*/files/private/(.*)$ $scheme://$host/system/files/private/$1 permanent;
-  add_header X-Header "Private Generator 1.0a";
   set $nocache_details "Skip";
   try_files  $uri @drupal;
 }
@@ -677,9 +674,12 @@ location ~* files/advagg_(?:css|js)/ {
   add_header ETag "";
 <?php endif; ?>
   rewrite    ^/files/advagg_(.*)/(.*)$ /sites/$main_site_name/files/advagg_$1/$2 last;
+  add_header X-Header "AdvAgg Generator 2.0";
   add_header Cache-Control "max-age=31449600, no-transform, public";
   add_header Access-Control-Allow-Origin *;
-  add_header X-Header "AdvAgg Generator 2.0";
+  add_header X-Frame-Options SAMEORIGIN;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block" always;
   set $nocache_details "Skip";
   try_files  $uri @nobots;
 }
@@ -698,7 +698,6 @@ location ~* \.css$ {
   access_log  off;
   tcp_nodelay off;
   expires     max; #if using aggregator
-  add_header  X-Header "Boost Citrus 2.1";
   try_files   /cache/perm/$host${uri}_.css $uri =404;
 }
 
@@ -716,7 +715,6 @@ location ~* \.(?:js|htc)$ {
   access_log  off;
   tcp_nodelay off;
   expires     max; # if using aggregator
-  add_header  X-Header "Boost Citrus 2.2";
   try_files   /cache/perm/$host${uri}_.js $uri =404;
 }
 
@@ -731,8 +729,6 @@ location ~* ^/sites/.*/files/.*\.json$ {
   access_log  off;
   tcp_nodelay off;
   expires     max; ### if using aggregator
-  add_header  X-Header "Boost Citrus 2.3";
-  add_header  Access-Control-Allow-Origin *;
   try_files   /cache/normal/$host${uri}_.json $uri =404;
 }
 
@@ -764,7 +760,6 @@ location ^~ /files/ {
     access_log off;
     log_not_found off;
     expires    30d;
-    add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
     set $nocache_details "Skip";
 <?php endif; ?>
@@ -779,7 +774,6 @@ location ^~ /files/ {
     access_log off;
     log_not_found off;
     expires    30d;
-    add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
     # fix common problems with old paths after import from standalone to Aegir multisite
     rewrite ^/files/imagecache/(.*)/sites/default/files/(.*)$ /sites/$main_site_name/files/imagecache/$1/$2 last;
@@ -795,7 +789,6 @@ location ^~ /files/ {
     tcp_nodelay   off;
     access_log    off;
     log_not_found off;
-    add_header  Access-Control-Allow-Origin *;
     rewrite  ^/files/(.*)$  /sites/$main_site_name/files/$1 last;
     try_files   $uri =404;
   }
@@ -815,7 +808,6 @@ location ^~ /downloads/ {
     tcp_nodelay   off;
     access_log    off;
     log_not_found off;
-    add_header  Access-Control-Allow-Origin *;
     rewrite  ^/downloads/(.*)$  /sites/$main_site_name/files/downloads/$1 last;
     try_files   $uri =404;
   }
@@ -835,7 +827,6 @@ location ~* ^.+\.(?:jpe?g|gif|png|ico|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rt
   tcp_nodelay   off;
   access_log    off;
   log_not_found off;
-  add_header  Access-Control-Allow-Origin *;
   rewrite     ^/images/(.*)$  /sites/$main_site_name/files/images/$1 last;
   rewrite     ^/.+/sites/.+/files/(.*)$  /sites/$main_site_name/files/$1 last;
   try_files   $uri =404;
@@ -849,7 +840,6 @@ location ~* ^.+\.(?:avi|mpe?g|mov|wmv|ogg|ogv|zip|tar|t?gz|rar|dmg|exe|apk|pxl|i
   expires     30d;
   tcp_nodelay off;
   tcp_nopush  off;
-  add_header  Access-Control-Allow-Origin *;
   rewrite     ^/.+/sites/.+/files/(.*)$  /sites/$main_site_name/files/$1 last;
   try_files   $uri =404;
 }
@@ -865,7 +855,6 @@ location ~* ^/sites/.+/files/.+\.(?:pdf|aspx?)$ {
   tcp_nodelay   off;
   access_log    off;
   log_not_found off;
-  add_header  Access-Control-Allow-Origin *;
   try_files   $uri =404;
 }
 
@@ -875,7 +864,6 @@ location ~* ^/sites/.+/files/.+\.(?:pdf|aspx?)$ {
 ###
 location ~* ^.+\.flv$ {
   flv;
-  add_header Access-Control-Allow-Origin *;
   tcp_nodelay off;
   tcp_nopush off;
   expires 30d;
@@ -887,7 +875,6 @@ location ~* ^.+\.flv$ {
 ###
 location ~* ^.+\.(?:mp4|m4a)$ {
   mp4;
-  add_header Access-Control-Allow-Origin *;
   mp4_buffer_size 1m;
   mp4_max_buffer_size 5m;
   tcp_nodelay off;
@@ -904,7 +891,6 @@ location ~* /(?:cross-?domain)\.xml$ {
   access_log  off;
   tcp_nodelay off;
   expires     30d;
-  add_header  X-Header "XML Generator 1.0";
   try_files   $uri =404;
 }
 
@@ -969,7 +955,6 @@ location ~* ^/sites/.*/files/ {
   access_log      off;
   tcp_nodelay     off;
   expires         30d;
-  add_header Access-Control-Allow-Origin *;
   try_files $uri =404;
 }
 
@@ -989,9 +974,13 @@ location ~* \.xml$ {
   }
   error_page 405 = @drupal;
   access_log off;
+  add_header X-Header "Boost Citrus 1.0";
   add_header Expires "Tue, 24 Jan 1984 08:00:00 GMT";
   add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
-  add_header X-Header "Boost Citrus 2.4";
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Frame-Options SAMEORIGIN;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block" always;
   charset    utf-8;
   types { }
   default_type text/xml;
@@ -1058,16 +1047,20 @@ location ~ ^/(?<esi>esi/.*)"$ {
   ssi on;
   ssi_silent_errors on;
   internal;
-  limit_conn    limreq 88;
-  add_header    X-Device "$device";
-  add_header    X-Speed-Micro-Cache "$upstream_cache_status";
-  add_header    X-Speed-Micro-Cache-Expire "5s";
-  add_header    X-NoCache "$nocache_details";
-  add_header    X-GeoIP-Country-Code "$geoip_country_code";
-  add_header    X-GeoIP-Country-Name "$geoip_country_name";
-  add_header    X-This-Proto "$http_x_forwarded_proto";
-  add_header    X-Server-Name "$main_site_name";
-  add_header    Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
+  limit_conn limreq 888;
+  add_header X-Device "$device";
+  add_header X-Speed-Micro-Cache "$upstream_cache_status";
+  add_header X-Speed-Micro-Cache-Expire "5s";
+  add_header X-NoCache "$nocache_details";
+  add_header X-GeoIP-Country-Code "$geoip_country_code";
+  add_header X-GeoIP-Country-Name "$geoip_country_name";
+  add_header X-This-Proto "$http_x_forwarded_proto";
+  add_header X-Server-Name "$main_site_name";
+  add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Frame-Options SAMEORIGIN;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block" always;
   ###
   ### Set correct, local $uri.
   ###
@@ -1165,9 +1158,13 @@ location @cache {
     return 405;
   }
   error_page 405 = @drupal;
+  add_header X-Header "Boost Citrus 1.0";
   add_header Expires "Tue, 24 Jan 1984 08:00:00 GMT";
   add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
-  add_header X-Header "Boost Citrus 1.9";
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Frame-Options SAMEORIGIN;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block" always;
   charset    utf-8;
   try_files  /cache/normal/$host${uri}_$args.html @drupal;
 }
@@ -1210,19 +1207,23 @@ location @nobots {
 location = /index.php {
 <?php if ($satellite_mode == 'boa'): ?>
   limit_conn    limreq 88;
-  add_header    X-Device "$device";
-  add_header    X-GeoIP-Country-Code "$geoip_country_code";
-  add_header    X-GeoIP-Country-Name "$geoip_country_name";
+  add_header X-Device "$device";
+  add_header X-GeoIP-Country-Code "$geoip_country_code";
+  add_header X-GeoIP-Country-Name "$geoip_country_name";
 <?php endif; ?>
 <?php if ($nginx_config_mode == 'extended'): ?>
-  add_header    X-Speed-Cache "$upstream_cache_status";
-  add_header    X-Speed-Cache-UID "$cache_uid";
-  add_header    X-Speed-Cache-Key "$key_uri";
-  add_header    X-NoCache "$nocache_details";
-  add_header    X-This-Proto "$http_x_forwarded_proto";
-  add_header    X-Server-Name "$main_site_name";
+  add_header X-Speed-Cache "$upstream_cache_status";
+  add_header X-Speed-Cache-UID "$cache_uid";
+  add_header X-Speed-Cache-Key "$key_uri";
+  add_header X-NoCache "$nocache_details";
+  add_header X-This-Proto "$http_x_forwarded_proto";
+  add_header X-Server-Name "$main_site_name";
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Frame-Options SAMEORIGIN;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block" always;
 <?php endif; ?>
-  add_header    Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
+  add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   tcp_nopush    off;
   keepalive_requests 0;
   try_files     $uri =404; ### check for existence of php file first

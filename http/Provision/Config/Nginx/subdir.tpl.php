@@ -28,11 +28,6 @@ if (!$nginx_is_modern && $server->nginx_is_modern) {
   $nginx_is_modern = $server->nginx_is_modern;
 }
 
-$nginx_has_etag = drush_get_option('nginx_has_etag');
-if (!$nginx_has_etag && $server->nginx_has_etag) {
-  $nginx_has_etag = $server->nginx_has_etag;
-}
-
 $nginx_has_http2 = drush_get_option('nginx_has_http2');
 if (!$nginx_has_http2 && $server->nginx_has_http2) {
   $nginx_has_http2 = $server->nginx_has_http2;
@@ -99,6 +94,14 @@ if ($subdir_main_site_name = '') {
 
 <?php if ($nginx_config_mode == 'extended'): ?>
 ###
+### Add recommended HTTP headers
+###
+add_header Access-Control-Allow-Origin *;
+add_header X-Frame-Options SAMEORIGIN;
+add_header X-Content-Type-Options nosniff;
+add_header X-XSS-Protection "1; mode=block" always;
+
+###
 ### Helper locations to avoid 404 on legacy images paths
 ###
 location ^~ /<?php print $subdir; ?>/sites/default/files {
@@ -109,7 +112,6 @@ location ^~ /<?php print $subdir; ?>/sites/default/files {
     access_log off;
     log_not_found off;
     expires    30d;
-    add_header Access-Control-Allow-Origin *;
     set $nocache_details "Skip";
     rewrite ^/<?php print $subdir; ?>/sites/default/files/imagecache/(.*)$ /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/imagecache/$1 last;
     try_files  $uri @drupal_<?php print $subdir_loc; ?>;
@@ -118,7 +120,6 @@ location ^~ /<?php print $subdir; ?>/sites/default/files {
     access_log off;
     log_not_found off;
     expires    30d;
-    add_header Access-Control-Allow-Origin *;
     set $nocache_details "Skip";
     rewrite ^/<?php print $subdir; ?>/sites/default/files/styles/(.*)$ /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/styles/$1 last;
     try_files  $uri @drupal_<?php print $subdir_loc; ?>;
@@ -127,7 +128,6 @@ location ^~ /<?php print $subdir; ?>/sites/default/files {
     access_log off;
     log_not_found off;
     expires    30d;
-    add_header Access-Control-Allow-Origin *;
     rewrite ^/<?php print $subdir; ?>/sites/default/files/(.*)$ /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/$1 last;
     try_files /$1 $uri =404;
   }
@@ -192,13 +192,6 @@ location ^~ /<?php print $subdir; ?> {
   if ($is_denied) {
     return 403;
   }
-
-  ###
-  ### Add recommended HTTP headers
-  ###
-  add_header X-Frame-Options SAMEORIGIN;
-  add_header X-Content-Type-Options nosniff;
-  add_header X-XSS-Protection "1; mode=block";
 <?php endif; ?>
 
   ###
@@ -207,7 +200,6 @@ location ^~ /<?php print $subdir; ?> {
   location ^~ /<?php print $subdir; ?>/httprl_async_function_callback {
     location ~* ^/<?php print $subdir; ?>/httprl_async_function_callback {
       access_log off;
-      add_header X-Header "HTTPRL 2.0";
       set $nocache_details "Skip";
       try_files /httprl_async_function_callback $uri @nobots_<?php print $subdir_loc; ?>;
     }
@@ -219,7 +211,6 @@ location ^~ /<?php print $subdir; ?> {
   location ^~ /<?php print $subdir; ?>/admin/httprl-test {
     location ~* ^/<?php print $subdir; ?>/admin/httprl-test {
       access_log off;
-      add_header X-Header "HTTPRL 2.1";
       set $nocache_details "Skip";
       try_files /admin/httprl-test $uri @nobots_<?php print $subdir_loc; ?>;
     }
@@ -238,18 +229,24 @@ location ^~ /<?php print $subdir; ?> {
     set $nocache_details "Skip";
     location ~* ^/<?php print $subdir; ?>/(cdn/farfuture/.+\.(?:css|js|jpe?g|gif|png|ico|bmp|svg|swf|pdf|docx?|xlsx?|pptx?|tiff?|txt|rtf|class|otf|ttf|woff|eot|less))$ {
       expires max;
-      add_header Access-Control-Allow-Origin *;
       add_header X-Header "CDN Far Future Generator 1.0";
       add_header Cache-Control "no-transform, public";
       add_header Last-Modified "Wed, 20 Jan 1988 04:20:42 GMT";
+      add_header Access-Control-Allow-Origin *;
+      add_header X-Frame-Options SAMEORIGIN;
+      add_header X-Content-Type-Options nosniff;
+      add_header X-XSS-Protection "1; mode=block" always;
       rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
       try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
     }
     location ~* ^/<?php print $subdir; ?>/(cdn/farfuture/) {
       expires epoch;
-      add_header Access-Control-Allow-Origin *;
       add_header X-Header "CDN Far Future Generator 1.1";
       add_header Cache-Control "private, must-revalidate, proxy-revalidate";
+      add_header Access-Control-Allow-Origin *;
+      add_header X-Frame-Options SAMEORIGIN;
+      add_header X-Content-Type-Options nosniff;
+      add_header X-XSS-Protection "1; mode=block" always;
       rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
       try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
     }
@@ -264,7 +261,6 @@ location ^~ /<?php print $subdir; ?> {
     access_log    off;
     log_not_found off;
     expires       30d;
-    add_header Access-Control-Allow-Origin *;
     try_files     /sites/$subdir_main_site_name/files/favicon.ico /sites/$host/files/favicon.ico /favicon.ico $uri =204;
   }
 
@@ -459,7 +455,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   ### Deny listed requests for security reasons.
   ###
-  location ~* /files/civicrm/(?:ConfigAndLog|custom|upload|templates_c) {
+  location ~* /files/civicrm/(?:ConfigAndLog|upload|templates_c) {
     access_log off;
     return 404;
   }
@@ -475,7 +471,6 @@ location ^~ /<?php print $subdir; ?> {
     }
     rewrite ^/<?php print $subdir; ?>/(.*)\.r(\.(?:jpe?g|png|gif))$ /<?php print $subdir; ?>/$1$2 last;
     access_log off;
-    add_header X-Header "RI Generator 1.0";
     set $nocache_details "Skip";
     try_files  $uri @drupal_<?php print $subdir_loc; ?>;
   }
@@ -489,8 +484,6 @@ location ^~ /<?php print $subdir; ?> {
       rewrite ^/<?php print $subdir; ?>/(.+)/files/styles/adaptive/(.+)$ /<?php print $subdir; ?>/$1/files/styles/$ais_cookie/$2 last;
     }
     access_log off;
-    add_header Access-Control-Allow-Origin *;
-    add_header X-Header "AIS Generator 1.0";
     set $nocache_details "Skip";
     try_files  $uri @drupal_<?php print $subdir_loc; ?>;
   }
@@ -508,7 +501,6 @@ location ^~ /<?php print $subdir; ?> {
       access_log off;
       log_not_found off;
       expires    30d;
-      add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
       set $nocache_details "Skip";
 <?php endif; ?>
@@ -523,7 +515,6 @@ location ^~ /<?php print $subdir; ?> {
       access_log off;
       log_not_found off;
       expires    30d;
-      add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
       # fix common problems with old paths after import from standalone to Aegir multisite
       rewrite ^/<?php print $subdir; ?>/files/imagecache/(.*)/sites/default/files/(.*)$ /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/imagecache/$1/$2 last;
@@ -539,7 +530,6 @@ location ^~ /<?php print $subdir; ?> {
       tcp_nodelay   off;
       access_log    off;
       log_not_found off;
-      add_header  Access-Control-Allow-Origin *;
       rewrite  ^/<?php print $subdir; ?>/files/(.*)$  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/$1 last;
       try_files   $uri =404;
     }
@@ -558,7 +548,6 @@ location ^~ /<?php print $subdir; ?> {
     access_log off;
     log_not_found off;
     expires    30d;
-    add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
     set $nocache_details "Skip";
 <?php endif; ?>
@@ -572,9 +561,7 @@ location ^~ /<?php print $subdir; ?> {
     access_log off;
     log_not_found off;
     expires    30d;
-    add_header Access-Control-Allow-Origin *;
 <?php if ($nginx_config_mode == 'extended'): ?>
-    add_header X-Header "IC Generator 1.0";
     set $nocache_details "Skip";
 <?php endif; ?>
     try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
@@ -655,14 +642,17 @@ location ^~ /<?php print $subdir; ?> {
   location ~* ^/<?php print $subdir; ?>/(.*/files/advagg_(?:css|js).*) {
     expires    max;
     access_log off;
-<?php if ($nginx_has_etag): ?>
+<?php if ($nginx_is_modern): ?>
     etag       off;
 <?php else: ?>
     add_header ETag "";
 <?php endif; ?>
+    add_header X-Header "AdvAgg Generator 2.0";
     add_header Cache-Control "max-age=31449600, no-transform, public";
     add_header Access-Control-Allow-Origin *;
-    add_header X-Header "AdvAgg Generator 2.0";
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block" always;
     set $nocache_details "Skip";
     try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
   }
@@ -674,7 +664,6 @@ location ^~ /<?php print $subdir; ?> {
     access_log  off;
     tcp_nodelay off;
     expires     max; #if using aggregator
-    add_header  X-Header "Boost Citrus 2.1";
     try_files   /cache/perm/$host${uri}_.css /$1 $uri =404;
   }
 
@@ -685,7 +674,6 @@ location ^~ /<?php print $subdir; ?> {
     access_log  off;
     tcp_nodelay off;
     expires     max; # if using aggregator
-    add_header  X-Header "Boost Citrus 2.2";
     try_files   /cache/perm/$host${uri}_.js /$1 $uri =404;
   }
 
@@ -696,8 +684,6 @@ location ^~ /<?php print $subdir; ?> {
     access_log  off;
     tcp_nodelay off;
     expires     max; ### if using aggregator
-    add_header  X-Header "Boost Citrus 2.3";
-    add_header  Access-Control-Allow-Origin *;
     try_files   /cache/normal/$host${uri}_.json /$1 $uri =404;
   }
 
@@ -718,7 +704,6 @@ location ^~ /<?php print $subdir; ?> {
     tcp_nodelay   off;
     access_log    off;
     log_not_found off;
-    add_header  Access-Control-Allow-Origin *;
     try_files   /$1 $uri =404;
   }
 
@@ -730,7 +715,6 @@ location ^~ /<?php print $subdir; ?> {
     expires     30d;
     tcp_nodelay off;
     tcp_nopush  off;
-    add_header  Access-Control-Allow-Origin *;
     try_files   /$1 $uri =404;
   }
 
@@ -741,7 +725,6 @@ location ^~ /<?php print $subdir; ?> {
     access_log  off;
     tcp_nodelay off;
     expires     30d;
-    add_header  X-Header "XML Generator 1.0";
     try_files   /$1 $uri =404;
   }
 
@@ -833,7 +816,6 @@ location ^~ /<?php print $subdir; ?> {
     access_log      off;
     tcp_nodelay     off;
     expires         30d;
-    add_header Access-Control-Allow-Origin *;
     try_files /$1 $uri =404;
   }
 
@@ -853,9 +835,13 @@ location ^~ /<?php print $subdir; ?> {
     }
     error_page 405 = @drupal_<?php print $subdir_loc; ?>;
     access_log off;
+    add_header X-Header "Boost Citrus 1.0";
     add_header Expires "Tue, 24 Jan 1984 08:00:00 GMT";
     add_header Cache-Control "must-revalidate, post-check=0, pre-check=0";
-    add_header X-Header "Boost Citrus 2.4";
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block" always;
     charset    utf-8;
     types { }
     default_type text/xml;
@@ -1019,18 +1005,23 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location = /<?php print $subdir; ?>/index.php {
 <?php if ($satellite_mode == 'boa'): ?>
-    limit_conn    limreq 88;
-    add_header    X-Device "$device";
-    add_header    X-GeoIP-Country-Code "$geoip_country_code";
-    add_header    X-GeoIP-Country-Name "$geoip_country_name";
+    limit_conn limreq 888;
+    add_header X-Device "$device";
+    add_header X-GeoIP-Country-Code "$geoip_country_code";
+    add_header X-GeoIP-Country-Name "$geoip_country_name";
 <?php endif; ?>
 <?php if ($nginx_config_mode == 'extended'): ?>
-    add_header    X-Speed-Cache "$upstream_cache_status";
-    add_header    X-Speed-Cache-UID "$cache_uid";
-    add_header    X-Speed-Cache-Key "$key_uri";
-    add_header    X-NoCache "$nocache_details";
-    add_header    X-This-Proto "$http_x_forwarded_proto";
-    add_header    X-Server-Sub-Name "$subdir_main_site_name";
+    add_header X-Speed-Cache "$upstream_cache_status";
+    add_header X-Speed-Cache-UID "$cache_uid";
+    add_header X-Speed-Cache-Key "$key_uri";
+    add_header X-NoCache "$nocache_details";
+    add_header X-This-Proto "$http_x_forwarded_proto";
+    add_header X-Server-Sub-Name "$subdir_main_site_name";
+    add_header X-Response-Status "$status";
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block" always;
 <?php endif; ?>
 
     root          <?php print "{$this->root}"; ?>;
@@ -1058,7 +1049,7 @@ location ^~ /<?php print $subdir; ?> {
     set $real_fastcgi_script_name index.php;
     fastcgi_param  SCRIPT_FILENAME     <?php print "{$this->root}"; ?>/$real_fastcgi_script_name;
 
-    add_header    Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
+    add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
     tcp_nopush    off;
     keepalive_requests 0;
     try_files     /index.php =404; ### check for existence of php file first
@@ -1083,7 +1074,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_cache speed;
     fastcgi_cache_methods GET HEAD; ### Nginx default, but added for clarity
     fastcgi_cache_min_uses 1;
-    fastcgi_cache_key "$is_bot$device$host$request_method$key_uri$cache_uid$http_x_forwarded_proto$sent_http_x_local_proto$cookie_respimg";
+    fastcgi_cache_key "$is_bot$device$host$request_method$key_uri$cache_uid$http_x_forwarded_proto$sent_http_x_local_proto$cookie_respimg$status";
     fastcgi_cache_valid 200 10s;
     fastcgi_cache_valid 302 1m;
     fastcgi_cache_valid 301 403 404 5s;
@@ -1137,9 +1128,13 @@ location @cache_<?php print $subdir_loc; ?> {
     return 405;
   }
   error_page 405 = @drupal_<?php print $subdir_loc; ?>;
+  add_header X-Header "Boost Citrus 1.0";
   add_header Expires "Tue, 24 Jan 1984 08:00:00 GMT";
   add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
-  add_header X-Header "Boost Citrus 1.9";
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Frame-Options SAMEORIGIN;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block" always;
   charset    utf-8;
   try_files  /cache/normal/$host${uri}_$args.html @drupal_<?php print $subdir_loc; ?>;
 }
