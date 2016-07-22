@@ -93,6 +93,8 @@ if ($nginx_has_upload_progress) {
   fastcgi_param  REDIRECT_STATUS     200;
   fastcgi_param  HTTP_PROXY          "";
   fastcgi_index  index.php;
+  # Block https://httpoxy.org/ attacks.
+  fastcgi_param  HTTP_PROXY          "";
 <?php endif; ?>
 
  ## Size Limits

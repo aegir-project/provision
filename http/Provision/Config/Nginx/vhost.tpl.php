@@ -1,6 +1,5 @@
 <?php
 if ($this->redirection) {
-  $aegir_root = d('@server_master')->aegir_root;
   // Redirect all aliases to the main http url using separate vhosts blocks to avoid if{} in Nginx.
   foreach ($this->aliases as $alias_url) {
     print "# alias redirection virtual host\n";
@@ -17,15 +16,6 @@ if ($this->redirection) {
       print "  server_name  {$alias_url};\n";
     }
     print "  access_log   off;\n";
-    print "\n";
-    print "  ###\n";
-    print "  ### Allow access to letsencrypt.org ACME challenges directory.\n";
-    print "  ###\n";
-    print "  location ^~ /.well-known/acme-challenge {\n";
-    print "    alias {$aegir_root}/tools/le/.acme-challenges;\n";
-    print "    try_files \$uri 404;\n";
-    print "  }\n";
-    print "\n";
     print "  return 301 \$scheme://{$this->redirection}\$request_uri;\n";
     print "}\n";
   }
@@ -34,7 +24,10 @@ if ($this->redirection) {
 
 server {
   include       fastcgi_params;
+
+  # Block https://httpoxy.org/ attacks.
   fastcgi_param HTTP_PROXY "";
+
   fastcgi_param MAIN_SITE_NAME <?php print $this->uri; ?>;
   set $main_site_name "<?php print $this->uri; ?>";
   fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;

@@ -19,6 +19,10 @@ if (!$phpfpm_mode && $server->phpfpm_mode) {
   $phpfpm_mode = $server->phpfpm_mode;
 }
 
+// We can use $server here once we have proper inheritance.
+// See Provision_Service_http_nginx_ssl for details.
+$phpfpm_socket_path = Provision_Service_http_nginx::getPhpFpmSocketPath();
+
 $nginx_is_modern = drush_get_option('nginx_is_modern');
 if (!$nginx_is_modern && $server->nginx_is_modern) {
   $nginx_is_modern = $server->nginx_is_modern;
@@ -223,11 +227,7 @@ location ^~ /<?php print $subdir; ?> {
     tcp_nodelay   off;
     access_log    off;
     log_not_found off;
-<?php if ($nginx_is_modern): ?>
     etag          off;
-<?php else: ?>
-    add_header ETag "";
-<?php endif; ?>
     gzip_http_version 1.0;
     if_modified_since exact;
     set $nocache_details "Skip";
@@ -286,7 +286,9 @@ location ^~ /<?php print $subdir; ?> {
 
     include       fastcgi_params;
 
+    # Block https://httpoxy.org/ attacks.
     fastcgi_param HTTP_PROXY "";
+
     fastcgi_param db_type   <?php print urlencode($db_type); ?>;
     fastcgi_param db_name   <?php print urlencode($db_name); ?>;
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
@@ -317,7 +319,7 @@ location ^~ /<?php print $subdir; ?> {
 <?php elseif ($phpfpm_mode == 'port'): ?>
     fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-    fastcgi_pass unix:/var/run/php5-fpm.sock;
+    fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
   }
 
@@ -750,7 +752,9 @@ location ^~ /<?php print $subdir; ?> {
 
     include       fastcgi_params;
 
+    # Block https://httpoxy.org/ attacks.
     fastcgi_param HTTP_PROXY "";
+
     fastcgi_param db_type   <?php print urlencode($db_type); ?>;
     fastcgi_param db_name   <?php print urlencode($db_name); ?>;
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
@@ -781,7 +785,7 @@ location ^~ /<?php print $subdir; ?> {
 <?php elseif ($phpfpm_mode == 'port'): ?>
     fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-    fastcgi_pass unix:/var/run/php5-fpm.sock;
+    fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
   }
 
@@ -950,7 +954,9 @@ location ^~ /<?php print $subdir; ?> {
 
     include       fastcgi_params;
 
+    # Block https://httpoxy.org/ attacks.
     fastcgi_param HTTP_PROXY "";
+
     fastcgi_param db_type   <?php print urlencode($db_type); ?>;
     fastcgi_param db_name   <?php print urlencode($db_name); ?>;
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
@@ -978,7 +984,7 @@ location ^~ /<?php print $subdir; ?> {
 <?php elseif ($phpfpm_mode == 'port'): ?>
     fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-    fastcgi_pass unix:/var/run/php5-fpm.sock;
+    fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
   }
 
@@ -1020,13 +1026,16 @@ location ^~ /<?php print $subdir; ?> {
     add_header    X-NoCache "$nocache_details";
     add_header    X-This-Proto "$http_x_forwarded_proto";
     add_header    X-Server-Sub-Name "$subdir_main_site_name";
+    add_header    X-Response-Status "$status";
 <?php endif; ?>
 
     root          <?php print "{$this->root}"; ?>;
 
     include       fastcgi_params;
 
+    # Block https://httpoxy.org/ attacks.
     fastcgi_param HTTP_PROXY "";
+
     fastcgi_param db_type   <?php print urlencode($db_type); ?>;
     fastcgi_param db_name   <?php print urlencode($db_name); ?>;
     fastcgi_param db_user   <?php print urlencode($db_user); ?>;
@@ -1054,7 +1063,7 @@ location ^~ /<?php print $subdir; ?> {
 <?php elseif ($phpfpm_mode == 'port'): ?>
     fastcgi_pass  127.0.0.1:9000;
 <?php else: ?>
-    fastcgi_pass  unix:/var/run/php5-fpm.sock;
+    fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 <?php if ($nginx_has_upload_progress): ?>
     track_uploads uploads 60s; ### required for upload progress
@@ -1070,10 +1079,11 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_cache speed;
     fastcgi_cache_methods GET HEAD; ### Nginx default, but added for clarity
     fastcgi_cache_min_uses 1;
-    fastcgi_cache_key "$scheme$is_bot$device$host$request_method$key_uri$cache_uid$http_x_forwarded_proto$sent_http_x_local_proto$cookie_respimg";
+    fastcgi_cache_key "$is_bot$device$host$request_method$key_uri$cache_uid$http_x_forwarded_proto$sent_http_x_local_proto$cookie_respimg$status";
     fastcgi_cache_valid 200 10s;
-    fastcgi_cache_valid 301 1m;
-    fastcgi_cache_valid 302 403 404 1s;
+    fastcgi_cache_valid 302 1m;
+    fastcgi_cache_valid 301 403 404 5s;
+    fastcgi_cache_valid 500 502 503 504 1s;
     fastcgi_cache_lock on;
     fastcgi_ignore_headers Cache-Control Expires;
     fastcgi_pass_header Set-Cookie;
@@ -1171,7 +1181,9 @@ location @allowupdate_<?php print $subdir_loc; ?> {
 <?php endif; ?>
   include       fastcgi_params;
 
+  # Block https://httpoxy.org/ attacks.
   fastcgi_param HTTP_PROXY "";
+
   fastcgi_param db_type   <?php print urlencode($db_type); ?>;
   fastcgi_param db_name   <?php print urlencode($db_name); ?>;
   fastcgi_param db_user   <?php print urlencode($db_user); ?>;
@@ -1199,7 +1211,7 @@ location @allowupdate_<?php print $subdir_loc; ?> {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
+  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 }
 <?php endif; ?>
