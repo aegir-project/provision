@@ -12,6 +12,8 @@ if (!$nginx_has_http2 && $server->nginx_has_http2) {
   $nginx_has_http2 = $server->nginx_has_http2;
 }
 
+$aegir_root = d('@server_master')->aegir_root;
+
 if ($nginx_has_http2) {
   $ssl_args = "ssl http2";
 }
@@ -45,12 +47,28 @@ server {
   }
 ?>
   ssl                        on;
+<?php if ($satellite_mode == 'boa'): ?>
+  ssl_stapling               on;
+  ssl_stapling_verify        on;
+  resolver 8.8.8.8 8.8.4.4 valid=300s;
+  resolver_timeout           5s;
+  ssl_dhparam                /etc/ssl/private/nginx-wild-ssl.dhp;
+<?php endif; ?>
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
 <?php if (!empty($ssl_chain_cert)) : ?>
   ssl_certificate            <?php print $ssl_chain_cert; ?>;
 <?php else: ?>
   ssl_certificate            <?php print $ssl_cert; ?>;
 <?php endif; ?>
+
+  ###
+  ### Allow access to letsencrypt.org ACME challenges directory.
+  ###
+  location ^~ /.well-known/acme-challenge {
+    alias <?php print $aegir_root; ?>/tools/le/.acme-challenges;
+    try_files $uri 404;
+  }
+
   return 301 $scheme://<?php print $this->redirection; ?>$request_uri;
 }
 <?php endforeach; ?>
@@ -113,13 +131,20 @@ server {
     } ?>;
   root          <?php print "{$this->root}"; ?>;
   ssl                        on;
+<?php if ($satellite_mode == 'boa'): ?>
+  ssl_stapling               on;
+  ssl_stapling_verify        on;
+  resolver 8.8.8.8 8.8.4.4 valid=300s;
+  resolver_timeout           5s;
+  ssl_dhparam                /etc/ssl/private/nginx-wild-ssl.dhp;
+<?php endif; ?>
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
 <?php if (!empty($ssl_chain_cert)) : ?>
   ssl_certificate            <?php print $ssl_chain_cert; ?>;
 <?php else: ?>
   ssl_certificate            <?php print $ssl_cert; ?>;
 <?php endif; ?>
-<?php print $extra_config; ?>
+  <?php print $extra_config; ?>
   include                    <?php print $server->include_path; ?>/nginx_vhost_common.conf;
 }
 
