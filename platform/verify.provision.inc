@@ -145,34 +145,53 @@ function drush_provision_drupal_pre_provision_verify() {
       if (is_numeric($latestDir)) {
         $core6_contrib_dir = '/data/all/' . $latestDir . '/o_contrib';
         $core7_contrib_dir = '/data/all/' . $latestDir . '/o_contrib_seven';
+        $core8_contrib_dir = '/data/all/' . $latestDir . '/o_contrib_eight';
       }
       else {
         $core6_contrib_dir = '/data/all/000/modules/o_contrib';
         $core7_contrib_dir = '/data/all/000/modules/o_contrib_seven';
+        $core8_contrib_dir = '/data/all/000/modules/o_contrib_eight';
       }
 
       $core6_version_id = d()->root . '/modules/path_alias_cache';
       $core6_contrib_symlink = d()->root . '/modules/o_contrib';
       $core7_version_id = d()->root . '/modules/overlay';
       $core7_contrib_symlink = d()->root . '/modules/o_contrib_seven';
+      $core8_version_id = d()->root . '/core';
+      $core8_contrib_symlink = d()->root . '/modules/o_contrib_eight';
 
       // Make sure the core modules directory is writable, but only if it is a BOA system.
-      if (provision_file()->exists($core6_contrib_dir)->status() || provision_file()->exists($core7_contrib_dir)->status()) {
+      if (provision_file()->exists($core6_contrib_dir)->status() ||
+          provision_file()->exists($core7_contrib_dir)->status() ||
+          provision_file()->exists($core8_contrib_dir)->status()) {
         provision_file()->writable(d()->root . '/modules')
           ->succeed('Drupal core modules directory @path is writable by the provisioning script')
           ->fail('Drupal core modules directory @path is not writable by the provisioning script', 'PROVISION_MODULES_DIR_NOT_WRITABLE');
       }
 
       // Add symlink to BOA specific contrib in Pressflow 6.
-      if (provision_file()->exists($core6_contrib_dir)->status() && provision_file()->exists($core6_version_id)->status() && !provision_file()->exists($core6_contrib_symlink)->status()) {
+      if (provision_file()->exists($core6_contrib_dir)->status() &&
+          provision_file()->exists($core6_version_id)->status() &&
+          !provision_file()->exists($core6_contrib_symlink)->status()) {
         provision_file()->symlink($core6_contrib_dir, $core6_contrib_symlink)
           ->succeed('Created symlink @path to @target')
           ->fail('Could not create symlink @path to @target: @reason');
       }
 
       // Add symlink to BOA specific contrib in Drupal 7.
-      if (provision_file()->exists($core7_contrib_dir)->status() && provision_file()->exists($core7_version_id)->status() && !provision_file()->exists($core7_contrib_symlink)->status()) {
+      if (provision_file()->exists($core7_contrib_dir)->status() &&
+         provision_file()->exists($core7_version_id)->status() &&
+         !provision_file()->exists($core7_contrib_symlink)->status()) {
         provision_file()->symlink($core7_contrib_dir, $core7_contrib_symlink)
+          ->succeed('Created symlink @path to @target')
+          ->fail('Could not create symlink @path to @target: @reason');
+      }
+
+      // Add symlink to BOA specific contrib in Drupal 8.
+      if (provision_file()->exists($core8_contrib_dir)->status() &&
+          provision_file()->exists($core8_version_id)->status() &&
+          !provision_file()->exists($core8_contrib_symlink)->status()) {
+        provision_file()->symlink($core8_contrib_dir, $core8_contrib_symlink)
           ->succeed('Created symlink @path to @target')
           ->fail('Could not create symlink @path to @target: @reason');
       }
