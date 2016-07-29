@@ -51,6 +51,8 @@ if (isset($_SERVER['db_name'])) {
 <?php if ($utf8mb4IsSupported): ?>
     'charset' => 'utf8mb4',
     'collation' => 'utf8mb4_general_ci',
+<?php else: ?>
+    // ... not adding charset utf8mb4, add "$options['utf8mb4IsSupported'] = TRUE;" to /etc/drush/drushrc.php to enable.
 <?php endif; ?>
   );
   $db_url['default'] = $_SERVER['db_type'] . '://' . $_SERVER['db_user'] . ':' . $_SERVER['db_passwd'] . '@' . $_SERVER['db_host'] . ':' . $_SERVER['db_port'] . '/' . $_SERVER['db_name'];

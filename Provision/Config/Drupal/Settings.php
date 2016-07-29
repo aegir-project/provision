@@ -24,7 +24,7 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
 
       // Multi-byte UTF-8 support in Drupal 7
       // https://www.drupal.org/node/2754539
-      if (version_compare(drush_drupal_version(), '7.50', '>=')) {
+      if (version_compare(drush_drupal_version(), '7.50', '>=') && drush_get_option('utf8mb4IsSupported', FALSE)) {
         $this->data['utf8mb4IsSupported'] = TRUE;
       }
 
