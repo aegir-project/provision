@@ -21,6 +21,13 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
       $this->data['file_directory_temp_var'] = 'file_temporary_path';
       $this->data['file_directory_private_var'] = 'file_private_path';
       $this->data['drupal_hash_salt_var'] = 'empty';
+
+      // Multi-byte UTF-8 support in Drupal 7
+      // https://www.drupal.org/node/2754539
+      if (version_compare(drush_drupal_version(), '7.50', '>=')) {
+        $this->data['utf8mb4IsSupported'] = TRUE;
+      }
+
     }
     else {
       $this->data['file_directory_path_var'] = 'file_directory_path';

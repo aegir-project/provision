@@ -48,6 +48,7 @@ if (isset($_SERVER['db_name'])) {
      * should probably be fixed in Drush.
      */
     'port' => (string) $_SERVER['db_port'],
+    'collation' => 'utf8mb4_general_ci',
   );
   $db_url['default'] = $_SERVER['db_type'] . '://' . $_SERVER['db_user'] . ':' . $_SERVER['db_passwd'] . '@' . $_SERVER['db_host'] . ':' . $_SERVER['db_port'] . '/' . $_SERVER['db_name'];
 }
