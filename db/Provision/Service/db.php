@@ -21,9 +21,15 @@ class Provision_Service_db extends Provision_Service {
   function init_server() {
     parent::init_server();
     $this->server->setProperty('master_db');
+    $this->server->setProperty('utf8mb4_is_supported', FALSE);
     $this->creds = array_map('urldecode', parse_url($this->server->master_db));
 
     return TRUE;
+  }
+
+  function save_server() {
+    // Check database 4 byte UTF-8 support and save it for later.
+    $this->server->utf8mb4_is_supported = $this->utf8mb4_is_supported();
   }
 
   /**
@@ -42,6 +48,12 @@ class Provision_Service_db extends Provision_Service {
       }
       else {
         drush_set_error('PROVISION_GRANT_DB_USER_FAILED');
+      }
+      if ($this->server->utf8mb4_is_supported) {
+        drush_log(dt('Provision can activate multi-byte UTF-8 support on Drupal 7 sites.'), 'success');
+      }
+      else {
+        drush_log(dt('Multi-byte UTF-8 for Drupal 7 is not supported on your system. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => 'https://www.drupal.org/node/2754539')), 'warning');
       }
     } else {
       drush_set_error('PROVISION_CONNECT_DB_FAILED');
@@ -239,5 +251,16 @@ class Provision_Service_db extends Provision_Service {
    */
   function grant_host(Provision_Context_server $server) {
     return $server->remote_host;
+  }
+
+  /**
+   * Checks whether utf8mb4 support is available on the current database system.
+   *
+   * @return bool
+   */
+  function utf8mb4_is_supported() {
+    // By default we assume that the database backend may not support 4 byte
+    // UTF-8.
+    return FALSE;
   }
 }
