@@ -3,7 +3,7 @@ language: generic
 sudo: required
 
 env:
-  globaL:
+  global:
     - DOCKER_VERSION=1.11.2-0~trusty
     - DOCKER_COMPOSE_VERSION=1.7.1
     - AEGIR_TESTS_VERSION
