@@ -27,6 +27,7 @@ services:
 before_install:
   # Show travis build dir variable.
   - echo $TRAVIS_BUILD_DIR
+  - dpkg -l docker\*
 
   # Get Hostmaster
   - git clone http://git.drupal.org/project/hostmaster.git /home/travis/build/aegir-project/hostmaster
