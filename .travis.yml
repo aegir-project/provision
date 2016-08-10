@@ -1,0 +1,64 @@
+language: generic
+
+sudo: required
+
+env:
+  globaL:
+    - DOCKER_VERSION=1.11.2-0~trusty
+    - DOCKER_COMPOSE_VERSION=1.7.1
+    - AEGIR_TESTS_VERSION
+    - AEGIR_HOSTMASTER_VERSION=7.x-3.x
+
+#env:
+#  - test: Ubuntu 14.04 Apache
+#    distribution: ubuntu
+#    version: 14.04
+#    init: /sbin/init
+#    run_opts: ""
+
+addons:
+  hosts:
+    - aegir.travis
+    - sitetest.aegir.travis
+
+services:
+  - docker
+
+before_install:
+  # Show travis build dir variable.
+  - echo $TRAVIS_BUILD_DIR
+
+  # Get Hostmaster
+  - git clone http://git.drupal.org/project/hostmaster.git /home/travis/build/aegir-project/hostmaster
+  - cd /home/travis/build/aegir-project/hostmaster
+  - git checkout $AEGIR_HOSTMASTER_VERSION
+
+  # Get test scripts
+  - git clone http://github.com/aegir-project/tests.git /home/travis/build/aegir-project/tests
+  - cd /home/travis/build/aegir-project/tests
+
+  # list docker-engine versions
+  - apt-cache madison docker-engine
+
+  # upgrade docker-engine to specific version
+  - sudo apt-get -o Dpkg::Options::="--force-confnew" install -y docker-engine=${DOCKER_VERSION}
+
+  # reinstall docker-compose at specific version
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - docker --version
+  - docker-compose --version
+
+  # Get aegir/hostmaster and database images.
+  - sudo docker pull aegir/hostmaster
+  - sudo docker pull mariadb
+
+script:
+
+  # Tests are included in the docker-compose.yml file in the tests repo.
+  # See https://github.com/aegir-project/tests/blob/master/travis/docker-compose.yml for the docker setup.
+  # See https://github.com/aegir-project/dockerfiles/blob/master/docker-entrypoint-tests.sh for the script that runs the tests.
+  # See https://github.com/aegir-project/tests for the behat tests.
+  - sudo docker-compose run hostmaster --rm
