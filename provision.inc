@@ -260,7 +260,7 @@ function _provision_file_check_location($source, $directory = '') {
   }
   else {
     // This file does not yet exist
-    $source = realpath(dirname($source)) .'/'. basename($source);
+    $source = realpath(dirname($source)) . '/' . basename($source);
   }
   $directory = realpath($directory);
   if ($directory && strpos($source, $directory) !== 0) {

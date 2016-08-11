@@ -24,7 +24,7 @@ function _provision_drupal_find_themes($scope, $key = '') {
       $files[$name]->name = $files[$name]->info['name'];
     }
     if (empty($files[$name]->info['engine'])) {
-      $filename = dirname($files[$name]->filename) .'/'. $files[$name]->name .'.theme';
+      $filename = dirname($files[$name]->filename) . '/' . $files[$name]->name . '.theme';
       if (file_exists($filename)) {
         $files[$name]->owner = $filename;
         $files[$name]->prefix = $name;

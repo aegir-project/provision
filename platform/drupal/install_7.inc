@@ -21,7 +21,7 @@ function install_send_welcome_mail($url, $account, $language, $client_email, $on
       '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
       '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail,
       '!date' => format_date(time()), '!login_uri' => url('user', array('absolute' => TRUE)),
-      '!edit_uri' => url('user/'. $account->uid .'/edit', array('absolute' => TRUE)));
+      '!edit_uri' => url('user/' . $account->uid . '/edit', array('absolute' => TRUE)));
 
     $mail_success = drupal_mail('install', 'welcome-admin', $account->mail, user_preferred_language($account), $mail_params, $from, TRUE);
 

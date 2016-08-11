@@ -41,7 +41,7 @@ function install_verify_settings() {
       $db_host = urldecode($url['host']);
       $db_port = isset($url['port']) ? urldecode($url['port']) : '3306';
       $db_path = ltrim(urldecode($url['path']), '/');
-      $settings_file = './'. conf_path() .'/settings.php';
+      $settings_file = './' . conf_path() . '/settings.php';
       return TRUE;
     }
     else {
@@ -82,7 +82,7 @@ function install_send_welcome_mail($url, $account, $profile, $language, $client_
       '!username' => $account->name, '!site' => variable_get('site_name', 'Drupal'), '!login_url' => $onetime,
       '!uri' => $base_url, '!uri_brief' => preg_replace('!^https?://!', '', $base_url), '!mailto' => $account->mail,
       '!date' => format_date(time()), '!login_uri' => url('user', array('absolute' => TRUE)),
-      '!edit_uri' => url('user/'. $account->uid .'/edit', array('absolute' => TRUE)));
+      '!edit_uri' => url('user/' . $account->uid . '/edit', array('absolute' => TRUE)));
 
   $mail_success = drupal_mail('install', 'welcome-admin', $client_email, user_preferred_language($account), $mail_params, $from, TRUE);
 
@@ -233,11 +233,11 @@ function install_main() {
   }
 
   $system_path = dirname(drupal_get_filename('module', 'system', NULL));
-  require_once './'. $system_path .'/system.install';
+  require_once './' . $system_path . '/system.install';
   module_invoke('system', 'install');
   $system_versions = drupal_get_schema_versions('system');
   $system_version = $system_versions ? max($system_versions) : SCHEMA_INSTALLED;
-  db_query("INSERT INTO {system} (filename, name, type, owner, status, throttle, bootstrap, schema_version) VALUES('%s', '%s', '%s', '%s', %d, %d, %d, %d)", $system_path .'/system.module', 'system', 'module', '', 1, 0, 0, $system_version);
+  db_query("INSERT INTO {system} (filename, name, type, owner, status, throttle, bootstrap, schema_version) VALUES('%s', '%s', '%s', '%s', %d, %d, %d, %d)", $system_path . '/system.module', 'system', 'module', '', 1, 0, 0, $system_version);
   // Now that we've installed things properly, bootstrap the full Drupal environment
 
   module_list(TRUE, FALSE);
@@ -301,7 +301,7 @@ function install_main() {
   // @TODO support install profiles with multiple additional tasks
   $task = 'profile';
 
-  $function = $profile .'_profile_tasks';
+  $function = $profile . '_profile_tasks';
 
   if (function_exists($function)) {
     while (!in_array($task, array('profile-finished', 'finished'))) {

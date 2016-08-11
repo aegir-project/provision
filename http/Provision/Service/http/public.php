@@ -44,8 +44,8 @@ class Provision_Service_http_public extends Provision_Service_http {
 
 
     // Redirection urls
-    $this->server->web_disable_url = rtrim($this->server->master_url, '/') .'/hosting/disabled';
-    $this->server->web_maintenance_url = rtrim($this->server->master_url, '/') .'/hosting/maintenance';
+    $this->server->web_disable_url = rtrim($this->server->master_url, '/') . '/hosting/disabled';
+    $this->server->web_maintenance_url = rtrim($this->server->master_url, '/') . '/hosting/maintenance';
 
 
     if (!is_null($this->application_name)) {
