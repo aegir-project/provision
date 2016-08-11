@@ -169,8 +169,24 @@ function drush_provision_drupal_provision_deploy() {
  * Implements drush_hook_post_COMMAND().
  */
 function drush_provision_drupal_post_provision_deploy() {
+  // Run registry-rebuild without cache-clear, if available.
+  if (function_exists('drush_registry_rebuild')) {
+    if (drush_drupal_major_version() < 8) {
+      provision_backend_invoke(d()->name, 'registry-rebuild --no-cache-clear');
+      drush_log(dt('Registry rebuilt with --no-cache-clear in drush_provision_drupal_post_provision_deploy'));
+    }
+  }
+
   // Call the drush updatedb command.
   provision_backend_invoke(d()->name, 'updatedb');
+
+  // Run registry-rebuild with cache-clear, if available.
+  if (function_exists('drush_registry_rebuild')) {
+    if (drush_drupal_major_version() < 8) {
+      provision_backend_invoke(d()->name, 'registry-rebuild');
+      drush_log(dt('Registry rebuilt without --no-cache-clear in drush_provision_drupal_post_provision_deploy'));
+    }
+  }
   // We should be able to fully load Drupal now.
   if (drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL)) {
     drush_include_engine('drupal', 'deploy');
