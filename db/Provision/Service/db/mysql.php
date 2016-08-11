@@ -255,7 +255,7 @@ port=%s
     // webserver.
     umask(0077);
     // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
-    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 --single-transaction --quick --no-autocommit --default-character-set=utf8 --hex-blob %s", escapeshellcmd(drush_get_option('db_name')));
+    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 --single-transaction --quick --no-autocommit --hex-blob %s", escapeshellcmd(drush_get_option('db_name')));
 
     // Fail if db file already exists.
     $dump_file = fopen(d()->site_path . '/database.sql', 'x');
