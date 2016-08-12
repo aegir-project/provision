@@ -156,6 +156,12 @@ function install_main() {
     ->set('path.temporary', "sites/$url/private/temp")
     ->save();
 
+  // Disable Redis integration until module is installed
+  $redisCtrl = d()->root . '/sites/' . d()->uri . '/.redisOff';
+  if (!provision_file()->exists($redisCtrl)->status()) {
+    provision_file()->create_dir($redisCtrl, dt("Redis tmp off ctrl dir created"), 0711);
+  }
+
   $account = user_load(1);
 
   $onetime = user_pass_reset_url($account);
