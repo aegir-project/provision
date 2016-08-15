@@ -481,6 +481,14 @@ location ~* ^/sites/.*/files/civicrm/(?:ConfigAndLog|upload|templates_c) {
 
 <?php if ($nginx_config_mode == 'extended'): ?>
 ###
+### Deny often flooded URI for performance reasons
+###
+location = /autodiscover/autodiscover.xml {
+  access_log off;
+  return 404;
+}
+
+###
 ### Deny some not supported URI like cgi-bin on the Nginx level.
 ###
 location ~* (?:cgi-bin|vti-bin) {
@@ -957,10 +965,6 @@ location ~* ^/sites/.*/files/ {
 ### Make feeds compatible with boost caching and set correct mime type.
 ###
 location ~* \.xml$ {
-  location ~* ^/autodiscover/autodiscover\.xml {
-    access_log off;
-    return 400;
-  }
   if ( $request_method = POST ) {
     return 405;
   }
