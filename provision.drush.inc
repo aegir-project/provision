@@ -1,5 +1,4 @@
 <?php
-intentionalfail();
 /**
  * @file
  * Provision Drush commands.
