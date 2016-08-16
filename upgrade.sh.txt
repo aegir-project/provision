@@ -183,8 +183,6 @@ else
   msg "Not upgrading Drush, $CURRENT_DRUSH_VERSION will be used."
 fi
 
-drush dl registry_rebuild-7.x
-
 # Fetch new version of provision.
 # move existing provision
 cd $HOME/.drush
