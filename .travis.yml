@@ -21,8 +21,8 @@ env:
 
 addons:
   hosts:
-    - aegir.travis
-    - sitetest.aegir.travis
+    - aegir.local.computer
+    - sitetest.aegir.local.computer
 
 services:
   - docker
