@@ -4,7 +4,7 @@
  * @file
  * Deploy command implementation
  *
- * This command when called will 
+ * This command when called will
  *   1. Extract the backup that is being deployed to the target folder in the sites directory.
  *   2. Import the drushrc.php details.
  *   3. Do some diagnostics to make sure all the needed packages are available.
@@ -48,10 +48,10 @@ function drush_provision_drupal_provision_deploy_validate($backup_file = NULL) {
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from.
  *
- * Implementats drush_hook_pre_COMMAND().
+ * Implements drush_hook_pre_COMMAND().
  */
 function drush_provision_drupal_pre_provision_deploy($backup_file) {
-  $extracted = provision_file()->extract($backup_file, drush_get_option('extract_path')) 
+  $extracted = provision_file()->extract($backup_file, drush_get_option('extract_path'))
     ->succeed('Successfully extracted the contents of @path')
     ->fail('Failed to extract the contents of @path to @target', 'PROVISION_BACKUP_EXTRACTION_FAILED')
     ->status();
@@ -120,7 +120,7 @@ function drush_provision_drupal_pre_provision_deploy($backup_file) {
                 array('!name' => $name, '!versionA' => $module['schema_version'], '!versionB' => $merged_modules[$name]['schema_version'])));
             }
             else {
-              drush_log(dt("Found a valid version of the !name module with schema version !schema_version", 
+              drush_log(dt("Found a valid version of the !name module with schema version !schema_version",
                 array('!name' => $name, '!schema_version' => $merged_modules[$name]['schema_version'])));
             }
           }

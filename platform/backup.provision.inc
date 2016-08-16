@@ -36,17 +36,26 @@ function drush_provision_drupal_provision_backup_validate($backup_file = NULL) {
   }
 
   if (!$backup_file) {
-    $suggested = d()->platform->server->backup_path . '/' . d()->uri . '-' . date("Ymd.His", time()) . '.tar.gz';
-
-    // Use format of mysite.com-2008-01-02, if already existing, add number.
-    $count = 0;
-    while (is_file($suggested)) {
-      $count++;
-      $suggested = d()->platform->server->backup_path . '/' . d()->uri . '-' .  date('Ymd.His', time()) . '_' . $count . '.tar.gz';
-    }
+    $suggested = drush_provision_drupal_provision_backup_suggest_filename();
     drush_set_option('backup_file', $suggested);
   }
 
+}
+
+/**
+ * Util function to suggest a filename for a new site backup.
+ */
+function drush_provision_drupal_provision_backup_suggest_filename() {
+  $suffix = drush_get_option('provision_backup_suffix', '.tar.gz');
+  $suggested = d()->platform->server->backup_path . '/' . d()->uri . '-' . date("Ymd.His", time()) . $suffix;
+
+  // Use format of mysite.com-2008-01-02, if already existing, add number.
+  $count = 0;
+  while (is_file($suggested)) {
+    $count++;
+    $suggested = d()->platform->server->backup_path . '/' . d()->uri . '-' .  date('Ymd.His', time()) . '_' . $count . $suffix;
+  }
+  return $suggested;
 }
 
 /**
@@ -84,6 +93,9 @@ function drush_provision_drupal_provision_backup() {
   }
   if (substr($backup_file, -2) == 'gz') {
     $command = 'tar cpfz %s .';
+  }
+  elseif (substr($backup_file, -3) == 'bz2') {
+    $command = 'tar cpfj %s .';
   } else {
     $command = 'tar cpf %s .';
   }
