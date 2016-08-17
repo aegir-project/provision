@@ -159,7 +159,7 @@ fi
 golden_contribs="hosting_civicrm hosting_git hosting_remote_import hosting_site_backup_manager hosting_tasks_extra"
 for shortname in $golden_contribs; do
   rm -rf build-area/$shortname
-  git clone --depth 1 --branch $CURRENT_BRANCH `git config remote.origin.url | sed "s/provision/$shortname/"` build-area/$shortname
+  git clone --branch $CURRENT_BRANCH `git config remote.origin.url | sed "s/provision/$shortname/"` build-area/$shortname
 
   echo "Setting the tag $NEW_TAG in a clean $shortname clone."
   git --work-tree=build-area/$shortname --git-dir=build-area/$shortname/.git tag -a $NEW_TAG -m 'Add a new release tag.'
