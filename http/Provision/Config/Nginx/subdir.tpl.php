@@ -28,6 +28,11 @@ if (!$nginx_is_modern && $server->nginx_is_modern) {
   $nginx_is_modern = $server->nginx_is_modern;
 }
 
+$nginx_has_etag = drush_get_option('nginx_has_etag');
+if (!$nginx_has_etag && $server->nginx_has_etag) {
+  $nginx_has_etag = $server->nginx_has_etag;
+}
+
 $nginx_has_http2 = drush_get_option('nginx_has_http2');
 if (!$nginx_has_http2 && $server->nginx_has_http2) {
   $nginx_has_http2 = $server->nginx_has_http2;
@@ -650,7 +655,7 @@ location ^~ /<?php print $subdir; ?> {
   location ~* ^/<?php print $subdir; ?>/(.*/files/advagg_(?:css|js).*) {
     expires    max;
     access_log off;
-<?php if ($nginx_is_modern): ?>
+<?php if ($nginx_has_etag): ?>
     etag       off;
 <?php else: ?>
     add_header ETag "";
