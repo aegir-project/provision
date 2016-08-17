@@ -28,6 +28,11 @@ if (!$nginx_is_modern && $server->nginx_is_modern) {
   $nginx_is_modern = $server->nginx_is_modern;
 }
 
+$nginx_has_etag = drush_get_option('nginx_has_etag');
+if (!$nginx_has_etag && $server->nginx_has_etag) {
+  $nginx_has_etag = $server->nginx_has_etag;
+}
+
 $nginx_has_http2 = drush_get_option('nginx_has_http2');
 if (!$nginx_has_http2 && $server->nginx_has_http2) {
   $nginx_has_http2 = $server->nginx_has_http2;
@@ -167,7 +172,7 @@ location ^~ /cdn/farfuture/ {
   tcp_nodelay   off;
   access_log    off;
   log_not_found off;
-<?php if ($nginx_is_modern): ?>
+<?php if ($nginx_has_etag): ?>
   etag          off;
 <?php else: ?>
   add_header ETag "";
@@ -671,7 +676,7 @@ location ~* wysiwyg_fields/(?:plugins|scripts)/.*\.(?:js|css) {
 location ~* files/advagg_(?:css|js)/ {
   expires    max;
   access_log off;
-<?php if ($nginx_is_modern): ?>
+<?php if ($nginx_has_etag): ?>
   etag       off;
 <?php else: ?>
   add_header ETag "";
@@ -965,6 +970,10 @@ location ~* ^/sites/.*/files/ {
 ### Make feeds compatible with boost caching and set correct mime type.
 ###
 location ~* \.xml$ {
+  location ~* ^/autodiscover/autodiscover\.xml {
+    access_log off;
+    return 400;
+  }
   if ( $request_method = POST ) {
     return 405;
   }
