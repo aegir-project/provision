@@ -48,7 +48,7 @@ function drush_provision_drupal_provision_deploy_validate($backup_file = NULL) {
 /**
  * Make a backup before making any changes, and add extract the file we are restoring from.
  *
- * Implementation of drush_hook_pre_COMMAND().
+ * Implements drush_hook_pre_COMMAND().
  */
 function drush_provision_drupal_pre_provision_deploy($backup_file) {
   $extracted = provision_file()->extract($backup_file, drush_get_option('extract_path'))
@@ -158,7 +158,7 @@ function drush_provision_drupal_pre_provision_deploy_rollback() {
 }
 
 /**
- * Implementation of drush_hook_COMMAND().
+ * Implements drush_hook_COMMAND().
  */
 function drush_provision_drupal_provision_deploy() {
   _provision_drupal_maintain_aliases();
@@ -166,7 +166,7 @@ function drush_provision_drupal_provision_deploy() {
 }
 
 /**
- * Implementation of drush_hook_post_COMMAND().
+ * Implements drush_hook_post_COMMAND().
  */
 function drush_provision_drupal_post_provision_deploy() {
   // Run registry-rebuild without cache-clear, if available.
