@@ -30,6 +30,11 @@ if (!$nginx_is_modern && $server->nginx_is_modern) {
   $nginx_is_modern = $server->nginx_is_modern;
 }
 
+$nginx_has_etag = drush_get_option('nginx_has_etag');
+if (!$nginx_has_etag && $server->nginx_has_etag) {
+  $nginx_has_etag = $server->nginx_has_etag;
+}
+
 $nginx_has_http2 = drush_get_option('nginx_has_http2');
 if (!$nginx_has_http2 && $server->nginx_has_http2) {
   $nginx_has_http2 = $server->nginx_has_http2;
@@ -92,6 +97,8 @@ if ($nginx_has_upload_progress) {
   fastcgi_param  GEOIP_COUNTRY_NAME  $geoip_country_name;
   fastcgi_param  REDIRECT_STATUS     200;
   fastcgi_index  index.php;
+  # Block https://httpoxy.org/ attacks.
+  fastcgi_param  HTTP_PROXY          "";
 <?php endif; ?>
 
  ## Size Limits

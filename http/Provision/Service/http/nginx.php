@@ -1,6 +1,11 @@
 <?php
 
 class Provision_Service_http_nginx extends Provision_Service_http_public {
+
+  // Define socket file locations for various PHP versions.
+  const SOCKET_PATH_PHP5 = '/var/run/php5-fpm.sock';
+  const SOCKET_PATH_PHP7 = '/var/run/php/php7.0-fpm.sock';
+
   protected $application_name = 'nginx';
   protected $has_restart_cmd = TRUE;
 
@@ -19,6 +24,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     $this->configs['site'][] = 'Provision_Config_Nginx_Site';
     $this->server->setProperty('nginx_config_mode', 'extended');
     $this->server->setProperty('nginx_is_modern', FALSE);
+    $this->server->setProperty('nginx_has_etag', FALSE);
     $this->server->setProperty('nginx_has_http2', FALSE);
     $this->server->setProperty('nginx_has_gzip', FALSE);
     $this->server->setProperty('nginx_has_upload_progress', FALSE);
@@ -55,6 +61,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     // Check if some nginx features are supported and save them for later.
     $this->server->shell_exec($path . ' -V');
     $this->server->nginx_is_modern = preg_match("/nginx\/1\.((1\.(8|9|(1[0-9]+)))|((2|3|4|5|6|7|8|9|[1-9][0-9]+)\.))/", implode('', drush_shell_exec_output()), $match);
+    $this->server->nginx_has_etag = preg_match("/nginx\/1\.([12][0-9]|[3]\.([12][0-9]|[3-9]))/", implode('', drush_shell_exec_output()), $match);
     $this->server->nginx_has_http2 = preg_match("/http_v2_module/", implode('', drush_shell_exec_output()), $match);
     $this->server->nginx_has_upload_progress = preg_match("/upload/", implode('', drush_shell_exec_output()), $match);
     $this->server->nginx_has_gzip = preg_match("/http_gzip_static_module/", implode('', drush_shell_exec_output()), $match);
@@ -71,14 +78,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     }
 
     // Check if there is php-fpm listening on unix socket, otherwise use port 9000 to connect
-    if (provision_file()->exists('/var/run/php5-fpm.sock')->status()) {
-      $this->server->phpfpm_mode = 'socket';
-      drush_log(dt('PHP-FPM unix socket mode detected -SAVE- YES socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
-    }
-    else {
-      $this->server->phpfpm_mode = 'port';
-      drush_log(dt('PHP-FPM port mode detected -SAVE- NO socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
-    }
+    $this->server->phpfpm_mode = $this->getPhpFpmMode('save');
 
     // Check if there is BOA specific global.inc file to enable extra Nginx locations
     if (provision_file()->exists('/data/conf/global.inc')->status()) {
@@ -117,6 +117,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     // Check if some nginx features are supported and save them for later.
     $this->server->shell_exec($path . ' -V');
     $this->server->nginx_is_modern = preg_match("/nginx\/1\.((1\.(8|9|(1[0-9]+)))|((2|3|4|5|6|7|8|9|[1-9][0-9]+)\.))/", implode('', drush_shell_exec_output()), $match);
+    $this->server->nginx_has_etag = preg_match("/nginx\/1\.([12][0-9]|[3]\.([12][0-9]|[3-9]))/", implode('', drush_shell_exec_output()), $match);
     $this->server->nginx_has_http2 = preg_match("/http_v2_module/", implode('', drush_shell_exec_output()), $match);
     $this->server->nginx_has_upload_progress = preg_match("/upload/", implode('', drush_shell_exec_output()), $match);
     $this->server->nginx_has_gzip = preg_match("/http_gzip_static_module/", implode('', drush_shell_exec_output()), $match);
@@ -133,14 +134,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
     }
 
     // Check if there is php-fpm listening on unix socket, otherwise use port 9000 to connect
-    if (provision_file()->exists('/var/run/php5-fpm.sock')->status()) {
-      $this->server->phpfpm_mode = 'socket';
-      drush_log(dt('PHP-FPM unix socket mode detected -VERIFY- YES socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
-    }
-    else {
-      $this->server->phpfpm_mode = 'port';
-      drush_log(dt('PHP-FPM port mode detected -VERIFY- NO socket found @path.', array('@path' => '/var/run/php5-fpm.sock')));
-    }
+    $this->server->phpfpm_mode = $this->getPhpFpmMode('verify');
 
     // Check if there is BOA specific global.inc file to enable extra Nginx locations
     if (provision_file()->exists('/data/conf/global.inc')->status()) {
@@ -159,6 +153,70 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
 
     // Call the parent at the end. it will restart the server when it finishes.
     parent::verify_server_cmd();
+  }
+
+  /**
+   * Determines the PHP FPM mode.
+   *
+   * @param string $server_task
+   *   The server task type for logging purposes. Leave blank to skip logging.
+   * @return string
+   *   The mode, either 'socket' or 'port'.
+   */
+  public static function getPhpFpmMode($server_task = NULL) {
+
+    // Search for socket files or fall back to port mode.
+    switch (TRUE) {
+      case provision_file()->exists(self::SOCKET_PATH_PHP5)->status():
+        $mode = 'socket';
+        $socket_path = self::SOCKET_PATH_PHP5;
+      break;
+      case provision_file()->exists(self::SOCKET_PATH_PHP7)->status():
+        $mode = 'socket';
+        $socket_path = self::SOCKET_PATH_PHP7;
+      break;
+      default:
+        $mode = 'port';
+        $socket_path = '';
+      break;
+    }
+
+    // Report results in the log if requested.
+    if (!empty($server_task)) {
+      drush_log(dt('PHP-FPM @mode mode detected -' . '@task' . '- @yes_or_no socket found @path.', array(
+        '@mode' => ($mode == 'socket') ? 'unix socket' : 'port',
+        '@task' => strtoupper($server_task),
+        '@yes_or_no' => ($mode == 'socket') ? 'YES' : 'NO',
+        '@path' => ($socket_path ? $socket_path : self::SOCKET_PATH_PHP5 . ' or ' . self::SOCKET_PATH_PHP7),
+      )));
+    }
+
+    // Return the discovered mode.
+    return $mode;
+  }
+
+  /**
+   * Gets the PHP FPM unix socket path.
+   *
+   * If we're running in port mode, there is no socket path. FALSE would be
+   * returned in this case.
+   *
+   * @return string
+   *   The path, or FALSE if there isn't one.
+   */
+  public static function getPhpFpmSocketPath() {
+    // Simply return FALSE if we're in port mode.
+    if (self::getPhpFpmMode() == 'port') {
+      return FALSE;
+    }
+
+    // Return the socket path based on the PHP version.
+    if (strtok(phpversion(), '.') == 7) {
+      return self::SOCKET_PATH_PHP7;
+    }
+    else {
+      return self::SOCKET_PATH_PHP5;
+    }
   }
 
   /**

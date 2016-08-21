@@ -303,4 +303,37 @@ port=%s
     }
   return ($return_value == 0);
   }
+
+  function utf8mb4_is_supported() {
+    // Ensure that provision can connect to the database.
+    if (!$this->connect()) {
+      return FALSE;
+    }
+
+    // Ensure that the MySQL driver supports utf8mb4 encoding.
+    $version = $this->conn->getAttribute(PDO::ATTR_CLIENT_VERSION);
+    if (strpos($version, 'mysqlnd') !== FALSE) {
+      // The mysqlnd driver supports utf8mb4 starting at version 5.0.9.
+      $version = preg_replace('/^\D+([\d.]+).*/', '$1', $version);
+      if (version_compare($version, '5.0.9', '<')) {
+        return FALSE;
+      }
+    }
+    else {
+      // The libmysqlclient driver supports utf8mb4 starting at version 5.5.3.
+      if (version_compare($version, '5.5.3', '<')) {
+        return FALSE;
+      }
+    }
+
+    // Ensure that the MySQL server supports large prefixes and utf8mb4.
+    $dbname = uniqid(drush_get_option('aegir_db_prefix', 'site_'));
+    $this->create_database($dbname);
+    $success = $this->query("CREATE TABLE `%s`.`drupal_utf8mb4_test` (id VARCHAR(255), PRIMARY KEY(id(255))) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ROW_FORMAT=DYNAMIC", $dbname);
+    if (!$this->drop_database($dbname)) {
+      drush_log(dt("Failed to drop database @dbname", array('@dbname' => $dbname)), 'warning');
+    }
+
+    return ($success !== FALSE);
+  }
 }

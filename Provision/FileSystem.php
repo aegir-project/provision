@@ -300,6 +300,9 @@ class Provision_FileSystem extends Provision_ChainedState {
           // same here: some do not support -z
           $command = 'gunzip -c %s | tar pxf -';
         }
+        elseif (substr($path, -2) == 'bz2') {
+          $command = 'bunzip -c %s | tar pxf -';
+        }
         else {
           $command = 'tar -pxf %s';
         }

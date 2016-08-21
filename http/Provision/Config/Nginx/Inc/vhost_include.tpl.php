@@ -19,9 +19,18 @@ if (!$phpfpm_mode && $server->phpfpm_mode) {
   $phpfpm_mode = $server->phpfpm_mode;
 }
 
+// We can use $server here once we have proper inheritance.
+// See Provision_Service_http_nginx_ssl for details.
+$phpfpm_socket_path = Provision_Service_http_nginx::getPhpFpmSocketPath();
+
 $nginx_is_modern = drush_get_option('nginx_is_modern');
 if (!$nginx_is_modern && $server->nginx_is_modern) {
   $nginx_is_modern = $server->nginx_is_modern;
+}
+
+$nginx_has_etag = drush_get_option('nginx_has_etag');
+if (!$nginx_has_etag && $server->nginx_has_etag) {
+  $nginx_has_etag = $server->nginx_has_etag;
 }
 
 $nginx_has_http2 = drush_get_option('nginx_has_http2');
@@ -164,7 +173,11 @@ location ^~ /cdn/farfuture/ {
   tcp_nodelay   off;
   access_log    off;
   log_not_found off;
+<?php if ($nginx_has_etag): ?>
   etag          off;
+<?php else: ?>
+  add_header ETag "";
+<?php endif; ?>
   gzip_http_version 1.0;
   if_modified_since exact;
   set $nocache_details "Skip";
@@ -227,7 +240,7 @@ location = /fpm-status {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
+  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 }
 
@@ -243,7 +256,7 @@ location = /fpm-ping {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
+  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 }
 <?php endif; ?>
@@ -266,7 +279,7 @@ location = /cron.php {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
+  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 }
 
@@ -658,7 +671,7 @@ location ~* wysiwyg_fields/(?:plugins|scripts)/.*\.(?:js|css) {
 location ~* files/advagg_(?:css|js)/ {
   expires    max;
   access_log off;
-<?php if ($nginx_is_modern): ?>
+<?php if ($nginx_has_etag): ?>
   etag       off;
 <?php else: ?>
   add_header ETag "";
@@ -915,7 +928,7 @@ location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tin
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
+  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 }
 
@@ -1054,7 +1067,6 @@ location ~ ^/(?<esi>esi/.*)"$ {
   add_header    X-GeoIP-Country-Name "$geoip_country_name";
   add_header    X-This-Proto "$http_x_forwarded_proto";
   add_header    X-Server-Name "$main_site_name";
-  add_header    X-Response-Status "$status";
   add_header    Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   ###
   ### Set correct, local $uri.
@@ -1066,7 +1078,7 @@ location ~ ^/(?<esi>esi/.*)"$ {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass  127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass  unix:/var/run/php5-fpm.sock;
+  fastcgi_pass  unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
   ###
   ### Use Nginx cache for all visitors.
@@ -1078,7 +1090,7 @@ location ~ ^/(?<esi>esi/.*)"$ {
   fastcgi_cache speed;
   fastcgi_cache_methods GET HEAD;
   fastcgi_cache_min_uses 1;
-  fastcgi_cache_key "$is_bot$device$host$request_method$uri$is_args$args$cache_uid$http_x_forwarded_proto$status";
+  fastcgi_cache_key "$is_bot$device$host$request_method$uri$is_args$args$cache_uid$http_x_forwarded_proto";
   fastcgi_cache_valid 200 301 404 5s;
   fastcgi_cache_valid 302 1m;
   fastcgi_cache_lock on;
@@ -1209,7 +1221,6 @@ location = /index.php {
   add_header    X-NoCache "$nocache_details";
   add_header    X-This-Proto "$http_x_forwarded_proto";
   add_header    X-Server-Name "$main_site_name";
-  add_header    X-Response-Status "$status";
 <?php endif; ?>
   add_header    Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   tcp_nopush    off;
@@ -1220,7 +1231,7 @@ location = /index.php {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass  127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass  unix:/var/run/php5-fpm.sock;
+  fastcgi_pass  unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 <?php if ($nginx_has_upload_progress): ?>
   track_uploads uploads 60s; ### required for upload progress
@@ -1235,7 +1246,7 @@ location = /index.php {
   fastcgi_cache speed;
   fastcgi_cache_methods GET HEAD; ### Nginx default, but added for clarity
   fastcgi_cache_min_uses 1;
-  fastcgi_cache_key "$is_bot$device$host$request_method$key_uri$cache_uid$http_x_forwarded_proto$sent_http_x_local_proto$cookie_respimg$status";
+  fastcgi_cache_key "$is_bot$device$host$request_method$key_uri$cache_uid$http_x_forwarded_proto$sent_http_x_local_proto$cookie_respimg";
   fastcgi_cache_valid 200 10s;
   fastcgi_cache_valid 302 1m;
   fastcgi_cache_valid 301 403 404 5s;
@@ -1274,7 +1285,7 @@ location ~* ^/(?:index|cron|boost_stats|update|authorize|xmlrpc)\.php$ {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
+  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 }
 
@@ -1304,7 +1315,7 @@ location @allowupdate {
 <?php elseif ($phpfpm_mode == 'port'): ?>
   fastcgi_pass 127.0.0.1:9000;
 <?php else: ?>
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
+  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
 <?php endif; ?>
 }
 <?php endif; ?>
