@@ -113,7 +113,6 @@ if ($is_denied) {
 ### Add recommended HTTP headers
 ###
 add_header Access-Control-Allow-Origin *;
-add_header X-Frame-Options SAMEORIGIN;
 add_header X-Content-Type-Options nosniff;
 add_header X-XSS-Protection "1; mode=block" always;
 <?php endif; ?>
@@ -186,7 +185,6 @@ location ^~ /cdn/farfuture/ {
     add_header Cache-Control "no-transform, public";
     add_header Last-Modified "Wed, 20 Jan 1988 04:20:42 GMT";
     add_header Access-Control-Allow-Origin *;
-    add_header X-Frame-Options SAMEORIGIN;
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection "1; mode=block" always;
     rewrite ^/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
@@ -197,7 +195,6 @@ location ^~ /cdn/farfuture/ {
     add_header X-Header "CDN Far Future Generator 1.1";
     add_header Cache-Control "private, must-revalidate, proxy-revalidate";
     add_header Access-Control-Allow-Origin *;
-    add_header X-Frame-Options SAMEORIGIN;
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection "1; mode=block" always;
     rewrite ^/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
@@ -677,7 +674,6 @@ location ~* files/advagg_(?:css|js)/ {
   add_header X-Header "AdvAgg Generator 2.0";
   add_header Cache-Control "max-age=31449600, no-transform, public";
   add_header Access-Control-Allow-Origin *;
-  add_header X-Frame-Options SAMEORIGIN;
   add_header X-Content-Type-Options nosniff;
   add_header X-XSS-Protection "1; mode=block" always;
   set $nocache_details "Skip";
@@ -978,7 +974,6 @@ location ~* \.xml$ {
   add_header Expires "Tue, 24 Jan 1984 08:00:00 GMT";
   add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   add_header Access-Control-Allow-Origin *;
-  add_header X-Frame-Options SAMEORIGIN;
   add_header X-Content-Type-Options nosniff;
   add_header X-XSS-Protection "1; mode=block" always;
   charset    utf-8;
@@ -1058,7 +1053,6 @@ location ~ ^/(?<esi>esi/.*)"$ {
   add_header X-Server-Name "$main_site_name";
   add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   add_header Access-Control-Allow-Origin *;
-  add_header X-Frame-Options SAMEORIGIN;
   add_header X-Content-Type-Options nosniff;
   add_header X-XSS-Protection "1; mode=block" always;
   ###
@@ -1162,7 +1156,6 @@ location @cache {
   add_header Expires "Tue, 24 Jan 1984 08:00:00 GMT";
   add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   add_header Access-Control-Allow-Origin *;
-  add_header X-Frame-Options SAMEORIGIN;
   add_header X-Content-Type-Options nosniff;
   add_header X-XSS-Protection "1; mode=block" always;
   charset    utf-8;
@@ -1219,7 +1212,6 @@ location = /index.php {
   add_header X-This-Proto "$http_x_forwarded_proto";
   add_header X-Server-Name "$main_site_name";
   add_header Access-Control-Allow-Origin *;
-  add_header X-Frame-Options SAMEORIGIN;
   add_header X-Content-Type-Options nosniff;
   add_header X-XSS-Protection "1; mode=block" always;
 <?php endif; ?>
