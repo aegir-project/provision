@@ -10,7 +10,7 @@
 
 # Basic variables, change before running.
 AEGIR_VERSION="7.x-3.x"
-NEW_DRUSH_VERSION=8.1.2
+NEW_DRUSH_VERSION="stable"  # e.g stable, unstable, ignore or a version number like 8.1.3
 
 # Extra variables, no changes needed for most use-cases.
 DRUSH_DIR=$HOME/drush
@@ -130,7 +130,7 @@ Your old hostmaster platform was $OLD_DRUPAL_DIR
 The Drush command is "$DRUSH"
 EOF
 
-if [ "$NEW_DRUSH_VERSION" != "$CURRENT_DRUSH_VERSION" ]; then
+if [ "$NEW_DRUSH_VERSION" != "$CURRENT_DRUSH_VERSION" -o "$DRUSH_VERSION" != "ignore" ]; then
   if [ -w $DRUSH_DIR ]; then
     echo "The version of Drush will be $NEW_DRUSH_VERSION"
     if prompt_yes_no "Do you want to upgrade Drush to the specified PHAR package?" ; then
@@ -163,7 +163,7 @@ fi
 mkdir -p $BACKUP_DIR
 
 # Upgrade drush if desired.
-if [ "$NEW_DRUSH_VERSION" != "$CURRENT_DRUSH_VERSION" ]; then
+if [ "$NEW_DRUSH_VERSION" != "$CURRENT_DRUSH_VERSION" -o "$DRUSH_VERSION" != "ignore" ]; then
   if [ -d $DRUSH_DIR ]; then
     msg "Moving existing drush into $BACKUP_DIR"
     mv $DRUSH_DIR/drush $BACKUP_DIR
@@ -174,7 +174,21 @@ if [ "$NEW_DRUSH_VERSION" != "$CURRENT_DRUSH_VERSION" ]; then
     mv HOME/.composer/vendor/bin/drush HOME/.composer/vendor/bin/drush-old-$(date +'%Y-%m-%d')
   fi
 
-  DRUSH_PHAR_URL="https://github.com/drush-ops/drush/releases/download/$NEW_DRUSH_VERSION/drush.phar"
+  DRUSH_MAJOR_VERSION=$(echo $NEW_DRUSH_VERSION| cut -d. -f1)
+
+  if [ "$DRUSH_VERSION" = "stable" ]; then
+
+      DRUSH_PHAR_URL="http://files.drush.org/drush.phar"
+
+  elif [ "$DRUSH_VERSION" = "unstable" ]; then
+
+      DRUSH_PHAR_URL="http://files.drush.org/drush-unstable.phar"
+
+  elif [ "$DRUSH_MAJOR_VERSION" -ge "8" ]; then
+
+      DRUSH_PHAR_URL="https://github.com/drush-ops/drush/releases/download/$NEW_DRUSH_VERSION/drush.phar"
+
+  fi
 
   curl -SsL $DRUSH_PHAR_URL -o $DRUSH_DIR/drush
   chmod +x $DRUSH_DIR/drush
