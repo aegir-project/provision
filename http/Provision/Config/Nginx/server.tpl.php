@@ -142,7 +142,7 @@ if ($nginx_has_upload_progress) {
 
  ## FastCGI Caching
   fastcgi_cache_path /var/lib/nginx/speed
-                     levels=2:2:2
+                     levels=2:2
                      keys_zone=speed:10m
                      inactive=15m
                      max_size=3g;
