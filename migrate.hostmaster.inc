@@ -158,11 +158,14 @@ function drush_provision_hostmaster_migrate($site, $platform) {
   if ($major_version_upgrade) {
     drush_log('Detected major version upgrade. Disabling error-reporting.', 'warning');
     $local_settings_file = d('@hostmaster')->site_path . '/local.settings.php';
+    if (!file_exists($local_settings_file)) {
+      file_put_contents($local_settings_file, "<?php # local settings.php \n");
+    }
     $local_settings_backup = $local_settings_file . '.bak';
     provision_file()->copy($local_settings_file, $local_settings_backup)
       ->succeed('Backed up local.settings.php.')
       ->fail('Failed to backup of local.settings.php.');
-    provision_file()->chmod($local_settings_file, 02740);
+    provision_file()->chmod($local_settings_file, 02640);
     $lines_to_append = "
     // These lines were added to overcome a false-positive error thrown in Drupal 7.50+
     error_reporting(0);
@@ -178,7 +181,7 @@ function drush_provision_hostmaster_migrate($site, $platform) {
     // The site path has changed, so update file paths.
     $local_settings_file = $platform . '/sites/' . d('@hostmaster')->uri . '/local.settings.php';
     $local_settings_backup = $local_settings_file . '.bak';
-    provision_file()->chmod($local_settings_file, 02740);
+    provision_file()->chmod($local_settings_file, 02640);
     provision_file()->copy($local_settings_backup, $local_settings_file)
       ->succeed('Restored backup of local.settings.php.')
       ->fail('Failed to restore backup of local.settings.php.');
