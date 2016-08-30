@@ -152,7 +152,41 @@ function drush_provision_pre_hostmaster_migrate($site, $platform) {
 }
 
 function drush_provision_hostmaster_migrate($site, $platform) {
+  // See: https://www.drupal.org/node/2762701.
+  $platform_version = provision_backend_invoke(drush_get_option('site_name'), 'status', array(), array('fields' => 'drupal-version', 'field-labels' => 0));
+  $major_version_upgrade = version_compare('7.0', trim($platform_version['output']));
+  if ($major_version_upgrade) {
+    drush_log('Detected major version upgrade. Disabling error-reporting.', 'warning');
+    $local_settings_file = d('@hostmaster')->site_path . '/local.settings.php';
+    if (!file_exists($local_settings_file)) {
+      file_put_contents($local_settings_file, "<?php # local settings.php \n");
+    }
+    $local_settings_backup = $local_settings_file . '.bak';
+    provision_file()->copy($local_settings_file, $local_settings_backup)
+      ->succeed('Backed up local.settings.php.')
+      ->fail('Failed to backup of local.settings.php.');
+    provision_file()->chmod($local_settings_file, 02640);
+    $lines_to_append = "
+    // These lines were added to overcome a false-positive error thrown in Drupal 7.50+
+    error_reporting(0);
+    ini_set('display_errors', FALSE);
+    ini_set('display_startup_errors', FALSE);";
+    file_put_contents($local_settings_file, $lines_to_append, FILE_APPEND);
+  }
+
   provision_backend_invoke(drush_get_option('site_name'), 'provision-migrate', array(drush_get_option('new_platform')));
+
+  if ($major_version_upgrade) {
+    drush_log('Re-enabling error-reporting.', 'notice');
+    // The site path has changed, so update file paths.
+    $local_settings_file = $platform . '/sites/' . d('@hostmaster')->uri . '/local.settings.php';
+    $local_settings_backup = $local_settings_file . '.bak';
+    provision_file()->chmod($local_settings_file, 02640);
+    provision_file()->copy($local_settings_backup, $local_settings_file)
+      ->succeed('Restored backup of local.settings.php.')
+      ->fail('Failed to restore backup of local.settings.php.');
+    provision_file()->unlink($local_settings_backup);
+  }
 }
 
 function drush_provision_post_hostmaster_migrate($site, $platform) {
