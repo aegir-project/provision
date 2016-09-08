@@ -40,7 +40,7 @@ before_install:
   - sudo bash prepare-docker.sh
 
   # Get aegir/hostmaster and database images.
-  - sudo docker pull aegir/hostmaster:local
+  - sudo docker pull aegir/hostmaster
   - sudo docker pull mariadb
 
 script:
