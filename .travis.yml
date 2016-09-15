@@ -36,7 +36,6 @@ before_install:
   - git checkout $AEGIR_TESTS_VERSION
 
   # Run docker prepare script.
-  - cd /home/travis/build/aegir-project/tests/travis
 
   - sudo mkdir vendor
   - sudo chmod 777 vendor
@@ -44,7 +43,7 @@ before_install:
   - sudo mkdir bin
   - sudo chmod 777 bin
 
-  - cd travis
+  - cd /home/travis/build/aegir-project/tests/travis
   - sudo bash prepare-docker.sh
 
   # Get aegir/hostmaster and database images.
