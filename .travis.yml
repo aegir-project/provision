@@ -35,20 +35,10 @@ before_install:
   - cd /home/travis/build/aegir-project/tests
   - git checkout $AEGIR_TESTS_VERSION
 
-  # Run docker prepare script.
-
-  - sudo mkdir vendor
-  - sudo chmod 777 vendor
-
-  - sudo mkdir bin
-  - sudo chmod 777 bin
-
+  # Run prepare scripts.
   - cd /home/travis/build/aegir-project/tests/travis
   - sudo bash prepare-docker.sh
-
-  # Get aegir/hostmaster and database images.
-  - sudo docker pull aegir/hostmaster
-  - sudo docker pull mariadb
+  - bash prepare-testenv.sh
 
 script:
 
