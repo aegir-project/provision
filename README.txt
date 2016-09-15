@@ -34,3 +34,5 @@ check out how to reach our community at:
 Other documentation for developers is also available at:
 
    http://docs.aegirproject.org/en/3.x/extend/
+
+Status: [![Build Status](https://travis-ci.org/aegir-project/provision.svg?branch=7.x-3.x)](https://travis-ci.org/aegir-project/provision)
