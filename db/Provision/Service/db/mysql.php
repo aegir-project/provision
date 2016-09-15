@@ -56,6 +56,11 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
 
   function grant($name, $username, $password, $host = '') {
     $host = ($host) ? $host : '%';
+    if ($host != "127.0.0.1") {
+      $extra_host = "127.0.0.1";
+      $success_extra_host = $this->query("GRANT ALL PRIVILEGES ON `%s`.* TO `%s`@`%s` IDENTIFIED BY '%s'", $name, $username, $extra_host, $password);
+    }
+    // Issue: https://github.com/omega8cc/provision/issues/2
     return $this->query("GRANT ALL PRIVILEGES ON `%s`.* TO `%s`@`%s` IDENTIFIED BY '%s'", $name, $username, $host, $password);
   }
 
@@ -79,6 +84,29 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
     if (!$grant_found) {
       $success = $this->query("DROP USER `%s`@`%s`", $username, $host) && $success;
     }
+
+    if ($host != "127.0.0.1") {
+      $extra_host = "127.0.0.1";
+      $success_extra_host = $this->query("REVOKE ALL PRIVILEGES ON `%s`.* FROM `%s`@`%s`", $name, $username, $extra_host);
+
+      // check if there are any privileges left for the user
+      $grants = $this->query("SHOW GRANTS FOR `%s`@`%s`", $username, $extra_host);
+      $grant_found = FALSE;
+      if ($grants) {
+        while ($grant = $grants->fetch()) {
+          // those are empty grants: just the user line
+          if (!preg_match("/^GRANT USAGE ON /", array_pop($grant))) {
+            // real grant, we shouldn't remove the user
+            $grant_found = TRUE;
+            break;
+          }
+        }
+      }
+      if (!$grant_found) {
+        $success_extra_host = $this->query("DROP USER `%s`@`%s`", $username, $extra_host) && $success_extra_host;
+      }
+    }
+
     return $success;
   }
 
