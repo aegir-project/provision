@@ -35,15 +35,12 @@ before_install:
   - cd /home/travis/build/aegir-project/tests
   - git checkout $AEGIR_TESTS_VERSION
 
-  # Run docker prepare script.
+  # Run prepare scripts.
   - cd /home/travis/build/aegir-project/tests/travis
   - sudo bash prepare-docker.sh
-
-  # Get aegir/hostmaster and database images.
-  - sudo docker pull aegir/hostmaster:local
-  - sudo docker pull mariadb
+  - bash prepare-testenv.sh
 
 script:
 
   # Tests are included in the docker-compose.yml file in the tests repo.
-  - sudo docker-compose -f docker-compose-provision.yml run hostmaster --rm
+  - sudo docker-compose -f docker-compose-provision.yml run hostmaster

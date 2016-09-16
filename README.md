@@ -1,5 +1,4 @@
-The Aegir system
-================
+# The Aegir system
 
 The Aegir hosting system allows developers and site administrators to
 automate many of the common tasks associated with deploying and
@@ -21,7 +20,7 @@ downloaded alongside this readme file.
 To install Aegir, you should follow the instructions at:
 
    http://docs.aegirproject.org/en/3.x/install/
-   
+
 To upgrade Aegir, follow the instructions at:
 
    http://docs.aegirproject.org/en/3.x/install/upgrade
@@ -34,3 +33,5 @@ check out how to reach our community at:
 Other documentation for developers is also available at:
 
    http://docs.aegirproject.org/en/3.x/extend/
+
+Build status: [![Build Status](https://travis-ci.org/aegir-project/provision.svg?branch=7.x-3.x)](https://travis-ci.org/aegir-project/provision)
