@@ -476,7 +476,7 @@ location ~* /(?:modules|themes|libraries)/.*\.(?:txt|md)$ {
 ###
 ### Deny listed requests for security reasons.
 ###
-location ~* ^/sites/.*/files/civicrm/(?:ConfigAndLog|upload|templates_c) {
+location ~* ^/sites/.*/files/civicrm/(?:ConfigAndLog|custom|upload|templates_c) {
   access_log off;
   return 404;
 }

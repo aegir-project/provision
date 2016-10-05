@@ -457,7 +457,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   ### Deny listed requests for security reasons.
   ###
-  location ~* /files/civicrm/(?:ConfigAndLog|upload|templates_c) {
+  location ~* /files/civicrm/(?:ConfigAndLog|custom|upload|templates_c) {
     access_log off;
     return 404;
   }
