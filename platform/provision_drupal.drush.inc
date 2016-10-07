@@ -603,31 +603,6 @@ function _provision_find_profiles() {
         }
       }
       $profile->info['languages'] = array_keys($languages);
-
-      // Drupal 7 renamed the default install profile to 'standard'
-      // Aegir now allows projects to specify an "old short name" to provide an upgrade path when projects get renamed.
-      if ($profile->name == 'standard') {
-        $profile->info['old_short_name'] = 'default';
-      }
-      elseif ($profile->name == 'minimal') {
-        $profile->info['old_short_name'] = 'acquia';
-      }
-      elseif ($profile->name == 'testing') {
-        $profile->info['old_short_name'] = 'uberdrupal';
-      }
-      elseif ($profile->name == 'default') {
-        $profile->info['old_short_name'] = 'acquia';
-      }
-      elseif ($profile->name == 'acquia') {
-        $profile->info['old_short_name'] = 'default';
-      }
-      elseif ($profile->name == 'commons') {
-        $profile->info['old_short_name'] = 'drupal_commons';
-      }
-      elseif ($profile->name == 'commerce_kickstart') {
-        $profile->info['old_short_name'] = 'commercedev';
-      }
-
       $return[$name] = $profile;
       drush_log(dt('Found install profile %name', array('%name' => $name)));
     }
