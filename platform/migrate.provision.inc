@@ -104,7 +104,6 @@ function drush_provision_drupal_provision_migrate($platform, $new_name = NULL) {
     $www_new_uri = "www." . $raw_new_uri;
     if (is_array($old_aliases) && !empty($old_aliases)) {
       foreach ($old_aliases as $alias) {
-        drush_log(dt("DEBUG RENAME old_aliases is @this", array('@this' => $alias)));
         if (!preg_match("/^www\./", $pre_old_uri) && preg_match("/^www\./", $pre_new_uri)) {
           $new_aliases[] = str_replace($www_old_uri, $raw_new_uri, $alias);
         }
@@ -123,20 +122,11 @@ function drush_provision_drupal_provision_migrate($platform, $new_name = NULL) {
       $options['aliases'] = $unique_aliases; // Use rewritten aliases array.
       if (!is_null(d($platform)->name) && (d($platform)->name == d()->platform->name)) {
         drush_set_option('rename_only', TRUE);
-        foreach ($new_aliases as $alias) {
-          drush_log(dt("DEBUG RENAME new_aliases is @this", array('@this' => $alias)));
-        }
-        foreach ($unique_aliases as $alias) {
-          drush_log(dt("DEBUG RENAME unique_aliases is @this", array('@this' => $alias)));
-        }
       }
       drush_set_option('aliases', $unique_aliases);
     }
     else {
       $detected_aliases = provision_drupal_find_aliases();
-      foreach ($detected_aliases as $alias) {
-        drush_log(dt("DEBUG RENAME detected_aliases is @this", array('@this' => $alias)));
-      }
       drush_set_option('aliases', $detected_aliases);
     }
     // Warning: do not try to re-verify the original site here
@@ -214,7 +204,6 @@ function drush_provision_drupal_post_provision_migrate($platform, $new_name = NU
   if (!is_null($new_name) && ($new_name != d()->name)) {
     // Use correct context for cleanup operations.
     $source_name = drush_get_option('source_name');
-    drush_log(dt("DEBUG RENAME source_name is @this", array('@this' => $source_name)));
     // Remove the existing drush alias.
     $config = new Provision_Config_Drushrc_Alias(d()->name);
     $config->unlink();
@@ -231,13 +220,8 @@ function drush_provision_drupal_post_provision_migrate($platform, $new_name = NU
   if ($rename_only) {
     // We run this extra tricky backend verify to avoid issue #1004526.
     if (d()->profile != 'hostmaster') {
-      drush_log(dt("DEBUG RENAME new_uri is @this", array('@this' => $new_name)));
       $deploy_replace_site = drush_get_option('deploy_replace_site');
-      drush_log(dt("DEBUG RENAME deploy_replace_site is @this", array('@this' => $deploy_replace_site)));
       $final_aliases = drush_get_option('aliases');
-      foreach ($final_aliases as $alias) {
-        drush_log(dt("DEBUG RENAME final_aliases is @this", array('@this' => $alias)));
-      }
       provision_reload_config('site', drush_get_option('new_site_path', d($new_name)->site_path) . '/drushrc.php');
       d($new_name)->aliases = drush_set_option('aliases', $final_aliases);
       d($new_name)->write_alias();
