@@ -24,7 +24,6 @@ class Provision_Config_Drushrc_Aegir extends Provision_Config_Drushrc {
       $enabled_features[$name] = $info['enabled'];
     }
 
-    $this->data['aegir_root'] = DRUPAL_ROOT;
     $this->data['hosting_features'] = $enabled_features;
 
     $this->data['drush_exclude'] = array();
