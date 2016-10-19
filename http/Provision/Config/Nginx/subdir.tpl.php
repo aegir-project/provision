@@ -426,7 +426,8 @@ location ^~ /<?php print $subdir; ?> {
         return 403;
       }
       tcp_nopush off;
-      access_log off;
+      access_log    off;
+      log_not_found off;
       set $nocache_details "Skip";
       try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
     }
@@ -711,6 +712,8 @@ location ^~ /<?php print $subdir; ?> {
     expires     30d;
     tcp_nodelay off;
     tcp_nopush  off;
+    access_log    off;
+    log_not_found off;
     try_files   /$1 $uri =404;
   }
 
