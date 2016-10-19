@@ -450,7 +450,8 @@ location ^~ /audio/download {
       return 403;
     }
     tcp_nopush off;
-    access_log off;
+    access_log    off;
+    log_not_found off;
     set $nocache_details "Skip";
     try_files $uri @drupal;
   }
@@ -837,13 +838,15 @@ location ~* ^.+\.(?:jpe?g|gif|png|ico|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rt
 }
 
 ###
-### Serve & log bigger media/static/archive files directly,
+### Serve bigger media/static/archive files directly,
 ### without all standard drupal rewrites, php-fpm etc.
 ###
 location ~* ^.+\.(?:avi|mpe?g|mov|wmv|ogg|ogv|zip|tar|t?gz|rar|dmg|exe|apk|pxl|ipa)$ {
   expires     30d;
   tcp_nodelay off;
   tcp_nopush  off;
+  access_log    off;
+  log_not_found off;
   rewrite     ^/.+/sites/.+/files/(.*)$  /sites/$main_site_name/files/$1 last;
   try_files   $uri =404;
 }
@@ -871,6 +874,8 @@ location ~* ^.+\.flv$ {
   tcp_nodelay off;
   tcp_nopush off;
   expires 30d;
+  access_log    off;
+  log_not_found off;
   try_files $uri =404;
 }
 
@@ -884,6 +889,8 @@ location ~* ^.+\.(?:mp4|m4a)$ {
   tcp_nodelay off;
   tcp_nopush off;
   expires 30d;
+  access_log    off;
+  log_not_found off;
   try_files $uri =404;
 }
 <?php endif; ?>
