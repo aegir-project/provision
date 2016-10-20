@@ -1185,12 +1185,23 @@ location @drupal {
 
 <?php if ($nginx_config_mode == 'extended'): ?>
 ###
-### Send all known bots to $args free URLs.
+### Special location for bots custom restrictions; can be overridden.
 ###
 location @nobots {
-  if ($is_bot) {
-    return 301 $scheme://$host$request_uri;
+  ###
+  ### Support for Accelerated Mobile Pages (AMP).
+  ###
+  if ( $query_string ~ "^amp$" ) {
+    rewrite ^/(.*)$  /index.php?q=$1 last;
   }
+
+  ###
+  ### Send all known bots to $args free URLs (optional)
+  ###
+  # if ($is_bot) {
+  #   return 301 $scheme://$host$request_uri;
+  # }
+
   ###
   ### Return 404 on special PHP URLs to avoid revealing version used,
   ### even indirectly. See also: https://drupal.org/node/2116387
