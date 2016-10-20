@@ -393,13 +393,11 @@ function _provision_find_profiles() {
     }
     while (FALSE !== ($name = readdir($dir))) {
       $languages = array();
-      $file = "$profiles_subdir/$name/$name.profile";
-      if ($name == '..' || $name == '.' || !file_exists($file)) {
+      if ($name == '..' || $name == '.') {
         continue;
       }
       $profile = new stdClass();
       $profile->name = $name;
-      $profile->filename = $file;
 
       $profile->info = array();
 
@@ -420,6 +418,7 @@ function _provision_find_profiles() {
         if (!empty($profile->info['name'])) {
           $profile->name = $profile->info['name'];
         }
+        $profile->filename = $yaml_file;
       }
       else {
         $info_file = "$profiles_subdir/$name/$name.info";
@@ -430,9 +429,14 @@ function _provision_find_profiles() {
             continue;
           }
         }
+        $profile->filename = $info_file;
       }
 
-      require_once($profile->filename);
+      // Include code from the profile.
+      if (file_exists($profile_file = "$profiles_subdir/$name/$name.profile")) {
+        require_once($profile_file);
+      }
+
       $func = $profile->name . "_profile_details";
       if (function_exists($func)) {
         $profile->info = array_merge($profile->info, $func());
@@ -587,7 +591,7 @@ function provision_find_packages() {
 
   // Iterate through the install profiles, finding the profile specific packages
   foreach ($profiles as $profile => $info) {
-    if (!$info->version) {
+    if (empty($info->version)) {
       $info->version = drush_drupal_version();
     }
     $packages['base']['profiles'][$profile] = $info;
