@@ -3,7 +3,7 @@
 /**
  * Clone command implementation
  *
- * This command when called will 
+ * This command when called will
  *   1. Make a backup of the current site, before modifications are made.
  *   2. Execute 'provision deploy' to build the new site using the backup of the old site.
  *
@@ -37,6 +37,19 @@ function drush_provision_drupal_pre_provision_clone_rollback($new_name, $platfor
  */
 function drush_provision_drupal_provision_clone($new_name, $platform = null) {
   drush_set_option('old_platform', d()->platform->name);
+
+  // If the site is cloned between platforms and not just in the same platform,
+  // we should update the info collected about source and target platform first.
+  if (!is_null(d($platform)->name) && (d($platform)->name != d()->platform->name)) {
+    provision_backend_invoke('@hostmaster', 'hosting-task', array(d()->platform->name, 'verify'), array('force' => TRUE));
+    sleep(5); // A small trick to avoid high load and race conditions.
+    provision_backend_invoke('@hostmaster', 'hosting-task', array(d($platform)->name, 'verify'), array('force' => TRUE));
+    sleep(5); // A small trick to avoid high load and race conditions.
+  }
+  // We should update also the info collected about the site before running clone.
+  $local_uri_verify = '@' . d()->uri;
+  provision_backend_invoke('@hostmaster', 'hosting-task', array($local_uri_verify, 'verify'), array('force' => TRUE));
+  sleep(5); // A small trick to avoid high load and race conditions.
 
   $options = d()->options;
   $options['uri'] = ltrim($new_name, '@');
@@ -80,7 +93,11 @@ function drush_provision_drupal_provision_clone($new_name, $platform = null) {
   provision_backend_invoke($new_name, 'provision-deploy', array(drush_get_option('backup_file')), $deploy_options);
 
   if (!drush_get_error()) {
+    // Verify the newly cloned site.
     provision_backend_invoke($new_name, 'provision-verify');
+    sleep(5); // A small trick to avoid high load and race conditions.
+    // Verify again also original site via frontend to avoid issue #1004526
+    provision_backend_invoke('@hostmaster', 'hosting-task', array($local_uri_verify, 'verify'), array('force' => TRUE));
   }
 
   provision_reload_config('site', d()->site_path . '/drushrc.php');
