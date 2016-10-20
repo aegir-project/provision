@@ -94,7 +94,8 @@ class Provision_Context_server extends Provision_Context {
         $type = 'local';
       }
     }
-    if ($type) {
+    // @see hosting_hosting_server_context_options().
+    if ($type && $type != 'NONE') {
       $className = sprintf("Provision_Service_%s_%s", $service, $type);
       if (class_exists($className)) {
         drush_log("Loading $type driver for the $service service");
@@ -107,7 +108,7 @@ class Provision_Context_server extends Provision_Context {
       }
     }
     else {
-      if ($type != NULL) {
+      if ($type != NULL && $type != 'NONE') {
         drush_log("Driver type not specified for the $service service, provide it with --{$service}_service_type");
       }
       $this->services[$service] = new Provision_Service_null($this->name);
