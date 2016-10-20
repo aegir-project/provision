@@ -3,7 +3,7 @@
 /**
  * Clone command implementation
  *
- * This command when called will 
+ * This command when called will
  *   1. Make a backup of the current site, before modifications are made.
  *   2. Execute 'provision deploy' to build the new site using the backup of the old site.
  *
