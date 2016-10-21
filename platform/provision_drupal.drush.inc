@@ -530,6 +530,8 @@ function _provision_drupal_rebuild_caches() {
  * Find available profiles on this platform.
  */
 function _provision_find_profiles() {
+  $profiles = array();
+
   if (drush_drupal_major_version() >= 8) {
     include_once('core/includes/install.inc');
     $profiles_subdirs[] = "./core/profiles";
@@ -539,19 +541,21 @@ function _provision_find_profiles() {
     include_once('includes/install.inc');
     $profiles_subdirs[] = "./profiles";
   }
+
   foreach($profiles_subdirs as $profiles_subdir) {
     if (!$dir = opendir($profiles_subdir)) {
       drush_log(dt("Cannot find profiles directory"), 'error');
       return FALSE;
     }
+
     while (FALSE !== ($name = readdir($dir))) {
       $languages = array();
-      if ($name == '..' || $name == '.') {
+      if (($name == '..') || ($name == '.') || (!is_dir("$profiles_subdir/$name"))) {
         continue;
       }
+
       $profile = new stdClass();
       $profile->name = $name;
-
       $profile->info = array();
 
       if (drush_drupal_major_version() >= 8) {
@@ -607,12 +611,18 @@ function _provision_find_profiles() {
         }
       }
       $profile->info['languages'] = array_keys($languages);
-      $return[$name] = $profile;
+
+      // Drupal 7 renamed the default install profile to 'standard'
+      // Aegir now allows projects to specify an "old short name" to provide an upgrade path when projects get renamed.
+      if ($profile->name == 'standard') {
+        $profile->info['old_short_name'] = 'default';
+      }
+
+      $profiles[$name] = $profile;
       drush_log(dt('Found install profile %name', array('%name' => $name)));
     }
   }
-  return $return;
-
+  return $profiles;
 }
 
 function provision_drupal_find_sites() {
