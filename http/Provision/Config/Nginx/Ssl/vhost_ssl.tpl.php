@@ -12,6 +12,8 @@ if (!$nginx_has_http2 && $server->nginx_has_http2) {
   $nginx_has_http2 = $server->nginx_has_http2;
 }
 
+$aegir_root = d('@server_master')->aegir_root;
+
 if ($nginx_has_http2) {
   $ssl_args = "ssl http2";
 }
@@ -57,6 +59,17 @@ server {
   ssl_certificate            <?php print $ssl_chain_cert; ?>;
 <?php else: ?>
   ssl_certificate            <?php print $ssl_cert; ?>;
+<?php endif; ?>
+<?php if ($satellite_mode == 'boa'): ?>
+
+  ###
+  ### Allow access to letsencrypt.org ACME challenges directory.
+  ###
+  location ^~ /.well-known/acme-challenge {
+    alias <?php print $aegir_root; ?>/tools/le/.acme-challenges;
+    try_files $uri 404;
+  }
+
 <?php endif; ?>
   return 301 $scheme://<?php print $this->redirection; ?>$request_uri;
 }
@@ -133,7 +146,7 @@ server {
 <?php else: ?>
   ssl_certificate            <?php print $ssl_cert; ?>;
 <?php endif; ?>
-<?php print $extra_config; ?>
+  <?php print $extra_config; ?>
   include                    <?php print $server->include_path; ?>/nginx_vhost_common.conf;
 }
 
