@@ -484,6 +484,14 @@ location ~* ^/sites/.*/files/civicrm/(?:ConfigAndLog|custom|upload|templates_c) 
 
 <?php if ($nginx_config_mode == 'extended'): ?>
 ###
+### Deny often flooded URI for performance reasons
+###
+location = /autodiscover/autodiscover.xml {
+  access_log off;
+  return 404;
+}
+
+###
 ### Deny some not supported URI like cgi-bin on the Nginx level.
 ###
 location ~* (?:cgi-bin|vti-bin) {
