@@ -60,6 +60,7 @@ server {
 <?php else: ?>
   ssl_certificate            <?php print $ssl_cert; ?>;
 <?php endif; ?>
+<?php if ($satellite_mode == 'boa'): ?>
 
   ###
   ### Allow access to letsencrypt.org ACME challenges directory.
@@ -69,6 +70,7 @@ server {
     try_files $uri 404;
   }
 
+<?php endif; ?>
   return 301 $scheme://<?php print $this->redirection; ?>$request_uri;
 }
 <?php endforeach; ?>
