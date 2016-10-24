@@ -48,7 +48,10 @@ if (isset($_SERVER['db_name'])) {
      * should probably be fixed in Drush.
      */
     'port' => (string) $_SERVER['db_port'],
+<?php if ($utf8mb4_is_configurable && $utf8mb4_is_supported): ?>
+    'charset' => 'utf8mb4',
     'collation' => 'utf8mb4_general_ci',
+<?php endif; ?>
   );
   $db_url['default'] = $_SERVER['db_type'] . '://' . $_SERVER['db_user'] . ':' . $_SERVER['db_passwd'] . '@' . $_SERVER['db_host'] . ':' . $_SERVER['db_port'] . '/' . $_SERVER['db_name'];
 }
@@ -131,20 +134,11 @@ if (isset($_SERVER['db_name'])) {
   umask(0002);
 
   $settings['install_profile'] = '<?php print $this->profile ?>';
-  $settings['<?php print $file_directory_path_var ?>'] = 'sites/<?php print $this->uri ?>/files';
-  $settings['<?php print $file_directory_temp_var ?>'] = 'sites/<?php print $this->uri ?>/private/temp';
-<?php if (isset($file_directory_private_var)): ?>
-  $settings['<?php print $file_directory_private_var ?>'] = 'sites/<?php print $this->uri ?>/private/files';
-<?php endif; ?>
-<?php if (isset($drupal_hash_salt_var)): ?>
+  $settings['file_public_path'] = 'sites/<?php print $this->uri ?>/files';
+  $settings['file_private_path'] = 'sites/<?php print $this->uri ?>/private/files';
+  $config['system.file']['path']['temporary'] = 'sites/<?php print $this->uri ?>/private/temp';
+  $config_directories[CONFIG_SYNC_DIRECTORY] = 'sites/<?php print $this->uri ?>/private/config/sync';
   $settings['hash_salt'] = '<?php print $drupal_hash_salt_var ?>';
-<?php endif; ?>
-<?php if (isset($config_directories_active_var)): ?>
-  $config_directories['active'] = 'sites/<?php print $this->uri ?>/private/config/active';
-<?php endif; ?>
-<?php if (isset($config_directories_sync_var)): ?>
-  $config_directories['sync'] = 'sites/<?php print $this->uri ?>/private/config/sync';
-<?php endif; ?>
   $settings['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
   $settings['allow_authorize_operations'] = FALSE;
 
