@@ -37,11 +37,11 @@ class Provision_Service_http_cluster extends Provision_Service_http {
     $this->_each_server(__FUNCTION__);
   }
 
-  function create_config($config) {
+  function create_config($config, $data = array()) {
     $this->_each_server(__FUNCTION__, array($config));
   }
 
-  function delete_config($config) {
+  function delete_config($config, $data = array()) {
     $this->_each_server(__FUNCTION__, array($config));
 
     return $this;
@@ -61,12 +61,12 @@ class Provision_Service_http_cluster extends Provision_Service_http {
     return $this->_each_server(__FUNCTION__);
   }
 
-  function sync() {
+  function sync($path = NULL, $additional_options = array()) {
     $args = func_get_args();
     $this->_each_server(__FUNCTION__, $args);
   }
 
-  function fetch() {
+  function fetch($path = NULL) {
     drush_log('Skipping fetch from remote server(s), since master is authoritative in cluster service.');
   }
 
