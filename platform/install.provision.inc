@@ -88,7 +88,7 @@ function drush_provision_drupal_provision_install() {
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
   // Run Drupal installation if option was specified
-  if (drush_get_option('install_drupal', FALSE)) {
+  if (drush_get_option('site_install_method', 'profile')) {
 
     // call a backend task to do the actual installation.
     $result = provision_backend_invoke(d()->name, "provision-install-backend", array(), array('client_email' => drush_get_option('client_email')));
