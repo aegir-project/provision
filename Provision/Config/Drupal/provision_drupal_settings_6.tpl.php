@@ -134,14 +134,8 @@ if (isset($_SERVER['db_name'])) {
 
   global $conf;
   $conf['install_profile'] = '<?php print $this->profile ?>';
-  $conf['<?php print $file_directory_path_var ?>'] = 'sites/<?php print $this->uri ?>/files';
-  $conf['<?php print $file_directory_temp_var ?>'] = 'sites/<?php print $this->uri ?>/private/temp';
-<?php if (isset($file_directory_private_var)): ?>
-  $conf['<?php print $file_directory_private_var ?>'] = 'sites/<?php print $this->uri ?>/private/files';
-<?php endif; ?>
-<?php if (isset($drupal_hash_salt_var)): ?>
-  $drupal_hash_salt = '';
-<?php endif; ?>
+  $conf['file_directory_path'] = 'sites/<?php print $this->uri ?>/files';
+  $conf['file_directory_temp'] = 'sites/<?php print $this->uri ?>/private/temp';
   $conf['clean_url'] = 1;
   $conf['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
   $conf['allow_authorize_operations'] = FALSE;

@@ -59,12 +59,12 @@ class Provision_Service_http_pack extends Provision_Service_http {
     $this->_each_server($this->server->slave_web_servers, __FUNCTION__);
   }
 
-  function create_config($config) {
+  function create_config($config, $data = array()) {
     $this->_each_server($this->server->master_web_servers, __FUNCTION__, array($config));
     $this->_each_server($this->server->slave_web_servers, __FUNCTION__, array($config));
   }
 
-  function delete_config($config) { 
+  function delete_config($configi, $data = array()) {
     $this->_each_server($this->server->master_web_servers, __FUNCTION__, array($config));
     $this->_each_server($this->server->slave_web_servers, __FUNCTION__, array($config));
 
@@ -87,12 +87,12 @@ class Provision_Service_http_pack extends Provision_Service_http {
       $this->_each_server($this->server->slave_web_servers, __FUNCTION__);
   }
 
-  function sync() {
+  function sync($path = NULL, $additional_options = array()) {
     $args = func_get_args();
     $this->_each_server($this->server->master_web_servers, __FUNCTION__, $args);
   }
 
-  function fetch() {
+  function fetch($path = NULL) {
     $args = func_get_args();
     $this->_each_server($this->server->master_web_servers, __FUNCTION__, $args);
   }

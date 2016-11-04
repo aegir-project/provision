@@ -154,7 +154,7 @@ function drush_provision_pre_hostmaster_migrate($site, $platform) {
 function drush_provision_hostmaster_migrate($site, $platform) {
   // See: https://www.drupal.org/node/2762701.
   $platform_version = provision_backend_invoke(drush_get_option('site_name'), 'status', array(), array('fields' => 'drupal-version', 'field-labels' => 0));
-  $major_version_upgrade = version_compare('7.0', trim($platform_version['output']));
+  $major_version_upgrade = version_compare('7.0', trim($platform_version['output'])) > 0 ? TRUE : FALSE;
   if ($major_version_upgrade) {
     drush_log('Detected major version upgrade. Disabling error-reporting.', 'warning');
     $local_settings_file = d('@hostmaster')->site_path . '/local.settings.php';

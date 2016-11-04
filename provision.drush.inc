@@ -282,6 +282,7 @@ function provision_drush_command() {
   $items['provision-backup-delete'] = array(
     'description' => 'Delete a backup file.',
     'arguments' => array('backup-file' => dt('The backup file to delete. This will be a gzipped tarball.')),
+		'required-arguments' => TRUE,
     'examples' => array(
       'drush @site provision-backup-delete /path/to/site_backup.tgz' => 'Delete a backup of this site as defined by the site Drush alias generated with provision-save.',
     ),

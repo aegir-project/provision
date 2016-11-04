@@ -150,6 +150,11 @@ EOF
             echo 'Enabling hosting-queued daemon'
             su -s /bin/sh aegir -c 'drush @hostmaster pm-enable -y hosting_queued'
             service hosting-queued start
+            if [ -f /bin/systemctl ]; then
+              # There must be a better way, but we're trying to stay compatible with Debian Wheezy and Jessie.
+              # See https://www.drupal.org/node/2347557 for discussion.
+              /bin/systemctl enable hosting-queued
+            fi
         fi
 
         case $WEBSERVER in

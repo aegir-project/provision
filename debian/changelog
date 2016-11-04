@@ -1,3 +1,10 @@
+aegir3-provision (3.8) unstable; urgency=medium
+
+  * Another stable release of the 3.x series.
+  * Many bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.8
+
+ -- Herman van Rink <helmo@initfour.nl>  Thu, 27 Oct 2016 18:44:58 +0200
+
 aegir3-provision (3.7) unstable; urgency=medium
 
   * Eighth stable release of the 3.x series.
