@@ -362,9 +362,6 @@ function _provision_drupal_create_directories($url = NULL) {
     $mkdir["sites/$url/private/config"]   = 02775;
     $chgrp["sites/$url/private/config"]   = d('@server_master')->web_group;
 
-    $mkdir["sites/$url/private/config/active"] = 02775;
-    $chgrp["sites/$url/private/config/active"] = d('@server_master')->web_group;
-
     $mkdir["sites/$url/private/config/sync"] = 02775;
     $chgrp["sites/$url/private/config/sync"] = d('@server_master')->web_group;
 
@@ -412,7 +409,7 @@ function _provision_drupal_create_directories($url = NULL) {
     "sites/$url/libraries",
     "sites/$url/modules",
     "sites/$url/private",
-    "sites/$url/private/config/active",
+    "sites/$url/private/config",
     "sites/$url/private/config/sync",
     "sites/$url/private/files",
     "sites/$url/private/files/backup_migrate",
