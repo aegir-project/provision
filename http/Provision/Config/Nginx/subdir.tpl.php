@@ -103,7 +103,7 @@ if ($subdir_main_site_name = '') {
 ###
 add_header Access-Control-Allow-Origin *;
 add_header X-Content-Type-Options nosniff;
-add_header X-XSS-Protection "1; mode=block" always;
+add_header X-XSS-Protection "1; mode=block";
 
 ###
 ### Helper locations to avoid 404 on legacy images paths
@@ -238,7 +238,7 @@ location ^~ /<?php print $subdir; ?> {
       add_header Last-Modified "Wed, 20 Jan 1988 04:20:42 GMT";
       add_header Access-Control-Allow-Origin *;
       add_header X-Content-Type-Options nosniff;
-      add_header X-XSS-Protection "1; mode=block" always;
+      add_header X-XSS-Protection "1; mode=block";
       rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
       try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
     }
@@ -248,7 +248,7 @@ location ^~ /<?php print $subdir; ?> {
       add_header Cache-Control "private, must-revalidate, proxy-revalidate";
       add_header Access-Control-Allow-Origin *;
       add_header X-Content-Type-Options nosniff;
-      add_header X-XSS-Protection "1; mode=block" always;
+      add_header X-XSS-Protection "1; mode=block";
       rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
       try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
     }
@@ -662,7 +662,7 @@ location ^~ /<?php print $subdir; ?> {
     add_header Cache-Control "max-age=31449600, no-transform, public";
     add_header Access-Control-Allow-Origin *;
     add_header X-Content-Type-Options nosniff;
-    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-XSS-Protection "1; mode=block";
     set $nocache_details "Skip";
     try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
   }
@@ -848,7 +848,7 @@ location ^~ /<?php print $subdir; ?> {
     add_header Cache-Control "must-revalidate, post-check=0, pre-check=0";
     add_header Access-Control-Allow-Origin *;
     add_header X-Content-Type-Options nosniff;
-    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-XSS-Protection "1; mode=block";
     charset    utf-8;
     types { }
     default_type text/xml;
@@ -1027,7 +1027,7 @@ location ^~ /<?php print $subdir; ?> {
     add_header X-Response-Status "$status";
     add_header Access-Control-Allow-Origin *;
     add_header X-Content-Type-Options nosniff;
-    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-XSS-Protection "1; mode=block";
 <?php endif; ?>
 
     root          <?php print "{$this->root}"; ?>;
@@ -1138,7 +1138,7 @@ location @cache_<?php print $subdir_loc; ?> {
   add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   add_header Access-Control-Allow-Origin *;
   add_header X-Content-Type-Options nosniff;
-  add_header X-XSS-Protection "1; mode=block" always;
+  add_header X-XSS-Protection "1; mode=block";
   charset    utf-8;
   try_files  /cache/normal/$host${uri}_$args.html @drupal_<?php print $subdir_loc; ?>;
 }
