@@ -107,7 +107,7 @@ function drush_provision_drupal_pre_provision_verify() {
     }
 
     if (!preg_match("/\/static\//", d()->root)) {
-      if (d()->profile != 'hostmaster') {
+      if (!provision_is_hostmaster_site()) {
         provision_file()->chmod(d()->root . '/sites/all/modules', 02775)
           ->succeed('Changed permissions of <code>@path</code> to @perm')
           ->fail('Could not change permissions of <code>@path</code> to @perm');
