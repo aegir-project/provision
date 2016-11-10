@@ -80,7 +80,7 @@ function drush_provision_drupal_provision_migrate($platform, $new_name = NULL) {
   // If the site is migrated between platforms and not just renamed,
   // we should update the info collected about source and target platform first.
   // Note that we have to exclude Hostmaster platform from this extra verify.
-  if (d()->profile != 'hostmaster') {
+  if (!provision_is_hostmaster_site()) {
     if (!is_null(d($platform)->name) && (d($platform)->name != d()->platform->name)) {
       provision_backend_invoke('@hostmaster', 'hosting-task', array(d()->platform->name, 'verify'), array('force' => TRUE));
       sleep(5); // A small trick to avoid high load and race conditions.
@@ -136,7 +136,7 @@ function drush_provision_drupal_provision_migrate($platform, $new_name = NULL) {
   }
   else {
     // We have to exclude Hostmaster site from any extra verify steps.
-    if (d()->profile != 'hostmaster') {
+    if (!provision_is_hostmaster_site()) {
       // We should update also the info collected about the site before running migrate task.
       // Doing this is safe only when the site is migrated with the same name - see issue #1067702.
       $local_uri_verify = '@' . d()->uri;
@@ -219,7 +219,7 @@ function drush_provision_drupal_post_provision_migrate($platform, $new_name = NU
   $rename_only = drush_get_option('rename_only');
   if ($rename_only) {
     // We run this extra tricky backend verify to avoid issue #1004526.
-    if (d()->profile != 'hostmaster') {
+    if (!provision_is_hostmaster_site()) {
       $deploy_replace_site = drush_get_option('deploy_replace_site');
       $final_aliases = drush_get_option('aliases');
       provision_reload_config('site', drush_get_option('new_site_path', d($new_name)->site_path) . '/drushrc.php');
