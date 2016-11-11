@@ -277,6 +277,8 @@ function drush_provision_hostmaster_install($site = NULL) {
   drush_invoke_process('@none', 'cache-clear', array('drush'));
   provision_backend_invoke($site_name, 'hosting-setup');
 
+  provision_backend_invoke($platform_name, 'provision-lock');
+
   drush_print("");
   drush_print("==============================================================================");
   drush_print("");
