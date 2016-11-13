@@ -8,7 +8,7 @@
 	dh $@
 
 override_dh_install:
-	cp -r "$(CURDIR)/db/"  "$(CURDIR)/dns/"  "$(CURDIR)/http/" "$(CURDIR)/"*.make "$(CURDIR)/platform/" "$(CURDIR)/Provision/" "$(CURDIR)/Symfony/" "$(CURDIR)"/*.inc "$(CURDIR)"/*.php "$(CURDIR)"/*.info "$(CURDIR)/debian/aegir3-provision/usr/share/drush/commands/provision/"
+	cp -r "$(CURDIR)/db/" "$(CURDIR)/http/" "$(CURDIR)/"*.make "$(CURDIR)/platform/" "$(CURDIR)/Provision/" "$(CURDIR)/Symfony/" "$(CURDIR)"/*.inc "$(CURDIR)"/*.php "$(CURDIR)"/*.info "$(CURDIR)/debian/aegir3-provision/usr/share/drush/commands/provision/"
 
 	# We need this nasty hack, because we added directories.
 	# TODO: this is really lame, there must be a better way to do this?
