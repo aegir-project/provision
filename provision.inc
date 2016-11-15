@@ -132,6 +132,17 @@ function provision_is_local_host($host) {
 }
 
 /**
+ * Determine if the currently acting context is the server's hostmaster site.
+ *
+ * @return
+ *   Boolean TRUE if the current drush context is "@hostmaster".
+ */
+function provision_is_hostmaster_site() {
+  // If the current root and URI matches "@hostmaster" root and URI, this is hostmaster.
+  return d()->root == d('@hostmaster')->root && d()->uri == d('@hostmaster')->uri;
+}
+
+/**
  * return the FQDN of the machine or provided host
  *
  * this replicates hostname -f, which is not portable

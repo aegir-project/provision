@@ -114,7 +114,7 @@ if ($is_denied) {
 ###
 add_header Access-Control-Allow-Origin *;
 add_header X-Content-Type-Options nosniff;
-add_header X-XSS-Protection "1; mode=block" always;
+add_header X-XSS-Protection "1; mode=block";
 <?php endif; ?>
 
 <?php if ($satellite_mode == 'boa'): ?>
@@ -186,7 +186,7 @@ location ^~ /cdn/farfuture/ {
     add_header Last-Modified "Wed, 20 Jan 1988 04:20:42 GMT";
     add_header Access-Control-Allow-Origin *;
     add_header X-Content-Type-Options nosniff;
-    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-XSS-Protection "1; mode=block";
     rewrite ^/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
     try_files $uri @nobots;
   }
@@ -196,7 +196,7 @@ location ^~ /cdn/farfuture/ {
     add_header Cache-Control "private, must-revalidate, proxy-revalidate";
     add_header Access-Control-Allow-Origin *;
     add_header X-Content-Type-Options nosniff;
-    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-XSS-Protection "1; mode=block";
     rewrite ^/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
     try_files $uri @nobots;
   }
@@ -461,7 +461,7 @@ location ^~ /audio/download {
 ###
 ### Deny listed requests for security reasons.
 ###
-location ~* (\.(?:git|htaccess|engine|config|inc|ini|info|install|make|module|profile|test|pl|po|sh|.*sql|theme|tpl(\.php)?|xtmpl)(~|\.sw[op]|\.bak|\.orig|\.save)?$|^(\..*|Entries.*|Repository|Root|Tag|Template|composer\.(json|lock))$|^#.*#$|\.php(~|\.sw[op]|\.bak|\.orig\.save))$ {
+location ~* (\.(?:git.*|htaccess|engine|config|inc|ini|info|install|make|module|profile|test|pl|po|sh|.*sql|theme|tpl(\.php)?|xtmpl)(~|\.sw[op]|\.bak|\.orig|\.save)?$|^(\..*|Entries.*|Repository|Root|Tag|Template|composer\.(json|lock))$|^#.*#$|\.php(~|\.sw[op]|\.bak|\.orig\.save))$ {
   access_log off;
   return 404;
 }
@@ -684,7 +684,7 @@ location ~* files/advagg_(?:css|js)/ {
   add_header Cache-Control "max-age=31449600, no-transform, public";
   add_header Access-Control-Allow-Origin *;
   add_header X-Content-Type-Options nosniff;
-  add_header X-XSS-Protection "1; mode=block" always;
+  add_header X-XSS-Protection "1; mode=block";
   set $nocache_details "Skip";
   try_files  $uri @nobots;
 }
@@ -789,7 +789,7 @@ location ^~ /files/ {
     try_files  /sites/$main_site_name/files/imagecache/$1 $uri @drupal;
   }
 
-  location ~* ^.+\.(?:pdf|jpe?g|gif|png|ico|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rtf|cgi|bat|pl|dll|class|otf|ttf|woff|eot|less|avi|mpe?g|mov|wmv|mp3|ogg|ogv|wav|midi|zip|tar|t?gz|rar|dmg|exe|apk|pxl|ipa)$ {
+  location ~* ^.+\.(?:pdf|jpe?g|gif|png|ico|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rtf|cgi|bat|pl|dll|class|otf|ttf|woff|eot|less|avi|mpe?g|mov|wmv|mp3|ogg|ogv|wav|midi|zip|tar|t?gz|rar|dmg|exe|apk|pxl|ipa|css|js)$ {
     expires       30d;
     tcp_nodelay   off;
     access_log    off;
@@ -990,7 +990,7 @@ location ~* \.xml$ {
   add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   add_header Access-Control-Allow-Origin *;
   add_header X-Content-Type-Options nosniff;
-  add_header X-XSS-Protection "1; mode=block" always;
+  add_header X-XSS-Protection "1; mode=block";
   charset    utf-8;
   types { }
   default_type text/xml;
@@ -1069,7 +1069,7 @@ location ~ ^/(?<esi>esi/.*)"$ {
   add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   add_header Access-Control-Allow-Origin *;
   add_header X-Content-Type-Options nosniff;
-  add_header X-XSS-Protection "1; mode=block" always;
+  add_header X-XSS-Protection "1; mode=block";
   ###
   ### Set correct, local $uri.
   ###
@@ -1173,7 +1173,7 @@ location @cache {
   add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   add_header Access-Control-Allow-Origin *;
   add_header X-Content-Type-Options nosniff;
-  add_header X-XSS-Protection "1; mode=block" always;
+  add_header X-XSS-Protection "1; mode=block";
   charset    utf-8;
   try_files  /cache/normal/$host${uri}_$args.html @drupal;
 }
@@ -1240,7 +1240,7 @@ location = /index.php {
   add_header X-Server-Name "$main_site_name";
   add_header Access-Control-Allow-Origin *;
   add_header X-Content-Type-Options nosniff;
-  add_header X-XSS-Protection "1; mode=block" always;
+  add_header X-XSS-Protection "1; mode=block";
 <?php endif; ?>
   add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
   tcp_nopush    off;
