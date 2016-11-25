@@ -20,6 +20,6 @@ print "# A list of paths that drush should include even when working outside\n";
 print "# the context of the hostmaster site.\n";
 print "\$options['include'] = ". var_export($drush_include, TRUE) . ";\n";
 
-print "# Local non-aegir-generated additions.";
-print "@include_once(dirname(__FILE__) . '/local.drushrc.php');";
+print "# Local non-aegir-generated additions.\n";
+print "@include_once(dirname(__FILE__) . '/local.drushrc.php');\n";
 ?>
