@@ -304,7 +304,6 @@ server {
 <?php if ($satellite_mode == 'boa'): ?>
     expires 99s;
     add_header Cache-Control "public, must-revalidate, proxy-revalidate";
-    add_header Access-Control-Allow-Origin *;
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection "1; mode=block";
     root   /var/www/nginx-default;

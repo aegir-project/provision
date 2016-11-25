@@ -101,7 +101,6 @@ if ($subdir_main_site_name = '') {
 ###
 ### Add recommended HTTP headers
 ###
-add_header Access-Control-Allow-Origin *;
 add_header X-Content-Type-Options nosniff;
 add_header X-XSS-Protection "1; mode=block";
 
@@ -109,6 +108,10 @@ add_header X-XSS-Protection "1; mode=block";
 ### Helper locations to avoid 404 on legacy images paths
 ###
 location ^~ /<?php print $subdir; ?>/sites/default/files {
+
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
 
   root  <?php print "{$this->root}"; ?>;
 
@@ -263,6 +266,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log    off;
     log_not_found off;
     expires       30d;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files     /sites/$subdir_main_site_name/files/favicon.ico /sites/$host/files/favicon.ico /favicon.ico $uri =204;
   }
 
@@ -273,6 +279,9 @@ location ^~ /<?php print $subdir; ?> {
   location = /<?php print $subdir; ?>/robots.txt {
     access_log    off;
     log_not_found off;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
 <?php if ($nginx_config_mode == 'extended'): ?>
     try_files /sites/$subdir_main_site_name/files/$host.robots.txt /sites/$subdir_main_site_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @cache_<?php print $subdir_loc; ?>;
 <?php else: ?>
@@ -505,6 +514,10 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ^~ /<?php print $subdir; ?>/files/ {
 
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+
     ###
     ### Sub-location to support files/styles with short URIs.
     ###
@@ -559,6 +572,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log off;
     log_not_found off;
     expires    30d;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
 <?php if ($nginx_config_mode == 'extended'): ?>
     set $nocache_details "Skip";
 <?php endif; ?>
@@ -572,6 +588,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log off;
     log_not_found off;
     expires    30d;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
 <?php if ($nginx_config_mode == 'extended'): ?>
     set $nocache_details "Skip";
 <?php endif; ?>
@@ -644,6 +663,9 @@ location ^~ /<?php print $subdir; ?> {
   location ~* ^/<?php print $subdir; ?>/(.*/wysiwyg_fields/(?:plugins|scripts)/.*\.(?:js|css)) {
     access_log off;
     log_not_found off;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
   }
 
@@ -674,6 +696,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log  off;
     tcp_nodelay off;
     expires     max; #if using aggregator
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files   /cache/perm/$host${uri}_.css /$1 $uri =404;
   }
 
@@ -684,6 +709,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log  off;
     tcp_nodelay off;
     expires     max; # if using aggregator
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files   /cache/perm/$host${uri}_.js /$1 $uri =404;
   }
 
@@ -694,6 +722,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log  off;
     tcp_nodelay off;
     expires     max; ### if using aggregator
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files   /cache/normal/$host${uri}_.json /$1 $uri =404;
   }
 
@@ -714,6 +745,9 @@ location ^~ /<?php print $subdir; ?> {
     tcp_nodelay   off;
     access_log    off;
     log_not_found off;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files   /$1 $uri =404;
   }
 
@@ -727,6 +761,9 @@ location ^~ /<?php print $subdir; ?> {
     tcp_nopush  off;
     access_log    off;
     log_not_found off;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files   /$1 $uri =404;
   }
 
@@ -737,6 +774,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log  off;
     tcp_nodelay off;
     expires     30d;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files   /$1 $uri =404;
   }
 
@@ -816,6 +856,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log      off;
     tcp_nodelay     off;
     expires         30d;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files /$1 $uri =404;
   }
 
@@ -828,6 +871,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log      off;
     tcp_nodelay     off;
     expires         30d;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files /$1 $uri =404;
   }
 
@@ -1025,7 +1071,6 @@ location ^~ /<?php print $subdir; ?> {
     add_header X-This-Proto "$http_x_forwarded_proto";
     add_header X-Server-Sub-Name "$subdir_main_site_name";
     add_header X-Response-Status "$status";
-    add_header Access-Control-Allow-Origin *;
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection "1; mode=block";
 <?php endif; ?>
