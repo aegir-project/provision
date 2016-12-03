@@ -139,7 +139,7 @@ if (isset($_SERVER['db_name'])) {
   $config['system.file']['path']['temporary'] = 'sites/<?php print $this->uri ?>/private/temp';
   $config_directories[CONFIG_SYNC_DIRECTORY] = 'sites/<?php print $this->uri ?>/private/config/sync';
   $settings['hash_salt'] = '<?php print $drupal_hash_salt_var ?>';
-  $settings['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
+  $settings['aegir_api'] = <?php print $this->api_version ? $this->api_version : 0 ?>;
   $settings['allow_authorize_operations'] = FALSE;
 
   /**
