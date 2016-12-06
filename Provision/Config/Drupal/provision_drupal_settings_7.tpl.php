@@ -141,7 +141,7 @@ if (isset($_SERVER['db_name'])) {
   $conf['file_temporary_path'] = 'sites/<?php print $this->uri ?>/private/temp';
   $drupal_hash_salt = '';
   $conf['clean_url'] = 1;
-  $conf['aegir_api'] = <?php print !$this->backup_in_progress ? $this->api_version : 0 ?>;
+  $conf['aegir_api'] = <?php print $this->api_version ? $this->api_version : 0 ?>;
   $conf['allow_authorize_operations'] = FALSE;
 
   // Nginx tries to cache the admin_menu if we don't do this.
