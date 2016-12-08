@@ -99,6 +99,8 @@ function _provision_system_query($type) {
     if ($frags[0] == 'sites' && $frags[1] != 'all') {
       $package->platform = -1;
     }
+    // In Drupal 8, system_get_info returns enabled modules/themes.
+    $package->status = 1;
 
     $package->filename = realpath($package->filename);
 
