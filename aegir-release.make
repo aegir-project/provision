@@ -5,6 +5,6 @@ api = 2
 projects[drupal][type] = "core"
 
 ; The release.sh script updates the version of hostmaster.
-projects[hostmaster][version] = "3.9-beta1"
+projects[hostmaster][version] = "7.x-3.0-dev"
 projects[hostmaster][type] = "profile"
 projects[hostmaster][variant] = "projects"
