@@ -7,6 +7,16 @@
  * @see drush_command_invoke_all()
  */
 
+/**
+ * Possible variables to set in local.drushrc.php or another drushrc location Drush supports.
+ *
+ * usage:
+ *   $options['provision_backup_suffix'] = '.tar.bz2';
+ *
+ * provision_verify_platforms_before_migrate - When migrating many sites turning this off can save time, default TRUE.
+ * provision_backup_suffix - Method to set the compression used for backups... e.g. '.tar.bz2' or '.tar.', defaults to '.tar.gz'.
+ *
+ */
 
 /**
  * Implements hook_drush_load(). Deprecated. Removed in Drush 7.x.
