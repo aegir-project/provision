@@ -80,7 +80,7 @@ dch -v $debversion -D unstable
 git add debian/changelog
 
 echo changing hostmaster version in aegir-release.make
-sed -i'.tmp' -e '/^projects\[hostmaster\]\[version\]/s/=.*$/= "'"$major-$version"'"/' aegir-release.make && git add aegir-release.make && rm aegir-release.make.tmp
+sed -i'.tmp' -e '/^projects\[hostmaster\]\[version\]/s/=.*$/= "'"$version"'"/' aegir-release.make && git add aegir-release.make && rm aegir-release.make.tmp
 
 echo enabling release makefilexs
 ln -sf aegir-release.make aegir.make && git add aegir.make
@@ -125,8 +125,19 @@ mkdir -p build-area;
 rm -rf build-area/hostmaster
 git clone --branch $CURRENT_BRANCH `git config remote.origin.url | sed 's/provision/hostmaster/'` build-area/hostmaster
 
+cd build-area/hostmaster
+echo changing hostmaster.make versions
+ln -sf drupal-org.make hostmaster.make && git add hostmaster.make
+cd -
+
+git --work-tree=build-area/hostmaster --git-dir=build-area/hostmaster/.git commit -m"change version information for release $version"
+
 echo "Setting the tag $NEW_TAG in a clean hostmaster clone."
 git --work-tree=build-area/hostmaster --git-dir=build-area/hostmaster/.git tag -a $NEW_TAG -m 'Add a new release tag.'
+
+echo reverting tree to HEAD versions
+git revert HEAD^
+
 
 # Hosting
 rm -rf build-area/hosting
