@@ -39,6 +39,8 @@ before_install:
   - cd /home/travis/build/aegir-project/tests/travis
   - sudo bash prepare-docker.sh
   - bash prepare-testenv.sh
+  - echo "Provition info file:"
+  - cat /usr/share/drush/commands/provision/provision.info
 
 script:
 
