@@ -136,7 +136,7 @@ echo "Setting the tag $NEW_TAG in a clean hostmaster clone."
 git --work-tree=build-area/hostmaster --git-dir=build-area/hostmaster/.git tag -a $NEW_TAG -m 'Add a new release tag.'
 
 echo reverting tree to HEAD versions
-git revert HEAD^
+git --work-tree=build-area/hostmaster --git-dir=build-area/hostmaster/.git revert HEAD
 
 
 # Hosting
