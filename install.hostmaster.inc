@@ -262,8 +262,8 @@ function drush_provision_hostmaster_install($site = NULL) {
   ));
 
   drush_log('Starting with the hostmaster frontend installation.', 'notice');
-  $data = provision_backend_invoke($site_name, 'provision-install', array(), array('client_email' => drush_get_option('client_email')));
-  provision_backend_invoke($site_name, 'provision-verify');
+  //$data = provision_backend_invoke($site_name, 'provision-install', array(), array('client_email' => drush_get_option('client_email')));
+  //provision_backend_invoke($site_name, 'provision-verify');
 
   // exit if an error has occured.
   if (drush_get_error()) {
