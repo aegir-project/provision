@@ -3,6 +3,19 @@
 /**
  * @file manual site migrate system
  */
+
+/**
+ * Convert a directory name to a drush aliasname, stripping unwanted chars.
+ *
+ * @param string $name The directory name.
+ *
+ * @return string
+ *   A drush alias name for the platform.
+ */
+function _provision_path_to_platform_alias($name) {
+  return '@platform_' . preg_replace("/[!\W]/", "", basename(rtrim($name, '/')));
+}
+
 function drush_provision_hostmaster_migrate_validate($site, $platform) {
   // XXX: this doesn't actually document the pre alpha9 upgrade path
   drush_print('
@@ -43,7 +56,7 @@ We are making the following assumptions:
     drush_set_option('site_name', '@hostmaster');
     drush_set_option('old_platform', d('@hostmaster')->platform->name);
 
-    $new_platform = '@platform_' . preg_replace("/[!\W]/", "", basename(rtrim($platform, '/')));
+    $new_platform = _provision_path_to_platform_alias($platform);
     drush_invoke_process('@none', "provision-save", array($new_platform), array(
       'context_type' => 'platform',
       'server' => '@server_master',
@@ -95,7 +108,7 @@ We are making the following assumptions:
     }
 
 
-    $old_platform = '@platform_' . preg_replace("/[!\W]/", "", basename(rtrim($data['publish_path'], '/')));
+    $old_platform = _provision_path_to_platform_alias($data['publish_path']);
     drush_invoke_process('@none', "provision-save", array($old_platform), array(
       'context_type' => 'platform',
       'server' => $server,
@@ -109,7 +122,7 @@ We are making the following assumptions:
       return false;
     }
 
-    $new_platform = '@platform_' . preg_replace("/[!\W]/", "", basename(rtrim($platform, '/')));
+    $new_platform = _provision_path_to_platform_alias($platform);
     drush_invoke_process('@none', "provision-save", array($new_platform), array(
       'context_type' => 'platform',
       'server' => $server,

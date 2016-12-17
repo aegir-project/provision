@@ -80,7 +80,7 @@ function drush_provision_drupal_provision_migrate($platform, $new_name = NULL) {
   // If the site is migrated between platforms and not just renamed,
   // we should update the info collected about source and target platform first.
   // Note that we have to exclude Hostmaster platform from this extra verify.
-  if (!provision_is_hostmaster_site()) {
+  if (!provision_is_hostmaster_site() && drush_get_option('provision_verify_platforms_before_migrate', TRUE)) {
     if (!is_null(d($platform)->name) && (d($platform)->name != d()->platform->name)) {
       provision_backend_invoke('@hostmaster', 'hosting-task', array(d()->platform->name, 'verify'), array('force' => TRUE));
       sleep(5); // A small trick to avoid high load and race conditions.
