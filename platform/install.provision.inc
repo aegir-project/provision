@@ -19,35 +19,7 @@ function drush_provision_drupal_provision_install_validate() {
     return drush_set_error("PROVISION_URL_REQUIRED", dt("You need to specify a valid url to install a site"));
   }
   if (_provision_drupal_site_exists()) {
-
-    // If "force-reinstall" option is set, delete the database and files.
-    if (drush_get_option('force-reinstall', FALSE)) {
-
-      drush_log(dt('Forcing reinstall...'), 'ok');
-
-      // Load the current database name from drushrc.php.
-      // I cannot find another way to find the current db_name!
-      require_once(d()->site_path . '/drushrc.php');
-      $old_db_name = $options['db_name'];
-
-      if (d()->service('db')->database_exists($old_db_name)) {
-        d()->service('db')->drop_database($old_db_name);
-        drush_log(dt('Dropped database @database.', array(
-          '@database' => $old_db_name,
-        )), 'ok');
-      }
-
-      // Destroy site_path
-      if (file_exists(d()->site_path)) {
-        _provision_recursive_delete( d()->site_path );
-        drush_log(dt('Deleted @site_path.', array('@site_path' => d()->site_path)), 'ok');
-      }
-    }
-
-    // Check again if site does not exist after the forced reinstall.
-    if (_provision_drupal_site_exists()) {
-      return drush_set_error('PROVISION_SITE_INSTALLED');
-    }
+    return drush_set_error('PROVISION_SITE_INSTALLED');
   }
 }
 
