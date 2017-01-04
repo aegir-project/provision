@@ -72,16 +72,6 @@ function provision_drupal_drush_exit() {
 }
 
 /**
- * Test to see if the site settings.php exists
- *
- * @return
- *   If the file exists, return TRUE, else return FALSE.
- */
-function _provision_drupal_site_exists() {
-  return is_readable(d()->site_path . '/settings.php');
-}
-
-/**
  * This command does the actual installation in it's own thread,
  * so we can recover gracefully if things go really wrong.
  */
