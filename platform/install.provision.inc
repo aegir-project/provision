@@ -37,7 +37,7 @@ function drush_provision_drupal_provision_install_validate() {
         )), 'ok');
       }
 
-      // Destroy site_path
+      // Destroy site_path.
       if (file_exists(d()->site_path)) {
         _provision_recursive_delete( d()->site_path );
         drush_log(dt('Deleted @site_path.', array('@site_path' => d()->site_path)), 'ok');
