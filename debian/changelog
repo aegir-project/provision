@@ -1,3 +1,10 @@
+aegir3-provision (3.9) unstable; urgency=medium
+
+  * Makefile tweaks to allow for minor releases to update Drupal core
+  * Many bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.9
+
+ -- Herman van Rink <helmo@initfour.nl>  Thu, 05 Jan 2017 20:23:06 +0100
+
 aegir3-provision (3.9~beta1) unstable; urgency=medium
 
   * Preparations for the 3.9 release
