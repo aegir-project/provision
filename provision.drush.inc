@@ -113,6 +113,7 @@ function provision_drush_command() {
     'options' => array(
       'client_email' => dt('The email address of the client to use.'),
       'profile' => dt('The profile to use when installing the site.'),
+      'force-reinstall' => dt('Delete the sites database and files, before attempting to install.'),
     ),
     'allow-additional-options' => TRUE,
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT
