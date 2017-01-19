@@ -62,6 +62,11 @@ function drush_provision_drupal_pre_provision_verify() {
       }
       $arguments[] = d()->makefile;
       $arguments[] = d()->root;
+      
+      // Change current directory to makefile's directory until Drush fixes this bug: https://github.com/drush-ops/drush/issues/2482
+      // @TODO: Remove this once is committed.
+      chdir(dirname(d()->makefile));
+      
       drush_invoke_process('@none', "make", $arguments, $options);
       if (drush_get_error()) {
         return drush_set_error("DRUSH_MAKE_FAILED",
