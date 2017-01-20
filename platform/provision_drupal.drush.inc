@@ -63,8 +63,11 @@ function provision_drupal_drush_exit() {
       }
     }
     elseif (d()->type === 'platform') {
-      // Don't generate the drushrc.php on provision-save/delete commands.
-      if (!preg_match("/^provision-(save|delete)/", $command[0])) {
+      // Don't generate the drushrc.php on provision-save/delete/git-clone commands.
+      // Avoiding running on git-clone is needed in order to let it work with makefiles in the git repo.
+      // If this function runs, the platform directory is created, and drush make fails because the directory already exists.
+      // @TODO: Determine what tasks should save platform data and only act on those.
+      if (!preg_match("/^provision-(save|delete|git-clone)/", $command[0])) {
         provision_save_platform_data();
       }
     }
