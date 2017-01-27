@@ -192,6 +192,11 @@ class Provision_Service_http_ssl extends Provision_Service_http_public {
   static function free_certificate_site($ssl_key, $site) {
     if (empty($ssl_key)) return FALSE;
     $ssl_dir = $site->platform->server->http_ssld_path . "/" . $ssl_key . "/";
+    // Respect hosting_le configuration, if detected -- start
+    $le_ctrl = d('@server_master')->aegir_root . "/tools/le/.ctrl";
+    $immutable = $le_ctrl . "/dont-overwrite-" . $site->uri . ".pid";
+    if (is_link($ssl_dir) || is_file($immutable)) return FALSE;
+    // Respect hosting_le configuration, if detected -- fin
     // Remove the file system reciept we left for this file
     if (provision_file()->unlink($ssl_dir . $site->uri . ".receipt")->
         succeed(dt("Deleted SSL Certificate association receipt for %site on %server", array(
