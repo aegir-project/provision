@@ -16,23 +16,6 @@ class Provision_Config_Http_Server extends Provision_Config_Http {
 
   function write() {
     parent::write();
-
-    if (isset($this->data['application_name'])) {
-      $file = $this->data['application_name'] . '.conf';
-      // We link the app_name.conf file on the remote server to the right version.
-      $cmd = sprintf('ln -sf %s %s', 
-        escapeshellarg($this->data['server']->config_path . '/' . $file), 
-        escapeshellarg($this->data['server']->aegir_root . '/config/' . $file)
-      );
-      
-      if ($this->data['server']->shell_exec($cmd)) {
-        drush_log(dt("Created symlink for %file on %server", array(
-          '%file' => $file,
-          '%server' => $this->data['server']->remote_host,
-        )));  
-       
-      };
-    }
   }
 
   function filename() {
