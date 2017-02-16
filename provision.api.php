@@ -231,10 +231,10 @@ function hook_provision_config_load_templates_alter(&$templates, $config) {
  * @see hook_provision_config_load_templates_alter()
  */
 function hook_provision_config_variables_alter(&$variables, $template, $config) {
-  
+
   // If this is the vhost template and the http service is Docker...
   if (is_a($config, 'Provision_Config_Apache_Site') && is_a(d()->platform->service('http'), 'Provision_Service_http_apache_docker')) {
-    
+
     // Force the listen port to be 80.
     $variables['http_port'] = '80';
   }
