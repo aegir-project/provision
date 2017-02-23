@@ -61,25 +61,6 @@ class Provision_Service_http_public extends Provision_Service_http {
       $this->symlink_service();
     }
   }
-  
-  /**
-   * Save symlink for this server from /var/aegir/config/APPLICATION_NAME.conf -> /var/aegir/config/SERVER/APPLICATION_NAME.conf
-   */
-  function symlink_service() {
-    $file = $this->application_name . '.conf';
-    // We link the app_name.conf file on the remote server to the right version.
-    $cmd = sprintf('ln -sf %s %s',
-      escapeshellarg($this->server->config_path . '/' . $file),
-      escapeshellarg($this->server->aegir_root . '/config/' . $file)
-    );
-  
-    if ($this->server->shell_exec($cmd)) {
-      drush_log(dt("Created symlink for %file on %server", array(
-        '%file' => $file,
-        '%server' => $this->server->remote_host,
-      )));
-    };
-  }
 
   static function option_documentation() {
     return array(
