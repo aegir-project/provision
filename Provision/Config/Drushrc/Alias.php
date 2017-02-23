@@ -18,6 +18,10 @@ class Provision_Config_Drushrc_Alias extends Provision_Config_Drushrc {
    */
   function __construct($context, $data = array()) {
     parent::__construct($context, $data);
+
+    $data['aliases'] = array_unique($data['aliases']);
+    $data['drush_aliases'] = array_unique($data['drush_aliases']);
+
     $this->data = array(
       'aliasname' => ltrim($context, '@'),
       'options' => $data,
