@@ -788,6 +788,44 @@ location ^~ /files/ {
   add_header X-Content-Type-Options nosniff;
   add_header X-XSS-Protection "1; mode=block";
 
+<?php if ($satellite_mode == 'boa'): ?>
+  ###
+  ### Sub-location to support Flash Video (FLV) files with short URIs.
+  ###
+  location ~* /files/.+\.flv$ {
+    flv;
+    tcp_nodelay off;
+    tcp_nopush off;
+    expires 30d;
+    access_log    off;
+    log_not_found off;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    rewrite  ^/files/(.*)$  /sites/$main_site_name/files/$1 last;
+    try_files   $uri =404;
+  }
+
+  ###
+  ### Sub-location to support H.264/AAC files with short URIs.
+  ###
+  location ~* /files/.+\.(?:mp4|m4a)$ {
+    mp4;
+    mp4_buffer_size 1m;
+    mp4_max_buffer_size 5m;
+    tcp_nodelay off;
+    tcp_nopush off;
+    expires 30d;
+    access_log    off;
+    log_not_found off;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    rewrite  ^/files/(.*)$  /sites/$main_site_name/files/$1 last;
+    try_files   $uri =404;
+  }
+<?php endif; ?>
+
   ###
   ### Sub-location to support files/styles with short URIs.
   ###
