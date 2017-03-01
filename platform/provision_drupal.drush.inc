@@ -542,28 +542,6 @@ function provision_drupal_system_map() {
 }
 
 /**
- * Retrieve a list of paths to search in a certain scope
- */
-function _provision_drupal_search_paths($scope, $key = '', $type = 'modules') {
-  $searchpaths = array();
-  $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
-  switch ($scope) {
-    case 'base' :
-      $searchpaths[] = sprintf("%s/%s", $drupal_root, $type);
-      $searchpaths[] = sprintf("%s/core/%s", $drupal_root, $type);
-      $searchpaths[] = sprintf("%s/sites/all/%s", $drupal_root, $type);
-      break;
-    default :
-      if ($key) {
-        $searchpaths[] = sprintf("%s/%s/%s/%s", $drupal_root, $scope, $key, $type);
-      }
-      break;
-
-  }
-  return $searchpaths;
-}
-
-/**
  * Find modules in a certain scope.
  *
  * This function is general enough that it works for all supported

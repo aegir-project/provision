@@ -135,14 +135,41 @@ function _provision_find_profiles() {
         $profile->name = $info['name'];
         $profile->info = $info;
         $profile->filename = $path;
-        $profile_path = dirname($path);
-        $profile->info['languages'] = _provision_find_profile_languages($profile_path);
+        $profile->path = dirname($path);
+        $profile->info['languages'] = _provision_find_profile_languages($profile->path);
 
-        $profiles[basename($profile_path)] = $profile;
+        $profiles[basename($profile->path)] = $profile;
         drush_log(dt('Found install profile %name', array('%name' => $name)));
       }
     }
   }
   return $profiles;
+}
+
+/**
+ * Retrieve a list of paths to search in a certain scope
+ */
+function _provision_drupal_search_paths($scope, $key = '', $type = 'modules') {
+  $searchpaths = array();
+  $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
+  switch ($scope) {
+    case 'base':
+      $searchpaths[] = sprintf("%s/%s", $drupal_root, $type);
+      $searchpaths[] = sprintf("%s/core/%s", $drupal_root, $type);
+      $searchpaths[] = sprintf("%s/sites/all/%s", $drupal_root, $type);
+      break;
+    case 'profiles':
+      foreach (_provision_find_profiles() as $profile) {
+        $searchpaths[] = $profile->path;
+      }
+      break;
+    default:
+      if ($key) {
+        $searchpaths[] = sprintf("%s/%s/%s/%s", $drupal_root, $scope, $key, $type);
+      }
+      break;
+
+  }
+  return $searchpaths;
 }
 
