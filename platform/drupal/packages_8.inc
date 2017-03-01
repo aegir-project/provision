@@ -118,19 +118,16 @@ function _provision_system_query($type) {
  * Find available profiles on this platform.
  */
 function _provision_find_profiles() {
+  $profile_dirs = array('./core/profiles', './profiles');
+
   $profiles = array();
-
-  include_once('core/includes/install.inc');
-  $profiles_subdirs[] = "./core/profiles";
-  $profiles_subdirs[] = "./profiles";
-
-  foreach($profiles_subdirs as $profiles_subdir) {
-    if (!is_dir($profiles_subdir)) {
-      drush_log(dt("Cannot find profiles directory"), 'error');
+  foreach($profile_dirs as $profile_dir) {
+    if (!is_dir($profile_dir)) {
+      drush_log(dt("Cannot find profiles directory %dir", array('%dir' => $profile_dir)), 'error');
       return FALSE;
     }
 
-    $info_files = drush_scan_directory($profiles_subdir, "/\.info.yml$/");
+    $info_files = drush_scan_directory($profile_dir, "/\.info.yml$/");
     foreach ($info_files as $path => $info_file) {
       $info = Symfony\Component\Yaml\Yaml::parse($path);
       if ($info['type'] == 'profile' && (!isset($info['hidden']) || !$info['hidden'])) {
