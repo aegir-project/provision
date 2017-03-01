@@ -748,3 +748,22 @@ function _provision_client_delete_symlink() {
       ->fail('Failed to delete symlink @path: @reason');
   }
 }
+
+/**
+ * Find available languages for a profile.
+ */
+function _provision_find_profile_languages($profile_path) {
+  $languages = array();
+  $languages['en'] = 1;
+  // Find languages available
+  $files = array_keys(drush_scan_directory($profile_path . '/translations', '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
+  $files = array_merge($files, array_keys(drush_scan_directory($profile_path, '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath')));
+  if (is_array($files)) {
+    foreach ($files as $file) {
+      if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
+        $languages[$langcode[2]] = 1; // use the language name as an index to weed out duplicates
+      }
+    }
+  }
+  return array_keys($languages);
+}

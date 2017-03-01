@@ -234,18 +234,8 @@ function _provision_find_profiles() {
         $profile->info = array_merge($profile->info, $func());
       }
 
-      $languages['en'] = 1;
-      // Find languages available
-      $files = array_keys(drush_scan_directory($profiles_subdir . '/' . $name . '/translations', '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
-      $files = array_merge($files, array_keys(drush_scan_directory($profiles_subdir . '/' . $name , '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath')));
-      if (is_array($files)) {
-        foreach ($files as $file) {
-          if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
-            $languages[$langcode[2]] = 1; // use the language name as an index to weed out duplicates
-          }
-        }
-      }
-      $profile->info['languages'] = array_keys($languages);
+      $profile_path = $profiles_subdir . '/' . $name;
+      $profile->info['languages'] = _provision_find_profile_languages($profile_path);
 
       $profiles[$name] = $profile;
       drush_log(dt('Found install profile %name', array('%name' => $name)));
