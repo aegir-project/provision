@@ -113,3 +113,77 @@ function _provision_system_query($type) {
 
   return $packages;
 }
+
+/**
+ * Find available profiles on this platform.
+ */
+function _provision_find_profiles() {
+  $profiles = array();
+
+  include_once('core/includes/install.inc');
+  $profiles_subdirs[] = "./core/profiles";
+  $profiles_subdirs[] = "./profiles";
+
+  foreach($profiles_subdirs as $profiles_subdir) {
+    if (!$dir = opendir($profiles_subdir)) {
+      drush_log(dt("Cannot find profiles directory"), 'error');
+      return FALSE;
+    }
+
+    while (FALSE !== ($name = readdir($dir))) {
+      $languages = array();
+      if (($name == '..') || ($name == '.') || (!is_dir("$profiles_subdir/$name"))) {
+        continue;
+      }
+
+      $profile = new stdClass();
+      $profile->name = $name;
+      $profile->info = array();
+
+      $yaml_file = "$profiles_subdir/$name/$name.info.yml";
+      if(!file_exists($yaml_file)) {
+        drush_log(dt("@name.info.yml not found.", array("@name" => $name)), 'notice');
+        unset($files[$name]);
+        continue;
+      }
+      $profile->info = Symfony\Component\Yaml\Yaml::parse($yaml_file);
+
+      // Skip hidden profiles.
+      if (isset($profile->info['hidden']) && $profile->info['hidden'] == 1) {
+        continue;
+      }
+
+      if (!empty($profile->info['name'])) {
+        $profile->name = $profile->info['name'];
+      }
+      $profile->filename = $yaml_file;
+
+      // Include code from the profile.
+      if (file_exists($profile_file = "$profiles_subdir/$name/$name.profile")) {
+        require_once($profile_file);
+      }
+
+      $func = $profile->name . "_profile_details";
+      if (function_exists($func)) {
+        $profile->info = array_merge($profile->info, $func());
+      }
+
+      $languages['en'] = 1;
+      // Find languages available
+      $files = array_keys(drush_scan_directory($profiles_subdir . '/' . $name . '/translations', '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
+      $files = array_merge($files, array_keys(drush_scan_directory($profiles_subdir . '/' . $name , '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath')));
+      if (is_array($files)) {
+        foreach ($files as $file) {
+          if (preg_match('!(/|\.)([^\./]+)\.po$!', $file, $langcode)) {
+            $languages[$langcode[2]] = 1; // use the language name as an index to weed out duplicates
+          }
+        }
+      }
+      $profile->info['languages'] = array_keys($languages);
+
+      $profiles[$name] = $profile;
+      drush_log(dt('Found install profile %name', array('%name' => $name)));
+    }
+  }
+  return $profiles;
+}
