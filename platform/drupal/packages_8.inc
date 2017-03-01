@@ -129,6 +129,7 @@ function _provision_find_profiles() {
 
     $info_files = drush_scan_directory($profile_dir, "/\.info.yml$/");
     foreach ($info_files as $path => $info_file) {
+      $path = realpath($path);
       $info = Symfony\Component\Yaml\Yaml::parse($path);
       if ($info['type'] == 'profile' && (!isset($info['hidden']) || !$info['hidden'])) {
         $profile = new stdClass();
