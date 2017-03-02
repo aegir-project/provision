@@ -199,3 +199,86 @@ function _provision_drupal_system_map() {
   drush_log(dt("Found !count themes", array('!count' => sizeof($packages['themes']))));
   return $packages;
 }
+
+/**
+ * Find available profiles on this platform.
+ */
+function _provision_find_profiles() {
+  $profiles = array();
+
+  include_once('includes/install.inc');
+  $profiles_subdirs[] = "./profiles";
+
+  foreach($profiles_subdirs as $profiles_subdir) {
+    if (!$dir = opendir($profiles_subdir)) {
+      drush_log(dt("Cannot find profiles directory"), 'error');
+      return FALSE;
+    }
+
+    while (FALSE !== ($name = readdir($dir))) {
+      $languages = array();
+      if (($name == '..') || ($name == '.') || (!is_dir("$profiles_subdir/$name"))) {
+        continue;
+      }
+
+      $profile = new stdClass();
+      $profile->name = $name;
+      $profile->info = array();
+
+      $info_file = "$profiles_subdir/$name/$name.info";
+      if (file_exists($info_file)) {
+        $profile->info = provision_parse_info_file($info_file);
+        // Skip hidden profiles
+        if (isset($profile->info['hidden']) && $profile->info['hidden'] == 1) {
+          continue;
+        }
+      }
+      $profile->filename = $info_file;
+
+      // Include code from the profile.
+      if (file_exists($profile_file = "$profiles_subdir/$name/$name.profile")) {
+        require_once($profile_file);
+      }
+
+      $func = $profile->name . "_profile_details";
+      if (function_exists($func)) {
+        $profile->info = array_merge($profile->info, $func());
+      }
+
+      $profile_path = $profiles_subdir . '/' . $name;
+      $profile->info['languages'] = _provision_find_profile_languages($profile_path);
+
+      // Drupal 7 renamed the default install profile to 'standard'
+      // Aegir now allows projects to specify an "old short name" to provide an upgrade path when projects get renamed.
+      if ($profile->name == 'standard') {
+        $profile->info['old_short_name'] = 'default';
+      }
+
+      $profiles[$name] = $profile;
+      drush_log(dt('Found install profile %name', array('%name' => $name)));
+    }
+  }
+  return $profiles;
+}
+
+/**
+ * Retrieve a list of paths to search in a certain scope
+ */
+function _provision_drupal_search_paths($scope, $key = '', $type = 'modules') {
+  $searchpaths = array();
+  $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
+  switch ($scope) {
+    case 'base' :
+      $searchpaths[] = sprintf("%s/%s", $drupal_root, $type);
+      $searchpaths[] = sprintf("%s/sites/all/%s", $drupal_root, $type);
+      break;
+    default :
+      if ($key) {
+        $searchpaths[] = sprintf("%s/%s/%s/%s", $drupal_root, $scope, $key, $type);
+      }
+      break;
+
+  }
+  return $searchpaths;
+}
+
