@@ -732,8 +732,11 @@ function _provision_client_delete_symlink() {
  */
 function _provision_find_profile_languages($profile_path) {
   $languages = array();
+
+  // English is default.
   $languages['en'] = 1;
-  // Find languages available
+
+  // Find languages available.
   $files = array_keys(drush_scan_directory($profile_path . '/translations', '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath'));
   $files = array_merge($files, array_keys(drush_scan_directory($profile_path, '/\.po$/', array('.', '..', 'CVS'), 0, FALSE, 'filepath')));
   if (is_array($files)) {
