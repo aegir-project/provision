@@ -167,6 +167,11 @@ class Provision_Config {
    * array.
    */
   private function render_template($template, $variables) {
+
+    // Allow modules to alter the variables before writing to the template.
+    // @see hook_provision_config_variables_alter()
+    drush_command_invoke_all_ref('provision_config_variables_alter', $variables, $template, $this);
+    
     drush_errors_off();
     extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
     ob_start();                      // Start output buffering

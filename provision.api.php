@@ -223,6 +223,31 @@ function hook_provision_config_load_templates_alter(&$templates, $config) {
 }
 
 /**
+ * Alter the variables used for rendering a config file.
+ *
+ * When implementing this hook, the function name should start with your file's name, not "drush_".
+ *
+ * @param $variables
+ *   The variables that are about to be injected into the template.
+ * @param $template
+ *   The template file chosen for use.
+ * @param $config
+ *   The Provision_config object trying to find its template.
+ *
+ * @see hook_provision_config_load_templates()
+ * @see hook_provision_config_load_templates_alter()
+ */
+function hook_provision_config_variables_alter(&$variables, $template, $config) {
+
+  // If this is the vhost template and the http service is Docker...
+  if (is_a($config, 'Provision_Config_Apache_Site') && is_a(d()->platform->service('http'), 'Provision_Service_http_apache_docker')) {
+
+    // Force the listen port to be 80.
+    $variables['http_port'] = '80';
+  }
+}
+
+/**
  * Alter the array of directories to create.
  *
  * @param $mkdir
