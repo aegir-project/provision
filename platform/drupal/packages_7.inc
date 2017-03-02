@@ -82,6 +82,11 @@ function _provision_drupal_parse_info_file($filename) {
       }
       $value = stripslashes(substr($value1, 1, -1)) . stripslashes(substr($value2, 1, -1)) . $value3;
 
+      // Remove any invalid UTF-8 sequences to prevent serialization errors.
+      if (function_exists('mb_convert_encoding')) {
+        $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+      }
+
       // Parse array syntax
       $keys = preg_split('/\]?\[/', rtrim($key, ']'));
       $last = array_pop($keys);
