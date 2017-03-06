@@ -147,7 +147,7 @@ if (isset($_SERVER['db_name'])) {
   $conf['admin_menu_cache_client'] = FALSE;
 
 <?php if (!$this->site_enabled) : ?>
-<?php if (isset($drupal_hash_salt_var)): ?>
+<?php if (isset($maintenance_var_new)): ?>
   $conf['maintenance_mode'] = 1;
 <?php else: ?>
   $conf['site_offline'] = 1;
