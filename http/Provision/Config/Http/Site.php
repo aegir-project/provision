@@ -11,7 +11,12 @@ class Provision_Config_Http_Site extends Provision_Config_Http {
 
 
   function filename() {
-    return $this->data['http_vhostd_path'] . '/' . $this->uri;
+    if (drush_get_option('provision_apache_conf_suffix', FALSE)) {
+      return $this->data['http_vhostd_path'] . '/' . $this->uri . '.conf';
+    }
+    else {
+      return $this->data['http_vhostd_path'] . '/' . $this->uri;
+    }
   }
 
   function process() {
