@@ -113,3 +113,64 @@ function _provision_system_query($type) {
 
   return $packages;
 }
+
+/**
+ * Find available profiles on this platform.
+ */
+function _provision_find_profiles() {
+  $profile_dirs = array('./core/profiles', './profiles');
+
+  $profiles = array();
+  foreach($profile_dirs as $profile_dir) {
+    if (!is_dir($profile_dir)) {
+      drush_log(dt("Cannot find profiles directory %dir", array('%dir' => $profile_dir)), 'error');
+      return FALSE;
+    }
+
+    $info_files = drush_scan_directory($profile_dir, "/\.info.yml$/");
+    foreach ($info_files as $path => $info_file) {
+      $path = realpath($path);
+      $info = Symfony\Component\Yaml\Yaml::parse($path);
+      if ($info['type'] == 'profile' && (!isset($info['hidden']) || !$info['hidden'])) {
+        $profile = new stdClass();
+        $profile->name = $info['name'];
+        $profile->info = $info;
+        $profile->filename = $path;
+        $profile->path = dirname($path);
+        $profile->info['languages'] = _provision_find_profile_languages($profile->path);
+
+        $profiles[basename($profile->path)] = $profile;
+        drush_log(dt('Found install profile %name', array('%name' => $name)));
+      }
+    }
+  }
+  return $profiles;
+}
+
+/**
+ * Retrieve a list of paths to search in a certain scope
+ */
+function _provision_drupal_search_paths($scope, $key = '', $type = 'modules') {
+  $searchpaths = array();
+  $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
+  switch ($scope) {
+    case 'base':
+      $searchpaths[] = sprintf("%s/%s", $drupal_root, $type);
+      $searchpaths[] = sprintf("%s/core/%s", $drupal_root, $type);
+      $searchpaths[] = sprintf("%s/sites/all/%s", $drupal_root, $type);
+      break;
+    case 'profiles':
+      foreach (_provision_find_profiles() as $profile) {
+        $searchpaths[] = $profile->path;
+      }
+      break;
+    default:
+      if ($key) {
+        $searchpaths[] = sprintf("%s/%s/%s/%s", $drupal_root, $scope, $key, $type);
+      }
+      break;
+
+  }
+  return $searchpaths;
+}
+
