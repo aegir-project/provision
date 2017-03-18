@@ -17,18 +17,30 @@ NameVirtualHost *:<?php print $http_port; ?>
   LoadModule rewrite_module modules/mod_rewrite.so
 </IfModule>
 
+<?php
+if (drush_get_option('provision_apache_conf_suffix', FALSE)) {
+  $include_statement = 'IncludeOptional ';
+  $include_suffix = '/*.conf';
+}
+else {
+  $include_statement = 'Include ';
+  $include_suffix = '';
+}
+
+?>
+
 # other configuration, not touched by aegir
 # this allows you to override aegir configuration, as it is included before
-Include <?php print $http_pred_path ?>
+<?php print $include_statement . $http_pred_path . $include_suffix ?>
 
 # virtual hosts
-Include <?php print $http_vhostd_path ?>
+<?php print $include_statement . $http_vhostd_path . $include_suffix ?>
 
 # platforms
-Include <?php print $http_platformd_path ?>
+<?php print $include_statement . $http_platformd_path . $include_suffix ?>
 
 # other configuration, not touched by aegir
 # this allows to have default (for example during migrations) that are eventually overriden by aegir
-Include <?php print $http_postd_path ?>
+<?php print $include_statement . $http_postd_path . $include_suffix ?>
 
 <?php print $extra_config; ?>
