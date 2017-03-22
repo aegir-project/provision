@@ -160,13 +160,23 @@ function drush_provision_drupal_pre_provision_verify() {
       $core8_version_id = d()->root . '/core';
       $core8_contrib_symlink = d()->root . '/modules/o_contrib_eight';
 
-      // Make sure the core modules directory is writable, but only if it is a BOA system.
+      $core6_contrib_js_file = $core6_contrib_dir . '/js/js.php';
+      $core7_contrib_js_file = $core7_contrib_dir . '/js/js.php';
+      $core8_contrib_js_file = $core8_contrib_dir . '/js/js.php';
+      $core6_contrib_js_symlink = d()->root . '/js.php';
+      $core7_contrib_js_symlink = d()->root . '/js.php';
+      $core8_contrib_js_symlink = d()->root . '/js.php';
+
+      // Make sure the platform root and core modules directories are writable (BOA).
       if (provision_file()->exists($core6_contrib_dir)->status() ||
           provision_file()->exists($core7_contrib_dir)->status() ||
           provision_file()->exists($core8_contrib_dir)->status()) {
+        provision_file()->writable(d()->root)
+          ->succeed('Drupal root directory @path is writable by the provisioning script')
+          ->fail('Drupal root directory @path is not writable by the provisioning script', 'PROVISION_DRUPAL_ROOT_DIR_NOT_WRITABLE');
         provision_file()->writable(d()->root . '/modules')
           ->succeed('Drupal core modules directory @path is writable by the provisioning script')
-          ->fail('Drupal core modules directory @path is not writable by the provisioning script', 'PROVISION_MODULES_DIR_NOT_WRITABLE');
+          ->fail('Drupal core modules directory @path is not writable by the provisioning script', 'PROVISION_CORE_MODULES_DIR_NOT_WRITABLE');
       }
 
       // Add symlink to BOA specific contrib in Pressflow 6.
@@ -192,6 +202,33 @@ function drush_provision_drupal_pre_provision_verify() {
           provision_file()->exists($core8_version_id)->status() &&
           !provision_file()->exists($core8_contrib_symlink)->status()) {
         provision_file()->symlink($core8_contrib_dir, $core8_contrib_symlink)
+          ->succeed('Created symlink @path to @target')
+          ->fail('Could not create symlink @path to @target: @reason');
+      }
+
+      // Add symlink to BOA specific JS Callback Handler support in Pressflow 6.
+      if (provision_file()->exists($core6_contrib_js_file)->status() &&
+          provision_file()->exists($core6_version_id)->status() &&
+          !provision_file()->exists($core6_contrib_js_symlink)->status()) {
+        provision_file()->symlink($core6_contrib_js_file, $core6_contrib_js_symlink)
+          ->succeed('Created symlink @path to @target')
+          ->fail('Could not create symlink @path to @target: @reason');
+      }
+
+      // Add symlink to BOA specific JS Callback Handler support in Drupal 7.
+      if (provision_file()->exists($core7_contrib_js_file)->status() &&
+         provision_file()->exists($core7_version_id)->status() &&
+         !provision_file()->exists($core7_contrib_js_symlink)->status()) {
+        provision_file()->symlink($core7_contrib_js_file, $core7_contrib_js_symlink)
+          ->succeed('Created symlink @path to @target')
+          ->fail('Could not create symlink @path to @target: @reason');
+      }
+
+      // Add symlink to BOA specific JS Callback Handler support in Drupal 8.
+      if (provision_file()->exists($core8_contrib_js_file)->status() &&
+          provision_file()->exists($core8_version_id)->status() &&
+          !provision_file()->exists($core8_contrib_js_symlink)->status()) {
+        provision_file()->symlink($core8_contrib_js_file, $core8_contrib_js_symlink)
           ->succeed('Created symlink @path to @target')
           ->fail('Could not create symlink @path to @target: @reason');
       }
