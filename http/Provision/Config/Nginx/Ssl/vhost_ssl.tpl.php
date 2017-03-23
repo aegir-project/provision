@@ -23,6 +23,15 @@ else {
 
 if ($satellite_mode == 'boa') {
   $ssl_listen_ip = "*";
+  $main_name = $this->uri;
+  if ($this->redirection) {
+    $main_name = $this->redirection;
+  }
+  $legacy_tls_ctrl = $aegir_root . "/static/control/tls-legacy-enable-" . $main_name . ".info";
+  $legacy_tls_enable = FALSE;
+  if (provision_file()->exists($legacy_tls_ctrl)->status()) {
+    $legacy_tls_enable = TRUE;
+  }
 }
 else {
   $ssl_listen_ip = $ip_address;
@@ -53,6 +62,9 @@ server {
   resolver 8.8.8.8 8.8.4.4 valid=300s;
   resolver_timeout           5s;
   ssl_dhparam                /etc/ssl/private/nginx-wild-ssl.dhp;
+<?php if ($legacy_tls_enable): ?>
+  ssl_protocols              TLSv1 TLSv1.1 TLSv1.2;
+<?php endif; ?>
 <?php endif; ?>
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
 <?php if (!empty($ssl_chain_cert)) : ?>
@@ -139,6 +151,9 @@ server {
   resolver 8.8.8.8 8.8.4.4 valid=300s;
   resolver_timeout           5s;
   ssl_dhparam                /etc/ssl/private/nginx-wild-ssl.dhp;
+<?php if ($legacy_tls_enable): ?>
+  ssl_protocols              TLSv1 TLSv1.1 TLSv1.2;
+<?php endif; ?>
 <?php endif; ?>
   ssl_certificate_key        <?php print $ssl_cert_key; ?>;
 <?php if (!empty($ssl_chain_cert)) : ?>
