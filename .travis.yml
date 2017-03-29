@@ -9,7 +9,7 @@ branches:
 
 env:
   global:
-    - AEGIR_HOSTING_VERSION=7.x-3.x
+    - AEGIR_HOSTING_VERSION=feature/quick-review
     - AEGIR_TESTS_VERSION=master
 
 #env:

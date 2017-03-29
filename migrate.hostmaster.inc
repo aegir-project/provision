@@ -213,5 +213,8 @@ function drush_provision_post_hostmaster_migrate($site, $platform) {
   // We need to re-verify @server_master via frontend to re-generate
   // its drush alias and to update Nginx configuration files.
   provision_backend_invoke('@hostmaster', 'hosting-task', array(@server_master, 'verify'), array('force' => TRUE));
+
+  $new_platform = _provision_path_to_platform_alias($platform);
+  provision_backend_invoke($new_platform, 'provision-lock');
 }
 
