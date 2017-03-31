@@ -10,10 +10,8 @@ stages:
 # Stage "build"
 build:deb:
   stage: build
+  image: aegir/hostmaster:packaging_base
   script:
-    - apt-get update
-    - apt-get install --yes devscripts build-essential debian-keyring
-    - apt-get install --yes git-core git-buildpackage dh-systemd
     - export commit=$(git log -n 1 --oneline | sed 's/ .*$//')
     - export version=$(sed -ne 's/^[^(]*(\([^)]*\)).*/\1/;1p' debian/changelog)
     - export new_version="${version}+${CI_BUILD_ID}.${commit}"
