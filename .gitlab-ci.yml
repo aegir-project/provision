@@ -111,5 +111,5 @@ publish:unstable-repo:
 
   script:
     - ls -lah build/*
-    - scp build/* ci@aegir0.aegir.coop:/tmp/incomming
+    - scp build/* ci@aegir0.aegir.coop:/var/www/repos/incoming/
       # reprepro should pick this up in seconds and update the repository index.
