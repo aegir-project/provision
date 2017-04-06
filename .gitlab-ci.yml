@@ -81,16 +81,16 @@ publish:unstable-repo:
     - build:deb
   allow_failure: true
 
-	image: ruby:2.1
-	before_script:
-		# install ssh-agent
-		- 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+  image: ruby:2.1
+  before_script:
+    # install ssh-agent
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
 
-		# run ssh-agent
-		- eval $(ssh-agent -s)
+    # run ssh-agent
+    - eval $(ssh-agent -s)
 
-		# add ssh key stored in SSH_PRIVATE_KEY variable to the agent store
-		- ssh-add <(echo "$SSH_PRIVATE_KEY")
+    # add ssh key stored in SSH_PRIVATE_KEY variable to the agent store
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
 
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
