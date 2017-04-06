@@ -93,7 +93,8 @@ publish:unstable-repo:
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
 
     - mkdir -p ~/.ssh
-    - '[[ -f /.dockerenv ]] && echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
+    - ls -la /.dockerenv
+    - echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
 
 
   script:
