@@ -19,7 +19,9 @@ build:deb:
     - dch -D unstable --newversion "$new_version" "automatic GitLab CI build ${CI_BUILD_ID}"
     - dpkg-buildpackage
     - mkdir build
+    - ls -la ../
     - mv -v ../aegir3*.deb build/
+    - mv -v ../aegir3*.changes build/
 
   # The files which are to be made available in GitLab as artifacts.
   artifacts:
