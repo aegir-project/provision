@@ -19,7 +19,6 @@ build:deb:
     - dch -D unstable --newversion "$new_version" "automatic GitLab CI build ${CI_BUILD_ID}"
     - dpkg-buildpackage
     - mkdir build
-    - ls -la ../
     - mv -v ../aegir3*.deb build/
     - mv -v ../aegir3*.changes build/
 
@@ -112,4 +111,5 @@ publish:unstable-repo:
 
   script:
     - ls -lah build/*
-    - scp build/*.deb ci@aegir0.aegir.coop:/tmp/incomming
+    - scp build/* ci@aegir0.aegir.coop:/tmp/incomming
+      # reprepro should pick this up in seconds and update the repository index.
