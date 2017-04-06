@@ -55,7 +55,13 @@ class Provision_Service extends Provision_ChainedState {
 
   }
 
-  // All services have the ability to have an associated restart command and listen port.
+  /**
+   * All services have the ability to have an associated restart command and listen port.
+   *
+   * This class also implements a utility function called symlink_service(),
+   * which create a symlink like /var/aegir/config/APPLICATION_NAME.conf,
+   * you can add it whet you override this function in a sub class.
+   */
   function init_server() {
     if (!is_null($this->service)) {
       if ($this->has_port) {
