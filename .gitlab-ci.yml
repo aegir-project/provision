@@ -103,7 +103,7 @@ publish:unstable-repo:
 
     - mkdir -p ~/.ssh
     - ls -la /.dockerenv
-    - echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
+    - echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts
 
 
   script:
