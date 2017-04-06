@@ -108,8 +108,6 @@ publish:unstable-repo:
     - ls -la /.dockerenv
     - echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts
     - cat ~/.ssh/known_hosts
-      # TODO this should not be needed!!
-    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
   script:
     - ls -lah build/*
