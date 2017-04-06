@@ -20,6 +20,7 @@ build:deb:
     - dpkg-buildpackage
     - mkdir build
     - mv -v ../aegir3*.deb build/
+    - mv -v ../aegir3*.dsc build/
     - mv -v ../aegir3*.changes build/
 
   # The files which are to be made available in GitLab as artifacts.
