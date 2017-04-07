@@ -58,9 +58,9 @@ class Provision_Service extends Provision_ChainedState {
   /**
    * All services have the ability to have an associated restart command and listen port.
    *
-   * This class also implements a utility function called symlink_service(),
-   * which create a symlink like /var/aegir/config/APPLICATION_NAME.conf,
-   * you can add it whet you override this function in a sub class.
+   * If services require a fixed path config file, implement the function symlink_service() inside this method.
+   *
+   * @See Provision_Service_http_public::init_server()
    */
   function init_server() {
     if (!is_null($this->service)) {
@@ -345,6 +345,10 @@ class Provision_Service extends Provision_ChainedState {
 
   /**
    * Save symlink for this server from /var/aegir/config/APPLICATION_NAME.conf -> /var/aegir/config/SERVER/APPLICATION_NAME.conf
+   *
+   * If service requires a fixed path config file, implement this function in the init_server() method.
+   *
+   * @See Provision_Service_http_public::init_server()
    */
   function symlink_service() {
     $file = $this->application_name . '.conf';
