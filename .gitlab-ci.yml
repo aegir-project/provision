@@ -49,6 +49,29 @@ test:debian-jessie-aegir3-apt:
 
   script: "scripts/ci-aegir-dev-install-apt-debian.sh"
 
+# Upgrade the latest stable Aegir to our unstable repo.
+test:debian-jessie-aegir3-apt-upgrade:
+  stage: test
+  image: debian:jessie
+  dependencies:
+    - build:deb
+
+  before_script:
+    - apt-get update
+    # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
+    - echo "#!/bin/sh" > /usr/sbin/policy-rc.d
+    - echo "exit 0" >> /usr/sbin/policy-rc.d
+    - apt-get install --yes sudo curl
+
+  script:
+    - "scripts/ci-aegir-stable-install-apt-debian.sh"
+    # upgrade to the latest version from the unstable repo.
+    - rm -v /etc/apt/sources.list.d/aegir-stable.list
+    - echo "deb http://debian.aegirproject.org unstable main" | sudo tee -a /etc/apt/sources.list.d/aegir-unstable.list
+    - sudo apt-get update
+    - sudo apt-get --yes upgrade
+
+
 test:debian-stretch-aegir3-apt:
   stage: test
   image: debian:stretch
