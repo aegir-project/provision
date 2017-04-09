@@ -4,7 +4,7 @@
 # This script is tuned for Debian 8 - Jessie.
 #
 
-echo "deb http://debian.aegirproject.org stable main" | sudo tee -a /etc/apt/sources.list.d/aegir-unstable.list
+echo "deb http://debian.aegirproject.org stable main" | sudo tee -a /etc/apt/sources.list.d/aegir-stable.list
 curl http://debian.aegirproject.org/key.asc | sudo apt-key add -
 sudo apt-get update
 echo "debconf debconf/frontend select Noninteractive" | debconf-set-selections
