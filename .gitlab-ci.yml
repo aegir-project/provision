@@ -121,7 +121,7 @@ upgradetest:debian-jessie-aegir3-apt-upgrade:
   stage: upgradetest
   image: debian:jessie
   dependencies:
-    - build:publish
+    - publish:unstable-repo
 
   before_script:
     - apt-get update
