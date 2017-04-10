@@ -66,7 +66,7 @@ test:debian-jessie-aegir3-apt-upgrade:
   script:
     - "scripts/ci-aegir-stable-install-apt-debian.sh"
     # extra step to run the task queue.
-    - sudo su aegir --login --ccommand 'drush @hostmaster hosting-tasks --force'
+    - sudo su aegir --login --command 'drush @hostmaster hosting-tasks --force'
     # upgrade to the latest version from the unstable repo.
     - rm -v /etc/apt/sources.list.d/aegir-stable.list
     - echo "deb http://debian.aegirproject.org unstable main" | sudo tee -a /etc/apt/sources.list.d/aegir-unstable.list
