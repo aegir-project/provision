@@ -65,6 +65,43 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
     }
     // Issue: https://github.com/omega8cc/provision/issues/2
     return $this->query("GRANT ALL PRIVILEGES ON `%s`.* TO `%s`@`%s` IDENTIFIED BY '%s'", $name, $username, $host, $password);
+
+    // Support for ProxySQL integration
+    if ($this->server->db_port == '6033') {
+      if (is_readable('/data/conf/proxysql_adm_pwd.inc')) {
+        include_once('/data/conf/proxysql_adm_pwd.inc');
+        $proxysqlc = "SELECT hostgroup_id,hostname,port,status FROM mysql_servers;";
+        $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
+        drush_shell_exec($command);
+        if (preg_match("/Access denied for user 'admin'@'([^']*)'/", implode('', drush_shell_exec_output()), $match)) {
+          drush_log(dt("Failed to add @username to ProxySQL", array('@username' => $username)), 'warning');
+        }
+        elseif (preg_match("/Host '([^']*)' is not allowed to connect to/", implode('', drush_shell_exec_output()), $match)) {
+          drush_log(dt("Failed to add @username to ProxySQL", array('@username' => $username)), 'warning');
+        }
+        else {
+          $proxysqlc = "DELETE FROM mysql_users where username=" . $username . ";";
+          $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
+          drush_shell_exec($command);
+
+          $proxysqlc = "INSERT INTO mysql_users (username,password) VALUES (" . $username . "," . $password . ");";
+          $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
+          drush_shell_exec($command);
+
+          $proxysqlc = "LOAD MYSQL USERS TO RUNTIME;";
+          $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
+          drush_shell_exec($command);
+
+          $proxysqlc = "SAVE MYSQL USERS FROM RUNTIME;";
+          $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
+          drush_shell_exec($command);
+
+          $proxysqlc = "SAVE MYSQL USERS TO DISK;";
+          $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
+          drush_shell_exec($command);
+        }
+      }
+    }
   }
 
   function revoke($name, $username, $host = '') {
@@ -110,6 +147,39 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
       }
       if (!$grant_found) {
         $success_extra_host = $this->query("DROP USER `%s`@`%s`", $username, $extra_host) && $success_extra_host;
+      }
+    }
+
+    // Support for ProxySQL integration
+    if (!$grant_found && $this->server->db_port == '6033') {
+      if (is_readable('/data/conf/proxysql_adm_pwd.inc')) {
+        include_once('/data/conf/proxysql_adm_pwd.inc');
+        $proxysqlc = "SELECT hostgroup_id,hostname,port,status FROM mysql_servers;";
+        $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
+        drush_shell_exec($command);
+        if (preg_match("/Access denied for user 'admin'@'([^']*)'/", implode('', drush_shell_exec_output()), $match)) {
+          drush_log(dt("Failed to add @username to ProxySQL", array('@username' => $username)), 'warning');
+        }
+        elseif (preg_match("/Host '([^']*)' is not allowed to connect to/", implode('', drush_shell_exec_output()), $match)) {
+          drush_log(dt("Failed to add @username to ProxySQL", array('@username' => $username)), 'warning');
+        }
+        else {
+          $proxysqlc = "DELETE FROM mysql_users where username=" . $username . ";";
+          $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
+          drush_shell_exec($command);
+
+          $proxysqlc = "LOAD MYSQL USERS TO RUNTIME;";
+          $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
+          drush_shell_exec($command);
+
+          $proxysqlc = "SAVE MYSQL USERS FROM RUNTIME;";
+          $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
+          drush_shell_exec($command);
+
+          $proxysqlc = "SAVE MYSQL USERS TO DISK;";
+          $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
+          drush_shell_exec($command);
+        }
       }
     }
 
