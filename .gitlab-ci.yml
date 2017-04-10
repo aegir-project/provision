@@ -128,7 +128,7 @@ upgradetest:debian-jessie-aegir3-apt-upgrade:
     # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
     - echo "#!/bin/sh" > /usr/sbin/policy-rc.d
     - echo "exit 0" >> /usr/sbin/policy-rc.d
-    - apt-get install --yes sudo curl cron apt-transport-https
+    - apt-get install --yes sudo curl cron
 
   script:
     - "scripts/ci-aegir-stable-install-apt-debian.sh"
@@ -140,6 +140,6 @@ upgradetest:debian-jessie-aegir3-apt-upgrade:
     - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count();"'
     # upgrade to the latest version from the unstable repo.
     - rm -v /etc/apt/sources.list.d/aegir-stable.list
-    - echo "deb https://debian2.aegirproject.org unstable main" | sudo tee -a /etc/apt/sources.list.d/aegir-unstable.list
+    - echo "deb http://debian2.aegirproject.org unstable main" | sudo tee -a /etc/apt/sources.list.d/aegir-unstable.list
     - sudo apt-get update
     - sudo apt-get --yes upgrade
