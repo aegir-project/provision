@@ -139,6 +139,8 @@ upgradetest:debian-jessie-aegir3-apt-upgrade:
     - sudo su aegir --login --command 'drush @hostmaster hosting-tasks --force'
     - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count();"'
     - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count_running();"'
+    - sleep 2m
+    - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count_running();"'
     # upgrade to the latest version from the unstable repo.
     - rm -v /etc/apt/sources.list.d/aegir-stable.list
     - echo "deb http://debian2.aegirproject.org unstable main" | sudo tee -a /etc/apt/sources.list.d/aegir-unstable.list
