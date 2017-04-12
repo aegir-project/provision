@@ -84,7 +84,7 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
           $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
           drush_shell_exec($command);
 
-          $proxysqlc = "INSERT INTO mysql_users (username,password) VALUES (" . $username . "," . $password . ");";
+          $proxysqlc = "INSERT INTO mysql_users (username,password,default_hostgroup) VALUES (" . $username . "," . $password . ",10);";
           $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
           drush_shell_exec($command);
 
