@@ -90,7 +90,7 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
           drush_log(dt("Failed to add @username to ProxySQL", array('@username' => $username)), 'warning');
         }
         else {
-          $proxysqlc = "DELETE FROM mysql_users where username=\'" . $username . "\';";
+          $proxysqlc = "DELETE FROM mysql_users where username='" . $username . "';";
           $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
           drush_shell_exec($command);
 
@@ -110,7 +110,7 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
           $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
           drush_shell_exec($command);
 
-          $proxysqlc = "DELETE FROM mysql_query_rules where username=\'" . $username . "\';";
+          $proxysqlc = "DELETE FROM mysql_query_rules where username='" . $username . "';";
           $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
           drush_shell_exec($command);
 
@@ -194,7 +194,7 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
           drush_log(dt("Failed to add @username to ProxySQL", array('@username' => $username)), 'warning');
         }
         else {
-          $proxysqlc = "DELETE FROM mysql_users where username=\'" . $username . "\';";
+          $proxysqlc = "DELETE FROM mysql_users where username='" . $username . "';";
           $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
           drush_shell_exec($command);
 
@@ -210,7 +210,7 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
           $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
           drush_shell_exec($command);
 
-          $proxysqlc = "DELETE FROM mysql_query_rules where username=\'" . $username . "\';";
+          $proxysqlc = "DELETE FROM mysql_query_rules where username='" . $username . "';";
           $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
           drush_shell_exec($command);
 
