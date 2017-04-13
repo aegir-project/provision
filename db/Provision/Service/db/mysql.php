@@ -13,7 +13,17 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
   protected $has_port = TRUE;
 
   function default_port() {
-    return 3306;
+    $script_user = drush_get_option('script_user');
+    if (!$script_user && $server->script_user) {
+      $script_user = $server->script_user;
+    }
+    $ctrlf = '/data/conf/' . $script_user . '_use_proxysql.txt';
+    if (provision_file()->exists($ctrlf)->status()) {
+      return 6033;
+    }
+    else {
+      return 3306;
+    }
   }
 
   function drop_database($name) {

@@ -75,7 +75,13 @@ $subdir_dot = str_replace('/', '.', $subdir);
   // use this simple fallback to guarantee that empty db_port does not
   // break Nginx reload which results with downtime for the affected vhosts.
   if (!$db_port) {
-    $db_port = $this->server->db_port ? $this->server->db_port : '3306';
+    $ctrlf = '/data/conf/' . $script_user . '_use_proxysql.txt'; 
+    if (provision_file()->exists($ctrlf)->status()) {
+      $db_port = '6033';
+    }
+    else {
+      $db_port = $this->server->db_port ? $this->server->db_port : '3306';
+    }
   }
 ?>
 #######################################################

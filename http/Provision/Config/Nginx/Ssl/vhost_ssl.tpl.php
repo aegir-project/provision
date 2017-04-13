@@ -2,6 +2,11 @@
 <?php if ($this->ssl_enabled && $this->ssl_key) : ?>
 
 <?php
+$script_user = drush_get_option('script_user');
+if (!$script_user && $server->script_user) {
+  $script_user = $server->script_user;
+}
+
 $satellite_mode = drush_get_option('satellite_mode');
 if (!$satellite_mode && $server->satellite_mode) {
   $satellite_mode = $server->satellite_mode;
@@ -122,7 +127,13 @@ server {
   // use this simple fallback to guarantee that empty db_port does not
   // break Nginx reload which results with downtime for the affected vhosts.
   if (!$db_port) {
-    $db_port = $this->server->db_port ? $this->server->db_port : '3306';
+    $ctrlf = '/data/conf/' . $script_user . '_use_proxysql.txt'; 
+    if (provision_file()->exists($ctrlf)->status()) {
+      $db_port = '6033';
+    }
+    else {
+      $db_port = $this->server->db_port ? $this->server->db_port : '3306';
+    }
   }
 ?>
   fastcgi_param db_port   <?php print urlencode($db_port); ?>;
