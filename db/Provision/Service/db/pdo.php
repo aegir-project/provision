@@ -84,48 +84,19 @@ class Provision_Service_db_pdo extends Provision_Service_db {
 
   function database_exists($name) {
     $dsn = $this->dsn . ';dbname=' . $name;
-    drush_log('DSN in database_exists', 'notice');
-    drush_log($dsn, 'notice');
-
     $user = isset($this->creds['user']) ? $this->creds['user'] : '';
     $pass = isset($this->creds['pass']) ? $this->creds['pass'] : '';
-    drush_log('DSN user/pass in database_exists', 'notice');
-    drush_log($user, 'notice');
-    drush_log($pass, 'notice');
 
     if (is_readable('/data/conf/proxysql_adm_pwd.inc')) {
       include('/data/conf/proxysql_adm_pwd.inc');
-
-      drush_log('Add user/pass to ProxySQL in database_exists', 'notice');
-
-	  $proxysqlc = "DELETE FROM mysql_users where username='" . $user . "';";
-	  $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
-	  drush_shell_exec($command);
-
-	  $proxysqlc = "INSERT INTO mysql_users (username,password,default_hostgroup) VALUES ('" . $user . "','" . $pass . "',10);";
-	  $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
-	  drush_shell_exec($command);
-
-	  $proxysqlc = "LOAD MYSQL USERS TO RUNTIME;";
-	  $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
-	  drush_shell_exec($command);
-
-	  $proxysqlc = "DELETE FROM mysql_query_rules where username='" . $name . "';";
-	  $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
-	  drush_shell_exec($command);
-
-	  $proxysqlc = "INSERT INTO mysql_query_rules (username,destination_hostgroup,active) values ('" . $user . "',10,1);";
-	  $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
-	  drush_shell_exec($command);
-
-	  $proxysqlc = "INSERT INTO mysql_query_rules (username,destination_hostgroup,active) values ('" . $user . "',11,1);";
-	  $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
-	  drush_shell_exec($command);
-
-	  $proxysqlc = "LOAD MYSQL QUERY RULES TO RUNTIME;";
-	  $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
-	  drush_shell_exec($command);
+      drush_log('Skip ProxySQL in database_exists', 'notice');
+      $this->dsn = sprintf("%s:host=%s", $this->PDO_type,  $writer_node_ip);
+      $this->dsn = "{$this->dsn};port=3306";
+      $dsn = $this->dsn . ';dbname=' . $name;
     }
+
+    drush_log('DSN in database_exists', 'notice');
+    drush_log($dsn, 'notice');
 
     try {
       // Try to connect to the DB to test if it exists.
