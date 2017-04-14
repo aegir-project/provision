@@ -77,7 +77,7 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
     // Support for ProxySQL integration
     if ($name && $this->server->db_port == '6033') {
       if (is_readable('/data/conf/proxysql_adm_pwd.inc')) {
-        include_once('/data/conf/proxysql_adm_pwd.inc');
+        include('/data/conf/proxysql_adm_pwd.inc');
         $proxysqlc = "SELECT hostgroup_id,hostname,port,status FROM mysql_servers;";
         $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
         drush_shell_exec($command);
@@ -158,15 +158,15 @@ class Provision_Service_db_mysql extends Provision_Service_db_pdo {
       // Support for ProxySQL integration
       if ($name && $this->server->db_port == '6033') {
         if (is_readable('/data/conf/proxysql_adm_pwd.inc')) {
-          include_once('/data/conf/proxysql_adm_pwd.inc');
+          include('/data/conf/proxysql_adm_pwd.inc');
           $proxysqlc = "SELECT hostgroup_id,hostname,port,status FROM mysql_servers;";
           $command = sprintf('mysql -u admin -h %s -P %s -p%s -e "' . $proxysqlc . '"', '127.0.0.1', '6032', $prxy_adm_paswd);
           drush_shell_exec($command);
           if (preg_match("/Access denied for user 'admin'@'([^']*)'/", implode('', drush_shell_exec_output()), $match)) {
-            drush_log(dt("Failed to delete @name to ProxySQL", array('@name' => $name)), 'warning');
+            drush_log(dt("Failed to delete @name in ProxySQL", array('@name' => $name)), 'warning');
           }
           elseif (preg_match("/Host '([^']*)' is not allowed to connect to/", implode('', drush_shell_exec_output()), $match)) {
-            drush_log(dt("Failed to delete @name to ProxySQL", array('@name' => $name)), 'warning');
+            drush_log(dt("Failed to delete @name in ProxySQL", array('@name' => $name)), 'warning');
           }
           else {
             $proxysqlc = "DELETE FROM mysql_users where username='" . $name . "';";
