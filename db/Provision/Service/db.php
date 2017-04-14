@@ -66,6 +66,13 @@ class Provision_Service_db extends Provision_Service {
   function suggest_db_name() {
     $uri = $this->context->uri;
 
+    if (!$uri) {
+      drush_log(dt("URI @uri is EMPTY...", array('@uri' => $uri)));
+    }
+    else {
+      drush_log(dt("URI is OK @uri", array('@uri' => $uri)));
+    }
+
     $suggest_base = substr(str_replace(array('.', '-'), '' , preg_replace('/^www\./', '', $uri)), 0, 16);
 
     if (!$this->database_exists($suggest_base)) {
