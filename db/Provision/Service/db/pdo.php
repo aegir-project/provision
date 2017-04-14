@@ -84,6 +84,7 @@ class Provision_Service_db_pdo extends Provision_Service_db {
 
   function database_exists($name) {
     $dsn = $this->dsn . ';dbname=' . $name;
+    drush_log($dsn, 'notice');
     try {
       // Try to connect to the DB to test if it exists.
       $conn = new PDO($dsn, $this->creds['user'], $this->creds['pass']);
@@ -92,6 +93,7 @@ class Provision_Service_db_pdo extends Provision_Service_db {
       return TRUE;
     }
     catch (PDOException $e) {
+      drush_log($e->getMessage(), 'warning');
       return FALSE;
     }
   }
