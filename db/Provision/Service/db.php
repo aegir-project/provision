@@ -75,6 +75,13 @@ class Provision_Service_db extends Provision_Service {
 
     $suggest_base = substr(str_replace(array('.', '-'), '' , preg_replace('/^www\./', '', $uri)), 0, 16);
 
+    if (!$suggest_base) {
+      drush_log(dt("SUGGEST_BASE @suggest_base is EMPTY...", array('@suggest_base' => $suggest_base)));
+    }
+    else {
+      drush_log(dt("SUGGEST_BASE is OK @suggest_base", array('@suggest_base' => $suggest_base)));
+    }
+
     if (!$this->database_exists($suggest_base)) {
       return $suggest_base;
     }
