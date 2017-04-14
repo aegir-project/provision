@@ -100,8 +100,8 @@ class Provision_Service_db_pdo extends Provision_Service_db {
     try {
       // Try to connect to the DB to test if it exists.
       $conn = new PDO($dsn, $user, $pass);
-      drush_log('TRY in database_exists', 'notice');
-      drush_log($conn, 'notice');
+      //drush_log('TRY in database_exists', 'notice');
+      //drush_log($conn, 'notice');
       // Free the $conn memory.
       $conn = NULL;
       return TRUE;
