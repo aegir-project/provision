@@ -84,15 +84,30 @@ class Provision_Service_db_pdo extends Provision_Service_db {
 
   function database_exists($name) {
     $dsn = $this->dsn . ';dbname=' . $name;
+    drush_log('DSN in database_exists', 'notice');
     drush_log($dsn, 'notice');
+
+    if (is_readable('/data/conf/proxysql_adm_pwd.inc')) {
+      include('/data/conf/proxysql_adm_pwd.inc');
+      $user = 'admin';
+      $pass = $prxy_adm_paswd;
+    }
+    else {
+      $user = isset($this->creds['user']) ? $this->creds['user'] : '';
+      $pass = isset($this->creds['pass']) ? $this->creds['pass'] : '';
+    }
+
     try {
       // Try to connect to the DB to test if it exists.
-      $conn = new PDO($dsn, $this->creds['user'], $this->creds['pass']);
+      $conn = new PDO($dsn, $user, $pass);
+      drush_log('TRY in database_exists', 'notice');
+      drush_log($conn, 'notice');
       // Free the $conn memory.
       $conn = NULL;
       return TRUE;
     }
     catch (PDOException $e) {
+      drush_log('PDOException in database_exists', 'notice');
       drush_log($e->getMessage(), 'warning');
       return FALSE;
     }
