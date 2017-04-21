@@ -362,7 +362,7 @@ class Provision_Service extends Provision_ChainedState {
       drush_log(dt("Created symlink for %file on %server", array(
         '%file' => $file,
         '%server' => $this->server->remote_host,
-      )), 'success');
+      )), 'notice');
     };
   }
 }
