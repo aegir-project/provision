@@ -94,6 +94,9 @@ publish:unstable-repo:
     - build:deb
   allow_failure: true
 
+  only:
+    - 7.x-3.x
+
   image: ruby:2.1
   before_script:
     # install ssh-agent
