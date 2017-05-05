@@ -93,9 +93,7 @@ test:behat:
   dependencies:
     - build:deb
   variables:
-    #    - AEGIR_HOSTING_VERSION: '7.x-3.x'
     - AEGIR_TESTS_VERSION: "master"
-
 
   before_script:
     - git clone http://github.com/aegir-project/tests.git tests
