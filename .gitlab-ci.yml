@@ -101,7 +101,7 @@ test:behat:
     - sudo apt-key fingerprint 0EBFCD88
     - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
     - sudo apt-get update
-    - sudo apt-get install docker-ce
+    - sudo apt-get install --yes docker-ce
     - git clone http://github.com/aegir-project/tests.git tests
     - cd tests
     - git checkout $AEGIR_TESTS_VERSION
