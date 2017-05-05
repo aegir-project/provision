@@ -89,7 +89,7 @@ test:ubuntu-xenial-aegir3-apt:
 
 test:behat:
   stage: test
-  image: debian:jessie
+  image: aegir/hostmaster:packaging_base
   dependencies:
     - build:deb
   variables:
