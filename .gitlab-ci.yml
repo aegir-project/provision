@@ -104,7 +104,8 @@ test:behat:
 
   before_script:
     - docker info
-    - apt-get install --yes git-core
+    - sudo apt-get update
+    - sudo apt-get install --yes git-core
     - git clone http://github.com/aegir-project/tests.git tests
     - cd tests
     - git checkout $AEGIR_TESTS_VERSION
