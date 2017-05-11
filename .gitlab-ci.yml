@@ -87,21 +87,23 @@ test:ubuntu-xenial-aegir3-apt:
 
   script: "scripts/ci-aegir-dev-install-apt-ubuntu.sh"
 
+
 test:behat:
   stage: test
-  image: aegir/hostmaster:packaging_base
+  image: docker:latest
+
+  services:
+    - docker:dind
+
   dependencies:
     - build:deb
+
   variables:
     AEGIR_TESTS_VERSION: "master"
+    DOCKER_DRIVER: overlay
 
   before_script:
-    - sudo apt-get install --yes apt-transport-https ca-certificates curl gnupg2 software-properties-common
-    - curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
-    - sudo apt-key fingerprint 0EBFCD88
-    - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
-    - sudo apt-get update
-    - sudo apt-get install --yes docker-ce
+    - docker info
     - git clone http://github.com/aegir-project/tests.git tests
     - cd tests
     - git checkout $AEGIR_TESTS_VERSION
@@ -112,11 +114,8 @@ test:behat:
     - bash prepare-testenv.sh
 
   script:
-
     # Tests are included in the docker-compose.yml file in the tests repo.
     - sudo docker-compose -f docker-compose-provision.yml run hostmaster
-
-
 
 
 publish:unstable-repo:
