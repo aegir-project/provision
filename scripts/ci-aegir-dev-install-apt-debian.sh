@@ -24,7 +24,7 @@ postfix postfix/main_mailer_type select Local only
 
 EOF
 
-sudo apt-get install --yes mysql-server php5-mysql php5-cli php5
+sudo apt-get install --yes mysql-server php5-mysql php5-cli php5 postfix
 
 set -x
 
