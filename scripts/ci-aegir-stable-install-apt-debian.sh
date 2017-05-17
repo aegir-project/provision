@@ -1,14 +1,13 @@
 #
-# Install Aegir debian packages located in the 'build/' directory.
-# These are provided by the GitLab CI build stage.
+# Install Aegir debian packages located in the projects stable repository.
 #
 # This script is tuned for Debian 8 - Jessie.
 #
 
+echo "deb http://debian.aegirproject.org stable main" | sudo tee -a /etc/apt/sources.list.d/aegir-stable.list
+curl http://debian.aegirproject.org/key.asc | sudo apt-key add -
 sudo apt-get update
 echo "debconf debconf/frontend select Noninteractive" | debconf-set-selections
-#echo "debconf debconf/priority select critical" | debconf-set-selections
-
 
 echo mysql-server-5.5 mysql-server/root_password password PASSWORD | debconf-set-selections
 echo mysql-server-5.5 mysql-server/root_password_again password PASSWORD | debconf-set-selections
@@ -24,12 +23,6 @@ postfix postfix/main_mailer_type select Local only
 
 EOF
 
-sudo apt-get install --yes mysql-server php5-mysql php5-cli php5 postfix
-
-set -x
-
-sudo DPKG_DEBUG=developer dpkg --install build/aegir3_*.deb build/aegir3-provision*.deb build/aegir3-hostmaster*.deb
-sudo apt-get install --fix-broken --yes
-
+sudo DPKG_DEBUG=developer apt-get install --yes aegir3 mysql-server
 
 

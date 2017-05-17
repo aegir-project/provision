@@ -7,6 +7,7 @@ stages:
   - build
   - test
   - publish
+  - upgradetest
 
 # Stage "build"
 build:deb:
@@ -36,9 +37,6 @@ test:debian-jessie-aegir3-apt:
   image: debian:jessie
   dependencies:
     - build:deb
-  only:
-    - 7.x-3.x
-    - triggers
 
   before_script:
     - apt-get update
@@ -57,7 +55,6 @@ test:debian-stretch-aegir3-apt:
     - build:deb
   only:
     - 7.x-3.x
-    - triggers
 
   before_script:
     - apt-get update
@@ -75,7 +72,6 @@ test:ubuntu-xenial-aegir3-apt:
     - build:deb
   only:
     - 7.x-3.x
-    - triggers
 
   before_script:
     - apt-get update
@@ -86,12 +82,49 @@ test:ubuntu-xenial-aegir3-apt:
 
   script: "scripts/ci-aegir-dev-install-apt-ubuntu.sh"
 
+test:behat:
+  stage: test
+  image: aegir/hostmaster:packaging_base
+  dependencies:
+    - build:deb
+  allow_failure: true
+  variables:
+    AEGIR_TESTS_VERSION: "master"
+
+  before_script:
+    - sudo apt-get update
+    - sudo apt-get install --yes apt-transport-https ca-certificates curl gnupg2 software-properties-common
+    - curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+    - sudo apt-key fingerprint 0EBFCD88
+    - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+    - sudo apt-get update
+    - sudo apt-get install --yes docker-ce
+    - docker info
+    - git clone http://github.com/aegir-project/tests.git tests
+    - cd tests
+    - git checkout $AEGIR_TESTS_VERSION
+
+      # Run prepare scripts.
+    - cd travis
+    - sudo bash prepare-docker.sh
+    - bash prepare-testenv.sh
+
+  script:
+
+    # Tests are included in the docker-compose.yml file in the tests repo.
+    - sudo docker-compose -f docker-compose-provision.yml run hostmaster
+
+
+
 
 publish:unstable-repo:
   stage: publish
   dependencies:
     - build:deb
   allow_failure: true
+
+  only:
+    - 7.x-3.x
 
   image: ruby:2.1
   before_script:
@@ -113,3 +146,37 @@ publish:unstable-repo:
     - ls -lah build/*
     - scp build/* ci@aegir0.aegir.coop:/var/www/repos/incoming/
       # reprepro should pick this up in seconds and update the repository index.
+
+
+# Upgrade the latest stable Aegir to our unstable repo.
+upgradetest:debian-jessie-aegir3-apt-upgrade:
+  stage: upgradetest
+  image: debian:jessie
+  dependencies:
+    - publish:unstable-repo
+
+  when: manual
+
+  before_script:
+    - apt-get update
+    # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
+    - echo "#!/bin/sh" > /usr/sbin/policy-rc.d
+    - echo "exit 0" >> /usr/sbin/policy-rc.d
+    - apt-get install --yes sudo curl cron
+
+  script:
+    - "scripts/ci-aegir-stable-install-apt-debian.sh"
+    # extra step to run the task queue.
+    - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count();"'
+    - sudo su aegir --login --command 'drush @hostmaster hosting-tasks --force'
+    - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count();"'
+    - sudo su aegir --login --command 'drush @hostmaster hosting-tasks --force'
+    - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count();"'
+    - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count_running();"'
+    - sleep 2m
+    - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count_running();"'
+    # upgrade to the latest version from the unstable repo.
+    - rm -v /etc/apt/sources.list.d/aegir-stable.list
+    - echo "deb http://debian2.aegirproject.org unstable main" | sudo tee -a /etc/apt/sources.list.d/aegir-unstable.list
+    - sudo apt-get update
+    - sudo apt-get --yes upgrade
