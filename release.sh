@@ -110,7 +110,7 @@ NEW_TAG="$major-$version"
 commitmsg=`git commit -m"change version information for release $version"`
 echo $commitmsg
 commitid=`echo $commitmsg | sed 's/^\[[^ ]* \([a-z0-9]*\)\].*$/\1/'`
-sed -n '1,/ --/p' debian/changelog | git tag -a -F - $major-$version
+sed -n '1,/ --/p' debian/changelog | git tag -a -F - $NEW_TAG
 
 echo reverting tree to HEAD versions
 git revert --no-commit $commitid
