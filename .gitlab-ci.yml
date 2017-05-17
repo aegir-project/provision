@@ -37,9 +37,6 @@ test:debian-jessie-aegir3-apt:
   image: debian:jessie
   dependencies:
     - build:deb
-  only:
-    - 7.x-3.x
-    - triggers
 
   before_script:
     - apt-get update
@@ -58,7 +55,6 @@ test:debian-stretch-aegir3-apt:
     - build:deb
   only:
     - 7.x-3.x
-    - triggers
 
   before_script:
     - apt-get update
@@ -76,7 +72,6 @@ test:ubuntu-xenial-aegir3-apt:
     - build:deb
   only:
     - 7.x-3.x
-    - triggers
 
   before_script:
     - apt-get update
@@ -92,6 +87,7 @@ test:behat:
   image: aegir/hostmaster:packaging_base
   dependencies:
     - build:deb
+  allow_failure: true
   variables:
     AEGIR_TESTS_VERSION: "master"
 
