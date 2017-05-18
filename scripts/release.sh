@@ -91,8 +91,9 @@ git add provision.info && rm provision.info.tmp
 echo changing upgrade.sh.txt version
 sed -i'.tmp' -e"s/AEGIR_VERSION=.*$/AEGIR_VERSION=\"$major-$version\"/" upgrade.sh.txt && git add upgrade.sh.txt && rm upgrade.sh.txt.tmp
 
-echo updating the package version scheme, dev packages get a buildID added, released do not.
-sed -i -e"s/new_version=.*$/new_version=\"\${version}\"/" .gitlab-ci.yml && git add .gitlab-ci.yml
+echo Skip adding a build ID for dev packages, released do not need that.
+sed -i -e"s/    - export new_version=.*$//" .gitlab-ci.yml && git add .gitlab-ci.yml
+sed -i -e"s/    - dch -D unstable --newversion.*$//" .gitlab-ci.yml && git add .gitlab-ci.yml
 
 echo resulting changes to be committed:
 git diff --cached | cat
