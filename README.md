@@ -35,4 +35,5 @@ Other documentation for developers is also available at:
    http://docs.aegirproject.org/en/3.x/extend/
 
 Build status Travis: [![Build Status](https://travis-ci.org/aegir-project/provision.svg?branch=7.x-3.x)](https://travis-ci.org/aegir-project/provision) (in-depth and manual install)
+
 Build status GitLab CI:[![build status](https://gitlab.com/aegir/provision/badges/7.x-3.x/build.svg)](https://gitlab.com/aegir/provision/commits/7.x-3.x) (debian packages)
