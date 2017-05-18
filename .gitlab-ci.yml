@@ -45,7 +45,7 @@ test:debian-jessie-aegir3-apt:
     - echo "exit 0" >> /usr/sbin/policy-rc.d
     - apt-get install --yes sudo curl
 
-  script: "scripts/ci-aegir-dev-install-apt-debian.sh"
+  script: "scripts/ci-aegir-dev-install-apt-debian8.sh"
 
 test:debian-stretch-aegir3-apt:
   stage: test
@@ -165,7 +165,7 @@ upgradetest:debian-jessie-aegir3-apt-upgrade:
     - apt-get install --yes sudo curl cron
 
   script:
-    - "scripts/ci-aegir-stable-install-apt-debian.sh"
+    - "scripts/ci-aegir-stable-install-apt-debian8.sh"
     # extra step to run the task queue.
     - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count();"'
     - sudo su aegir --login --command 'drush @hostmaster hosting-tasks --force'
