@@ -79,7 +79,7 @@ dch -v $debversion -D unstable
 git add debian/changelog
 
 echo changing hostmaster version in aegir-release.make
-sed -i'.tmp' -e '/^projects\[hostmaster\]\[version\]/s/=.*$/= "'"$version"'"/' aegir-release.make && git add aegir-release.make && rm aegir-release.make.tmp
+sed -i'.tmp' -e "/7.x-3.0-dev/$major-$version/" aegir-release.make && git add aegir-release.make && rm aegir-release.make.tmp
 
 echo enabling release makefilexs
 ln -sf aegir-release.make aegir.make && git add aegir.make
@@ -160,8 +160,13 @@ echo =========
 echo
 # Can we push?
 if prompt_yes_no "Push tags and commits upstream? "; then
+
     # this makes sure we push the commit *and* the tag, and leave the revert commit for the moment.
-    git push --tags origin tag $NEW_TAG:$CURRENT_BRANCH
+    git push --tags origin $commitid:$CURRENT_BRANCH
+
+    # Also push provision to GitLab to kick off CI.
+    git push --tags gitlab $commitid:$CURRENT_BRANCH
+
     git --work-tree=build-area/hostmaster --git-dir=build-area/hostmaster/.git push --tags origin HEAD
     git --work-tree=build-area/hosting --git-dir=build-area/hosting/.git push --tags origin HEAD
     git --work-tree=build-area/eldir --git-dir=build-area/eldir/.git push --tags origin HEAD
