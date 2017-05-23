@@ -1154,6 +1154,16 @@ location @drupal_<?php print $subdir_loc; ?> {
     return 418;
   }
 <?php endif; ?>
+  ###
+  ### For Drupal >= 7
+  ###
+  if ($sent_http_x_generator) {
+    add_header X-Info-Gen "Modern";
+    rewrite ^ /<?php print $subdir; ?>/index.php?$query_string last;
+  }
+  ###
+  ### For Drupal <= 6
+  ###
   rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
 }
 
@@ -1163,11 +1173,11 @@ location @drupal_<?php print $subdir_loc; ?> {
 ###
 location @nobots_<?php print $subdir_loc; ?> {
   ###
-  ### Support for Accelerated Mobile Pages (AMP).
+  ### Support for Accelerated Mobile Pages (AMP) when bots are redirected below
   ###
-  if ( $query_string ~ "^amp$" ) {
-    rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
-  }
+  # if ( $query_string ~ "^amp$" ) {
+  #   rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
+  # }
 
   ###
   ### Send all known bots to $args free URLs (optional)
@@ -1183,6 +1193,17 @@ location @nobots_<?php print $subdir_loc; ?> {
   if ( $args ~* "=PHP[A-Z0-9]{8}-" ) {
     return 404;
   }
+
+  ###
+  ### For Drupal >= 7
+  ###
+  if ($sent_http_x_generator) {
+    add_header X-Info-Gen "Modern";
+    rewrite ^ /<?php print $subdir; ?>/index.php?$query_string last;
+  }
+  ###
+  ### For Drupal <= 6
+  ###
   rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
 }
 

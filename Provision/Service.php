@@ -55,7 +55,13 @@ class Provision_Service extends Provision_ChainedState {
 
   }
 
-  // All services have the ability to have an associated restart command and listen port.
+  /**
+   * All services have the ability to have an associated restart command and listen port.
+   *
+   * If services require a fixed path config file, implement the function symlink_service() inside this method.
+   *
+   * @See Provision_Service_http_public::init_server()
+   */
   function init_server() {
     if (!is_null($this->service)) {
       if ($this->has_port) {
@@ -335,5 +341,28 @@ class Provision_Service extends Provision_ChainedState {
    */
   static function option_documentation() {
     return array();
+  }
+
+  /**
+   * Save symlink for this server from /var/aegir/config/APPLICATION_NAME.conf -> /var/aegir/config/SERVER/APPLICATION_NAME.conf
+   *
+   * If service requires a fixed path config file, implement this function in the init_server() method.
+   *
+   * @See Provision_Service_http_public::init_server()
+   */
+  function symlink_service() {
+    $file = $this->application_name . '.conf';
+    // We link the app_name.conf file on the remote server to the right version.
+    $cmd = sprintf('ln -sf %s %s',
+      escapeshellarg($this->server->config_path . '/' . $file),
+      escapeshellarg($this->server->aegir_root . '/config/' . $file)
+    );
+
+    if ($this->server->shell_exec($cmd)) {
+      drush_log(dt("Created symlink for %file on %server", array(
+        '%file' => $file,
+        '%server' => $this->server->remote_host,
+      )), 'notice');
+    };
   }
 }

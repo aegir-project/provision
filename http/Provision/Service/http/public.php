@@ -57,9 +57,10 @@ class Provision_Service_http_public extends Provision_Service_http {
       $this->server->http_vhostd_path = "{$app_dir}/vhost.d";
       $this->server->http_subdird_path = "{$app_dir}/subdir.d";
       $this->server->http_platforms_path = "{$this->server->aegir_root}/platforms";
+      
+      $this->symlink_service();
     }
   }
-
 
   static function option_documentation() {
     return array(

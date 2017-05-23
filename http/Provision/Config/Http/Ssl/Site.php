@@ -60,6 +60,14 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
 
     if ($this->ssl_enabled) {
       // XXX: to be tested, not sure the data structure is sound
+      //
+      // ACHTUNG! This deletes even perfectly good certificate and key.
+      // There is no check in place to determine if the cert is "stale".
+      // Not sure what the idea was behind this cleanup, but it looks like
+      // an unfinished work, aggressively deleting existing cert/key pair,
+      // even if there is absolutely no reason to do so -- like when the site
+      // is simply migrated to another platform, while its name doesn't change.
+      //
       Provision_Service_http_ssl::free_certificate_site($this->ssl_key, $this);
     }
   }

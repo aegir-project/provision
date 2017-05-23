@@ -1,0 +1,182 @@
+# Is performed before the scripts in the stages step
+before_script:
+  - source /etc/profile
+
+# Defines stages which are to be executed
+stages:
+  - build
+  - test
+  - publish
+  - upgradetest
+
+# Stage "build"
+build:deb:
+  stage: build
+  image: aegir/hostmaster:packaging_base
+  script:
+    - export commit=$(git log -n 1 --oneline | sed 's/ .*$//')
+    - export version=$(sed -ne 's/^[^(]*(\([^)]*\)).*/\1/;1p' debian/changelog)
+    - export new_version="${version}+${CI_BUILD_ID}.${commit}"
+    - dch -D unstable --newversion "$new_version" "automatic GitLab CI build ${CI_BUILD_ID}"
+    - dpkg-buildpackage
+    - mkdir build
+    - mv -v ../aegir3*.deb build/
+    - mv -v ../aegir3*.tar.gz build/
+    - mv -v ../aegir3*.dsc build/
+    - mv -v ../aegir3*.changes build/
+
+  # The files which are to be made available in GitLab as artifacts.
+  artifacts:
+    paths:
+      - build/*
+
+
+# Stage "test"
+test:debian-jessie-aegir3-apt:
+  stage: test
+  image: debian:jessie
+  dependencies:
+    - build:deb
+
+  before_script:
+    - apt-get update
+    # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
+    - echo "#!/bin/sh" > /usr/sbin/policy-rc.d
+    - echo "exit 0" >> /usr/sbin/policy-rc.d
+    - apt-get install --yes sudo curl
+
+  script: "scripts/ci-aegir-dev-install-apt-debian8.sh"
+
+test:debian-stretch-aegir3-apt:
+  stage: test
+  image: debian:stretch
+  allow_failure: true
+  dependencies:
+    - build:deb
+  only:
+    - 7.x-3.x
+
+  before_script:
+    - apt-get update
+    # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
+    - echo "#!/bin/sh" > /usr/sbin/policy-rc.d
+    - echo "exit 0" >> /usr/sbin/policy-rc.d
+    - apt-get install --yes sudo curl
+
+  script: "scripts/ci-aegir-dev-install-apt-debian9.sh"
+
+test:ubuntu-xenial-aegir3-apt:
+  stage: test
+  image: ubuntu:xenial
+  dependencies:
+    - build:deb
+  only:
+    - 7.x-3.x
+
+  before_script:
+    - apt-get update
+    # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
+    - echo "#!/bin/sh" > /usr/sbin/policy-rc.d
+    - echo "exit 0" >> /usr/sbin/policy-rc.d
+    - apt-get install --yes sudo curl
+
+  script: "scripts/ci-aegir-dev-install-apt-ubuntu.sh"
+
+test:behat:
+  stage: test
+  image: aegir/hostmaster:packaging_base
+  dependencies:
+    - build:deb
+  allow_failure: true
+  variables:
+    AEGIR_TESTS_VERSION: "master"
+
+  before_script:
+    - sudo apt-get update
+    - sudo apt-get install --yes apt-transport-https ca-certificates curl gnupg2 software-properties-common
+    - curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+    - sudo apt-key fingerprint 0EBFCD88
+    - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+    - sudo apt-get update
+    - sudo apt-get install --yes docker-ce
+    - docker info
+    - git clone http://github.com/aegir-project/tests.git tests
+    - cd tests
+    - git checkout $AEGIR_TESTS_VERSION
+
+      # Run prepare scripts.
+    - cd travis
+    - sudo bash prepare-docker.sh
+    - bash prepare-testenv.sh
+
+  script:
+
+    # Tests are included in the docker-compose.yml file in the tests repo.
+    - sudo docker-compose -f docker-compose-provision.yml run hostmaster
+
+
+
+
+publish:unstable-repo:
+  stage: publish
+  dependencies:
+    - build:deb
+  allow_failure: true
+
+  only:
+    - 7.x-3.x
+
+  image: ruby:2.1
+  before_script:
+    # install ssh-agent
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+
+    # run ssh-agent
+    - eval $(ssh-agent -s)
+
+    # add ssh key stored in SSH_PRIVATE_KEY variable to the agent store
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+
+    - mkdir -p ~/.ssh
+    - ls -la /.dockerenv
+    - echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts
+    - cat ~/.ssh/known_hosts
+
+  script:
+    - ls -lah build/*
+    - scp build/* ci@aegir0.aegir.coop:/var/www/repos/incoming/
+      # reprepro should pick this up in seconds and update the repository index.
+
+
+# Upgrade the latest stable Aegir to our unstable repo.
+upgradetest:debian-jessie-aegir3-apt-upgrade:
+  stage: upgradetest
+  image: debian:jessie
+  dependencies:
+    - publish:unstable-repo
+
+  when: manual
+
+  before_script:
+    - apt-get update
+    # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
+    - echo "#!/bin/sh" > /usr/sbin/policy-rc.d
+    - echo "exit 0" >> /usr/sbin/policy-rc.d
+    - apt-get install --yes sudo curl cron
+
+  script:
+    - "scripts/ci-aegir-stable-install-apt-debian8.sh"
+    # extra step to run the task queue.
+    - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count();"'
+    - sudo su aegir --login --command 'drush @hostmaster hosting-tasks --force'
+    - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count();"'
+    - sudo su aegir --login --command 'drush @hostmaster hosting-tasks --force'
+    - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count();"'
+    - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count_running();"'
+    - sleep 2m
+    - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count_running();"'
+    # upgrade to the latest version from the unstable repo.
+    - rm -v /etc/apt/sources.list.d/aegir-stable.list
+    - echo "deb http://debian2.aegirproject.org unstable main" | sudo tee -a /etc/apt/sources.list.d/aegir-unstable.list
+    - sudo apt-get update
+    - sudo apt-get --yes upgrade

@@ -14,7 +14,14 @@
  *   $options['provision_backup_suffix'] = '.tar.bz2';
  *
  * provision_verify_platforms_before_migrate - When migrating many sites turning this off can save time, default TRUE.
+ *
  * provision_backup_suffix - Method to set the compression used for backups... e.g. '.tar.bz2' or '.tar.', defaults to '.tar.gz'.
+ *
+ * provision_apache_conf_suffix
+ *   Set to TRUE to generate apache vhost files with a .conf suffix, default FALSE.
+ *   This takes advantage of the IncludeOptional statment introduced in Apache 2.3.6.
+ *   WARNING: After turning this on you need to re-verify all your sites, then then servers,
+ *   and then cleanup the old configfiles (those without the .conf suffix).
  *
  */
 
@@ -213,6 +220,31 @@ function hook_provision_config_load_templates($config) {
 function hook_provision_config_load_templates_alter(&$templates, $config) {
   // Don't let any custom templates be used.
   $templates = array();
+}
+
+/**
+ * Alter the variables used for rendering a config file.
+ *
+ * When implementing this hook, the function name should start with your file's name, not "drush_".
+ *
+ * @param $variables
+ *   The variables that are about to be injected into the template.
+ * @param $template
+ *   The template file chosen for use.
+ * @param $config
+ *   The Provision_config object trying to find its template.
+ *
+ * @see hook_provision_config_load_templates()
+ * @see hook_provision_config_load_templates_alter()
+ */
+function hook_provision_config_variables_alter(&$variables, $template, $config) {
+
+  // If this is the vhost template and the http service is Docker...
+  if (is_a($config, 'Provision_Config_Apache_Site') && is_a(d()->platform->service('http'), 'Provision_Service_http_apache_docker')) {
+
+    // Force the listen port to be 80.
+    $variables['http_port'] = '80';
+  }
 }
 
 /**
