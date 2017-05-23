@@ -91,17 +91,26 @@ function _provision_drupal_system_map() {
  */
 function _provision_system_query($type) {
   $packages = array();
-  foreach (system_get_info($type) as $name => $package) {
-    $package = (object) $package;
+
+  if ($type == 'theme') {
+    /** @var \Drupal\Core\Extension\Extension[] $extensions_data */
+    $extensions_data = \Drupal::service('theme_handler')->rebuildThemeData();
+  }
+  // Modules.
+  else {
+    /** @var \Drupal\Core\Extension\Extension[] $extensions_data */
+    $extensions_data = system_rebuild_module_data();
+  }
+
+  foreach ($extensions_data as $name => $extension_data) {
+    $package = (object) $extension_data->info;
     $package->filename = drupal_get_filename($type, $name);
     $frags = explode("/", $package->filename);
     // Flag site-specific packages.
     if ($frags[0] == 'sites' && $frags[1] != 'all') {
       $package->platform = -1;
     }
-    // In Drupal 8, system_get_info returns enabled modules/themes.
-    $package->status = 1;
-
+    $package->status = $extension_data->status;
     $package->filename = realpath($package->filename);
 
     if ($type == 'module') {
@@ -113,3 +122,64 @@ function _provision_system_query($type) {
 
   return $packages;
 }
+
+/**
+ * Find available profiles on this platform.
+ */
+function _provision_find_profiles() {
+  $profile_dirs = array('./core/profiles', './profiles');
+
+  $profiles = array();
+  foreach($profile_dirs as $profile_dir) {
+    if (!is_dir($profile_dir)) {
+      drush_log(dt("Cannot find profiles directory %dir", array('%dir' => $profile_dir)), 'error');
+      return FALSE;
+    }
+
+    $info_files = drush_scan_directory($profile_dir, "/\.info.yml$/");
+    foreach ($info_files as $path => $info_file) {
+      $path = realpath($path);
+      $info = Symfony\Component\Yaml\Yaml::parse($path);
+      if ($info['type'] == 'profile' && (!isset($info['hidden']) || !$info['hidden'])) {
+        $profile = new stdClass();
+        $profile->name = $info['name'];
+        $profile->info = $info;
+        $profile->filename = $path;
+        $profile->path = dirname($path);
+        $profile->info['languages'] = _provision_find_profile_languages($profile->path);
+
+        $profiles[basename($profile->path)] = $profile;
+        drush_log(dt('Found install profile %name', array('%name' => $name)));
+      }
+    }
+  }
+  return $profiles;
+}
+
+/**
+ * Retrieve a list of paths to search in a certain scope
+ */
+function _provision_drupal_search_paths($scope, $key = '', $type = 'modules') {
+  $searchpaths = array();
+  $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
+  switch ($scope) {
+    case 'base':
+      $searchpaths[] = sprintf("%s/%s", $drupal_root, $type);
+      $searchpaths[] = sprintf("%s/core/%s", $drupal_root, $type);
+      $searchpaths[] = sprintf("%s/sites/all/%s", $drupal_root, $type);
+      break;
+    case 'profiles':
+      foreach (_provision_find_profiles() as $profile) {
+        $searchpaths[] = $profile->path;
+      }
+      break;
+    default:
+      if ($key) {
+        $searchpaths[] = sprintf("%s/%s/%s/%s", $drupal_root, $scope, $key, $type);
+      }
+      break;
+
+  }
+  return $searchpaths;
+}
+

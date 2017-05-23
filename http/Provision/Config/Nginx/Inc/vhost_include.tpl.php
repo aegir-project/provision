@@ -1189,7 +1189,17 @@ location @drupal {
     return 418;
   }
 <?php endif; ?>
-  rewrite ^/(.*)$  /index.php?q=$1 last;
+  ###
+  ### For Drupal >= 7
+  ###
+  if ($sent_http_x_generator) {
+    add_header X-Info-Gen "Modern";
+    rewrite ^ /index.php?$query_string last;
+  }
+  ###
+  ### For Drupal <= 6
+  ###
+  rewrite ^/(.*)$ /index.php?q=$1 last;
 }
 
 <?php if ($nginx_config_mode == 'extended'): ?>
@@ -1198,11 +1208,11 @@ location @drupal {
 ###
 location @nobots {
   ###
-  ### Support for Accelerated Mobile Pages (AMP).
+  ### Support for Accelerated Mobile Pages (AMP) when bots are redirected below
   ###
-  if ( $query_string ~ "^amp$" ) {
-    rewrite ^/(.*)$  /index.php?q=$1 last;
-  }
+  # if ( $query_string ~ "^amp$" ) {
+  #  rewrite ^/(.*)$  /index.php?q=$1 last;
+  # }
 
   ###
   ### Send all known bots to $args free URLs (optional)
@@ -1218,7 +1228,18 @@ location @nobots {
   if ( $args ~* "=PHP[A-Z0-9]{8}-" ) {
     return 404;
   }
-  rewrite ^/(.*)$  /index.php?q=$1 last;
+
+  ###
+  ### For Drupal >= 7
+  ###
+  if ($sent_http_x_generator) {
+    add_header X-Info-Gen "Modern";
+    rewrite ^ /index.php?$query_string last;
+  }
+  ###
+  ### For Drupal <= 6
+  ###
+  rewrite ^/(.*)$ /index.php?q=$1 last;
 }
 
 ###
