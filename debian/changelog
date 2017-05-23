@@ -1,3 +1,10 @@
+aegir3-provision (3.11~beta2) unstable; urgency=medium
+
+  * Preparations for the 3.11 release, testing the GitLab build process.
+  * Many bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.11
+
+ -- Herman van Rink <helmo@initfour.nl>  Tue, 23 May 2017 11:13:35 +0200
+
 aegir3-provision (3.11~beta1) unstable; urgency=medium
 
   * Preparations for the 3.11 release, testing the GitLab build process.
