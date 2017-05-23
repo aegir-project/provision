@@ -120,7 +120,7 @@ function drush_provision_drupal_provision_install() {
 function drush_provision_drupal_post_provision_install() {
 
   // If Drupal profile was installed, rebuild drupal caches and save enabled packages for aegir.
-  if (drush_get_option('install_method', 'profile') == 'profile' && drush_get_option('installed', FALSE, 'site')) {
+  if (d()->install_method == 'profile' && drush_get_option('installed', FALSE, 'site')) {
     _provision_drupal_rebuild_caches();
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
     _provision_client_create_symlink();
