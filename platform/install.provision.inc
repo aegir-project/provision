@@ -89,21 +89,23 @@ function drush_provision_drupal_provision_install() {
 
   // Install site according to install_method.
   drush_log(dt('Installing site with the "!method" method.', array(
-    '!method' => drush_get_option('install_method', 'profile'),
+    '!method' => d()->install_method,
   )), 'ok');
 
   // Run Drupal installation if option was specified
-  if (drush_get_option('install_method', 'profile') == 'profile') {
+  if (d()->install_method == 'profile') {
 
     // call a backend task to do the actual installation.
     $result = provision_backend_invoke(d()->name, "provision-install-backend", array(), array('client_email' => drush_get_option('client_email')));
+    
     // pass the login link back to the front end.
     drush_set_option('login_link', $result['context']['login_link']);
 
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
     drush_set_option('installed', TRUE, 'site');
   }
-  elseif (drush_get_option('install_method', 'profile') == 'manual') {
+  // If install_method is 'manual', do nothing.
+  elseif (d()->install_method == 'manual') {
     drush_set_option('login_link', 'http://' . d()->uri . '/install.php');
   }
 
