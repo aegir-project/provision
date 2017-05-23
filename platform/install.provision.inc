@@ -87,13 +87,13 @@ function drush_provision_drupal_provision_install() {
 
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
-  // Install site according to site_install_method.
+  // Install site according to install_method.
   drush_log(dt('Installing site with the "!method" method.', array(
-    '!method' => drush_get_option('site_install_method', 'profile'),
+    '!method' => drush_get_option('install_method', 'profile'),
   )), 'ok');
 
   // Run Drupal installation if option was specified
-  if (drush_get_option('site_install_method', 'profile') == 'profile') {
+  if (drush_get_option('install_method', 'profile') == 'profile') {
 
     // call a backend task to do the actual installation.
     $result = provision_backend_invoke(d()->name, "provision-install-backend", array(), array('client_email' => drush_get_option('client_email')));
@@ -103,7 +103,7 @@ function drush_provision_drupal_provision_install() {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
     drush_set_option('installed', TRUE, 'site');
   }
-  elseif (drush_get_option('site_install_method', 'profile') == 'manual') {
+  elseif (drush_get_option('install_method', 'profile') == 'manual') {
     drush_set_option('login_link', 'http://' . d()->uri . '/install.php');
   }
 
@@ -118,7 +118,7 @@ function drush_provision_drupal_provision_install() {
 function drush_provision_drupal_post_provision_install() {
 
   // If Drupal profile was installed, rebuild drupal caches and save enabled packages for aegir.
-  if (drush_get_option('site_install_method', 'profile') == 'profile' && drush_get_option('installed', FALSE, 'site')) {
+  if (drush_get_option('install_method', 'profile') == 'profile' && drush_get_option('installed', FALSE, 'site')) {
     _provision_drupal_rebuild_caches();
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
     _provision_client_create_symlink();
