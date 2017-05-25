@@ -23,6 +23,7 @@
  *   WARNING: After turning this on you need to re-verify all your sites, then then servers,
  *   and then cleanup the old configfiles (those without the .conf suffix).
  *
+ * provision_create_local_settings_file - Create a site 'local.settings.php' file if one isn't found, default TRUE.
  */
 
 /**

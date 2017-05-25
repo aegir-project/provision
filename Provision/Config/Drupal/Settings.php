@@ -59,22 +59,25 @@ class Provision_Config_Drupal_Settings extends Provision_Config {
     $backup_file = drush_get_option('backup_file');
     $this->backup_in_progress = !empty($backup_file);
 
-    // Create a blank local.settings.php file if not exists.
+    // Create a blank local.settings.php file if not exists and option calls for this.
     $local_settings = $this->site_path . '/local.settings.php';
     $local_settings_blank = "<?php # local settings.php \n";
     $local_description = 'Drupal local.settings.php file';
-    if (!provision_file()->exists($local_settings)->status()) {
+    if (!provision_file()->exists($local_settings)->status() &&
+        drush_get_option('provision_create_local_settings_file', TRUE)) {
       provision_file()->file_put_contents($local_settings, $local_settings_blank)
         ->succeed('Generated blank ' . $local_description)
         ->fail('Could not generate ' . $local_description);
     }
 
-    // Set permissions on local.settings.php.
-    provision_file()->chgrp($local_settings, $this->group)
-      ->succeed('Changed group ownership of <code>@path</code> to @gid')
-      ->fail('Could not change group ownership of <code>@path</code> to @gid');
-    provision_file()->chmod($local_settings, $this->mode | 0440)
-      ->succeed('Changed permissions of <code>@path</code> to @perm')
-      ->fail('Could not change permissions of <code>@path</code> to @perm');
+    // Set permissions on local.settings.php, if it exists.
+    if (provision_file()->exists($local_settings)->status()) {
+      provision_file()->chgrp($local_settings, $this->group)
+        ->succeed('Changed group ownership of <code>@path</code> to @gid')
+        ->fail('Could not change group ownership of <code>@path</code> to @gid');
+      provision_file()->chmod($local_settings, $this->mode | 0440)
+        ->succeed('Changed permissions of <code>@path</code> to @perm')
+        ->fail('Could not change permissions of <code>@path</code> to @perm');
+    }
   }
 }
