@@ -174,8 +174,14 @@ fi
 
 
 # Golden Contrib
-
 golden_contribs="hosting_civicrm hosting_git hosting_remote_import hosting_site_backup_manager hosting_tasks_extra"
+
+echo =========
+echo
+echo Golden Contribs: $golden_contribs
+echo
+echo Cloning fresh copies...
+echo
 for shortname in $golden_contribs; do
   rm -rf build-area/$shortname
   git clone --branch $CURRENT_BRANCH `git config remote.origin.url | sed "s/provision/$shortname/"` build-area/$shortname
@@ -185,10 +191,8 @@ for shortname in $golden_contribs; do
 
 done
 
-echo =========
 echo
-echo Golden Contribs: $golden_contribs
-echo
+
 # Can we push?
 if prompt_yes_no "Push tags and commits for GOLDEN CONTRIB upstream? "; then
   for shortname in $golden_contribs; do
