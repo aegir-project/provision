@@ -1,3 +1,9 @@
+aegir3-provision (3.11) unstable; urgency=medium
+
+  * Many bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.11
+
+ -- Herman van Rink <helmo@initfour.nl>  Tue, 30 May 2017 13:45:14 +0200
+
 aegir3-provision (3.11~beta3) unstable; urgency=medium
 
   * Preparations for the 3.11 release, testing the GitLab build process.
