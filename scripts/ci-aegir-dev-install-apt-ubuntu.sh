@@ -23,7 +23,7 @@ postfix postfix/main_mailer_type select Local only
 
 EOF
 
-sudo apt-get install --yes mysql-server
+sudo apt-get install --yes mysql-server php7.0-mysql php7.0-cli php7.0 postfix
 
 sudo DPKG_DEBUG=developer dpkg --install build/aegir3_*.deb build/aegir3-provision*.deb build/aegir3-hostmaster*.deb
 sudo apt-get install --fix-broken --yes

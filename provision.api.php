@@ -13,9 +13,11 @@
  * usage:
  *   $options['provision_backup_suffix'] = '.tar.bz2';
  *
- * provision_verify_platforms_before_migrate - When migrating many sites turning this off can save time, default TRUE.
+ * provision_verify_platforms_before_migrate
+ *   When migrating many sites turning this off can save time, default TRUE.
  *
- * provision_backup_suffix - Method to set the compression used for backups... e.g. '.tar.bz2' or '.tar.', defaults to '.tar.gz'.
+ * provision_backup_suffix
+ *   Method to set the compression used for backups... e.g. '.tar.bz2' or '.tar.', defaults to '.tar.gz'.
  *
  * provision_apache_conf_suffix
  *   Set to TRUE to generate apache vhost files with a .conf suffix, default FALSE.
@@ -23,6 +25,8 @@
  *   WARNING: After turning this on you need to re-verify all your sites, then then servers,
  *   and then cleanup the old configfiles (those without the .conf suffix).
  *
+ * provision_create_local_settings_file
+ *   Create a site 'local.settings.php' file if one isn't found, default TRUE.
  */
 
 /**
