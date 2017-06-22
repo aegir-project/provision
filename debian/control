@@ -1,7 +1,7 @@
 Source: aegir3-provision
 Section: admin
 Priority: optional
-Maintainer: Antoine Beaupré <anarcat@debian.org>
+Maintainer: Herman van Rink <helmo@initfour.nl>
 DM-Upload-Allowed: yes
 Build-Depends: debhelper (>= 8)
 Standards-Version: 3.9.2
@@ -55,6 +55,7 @@ Architecture: all
 Depends: ${misc:Depends}, aegir3-provision (>= ${source:Version}), aegir3-hostmaster (>= ${source:Version})
 Conflicts: aegir, aegir2
 Replaces: aegir, aegir2
+Suggests: aegir-archive-keyring
 Description: mass Drupal hosting system
  A set of contributed modules for Drupal that aims to solve the
  problem of managing a large number of Drupal sites. It does this by
@@ -86,3 +87,11 @@ Description: web frontend for the Aegir hosting system
     connect via SSH to sync files and reload apache
   * /etc/sudoers.d/aegir - allow aegir to restart apache
   * /etc/apache2/conf.d/aegir.conf - load the aegir apache config
+
+Package: aegir-archive-keyring
+Architecture: all
+Depends: ${misc:Depends}, gnupg2 | gnupg
+Description: GnuPG archive keys for the Aegir hosting system
+ The Aegir project digitally signs its Release files. This package
+ contains the archive keys used for that.
+ With this package we can update these keys when they expire.
