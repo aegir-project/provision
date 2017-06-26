@@ -1,3 +1,9 @@
+aegir3-provision (3.11.2) testing; urgency=medium
+
+  * Version bump to get the Drupal core security update. 3.11.1 got stuck in our packaging system.
+
+ -- Herman van Rink <helmo@initfour.nl>  Mon, 26 Jun 2017 21:36:53 +0200
+
 aegir3-provision (3.11.1) unstable; urgency=medium
 
   * Version bump to get the Drupal core security update.
