@@ -125,6 +125,7 @@ publish:unstable-repo:
 
   only:
     - 7.x-3.x
+    - /^7\.x-3\.\d+\.x/
 
   image: ruby:2.1
   before_script:

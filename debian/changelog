@@ -1,3 +1,9 @@
+aegir3-provision (3.11.1) unstable; urgency=medium
+
+  * Version bump to get the Drupal core security update.
+
+ -- Herman van Rink <helmo@initfour.nl>  Mon, 26 Jun 2017 19:45:53 +0200
+
 aegir3-provision (3.11) unstable; urgency=medium
 
   * Many bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.11
