@@ -87,14 +87,28 @@ function drush_provision_drupal_provision_install() {
 
   drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_SITE);
 
-  // call a backend task to do the actual installation.
-  $result = provision_backend_invoke(d()->name, "provision-install-backend", array(), array('client_email' => drush_get_option('client_email')));
-  // pass the login link back to the front end.
-  drush_set_option('login_link', $result['context']['login_link']);
+  // Install site according to site_install_method.
+  drush_log(dt('Installing site with the "!method" method.', array(
+    '!method' => d()->install_method,
+  )), 'ok');
 
-  drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
-  drush_set_option('installed', TRUE, 'site');
+  // Run Drupal installation if option was specified
+  if (d()->install_method == 'profile') {
+
+    // call a backend task to do the actual installation.
+    $result = provision_backend_invoke(d()->name, "provision-install-backend", array(), array('client_email' => drush_get_option('client_email')));
+    // pass the login link back to the front end.
+    drush_set_option('login_link', $result['context']['login_link']);
+
+    drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+    drush_set_option('installed', TRUE, 'site');
+  }
+  else {
+    drush_set_option('login_link', 'http://' . d()->uri . '/install.php');
+  }
+
   _provision_drupal_maintain_aliases();
+
 }
 
 /**
@@ -102,10 +116,17 @@ function drush_provision_drupal_provision_install() {
  * any changes to things such as available modules/ themes can take affect.
  */
 function drush_provision_drupal_post_provision_install() {
-  drush_set_option('installed', TRUE, 'site');
-  _provision_drupal_rebuild_caches();
-  drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
-  _provision_client_create_symlink();
-  drush_include_engine('drupal', 'cron_key');
+
+  // If Drupal profile was installed, rebuild drupal caches and save enabled packages for aegir.
+  if (d()->install_method == 'profile' && drush_get_option('installed', FALSE, 'site')) {
+    _provision_drupal_rebuild_caches();
+    drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
+    _provision_client_create_symlink();
+    drush_include_engine('drupal', 'cron_key');
+  }
+  // For all other install methods, just create the symlink.
+  else {
+    _provision_client_create_symlink();
+  }
 }
 
