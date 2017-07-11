@@ -39,6 +39,14 @@ Description: Makefile used to create the platform:
  .
  If this is left empty, Aegir will use its internal makefile.
 
+Template:aegir/profile
+Type: string
+Description: The install profile to use:
+ The profile parameter passed to hostmaster-install. Normally this is
+ hostmaster.
+ .
+ If this is left empty, Aegir will use its default.
+
 Template:aegir/webserver
 Type: select
 Description: Webserver type to use:

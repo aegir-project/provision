@@ -1,3 +1,28 @@
+aegir3-provision (3.11.2) testing; urgency=medium
+
+  * Version bump to get the Drupal core security update. 3.11.1 got stuck in our packaging system.
+
+ -- Herman van Rink <helmo@initfour.nl>  Mon, 26 Jun 2017 21:36:53 +0200
+
+aegir3-provision (3.11.1) unstable; urgency=medium
+
+  * Version bump to get the Drupal core security update.
+
+ -- Herman van Rink <helmo@initfour.nl>  Mon, 26 Jun 2017 19:45:53 +0200
+
+aegir3-provision (3.11) unstable; urgency=medium
+
+  * Many bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.11
+
+ -- Herman van Rink <helmo@initfour.nl>  Tue, 30 May 2017 13:45:14 +0200
+
+aegir3-provision (3.11~beta3) unstable; urgency=medium
+
+  * Preparations for the 3.11 release, testing the GitLab build process.
+  * Many bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.11
+
+ -- Herman van Rink <helmo@initfour.nl>  Fri, 26 May 2017 10:13:19 +0200
+
 aegir3-provision (3.11~beta2) unstable; urgency=medium
 
   * Preparations for the 3.11 release, testing the GitLab build process.

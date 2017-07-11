@@ -41,6 +41,10 @@ case "$1" in
         if [ ! -z "$RET" ]; then
             FLAGS="$FLAGS --makefile='$RET'"
         fi
+        db_get "aegir/profile"
+        if [ ! -z "$RET" ]; then
+            FLAGS="$FLAGS --profile='$RET'"
+        fi
         db_get "aegir/webserver"
         if [ ! -z "$RET" ]; then
             if [ "$RET" = 'apache2' ]; then

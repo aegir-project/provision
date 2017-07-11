@@ -52,15 +52,15 @@ The following operations will be done:
  0. prompt you for a debian/changelog entry
  1. change the makefile to download tarball
  2. change the upgrade.sh.txt version
-  . change the .gitlab-ci.yml to build a release package
- 3. display the resulting diff
- 4. commit those changes to git
- 5. lay down the tag
- 6. revert the commit
- 7. clone fresh copies of hosting/hostmaster and eldir to lay down the tag
- 8. (optionally) push those changes
- 9. clone fresh copies of golden contrib to lay down the tag
-10. (optionally) push those changes
+ 3. change the .gitlab-ci.yml to build a release package
+ 4. display the resulting diff
+ 5. commit those changes to git
+ 6. lay down the tag
+ 7. revert the commit
+ 8. clone fresh copies of hosting/hostmaster and eldir to lay down the tag
+ 9. (optionally) push those changes
+10. clone fresh copies of golden contrib to lay down the tag
+11. (optionally) push those changes
 
 The operation can be aborted before step 8. Don't forget that as
 long as changes are not pushed upstream, this can all be reverted (see
@@ -174,8 +174,14 @@ fi
 
 
 # Golden Contrib
-
 golden_contribs="hosting_civicrm hosting_git hosting_remote_import hosting_site_backup_manager hosting_tasks_extra"
+
+echo =========
+echo
+echo Golden Contribs: $golden_contribs
+echo
+echo Cloning fresh copies...
+echo
 for shortname in $golden_contribs; do
   rm -rf build-area/$shortname
   git clone --branch $CURRENT_BRANCH `git config remote.origin.url | sed "s/provision/$shortname/"` build-area/$shortname
@@ -185,10 +191,8 @@ for shortname in $golden_contribs; do
 
 done
 
-echo =========
 echo
-echo Golden Contribs: $golden_contribs
-echo
+
 # Can we push?
 if prompt_yes_no "Push tags and commits for GOLDEN CONTRIB upstream? "; then
   for shortname in $golden_contribs; do
@@ -196,6 +200,6 @@ if prompt_yes_no "Push tags and commits for GOLDEN CONTRIB upstream? "; then
   done
 fi
 
-if prompt_yes_no "Is GitLab finished building the release packages? Then we can push the revert commit. "; then
+if prompt_yes_no "Is GitLab finished building the release packages? And is the release promoted to the stable channel? Then we can push the revert commit. "; then
    git push origin
 fi
