@@ -81,9 +81,13 @@ function drush_provision_drupal_pre_provision_verify() {
 
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
     // If we couldn't bootstrap, there's no sense in continuing past this point.
-    if ($error = drush_get_error()) {
+    if (drush_get_error()) {
+      $errors = drush_get_error_log();
       return drush_set_error("DRUSH_INVALID_DRUPAL_ROOT",
-        "Drush could not bootstrap this platform. Please check the platform directory exists and is readable. The errors were: " . print_r($error,1));
+        dt("Drush could not bootstrap the platform at @path. Please check the platform directory exists and is readable. The errors were: @errors", array(
+          '@path' => d()->root,
+          '@errors' => implode('|', $errors)
+        )));
     }
     provision_file()->writable(d()->root . '/sites')
       ->succeed('Drupal sites directory @path is writable by the provisioning script')
