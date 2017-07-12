@@ -83,6 +83,9 @@ function drush_provision_drupal_pre_provision_verify() {
     // If we couldn't bootstrap, there's no sense in continuing past this point.
     if (drush_get_error()) {
       $errors = drush_get_error_log();
+      foreach ($errors as $type => &$error) {
+        $error = "$type: {$error[0]}";
+      }
       return drush_set_error("DRUSH_INVALID_DRUPAL_ROOT",
         dt("Drush could not bootstrap the platform at @path. Please check the platform directory exists and is readable. The errors were: @errors", array(
           '@path' => d()->root,
