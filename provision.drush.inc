@@ -319,6 +319,7 @@ function provision_drush_command() {
      'aegir_db_user' => dt('Database user to connect as (default: %user)', array('%user' => 'root')),
      'aegir_db_pass' => dt('Database password to use'),
      'aegir_db_port' => dt('Database port to use (default: %port)', array('%port' => '3306')),
+     'aegir_db_grant_all_hosts' => dt('Allow connection from arbitrary web hosts. (Default: FALSE)'),
      'client_email' => dt('Email of the first client to create in the frontend'),
      'client_name' => dt('Name of the first client to create in the frontend (default: %user)', array('%user' => 'admin')),
      'makefile' => dt('The makefile used to create the hostmaster platform (default: %makefile)', array('%makefile' => dirname(__FILE__). '/aegir.make')),

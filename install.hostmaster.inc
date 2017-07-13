@@ -174,6 +174,7 @@ function drush_provision_hostmaster_install($site = NULL) {
   $aegir_db_pass = drush_get_option('aegir_db_pass');
   $aegir_db_port = drush_get_option('aegir_db_port');
   $aegir_db_host = drush_get_option('aegir_db_host');
+  $aegir_db_grant_all_hosts = drush_get_option('aegir_db_grant_all_hosts');
 
   $server = '@server_master';
   $master_context = array(
@@ -202,6 +203,7 @@ function drush_provision_hostmaster_install($site = NULL) {
       'context_type' => 'server',
       'db_service_type' => 'mysql',
       'master_db' => $master_db,
+      'db_grant_all_hosts' => $aegir_db_grant_all_hosts,
       'db_port' => $aegir_db_port,
     );
     drush_invoke_process('@none', "provision-save", array($dbserver), $dbserver_context);
