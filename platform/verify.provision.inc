@@ -51,6 +51,10 @@ function drush_provision_drupal_pre_provision_verify() {
     }
   }
   elseif (d()->type === 'platform') {
+  
+    drush_log(dt("Checking for platform at path @path...", array('@path' => d()->root)), 'debug');
+    drush_log(dt("Platform makefile: @makefile", array('@makefile' => d()->makefile)), 'debug');
+    
     // Create a platform from a makefile, if it doesnt already exist and the makefile does.
     if (!provision_file()->exists(d()->root)->status() && !empty(d()->makefile)) {
       drush_log(dt("Platform path does not exist, fetching from drush makefile"), 'notice');
