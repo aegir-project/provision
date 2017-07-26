@@ -102,13 +102,14 @@ function drush_provision_drupal_provision_install() {
     drush_set_option('login_link', $result['context']['login_link']);
 
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
-    drush_set_option('installed', TRUE, 'site');
+    drush_set_option('profile_installed', TRUE, 'site');
   }
   // If install_method is 'manual', do nothing.
   elseif (d()->install_method == 'manual') {
     drush_set_option('login_link', 'http://' . d()->uri . '/install.php');
   }
-
+  
+  drush_set_option('installed', TRUE, 'site');
   _provision_drupal_maintain_aliases();
 
 }
@@ -120,7 +121,7 @@ function drush_provision_drupal_provision_install() {
 function drush_provision_drupal_post_provision_install() {
 
   // If Drupal profile was installed, rebuild drupal caches and save enabled packages for aegir.
-  if (d()->install_method == 'profile' && drush_get_option('installed', FALSE, 'site')) {
+  if (d()->install_method == 'profile' && drush_get_option('profile_installed', FALSE, 'site')) {
     _provision_drupal_rebuild_caches();
     drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
     _provision_client_create_symlink();
