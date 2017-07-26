@@ -16,7 +16,7 @@ function drush_provision_drupal_provision_backup_validate($backup_file = NULL) {
       drush_set_context('DRUSH_ERROR_CODE', DRUSH_SUCCESS);
     }
   }
-  if (!_provision_drupal_site_exists() && !drush_get_option('force', false)) {
+  if (!drush_get_option('installed') && !drush_get_option('force', false)) {
      drush_set_error('PROVISION_DRUPAL_SITE_NOT_FOUND');
    }
 
