@@ -27,6 +27,12 @@
  *
  * provision_create_local_settings_file
  *   Create a site 'local.settings.php' file if one isn't found, default TRUE.
+ *
+ * provision_mysqldump_suppress_gtid_restore
+ *   Don't restore GTIDs from a database export.  Set to TRUE for MySQL versions 5.6 and above to
+ *   avoid having restores error out during operations such as cloning, migrating, and restoring from
+ *   backup.  Default is FALSE.
+ *
  */
 
 /**
