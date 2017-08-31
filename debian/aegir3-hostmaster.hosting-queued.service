@@ -1,5 +1,6 @@
 [Unit]
 Description=Hosting queue daemon
+After=mysql.service
 
 [Service]
 ExecStart=/usr/local/bin/drush --quiet @hostmaster hosting-queued

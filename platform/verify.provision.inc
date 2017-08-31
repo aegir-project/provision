@@ -51,9 +51,13 @@ function drush_provision_drupal_pre_provision_verify() {
     }
   }
   elseif (d()->type === 'platform') {
+  
+    drush_log(dt("Checking for platform at path @path...", array('@path' => d()->root)), 'debug');
+    drush_log(dt("Platform makefile: @makefile", array('@makefile' => d()->makefile)), 'debug');
+    
     // Create a platform from a makefile, if it doesnt already exist and the makefile does.
     if (!provision_file()->exists(d()->root)->status() && !empty(d()->makefile)) {
-      drush_log(dt("Platform path does not exist, fetching from drush makefile"));
+      drush_log(dt("Platform path does not exist, fetching from drush makefile"), 'notice');
       $arguments = array();
       $options = array();
       // Propagate working-copy args downward.
@@ -62,6 +66,13 @@ function drush_provision_drupal_pre_provision_verify() {
       }
       $arguments[] = d()->makefile;
       $arguments[] = d()->root;
+      
+      // Change current directory to makefile's directory until Drush fixes this bug: https://github.com/drush-ops/drush/issues/2482
+      // @TODO: Remove this once is committed.
+      if (!empty(d()->makefile) && file_exists(dirname(d()->makefile))) {
+        chdir(dirname(d()->makefile));
+      }
+
       drush_invoke_process('@none', "make", $arguments, $options);
       if (drush_get_error()) {
         return drush_set_error("DRUSH_MAKE_FAILED",
@@ -77,8 +88,15 @@ function drush_provision_drupal_pre_provision_verify() {
     drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_ROOT);
     // If we couldn't bootstrap, there's no sense in continuing past this point.
     if (drush_get_error()) {
+      $errors = drush_get_error_log();
+      foreach ($errors as $type => &$error) {
+        $error = "$type: {$error[0]}";
+      }
       return drush_set_error("DRUSH_INVALID_DRUPAL_ROOT",
-        "Drush could not bootstrap this platform. Please check the platform directory exists and is readable.");
+        dt("Drush could not bootstrap the platform at @path. Please check the platform directory exists and is readable. The errors were: @errors", array(
+          '@path' => d()->root,
+          '@errors' => implode('|', $errors)
+        )));
     }
     provision_file()->writable(d()->root . '/sites')
       ->succeed('Drupal sites directory @path is writable by the provisioning script')

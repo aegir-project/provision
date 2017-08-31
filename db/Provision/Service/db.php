@@ -15,12 +15,14 @@ class Provision_Service_db extends Provision_Service {
   static function option_documentation() {
     return array(
       'master_db' => 'server with db: Master database connection info, {type}://{user}:{password}@{host}',
+      'db_grant_all_hosts' => 'Grant access to site database users from any web host. If set to TRUE, any host will be allowed to connect to MySQL site databases on this server using the generated username and password. If set to FALSE, web hosts will be granted access by their detected IP address.',
     );
   }
 
   function init_server() {
     parent::init_server();
     $this->server->setProperty('master_db');
+    $this->server->setProperty('db_grant_all_hosts', FALSE);
     $this->server->setProperty('utf8mb4_is_supported', FALSE);
     $this->creds = array_map('urldecode', parse_url($this->server->master_db));
 
@@ -117,6 +119,7 @@ class Provision_Service_db extends Provision_Service {
       if (!$this->grant($db_name, $db_user, $db_passwd, $db_grant_host)) {
         drush_set_error('PROVISION_CREATE_DB_FAILED', dt("Could not create database user @user", array('@user' => $db_user)));
       }
+      drush_log(dt("Granted privileges to %user@%client on %database", array('%user' => $db_user, '%client' => $db_grant_host, '%database' => $db_name)), 'success');
     }
 
     $this->create_database($db_name);
@@ -254,10 +257,16 @@ class Provision_Service_db extends Provision_Service {
 
   /**
    * Return a list of hosts, as seen by the db server, which should be granted
-   * access to the site database.
+   * access to the site database. If server property 'db_grant_all_hosts' is
+   * TRUE, use the MySQL wildcard '%' instead of
    */
   function grant_host_list() {
-    return array_unique(array_map(array($this, 'grant_host'), $this->context->service('http')->grant_server_list()));
+    if ($this->server->db_grant_all_hosts) {
+      return array('%');
+    }
+    else {
+      return array_unique(array_map(array($this, 'grant_host'), $this->context->service('http')->grant_server_list()));
+    }
   }
 
   /**
