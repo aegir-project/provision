@@ -365,8 +365,19 @@ port=%s
     // Set the umask to 077 so that the dump itself is non-readable by the
     // webserver.
     umask(0077);
+
+    // If a database uses Global Transaction IDs (GTIDs), information about this is written to the dump
+    // file by default.  Trying to import such a dump during a clone or migrate will fail.  So use the
+    // '--set-gtid-purged=OFF' option to suppress the restoration of GTIDs.  GTIDs were added in MySQL version 5.6
+    if (drush_get_option('provision_mysqldump_suppress_gtid_restore', FALSE)) {
+      $gtid_option = '--set-gtid-purged=OFF';
+    } // if
+    else {
+      $gtid_option = '';
+    } // else
+
     // Mixed copy-paste of drush_shell_exec and provision_shell_exec.
-    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 --single-transaction --quick --no-autocommit --skip-add-locks --hex-blob %s", escapeshellcmd(drush_get_option('db_name')));
+    $cmd = sprintf("mysqldump --defaults-file=/dev/fd/3 %s --single-transaction --quick --no-autocommit --skip-add-locks --hex-blob %s", $gtid_option, escapeshellcmd(drush_get_option('db_name')));
 
     // Fail if db file already exists.
     $dump_file = fopen(d()->site_path . '/database.sql', 'x');
