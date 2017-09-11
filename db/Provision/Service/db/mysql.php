@@ -408,7 +408,7 @@ port=%s
         // Close stderr as well.
         fclose($pipes[2]);
         if (proc_close($process) != 0) {
-          drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump (error: %msg)', array('%msg' => $err)));
+          drush_set_error('PROVISION_BACKUP_FAILED', dt('Could not write database backup file mysqldump (command: %command) (error: %msg)', array('%msg' => $err, '%command' => $cmd)));
         }
       }
       else {
