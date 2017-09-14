@@ -37,6 +37,8 @@ test:debian-jessie-aegir3-apt:
   image: debian:jessie
   dependencies:
     - build:deb
+  only:
+    - 7.x-3.x
 
   before_script:
     - apt-get update
@@ -53,8 +55,6 @@ test:debian-stretch-aegir3-apt:
   allow_failure: true
   dependencies:
     - build:deb
-  only:
-    - 7.x-3.x
 
   before_script:
     - apt-get update
