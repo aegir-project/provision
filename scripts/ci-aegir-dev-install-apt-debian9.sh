@@ -23,7 +23,6 @@ EOF
 
 set -x
 sudo apt-get install --yes mariadb-server-10.1 php7.0-mysql php7.0-cli
-sudo /usr/bin/mysql -e "GRANT ALL ON *.* TO 'aegir_root'@'localhost' IDENTIFIED BY 'PASSWORD' WITH GRANT OPTION"
 
 
 sudo DPKG_DEBUG=developer dpkg --install build/aegir3_*.deb build/aegir3-provision*.deb build/aegir3-hostmaster*.deb

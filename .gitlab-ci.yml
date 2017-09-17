@@ -1,3 +1,9 @@
+#
+# CI for Aegir Hosting System
+#
+# For docs see http://docs.aegirproject.org
+# and http://docs.aegirproject.org/en/3.x/community/release-process/#setting-up-a-gitlab-runner
+
 # Is performed before the scripts in the stages step
 before_script:
   - source /etc/profile
@@ -9,7 +15,11 @@ stages:
   - publish
   - upgradetest
 
-# Stage "build"
+
+#
+### Stage "build"
+#
+
 build:deb:
   stage: build
   image: aegir/hostmaster:packaging_base
@@ -31,7 +41,10 @@ build:deb:
       - build/*
 
 
-# Stage "test"
+#
+### Stage "test"
+#
+
 test:debian-jessie-aegir3-apt:
   stage: test
   image: debian:jessie
@@ -131,7 +144,9 @@ test:behat:
     - sudo docker-compose -f docker-compose-provision.yml run hostmaster
 
 
-
+#
+### Stage "publish"
+#
 
 publish:unstable-repo:
   stage: publish
@@ -164,6 +179,10 @@ publish:unstable-repo:
     - scp build/* ci@aegir0.aegir.coop:/var/www/repos/incoming/
       # reprepro should pick this up in seconds and update the repository index.
 
+
+#
+### Stage "upgradetest"
+#
 
 # Upgrade the latest stable Aegir to our unstable repo.
 upgradetest:debian-jessie-aegir3-apt-upgrade:
