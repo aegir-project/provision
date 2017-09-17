@@ -82,6 +82,22 @@ test:ubuntu-xenial-aegir3-apt:
 
   script: "scripts/ci-aegir-dev-install-apt-ubuntu.sh"
 
+test:ubuntu-xenial-aegir3-apt:
+  stage: test
+  image: ubuntu:artful
+  dependencies:
+    - build:deb
+  allow_failure: true
+
+  before_script:
+    - apt-get update
+    # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
+    - echo "#!/bin/sh" > /usr/sbin/policy-rc.d
+    - echo "exit 0" >> /usr/sbin/policy-rc.d
+    - apt-get install --yes sudo curl
+
+  script: "scripts/ci-aegir-dev-install-apt-ubuntu.sh"
+
 test:behat:
   stage: test
   image: aegir/hostmaster:packaging_base
