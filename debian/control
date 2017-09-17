@@ -11,7 +11,7 @@ Vcs-browser: http://drupalcode.org/project/provision.git
 
 Package: aegir3-provision
 Architecture: all
-Depends: ${misc:Depends}, php5-cli (>= 5.3) | php7.0-cli, php5 | php7.0-xml, php5-mysql | php7.0-mysql, mysql-client | mariadb-client, sudo, postfix | mail-transport-agent, apache2 | nginx, adduser, ucf, curl
+Depends: ${misc:Depends}, php5-cli (>= 5.3) | php7.0-cli | php7.1-cli, php5 | php7.0-xml | php7.1-xml, php5-mysql | php7.0-mysql | php7.1-mysql, mysql-client | mariadb-client, sudo, postfix | mail-transport-agent, apache2 | nginx, adduser, ucf, curl
 Recommends: mysql-server | mariadb-server, rsync
 Conflicts: aegir-provision, aegir-provision2, aegir2-provision
 Replaces: aegir-provision, aegir-provision2, aegir2-provision
@@ -30,8 +30,8 @@ Description: mass Drupal hosting system - backend
 
 Package: aegir3-hostmaster
 Architecture: all
-Depends: ${misc:Depends}, php5-mysql | php7.0-mysql, php5-gd | php7.0-gd, apache2 | nginx, libapache2-mod-php5 | libapache2-mod-php7.0 | php5-fpm | php7.0-fpm, aegir3-provision (>= ${source:Version}), git-core, unzip, lsb-base (>= 3.0-6)
-Recommends: php5 | php7.0
+Depends: ${misc:Depends}, php5-mysql | php7.0-mysql | php7.1-mysql, php5-gd | php7.0-gd | php7.1-gd, apache2 | nginx, libapache2-mod-php5 | libapache2-mod-php7.0 | php5-fpm | php7.0-fpm | php7.1-fpm, aegir3-provision (>= ${source:Version}), git-core, unzip, lsb-base (>= 3.0-6)
+Recommends: php5 | php7.0 | php7.1
 Conflicts: aegir-hostmaster, aegir-hostmaster2, aegir2-hostmaster
 Replaces: aegir-hostmaster, aegir-hostmaster2, aegir2-hostmaster
 Description: mass Drupal hosting system - frontend
@@ -69,8 +69,8 @@ Description: mass Drupal hosting system
 
 Package: aegir3-cluster-slave
 Architecture: all
-Depends: ${misc:Depends}, php5-mysql | php7.0-mysql, sudo, apache2, adduser, ucf, libapache2-mod-php5 | libapache2-mod-php7.0, rsync, nfs-client, mysql-client
-Recommends: php5-gd | php7.0-gd, php5 | php7.0
+Depends: ${misc:Depends}, php5-mysql | php7.0-mysql | php7.1-mysql, sudo, apache2, adduser, ucf, libapache2-mod-php5 | libapache2-mod-php7.0 | libapache2-mod-php7.1, rsync, nfs-client, mysql-client
+Recommends: php5-gd | php7.0-gd | php7.1-gd, php5 | php7.0 | php7.1
 Conflicts: aegir-cluster-slave, aegir-cluster-slave2, aegir2-cluster-slave, aegir3
 Replaces: aegir-cluster-slave, aegir-cluster-slave2, aegir2-cluster-slave
 Description: web frontend for the Aegir hosting system
