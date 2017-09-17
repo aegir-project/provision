@@ -30,7 +30,7 @@ Description: mass Drupal hosting system - backend
 
 Package: aegir3-hostmaster
 Architecture: all
-Depends: ${misc:Depends}, php5-mysql | php7.0-mysql | php7.1-mysql, php5-gd | php7.0-gd | php7.1-gd, apache2 | nginx, libapache2-mod-php5 | libapache2-mod-php7.0 | php5-fpm | php7.0-fpm | php7.1-fpm, aegir3-provision (>= ${source:Version}), git-core, unzip, lsb-base (>= 3.0-6)
+Depends: ${misc:Depends}, php5-mysql | php7.0-mysql | php7.1-mysql, php5-gd | php7.0-gd | php7.1-gd, apache2 | nginx, libapache2-mod-php5 | libapache2-mod-php7.0 | libapache2-mod-php7.1 | php5-fpm | php7.0-fpm | php7.1-fpm, aegir3-provision (>= ${source:Version}), git-core, unzip, lsb-base (>= 3.0-6)
 Recommends: php5 | php7.0 | php7.1
 Conflicts: aegir-hostmaster, aegir-hostmaster2, aegir2-hostmaster
 Replaces: aegir-hostmaster, aegir-hostmaster2, aegir2-hostmaster
