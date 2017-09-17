@@ -80,9 +80,9 @@ test:ubuntu-xenial-aegir3-apt:
     - echo "exit 0" >> /usr/sbin/policy-rc.d
     - apt-get install --yes sudo curl
 
-  script: "scripts/ci-aegir-dev-install-apt-ubuntu.sh"
+  script: "scripts/ci-aegir-dev-install-apt-ubuntu-xenial.sh"
 
-test:ubuntu-xenial-aegir3-apt:
+test:ubuntu-artful-aegir3-apt:
   stage: test
   image: ubuntu:artful
   dependencies:
@@ -96,7 +96,7 @@ test:ubuntu-xenial-aegir3-apt:
     - echo "exit 0" >> /usr/sbin/policy-rc.d
     - apt-get install --yes sudo curl
 
-  script: "scripts/ci-aegir-dev-install-apt-ubuntu.sh"
+  script: "scripts/ci-aegir-dev-install-apt-ubuntu-artful.sh"
 
 test:behat:
   stage: test
