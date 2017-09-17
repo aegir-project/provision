@@ -32,6 +32,6 @@ sudo apt-get install --yes mariadb-server mariadb-client php7.1-mysql php7.1-cli
 echo "[CI] Installing .deb files .. will fail on missing packages"
 sudo DPKG_DEBUG=developer dpkg --install build/aegir3_*.deb build/aegir3-provision*.deb build/aegir3-hostmaster*.deb
 
-echo "[CI] Installing remaining packaged and configuring our debs"
+echo "[CI] Installing remaining packages and configuring our debs"
 sudo apt-get install --fix-broken --yes
 
