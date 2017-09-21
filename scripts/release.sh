@@ -174,7 +174,7 @@ fi
 
 
 # Golden Contrib
-golden_contribs="hosting_civicrm hosting_git hosting_remote_import hosting_site_backup_manager hosting_tasks_extra"
+golden_contribs="hosting_civicrm hosting_git hosting_remote_import hosting_site_backup_manager hosting_tasks_extra hosting_logs"
 
 echo =========
 echo
