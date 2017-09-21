@@ -31,6 +31,7 @@ build:deb:
     - dpkg-buildpackage
     - mkdir build
     - mv -v ../aegir3*.deb build/
+    - mv -v ../aegir-archive-keyring*.deb build/
     - mv -v ../aegir3*.tar.gz build/
     - mv -v ../aegir3*.dsc build/
     - mv -v ../aegir3*.changes build/
