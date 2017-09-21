@@ -26,8 +26,8 @@ build:deb:
   script:
     - export commit=$(git log -n 1 --oneline | sed 's/ .*$//')
     - export version=$(sed -ne 's/^[^(]*(\([^)]*\)).*/\1/;1p' debian/changelog)
-
-
+    - export new_version="${version}+${CI_BUILD_ID}.${commit}"
+    - dch -D unstable --newversion "$new_version" "automatic GitLab CI build ${CI_BUILD_ID}"
     - dpkg-buildpackage
     - mkdir build
     - mv -v ../aegir3*.deb build/
