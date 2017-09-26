@@ -1,3 +1,9 @@
+#
+# CI for Aegir Hosting System
+#
+# For docs see http://docs.aegirproject.org
+# and http://docs.aegirproject.org/en/3.x/community/release-process/#setting-up-a-gitlab-runner
+
 # Is performed before the scripts in the stages step
 before_script:
   - source /etc/profile
@@ -9,7 +15,11 @@ stages:
   - publish
   - upgradetest
 
-# Stage "build"
+
+#
+### Stage "build"
+#
+
 build:deb:
   stage: build
   image: aegir/hostmaster:packaging_base
@@ -21,6 +31,7 @@ build:deb:
     - dpkg-buildpackage
     - mkdir build
     - mv -v ../aegir3*.deb build/
+    - mv -v ../aegir-archive-keyring*.deb build/
     - mv -v ../aegir3*.tar.gz build/
     - mv -v ../aegir3*.dsc build/
     - mv -v ../aegir3*.changes build/
@@ -31,12 +42,17 @@ build:deb:
       - build/*
 
 
-# Stage "test"
+#
+### Stage "test"
+#
+
 test:debian-jessie-aegir3-apt:
   stage: test
   image: debian:jessie
   dependencies:
     - build:deb
+  only:
+    - 7.x-3.x
 
   before_script:
     - apt-get update
@@ -53,8 +69,6 @@ test:debian-stretch-aegir3-apt:
   allow_failure: true
   dependencies:
     - build:deb
-  only:
-    - 7.x-3.x
 
   before_script:
     - apt-get update
@@ -80,7 +94,23 @@ test:ubuntu-xenial-aegir3-apt:
     - echo "exit 0" >> /usr/sbin/policy-rc.d
     - apt-get install --yes sudo curl
 
-  script: "scripts/ci-aegir-dev-install-apt-ubuntu.sh"
+  script: "scripts/ci-aegir-dev-install-apt-ubuntu-xenial.sh"
+
+test:ubuntu-artful-aegir3-apt:
+  stage: test
+  image: ubuntu:artful
+  dependencies:
+    - build:deb
+  allow_failure: true
+
+  before_script:
+    - apt-get update
+    # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
+    - echo "#!/bin/sh" > /usr/sbin/policy-rc.d
+    - echo "exit 0" >> /usr/sbin/policy-rc.d
+    - apt-get install --yes sudo curl
+
+  script: "scripts/ci-aegir-dev-install-apt-ubuntu-artful.sh"
 
 test:behat:
   stage: test
@@ -115,7 +145,9 @@ test:behat:
     - sudo docker-compose -f docker-compose-provision.yml run hostmaster
 
 
-
+#
+### Stage "publish"
+#
 
 publish:unstable-repo:
   stage: publish
@@ -149,6 +181,10 @@ publish:unstable-repo:
       # reprepro should pick this up in seconds and update the repository index.
 
 
+#
+### Stage "upgradetest"
+#
+
 # Upgrade the latest stable Aegir to our unstable repo.
 upgradetest:debian-jessie-aegir3-apt-upgrade:
   stage: upgradetest
@@ -178,6 +214,6 @@ upgradetest:debian-jessie-aegir3-apt-upgrade:
     - sudo su aegir --login --command 'drush @hostmaster php-eval "echo hosting_task_count_running();"'
     # upgrade to the latest version from the unstable repo.
     - rm -v /etc/apt/sources.list.d/aegir-stable.list
-    - echo "deb http://debian2.aegirproject.org unstable main" | sudo tee -a /etc/apt/sources.list.d/aegir-unstable.list
+    - echo "deb http://debian.aegirproject.org unstable main" | sudo tee -a /etc/apt/sources.list.d/aegir-unstable.list
     - sudo apt-get update
     - sudo apt-get --yes upgrade
