@@ -149,7 +149,7 @@ function _provision_find_profiles() {
         $profile->info['languages'] = _provision_find_profile_languages($profile->path);
 
         $profiles[basename($profile->path)] = $profile;
-        drush_log(dt('Found install profile %name', array('%name' => $name)));
+        drush_log(dt('Found install profile %name', array('%name' => $profile->name)));
       }
     }
   }
