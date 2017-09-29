@@ -266,6 +266,9 @@ function drush_provision_hostmaster_install($site = NULL) {
   $options = array();
   if (drush_get_option('working-copy')) {
     $options['working-copy'] = 1;
+
+    # Don't rewrite module info files if using working-copy.
+    $options['no-gitinfofile'] = 1;
   }
   provision_backend_invoke($platform_name, 'provision-verify', array(), $options);
 
