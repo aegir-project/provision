@@ -3,6 +3,7 @@
 namespace Aegir\Provision\Command;
 
 use Aegir\Provision\Command;
+use Aegir\Provision\Context\SiteContext;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
@@ -42,6 +43,10 @@ class SaveCommand extends Command
 
       // @TODO: Load up all ProvisionContextTypes and inject their options.
 
+      // Load all SiteContext options
+      foreach (SiteContext::option_documentation() as $option => $description) {
+        $inputDefinition[] = new InputOption($option, NULL, InputOption::VALUE_OPTIONAL, $description);
+      }
       return new InputDefinition($inputDefinition);
     }
 

@@ -5,9 +5,10 @@ namespace Aegir\Provision\Context;
 use Aegir\Provision\Context;
 
 /**
- * @file Provision named context site class.
+ * Class SiteContext
+ *
+ * @package Aegir\Provision\Context
  */
-
 class SiteContext extends Context {
   static function option_documentation() {
     return array(
