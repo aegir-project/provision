@@ -1,0 +1,37 @@
+{
+    "name": "aegir/provision",
+    "description": "The CLI for the Aegir Hosting System.",
+    "keywords": ["Hosting", "Drupal", "Aegir"],
+    "homepage": "http://aegirproject.org/",
+    "type": "library",
+    "license": "GPL-2.0+",
+    "require": {
+        "symfony/console": "^3.3",
+        "drupal/console-core": "1.0.2"
+    },
+    "bin": ["bin/drupal"],
+    "authors": [
+        {
+            "name":     "Aegir Contributors",
+            "homepage": "https://github.com/aegir/provision/graphs/contributors"
+        },
+        {
+            "name":     "Jon Pugh",
+            "email":    "jon@thinkdrop.net",
+            "homepage": "http://thinkdrop.net"
+        }
+    ],
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/provision?categories=All",
+        "docs": "https://docs.aegirproject.org/"
+    },
+    "config": {
+        "bin-dir": "bin/",
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {"Aegir\\Provision\\": "src"}
+    }
+}

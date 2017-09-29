@@ -5,3 +5,6 @@ GPATH
 GRTAGS
 GSYMS
 GTAGS
+
+# Composer
+vendor
