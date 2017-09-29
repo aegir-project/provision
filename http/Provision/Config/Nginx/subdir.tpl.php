@@ -75,7 +75,7 @@ $subdir_dot = str_replace('/', '.', $subdir);
   // use this simple fallback to guarantee that empty db_port does not
   // break Nginx reload which results with downtime for the affected vhosts.
   if (!$db_port) {
-    $ctrlf = '/data/conf/' . $script_user . '_use_proxysql.txt'; 
+    $ctrlf = '/data/conf/' . $script_user . '_use_proxysql.txt';
     if (provision_file()->exists($ctrlf)->status()) {
       $db_port = '6033';
     }
@@ -1206,16 +1206,15 @@ location @drupal_<?php print $subdir_loc; ?> {
   }
 <?php endif; ?>
   ###
-  ### For Drupal >= 7
+  ### For Pressflow 6 (vanilla Drupal 6 will not be detected!)
   ###
-  if ($sent_http_x_generator) {
-    add_header X-Info-Gen "Modern";
-    rewrite ^ /<?php print $subdir; ?>/index.php?$query_string last;
+  if (-e $document_root/modules/path_alias_cache) {
+    rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
   }
   ###
-  ### For Drupal <= 6
+  ### For Drupal >= 7
   ###
-  rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
+  rewrite ^ /<?php print $subdir; ?>/index.php?$query_string last;
 }
 
 <?php if ($nginx_config_mode == 'extended'): ?>
@@ -1246,16 +1245,15 @@ location @nobots_<?php print $subdir_loc; ?> {
   }
 
   ###
-  ### For Drupal >= 7
+  ### For Pressflow 6 (vanilla Drupal 6 will not be detected!)
   ###
-  if ($sent_http_x_generator) {
-    add_header X-Info-Gen "Modern";
-    rewrite ^ /<?php print $subdir; ?>/index.php?$query_string last;
+  if (-e $document_root/modules/path_alias_cache) {
+    rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
   }
   ###
-  ### For Drupal <= 6
+  ### For Drupal >= 7
   ###
-  rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
+  rewrite ^ /<?php print $subdir; ?>/index.php?$query_string last;
 }
 
 ###

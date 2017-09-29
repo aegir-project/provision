@@ -1284,16 +1284,15 @@ location @drupal {
   }
 <?php endif; ?>
   ###
-  ### For Drupal >= 7
+  ### For Pressflow 6 (vanilla Drupal 6 will not be detected!)
   ###
-  if ($sent_http_x_generator) {
-    add_header X-Info-Gen "Modern";
-    rewrite ^ /index.php?$query_string last;
+  if (-e $document_root/modules/path_alias_cache) {
+    rewrite ^/(.*)$ /index.php?q=$1 last;
   }
   ###
-  ### For Drupal <= 6
+  ### For Drupal >= 7
   ###
-  rewrite ^/(.*)$ /index.php?q=$1 last;
+  rewrite ^ /index.php?$query_string last;
 }
 
 <?php if ($nginx_config_mode == 'extended'): ?>
@@ -1324,16 +1323,15 @@ location @nobots {
   }
 
   ###
-  ### For Drupal >= 7
+  ### For Pressflow 6 (vanilla Drupal 6 will not be detected!)
   ###
-  if ($sent_http_x_generator) {
-    add_header X-Info-Gen "Modern";
-    rewrite ^ /index.php?$query_string last;
+  if (-e $document_root/modules/path_alias_cache) {
+    rewrite ^/(.*)$ /index.php?q=$1 last;
   }
   ###
-  ### For Drupal <= 6
+  ### For Drupal >= 7
   ###
-  rewrite ^/(.*)$ /index.php?q=$1 last;
+  rewrite ^ /index.php?$query_string last;
 }
 
 ###
