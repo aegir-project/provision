@@ -32,8 +32,6 @@ class SaveCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $config = new Configuration;
-        $shell = new Shell($config);
-        $shell->run();
+      shell_exec('drush provision-save');
     }
 }
