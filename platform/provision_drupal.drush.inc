@@ -561,7 +561,7 @@ function _provision_drupal_find_modules($scope, $key = '') {
         unset($files[$name]);
         continue;
       }
-      $files[$name]->info = Symfony\Component\Yaml\Yaml::parse($yaml_file);
+      $files[$name]->info = Symfony\Component\Yaml\Yaml::parse(file_get_contents($yaml_file));
       if (!empty($files[$name]->info['name'])) {
         $files[$name]->name = $files[$name]->info['name'];
       }
