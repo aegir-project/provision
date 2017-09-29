@@ -20,8 +20,18 @@ for shortname in $modules; do
   cd $shortname >> /dev/null;
   git pull --quiet
   echo "**Changes to $shortname since $prev_release**"
-  drush rn --baseurl=https://www.drupal.org/ --md $prev_release HEAD | grep -v "Changes since $prev_release"
+  changes=`drush rn --baseurl=https://www.drupal.org/ --md $prev_release HEAD | grep -v "Changes since $prev_release"`
+  if [ -z "$changes" ]; then
+    echo
+    echo "* None"
+  else
+    echo "$changes"
+  fi
+
+  echo
+  echo
+
   cd - >> /dev/null;
 done
 
-cd -
+cd - >> /dev/null;
