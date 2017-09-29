@@ -360,7 +360,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ^~ /<?php print $subdir; ?>/search {
     location ~* ^/<?php print $subdir; ?>/search {
-      if ($is_bot) {
+      if ( $is_bot ) {
         return 403;
       }
       try_files /search $uri @cache_<?php print $subdir_loc; ?>;
@@ -372,7 +372,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ^~ /<?php print $subdir; ?>/js/ {
     location ~* ^/<?php print $subdir; ?>/js/ {
-      if ($is_bot) {
+      if ( $is_bot ) {
         return 403;
       }
       rewrite ^/<?php print $subdir; ?>/(.*)$ /js.php?q=$1 last;
@@ -418,7 +418,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Support for backup_migrate module download/restore/delete actions.
   ###
   location ^~ /<?php print $subdir; ?>/admin {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
@@ -430,7 +430,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Avoid caching /civicrm* and protect it from bots.
   ###
   location ^~ /<?php print $subdir; ?>/civicrm {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     set $nocache_details "Skip";
@@ -442,7 +442,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ^~ /<?php print $subdir; ?>/audio/download {
     location ~* ^/<?php print $subdir; ?>/(audio/download/.*/.*\.(?:mp3|mp4|m4a|ogg))$ {
-      if ($is_bot) {
+      if ( $is_bot ) {
         return 403;
       }
       tcp_nopush off;
@@ -625,7 +625,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Note: this location doesn't work with X-Accel-Redirect.
   ###
   location ~* ^/<?php print $subdir; ?>/(sites/.*/files/private/.*) {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
@@ -642,7 +642,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ~* ^/<?php print $subdir; ?>/sites/.*/private/ {
 <?php if ($nginx_config_mode == 'extended'): ?>
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
 <?php endif; ?>
@@ -656,7 +656,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Note: this location works with X-Accel-Redirect.
   ###
   location ~* /<?php print $subdir; ?>/files/private/ {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
@@ -822,7 +822,7 @@ location ^~ /<?php print $subdir; ?> {
     tcp_nopush   off;
     keepalive_requests 0;
     access_log   off;
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     try_files    /$1 $uri =404;
@@ -839,7 +839,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Deny crawlers and never cache known AJAX requests.
   ###
   location ~* ^/<?php print $subdir; ?>/(.*(?:ahah|ajax|batch|autocomplete|done|progress/|x-progress-id|js/.*).*)$ {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
@@ -856,7 +856,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Serve & no-log static helper files used in some wysiwyg editors.
   ###
   location ~* ^/<?php print $subdir; ?>/(sites/.*/(?:modules|libraries)/(?:contrib/)?(?:tinybrowser|f?ckeditor|tinymce|flowplayer|jwplayer|videomanager)/.*\.(?:html?|xml))$ {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log      off;
@@ -911,7 +911,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Deny bots on never cached uri.
   ###
   location ~* ^/<?php print $subdir; ?>/((?:.*/)?(?:admin|user|cart|checkout|logout|comment/reply)) {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
@@ -923,7 +923,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Protect from DoS attempts on never cached uri.
   ###
   location ~* ^/<?php print $subdir; ?>/((?:.*/)?(?:node/[0-9]+/edit|node/add)) {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
@@ -938,7 +938,7 @@ location ^~ /<?php print $subdir; ?> {
     if ($cache_uid = '') {
       return 403;
     }
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
@@ -997,7 +997,7 @@ location ^~ /<?php print $subdir; ?> {
 <?php endif; ?>
 <?php if ($satellite_mode == 'boa'): ?>
     limit_conn   limreq 88;
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 404;
     }
 <?php endif; ?>
@@ -1208,7 +1208,7 @@ location @drupal_<?php print $subdir_loc; ?> {
   ###
   ### For Pressflow 6 (vanilla Drupal 6 will not be detected!)
   ###
-  if (-e $document_root/modules/path_alias_cache) {
+  if ( -e $document_root/modules/path_alias_cache ) {
     rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
   }
   ###
@@ -1232,7 +1232,7 @@ location @nobots_<?php print $subdir_loc; ?> {
   ###
   ### Send all known bots to $args free URLs (optional)
   ###
-  # if ($is_bot) {
+  # if ( $is_bot ) {
   #   return 301 $scheme://$host$request_uri;
   # }
 
@@ -1247,7 +1247,7 @@ location @nobots_<?php print $subdir_loc; ?> {
   ###
   ### For Pressflow 6 (vanilla Drupal 6 will not be detected!)
   ###
-  if (-e $document_root/modules/path_alias_cache) {
+  if ( -e $document_root/modules/path_alias_cache ) {
     rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
   }
   ###

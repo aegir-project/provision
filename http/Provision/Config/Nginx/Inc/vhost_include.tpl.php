@@ -310,7 +310,7 @@ location ^~ /cron/ {
 ###
 location ^~ /search {
   location ~* ^/search {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     try_files $uri @cache;
@@ -322,7 +322,7 @@ location ^~ /search {
 ###
 location ^~ /js/ {
   location ~* ^/js/ {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     rewrite ^/(.*)$ /js.php?q=$1 last;
@@ -356,7 +356,7 @@ location ^~ /hosting/c/server_master {
   if ($cache_uid = '') {
     return 403;
   }
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log off;
@@ -372,7 +372,7 @@ location ^~ /hosting/c/server_localhost {
   if ($cache_uid = '') {
     return 403;
   }
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log off;
@@ -384,7 +384,7 @@ location ^~ /hosting/c/server_localhost {
 ### Fix for #2005116
 ###
 location ^~ /hosting/sites {
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log off;
@@ -396,7 +396,7 @@ location ^~ /hosting/sites {
 ### Fix for Aegir & .info .pl domain extensions.
 ###
 location ^~ /hosting {
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log off;
@@ -426,7 +426,7 @@ location ^~ /admin/config/development/performance/redis {
 ### Support for backup_migrate module download/restore/delete actions.
 ###
 location ^~ /admin {
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log off;
@@ -438,7 +438,7 @@ location ^~ /admin {
 ### Avoid caching /civicrm* and protect it from bots.
 ###
 location ^~ /civicrm {
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log off;
@@ -451,7 +451,7 @@ location ^~ /civicrm {
 ###
 location ^~ /audio/download {
   location ~* ^/audio/download/.*/.*\.(?:mp3|mp4|m4a|ogg)$ {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     tcp_nopush off;
@@ -508,7 +508,7 @@ location ~* (?:cgi-bin|vti-bin) {
 ### Deny bots on some weak modules uri.
 ###
 location ~* (?:validation|aggregator|vote_up_down|captcha|vbulletin|glossary/) {
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log off;
@@ -636,7 +636,7 @@ include <?php print $aegir_root; ?>/config/server_master/nginx/post.d/nginx_vhos
 ### Note: this location doesn't work with X-Accel-Redirect.
 ###
 location ~* ^/sites/.*/files/private/ {
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log off;
@@ -653,7 +653,7 @@ location ~* ^/sites/.*/files/private/ {
 location ~* ^/sites/.*/private/ {
   internal;
 <?php if ($nginx_config_mode == 'extended'): ?>
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
 <?php endif; ?>
@@ -667,7 +667,7 @@ location ~* ^/sites/.*/private/ {
 ###
 location ~* /files/private/ {
   internal;
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log off;
@@ -1005,7 +1005,7 @@ location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tin
   tcp_nopush   off;
   keepalive_requests 0;
   access_log   off;
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   try_files    $uri =404;
@@ -1022,7 +1022,7 @@ location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tin
 ### Deny crawlers and never cache known AJAX requests.
 ###
 location ~* /(?:ahah|ajax|batch|autocomplete|done|progress/|x-progress-id|js/.*) {
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log off;
@@ -1039,7 +1039,7 @@ location ~* /(?:ahah|ajax|batch|autocomplete|done|progress/|x-progress-id|js/.*)
 ### Serve & no-log static helper files used in some wysiwyg editors.
 ###
 location ~* ^/sites/.*/(?:modules|libraries)/(?:contrib/)?(?:tinybrowser|f?ckeditor|tinymce|flowplayer|jwplayer|videomanager)/.*\.(?:html?|xml)$ {
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log      off;
@@ -1096,7 +1096,7 @@ location ~* \.xml$ {
 ### Deny bots on never cached uri.
 ###
 location ~* ^/(?:.*/)?(?:admin|user|cart|checkout|logout|comment/reply) {
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log off;
@@ -1108,7 +1108,7 @@ location ~* ^/(?:.*/)?(?:admin|user|cart|checkout|logout|comment/reply) {
 ### Protect from DoS attempts on never cached uri.
 ###
 location ~* ^/(?:.*/)?(?:node/[0-9]+/edit|node/add) {
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log off;
@@ -1123,7 +1123,7 @@ location ~* ^/(?:.*/)?(?:node/[0-9]+/delete|approve) {
   if ($cache_uid = '') {
     return 403;
   }
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 403;
   }
   access_log off;
@@ -1286,7 +1286,7 @@ location @drupal {
   ###
   ### For Pressflow 6 (vanilla Drupal 6 will not be detected!)
   ###
-  if (-e $document_root/modules/path_alias_cache) {
+  if ( -e $document_root/modules/path_alias_cache ) {
     rewrite ^/(.*)$ /index.php?q=$1 last;
   }
   ###
@@ -1310,7 +1310,7 @@ location @nobots {
   ###
   ### Send all known bots to $args free URLs (optional)
   ###
-  # if ($is_bot) {
+  # if ( $is_bot ) {
   #   return 301 $scheme://$host$request_uri;
   # }
 
@@ -1325,7 +1325,7 @@ location @nobots {
   ###
   ### For Pressflow 6 (vanilla Drupal 6 will not be detected!)
   ###
-  if (-e $document_root/modules/path_alias_cache) {
+  if ( -e $document_root/modules/path_alias_cache ) {
     rewrite ^/(.*)$ /index.php?q=$1 last;
   }
   ###
@@ -1403,7 +1403,7 @@ location ~* ^/(?:index|cron|boost_stats|update|authorize|xmlrpc)\.php$ {
 <?php endif; ?>
 <?php if ($satellite_mode == 'boa'): ?>
   limit_conn   limreq 88;
-  if ($is_bot) {
+  if ( $is_bot ) {
     return 404;
   }
 <?php endif; ?>
