@@ -2,11 +2,11 @@
 
 namespace Aegir\Provision\Command;
 
+use Aegir\Provision\Command;
 use Psy\Shell;
 use Psy\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Drupal\Console\Core\Command\Command;
 
 /**
  * Class ShellCommand

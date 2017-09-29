@@ -2,13 +2,12 @@
 
 namespace Aegir\Provision\Command;
 
+use Aegir\Provision\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
-use Drupal\Console\Core\Command\Command;
-
 
 /**
  * Class SaveCommand
@@ -52,6 +51,8 @@ class SaveCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
       $output->writeln("Saving context: " . $input->getArgument('context_name'));
-      shell_exec('drush provision-save');
+
+      $command = 'drush provision-save ' . $input->getArgument('context_name');
+      $this->process($command);
     }
 }
