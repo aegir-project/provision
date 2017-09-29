@@ -8,6 +8,8 @@ use Aegir\Provision\Context;
  * Class SiteContext
  *
  * @package Aegir\Provision\Context
+ *
+ * @see \Provision_Context_site
  */
 class SiteContext extends Context {
   static function option_documentation() {

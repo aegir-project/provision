@@ -3,6 +3,8 @@
 namespace Aegir\Provision\Command;
 
 use Aegir\Provision\Command;
+use Aegir\Provision\Context\PlatformContext;
+use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Context\SiteContext;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -41,12 +43,18 @@ class SaveCommand extends Command
       $inputDefinition[] = new InputOption('context_type', NULL, InputOption::VALUE_OPTIONAL, 'server, platform, or site; default server', 'server');
       $inputDefinition[] = new InputOption('delete', NULL, InputOption::VALUE_OPTIONAL, 'Remove the alias.');
 
-      // @TODO: Load up all ProvisionContextTypes and inject their options.
-
-      // Load all SiteContext options
-      foreach (SiteContext::option_documentation() as $option => $description) {
-        $inputDefinition[] = new InputOption($option, NULL, InputOption::VALUE_OPTIONAL, $description);
+      // Load all Aegir\Provision\Context and inject their options.
+      // @TODO: Figure out a way to do discovery to include all classes that inherit Aegir\Provision\Context
+      $contexts[] = SiteContext::option_documentation();
+      $contexts[] = PlatformContext::option_documentation();
+      $contexts[] = ServerContext::option_documentation();
+      
+      foreach ($contexts as $context_options) {
+        foreach ($context_options as $option => $description) {
+          $inputDefinition[] = new InputOption($option, NULL, InputOption::VALUE_OPTIONAL, $description);
+        }
       }
+      
       return new InputDefinition($inputDefinition);
     }
 
