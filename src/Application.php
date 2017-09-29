@@ -2,6 +2,7 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Command\SaveCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Application as BaseApplication;
@@ -32,5 +33,14 @@ class Application extends BaseApplication
   public function __construct()
   {
     parent::__construct($this::NAME, $this::VERSION);
+  }
+
+  /**
+   * Initializes all the default commands.
+   */
+  protected function getDefaultCommands() {
+    $commands = parent::getDefaultCommands();
+    $commands[] = new SaveCommand();
+    return $commands;
   }
 }
