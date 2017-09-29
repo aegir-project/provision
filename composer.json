@@ -12,8 +12,16 @@
     "bin": ["bin/drupal"],
     "authors": [
         {
-            "name":     "Aegir Contributors",
-            "homepage": "https://github.com/aegir/provision/graphs/contributors"
+            "name":     "Provision Contributors",
+            "homepage": "https://github.com/aegir-project/provision/graphs/contributors"
+        },
+        {
+            "name":     "Hosting Contributors",
+            "homepage": "https://github.com/aegir-project/hosting/graphs/contributors"
+        },
+        {
+            "name":     "Hostmaster Contributors",
+            "homepage": "https://github.com/aegir-project/hostmaster/graphs/contributors"
         },
         {
             "name":     "Jon Pugh",
