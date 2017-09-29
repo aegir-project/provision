@@ -6,8 +6,9 @@
     "type": "library",
     "license": "GPL-2.0+",
     "require": {
-        "symfony/console": "^3.3",
-        "drupal/console-core": "1.0.2"
+        "drupal/console-core": "1.0.2",
+        "psy/psysh": "^0.8.11",
+        "symfony/console": "^3.3"
     },
     "bin": ["bin/drupal"],
     "authors": [
