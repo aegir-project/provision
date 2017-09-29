@@ -1,3 +1,21 @@
+# Provision 4.x
+
+This branch of Provision is the first steps toward converting a drush package to a Symfony Console CLI tool.
+
+It is IN ACTIVE DEVELOPMENT: Most things will not work yet.
+
+The plan is to create a Provision.phar CLI tool with all of the same commands that drush provision contains.
+
+If we attain Command-Parity with drush provision, we can switch out the command Hosting.module uses when running tasks to use provision.phar instead of drush_backend_invoke().
+
+This way we do not have to redesign the whole system: Just replace provision.
+
+See this issue for more information on this effort: https://www.drupal.org/node/2912579
+
+Thoughts welcome.
+
+ -JonPugh
+
 # The Aegir system
 
 The Aegir hosting system allows developers and site administrators to
