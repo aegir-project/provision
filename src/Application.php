@@ -5,6 +5,8 @@ namespace Aegir\Provision;
 use Aegir\Provision\Command\SaveCommand;
 use Aegir\Provision\Command\ShellCommand;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Application as BaseApplication;
 
@@ -55,5 +57,17 @@ class Application extends BaseApplication
     $commands[] = new SaveCommand();
     $commands[] = new ShellCommand();
     return $commands;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Adds "--target" option.
+   */
+  protected function getDefaultInputDefinition()
+  {
+    $inputDefinition = parent::getDefaultInputDefinition();
+    $inputDefinition->addOption(new InputOption('--target', '-t', InputOption::VALUE_NONE, 'The target context to act on.'));
+    return $inputDefinition;
   }
 }
