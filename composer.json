@@ -10,7 +10,7 @@
         "psy/psysh": "^0.8.11",
         "symfony/console": "^3.3"
     },
-    "bin": ["bin/drupal"],
+    "bin": ["bin/provision"],
     "authors": [
         {
             "name":     "Provision Contributors",
