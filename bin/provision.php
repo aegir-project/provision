@@ -2,11 +2,8 @@
 
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Input\ArrayInput;
-use Drupal\Console\Bootstrap\Drupal;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Drupal\Console\Core\Utils\ArgvInputReader;
-use Drupal\Console\Core\Utils\ConfigurationManager;
-//use Drupal\Console\Core\Utils\DrupalFinder;
 
 use Aegir\Provision\Application;
 
@@ -44,36 +41,7 @@ $output = new ConsoleOutput();
 $input = new ArrayInput([]);
 $io = new DrupalStyle($input, $output);
 $argvInputReader = new ArgvInputReader();
-//$root = $argvInputReader->get('root', getcwd());
 
-//$drupalFinder = new DrupalFinder();
-//if (!$drupalFinder->locateRoot($root)) {
-//    $io->info('No Drupal site bootstrapped.');
-//    $application = new Application();
-//}
-//else {
-  //chdir($drupalFinder->getDrupalRoot());
-//  $configurationManager = new ConfigurationManager();
-//  $configuration = $configurationManager
-//    ->loadConfigurationFromDirectory($drupalFinder->getComposerRoot());
-//
-//  if ($configuration && $options = $configuration->get('application.options') ?: []) {
-//    $argvInputReader->setOptionsFromConfiguration($options);
-//  }
-//
-//  $drupal = new Drupal($autoload, $drupalFinder);
-//  $container = $drupal->boot();
-//
-//  if (!$container) {
-//    $io->error('Something was wrong. Drupal can not be bootstrap.');
-//
-//    exit(1);
-//  }
-//
-//  $application = new Application($container);
-//}
-
-//$argvInputReader->setOptionsAsArgv();
 $debug = $argvInputReader->get('debug', false);
 if ($debug){
     $io->writeln(
