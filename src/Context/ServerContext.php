@@ -2,7 +2,6 @@
 
 namespace Aegir\Provision\Context;
 
-use Aegir\Provision\Console\Config;
 use Aegir\Provision\Context;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
