@@ -85,8 +85,23 @@ class SaveCommand extends Command
         
         $context = new $class($input->getArgument('context_name'), $input->getOptions(), $this->getApplication()->getConfig()->all());
         
+        foreach ($context->getProperties() as $name => $value) {
+            $rows[] = [$name, $value];
+        }
+        
+        $this->io->table(['Saving Context:', $context->name], $rows);
+        
+        if ($this->io->confirm("Write configuration for <question>{$context->type}</question> context <question>{$context->name}</question> to <question>{$context->config_path}</question>?")) {
+            if ($context->save()) {
+                $this->io->success("Configuration saved to {$context->config_path}");
+            }
+            else {
+                $this->io->error("Unable to save configuration to {$context->config_path}. ");
+            }
+        }
+        
         $output->writeln(
-          "Saving context: ".print_r($context,1)
+          "Context Object: ".print_r($context,1)
         );
 
 //        $command = 'drush provision-save '.$input->getArgument('context_name');

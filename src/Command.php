@@ -2,6 +2,7 @@
 
 namespace Aegir\Provision;
 
+use Drupal\Console\Core\Style\DrupalStyle;
 use Symfony\Component\Console\Command\Command as BaseCommand;
 use Drupal\Console\Core\Command\Shared\CommandTrait;
 use Symfony\Component\Console\Input\InputInterface;
@@ -27,6 +28,11 @@ abstract class Command extends BaseCommand
      * @var \Symfony\Component\Console\Output\OutputInterface
      */
     protected $output;
+    
+    /**
+     * @var DrupalStyle;
+     */
+    protected $io;
 
     /**
      * @var \Aegir\Provision\Console\Config
@@ -43,6 +49,9 @@ abstract class Command extends BaseCommand
     ) {
         $this->input = $input;
         $this->output = $output;
+        
+        $this->io = new DrupalStyle($input, $output);
+        
         $this->config = $this->getApplication()->getConfig();
     }
 
