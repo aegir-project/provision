@@ -53,12 +53,47 @@ class Config implements ConfigurationInterface
             }
             $this->config = $processor->processConfiguration($this, $configs);
         } catch (\Exception $e) {
-            throw new \Exception(
+            throw new Exception(
               'There is an error with your configuration: '.$e->getMessage()
             );
         }
 
+        $this->validateConfig();
+    }
 
+    /**
+     * Check configuration values against the current system.
+     *
+     * @throws \Exception
+     */
+    protected function validateConfig() {
+        // Check that aegir_root is writable.
+        // @TODO: Figure out how to throw pretty console exceptions.
+        // @TODO: Create some kind of Setup functionality.
+        if (!is_writable($this->config['aegir_root'])) {
+            throw new \Exception(
+              "There is an error with your configuration: The folder set to 'aegir_root' ({$this->config['aegir_root']}) is not writable. Check your ~/.provision.yml file and try again."
+            );
+        }
+        // Check that config_path exists and is writable.
+        if (!file_exists($this->config['config_path'])) {
+            throw new \Exception(
+              "There is an error with your configuration: The folder set to 'config_path'({$this->config['config_path']}) does not exist. Check your ~/.provision.yml file and try again."
+            );
+        }
+        elseif (!is_writable($this->config['config_path'])) {
+            throw new \Exception(
+              "There is an error with your configuration: The folder set to 'config_path'({$this->config['config_path']}) is not writable."
+            );
+        }
+
+        // Ensure that script_user is the user.
+        $real_script_user = $this->getScriptUser();
+        if ($this->config['script_user'] != $real_script_user) {
+            throw new \Exception(
+              "There is an error with your configuration: The user set in 'script_user'({$this->config['script_user']}) is not the currently running user ({$real_script_user})."
+            );
+        }
     }
 
     /**
@@ -209,6 +244,14 @@ class Config implements ConfigurationInterface
         } catch (IOExceptionInterface $e) {
             return false;
         }
+    }
+
+    /**
+     * Determine the user running provision.
+     */
+    protected function getScriptUser() {
+        $real_script_user = posix_getpwuid(posix_geteuid());
+        return $real_script_user['name'];
     }
 
     /**
