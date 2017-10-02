@@ -106,13 +106,13 @@ class Config implements ConfigurationInterface
         $root_node
           ->children()
           ->scalarNode('aegir_root')
-          ->defaultValue('/var/aegir')
+          ->defaultValue(Config::getHomeDir())
           ->end()
           ->scalarNode('script_user')
-          ->defaultValue('aegir')
+          ->defaultValue(Config::getScriptUser())
           ->end()
           ->scalarNode('config_path')
-          ->defaultValue('/var/aegir/config')
+          ->defaultValue(Config::getHomeDir() . '/config')
           ->end()
           ->end();;
 
