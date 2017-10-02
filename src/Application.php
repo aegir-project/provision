@@ -27,39 +27,40 @@ use Symfony\Component\Console\Application as BaseApplication;
  */
 class Application extends BaseApplication
 {
-  /**
-   * @var string
-   */
-  const NAME = 'Aegir Provision';
 
-  /**
-   * @var string
-   */
-  const VERSION = '4.x';
+    /**
+     * @var string
+     */
+    const NAME = 'Aegir Provision';
 
-  /**
-   * @var string
-   */
-  const CONSOLE_CONFIG = '.provision.yml';
+    /**
+     * @var string
+     */
+    const VERSION = '4.x';
 
-  /**
-   * @var string
-   */
-  const DEFAULT_TIMEZONE = 'America/New_York';
+    /**
+     * @var string
+     */
+    const CONSOLE_CONFIG = '.provision.yml';
 
-  public function __construct()
-  {
+    /**
+     * @var string
+     */
+    const DEFAULT_TIMEZONE = 'America/New_York';
 
-    // If no timezone is set, set Default.
-    if (empty(ini_get('date.timezone'))) {
-      date_default_timezone_set($this::DEFAULT_TIMEZONE);
+    public function __construct()
+    {
+
+        // If no timezone is set, set Default.
+        if (empty(ini_get('date.timezone'))) {
+            date_default_timezone_set($this::DEFAULT_TIMEZONE);
+        }
+
+        // Load Configs
+        $this->config = new Config();
+
+        parent::__construct($this::NAME, $this::VERSION);
     }
-
-    // Load Configs
-    $this->config = new Config();
-
-    parent::__construct($this::NAME, $this::VERSION);
-  }
 
     /**
      * @var Config
@@ -88,27 +89,37 @@ class Application extends BaseApplication
         $this->config = $config;
     }
 
-  /**
-   * Initializes all the default commands.
-   */
-  protected function getDefaultCommands() {
-      $commands[] = new HelpCommand();
-      $commands[] = new ListCommand();
-      $commands[] = new SaveCommand();
-      $commands[] = new ShellCommand();
-      $commands[] = new StatusCommand();
-      return $commands;
-  }
+    /**
+     * Initializes all the default commands.
+     */
+    protected function getDefaultCommands()
+    {
+        $commands[] = new HelpCommand();
+        $commands[] = new ListCommand();
+        $commands[] = new SaveCommand();
+        $commands[] = new ShellCommand();
+        $commands[] = new StatusCommand();
 
-  /**
-   * {@inheritdoc}
-   *
-   * Adds "--target" option.
-   */
-  protected function getDefaultInputDefinition()
-  {
-    $inputDefinition = parent::getDefaultInputDefinition();
-    $inputDefinition->addOption(new InputOption('--target', '-t', InputOption::VALUE_NONE, 'The target context to act on.'));
-    return $inputDefinition;
-  }
+        return $commands;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * Adds "--target" option.
+     */
+    protected function getDefaultInputDefinition()
+    {
+        $inputDefinition = parent::getDefaultInputDefinition();
+        $inputDefinition->addOption(
+          new InputOption(
+            '--target',
+            '-t',
+            InputOption::VALUE_NONE,
+            'The target context to act on.'
+          )
+        );
+
+        return $inputDefinition;
+    }
 }

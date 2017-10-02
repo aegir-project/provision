@@ -17,16 +17,16 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class StatusCommand extends Command
 {
+
     /**
      * {@inheritdoc}
      */
     protected function configure()
     {
         $this
-            ->setName('status')
-            ->setDescription('Display system status.')
-            ->setHelp('Lists helpful information about your system.')
-            ;
+          ->setName('status')
+          ->setDescription('Display system status.')
+          ->setHelp('Lists helpful information about your system.');
     }
 
     /**

@@ -16,12 +16,13 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Config implements ConfigurationInterface
 {
+
     /**
      * Configuration values array.
      *
      * @var array
      */
-    private $config = array();
+    private $config = [];
 
     /**
      * Path to config YML file.
@@ -42,7 +43,7 @@ class Config implements ConfigurationInterface
      */
     public function __construct()
     {
-        $this->config_path = $this->getHomeDir() . '/' . $this->config_filename;
+        $this->config_path = $this->getHomeDir().'/'.$this->config_filename;
 
         try {
             $processor = new Processor();
@@ -52,7 +53,9 @@ class Config implements ConfigurationInterface
             }
             $this->config = $processor->processConfiguration($this, $configs);
         } catch (\Exception $e) {
-            throw new \Exception('There is an error with your configuration: '.$e->getMessage());
+            throw new \Exception(
+              'There is an error with your configuration: '.$e->getMessage()
+            );
         }
 
 
@@ -66,18 +69,17 @@ class Config implements ConfigurationInterface
         $tree_builder = new TreeBuilder();
         $root_node = $tree_builder->root('aegir');
         $root_node
-            ->children()
-                ->scalarNode('aegir_root')
-                    ->defaultValue('/var/aegir')
-                ->end()
-                ->scalarNode('script_user')
-                    ->defaultValue('aegir')
-                ->end()
-                ->scalarNode('config_path')
-                    ->defaultValue('/var/aegir/config')
-                ->end()
-            ->end();
-        ;
+          ->children()
+          ->scalarNode('aegir_root')
+          ->defaultValue('/var/aegir')
+          ->end()
+          ->scalarNode('script_user')
+          ->defaultValue('aegir')
+          ->end()
+          ->scalarNode('config_path')
+          ->defaultValue('/var/aegir/config')
+          ->end()
+          ->end();;
 
         return $tree_builder;
     }
@@ -94,7 +96,10 @@ class Config implements ConfigurationInterface
     public function get($key, $name = null)
     {
         if ($name) {
-            return array_key_exists($name, $this->config[$key]) ? $this->config[$key][$name] : null;
+            return array_key_exists(
+              $name,
+              $this->config[$key]
+            ) ? $this->config[$key][$name] : null;
         } else {
             return $this->has($key) ? $this->config[$key] : null;
         }
@@ -119,7 +124,7 @@ class Config implements ConfigurationInterface
      *
      * @param string $key
      *                    Key of the param to get.
-     * @param mixed  $val
+     * @param mixed $val
      *                    Value of the param to set.
      *
      * @return bool
@@ -143,11 +148,11 @@ class Config implements ConfigurationInterface
     /**
      * Add a config param value to a config array.
      *
-     * @param string       $key
+     * @param string $key
      *                            Key of the group to set to.
      * @param string|array $names
      *                            Name of the new object to set.
-     * @param mixed        $val
+     * @param mixed $val
      *                            Value of the new object to set.
      *
      * @return bool
@@ -187,6 +192,7 @@ class Config implements ConfigurationInterface
 
     /**
      * Saves the config class to file.
+     *
      * @return bool
      */
     public function save()
@@ -198,6 +204,7 @@ class Config implements ConfigurationInterface
 
         try {
             $fs->dumpFile($this->config_path, $dumper->dump($this->config, 10));
+
             return true;
         } catch (IOExceptionInterface $e) {
             return false;
@@ -208,6 +215,7 @@ class Config implements ConfigurationInterface
      * Returns the appropriate home directory.
      *
      * Adapted from Terminus Package Manager by Ed Reel
+     *
      * @author Ed Reel <@uberhacker>
      * @url    https://github.com/uberhacker/tpm
      *
@@ -225,6 +233,7 @@ class Config implements ConfigurationInterface
                 $home = getenv('HOMEPATH');
             }
         }
+
         return $home;
     }
 }

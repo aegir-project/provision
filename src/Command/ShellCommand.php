@@ -15,15 +15,16 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ShellCommand extends Command
 {
+
     /**
      * {@inheritdoc}
      */
     protected function configure()
     {
         $this
-            ->setName('shell')
-            ->setDescription($this->trans('commands.shell.description'))
-            ->setHelp($this->trans('commands.shell.help'));
+          ->setName('shell')
+          ->setDescription($this->trans('commands.shell.description'))
+          ->setHelp($this->trans('commands.shell.help'));
     }
 
     /**
