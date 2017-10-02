@@ -139,4 +139,19 @@ class Application extends BaseApplication
         }
         return $contexts;
     }
+    
+    /**
+     * Load the Aegir context with the specified name.
+     *
+     * @param $name
+     *
+     * @return \Aegir\Provision\Context
+     * @throws \Exception
+     */
+    function getContext($name) {
+        if (empty($this->getAllContexts()[$name])) {
+            throw new \Exception('Context not found with name: ' . $name);
+        }
+        return $this->getAllContexts()[$name];
+    }
 }

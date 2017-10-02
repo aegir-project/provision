@@ -26,7 +26,15 @@ class StatusCommand extends Command
         $this
           ->setName('status')
           ->setDescription('Display system status.')
-          ->setHelp('Lists helpful information about your system.');
+          ->setHelp('Lists helpful information about your system.')
+          ->setDefinition([
+              new InputArgument(
+                  'context_name',
+                  InputArgument::OPTIONAL,
+                  'Context to show info for.'
+              )
+          ])
+        ;
     }
 
     /**
@@ -34,21 +42,34 @@ class StatusCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $io = new DrupalStyle($input, $output);
-        $io->comment('Provision Status');
-        $headers = ['Name', 'Value'];
-        $config = $this->getApplication()->getConfig()->all();
-        foreach ($config as $key => $value) {
-            $rows[] = [$key, $value];
+        
+        if ($input->getArgument('context_name')) {
+            $context = $this->getApplication()->getContext($input->getArgument('context_name'));
+            $rows = [['Configuration File', $context->config_path]];
+            foreach ($context->getProperties() as $name => $value) {
+                $rows[] = [$name, $value];
+            }
+            $this->io->table(['Provision Context:', $input->getArgument('context_name')], $rows);
+    
         }
-        $io->table($headers, $rows);
-
-        // Lookup all contexts
-        $rows = [];
-        foreach ($this->getApplication()->getAllContexts() as $context) {
-            $rows[] = [$context->name, $context->type];
+        else {
+            $headers = ['Provision CLI Configuration'];
+            $rows = [['Configuration File', $this->getApplication()->getConfig()->getConfigPath()]];
+            $config = $this->getApplication()->getConfig()->all();
+            foreach ($config as $key => $value) {
+                $rows[] = [$key, $value];
+            }
+            $this->io->table($headers, $rows);
+    
+            // Lookup all contexts
+            $rows = [];
+            foreach ($this->getApplication()->getAllContexts() as $context) {
+                $rows[] = [$context->name, $context->type];
+            }
+            $headers = ['Contexts'];
+            $this->io->table($headers, $rows);
+    
+            $this->io->info('Use the command `provision status CONTEXT_NAME` to show more information about that context.');
         }
-        $headers = ['Contexts'];
-        $io->table($headers, $rows);
     }
 }

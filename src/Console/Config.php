@@ -279,4 +279,11 @@ class Config implements ConfigurationInterface
 
         return $home;
     }
+    
+    /**
+     * Determine the user running provision.
+     */
+    public function getConfigPath() {
+        return $this->config_path;
+    }
 }
