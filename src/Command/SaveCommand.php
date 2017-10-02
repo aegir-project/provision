@@ -81,10 +81,12 @@ class SaveCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $server = new ServerContext($input->getArgument('context_name'), $input->getOptions(), $this->getApplication()->getConfig()->all());
+        $class = '\Aegir\Provision\Context\\' . ucfirst($input->getOption('context_type')) . "Context";
+        
+        $context = new $class($input->getArgument('context_name'), $input->getOptions(), $this->getApplication()->getConfig()->all());
         
         $output->writeln(
-          "Saving context: ".print_r($server,1)
+          "Saving context: ".print_r($context,1)
         );
 
 //        $command = 'drush provision-save '.$input->getArgument('context_name');
