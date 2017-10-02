@@ -104,17 +104,17 @@ class Config implements ConfigurationInterface
         $tree_builder = new TreeBuilder();
         $root_node = $tree_builder->root('aegir');
         $root_node
-          ->children()
-          ->scalarNode('aegir_root')
-          ->defaultValue(Config::getHomeDir())
-          ->end()
-          ->scalarNode('script_user')
-          ->defaultValue(Config::getScriptUser())
-          ->end()
-          ->scalarNode('config_path')
-          ->defaultValue(Config::getHomeDir() . '/config')
-          ->end()
-          ->end();;
+            ->children()
+                ->scalarNode('aegir_root')
+                    ->defaultValue(Config::getHomeDir())
+                ->end()
+                ->scalarNode('script_user')
+                    ->defaultValue(Config::getScriptUser())
+                ->end()
+                ->scalarNode('config_path')
+                    ->defaultValue(Config::getHomeDir() . '/config')
+                ->end()
+            ->end();;
 
         return $tree_builder;
     }
