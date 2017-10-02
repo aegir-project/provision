@@ -122,4 +122,21 @@ class Application extends BaseApplication
 
         return $inputDefinition;
     }
+    
+    /**
+     * Lookup and return all contexts as found in files.
+     *
+     * @return array
+     */
+    function getAllContexts() {
+        $contexts = [];
+        $finder = new \Symfony\Component\Finder\Finder();
+        $finder->files()->name('*.yml')->in($this->config->get('config_path') . '/provision');
+        foreach ($finder as $file) {
+            list($context_type, $context_name) = explode('.', $file->getFilename());
+            $class = '\Aegir\Provision\Context\\' . ucfirst($context_type) . "Context";
+            $contexts[$context_name] = new $class($context_name, $this->config->all());
+        }
+        return $contexts;
+    }
 }

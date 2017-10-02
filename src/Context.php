@@ -41,7 +41,7 @@ class Context
     /**
      * Constructor for the context.
      */
-    function __construct($name, $options, $console_config)
+    function __construct($name, $console_config, $options = [])
     {
         $this->name = $name;
         
@@ -64,7 +64,7 @@ class Context
                     $this->properties[$option] = $options[$option];
                 }
             }
-            $this->properties['context_type'] = $options['context_type'];
+            $this->properties['context_type'] = $this->type;
 
             $this->config = $processor->processConfiguration($this, $configs);
             

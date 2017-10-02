@@ -83,7 +83,7 @@ class SaveCommand extends Command
     {
         $class = '\Aegir\Provision\Context\\' . ucfirst($input->getOption('context_type')) . "Context";
         
-        $context = new $class($input->getArgument('context_name'), $input->getOptions(), $this->getApplication()->getConfig()->all());
+        $context = new $class($input->getArgument('context_name'),$this->getApplication()->getConfig()->all(), $input->getOptions());
         
         foreach ($context->getProperties() as $name => $value) {
             $rows[] = [$name, $value];

@@ -43,5 +43,12 @@ class StatusCommand extends Command
         }
         $io->table($headers, $rows);
 
+        // Lookup all contexts
+        $rows = [];
+        foreach ($this->getApplication()->getAllContexts() as $context) {
+            $rows[] = [$context->name, $context->type];
+        }
+        $headers = ['Contexts'];
+        $io->table($headers, $rows);
     }
 }
