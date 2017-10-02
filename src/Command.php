@@ -29,9 +29,9 @@ abstract class Command extends BaseCommand
     protected $output;
 
     /**
-     * @var Config
+     * @var \Aegir\Provision\Console\Config
      */
-    private $config;
+    protected $config;
 
     /**
      * @param InputInterface $input An InputInterface instance

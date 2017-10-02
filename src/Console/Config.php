@@ -22,7 +22,7 @@ class Config implements ConfigurationInterface
      *
      * @var array
      */
-    private $config = [];
+    protected $config = [];
 
     /**
      * Path to config YML file.
@@ -249,7 +249,7 @@ class Config implements ConfigurationInterface
     /**
      * Determine the user running provision.
      */
-    protected function getScriptUser() {
+    static function getScriptUser() {
         $real_script_user = posix_getpwuid(posix_geteuid());
         return $real_script_user['name'];
     }
@@ -264,7 +264,7 @@ class Config implements ConfigurationInterface
      *
      * @return string
      */
-    protected function getHomeDir()
+    static function getHomeDir()
     {
         $home = getenv('HOME');
         if (!$home) {

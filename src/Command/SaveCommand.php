@@ -81,11 +81,13 @@ class SaveCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $server = new ServerContext($input->getArgument('context_name'), $input->getOptions(), $this->getApplication()->getConfig()->all());
+        
         $output->writeln(
-          "Saving context: ".$input->getArgument('context_name')
+          "Saving context: ".print_r($server,1)
         );
 
-        $command = 'drush provision-save '.$input->getArgument('context_name');
-        $this->process($command);
+//        $command = 'drush provision-save '.$input->getArgument('context_name');
+//        $this->process($command);
     }
 }
