@@ -26,14 +26,20 @@ abstract class Command extends BaseCommand
    */
   protected $output;
 
+    /**
+     * @var Config
+     */
+    private $config;
+
   /**
    * @param InputInterface  $input  An InputInterface instance
    * @param OutputInterface $output An OutputInterface instance
    */
   protected function initialize(InputInterface $input, OutputInterface $output)
   {
-    $this->input = $input;
-    $this->output = $output;
+        $this->input = $input;
+        $this->output = $output;
+        $this->config = $this->getApplication()->getConfig();
   }
 
   /**
@@ -45,4 +51,16 @@ abstract class Command extends BaseCommand
     $this->output->writeln(["Running: $cmd"]);
     shell_exec($cmd);
   }
+
+    /**
+     * Gets the application instance for this command.
+     *
+     * @return \Aegir\Provision\Application
+     *
+     * @api
+     */
+    public function getApplication()
+    {
+        return parent::getApplication();
+    }
 }
