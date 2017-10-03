@@ -3,6 +3,7 @@
 namespace Aegir\Provision\Command;
 
 use Aegir\Provision\Command;
+use Aegir\Provision\Context;
 use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Context\SiteContext;
@@ -97,7 +98,8 @@ class SaveCommand extends Command
                 $this->input->setOption('context_type', $context_type);
             }
             $properties = $this->askForContextProperties();
-            $context = new ServerContext($input->getArgument('context_name'), $this->getApplication()->getConfig()->all(), $properties);
+            $class = Context::getClassName($this->input->getOption('context_type'));
+            $context = new $class($input->getArgument('context_name'), $this->getApplication()->getConfig()->all(), $properties);
         }
 
         foreach ($context->getProperties() as $name => $value) {

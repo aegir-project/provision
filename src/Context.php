@@ -140,5 +140,8 @@ class Context
             return false;
         }
     }
-    
+
+    static function getClassName($type) {
+        return '\Aegir\Provision\Context\\' . ucfirst($type) . "Context";
+    }
 }
