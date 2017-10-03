@@ -1,46 +1,36 @@
-language: generic
+language: php
+php:
+  - '5.5'  # Ubuntu Trusty default
+  - '5.6'  # MacOS default
+  - '7.0'
+  - '7.1'
 
 sudo: required
 
 # Only run test when committing to master branch.
 branches:
   only:
-    - 7.x-3.x
+    - 4.x
 
 env:
   global:
-    - AEGIR_HOSTING_VERSION=7.x-3.x
-    - AEGIR_TESTS_VERSION=master
-
-#env:
-#  - test: Ubuntu 14.04 Apache
-#    distribution: ubuntu
-#    version: 14.04
-#    init: /sbin/init
-#    run_opts: ""
+#    - AEGIR_HOSTING_VERSION=7.x-3.x
+#    - AEGIR_TESTS_VERSION=master
 
 addons:
   hosts:
-    - aegir.local.computer
-    - sitetest.aegir.local.computer
+    - provision.local.computer
 
-services:
-  - docker
+#services:
+#  - docker
 
-
-before_install:
-
-  # Get test scripts
-  - git clone http://github.com/aegir-project/tests.git /home/travis/build/aegir-project/tests
-  - cd /home/travis/build/aegir-project/tests
-  - git checkout $AEGIR_TESTS_VERSION
-
-  # Run prepare scripts.
-  - cd /home/travis/build/aegir-project/tests/travis
-  - sudo bash prepare-docker.sh
-  - bash prepare-testenv.sh
+install:
+  - composer install
+  - sudo ln -s $PWD/bin/provision /usr/local/bin/provision
+  - ls -la
 
 script:
 
-  # Tests are included in the docker-compose.yml file in the tests repo.
-  - sudo docker-compose -f docker-compose-provision.yml run -T -e TERM=xterm hostmaster
+  - provision
+  - provision status
+  - provision save server_master --context_type=server --remote_host=provision.local.computer --aegir_root=/home/travis --script_user=travis --master_url=provision.local.computer
