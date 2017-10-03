@@ -239,17 +239,24 @@ class Service {
 //    return $default;
 //  }
 //
-//
-//  /**
-//   * Generate a configuration file.
-//   *
-//   * This method will fetch the class to instantiate from the internal
-//   * $this->configs control array.
-//   */
-//  function create_config($config, $data = array()) {
-//    $this->config($config, $data)->write();
-//  }
-//
+
+    /**
+    * Generate a configuration file.
+    *
+    * This method will fetch the class to instantiate from the internal
+    * $this->configs control array.
+    */
+    function create_config($config, $data = array()) {
+        $this->config($config, $data)->write();
+    }
+
+    /**
+     * Ask the web server to check for and load configuration changes.
+     */
+    function parse_configs() {
+        return TRUE;
+    }
+
 //  /**
 //   * Delete a configuration file.
 //   *
