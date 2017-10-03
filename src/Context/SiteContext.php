@@ -3,6 +3,7 @@
 namespace Aegir\Provision\Context;
 
 use Aegir\Provision\Context;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
  * Class SiteContext
@@ -11,8 +12,12 @@ use Aegir\Provision\Context;
  *
  * @see \Provision_Context_site
  */
-class SiteContext extends Context
+class SiteContext extends Context implements ConfigurationInterface
 {
+    /**
+     * @var string
+     */
+    public $type = 'site';
 
     static function option_documentation()
     {

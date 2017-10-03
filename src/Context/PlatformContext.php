@@ -3,6 +3,7 @@
 namespace Aegir\Provision\Context;
 
 use Aegir\Provision\Context;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
  * Class PlatformContext
@@ -11,8 +12,12 @@ use Aegir\Provision\Context;
  *
  * @see \Provision_Context_platform
  */
-class PlatformContext extends Context
+class PlatformContext extends Context implements ConfigurationInterface
 {
+    /**
+     * @var string
+     */
+    public $type = 'platform';
 
     static function option_documentation()
     {
