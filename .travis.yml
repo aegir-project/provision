@@ -65,3 +65,8 @@ script:
     --install_method=profile
     --profile=hostmaster
     --drush_aliases=hm,host
+
+  - provision status
+  - provision status server_master
+  - provision status platform_hostmaster
+  - provision status hostmaster
