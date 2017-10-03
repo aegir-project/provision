@@ -81,7 +81,14 @@ class SaveCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $context = $this->getApplication()->getContext($input->getArgument('context_name'));
+        try {
+            $context = $this->getApplication()->getContext($input->getArgument('context_name'));
+        }
+        catch (\Exception $e) {
+            $properties = $this->askForContextProperties();
+            $context = new ServerContext($input->getArgument('context_name'), $this->getApplication()->getConfig()->all(), $properties);
+        }
+
         foreach ($context->getProperties() as $name => $value) {
             $rows[] = [$name, $value];
         }
@@ -103,5 +110,20 @@ class SaveCommand extends Command
 
 //        $command = 'drush provision-save '.$input->getArgument('context_name');
 //        $this->process($command);
+    }
+
+    /**
+     * Loop through this context type's option_documentation() method and ask for each property.
+     *
+     * @return array
+     */
+    private function askForContextProperties() {
+        $class = '\Aegir\Provision\Context\\' . ucfirst($this->input->getOption('context_type')) . "Context";
+        $options = $class::option_documentation();
+        $properties = [];
+        foreach ($options as $name => $description) {
+            $properties[$name] = $this->io->ask("$name ($description)");
+        }
+        return $properties;
     }
 }
