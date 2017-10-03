@@ -6,6 +6,7 @@
 
 namespace Aegir\Provision;
 
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
@@ -74,7 +75,34 @@ class Context
             );
         }
     }
-    
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getConfigTreeBuilder()
+    {
+        $tree_builder = new TreeBuilder();
+        $root_node = $tree_builder->root('server');
+        $root_node
+            ->children()
+            ->scalarNode('name')
+            ->defaultValue($this->name)
+            ->end()
+            ->end();
+
+        // @TODO: Figure out how we can let other classes add to Context properties.
+        foreach ($this->option_documentation() as $name => $description) {
+            $root_node
+                ->children()
+                ->scalarNode($name)
+                ->defaultValue($this->properties[$name])
+                ->end()
+                ->end();
+        }
+
+        return $tree_builder;
+    }
+
     /**
      * Return all properties for this context.
      *

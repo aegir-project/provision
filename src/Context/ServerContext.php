@@ -32,32 +32,4 @@ class ServerContext extends Context implements ConfigurationInterface
 
         return $options;
     }
-    
-    /**
-     * {@inheritdoc}
-     */
-    public function getConfigTreeBuilder()
-    {
-        $tree_builder = new TreeBuilder();
-        $root_node = $tree_builder->root('server');
-        $root_node
-            ->children()
-                ->scalarNode('name')
-                    ->defaultValue($this->name)
-                ->end()
-            ->end();
-
-        // @TODO: Figure out how we can let other classes add to ServerContext properties.
-        foreach (self::option_documentation() as $name => $description) {
-            $root_node
-                ->children()
-                    ->scalarNode($name)
-                    ->defaultValue($this->properties[$name])
-                ->end()
-            ->end();
-        }
-
-        return $tree_builder;
-    }
-    
 }
