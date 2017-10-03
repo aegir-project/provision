@@ -57,7 +57,12 @@ class Application extends BaseApplication
         }
 
         // Load Configs
-        $this->config = new Config();
+        try {
+            $this->config = new Config();
+        }
+        catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
 
         parent::__construct($this::NAME, $this::VERSION);
     }

@@ -68,30 +68,32 @@ class Config implements ConfigurationInterface
      */
     protected function validateConfig() {
         // Check that aegir_root is writable.
-        // @TODO: Figure out how to throw pretty console exceptions.
         // @TODO: Create some kind of Setup functionality.
         if (!is_writable($this->config['aegir_root'])) {
             throw new \Exception(
-              "There is an error with your configuration: The folder set to 'aegir_root' ({$this->config['aegir_root']}) is not writable. Check your ~/.provision.yml file and try again."
+              "There is an error with your configuration. The folder set to 'aegir_root' ({$this->config['aegir_root']}) is not writable. Fix this or change the aegir_root value in the file {$this->config_path}."
             );
         }
         // Check that config_path exists and is writable.
         if (!file_exists($this->config['config_path'])) {
             throw new \Exception(
-              "There is an error with your configuration: The folder set to 'config_path'({$this->config['config_path']}) does not exist. Check your ~/.provision.yml file and try again."
+              "There is an error with your configuration. The folder set to 'config_path' ({$this->config['config_path']}) does not exist. Create it or change the config_path value in the file {$this->config_path}."
             );
         }
         elseif (!is_writable($this->config['config_path'])) {
             throw new \Exception(
-              "There is an error with your configuration: The folder set to 'config_path'({$this->config['config_path']}) is not writable."
+              "There is an error with your configuration. The folder set to 'config_path' ({$this->config['config_path']}) is not writable. Fix this or change the config_path value in the file {$this->config_path}."
             );
+        }
+        elseif (!file_exists($this->config['config_path'] . '/provision')) {
+          mkdir($this->config['config_path'] . '/provision');
         }
 
         // Ensure that script_user is the user.
         $real_script_user = $this->getScriptUser();
         if ($this->config['script_user'] != $real_script_user) {
             throw new \Exception(
-              "There is an error with your configuration: The user set in 'script_user'({$this->config['script_user']}) is not the currently running user ({$real_script_user})."
+              "There is an error with your configuration. The user set as 'script_user' ({$this->config['script_user']}) is not the currently running user ({$real_script_user}). Change to user {$this->config['script_user']} or change the script_user value in the file {$this->config_path}."
             );
         }
     }
