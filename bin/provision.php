@@ -53,5 +53,10 @@ if ($debug){
     );
 }
 
-$application = new Application();
-$application->run();
+try {
+    $application = new Application();
+    $application->run();
+}
+catch (\Exception $e) {
+    $io->error("Unable to run provision: " . $e->getMessage());
+}
