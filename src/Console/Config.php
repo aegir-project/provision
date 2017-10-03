@@ -68,7 +68,6 @@ class Config implements ConfigurationInterface
      */
     protected function validateConfig() {
         // Check that aegir_root is writable.
-        // @TODO: Figure out how to throw pretty console exceptions.
         // @TODO: Create some kind of Setup functionality.
         if (!is_writable($this->config['aegir_root'])) {
             throw new \Exception(
