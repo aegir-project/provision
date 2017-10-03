@@ -1,7 +1,19 @@
 <?php
+/**
+ * @file
+ * The base Provision HttpService class.
+ *
+ * @see \Provision_Service_http
+ */
 
-// Base http service class. 
-class Provision_Service_http extends Provision_Service {
+namespace Aegir\Provision\Service;
+
+//require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
+
+use Aegir\Provision\Service;
+
+class HttpService extends Service {
+
   public $service = 'http';
   protected $ssl_enabled = FALSE;
 
