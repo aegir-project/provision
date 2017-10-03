@@ -6,10 +6,12 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Context\ServerContext;
+
 class Service {
 
   /**
-   * @var \Aegir\Provision\Context\ServerContext
+   * @var ServerContext
    *
    * The server this service is associated to
    */
@@ -303,9 +305,14 @@ class Service {
     return FALSE;
   }
 
-  function __construct($server) {
-    $this->server = is_object($server) ? $server : d($server);
-  }
+  /**
+    * Service constructor.
+    * @TODO: Load server context and
+    * @param $server
+    */
+    function __construct($server) {
+//        $this->server = is_object($server) ? $server : d($server);
+    }
 //
 //  /**
 //   * Set the currently active context of the service.
