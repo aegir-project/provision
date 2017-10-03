@@ -51,8 +51,7 @@ class SaveCommand extends Command
           'context_type',
           null,
           InputOption::VALUE_OPTIONAL,
-          'server, platform, or site; default server',
-          'server'
+          'server, platform, or site'
         );
         $inputDefinition[] = new InputOption(
           'delete',
@@ -85,6 +84,18 @@ class SaveCommand extends Command
             $context = $this->getApplication()->getContext($input->getArgument('context_name'));
         }
         catch (\Exception $e) {
+
+            $context_name = $this->input->getArgument('context_name');
+            $this->io->comment("No context named '$context_name'. Creating a new one...");
+
+            if (empty($this->input->getOption('context_type'))) {
+                $context_type = $this->io->choice('Context Type?', [
+                    'server',
+                    'platform',
+                    'site'
+                ]);
+                $this->input->setOption('context_type', $context_type);
+            }
             $properties = $this->askForContextProperties();
             $context = new ServerContext($input->getArgument('context_name'), $this->getApplication()->getConfig()->all(), $properties);
         }
