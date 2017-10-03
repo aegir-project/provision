@@ -141,6 +141,23 @@ class Context
         }
     }
 
+    /**
+     * Deletes the config YML file.
+     * @return bool
+     */
+    public function deleteConfig() {
+
+        // Create config folder if it does not exist.
+        $fs = new Filesystem();
+
+        try {
+            $fs->remove($this->config_path);
+            return true;
+        } catch (IOException $e) {
+            return false;
+        }
+    }
+
     static function getClassName($type) {
         return '\Aegir\Provision\Context\\' . ucfirst($type) . "Context";
     }

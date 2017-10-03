@@ -57,7 +57,7 @@ class SaveCommand extends Command
         $inputDefinition[] = new InputOption(
           'delete',
           null,
-          InputOption::VALUE_OPTIONAL,
+          InputOption::VALUE_NONE,
           'Remove the alias.'
         );
 
@@ -81,12 +81,17 @@ class SaveCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $context_name = $this->input->getArgument('context_name');
         try {
             $context = $this->getApplication()->getContext($input->getArgument('context_name'));
         }
         catch (\Exception $e) {
 
-            $context_name = $this->input->getArgument('context_name');
+            if ($input->getOption('delete')) {
+                $this->io->comment("No context named '$context_name'.");
+                exit(1);
+            }
+
             $this->io->comment("No context named '$context_name'. Creating a new one...");
 
             if (empty($this->input->getOption('context_type'))) {
@@ -100,6 +105,20 @@ class SaveCommand extends Command
             $properties = $this->askForContextProperties();
             $class = Context::getClassName($this->input->getOption('context_type'));
             $context = new $class($input->getArgument('context_name'), $this->getApplication()->getConfig()->all(), $properties);
+        }
+
+        // Delete context config.
+        if ($input->getOption('delete')) {
+            if (!$input->isInteractive() || $this->io->confirm("Delete context '$context_name' configuration ($context->config_path)?")) {
+                if ($context->deleteConfig()) {
+                    $this->io->info('Context file deleted.');
+                    exit(0);
+                }
+                else {
+                    $this->io->error('Unable to delete ' . $context->config_path);
+                    exit(1);
+                }
+            }
         }
 
         foreach ($context->getProperties() as $name => $value) {
