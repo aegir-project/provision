@@ -7,6 +7,7 @@ use Aegir\Provision\Context;
 use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Context\SiteContext;
+use Symfony\Component\Console\Exception\InvalidOptionException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
@@ -20,6 +21,12 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class SaveCommand extends Command
 {
+    
+    /**
+     * @var string
+     */
+    private $context_name;
+    private $context_type;
 
     /**
      * {@inheritdoc}
@@ -75,26 +82,36 @@ class SaveCommand extends Command
       
       return new InputDefinition($inputDefinition);
     }
-
+    
+    /**
+     * Load commonly used properties context_name and context_type.
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface   $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     */
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        parent::initialize($input,$output);
+        $this->context_name = $input->getArgument('context_name');
+        $this->context_type = $input->getOption('context_type');
+    }
+    
     /**
      * {@inheritdoc}
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $context_name = $this->input->getArgument('context_name');
         try {
-            $context = $this->getApplication()->getContext($input->getArgument('context_name'));
+            $context = $this->getApplication()->getContext($this->context_name);
         }
         catch (\Exception $e) {
 
             if ($input->getOption('delete')) {
-                $this->io->comment("No context named '$context_name'.");
+                $this->io->comment("No context named '{$this->context_name}'.");
                 exit(1);
             }
-
-            $this->io->comment("No context named '$context_name'. Creating a new one...");
-
-            if (empty($this->input->getOption('context_type'))) {
+            
+            if (empty($this->context_type)) {
                 $context_type = $this->io->choice('Context Type?', [
                     'server',
                     'platform',
@@ -109,7 +126,7 @@ class SaveCommand extends Command
 
         // Delete context config.
         if ($input->getOption('delete')) {
-            if (!$input->isInteractive() || $this->io->confirm("Delete context '$context_name' configuration ($context->config_path)?")) {
+            if (!$input->isInteractive() || $this->io->confirm("Delete context '{$this->context_name}' configuration ($context->config_path)?")) {
                 if ($context->deleteConfig()) {
                     $this->io->info('Context file deleted.');
                     exit(0);
@@ -150,6 +167,12 @@ class SaveCommand extends Command
      * @return array
      */
     private function askForContextProperties() {
+        if (empty($this->input->getOption('context_type'))) {
+            throw new InvalidOptionException('context_type option is required.');
+        }
+        
+        $this->io->comment("No context named '$this->context_name'. Creating a new one...");
+    
         $class = '\Aegir\Provision\Context\\' . ucfirst($this->input->getOption('context_type')) . "Context";
         $options = $class::option_documentation();
         $properties = [];
