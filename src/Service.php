@@ -2,12 +2,15 @@
 /**
  * @file
  * The base Provision service class.
+ *
+ * @see Provision_Service
  */
 
-require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
+namespace Aegir\Provision;
 
+//require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
-class Provision_Service extends Provision_ChainedState {
+class Service {
 
   /**
    * The server this service is associated to
@@ -15,6 +18,7 @@ class Provision_Service extends Provision_ChainedState {
   protected $server = '@server_master';
 
   /**
+   * @var Context;
    * The context in which this service stores its data
    *
    * This is usually an object made from a class derived from the
