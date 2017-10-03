@@ -81,8 +81,6 @@ class SaveCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $class = '\Aegir\Provision\Context\\' . ucfirst($input->getOption('context_type')) . "Context";
-        
         $context = $this->getApplication()->getContext($input->getArgument('context_name'));
         foreach ($context->getProperties() as $name => $value) {
             $rows[] = [$name, $value];
