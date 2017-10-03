@@ -14,7 +14,11 @@ use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Yaml;
 
 /**
+ * Class Context
+ *
  * Base context class.
+ *
+ * @package Aegir\Provision
  */
 class Context
 {
