@@ -45,20 +45,18 @@ class ServerContext extends Context implements ConfigurationInterface
                 ->scalarNode('name')
                     ->defaultValue($this->name)
                 ->end()
-                ->scalarNode('remote_host')
-                    ->defaultValue($this->properties['remote_host'])
-                ->end()
-                ->scalarNode('script_user')
-                    ->defaultValue($this->properties['script_user'])
-                ->end()
-                ->scalarNode('aegir_root')
-                    ->defaultValue($this->properties['aegir_root'])
-                ->end()
-                ->scalarNode('master_url')
-                    ->defaultValue($this->properties['master_url'])
+            ->end();
+
+        // @TODO: Figure out how we can let other classes add to ServerContext properties.
+        foreach (self::option_documentation() as $name => $description) {
+            $root_node
+                ->children()
+                    ->scalarNode($name)
+                    ->defaultValue($this->properties[$name])
                 ->end()
             ->end();
-        
+        }
+
         return $tree_builder;
     }
     
