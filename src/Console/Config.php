@@ -86,6 +86,9 @@ class Config implements ConfigurationInterface
               "There is an error with your configuration. The folder set to 'config_path' ({$this->config['config_path']}) is not writable. Fix this or change the config_path value in the file {$this->config_path}."
             );
         }
+        elseif (!file_exists($this->config['config_path'] . '/provision')) {
+          mkdir($this->config['config_path'] . '/provision');
+        }
 
         // Ensure that script_user is the user.
         $real_script_user = $this->getScriptUser();
