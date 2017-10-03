@@ -1,13 +1,16 @@
 <?php
-/**
- * @file
- * The base Provision service class.
- */
 
 namespace Aegir\Provision;
 
 use Aegir\Provision\Context\ServerContext;
 
+/**
+ * Class Service
+ *
+ * The base Aegir\Provision\Service class.
+ *
+ * @package Aegir\Provision
+ */
 class Service {
 
   /**
