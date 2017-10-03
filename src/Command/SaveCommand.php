@@ -154,7 +154,15 @@ class SaveCommand extends Command
         $options = $class::option_documentation();
         $properties = [];
         foreach ($options as $name => $description) {
-            $properties[$name] = $this->io->ask("$name ($description)");
+          
+            // If option does not exist, ask for it.
+            if (!empty($this->input->getOption($name))) {
+                $properties[$name] = $this->input->getOption($name);
+                $this->io->comment("Using option {$name}={$properties[$name]}");
+            }
+            else {
+                $properties[$name] = $this->io->ask("$name ($description)");
+            }
         }
         return $properties;
     }
