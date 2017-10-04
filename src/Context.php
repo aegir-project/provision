@@ -51,7 +51,7 @@ class Context
     function __construct($name, $console_config, $options = [])
     {
         $this->name = $name;
-        $this->getContextConfig($console_config, $options);
+        $this->loadContextConfig($console_config, $options);
     }
 
     /**
@@ -62,7 +62,7 @@ class Context
      *
      * @throws \Exception
      */
-    private function getContextConfig($console_config, $options = []) {
+    private function loadContextConfig($console_config, $options = []) {
         $this->console_config = $console_config;
         $this->config_path = $console_config['config_path'] . '/provision/' . $this->type . '.' . $this->name . '.yml';
 
@@ -135,7 +135,7 @@ class Context
     public function getProperty($name) {
         return $this->properties[$name];
     }
-    
+
     /**
      * Saves the config class to file.
      *
