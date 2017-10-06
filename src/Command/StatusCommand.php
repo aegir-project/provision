@@ -47,7 +47,9 @@ class StatusCommand extends Command
             $context = $this->getApplication()->getContext($input->getArgument('context_name'));
             $rows = [['Configuration File', $context->config_path]];
             foreach ($context->getProperties() as $name => $value) {
-                $rows[] = [$name, $value];
+                if (is_string($value)) {
+                    $rows[] = [$name, $value];
+                }
             }
             $this->io->table(['Provision Context:', $input->getArgument('context_name')], $rows);
     
