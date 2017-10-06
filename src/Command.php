@@ -63,7 +63,7 @@ abstract class Command extends BaseCommand
         $this->io = new DrupalStyle($input, $output);
         
         // Load active context if a command uses the argument.
-        if ($this->input->hasArgument('context_name')) {
+        if ($this->input->hasArgument('context_name') && !empty($this->input->getArgument('context_name'))) {
             $this->context_name = $this->input->getArgument('context_name');
             $this->context = $this->getApplication()->getContext($this->context_name);
         }
