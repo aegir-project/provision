@@ -65,7 +65,7 @@ abstract class Command extends BaseCommand
         // Load active context if a command uses the argument.
         if ($this->input->hasArgument('context_name')) {
             $this->context_name = $this->input->getArgument('context_name');
-            $this->config = $this->getApplication()->getContext($this->context_name);
+            $this->context = $this->getApplication()->getContext($this->context_name);
         }
     }
 
