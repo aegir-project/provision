@@ -46,7 +46,11 @@ class Context
     protected $properties = [];
 
     /**
-     * Constructor for the context.
+     * Context constructor.
+     *
+     * @param $name
+     * @param $console_config
+     * @param array $options
      */
     function __construct($name, $console_config, $options = [])
     {
@@ -115,6 +119,10 @@ class Context
                 ->end();
         }
 
+        if (method_exists($this, 'configTreeBuilder')) {
+            $this->configTreeBuilder($root_node);
+        }
+
         return $tree_builder;
     }
 
@@ -126,7 +134,7 @@ class Context
     public function getProperties() {
         return $this->properties;
     }
-    
+
     /**
      * Return all properties for this context.
      *
