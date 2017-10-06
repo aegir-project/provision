@@ -5,6 +5,7 @@ namespace Aegir\Provision;
 use Aegir\Provision\Command\SaveCommand;
 use Aegir\Provision\Command\ShellCommand;
 use Aegir\Provision\Command\StatusCommand;
+use Aegir\Provision\Command\VerifyCommand;
 use Aegir\Provision\Console\Config;
 use Symfony\Component\Console\Command\HelpCommand;
 use Symfony\Component\Console\Command\ListCommand;
@@ -99,6 +100,7 @@ class Application extends BaseApplication
         $commands[] = new SaveCommand();
         $commands[] = new ShellCommand();
         $commands[] = new StatusCommand();
+        $commands[] = new VerifyCommand();
 
         return $commands;
     }

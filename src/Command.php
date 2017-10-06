@@ -40,6 +40,16 @@ abstract class Command extends BaseCommand
     protected $config;
 
     /**
+     * @var \Aegir\Provision\Context;
+     */
+    public $context;
+
+    /**
+     * @var string
+     */
+    public $context_name;
+
+    /**
      * @param InputInterface $input An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      */
@@ -52,7 +62,11 @@ abstract class Command extends BaseCommand
         
         $this->io = new DrupalStyle($input, $output);
         
-        $this->config = $this->getApplication()->getConfig();
+        // Load active context if a command uses the argument.
+        if ($this->input->hasArgument('context_name')) {
+            $this->context_name = $this->input->getArgument('context_name');
+            $this->config = $this->getApplication()->getContext($this->context_name);
+        }
     }
 
     /**
