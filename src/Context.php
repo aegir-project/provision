@@ -176,4 +176,8 @@ class Context
     static function getClassName($type) {
         return '\Aegir\Provision\Context\\' . ucfirst($type) . "Context";
     }
+
+    public function verify() {
+        return "Provision Context";
+    }
 }

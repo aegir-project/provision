@@ -32,4 +32,10 @@ class ServerContext extends Context implements ConfigurationInterface
 
         return $options;
     }
+
+    public function verify() {
+
+//        parent::verify();
+        return "Server Context Verified: " . $this->name;
+    }
 }

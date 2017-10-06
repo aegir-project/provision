@@ -16,7 +16,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Class VerifyCommand
  *
+ * Replacement for drush provision-verify command
+ *
  * @package Aegir\Provision\Command
+ * @see provision.drush.inc
+ * @see drush_provision_verify()
  */
 class VerifyCommand extends Command
 {
@@ -57,5 +61,19 @@ class VerifyCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->io->info('Provision Verify: ' . $this->context_name);
+
+        /**
+         * The provision-verify command function looks like:
+         *
+         *
+        function drush_provision_verify() {
+            provision_backend_invoke(d()->name, 'provision-save');
+            d()->command_invoke('verify');
+        }
+         */
+
+        $message = $this->context->verify();
+
+        $this->io->comment($message);
     }
 }
