@@ -100,18 +100,18 @@ class Context
         $root_node = $tree_builder->root('server');
         $root_node
             ->children()
-            ->scalarNode('name')
-            ->defaultValue($this->name)
-            ->end()
+                ->scalarNode('name')
+                    ->defaultValue($this->name)
+                ->end()
             ->end();
 
         // @TODO: Figure out how we can let other classes add to Context properties.
         foreach ($this->option_documentation() as $name => $description) {
             $root_node
                 ->children()
-                ->scalarNode($name)
-                ->defaultValue($this->properties[$name])
-                ->end()
+                    ->scalarNode($name)
+                        ->defaultValue($this->properties[$name])
+                    ->end()
                 ->end();
         }
 
