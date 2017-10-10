@@ -170,7 +170,6 @@ function drush_provision_hostmaster_migrate($site, $platform) {
   drush_log(dt("Debug trim platform_version @name", array('@name' => trim($platform_version['output']))), 'warning');
   drush_log(dt("Debug platform_version @path: @id", array('@path' => $platform, '@id' => $platform_version)), 'warning');
   $major_version_upgrade = version_compare('7.0', trim($platform_version['output'])) > 0 ? TRUE : FALSE;
-  $major_version_upgrade = FALSE;
   if ($major_version_upgrade) {
     drush_log('Detected major version upgrade. Disabling error-reporting.', 'warning');
     $local_settings_file = d('@hostmaster')->site_path . '/local.settings.php';
