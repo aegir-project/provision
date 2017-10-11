@@ -1284,9 +1284,15 @@ location @drupal {
   }
 <?php endif; ?>
   ###
-  ### For Pressflow 6 (vanilla Drupal 6 will not be detected!)
+  ### For Pressflow 6
   ###
   if ( -e $document_root/modules/path_alias_cache ) {
+    rewrite ^/(.*)$ /index.php?q=$1 last;
+  }
+  ###
+  ### For vanilla Drupal 6
+  ###
+  if ( -e $document_root/profiles/default ) {
     rewrite ^/(.*)$ /index.php?q=$1 last;
   }
   ###
@@ -1323,9 +1329,15 @@ location @nobots {
   }
 
   ###
-  ### For Pressflow 6 (vanilla Drupal 6 will not be detected!)
+  ### For Pressflow 6
   ###
   if ( -e $document_root/modules/path_alias_cache ) {
+    rewrite ^/(.*)$ /index.php?q=$1 last;
+  }
+  ###
+  ### For vanilla Drupal 6
+  ###
+  if ( -e $document_root/profiles/default ) {
     rewrite ^/(.*)$ /index.php?q=$1 last;
   }
   ###

@@ -1206,9 +1206,15 @@ location @drupal_<?php print $subdir_loc; ?> {
   }
 <?php endif; ?>
   ###
-  ### For Pressflow 6 (vanilla Drupal 6 will not be detected!)
+  ### For Pressflow 6
   ###
   if ( -e $document_root/modules/path_alias_cache ) {
+    rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
+  }
+  ###
+  ### For vanilla Drupal 6
+  ###
+  if ( -e $document_root/profiles/default ) {
     rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
   }
   ###
@@ -1245,9 +1251,15 @@ location @nobots_<?php print $subdir_loc; ?> {
   }
 
   ###
-  ### For Pressflow 6 (vanilla Drupal 6 will not be detected!)
+  ### For Pressflow 6
   ###
   if ( -e $document_root/modules/path_alias_cache ) {
+    rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
+  }
+  ###
+  ### For vanilla Drupal 6
+  ###
+  if ( -e $document_root/profiles/default ) {
     rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
   }
   ###
