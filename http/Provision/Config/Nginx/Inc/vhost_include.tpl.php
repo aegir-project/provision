@@ -1284,21 +1284,15 @@ location @drupal {
   }
 <?php endif; ?>
   ###
-  ### For Pressflow 6
+  ### For Drupal >= 8
   ###
-  if ( -e $document_root/modules/path_alias_cache ) {
-    rewrite ^/(.*)$ /index.php?q=$1 last;
+  if ( -e $document_root/core ) {
+    rewrite ^ /index.php?$query_string last;
   }
   ###
-  ### For vanilla Drupal 6
+  ### For Drupal <= 7
   ###
-  if ( -e $document_root/profiles/default ) {
-    rewrite ^/(.*)$ /index.php?q=$1 last;
-  }
-  ###
-  ### For Drupal >= 7
-  ###
-  rewrite ^ /index.php?$query_string last;
+  rewrite ^/(.*)$ /index.php?q=$1 last;
 }
 
 <?php if ($nginx_config_mode == 'extended'): ?>
@@ -1329,21 +1323,15 @@ location @nobots {
   }
 
   ###
-  ### For Pressflow 6
+  ### For Drupal >= 8
   ###
-  if ( -e $document_root/modules/path_alias_cache ) {
-    rewrite ^/(.*)$ /index.php?q=$1 last;
+  if ( -e $document_root/core ) {
+    rewrite ^ /index.php?$query_string last;
   }
   ###
-  ### For vanilla Drupal 6
+  ### For Drupal <= 7
   ###
-  if ( -e $document_root/profiles/default ) {
-    rewrite ^/(.*)$ /index.php?q=$1 last;
-  }
-  ###
-  ### For Drupal >= 7
-  ###
-  rewrite ^ /index.php?$query_string last;
+  rewrite ^/(.*)$ /index.php?q=$1 last;
 }
 
 ###

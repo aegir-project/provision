@@ -1206,21 +1206,15 @@ location @drupal_<?php print $subdir_loc; ?> {
   }
 <?php endif; ?>
   ###
-  ### For Pressflow 6
+  ### For Drupal >= 8
   ###
-  if ( -e $document_root/modules/path_alias_cache ) {
-    rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
+  if ( -e $document_root/core ) {
+    rewrite ^ /<?php print $subdir; ?>/index.php?$query_string last;
   }
   ###
-  ### For vanilla Drupal 6
+  ### For Drupal <= 7
   ###
-  if ( -e $document_root/profiles/default ) {
-    rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
-  }
-  ###
-  ### For Drupal >= 7
-  ###
-  rewrite ^ /<?php print $subdir; ?>/index.php?$query_string last;
+  rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
 }
 
 <?php if ($nginx_config_mode == 'extended'): ?>
@@ -1251,21 +1245,15 @@ location @nobots_<?php print $subdir_loc; ?> {
   }
 
   ###
-  ### For Pressflow 6
+  ### For Drupal >= 8
   ###
-  if ( -e $document_root/modules/path_alias_cache ) {
-    rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
+  if ( -e $document_root/core ) {
+    rewrite ^ /<?php print $subdir; ?>/index.php?$query_string last;
   }
   ###
-  ### For vanilla Drupal 6
+  ### For Drupal <= 7
   ###
-  if ( -e $document_root/profiles/default ) {
-    rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
-  }
-  ###
-  ### For Drupal >= 7
-  ###
-  rewrite ^ /<?php print $subdir; ?>/index.php?$query_string last;
+  rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
 }
 
 ###
