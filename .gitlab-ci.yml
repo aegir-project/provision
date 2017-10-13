@@ -53,6 +53,8 @@ test:debian-jessie-aegir3-apt:
     - build:deb
   only:
     - 7.x-3.x
+    - /^7\.x-3\.\d+\.x/
+    - 2915491-ubuntu-mariadb
 
   before_script:
     - apt-get update
@@ -86,6 +88,8 @@ test:ubuntu-xenial-aegir3-apt:
     - build:deb
   only:
     - 7.x-3.x
+    - /^7\.x-3\.\d+\.x/
+    - 2915491-ubuntu-mariadb
 
   before_script:
     - apt-get update
