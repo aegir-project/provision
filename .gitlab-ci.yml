@@ -23,7 +23,7 @@ stages:
 
 syntax:codestyle:
   stage: syntax
-  image: debian:stretch
+  image: bobey/docker-gitlab-ci-runner-php5.6
   allow_failure: false
 
   script:
