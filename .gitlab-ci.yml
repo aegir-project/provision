@@ -62,14 +62,17 @@ build:deb:
 ### Stage "test"
 #
 
+
 test:debian-jessie-aegir3-apt:
   stage: test
   image: debian:jessie
+  allow_failure: false
   dependencies:
     - build:deb
   when: manual
   except:
      - 7.x-3.x
+    - /^7\.x-3\.\d+\.x/
 
   before_script:
     - apt-get update
@@ -83,7 +86,7 @@ test:debian-jessie-aegir3-apt:
 test:debian-stretch-aegir3-apt:
   stage: test
   image: debian:stretch
-  allow_failure: true
+  allow_failure: false
   dependencies:
     - build:deb
 
@@ -99,12 +102,14 @@ test:debian-stretch-aegir3-apt:
 test:ubuntu-xenial-aegir3-apt:
   stage: test
   image: ubuntu:xenial
+  allow_failure: false
   dependencies:
     - build:deb
 
   when: manual
   except:
      - 7.x-3.x
+    - /^7\.x-3\.\d+\.x/
 
   before_script:
     - apt-get update
@@ -172,7 +177,6 @@ publish:unstable-repo:
   stage: publish
   dependencies:
     - build:deb
-  allow_failure: true
 
   only:
     - 7.x-3.x
@@ -210,6 +214,7 @@ upgradetest:debian-jessie-aegir3-apt-upgrade:
   image: debian:jessie
   dependencies:
     - publish:unstable-repo
+  allow_failure: false
 
   when: manual
 
