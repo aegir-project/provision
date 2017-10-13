@@ -26,11 +26,11 @@ test:codestyle:
   image: debian:stretch
   allow_failure: false
 
-	script:
-			- composer require phplint/phplint
-			- echo "Syntax checking PHP files"
-			- echo "For more information http://www.icosaedro.it/phplint/"
-			- vendor/bin/phplint ./ --exclude "vendor"
+  script:
+    - composer require phplint/phplint
+    - echo "Syntax checking PHP files"
+    - echo "For more information http://www.icosaedro.it/phplint/"
+    - vendor/bin/phplint ./ --exclude "vendor"
 
 #
 ### Stage "build"
