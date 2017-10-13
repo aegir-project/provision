@@ -10,11 +10,27 @@ before_script:
 
 # Defines stages which are to be executed
 stages:
+  - syntax
   - build
   - test
   - publish
   - upgradetest
 
+
+#
+### Stage syntax
+#
+
+test:codestyle:
+  stage: syntax
+  image: debian:stretch
+  allow_failure: false
+
+	script:
+			- composer require phplint/phplint
+			- echo "Syntax checking PHP files"
+			- echo "For more information http://www.icosaedro.it/phplint/"
+			- vendor/bin/phplint ./ --exclude "vendor"
 
 #
 ### Stage "build"
