@@ -115,13 +115,13 @@ case "$1" in
             db_get "aegir/db_host"
             AEGIR_DB_HOST="$RET"
 
-            # Source os-release to properly handle differences between distributions
-            . /etc/os-release
+            # Read /etc/os-release to properly handle differences between distributions
+            OS_ID=$(grep ^ID /etc/os-release | cut -d= -f2)
 
             # Determin if we create a db accoount or ask for it.
             # Starting from MariaDB 10.1... https://www.drupal.org/node/2770819
             # TODO: Work with future versions
-            if [ $ID = 'debian' ]  && dpkg -s mariadb-server-10.1 > /dev/null 2>&1
+            if [ $OS_ID = 'debian' ]  && dpkg -s mariadb-server-10.1 > /dev/null 2>&1
             then
               # MariaDB = 10.1
               CREATEUSER=1
