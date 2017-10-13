@@ -20,7 +20,28 @@ class ServerContext extends Context implements ConfigurationInterface
      * 'server', 'platform', or 'site'.
      */
     public $type = 'server';
-    
+
+    /**
+     * @var array
+     * A list of services needed for this context.
+     */
+    protected $services = [];
+
+    /**
+     * ServerContext constructor.
+     *
+     * @param $name
+     * @param $console_config
+     * @param array $options
+     */
+    function __construct($name, $console_config, array $options = [])
+    {
+        parent::__construct($name, $console_config, $options);
+        if (isset($this->config['services'])) {
+            $this->services = $this->config['services'];
+        }
+    }
+
     static function option_documentation()
     {
         $options = [
@@ -31,5 +52,37 @@ class ServerContext extends Context implements ConfigurationInterface
         ];
 
         return $options;
+    }
+
+    /**
+     * Return all services for this context.
+     *
+     * @return array
+     */
+    public function getServices() {
+        return $this->services;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function configTreeBuilder(&$root_node)
+    {
+        $root_node
+            ->children()
+                ->arrayNode('services')
+                    ->prototype('array')
+                    ->children()
+                        ->scalarNode('name')
+                        ->isRequired(true)
+                    ->end()
+            ->end()
+        ->end();
+    }
+
+    public function verify() {
+
+//        parent::verify();
+        return "Server Context Verified: " . $this->name;
     }
 }

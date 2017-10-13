@@ -36,6 +36,12 @@ class Context
     public $type = null;
 
     /**
+     * @var string
+     * Full path to this context's config file.
+     */
+    public $config_path = null;
+
+    /**
      * @var array
      * Properties that will be persisted by provision-save. Access as object
      * members, $evironment->property_name. __get() and __set handle this. In
@@ -44,19 +50,32 @@ class Context
     protected $properties = [];
 
     /**
-     * Constructor for the context.
+     * Context constructor.
+     *
+     * @param $name
+     * @param $console_config
+     * @param array $options
      */
     function __construct($name, $console_config, $options = [])
     {
         $this->name = $name;
-        
+        $this->loadContextConfig($console_config, $options);
+    }
+
+    /**
+     * Load and process the Config object for this context.
+     *
+     * @param $console_config
+     * @param array $options
+     *
+     * @throws \Exception
+     */
+    private function loadContextConfig($console_config, $options = []) {
         $this->console_config = $console_config;
         $this->config_path = $console_config['config_path'] . '/provision/' . $this->type . '.' . $this->name . '.yml';
-        
-        
+
         $configs = [];
 
-    
         try {
             $processor = new Processor();
             if (file_exists($this->config_path)) {
@@ -89,19 +108,23 @@ class Context
         $root_node = $tree_builder->root('server');
         $root_node
             ->children()
-            ->scalarNode('name')
-            ->defaultValue($this->name)
-            ->end()
+                ->scalarNode('name')
+                    ->defaultValue($this->name)
+                ->end()
             ->end();
 
         // @TODO: Figure out how we can let other classes add to Context properties.
         foreach ($this->option_documentation() as $name => $description) {
             $root_node
                 ->children()
-                ->scalarNode($name)
-                ->defaultValue($this->properties[$name])
-                ->end()
+                    ->scalarNode($name)
+                        ->defaultValue($this->properties[$name])
+                    ->end()
                 ->end();
+        }
+
+        if (method_exists($this, 'configTreeBuilder')) {
+            $this->configTreeBuilder($root_node);
         }
 
         return $tree_builder;
@@ -115,7 +138,7 @@ class Context
     public function getProperties() {
         return $this->properties;
     }
-    
+
     /**
      * Return all properties for this context.
      *
@@ -124,7 +147,7 @@ class Context
     public function getProperty($name) {
         return $this->properties[$name];
     }
-    
+
     /**
      * Saves the config class to file.
      *
@@ -164,5 +187,9 @@ class Context
 
     static function getClassName($type) {
         return '\Aegir\Provision\Context\\' . ucfirst($type) . "Context";
+    }
+
+    public function verify() {
+        return "Provision Context";
     }
 }

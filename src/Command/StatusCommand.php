@@ -44,13 +44,22 @@ class StatusCommand extends Command
     {
         
         if ($input->getArgument('context_name')) {
-            $context = $this->getApplication()->getContext($input->getArgument('context_name'));
-            $rows = [['Configuration File', $context->config_path]];
-            foreach ($context->getProperties() as $name => $value) {
-                $rows[] = [$name, $value];
+            $rows = [['Configuration File', $this->context->config_path]];
+            foreach ($this->context->getProperties() as $name => $value) {
+                if (is_string($value)) {
+                    $rows[] = [$name, $value];
+                }
             }
             $this->io->table(['Provision Context:', $input->getArgument('context_name')], $rows);
-    
+
+            // Display services.
+            if (!empty($this->context->getServices())) {
+                $rows = [];
+                foreach ($this->context->getServices() as $name => $service) {
+                    $rows[] = [$name, $service['name']];
+                }
+                $this->io->table(['Services'], $rows);
+            }
         }
         else {
             $headers = ['Provision CLI Configuration'];

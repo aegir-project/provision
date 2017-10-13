@@ -12,11 +12,14 @@ namespace Aegir\Provision\Service;
 
 use Aegir\Provision\Service;
 
+/**
+ * Class HttpService
+ *
+ * @package Aegir\Provision\Service
+ */
 class HttpService extends Service {
-
   public $service = 'http';
   protected $ssl_enabled = FALSE;
-
 
   /**
    * Support the ability to cloak the database credentials using environment variables.

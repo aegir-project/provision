@@ -40,6 +40,16 @@ abstract class Command extends BaseCommand
     protected $config;
 
     /**
+     * @var \Aegir\Provision\Context;
+     */
+    public $context;
+
+    /**
+     * @var string
+     */
+    public $context_name;
+
+    /**
      * @param InputInterface $input An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      */
@@ -52,7 +62,27 @@ abstract class Command extends BaseCommand
         
         $this->io = new DrupalStyle($input, $output);
         
-        $this->config = $this->getApplication()->getConfig();
+        // Load active context if a command uses the argument.
+        if ($this->input->hasArgument('context_name') && !empty($this->input->getArgument('context_name'))) {
+
+            try {
+                // Load context from context_name argument.
+                $this->context_name = $this->input->getArgument('context_name');
+                $this->context = $this->getApplication()->getContext($this->context_name);
+            }
+            catch (\Exception $e) {
+
+                // If no context with the specified name is found:
+                // if this is "save" command and option for --delete is used, throw exception: context must exist to delete.
+                if ($this->getName() == 'save' && $input->getOption('delete')) {
+                    throw new \Exception("No context named {$this->context_name}. Unable to delete.");
+                }
+                // If this is any other command, context is required.
+                elseif ($this->getName() != 'save') {
+                    throw new \Exception($e->getMessage());
+                }
+            }
+        }
     }
 
     /**

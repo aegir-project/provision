@@ -101,17 +101,10 @@ class SaveCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        try {
-            $context = $this->getApplication()->getContext($this->context_name);
-        }
-        catch (\Exception $e) {
+        if (empty($this->context)) {
+            $this->io->comment("No context named '$this->context_name'. Creating a new one...");
 
-            if ($input->getOption('delete')) {
-                $this->io->comment("No context named '{$this->context_name}'.");
-                exit(1);
-            }
-            
-            if (empty($this->context_type)) {
+            if (empty($this->input->getOption('context_type'))) {
                 $context_type = $this->io->choice('Context Type?', [
                     'server',
                     'platform',
@@ -121,40 +114,40 @@ class SaveCommand extends Command
             }
             $properties = $this->askForContextProperties();
             $class = Context::getClassName($this->input->getOption('context_type'));
-            $context = new $class($input->getArgument('context_name'), $this->getApplication()->getConfig()->all(), $properties);
+            $this->context = new $class($input->getArgument('context_name'), $this->getApplication()->getConfig()->all(), $properties);
         }
 
         // Delete context config.
         if ($input->getOption('delete')) {
-            if (!$input->isInteractive() || $this->io->confirm("Delete context '{$this->context_name}' configuration ($context->config_path)?")) {
-                if ($context->deleteConfig()) {
+            if (!$input->isInteractive() || $this->io->confirm("Delete context '{$this->context_name}' configuration ($this->context->config_path)?")) {
+                if ($this->context->deleteConfig()) {
                     $this->io->info('Context file deleted.');
                     exit(0);
                 }
                 else {
-                    $this->io->error('Unable to delete ' . $context->config_path);
+                    $this->io->error('Unable to delete ' . $this->context->config_path);
                     exit(1);
                 }
             }
         }
 
-        foreach ($context->getProperties() as $name => $value) {
+        foreach ($this->context->getProperties() as $name => $value) {
             $rows[] = [$name, $value];
         }
         
-        $this->io->table(['Saving Context:', $context->name], $rows);
+        $this->io->table(['Saving Context:', $this->context->name], $rows);
         
-        if ($this->io->confirm("Write configuration for <question>{$context->type}</question> context <question>{$context->name}</question> to <question>{$context->config_path}</question>?")) {
-            if ($context->save()) {
-                $this->io->success("Configuration saved to {$context->config_path}");
+        if ($this->io->confirm("Write configuration for <question>{$this->context->type}</question> context <question>{$this->context->name}</question> to <question>{$this->context->config_path}</question>?")) {
+            if ($this->context->save()) {
+                $this->io->success("Configuration saved to {$this->context->config_path}");
             }
             else {
-                $this->io->error("Unable to save configuration to {$context->config_path}. ");
+                $this->io->error("Unable to save configuration to {$this->context->config_path}. ");
             }
         }
         
         $output->writeln(
-          "Context Object: ".print_r($context,1)
+          "Context Object: ".print_r($this->context,1)
         );
 
 //        $command = 'drush provision-save '.$input->getArgument('context_name');
