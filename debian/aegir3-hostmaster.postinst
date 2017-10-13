@@ -121,7 +121,7 @@ case "$1" in
             # Determin if we create a db accoount or ask for it.
             # Starting from MariaDB 10.1... https://www.drupal.org/node/2770819
             # TODO: Work with future versions
-            if [ "$OS_ID" = 'debian' ] && dpkg -s mariadb-server-10.1 > /dev/null 2>&1
+            if mysql --database=mysql --execute="show tables;" > /dev/null 2>&1
             then
               # MariaDB = 10.1
               CREATEUSER=1

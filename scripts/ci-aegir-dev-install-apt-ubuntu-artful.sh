@@ -2,7 +2,7 @@
 # Install Aegir debian packages located in the 'build/' directory.
 # These are provided by the GitLab CI build stage.
 #
-# This script is tuned for Ubuntu 16.04.
+# This script is tuned for Ubuntu 17.10.
 #
 echo "[CI] Updating APT"
 sudo apt-get update
@@ -11,9 +11,6 @@ echo "[CI] Setting debconf settings"
 echo "debconf debconf/frontend select Noninteractive" | debconf-set-selections
 #echo "debconf debconf/priority select critical" | debconf-set-selections
 
-
-echo mysql-server-5.7 mysql-server/root_password password PASSWORD | debconf-set-selections
-echo mysql-server-5.7 mysql-server/root_password_again password PASSWORD | debconf-set-selections
 
 debconf-set-selections <<EOF
 aegir3-hostmaster aegir/db_password string PASSWORD
