@@ -62,7 +62,6 @@ build:deb:
 ### Stage "test"
 #
 
-
 test:debian-jessie-aegir3-apt:
   stage: test
   image: debian:jessie
