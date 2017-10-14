@@ -53,13 +53,7 @@ class StatusCommand extends Command
             $this->io->table(['Provision Context:', $input->getArgument('context_name')], $rows);
 
             // Display services.
-            if (!empty($this->context->getServices())) {
-                $rows = [];
-                foreach ($this->context->getServices() as $name => $service) {
-                    $rows[] = [$name, $service['name']];
-                }
-                $this->io->table(['Services'], $rows);
-            }
+            $this->context->showServices($this->io);
         }
         else {
             $headers = ['Provision CLI Configuration'];

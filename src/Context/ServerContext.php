@@ -3,6 +3,7 @@
 namespace Aegir\Provision\Context;
 
 use Aegir\Provision\Context;
+use Drupal\Console\Core\Style\DrupalStyle;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -84,5 +85,18 @@ class ServerContext extends Context implements ConfigurationInterface
 
 //        parent::verify();
         return "Server Context Verified: " . $this->name;
+    }
+
+    /**
+     * Output a list of all services for this service.
+     */
+    public function showServices(DrupalStyle $io) {
+        if (!empty($this->getServices())) {
+            $rows = [];
+            foreach ($this->getServices() as $name => $service) {
+                $rows[] = [$name, $service['name']];
+            }
+            $io->table(['Services'], $rows);
+        }
     }
 }
