@@ -21,7 +21,7 @@ stages:
 ### Stage syntax
 #
 
-syntax:codestyle:
+syntax:lint:
   stage: syntax
   image: bobey/docker-gitlab-ci-runner-php5.6
   allow_failure: false
