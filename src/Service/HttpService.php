@@ -24,7 +24,16 @@ class HttpService extends Service {
 
   protected $ssl_enabled = FALSE;
 
-  /**
+    static function option_documentation() {
+        return array(
+            'web_group' => 'server with http: OS group for permissions; working default will be attempted',
+            'web_disable_url' => 'server with http: URL disabled sites are redirected to; default {master_url}/hosting/disabled',
+            'web_maintenance_url' => 'server with http: URL maintenance sites are redirected to; default {master_url}/hosting/maintenance',
+        );
+    }
+
+
+    /**
    * Support the ability to cloak the database credentials using environment variables.
    */
   function cloaked_db_creds() {
