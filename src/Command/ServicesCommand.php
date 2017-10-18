@@ -126,6 +126,10 @@ class ServicesCommand extends Command
 
         $this->io->info("Adding $service service $service_type...");
 
+        $this->context->config['services'][$service] = [
+            'type' => $service_type,
+        ];
+        $this->context->save();
 
     }
 }

@@ -155,7 +155,7 @@ class ServerContext extends Context implements ConfigurationInterface
                 ->arrayNode('services')
                     ->prototype('array')
                     ->children()
-                        ->scalarNode('name')
+                        ->scalarNode('type')
                         ->isRequired(true)
                     ->end()
             ->end()
