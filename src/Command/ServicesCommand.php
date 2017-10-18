@@ -7,6 +7,7 @@ use Aegir\Provision\Context;
 use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Context\SiteContext;
+use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -108,5 +109,23 @@ class ServicesCommand extends Command
 
         $this->io->comment("List Services");
         $this->context->showServices($this->io);
+    }
+
+    /**
+     * Add a new service to a server.
+     */
+    protected function execute_add(InputInterface $input, OutputInterface $output)
+    {
+        // Ask which service.
+        $this->io->comment("List Services");
+        $service = $this->io->choice('Which service?', $this->context->getServiceOptions());
+
+
+        // Then ask which service type
+        $service_type = $this->io->choice('Which service type?', $this->context->getServiceTypeOptions($service));
+
+        $this->io->info("Adding $service service $service_type...");
+
+
     }
 }

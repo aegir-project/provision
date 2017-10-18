@@ -11,6 +11,7 @@ namespace Aegir\Provision\Service;
 //require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
 use Aegir\Provision\Service;
+use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 
 /**
  * Class HttpService
@@ -18,7 +19,9 @@ use Aegir\Provision\Service;
  * @package Aegir\Provision\Service
  */
 class HttpService extends Service {
-  public $service = 'http';
+  const SERVICE = 'http';
+  const SERVICE_NAME = 'Web Server';
+
   protected $ssl_enabled = FALSE;
 
   /**
