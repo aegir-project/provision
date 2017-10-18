@@ -25,7 +25,6 @@ class SaveCommand extends Command
     /**
      * @var string
      */
-    private $context_name;
     private $context_type;
 
     /**
