@@ -29,9 +29,9 @@ class HttpService extends Service {
             'web_group' => 'server with http: OS group for permissions; working default will be attempted',
             'web_disable_url' => 'server with http: URL disabled sites are redirected to; default {master_url}/hosting/disabled',
             'web_maintenance_url' => 'server with http: URL maintenance sites are redirected to; default {master_url}/hosting/maintenance',
+            'restart_command' => 'The command to reload the web server configuration;'
         );
     }
-
 
     /**
    * Support the ability to cloak the database credentials using environment variables.
