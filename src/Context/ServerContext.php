@@ -205,8 +205,10 @@ class ServerContext extends Context implements ConfigurationInterface
                 $rows[] = [$name, $service['type']];
 
                 // Show all properties.
-                foreach ($service['properties'] as $name => $value) {
-                    $rows[] = ['  ' . $name, $value];
+                if (!empty($service['properties'] )) {
+                    foreach ($service['properties'] as $name => $value) {
+                        $rows[] = ['  ' . $name, $value];
+                    }
                 }
             }
             $io->table(['Services'], $rows);

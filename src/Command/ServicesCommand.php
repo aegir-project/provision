@@ -131,6 +131,7 @@ class ServicesCommand extends Command
         try {
             $this->context->config['services'][$service] = [
                 'type' => $service_type,
+                'properties' => $properties,
             ];
             $this->context->save();
             $this->io->success('Service saved to Context!');
