@@ -61,7 +61,7 @@ class ServerContext extends Context implements ConfigurationInterface
     *
     * @return array
     */
-    protected function getAvailableServices($service = NULL) {
+    public function getAvailableServices($service = NULL) {
 
         // Load all service classes
         $classes = [];

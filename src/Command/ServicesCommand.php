@@ -123,6 +123,9 @@ class ServicesCommand extends Command
         // Then ask which service type
         $service_type = $this->io->choice('Which service type?', $this->context->getServiceTypeOptions($service));
 
+        // Then ask for all options.
+        $properties = $this->askForServiceProperties($service);
+
         $this->io->info("Adding $service service $service_type...");
 
         try {
@@ -135,5 +138,29 @@ class ServicesCommand extends Command
         catch (\Exception $e) {
             throw new \Exception("Something went wrong when saving the context: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Loop through this context type's option_documentation() method and ask for each property.
+     *
+     * @return array
+     */
+    private function askForServiceProperties($service) {
+
+        $class = $this->context->getAvailableServices($service);
+
+        $options = $class::option_documentation();
+        $properties = [];
+        foreach ($options as $name => $description) {
+            // If option does not exist, ask for it.
+            if (!empty($this->input->hasOption($name))) {
+                $properties[$name] = $this->input->getOption($name);
+                $this->io->comment("Using option {$name}={$properties[$name]}");
+            }
+            else {
+                $properties[$name] = $this->io->ask("$name ($description)");
+            }
+        }
+        return $properties;
     }
 }
