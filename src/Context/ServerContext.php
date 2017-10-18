@@ -146,7 +146,7 @@ class ServerContext extends Context implements ConfigurationInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Pass server specific config to Context configTreeBuilder.
      */
     public function configTreeBuilder(&$root_node)
     {
@@ -158,8 +158,35 @@ class ServerContext extends Context implements ConfigurationInterface
                         ->scalarNode('type')
                         ->isRequired(true)
                     ->end()
-            ->end()
-        ->end();
+                    ->append($this->addServiceProperties())
+                ->end()
+            ->end();
+    }
+
+    /**
+     * Append Service class options_documentation to config tree.
+     */
+    public function addServiceProperties()
+    {
+        $builder = new TreeBuilder();
+        $node = $builder->root('properties');
+
+        // Load config tree from Service type classes
+        if (!empty($this->getProperty('services')) && !empty($this->getProperty('services'))) {
+            foreach ($this->getProperty('services') as $service => $info) {
+                $service = ucfirst($service);
+                $service_type = ucfirst($info['type']);
+                $class = "\Aegir\Provision\Service\\{$service}\\{$service}{$service_type}Service";
+                foreach ($class::option_documentation() as $name => $description) {
+                    $node
+                        ->children()
+                            ->scalarNode($name)->end()
+                        ->end()
+                    ->end();
+                }
+            }
+        }
+        return $node;
     }
 
     public function verify() {
