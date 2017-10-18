@@ -117,19 +117,23 @@ class ServicesCommand extends Command
     protected function execute_add(InputInterface $input, OutputInterface $output)
     {
         // Ask which service.
-        $this->io->comment("List Services");
+        $this->io->comment("Add Services");
         $service = $this->io->choice('Which service?', $this->context->getServiceOptions());
-
 
         // Then ask which service type
         $service_type = $this->io->choice('Which service type?', $this->context->getServiceTypeOptions($service));
 
         $this->io->info("Adding $service service $service_type...");
 
-        $this->context->config['services'][$service] = [
-            'type' => $service_type,
-        ];
-        $this->context->save();
-
+        try {
+            $this->context->config['services'][$service] = [
+                'type' => $service_type,
+            ];
+            $this->context->save();
+            $this->io->success('Service saved to Context!');
+        }
+        catch (\Exception $e) {
+            throw new \Exception("Something went wrong when saving the context: " . $e->getMessage());
+        }
     }
 }
