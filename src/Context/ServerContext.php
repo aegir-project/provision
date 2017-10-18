@@ -175,7 +175,7 @@ class ServerContext extends Context implements ConfigurationInterface
         if (!empty($this->getServices())) {
             $rows = [];
             foreach ($this->getServices() as $name => $service) {
-                $rows[] = [$name, $service['name']];
+                $rows[] = [$name, $service['type']];
             }
             $io->table(['Services'], $rows);
         }
