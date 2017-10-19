@@ -41,7 +41,7 @@ case "$1" in
         adduser --quiet aegir www-data
 
         if [ -d /etc/sudoers.d ]; then
-            ucf --debconf-ok /usr/share/doc/aegir-cluster-slave2/examples/example.sudoers /etc/sudoers.d/aegir
+            ucf --debconf-ok /usr/share/doc/aegir3-cluster-slave/examples/example.sudoers /etc/sudoers.d/aegir
             ucfr aegir-provision /etc/sudoers.d/aegir
             chmod 440 /etc/sudoers.d/aegir
         else
