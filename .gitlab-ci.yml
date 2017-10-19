@@ -137,6 +137,23 @@ test:ubuntu-artful-aegir3-apt:
 
   script: "scripts/ci-aegir-dev-install-apt-ubuntu-artful.sh"
 
+
+test:debian-stretch-aegir3-cluster-slave-apt:
+  stage: test
+  image: debian:stretch
+  allow_failure: false
+  dependencies:
+    - build:deb
+
+  before_script:
+    - apt-get update
+    # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
+    - echo "#!/bin/sh" > /usr/sbin/policy-rc.d
+    - echo "exit 0" >> /usr/sbin/policy-rc.d
+    - apt-get install --yes sudo curl
+
+  script: "scripts/ci-aegir-dev-install-apt-debian9-cluster-slave.sh"
+
 test:behat:
   stage: test
   image: aegir/hostmaster:packaging_base
