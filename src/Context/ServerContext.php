@@ -3,6 +3,7 @@
 namespace Aegir\Provision\Context;
 
 use Aegir\Provision\Context;
+use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -56,6 +57,86 @@ class ServerContext extends Context implements ConfigurationInterface
     }
 
     /**
+    * Loads all available \Aegir\Provision\Service classes
+    *
+    * @return array
+    */
+    public function getAvailableServices($service = NULL) {
+
+        // Load all service classes
+        $classes = [];
+        $discovery = new CommandFileDiscovery();
+        $discovery->setSearchPattern('*Service.php');
+        $servicesFiles = $discovery->discover(__DIR__ .'/../Service', '\Aegir\Provision\Service');
+
+        foreach ($servicesFiles as $serviceClass) {
+          $classes[$serviceClass::SERVICE] = $serviceClass;
+        }
+
+        if ($service && isset($classes[$service])) {
+          return $classes[$service];
+        }
+        elseif ($service && !isset($classes[$service])) {
+          throw new \Exception("No service with name $service was found.");
+        }
+        else {
+          return $classes;
+        }
+    }
+
+    /**
+    * Lists all available services as a simple service => name array.
+    * @return array
+    */
+    public function getServiceOptions() {
+        $options = [];
+        $services = $this->getAvailableServices();
+        foreach ($services as $service => $class) {
+            $options[$service] = $class::SERVICE_NAME;
+        }
+        return $options;
+    }
+
+    /**
+    * @return array
+    */
+    protected function getAvailableServiceTypes($service, $service_type = NULL) {
+
+        // Load all service classes
+        $classes = [];
+        $discovery = new CommandFileDiscovery();
+        $discovery->setSearchPattern(ucfirst($service) . '*Service.php');
+        $serviceTypesFiles = $discovery->discover(__DIR__ .'/../Service/' . ucfirst($service), '\Aegir\Provision\Service\\' . ucfirst($service));
+        foreach ($serviceTypesFiles as $serviceTypeClass) {
+          $classes[$serviceTypeClass::SERVICE_TYPE] = $serviceTypeClass;
+        }
+
+        if ($service_type && isset($classes[$service_type])) {
+          return $classes[$service_type];
+        }
+        elseif ($service_type && !isset($classes[$service_type])) {
+          throw new \Exception("No service type with name $service_type was found.");
+        }
+        else {
+          return $classes;
+        }
+    }
+
+    /**
+    * Lists all available services as a simple service => name array.
+    * @return array
+    */
+    public function getServiceTypeOptions($service) {
+        $options = [];
+        $service_types = $this->getAvailableServiceTypes($service);
+        foreach ($service_types as $service_type => $class) {
+            $options[$service_type] = $class::SERVICE_TYPE_NAME;
+        }
+        return $options;
+    }
+
+
+  /**
      * Return all services for this context.
      *
      * @return array
@@ -65,7 +146,7 @@ class ServerContext extends Context implements ConfigurationInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Pass server specific config to Context configTreeBuilder.
      */
     public function configTreeBuilder(&$root_node)
     {
@@ -74,11 +155,38 @@ class ServerContext extends Context implements ConfigurationInterface
                 ->arrayNode('services')
                     ->prototype('array')
                     ->children()
-                        ->scalarNode('name')
+                        ->scalarNode('type')
                         ->isRequired(true)
                     ->end()
-            ->end()
-        ->end();
+                    ->append($this->addServiceProperties())
+                ->end()
+            ->end();
+    }
+
+    /**
+     * Append Service class options_documentation to config tree.
+     */
+    public function addServiceProperties()
+    {
+        $builder = new TreeBuilder();
+        $node = $builder->root('properties');
+
+        // Load config tree from Service type classes
+        if (!empty($this->getProperty('services')) && !empty($this->getProperty('services'))) {
+            foreach ($this->getProperty('services') as $service => $info) {
+                $service = ucfirst($service);
+                $service_type = ucfirst($info['type']);
+                $class = "\Aegir\Provision\Service\\{$service}\\{$service}{$service_type}Service";
+                foreach ($class::option_documentation() as $name => $description) {
+                    $node
+                        ->children()
+                            ->scalarNode($name)->end()
+                        ->end()
+                    ->end();
+                }
+            }
+        }
+        return $node;
     }
 
     public function verify() {
@@ -94,7 +202,14 @@ class ServerContext extends Context implements ConfigurationInterface
         if (!empty($this->getServices())) {
             $rows = [];
             foreach ($this->getServices() as $name => $service) {
-                $rows[] = [$name, $service['name']];
+                $rows[] = [$name, $service['type']];
+
+                // Show all properties.
+                if (!empty($service['properties'] )) {
+                    foreach ($service['properties'] as $name => $value) {
+                        $rows[] = ['  ' . $name, $value];
+                    }
+                }
             }
             $io->table(['Services'], $rows);
         }

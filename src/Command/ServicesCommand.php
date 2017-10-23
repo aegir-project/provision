@@ -7,6 +7,7 @@ use Aegir\Provision\Context;
 use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Context\SiteContext;
+use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -108,5 +109,59 @@ class ServicesCommand extends Command
 
         $this->io->comment("List Services");
         $this->context->showServices($this->io);
+    }
+
+    /**
+     * Add a new service to a server.
+     */
+    protected function execute_add(InputInterface $input, OutputInterface $output)
+    {
+        // Ask which service.
+        $this->io->comment("Add Services");
+        $service = $this->io->choice('Which service?', $this->context->getServiceOptions());
+
+        // Then ask which service type
+        $service_type = $this->io->choice('Which service type?', $this->context->getServiceTypeOptions($service));
+
+        // Then ask for all options.
+        $properties = $this->askForServiceProperties($service);
+
+        $this->io->info("Adding $service service $service_type...");
+
+        try {
+            $this->context->config['services'][$service] = [
+                'type' => $service_type,
+                'properties' => $properties,
+            ];
+            $this->context->save();
+            $this->io->success('Service saved to Context!');
+        }
+        catch (\Exception $e) {
+            throw new \Exception("Something went wrong when saving the context: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Loop through this context type's option_documentation() method and ask for each property.
+     *
+     * @return array
+     */
+    private function askForServiceProperties($service) {
+
+        $class = $this->context->getAvailableServices($service);
+
+        $options = $class::option_documentation();
+        $properties = [];
+        foreach ($options as $name => $description) {
+            // If option does not exist, ask for it.
+            if (!empty($this->input->hasOption($name))) {
+                $properties[$name] = $this->input->getOption($name);
+                $this->io->comment("Using option {$name}={$properties[$name]}");
+            }
+            else {
+                $properties[$name] = $this->io->ask("$name ($description)");
+            }
+        }
+        return $properties;
     }
 }

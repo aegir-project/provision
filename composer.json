@@ -6,6 +6,7 @@
     "type": "library",
     "license": "GPL-2.0+",
     "require": {
+        "consolidation/annotated-command": "~2",
         "drupal/console-core": "1.0.2",
         "psy/psysh": "^0.8.11",
         "symfony/console": "^3.3",

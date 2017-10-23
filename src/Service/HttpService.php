@@ -11,6 +11,7 @@ namespace Aegir\Provision\Service;
 //require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
 use Aegir\Provision\Service;
+use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 
 /**
  * Class HttpService
@@ -18,10 +19,21 @@ use Aegir\Provision\Service;
  * @package Aegir\Provision\Service
  */
 class HttpService extends Service {
-  public $service = 'http';
+  const SERVICE = 'http';
+  const SERVICE_NAME = 'Web Server';
+
   protected $ssl_enabled = FALSE;
 
-  /**
+    static function option_documentation() {
+        return array(
+            'web_group' => 'server with http: OS group for permissions; working default will be attempted',
+            'web_disable_url' => 'server with http: URL disabled sites are redirected to; default {master_url}/hosting/disabled',
+            'web_maintenance_url' => 'server with http: URL maintenance sites are redirected to; default {master_url}/hosting/maintenance',
+        );
+    }
+
+
+    /**
    * Support the ability to cloak the database credentials using environment variables.
    */
   function cloaked_db_creds() {

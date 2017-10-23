@@ -28,7 +28,19 @@ class Service {
    */
   public $context;
 
-  protected $service = NULL;
+  /**
+   * @var string
+   * The machine name of the service.  ie. http, db
+   */
+  const SERVICE = 'service';
+
+  /**
+   * @var string
+   * A descriptive name of the service.  ie. Web Server
+   */
+  const SERVICE_NAME = 'Service Name';
+
+
   protected $application_name = NULL;
 
   protected $has_restart_cmd = FALSE;
