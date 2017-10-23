@@ -45,8 +45,6 @@ class ServerContext extends Context implements ConfigurationInterface
         else {
           $this->services = [];
         }
-        
-        print_r($this->services);
     }
   
     /**
@@ -208,7 +206,11 @@ class ServerContext extends Context implements ConfigurationInterface
 
     public function verify() {
 
-//        parent::verify();
+        // Run verify method on all services.
+        foreach ($this->getServices() as $service) {
+            $service->verify();
+        }
+
         return "Server Context Verified: " . $this->name;
     }
 
