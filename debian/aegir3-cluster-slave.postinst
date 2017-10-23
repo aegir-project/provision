@@ -41,7 +41,7 @@ case "$1" in
         adduser --quiet aegir www-data
 
         if [ -d /etc/sudoers.d ]; then
-            ucf --debconf-ok /usr/share/doc/aegir-cluster-slave2/examples/example.sudoers /etc/sudoers.d/aegir
+            ucf --debconf-ok /usr/share/doc/aegir3-cluster-slave/examples/example.sudoers /etc/sudoers.d/aegir
             ucfr aegir-provision /etc/sudoers.d/aegir
             chmod 440 /etc/sudoers.d/aegir
         else
@@ -54,7 +54,14 @@ case "$1" in
         # make sure we have apache configs settled in, for remote headless aegir servers
         touch $VARLIB/config/apache.conf
         chown aegir:aegir "$VARLIB/config/apache.conf"
-        ln -sf $VARLIB/config/apache.conf /etc/apache2/conf.d/aegir.conf
+        if [ -d /etc/apache2/conf-enabled ]; then
+            # Apache 2.4
+            ln -sf $VARLIB/config/apache.conf /etc/apache2/conf-enabled/aegir.conf
+        else
+            # Apache 2.2
+            ln -sf $VARLIB/config/apache.conf /etc/apache2/conf.d/aegir.conf
+        fi
+
         a2enmod ssl rewrite
         apache2ctl graceful
 

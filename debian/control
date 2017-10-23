@@ -73,7 +73,7 @@ Depends: ${misc:Depends}, php5-mysql | php7.0-mysql | php7.1-mysql, sudo, apache
 Recommends: php5-gd | php7.0-gd | php7.1-gd, php5 | php7.0 | php7.1
 Conflicts: aegir-cluster-slave, aegir-cluster-slave2, aegir2-cluster-slave, aegir3
 Replaces: aegir-cluster-slave, aegir-cluster-slave2, aegir2-cluster-slave
-Description: web frontend for the Aegir hosting system
+Description: mass Drupal hosting system - slave backend
  Configuration of lightweight slave servers for the Aegir "pack"
  clustering system.
  .

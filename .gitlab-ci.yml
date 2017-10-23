@@ -10,11 +10,27 @@ before_script:
 
 # Defines stages which are to be executed
 stages:
+  - syntax
   - build
   - test
   - publish
   - upgradetest
 
+
+#
+### Stage syntax
+#
+
+syntax:lint:
+  stage: syntax
+  image: bobey/docker-gitlab-ci-runner-php5.6
+  allow_failure: false
+
+  script:
+    - composer require phplint/phplint
+    - echo "Syntax checking PHP files"
+    - echo "For more information http://www.icosaedro.it/phplint/"
+    - vendor/bin/phplint ./ --exclude "vendor"
 
 #
 ### Stage "build"
@@ -53,6 +69,8 @@ test:debian-jessie-aegir3-apt:
     - build:deb
   only:
     - 7.x-3.x
+    - /^7\.x-3\.\d+\.x/
+    - /-runalltests$/
 
   before_script:
     - apt-get update
@@ -66,7 +84,7 @@ test:debian-jessie-aegir3-apt:
 test:debian-stretch-aegir3-apt:
   stage: test
   image: debian:stretch
-  allow_failure: true
+  allow_failure: false
   dependencies:
     - build:deb
 
@@ -84,8 +102,11 @@ test:ubuntu-xenial-aegir3-apt:
   image: ubuntu:xenial
   dependencies:
     - build:deb
+
   only:
     - 7.x-3.x
+    - /^7\.x-3\.\d+\.x/
+    - /-runalltests$/
 
   before_script:
     - apt-get update
@@ -101,7 +122,11 @@ test:ubuntu-artful-aegir3-apt:
   image: ubuntu:artful
   dependencies:
     - build:deb
-  allow_failure: true
+
+  only:
+    - 7.x-3.x
+    - /^7\.x-3\.\d+\.x/
+    - /-runalltests$/
 
   before_script:
     - apt-get update
@@ -111,6 +136,23 @@ test:ubuntu-artful-aegir3-apt:
     - apt-get install --yes sudo curl
 
   script: "scripts/ci-aegir-dev-install-apt-ubuntu-artful.sh"
+
+
+test:debian-stretch-aegir3-cluster-slave-apt:
+  stage: test
+  image: debian:stretch
+  allow_failure: false
+  dependencies:
+    - build:deb
+
+  before_script:
+    - apt-get update
+    # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
+    - echo "#!/bin/sh" > /usr/sbin/policy-rc.d
+    - echo "exit 0" >> /usr/sbin/policy-rc.d
+    - apt-get install --yes sudo curl
+
+  script: "scripts/ci-aegir-dev-install-apt-debian9-cluster-slave.sh"
 
 test:behat:
   stage: test
@@ -153,7 +195,6 @@ publish:unstable-repo:
   stage: publish
   dependencies:
     - build:deb
-  allow_failure: true
 
   only:
     - 7.x-3.x
