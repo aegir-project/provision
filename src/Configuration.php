@@ -4,7 +4,14 @@
  * Provision configuration generation classes.
  */
 
-class Provision_Config {
+namespace Aegir\Provision;
+
+/**
+ * Class Configuration
+ *
+ * @package Aegir\Provision
+ */
+class Configuration {
   /**
    * Template file, a PHP file which will have access to $this and variables
    * as defined in $data.
