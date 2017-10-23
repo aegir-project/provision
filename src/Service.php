@@ -11,7 +11,19 @@ namespace Aegir\Provision;
 //require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
 class Service {
-
+  
+   public $type;
+   public $properties;
+  
+  function __construct($service_config, $context) {
+      $this->context = $context;
+      $this->type = $service_config['type'];
+      $this->properties = $service_config['properties'];
+  }
+  
+  /**
+   * LEGACY
+   */
   /**
    * The server this service is associated to
    */
@@ -314,10 +326,6 @@ class Service {
       }
     }
     return FALSE;
-  }
-
-  function __construct($server) {
-    $this->server = is_object($server) ? $server : d($server);
   }
 
   /**

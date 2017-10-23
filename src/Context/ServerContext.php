@@ -40,7 +40,24 @@ class ServerContext extends Context implements ConfigurationInterface
     {
         parent::__construct($name, $console_config, $options);
         if (isset($this->config['services'])) {
-            $this->services = $this->config['services'];
+            $this->prepareServices();
+        }
+        else {
+          $this->services = [];
+        }
+        
+        print_r($this->services);
+    }
+  
+    /**
+     * Load Service classes from config into Context..
+     */
+    protected function prepareServices() {
+        foreach ($this->config['services'] as $service_name => $service) {
+            $service_name = ucfirst($service_name);
+            $service_type = ucfirst($service['type']);
+            $service_class = "\\Aegir\\Provision\\Service\\{$service_name}\\{$service_name}{$service_type}Service";
+            $this->services[strtolower($service_name)] = new $service_class($service, $this);
         }
     }
 
@@ -202,11 +219,11 @@ class ServerContext extends Context implements ConfigurationInterface
         if (!empty($this->getServices())) {
             $rows = [];
             foreach ($this->getServices() as $name => $service) {
-                $rows[] = [$name, $service['type']];
+                $rows[] = [$name, $service->type];
 
                 // Show all properties.
-                if (!empty($service['properties'] )) {
-                    foreach ($service['properties'] as $name => $value) {
+                if (!empty($service->properties )) {
+                    foreach ($service->properties as $name => $value) {
                         $rows[] = ['  ' . $name, $value];
                     }
                 }
