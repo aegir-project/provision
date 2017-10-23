@@ -145,7 +145,12 @@ class Context
      * @return array
      */
     public function getProperty($name) {
-        return $this->properties[$name];
+        if (isset($this->properties[$name])) {
+            return $this->properties[$name];
+        }
+        else {
+          return NULL;
+        }
     }
 
     /**
