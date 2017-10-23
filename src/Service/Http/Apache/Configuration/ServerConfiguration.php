@@ -3,6 +3,10 @@
  * @file Server.php
  *
  *       Apache Configuration for Server Context.
+ *
+ *       This class represents the file at /var/aegir/config/apache.conf.
+ *
+ *
  * @see \Provision_Config_Apache_Server
  * @see \Provision_Config_Http_Server
  * @see \Provision_Config_Http_Server
@@ -22,7 +26,7 @@ class ServerConfiguration extends Configuration {
   function filename() {
     if ($this->service->getType()) {
       $file = $this->service->getType() . '.conf';
-      return $this->context->console_config['config_path'] . '/' . $file;
+      return $this->context->console_config['config_path'] . '/' . $this->context->name . '/' . $file;
     }
     else {
       return FALSE;
