@@ -2,6 +2,7 @@
 
 namespace Aegir\Provision\Context;
 
+use Aegir\Provision\Application;
 use Aegir\Provision\Context;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Drupal\Console\Core\Style\DrupalStyle;
@@ -36,9 +37,9 @@ class ServerContext extends Context implements ConfigurationInterface
      * @param $console_config
      * @param array $options
      */
-    function __construct($name, $console_config, array $options = [])
+    function __construct($name, $console_config, Application $application,array $options = [])
     {
-        parent::__construct($name, $console_config, $options);
+        parent::__construct($name, $console_config, $application, $options);
         if (isset($this->config['services'])) {
             $this->prepareServices();
         }

@@ -8,6 +8,7 @@ use Aegir\Provision\Command\ShellCommand;
 use Aegir\Provision\Command\StatusCommand;
 use Aegir\Provision\Command\VerifyCommand;
 use Aegir\Provision\Console\Config;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\HelpCommand;
 use Symfony\Component\Console\Command\ListCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -137,16 +138,22 @@ class Application extends BaseApplication
      *
      * @return array
      */
-    function getAllContexts() {
+    function getAllContexts($name = '') {
         $contexts = [];
         $finder = new \Symfony\Component\Finder\Finder();
-        $finder->files()->name('*.yml')->in($this->config->get('config_path') . '/provision');
+        $finder->files()->name('*.' . $name . '.yml')->in($this->config->get('config_path') . '/provision');
         foreach ($finder as $file) {
             list($context_type, $context_name) = explode('.', $file->getFilename());
             $class = '\Aegir\Provision\Context\\' . ucfirst($context_type) . "Context";
-            $contexts[$context_name] = new $class($context_name, $this->config->all());
+            $contexts[$context_name] = new $class($context_name, $this->config->all(), $this);
         }
-        return $contexts;
+        
+        if ($name) {
+            return $contexts[$name];
+        }
+        else {
+            return $contexts;
+        }
     }
     
     /**
@@ -158,9 +165,9 @@ class Application extends BaseApplication
      * @throws \Exception
      */
     function getContext($name) {
-        if (empty($this->getAllContexts()[$name])) {
+        if (empty($this->getAllContexts($name))) {
             throw new \Exception('Context not found with name: ' . $name);
         }
-        return $this->getAllContexts()[$name];
+        return $this->getAllContexts($name);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Aegir\Provision\Context;
 
+use Aegir\Provision\Application;
 use Aegir\Provision\Context;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -18,7 +19,35 @@ class PlatformContext extends Context implements ConfigurationInterface
      * @var string
      */
     public $type = 'platform';
-
+    
+    /**
+     * @var \Aegir\Provision\Context\ServerContext;
+     */
+    public $web_server;
+    
+    /**
+     * PlatformContext constructor.
+     *
+     * @param $name
+     * @param $console_config
+     * @param Application $application
+     * @param array $options
+     */
+    function __construct($name, $console_config, Application $application, array $options = [])
+    {
+        parent::__construct($name, $console_config, $application, $options);
+        
+        // Load "web_server" context.
+        if (isset($this->config['web_server'])) {
+            $this->web_server = $application->getContext($this->config['web_server']);
+            $this->web_server->logger = $application->logger;
+    
+        }
+        else {
+            throw new \Exception('No web_server found.');
+        }
+    }
+    
     static function option_documentation()
     {
         $options = [
@@ -30,5 +59,12 @@ class PlatformContext extends Context implements ConfigurationInterface
         ];
 
         return $options;
+    }
+    
+    
+    public function verify() {
+        parent::verify();
+        $this->web_server->verify();
+        return "Platform Context Verified: " . $this->name;
     }
 }

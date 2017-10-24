@@ -51,6 +51,11 @@ class Context
     protected $properties = [];
     
     /**
+     * @var \Aegir\Provision\Application;
+     */
+    public $application;
+    
+    /**
      * @var LoggerInterface
      */
     public $logger;
@@ -62,9 +67,10 @@ class Context
      * @param $console_config
      * @param array $options
      */
-    function __construct($name, $console_config, $options = [])
+    function __construct($name, $console_config, Application $application, $options = [])
     {
         $this->name = $name;
+        $this->application = $application;
         $this->loadContextConfig($console_config, $options);
     }
 
