@@ -3,6 +3,7 @@
 namespace Aegir\Provision;
 
 use Drupal\Console\Core\Style\DrupalStyle;
+use Psr\Log\LogLevel;
 use Symfony\Component\Console\Command\Command as BaseCommand;
 use Drupal\Console\Core\Command\Shared\CommandTrait;
 use Symfony\Component\Console\Input\InputInterface;
@@ -70,7 +71,9 @@ abstract class Command extends BaseCommand
                 // Load context from context_name argument.
                 $this->context_name = $this->input->getArgument('context_name');
                 $this->context = $this->getApplication()->getContext($this->context_name);
-                $this->context->logger = new ConsoleLogger($output);
+                $this->context->logger = new ConsoleLogger($output,
+                    [LogLevel::INFO => OutputInterface::VERBOSITY_NORMAL]
+                );
             }
             catch (\Exception $e) {
 
