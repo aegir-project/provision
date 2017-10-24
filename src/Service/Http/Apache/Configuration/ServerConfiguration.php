@@ -34,16 +34,14 @@ class ServerConfiguration extends Configuration {
   }
   function process()
   {
-
-    $app_dir = $this->context->console_config['config_path'] . '/' . $this->service->getType();
-    $this->data['http_port'] = $this->service->properties['http_port'];
-    $this->data['include_statement'] = '# INCLUDE STATEMENT';
-    $this->data['http_pred_path'] = "{$app_dir}/pre.d";
-    $this->data['http_postd_path'] = "{$app_dir}/post.d";
-    $this->data['http_platformd_path'] = "{$app_dir}/platform.d";
-    $this->data['http_vhostd_path'] = "{$app_dir}/vhost.d";
-    $this->data['extra_config'] = "";
-    
-    return parent::process();
+      parent::process();
+      $app_dir = $this->context->console_config['config_path'] . '/' . $this->service->getType();
+      $this->data['http_port'] = $this->service->properties['http_port'];
+      $this->data['include_statement'] = '# INCLUDE STATEMENT';
+      $this->data['http_pred_path'] = "{$app_dir}/pre.d";
+      $this->data['http_postd_path'] = "{$app_dir}/post.d";
+      $this->data['http_platformd_path'] = "{$app_dir}/platform.d";
+      $this->data['http_vhostd_path'] = "{$app_dir}/vhost.d";
+      $this->data['extra_config'] = "";
   }
 }

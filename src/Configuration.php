@@ -125,10 +125,15 @@ class Configuration {
    * This is a stub to be implemented by subclasses.
    */
   function process() {
-    if (is_object($this->store)) {
-      $this->data['records'] = array_filter(array_merge($this->store->loaded_records, $this->store->records));
-    }
-    return TRUE;
+      if (!empty($this->context->getProperties())) {
+          $this->data = $this->context->getProperties();
+      }
+
+      // @TODO: Remove legacy code.
+//    if (is_object($this->store)) {
+//      $this->data['records'] = array_filter(array_merge($this->store->loaded_records, $this->store->records));
+//    }
+//    return TRUE;
   }
 
   /**
