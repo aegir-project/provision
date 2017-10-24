@@ -27,8 +27,8 @@ class HttpService extends Service {
     static function option_documentation() {
         return array(
             'http_port' => 'The port which the web service is running on.',
-            'http_platformd_path' => 'The path to store platforms.',
-            'http_postd_path' => 'The path to store post configuration.',
+//            'http_platformd_path' => 'The path to store platforms.',
+//            'http_postd_path' => 'The path to store post configuration.',
             'web_group' => 'server with http: OS group for permissions; working default will be attempted',
             'web_disable_url' => 'server with http: URL disabled sites are redirected to; default {master_url}/hosting/disabled',
             'web_maintenance_url' => 'server with http: URL maintenance sites are redirected to; default {master_url}/hosting/maintenance',
