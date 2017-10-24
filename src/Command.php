@@ -6,6 +6,7 @@ use Drupal\Console\Core\Style\DrupalStyle;
 use Symfony\Component\Console\Command\Command as BaseCommand;
 use Drupal\Console\Core\Command\Shared\CommandTrait;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -69,6 +70,7 @@ abstract class Command extends BaseCommand
                 // Load context from context_name argument.
                 $this->context_name = $this->input->getArgument('context_name');
                 $this->context = $this->getApplication()->getContext($this->context_name);
+                $this->context->logger = new ConsoleLogger($output);
             }
             catch (\Exception $e) {
 

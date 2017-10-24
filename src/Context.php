@@ -6,6 +6,7 @@
 
 namespace Aegir\Provision;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Filesystem\Exception\IOException;
@@ -48,7 +49,12 @@ class Context
      * init(), set defaults with setProperty().
      */
     protected $properties = [];
-
+    
+    /**
+     * @var LoggerInterface
+     */
+    public $logger;
+    
     /**
      * Context constructor.
      *
