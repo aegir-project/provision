@@ -38,7 +38,7 @@ class Service {
       foreach ($this->getConfigurations()[$this->context->type] as $configuration_class) {
           $config = new $configuration_class($this->context, $this);
           $config->write();
-          $this->context->logger->info('Wrote ' . $config->description . ' to ' . $config->filename());
+          $this->context->application->logger->info('Wrote ' . $config->description . ' to ' . $config->filename());
       }
   }
   

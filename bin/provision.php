@@ -54,7 +54,7 @@ if ($debug){
 }
 
 try {
-    $application = new Application();
+    $application = new Application($input, $output);
     $application->run();
 }
 catch (\Exception $e) {

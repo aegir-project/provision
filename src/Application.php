@@ -9,11 +9,13 @@ use Aegir\Provision\Command\StatusCommand;
 use Aegir\Provision\Command\VerifyCommand;
 use Aegir\Provision\Console\Config;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 use Symfony\Component\Console\Command\HelpCommand;
 use Symfony\Component\Console\Command\ListCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Application as BaseApplication;
 
@@ -50,10 +52,26 @@ class Application extends BaseApplication
      * @var string
      */
     const DEFAULT_TIMEZONE = 'America/New_York';
-
-    public function __construct()
+    
+    /**
+     * @var LoggerInterface
+     */
+    public $logger;
+    
+    /**
+     * Application constructor.
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface   $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     *
+     * @throws \Exception
+     */
+    public function __construct(InputInterface $input, OutputInterface $output)
     {
-
+        $this->logger = new ConsoleLogger($output,
+            [LogLevel::INFO => OutputInterface::VERBOSITY_NORMAL]
+        );
+    
         // If no timezone is set, set Default.
         if (empty(ini_get('date.timezone'))) {
             date_default_timezone_set($this::DEFAULT_TIMEZONE);

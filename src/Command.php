@@ -71,9 +71,6 @@ abstract class Command extends BaseCommand
                 // Load context from context_name argument.
                 $this->context_name = $this->input->getArgument('context_name');
                 $this->context = $this->getApplication()->getContext($this->context_name);
-                $this->context->logger = new ConsoleLogger($output,
-                    [LogLevel::INFO => OutputInterface::VERBOSITY_NORMAL]
-                );
             }
             catch (\Exception $e) {
 
