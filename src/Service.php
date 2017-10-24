@@ -32,6 +32,9 @@ class Service {
    * Write this service's configurations.
    */
   protected function writeConfigurations() {
+      if (empty($this->getConfigurations()[$this->context->type])) {
+          return;
+      }
       foreach ($this->getConfigurations()[$this->context->type] as $configuration_class) {
           $config = new $configuration_class($this->context, $this);
           $config->write();
