@@ -144,11 +144,6 @@ class SaveCommand extends Command
                 $this->io->error("Unable to save configuration to {$this->context->config_path}. ");
             }
         }
-        
-        $output->writeln(
-          "Context Object: ".print_r($this->context,1)
-        );
-
 //        $command = 'drush provision-save '.$input->getArgument('context_name');
 //        $this->process($command);
     }
