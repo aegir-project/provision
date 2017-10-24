@@ -11,7 +11,59 @@ namespace Aegir\Provision;
 //require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
 class Service {
-
+  
+   public $type;
+   public $properties;
+  
+  function __construct($service_config, $context) {
+      $this->context = $context;
+      $this->type = $service_config['type'];
+      $this->properties = $service_config['properties'];
+  }
+  
+  /**
+   * React to the `provision verify` command.
+   */
+  function verify() {
+    $this->writeConfigurations();
+  }
+  
+  /**
+   * Write this service's configurations.
+   */
+  protected function writeConfigurations() {
+      foreach ($this->getConfigurations()[$this->context->type] as $configuration_class) {
+          $config = new $configuration_class($this->context, $this);
+          $config->write();
+      }
+  }
+  
+  /**
+   * Stub for this services configurations.
+   */
+  protected function getConfigurations() {
+      return [];
+  }
+  
+  /**
+   * Return the SERVICE_TYPE
+   * @return mixed
+   */
+  public function getType() {
+    return $this::SERVICE_TYPE;
+  }
+  
+  /**
+   * Return the SERVICE_TYPE
+   * @return mixed
+   */
+  public function getName() {
+    return $this::SERVICE;
+  }
+  
+  /**
+   * LEGACY
+   */
   /**
    * The server this service is associated to
    */
@@ -62,9 +114,9 @@ class Service {
    * This is used so that we can create methods for drush commands, and
    * can fail safely.
    */
-  function __call($name, $args = array()) {
-    return provision::method_invoke($this, $name, $args);
-  }
+//  function __call($name, $args = array()) {
+//    return provision::method_invoke($this, $name, $args);
+//  }
 
 
   function init() {
@@ -316,10 +368,6 @@ class Service {
     return FALSE;
   }
 
-  function __construct($server) {
-    $this->server = is_object($server) ? $server : d($server);
-  }
-
   /**
    * Set the currently active context of the service.
    *
@@ -344,10 +392,10 @@ class Service {
   function fetch($path = NULL) {
     return $this->server->fetch($path);
   }
-
-  function verify() {
-    return TRUE;
-  }
+//
+//  function verify() {
+//    return TRUE;
+//  }
 
   /**
    * Return service-specific configuration options for help.
