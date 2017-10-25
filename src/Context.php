@@ -227,6 +227,20 @@ class Context
     }
 
     /**
+     * Return all services for this context.
+     *
+     * @return array
+     */
+    public function getService($type) {
+        if (isset($this->services[$type])) {
+            return $this->services[$type];
+        }
+        else {
+            throw new \Exception("Service '$type' does not exist.");
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getConfigTreeBuilder()
