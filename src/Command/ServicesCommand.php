@@ -81,9 +81,9 @@ class ServicesCommand extends Command
             $input,
             $output
         );
-        if (isset($this->context->type) && $this->context->type != 'server') {
-            throw new \Exception('Context must be a server.');
-        }
+//        if (isset($this->context->type) && $this->context->type != 'server') {
+//            throw new \Exception('Context must be a server.');
+//        }
 
         $this->sub_command = $input->getArgument('sub_command');
     }
@@ -120,19 +120,42 @@ class ServicesCommand extends Command
         $this->io->comment("Add Services");
         $service = $this->io->choice('Which service?', $this->context->getServiceOptions());
 
-        // Then ask which service type
-        $service_type = $this->io->choice('Which service type?', $this->context->getServiceTypeOptions($service));
 
-        // Then ask for all options.
-        $properties = $this->askForServiceProperties($service);
+        // If server, ask which service type.
+        if ($this->context->type == 'server') {
+            $service_type = $this->io->choice('Which service type?', $this->context->getServiceTypeOptions($service));
 
-        $this->io->info("Adding $service service $service_type...");
+            // Then ask for all options.
+            $properties = $this->askForServiceProperties($service);
+
+            $this->io->info("Adding $service service $service_type...");
+
+            $services_key = 'services';
+            $service_info = [
+                'type' => $service_type,
+            ];
+        }
+        // All other context types are associating with servers that provide the service.
+        else {
+            $server = $this->io->choice('Which server?', $this->getApplication()->getServerOptions($service));
+
+            // Then ask for all options.
+            $server_context = $this->getApplication()->getContext($server);
+            $properties = $this->askForServiceProperties($service);
+
+            $this->io->info("Using $service service from server $server...");
+
+            $services_key = 'service_subscriptions';
+            $service_info = [
+                'server' => $server,
+            ];
+        }
 
         try {
-            $this->context->config['services'][$service] = [
-                'type' => $service_type,
-                'properties' => $properties,
-            ];
+            $this->context->config[$services_key][$service] = $service_info;
+            if (!empty($properties)) {
+                $this->context->config[$services_key][$service]['properties'] = $properties;
+            }
             $this->context->save();
             $this->io->success('Service saved to Context!');
         }
@@ -149,8 +172,9 @@ class ServicesCommand extends Command
     private function askForServiceProperties($service) {
 
         $class = $this->context->getAvailableServices($service);
+        $method = "{$this->context->type}_options";
 
-        $options = $class::option_documentation();
+        $options = $class::{$method}();
         $properties = [];
         foreach ($options as $name => $description) {
             // If option does not exist, ask for it.

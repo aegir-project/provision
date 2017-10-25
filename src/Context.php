@@ -143,7 +143,7 @@ class Context
      *
      * @return array
      */
-    public function getAvailableServices($service = NULL) {
+    public function getAvailableServices($service = '') {
 
         // Load all service classes
         $classes = [];
@@ -246,7 +246,7 @@ class Context
     public function getConfigTreeBuilder()
     {
         $tree_builder = new TreeBuilder();
-        $root_node = $tree_builder->root('server');
+        $root_node = $tree_builder->root($this->type);
         $root_node
             ->children()
                 ->scalarNode('name')
@@ -255,15 +255,24 @@ class Context
             ->end();
 
         // Load Services
+        if ($this->type == 'server') {
+            $services_key = 'services';
+            $services_property = 'type';
+        }
+        else {
+            $services_key = 'service_subscriptions';
+            $services_property = 'server';
+        }
+
         $root_node
             ->children()
-                ->arrayNode('services')
+                ->arrayNode($services_key)
                     ->prototype('array')
                     ->children()
-                        ->scalarNode('type')
+                        ->scalarNode($services_property)
                         ->isRequired(true)
                     ->end()
-                    ->append($this->addServiceProperties())
+                    ->append($this->addServiceProperties($services_key))
                 ->end()
             ->end();
 
@@ -287,18 +296,28 @@ class Context
     /**
      * Append Service class options_documentation to config tree.
      */
-    public function addServiceProperties()
+    public function addServiceProperties($property_name = 'services')
     {
         $builder = new TreeBuilder();
         $node = $builder->root('properties');
 
         // Load config tree from Service type classes
-        if (!empty($this->getProperty('services')) && !empty($this->getProperty('services'))) {
-            foreach ($this->getProperty('services') as $service => $info) {
+        if (!empty($this->getProperty($property_name)) && !empty($this->getProperty($property_name))) {
+            foreach ($this->getProperty($property_name) as $service => $info) {
+
+                // If type is empty, it's because it's in the ServerContext
+                if (empty($info['type'])) {
+                    $server = $this->application->getContext($info['server']);
+                    $service_type = ucfirst($server->getService($service)->type);
+                }
+                else {
+                    $service_type = ucfirst($info['type']);
+                }
                 $service = ucfirst($service);
-                $service_type = ucfirst($info['type']);
                 $class = "\Aegir\Provision\Service\\{$service}\\{$service}{$service_type}Service";
-                foreach ($class::option_documentation() as $name => $description) {
+                $method = "{$this->type}_options";
+
+                foreach ($class::{$method}() as $name => $description) {
                     $node
                         ->children()
                         ->scalarNode($name)->end()
