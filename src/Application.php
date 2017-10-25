@@ -159,7 +159,7 @@ class Application extends BaseApplication
     function getAllContexts($name = '') {
         $contexts = [];
         $finder = new \Symfony\Component\Finder\Finder();
-        $finder->files()->name('*.' . $name . '.yml')->in($this->config->get('config_path') . '/provision');
+        $finder->files()->name('*' . $name . '.yml')->in($this->config->get('config_path') . '/provision');
         foreach ($finder as $file) {
             list($context_type, $context_name) = explode('.', $file->getFilename());
             $class = '\Aegir\Provision\Context\\' . ucfirst($context_type) . "Context";
