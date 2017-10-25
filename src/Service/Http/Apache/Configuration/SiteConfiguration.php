@@ -48,6 +48,6 @@ class SiteConfiguration extends Configuration {
     if (!$this->site_enabled) {
       $this->template = $this->disabled_template;
     }
-    
+
   }
 }
