@@ -68,7 +68,7 @@ class SaveCommand extends Command
         );
 
       // Load all Aegir\Provision\Context and inject their options.
-      // @TODO: Figure out a way to do discovery to include all classes that inherit Aegir\Provision\Context
+      // @TODO: Use CommandFileDiscovery to include all classes that inherit Aegir\Provision\Context
       $contexts[] = SiteContext::option_documentation();
       $contexts[] = PlatformContext::option_documentation();
       $contexts[] = ServerContext::option_documentation();
