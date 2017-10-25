@@ -165,7 +165,7 @@ class Application extends BaseApplication
             $class = '\Aegir\Provision\Context\\' . ucfirst($context_type) . "Context";
             $contexts[$context_name] = new $class($context_name, $this->config->all(), $this);
         }
-        
+
         if ($name) {
             return $contexts[$name];
         }
@@ -220,11 +220,11 @@ class Application extends BaseApplication
     public function getServerOptions($service_type = '') {
         $servers = [];
         foreach ($this->getAllServers() as $server) {
-            if ($service_type && isset($server->services[$service_type])) {
-                $servers[$server->name] = $server->name . ': ' . $server->getService($service_type)->type;
+            if ($service_type && !empty($server->config['services'][$service_type])) {
+                $servers[$server->name] = $server->name . ': ' . $server->config['services'][$service_type]['type'];
             }
-            else {
-                $servers[$server->name] = $server->name . ': ' . $server->getService($service_type)->type;
+            elseif ($service_type == '') {
+                $servers[$server->name] = $server->name . ': ' . $server->config['services'][$service_type]['type'];
             }
         }
         return $servers;
