@@ -188,4 +188,45 @@ class Application extends BaseApplication
         }
         return $this->getAllContexts($name);
     }
+
+
+    /**
+     * Load all server contexts.
+     *
+     * @param null $service
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getAllServers($service = NULL) {
+        $servers = [];
+        $contexts = $this->getAllContexts();
+        if (empty($contexts)) {
+            throw new \Exception('No contexts found. Use `provision save` to create one.');
+        }
+
+        foreach ($contexts as $name => &$context) {
+            if ($context->type == 'server') {
+                $servers[$name] = $context;
+            }
+        }
+        return $servers;
+    }
+
+    /**
+     * Get a simple array of all servers, optionally specifying the the service_type to filter by ("http", "db" etc.)
+     * @param string $service_type
+     * @return array
+     */
+    public function getServerOptions($service_type = '') {
+        $servers = [];
+        foreach ($this->getAllServers() as $server) {
+            if ($service_type && isset($server->services[$service_type])) {
+                $servers[$server->name] = $server->name . ': ' . $server->getService($service_type)->type;
+            }
+            else {
+                $servers[$server->name] = $server->name . ': ' . $server->getService($service_type)->type;
+            }
+        }
+        return $servers;
+    }
 }
