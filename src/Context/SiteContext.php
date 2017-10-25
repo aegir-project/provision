@@ -2,6 +2,7 @@
 
 namespace Aegir\Provision\Context;
 
+use Aegir\Provision\Application;
 use Aegir\Provision\Context;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -19,6 +20,30 @@ class SiteContext extends Context implements ConfigurationInterface
      */
     public $type = 'site';
 
+    /**
+     * PlatformContext constructor.
+     *
+     * @param $name
+     * @param $console_config
+     * @param Application $application
+     * @param array $options
+     */
+    function __construct($name, $console_config, Application $application, array $options = [])
+    {
+        parent::__construct($name, $console_config, $application, $options);
+
+        // Load "db_server" context.
+        if (isset($this->config['db_server'])) {
+            $this->db_server = $application->getContext($this->config['service_subscriptions']['db']['server']);
+            $this->db_server->logger = $application->logger;
+
+            $this->platform = $application->getContext($this->config['platform']);
+        }
+        else {
+            throw new \Exception('No db_server found.');
+        }
+    }
+
     static function option_documentation()
     {
         return [
@@ -33,6 +58,17 @@ class SiteContext extends Context implements ConfigurationInterface
           'profile' => 'site: Drupal profile to use; default standard',
           'drush_aliases' => 'site: Comma-separated list of additional Drush aliases through which this site can be accessed.',
         ];
+    }
+
+
+    public function verify() {
+        parent::verify();
+        $this->db_server->verify();
+        $this->platform->verify();
+
+        // @TODO: Write VHOST!
+
+        return "Site Context Verified: " . $this->name;
     }
 
     //  /**
