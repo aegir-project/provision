@@ -64,7 +64,7 @@ class PlatformContext extends Context implements ConfigurationInterface
     
     public function verify() {
         parent::verify();
+        $this->logger->info('Verifying Web Server...');
         $this->web_server->verify();
-        return "Platform Context Verified: " . $this->name;
     }
 }

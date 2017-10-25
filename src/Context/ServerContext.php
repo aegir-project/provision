@@ -36,14 +36,4 @@ class ServerContext extends Context implements ConfigurationInterface
         return $options;
     }
 
-    public function verify() {
-
-        // Run verify method on all services.
-        foreach ($this->getServices() as $service) {
-            $service->verify();
-        }
-
-        return "Server Context Verified: " . $this->name;
-    }
-
 }

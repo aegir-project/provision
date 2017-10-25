@@ -35,6 +35,7 @@ class Service {
       if (empty($this->getConfigurations()[$this->context->type])) {
           return;
       }
+      $this->context->application->logger->info('CONTEXT ' .  $this->context->type);
       foreach ($this->getConfigurations()[$this->context->type] as $configuration_class) {
           $config = new $configuration_class($this->context, $this);
           $config->write();

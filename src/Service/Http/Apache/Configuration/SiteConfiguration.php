@@ -22,12 +22,18 @@ class SiteConfiguration extends Configuration {
   
   
   function filename() {
-    if (drush_get_option('provision_apache_conf_suffix', FALSE)) {
-      return $this->data['http_vhostd_path'] . '/' . $this->uri . '.conf';
-    }
-    else {
-      return $this->data['http_vhostd_path'] . '/' . $this->uri;
-    }
+      $file = $this->uri . '.conf';
+
+//      return $this->service->properties['http_platformd_path'] . '/' . ltrim($this->context->name, '@') . '.conf';
+      return $this->context->console_config['config_path'] . '/' . $this->context->name . '/' . $file;
+
+//      return $this->context->config['config_path'];
+//    if (drush_get_option('provision_apache_conf_suffix', FALSE)) {
+//      return $this->data['http_vhostd_path'] . '/' . $this->uri . '.conf';
+//    }
+//    else {
+//      return $this->data['http_vhostd_path'] . '/' . $this->uri;
+//    }
   }
   
   function process() {

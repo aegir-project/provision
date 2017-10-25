@@ -133,6 +133,15 @@ class Context
                 $this->services[strtolower($service_name)] = new $service_class($service, $this);
             }
         }
+        elseif (isset($this->config['service_subscriptions'])) {
+            foreach ($this->config['service_subscriptions'] as $service_name => $service) {
+                $this->servers[$service_name] = $server = $this->application->getContext($service['server']);
+                $service_type = ucfirst($server->services[$service_name]->type);
+                $service_name = ucfirst($service_name);
+                $service_class = "\\Aegir\\Provision\\Service\\{$service_name}\\{$service_name}{$service_type}Service";
+                $this->services[strtolower($service_name)] = new $service_class($service, $this);
+            }
+        }
         else {
             $this->services = [];
         }
@@ -413,7 +422,16 @@ class Context
         return '\Aegir\Provision\Context\\' . ucfirst($type) . "Context";
     }
 
+//    public function verify() {
+//        return "Provision Context";
+//    }
+
     public function verify() {
-        return "Provision Context";
+
+        // Run verify method on all services.
+        foreach ($this->getServices() as $service) {
+            $service->verify();
+        }
     }
+
 }

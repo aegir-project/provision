@@ -63,12 +63,11 @@ class SiteContext extends Context implements ConfigurationInterface
 
     public function verify() {
         parent::verify();
-        $this->db_server->verify();
-        $this->platform->verify();
 
-        // @TODO: Write VHOST!
+        // $this->db_server->service('db')->verify();
+//        $this->platform->verify();
 
-        return "Site Context Verified: " . $this->name;
+//        return "Site Context Verified: " . $this->name;
     }
 
     //  /**
