@@ -8,6 +8,7 @@ use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Context\SiteContext;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
+use Symfony\Component\Console\Exception\LogicException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -123,6 +124,10 @@ class ServicesCommand extends Command
 
         // If server, ask which service type.
         if ($this->context->type == 'server') {
+            if (empty($this->context->getServiceTypeOptions($service))) {
+                throw new \Exception("There was no class found for service $service. Create one named \\Aegir\\Provision\\Service\\{$service}Service");
+            }
+            
             $service_type = $this->io->choice('Which service type?', $this->context->getServiceTypeOptions($service));
 
             // Then ask for all options.
@@ -137,6 +142,10 @@ class ServicesCommand extends Command
         }
         // All other context types are associating with servers that provide the service.
         else {
+            if (empty($this->getApplication()->getServerOptions($service))) {
+                throw new \Exception("No servers providing $service service were found. Create one with `provision save` or use `provision services` to add to an existing server.");
+            }
+            
             $server = $this->io->choice('Which server?', $this->getApplication()->getServerOptions($service));
 
             // Then ask for all options.
