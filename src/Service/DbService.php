@@ -11,6 +11,7 @@ namespace Aegir\Provision\Service;
 //require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
 use Aegir\Provision\Service;
+use Aegir\Provision\ServiceSubscription;
 
 /**
  * Class DbService
@@ -23,6 +24,8 @@ class DbService extends Service
     const SERVICE = 'db';
 
     const SERVICE_NAME = 'Database Server';
+    
+    public $dsn = '';
 
     /**
      * Implements Service::server_options()
@@ -60,7 +63,43 @@ class DbService extends Service
             'db_password' => 'The password used to access the database. Default: Automatically generated.',
         ];
     }
-//
+    
+    /**
+     * React to the `provision verify` command.
+     */
+    function verify() {
+        $this->connect();
+        
+        $this->context->logger->warning('Hello DB SERVER!');
+    }
+    
+    /**
+     * React to the `provision verify` command.
+     */
+    function verifySubscription(ServiceSubscription $serviceSubscription) {
+        $this->subscription = $serviceSubscription;
+        $this->connect();
+        $this->subscription->context->logger->warning('Hi Subscriber. Is your DB ok?');
+    }
+    
+    function connect() {
+        $host = $this->subscription->server->getProperty('remote_host');
+        $db = $this->subscription->properties['db_name'];
+        $this->dsn = "mysql:dbname=$db;host=$host";
+        $user = isset($this->subscription->properties['db_user']) ? $this->subscription->properties['db_user'] : '';
+        $pass = isset($this->subscription->properties['db_pass']) ? $this->subscription->properties['db_pass'] : '';
+        try {
+            $this->conn = new \PDO($this->dsn, $user, $pass);
+            return $this->conn;
+        }
+        catch (\PDOException $e) {
+    
+            throw new \Exception("Unable to connect. Check database connection info with `provision status {$this->subscription->context->name}`: " . $e->getMessage());
+        }
+    }
+  
+    
+    //
 //    /**
 //     * Register the db handler for sites, based on the db_server option.
 //     */
