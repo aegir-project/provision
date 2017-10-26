@@ -136,10 +136,7 @@ class Context
         elseif (isset($this->config['service_subscriptions'])) {
             foreach ($this->config['service_subscriptions'] as $service_name => $service) {
                 $this->servers[$service_name] = $server = $this->application->getContext($service['server']);
-                $service_type = ucfirst($server->services[$service_name]->type);
-                $service_name = ucfirst($service_name);
-                $service_class = "\\Aegir\\Provision\\Service\\{$service_name}\\{$service_name}{$service_type}Service";
-                $this->services[strtolower($service_name)] = new $service_class($service, $this);
+                $this->services[$service_name] = new ServiceSubscription($this, $server, $service_name);
             }
         }
         else {
@@ -346,9 +343,24 @@ class Context
      */
     public function showServices(DrupalStyle $io) {
         if (!empty($this->getServices())) {
+            $is_server = $this->type == 'server';
             $rows = [];
+            
+            $headers = $is_server?
+                ['Services']:
+                ['Service', 'Server', 'Type'];
+            
             foreach ($this->getServices() as $name => $service) {
-                $rows[] = [$name, $service->type];
+                if ($is_server) {
+                    $rows[] = [$name, $service->type];
+                }
+                else {
+                    $rows[] = [
+                        $name,
+                        $service->server->name,
+                        $service->server->getService($name)->type
+                    ];
+                }
 
                 // Show all properties.
                 if (!empty($service->properties )) {
@@ -357,7 +369,7 @@ class Context
                     }
                 }
             }
-            $io->table(['Services'], $rows);
+            $io->table($headers, $rows);
         }
     }
 

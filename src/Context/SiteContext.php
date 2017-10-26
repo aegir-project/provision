@@ -33,15 +33,18 @@ class SiteContext extends Context implements ConfigurationInterface
         parent::__construct($name, $console_config, $application, $options);
 
         // Load "db_server" context.
-        if (isset($this->config['db_server'])) {
-            $this->db_server = $application->getContext($this->config['service_subscriptions']['db']['server']);
-            $this->db_server->logger = $application->logger;
+//        if (isset($this->config['service_subscriptions']['db'])) {
+//            $this->db_server = $application->getContext($this->config['service_subscriptions']['db']['server']);
+//        }
 
-            $this->platform = $application->getContext($this->config['platform']);
+        $this->logger = $application->logger;
+        
+        if (isset($this->config['platform'])) {
+            $this->platform = $application->getContext(
+                $this->config['platform']
+            );
         }
-        else {
-            throw new \Exception('No db_server found.');
-        }
+    
     }
 
     static function option_documentation()
