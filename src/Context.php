@@ -425,7 +425,14 @@ class Context
 //    public function verify() {
 //        return "Provision Context";
 //    }
-
+    
+    /**
+     * Verify this context.
+     *
+     * Running `provision verify CONTEXT` triggers this method.
+     *
+     * Collect all services for the context and run the verify() method on them
+     */
     public function verify() {
 
         // Run verify method on all services.
