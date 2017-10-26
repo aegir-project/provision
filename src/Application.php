@@ -124,7 +124,7 @@ class Application extends BaseApplication
         $commands[] = new ListCommand();
         $commands[] = new SaveCommand();
         $commands[] = new ServicesCommand();
-        $commands[] = new ShellCommand();
+//        $commands[] = new ShellCommand();
         $commands[] = new StatusCommand();
         $commands[] = new VerifyCommand();
 
