@@ -36,7 +36,17 @@ class DbService extends Service
             'db_grant_all_hosts' => 'Grant access to site database users from any web host. If set to TRUE, any host will be allowed to connect to MySQL site databases on this server using the generated username and password. If set to FALSE, web hosts will be granted access by their detected IP address.',
         ];
     }
-
+    
+    /**
+     * List context types that are allowed to subscribe to this service.
+     * @return array
+     */
+    static function allowedContexts() {
+        return [
+            'site'
+        ];
+    }
+    
     /**
      * Implements Service::server_options()
      *

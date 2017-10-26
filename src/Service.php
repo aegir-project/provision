@@ -27,6 +27,14 @@ class Service {
   function verify() {
     $this->writeConfigurations();
   }
+    
+    /**
+     * List context types that are allowed to subscribe to this service.
+     * @return array
+     */
+    static function allowedContexts() {
+        return [];
+    }
   
   /**
    * Write this service's configurations.

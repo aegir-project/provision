@@ -160,7 +160,10 @@ class Context
         $discovery->setSearchPattern('*Service.php');
         $servicesFiles = $discovery->discover(__DIR__ .'/Service', '\Aegir\Provision\Service');
         foreach ($servicesFiles as $serviceClass) {
-            $classes[$serviceClass::SERVICE] = $serviceClass;
+            // If this is a server, show all services. If it is not, but service allows this type of context, load it.
+            if ($this->type == 'server' || in_array($this->type, $serviceClass::allowedContexts())) {
+                $classes[$serviceClass::SERVICE] = $serviceClass;
+            }
         }
 
         if ($service && isset($classes[$service])) {

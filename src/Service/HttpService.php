@@ -40,6 +40,16 @@ class HttpService extends Service {
             'restart_command' => 'The command to reload the web server configuration;'
         ];
     }
+    
+    /**
+     * List context types that are allowed to subscribe to this service.
+     * @return array
+     */
+    static function allowedContexts() {
+        return [
+            'platform'
+        ];
+    }
 
     /**
    * Support the ability to cloak the database credentials using environment variables.
