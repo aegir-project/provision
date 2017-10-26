@@ -22,4 +22,8 @@ class ServiceSubscription {
       $this->service = $server->getService($service_name);
       $this->type = $server->getService($service_name)->type;
   }
+  
+  public function verify() {
+      $this->service->verify();
+  }
 }
