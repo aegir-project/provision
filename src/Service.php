@@ -54,6 +54,14 @@ class Service
     }
     
     /**
+     * React to the `provision verify` command.
+     */
+    function verifySubscription(ServiceSubscription $serviceSubscription)
+    {
+        $this->writeConfigurations($serviceSubscription);
+    }
+    
+    /**
      * List context types that are allowed to subscribe to this service.
      *
      * @return array

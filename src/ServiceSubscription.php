@@ -24,6 +24,6 @@ class ServiceSubscription {
   }
   
   public function verify() {
-      $this->service->verify();
+      $this->service->verifySubscription($this);
   }
 }
