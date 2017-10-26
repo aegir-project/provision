@@ -85,8 +85,22 @@ abstract class Command extends BaseCommand
                 }
             }
         }
+        
+        // If context_name is not specified, ask for it.
+        elseif ($this->getDefinition()->getArgument('context_name')->isRequired()) {
+            $this->askForContext();
+            $this->input->setArgument('context_name', $this->context_name);
+            $this->context = $this->getApplication()->getContext($this->context_name);
+        }
     }
-
+    
+    /**
+     * Show a list of Contexts to the user for them to choose from.
+     */
+    public function askForContext($question = 'Choose a context') {
+        $this->context_name = $this->io->choice($question, $this->getApplication()->getAllContextsOptions());
+    }
+    
     /**
      * Run a process.
      *
