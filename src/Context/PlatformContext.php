@@ -4,6 +4,7 @@ namespace Aegir\Provision\Context;
 
 use Aegir\Provision\Application;
 use Aegir\Provision\Context;
+use Aegir\Provision\Service\Http\Apache\Configuration\PlatformConfiguration;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
@@ -61,10 +62,10 @@ class PlatformContext extends Context implements ConfigurationInterface
         return $options;
     }
     
-    
-    public function verify() {
-        parent::verify();
-        $this->logger->info('Verifying Web Server...');
-        $this->web_server->verify();
-    }
+// @TODO: Remove. This should be handled by Services now.
+//    public function verify() {
+//        parent::verify();
+//        $this->logger->info('Verifying Web Server...');
+//        $this->web_server->verify();
+//    }
 }
