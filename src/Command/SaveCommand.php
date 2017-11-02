@@ -8,6 +8,7 @@ use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Context\SiteContext;
 use Symfony\Component\Console\Exception\InvalidOptionException;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
@@ -144,11 +145,53 @@ class SaveCommand extends Command
                 $this->io->error("Unable to save configuration to {$this->context->config_path}. ");
             }
         }
+        else {
+            $this->io->warningLite('Context not saved.');
+            return;
+        }
 //        $command = 'drush provision-save '.$input->getArgument('context_name');
 //        $this->process($command);
+
+        // Offer to add services.
+        if ($this->input->isInteractive()) {
+            $command = $this->getApplication()->find('services');
+            $arguments = [
+                'context_name' => $this->input->getArgument('context_name'),
+                'sub_command' => 'add',
+            ];
+            while ($this->io->confirm('Add a service?')) {
+
+                $greetInput = new ArrayInput($arguments);
+                $returnCode = $command->run($greetInput, $output);
+                $returnCodes[$returnCode] = $returnCode;
+            }
+        }
     }
 
     /**
+     * Override  to add options
+     * @param string $question
+     */
+    public function askForContext($question = 'Choose a context')
+    {
+        $options = $this->getApplication()->getAllContextsOptions();
+
+        // If there are options, add "new" to the list.
+        if (count($options)) {
+            $options['new'] = 'Create a new context.';
+            $this->context_name = $this->io->choice($question, $options);
+
+            if ($this->context_name == 'new') {
+                $this->context_name = $this->io->ask('Context name');
+            }
+        }
+        // If there are no options, just ask for the name to create.
+        else {
+            $this->context_name = $this->io->ask('Context name');
+        }
+    }
+
+        /**
      * Loop through this context type's option_documentation() method and ask for each property.
      *
      * @return array

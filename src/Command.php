@@ -105,11 +105,10 @@ abstract class Command extends BaseCommand
      */
     public function askForContext($question = 'Choose a context') {
         if (empty($this->getApplication()->getAllContextsOptions())) {
-            $this->context_name = $this->io->ask('Context name');
+            throw new \Exception('No contexts available! use <comment>provision save</comment> to create one.');
         }
-        else {
-            $this->context_name = $this->io->choice($question, $this->getApplication()->getAllContextsOptions());
-        }
+
+        $this->context_name = $this->io->choice($question, $this->getApplication()->getAllContextsOptions());
     }
     
     /**
