@@ -5,8 +5,10 @@ namespace Aegir\Provision\Context;
 use Aegir\Provision\Application;
 use Aegir\Provision\Context;
 use Aegir\Provision\Service\Http\Apache\Configuration\PlatformConfiguration;
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
+use Aegir\Provision\ConfigDefinition\ContextNodeDefinition;
 /**
  * Class PlatformContext
  *
@@ -40,8 +42,9 @@ class PlatformContext extends Context implements ConfigurationInterface
         
         // Load "web_server" context.
         if (isset($this->config['web_server'])) {
-            $this->web_server = $application->getContext($this->config['web_server']);
-            $this->web_server->logger = $application->logger;
+//            print $this->config['web_server'];
+//            $this->web_server = $application->getContext($this->config['web_server']);
+//            $this->web_server->logger = $application->logger;
     
         }
         else {
@@ -54,14 +57,28 @@ class PlatformContext extends Context implements ConfigurationInterface
         $options = [
           'root' => 'platform: path to a Drupal installation',
           'server' => 'platform: drush backend server; default @server_master',
-          'web_server' => 'platform: web server hosting the platform; default @server_master',
+
+            // web_server will be loaded via another method. For now using configTreeBuilder()
+//          'web_server' => 'platform: web server hosting the platform; default @server_master',
           'makefile' => 'platform: drush makefile to use for building the platform if it doesn\'t already exist',
           'make_working_copy' => 'platform: Specifiy TRUE to build the platform with the Drush make --working-copy option.',
         ];
 
         return $options;
     }
-    
+
+    /**
+     * @param $root_node
+     */
+    function configTreeBuilder(ArrayNodeDefinition &$root_node) {
+        $root_node
+            ->children()
+                ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
+                ->node('web_server', 'context')
+            ->end()
+        ->end();
+    }
+
 // @TODO: Remove. This should be handled by Services now.
 //    public function verify() {
 //        parent::verify();

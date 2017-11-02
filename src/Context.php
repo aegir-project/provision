@@ -274,6 +274,8 @@ class Context
         }
 
         $root_node
+            ->attribute('context', $this)
+            ->attribute('application', $this->application)
             ->children()
                 ->arrayNode($services_key)
                     ->prototype('array')
