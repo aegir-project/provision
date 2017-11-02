@@ -48,6 +48,17 @@ class SiteConfiguration extends Configuration {
     if (!$this->site_enabled) {
       $this->template = $this->disabled_template;
     }
-    
+
+    $app_dir = $this->context->console_config['config_path'] . '/' . $this->service->getType();
+
+//    $this->data['http_port'] = $this->service->properties['http_port'];
+//    $this->data['include_statement'] = '# INCLUDE STATEMENT';
+//    $this->data['http_pred_path'] = "{$app_dir}/pre.d";
+//    $this->data['http_postd_path'] = "{$app_dir}/post.d";
+//    $this->data['http_platformd_path'] = "{$app_dir}/platform.d";
+//    $this->data['extra_config'] = "";
+
+    $this->data['http_vhostd_path'] = "{$app_dir}/vhost.d";
+
   }
 }
