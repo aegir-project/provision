@@ -4,6 +4,7 @@ namespace Aegir\Provision\Context;
 
 use Aegir\Provision\Application;
 use Aegir\Provision\Context;
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
@@ -32,26 +33,17 @@ class SiteContext extends Context implements ConfigurationInterface
     {
         parent::__construct($name, $console_config, $application, $options);
 
-        // Load "db_server" context.
-//        if (isset($this->config['service_subscriptions']['db'])) {
-//            $this->db_server = $application->getContext($this->config['service_subscriptions']['db']['server']);
-//        }
-
-        $this->logger = $application->logger;
-        
-        if (isset($this->config['platform'])) {
-            $this->platform = $application->getContext(
-                $this->config['platform']
-            );
-        }
-    
+        // Load "web_server" and "platform" contexts.
+        // There is no need to check if the property exists because the config system does that.
+        $this->db_server = $application->getContext($this->properties['db_server']);
+        $this->platform = $application->getContext($this->properties['platform']);
     }
 
     static function option_documentation()
     {
         return [
-          'platform' => 'site: the platform the site is run on',
-          'db_server' => 'site: the db server the site is run on',
+//          'platform' => 'site: the platform the site is run on',
+//          'db_server' => 'site: the db server the site is run on',
           'uri' => 'site: example.com URI, no http:// or trailing /',
           'language' => 'site: site language; default en',
           'aliases' => 'site: comma-separated URIs',
@@ -63,6 +55,25 @@ class SiteContext extends Context implements ConfigurationInterface
         ];
     }
 
+    /**
+     * @TODO: Come up with another method to let Context nodes specify related contexts with ability to validate.
+     * @param $root_node
+     */
+    function configTreeBuilder(ArrayNodeDefinition &$root_node) {
+        $root_node
+            ->children()
+                ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
+                ->node('db_server', 'context')
+                    ->isRequired()
+                    ->attribute('context_type', 'server')
+                    ->attribute('service_requirement', 'db')
+                ->end()
+                ->node('platform', 'context')
+                    ->isRequired()
+                    ->attribute('context_type', 'platform')
+                ->end()
+        ->end();
+    }
 
     public function verify() {
         parent::verify();

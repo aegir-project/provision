@@ -61,6 +61,7 @@ class PlatformContext extends Context implements ConfigurationInterface
     }
 
     /**
+     * @TODO: Remove in favor of a simpler method like $this->relatedContexts()
      * @param $root_node
      */
     function configTreeBuilder(ArrayNodeDefinition &$root_node) {
@@ -68,7 +69,10 @@ class PlatformContext extends Context implements ConfigurationInterface
             ->children()
                 ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
                 ->node('web_server', 'context')
-                ->isRequired()
+                    ->isRequired()
+                    ->attribute('context_type', 'server')
+                    ->attribute('service_requirement', 'http')
+                ->end()
             ->end()
         ->end();
     }
