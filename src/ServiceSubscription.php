@@ -15,11 +15,20 @@ class ServiceSubscription {
    public $service;
    public $server;
    public $type;
+   public $properties = [];
   
   function __construct($context, $server, $service_name) {
       $this->context = $context;
       $this->server = $server;
       $this->service = $server->getService($service_name);
       $this->type = $server->getService($service_name)->type;
+      
+      if (isset($context->config['service_subscriptions'][$service_name]['properties'])) {
+          $this->properties = $context->config['service_subscriptions'][$service_name]['properties'];
+      }
+  }
+  
+  public function verify() {
+      $this->service->verifySubscription($this);
   }
 }

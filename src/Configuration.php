@@ -78,15 +78,15 @@ class Configuration {
    */
   public $store = NULL;
 
-  /**
-   * Forward $this->... to $this->context->...
-   * object.
-   */
-  function __get($name) {
-    if (isset($this->context)) {
-      return $this->context->$name;
-    }
-  }
+//  /**
+//   * Forward $this->... to $this->context->...
+//   * object.
+//   */
+//  function __get($name) {
+//    if (isset($this->context)) {
+//      return $this->context->$name;
+//    }
+//  }
 
   /**
    * Constructor, overriding not recommended.
@@ -287,18 +287,18 @@ class Configuration {
     }
     return $status;
   }
-
-  // allow overriding w.r.t locking
-  function file_put_contents($filename, $text) {
-    provision_file()->file_put_contents($filename, $text)
-      ->succeed('Generated config in file_put_contents()' . (empty($this->description) ? $filename : $this->description), 'success');
-  }
-
-  /**
-   * Remove configuration file as specified by filename().
-   */
-  function unlink() {
-    return provision_file()->unlink($this->filename())->status();
-  }
+//
+//  // allow overriding w.r.t locking
+//  function file_put_contents($filename, $text) {
+//    provision_file()->file_put_contents($filename, $text)
+//      ->succeed('Generated config in file_put_contents()' . (empty($this->description) ? $filename : $this->description), 'success');
+//  }
+//
+//  /**
+//   * Remove configuration file as specified by filename().
+//   */
+//  function unlink() {
+//    return provision_file()->unlink($this->filename())->status();
+//  }
 
 }
