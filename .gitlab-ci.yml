@@ -145,6 +145,11 @@ test:debian-stretch-aegir3-cluster-slave-apt:
   dependencies:
     - build:deb
 
+  only:
+    - 7.x-3.x
+    - /^7\.x-3\.\d+\.x/
+    - /-runalltests$/
+
   before_script:
     - apt-get update
     # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
@@ -233,7 +238,10 @@ upgradetest:debian-jessie-aegir3-apt-upgrade:
   dependencies:
     - publish:unstable-repo
 
-  when: manual
+  only:
+    - 7.x-3.x
+    - /^7\.x-3\.\d+\.x/
+    - /-runalltests$/
 
   before_script:
     - apt-get update

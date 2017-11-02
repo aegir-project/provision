@@ -16,6 +16,9 @@ print "\$options['hosting_features'] = ". var_export($hosting_features, TRUE) . 
 print "# A list of modules to be excluded because the hosting feature is not enabled.\n";
 print "\$options['exclude'] = ". var_export($drush_exclude, TRUE) . ";\n\n";
 
+print "# Drush 8 looks at ignored-modules instead of exclude.\n";
+print "\$options['ignored-modules'] = \$options['exclude'];\n\n";
+
 print "# A list of paths that drush should include even when working outside\n";
 print "# the context of the hostmaster site.\n";
 print "\$options['include'] = ". var_export($drush_include, TRUE) . ";\n";
