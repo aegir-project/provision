@@ -41,15 +41,8 @@ class PlatformContext extends Context implements ConfigurationInterface
         parent::__construct($name, $console_config, $application, $options);
         
         // Load "web_server" context.
-        if (isset($this->config['web_server'])) {
-//            print $this->config['web_server'];
-//            $this->web_server = $application->getContext($this->config['web_server']);
-//            $this->web_server->logger = $application->logger;
-    
-        }
-        else {
-            throw new \Exception('No web_server found.');
-        }
+        // There is no need to validate for $this->properties['web_server'] because the config system does that.
+        $this->web_server = $application->getContext($this->properties['web_server']);
     }
     
     static function option_documentation()
@@ -75,6 +68,7 @@ class PlatformContext extends Context implements ConfigurationInterface
             ->children()
                 ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
                 ->node('web_server', 'context')
+                ->isRequired()
             ->end()
         ->end();
     }
