@@ -24,11 +24,40 @@ class DbService extends Service
 
     const SERVICE_NAME = 'Database Server';
 
-    static function option_documentation()
+    /**
+     * Implements Service::server_options()
+     *
+     * @return array
+     */
+    static function server_options()
     {
         return [
             'master_db' => 'server with db: Master database connection info, {type}://{user}:{password}@{host}',
             'db_grant_all_hosts' => 'Grant access to site database users from any web host. If set to TRUE, any host will be allowed to connect to MySQL site databases on this server using the generated username and password. If set to FALSE, web hosts will be granted access by their detected IP address.',
+        ];
+    }
+    
+    /**
+     * List context types that are allowed to subscribe to this service.
+     * @return array
+     */
+    static function allowedContexts() {
+        return [
+            'site'
+        ];
+    }
+    
+    /**
+     * Implements Service::server_options()
+     *
+     * @return array
+     */
+    static function site_options()
+    {
+        return [
+            'db_name' => 'The name of the database. Default: Automatically generated.',
+            'db_user' => 'The username used to access the database. Default: Automatically generated.',
+            'db_password' => 'The password used to access the database. Default: Automatically generated.',
         ];
     }
 

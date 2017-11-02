@@ -27,6 +27,14 @@ class Service {
   function verify() {
     $this->writeConfigurations();
   }
+    
+    /**
+     * List context types that are allowed to subscribe to this service.
+     * @return array
+     */
+    static function allowedContexts() {
+        return [];
+    }
   
   /**
    * Write this service's configurations.
@@ -35,9 +43,11 @@ class Service {
       if (empty($this->getConfigurations()[$this->context->type])) {
           return;
       }
+      $this->context->application->logger->info('CONTEXT ' .  $this->context->type);
       foreach ($this->getConfigurations()[$this->context->type] as $configuration_class) {
           $config = new $configuration_class($this->context, $this);
           $config->write();
+          $this->context->application->logger->info('Wrote ' . $config->description . ' to ' . $config->filename());
       }
   }
   
@@ -63,6 +73,37 @@ class Service {
   public function getName() {
     return $this::SERVICE;
   }
+
+    /**
+     * Return a list of user configurable options that this service provides to Server Context objects.
+     */
+    static function server_options() {
+        return [];
+//        return [
+//            'http_port' => 'The port which the web service is running on.',
+//            'web_group' => 'server with http: OS group for permissions; working default will be attempted',
+//        ];
+    }
+
+    /**
+     * Return a list of user configurable options that this service provides to Platform Context objects.
+     */
+    static function platform_options() {
+        return [];
+//        return [
+//            'platform_extra_config' => 'Extra lines of configuration to add to this platform.',
+//        ];
+    }
+
+    /**
+     * Return a list of user configurable options that this service provides to Site Context objects.
+     */
+    static function site_options() {
+        return [];
+//      return [
+//          'site_mail' => 'The email address to use for the ServerAdmin configuration.',
+//      ];
+    }
   
   /**
    * LEGACY
@@ -399,16 +440,6 @@ class Service {
 //  function verify() {
 //    return TRUE;
 //  }
-
-  /**
-   * Return service-specific configuration options for help.
-   *
-   * @return
-   *   array('option' => 'description')
-   */
-  static function option_documentation() {
-    return array();
-  }
 
   /**
    * Save symlink for this server from /var/aegir/config/APPLICATION_NAME.conf -> /var/aegir/config/SERVER/APPLICATION_NAME.conf

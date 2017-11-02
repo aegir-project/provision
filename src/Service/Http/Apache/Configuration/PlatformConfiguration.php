@@ -16,16 +16,10 @@ class PlatformConfiguration extends Configuration {
   
   const SERVICE_TYPE = 'apache';
   
-  public $template = 'server.tpl.php';
-  public $description = 'web server configuration file';
+  public $template = 'platform.tpl.php';
+  public $description = 'platform configuration file';
   
   function filename() {
-    if (isset($this->data['application_name'])) {
-      $file = $this->data['application_name'] . '.conf';
-      return $this->data['server']->config_path . '/' . $file;
-    }
-    else {
-      return FALSE;
-    }
+      return $this->service->properties['http_platformd_path'] . '/' . ltrim($this->context->name, '@') . '.conf';
   }
 }

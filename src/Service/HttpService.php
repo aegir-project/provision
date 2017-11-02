@@ -24,16 +24,31 @@ class HttpService extends Service {
 
   protected $ssl_enabled = FALSE;
 
-    static function option_documentation() {
-        return array(
+
+    /**
+     * Implements Service::server_options()
+     *
+     * @return array
+     */
+    static function server_options()
+    {
+        return [
             'http_port' => 'The port which the web service is running on.',
-//            'http_platformd_path' => 'The path to store platforms.',
-//            'http_postd_path' => 'The path to store post configuration.',
             'web_group' => 'server with http: OS group for permissions; working default will be attempted',
             'web_disable_url' => 'server with http: URL disabled sites are redirected to; default {master_url}/hosting/disabled',
             'web_maintenance_url' => 'server with http: URL maintenance sites are redirected to; default {master_url}/hosting/maintenance',
             'restart_command' => 'The command to reload the web server configuration;'
-        );
+        ];
+    }
+    
+    /**
+     * List context types that are allowed to subscribe to this service.
+     * @return array
+     */
+    static function allowedContexts() {
+        return [
+            'platform'
+        ];
     }
 
     /**

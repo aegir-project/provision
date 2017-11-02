@@ -68,7 +68,7 @@ class SaveCommand extends Command
         );
 
       // Load all Aegir\Provision\Context and inject their options.
-      // @TODO: Figure out a way to do discovery to include all classes that inherit Aegir\Provision\Context
+      // @TODO: Use CommandFileDiscovery to include all classes that inherit Aegir\Provision\Context
       $contexts[] = SiteContext::option_documentation();
       $contexts[] = PlatformContext::option_documentation();
       $contexts[] = ServerContext::option_documentation();
@@ -113,7 +113,7 @@ class SaveCommand extends Command
             }
             $properties = $this->askForContextProperties();
             $class = Context::getClassName($this->input->getOption('context_type'));
-            $this->context = new $class($input->getArgument('context_name'), $this->getApplication()->getConfig()->all(), $properties);
+            $this->context = new $class($input->getArgument('context_name'), $this->getApplication()->getConfig()->all(), $this->getApplication(), $properties);
         }
 
         // Delete context config.
@@ -144,11 +144,6 @@ class SaveCommand extends Command
                 $this->io->error("Unable to save configuration to {$this->context->config_path}. ");
             }
         }
-        
-        $output->writeln(
-          "Context Object: ".print_r($this->context,1)
-        );
-
 //        $command = 'drush provision-save '.$input->getArgument('context_name');
 //        $this->process($command);
     }
