@@ -57,6 +57,7 @@ try {
     $application = new Application($input, $output);
     $application->run();
 }
+// @TODO: This never catches.
 catch (\Exception $e) {
     $io->error("Unable to run provision: " . $e->getMessage());
 }
