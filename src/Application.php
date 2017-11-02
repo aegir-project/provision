@@ -176,6 +176,17 @@ class Application extends BaseApplication
     }
     
     /**
+     * Get a simple array of all contexts, for use in an options list.
+     * @return array
+     */
+    public function getAllContextsOptions() {
+        foreach ($this->getAllContexts() as $name => $context) {
+            $options[$name] = $context->type . ' ' . $context->name;
+        }
+        return $options;
+    }
+    
+    /**
      * Load the Aegir context with the specified name.
      *
      * @param $name
