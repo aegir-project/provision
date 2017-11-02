@@ -164,6 +164,7 @@ class Application extends BaseApplication
             list($context_type, $context_name) = explode('.', $file->getFilename());
             $class = '\Aegir\Provision\Context\\' . ucfirst($context_type) . "Context";
             $contexts[$context_name] = new $class($context_name, $this->config->all(), $this);
+            $contexts[$context_name]->logger = $this->logger;
         }
 
         if ($name) {
