@@ -21,6 +21,8 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *      ->end()
  *  ->end();
  *
+ * Many thanks to @andytruong for the guidance on this class: https://stackoverflow.com/a/25518962
+ *
  * @package Aegir\Provision\ConfigDefinition
  */
 class ContextNodeDefinition extends ScalarNodeDefinition
