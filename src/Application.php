@@ -167,8 +167,11 @@ class Application extends BaseApplication
             $contexts[$context_name]->logger = $this->logger;
         }
 
-        if ($name) {
+        if ($name && isset($contexts[$name])) {
             return $contexts[$name];
+        }
+        elseif ($name && !isset($contexts[$name])) {
+            return NULL;
         }
         else {
             return $contexts;
@@ -180,6 +183,7 @@ class Application extends BaseApplication
      * @return array
      */
     public function getAllContextsOptions() {
+        $options = [];
         foreach ($this->getAllContexts() as $name => $context) {
             $options[$name] = $context->type . ' ' . $context->name;
         }

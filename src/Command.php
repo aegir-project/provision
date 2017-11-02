@@ -87,10 +87,16 @@ abstract class Command extends BaseCommand
         }
         
         // If context_name is not specified, ask for it.
-        elseif ($this->getDefinition()->getArgument('context_name')->isRequired()) {
+        elseif ($this->getDefinition()->getArgument('context_name')->isRequired() && $this->input->hasArgument('context_name') && empty($this->input->getArgument('context_name'))) {
             $this->askForContext();
             $this->input->setArgument('context_name', $this->context_name);
-            $this->context = $this->getApplication()->getContext($this->context_name);
+
+            try {
+                $this->context = $this->getApplication()->getContext($this->context_name);
+            }
+            catch (\Exception $e) {
+                $this->context = NULL;
+            }
         }
     }
     
@@ -98,7 +104,12 @@ abstract class Command extends BaseCommand
      * Show a list of Contexts to the user for them to choose from.
      */
     public function askForContext($question = 'Choose a context') {
-        $this->context_name = $this->io->choice($question, $this->getApplication()->getAllContextsOptions());
+        if (empty($this->getApplication()->getAllContextsOptions())) {
+            $this->context_name = $this->io->ask('Context name');
+        }
+        else {
+            $this->context_name = $this->io->choice($question, $this->getApplication()->getAllContextsOptions());
+        }
     }
     
     /**
