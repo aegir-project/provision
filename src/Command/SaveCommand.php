@@ -158,7 +158,7 @@ class SaveCommand extends Command
             throw new InvalidOptionException('context_type option is required.');
         }
         
-        $this->io->comment("No context named '$this->context_name'. Creating a new one...");
+        $this->io->comment("Please input context properties.");
     
         $class = '\Aegir\Provision\Context\\' . ucfirst($this->input->getOption('context_type')) . "Context";
         $options = $class::option_documentation();
