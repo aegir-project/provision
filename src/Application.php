@@ -152,19 +152,17 @@ class Application extends BaseApplication
     }
     
     /**
-     * Lookup and return all contexts as found in files.
+     * Load all contexts into Context objects.
      *
      * @return array
      */
     function getAllContexts($name = '') {
         $contexts = [];
-        $finder = new \Symfony\Component\Finder\Finder();
-        $finder->files()->name('*' . $name . '.yml')->in($this->config->get('config_path') . '/provision');
-        foreach ($finder as $file) {
-            list($context_type, $context_name) = explode('.', $file->getFilename());
-            $class = '\Aegir\Provision\Context\\' . ucfirst($context_type) . "Context";
-            $contexts[$context_name] = new $class($context_name, $this->config->all(), $this);
-            $contexts[$context_name]->logger = $this->logger;
+        $context_files = $this::findAllContexts($name);
+        foreach ($context_files as $context) {
+            $class = Context::getClassName($context['type']);
+            $contexts[$context['name']] = new $class($context['name '], $this);
+            $contexts[$context['name']]->logger = $this->logger;
         }
 
         if ($name && isset($contexts[$name])) {
@@ -177,7 +175,28 @@ class Application extends BaseApplication
             return $contexts;
         }
     }
-    
+
+    /**
+     * Load all context files.
+     * @param string $name
+     */
+    static function findAllContexts($name = '') {
+        $config = new Config();
+
+        $contexts = [];
+        $finder = new \Symfony\Component\Finder\Finder();
+        $finder->files()->name('*' . $name . '.yml')->in($config->get('config_path') . '/provision');
+        foreach ($finder as $file) {
+            list($context_type, $context_name) = explode('.', $file->getFilename());
+            $contexts[$context_name] = [
+                'name' => $context_name,
+                'type' => $context_type,
+                'file' => $file,
+            ];
+        }
+        return $contexts;
+    }
+
     /**
      * Get a simple array of all contexts, for use in an options list.
      * @return array
@@ -213,9 +232,9 @@ class Application extends BaseApplication
      * @return mixed
      * @throws \Exception
      */
-    public function getAllServers($service = NULL) {
+    static public function getAllServers($service = NULL) {
         $servers = [];
-        $contexts = $this->getAllContexts();
+        $contexts = self::findAllContexts();
         if (empty($contexts)) {
             throw new \Exception('No contexts found. Use `provision save` to create one.');
         }
@@ -244,5 +263,33 @@ class Application extends BaseApplication
             }
         }
         return $servers;
+    }
+
+    /**
+     * Check that a context type's service requirements are provided by at least 1 server.
+     *
+     * @param $type
+     * @return array
+     */
+    static function checkServiceRequirements($type) {
+        $class_name = Context::getClassName($type);
+
+        // @var $context Context
+        $service_requirements = $class_name::serviceRequirements();
+
+        $services = [];
+        foreach ($service_requirements as $service) {
+            try {
+                if (empty(Application::getAllServers($service))) {
+                    $services[$service] = 0;
+                }
+                else {
+                    $services[$service] = 1;
+                }
+            } catch (\Exception $e) {
+                $services[$service] = 0;
+            }
+        }
+        return $services;
     }
 }

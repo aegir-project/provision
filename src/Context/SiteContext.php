@@ -55,6 +55,10 @@ class SiteContext extends Context implements ConfigurationInterface
         ];
     }
 
+    public static function serviceRequirements() {
+        return ['db'];
+    }
+
     /**
      * @TODO: Come up with another method to let Context nodes specify related contexts with ability to validate.
      * @param $root_node

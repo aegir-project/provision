@@ -61,21 +61,31 @@ class PlatformContext extends Context implements ConfigurationInterface
     }
 
     /**
-     * @TODO: Remove in favor of a simpler method like $this->relatedContexts()
-     * @param $root_node
+     * Platforms require a web (http) server.
+     *
+     * @return array
      */
-    function configTreeBuilder(ArrayNodeDefinition &$root_node) {
-        $root_node
-            ->children()
-                ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
-                ->node('web_server', 'context')
-                    ->isRequired()
-                    ->attribute('context_type', 'server')
-                    ->attribute('service_requirement', 'http')
-                ->end()
-            ->end()
-        ->end();
+    public static function serviceRequirements() {
+        return ['http'];
     }
+
+//
+//    /**
+//     * @TODO: Remove in favor of a simpler method like $this->relatedContexts()
+//     * @param $root_node
+//     */
+//    function configTreeBuilder(ArrayNodeDefinition &$root_node) {
+//        $root_node
+//            ->children()
+//                ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
+//                ->node('web_server', 'context')
+//                    ->isRequired()
+//                    ->attribute('context_type', 'server')
+//                    ->attribute('service_requirement', 'http')
+//                ->end()
+//            ->end()
+//        ->end();
+//    }
 
 // @TODO: Remove. This should be handled by Services now.
 //    public function verify() {

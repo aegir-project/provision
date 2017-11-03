@@ -67,7 +67,7 @@ class Context
      * @var LoggerInterface
      */
     public $logger;
-    
+
     /**
      * Context constructor.
      *
@@ -75,11 +75,11 @@ class Context
      * @param $console_config
      * @param array $options
      */
-    function __construct($name, $console_config, Application $application, $options = [])
+    function __construct($name, Application $application = NULL, $options = [])
     {
         $this->name = $name;
         $this->application = $application;
-        $this->loadContextConfig($console_config, $options);
+        $this->loadContextConfig($options);
         $this->prepareServices();
     }
 
@@ -92,7 +92,7 @@ class Context
      * @throws \Exception
      */
     private function loadContextConfig($console_config, $options = []) {
-        $this->console_config = $console_config;
+        $this->console_config = $this->application->getConfig()->all();
         $this->config_path = $console_config['config_path'] . '/provision/' . $this->type . '.' . $this->name . '.yml';
 
         $configs = [];
@@ -459,4 +459,32 @@ class Context
         }
     }
 
+    /**
+     * Return an array of required services for this context.
+     * Example:
+     *   return ['http'];
+     */
+    public static function serviceRequirements() {
+        return [];
+    }
+
+//    /**
+//     * Check that there is at least one server that provides for each serviceRequirements().
+//     *
+//     * @return array
+//     *   The key is the service, the value is 0 if not available or 1 if is available.
+//     */
+//    function checkRequirements() {
+//        $reqs = self::serviceRequirements();
+//        $services = [];
+//        foreach ($reqs as $service) {
+//            if (empty($this->application->getAllServers($service))) {
+//                $services[$service] = 0;
+//            }
+//            else {
+//                $services[$service] = 1;
+//            }
+//        }
+//        return $services;
+//    }
 }

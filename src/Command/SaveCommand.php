@@ -2,6 +2,7 @@
 
 namespace Aegir\Provision\Command;
 
+use Aegir\Provision\Application;
 use Aegir\Provision\Command;
 use Aegir\Provision\Context;
 use Aegir\Provision\Context\PlatformContext;
@@ -112,6 +113,30 @@ class SaveCommand extends Command
                 ]);
                 $this->input->setOption('context_type', $context_type);
             }
+            else {
+                $context_type = $this->input->getOption('context_type');
+            }
+
+            // Check for context type service requirements.
+            $exit = FALSE;
+            $this->io->comment("Checking service requirements for context type {$context_type}...");
+            $reqs = Application::checkServiceRequirements($context_type);
+            foreach ($reqs as $service => $available) {
+                if ($available) {
+                    $this->io->successLite("Service $service: Available");
+                }
+                else {
+                    $this->io->warningLite("There is no server that provides the service '$service'.");
+                    $exit = TRUE;
+                }
+            }
+
+            if ($exit) {
+                $this->io->error('Service requirements are unfulfillable. Please create a new server (provision save) or add to an existing server (provision services).');
+                exit(1);
+            }
+
+
             $properties = $this->askForContextProperties();
             $class = Context::getClassName($this->input->getOption('context_type'));
             $this->context = new $class($input->getArgument('context_name'), $this->getApplication()->getConfig()->all(), $this->getApplication(), $properties);
