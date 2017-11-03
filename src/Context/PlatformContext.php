@@ -49,7 +49,7 @@ class PlatformContext extends Context implements ConfigurationInterface
     {
         $options = [
           'root' => 'platform: path to a Drupal installation',
-          'server' => 'platform: drush backend server; default @server_master',
+//          'server' => 'platform: drush backend server; default @server_master',
 
             // web_server will be loaded via another method. For now using configTreeBuilder()
 //          'web_server' => 'platform: web server hosting the platform; default @server_master',
