@@ -161,7 +161,7 @@ class Application extends BaseApplication
         $context_files = $this::findAllContexts($name);
         foreach ($context_files as $context) {
             $class = Context::getClassName($context['type']);
-            $contexts[$context['name']] = new $class($context['name '], $this);
+            $contexts[$context['name']] = new $class($context['name'], $this);
             $contexts[$context['name']]->logger = $this->logger;
         }
 
@@ -194,6 +194,8 @@ class Application extends BaseApplication
                 'file' => $file,
             ];
         }
+        print "FIND ALL CONTEXTS: ";
+        print_r($contexts);
         return $contexts;
     }
 
