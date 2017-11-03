@@ -124,6 +124,7 @@ class Context
      * Load Service classes from config into Context..
      */
     protected function prepareServices() {
+        // Only servers have config['services']
         if (isset($this->config['services'])) {
 
             foreach ($this->config['services'] as $service_name => $service) {
