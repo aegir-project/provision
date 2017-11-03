@@ -91,7 +91,7 @@ class Context
      *
      * @throws \Exception
      */
-    private function loadContextConfig($console_config, $options = []) {
+    private function loadContextConfig($options = []) {
         $this->console_config = $this->application->getConfig()->all();
         $this->config_path = $this->console_config['config_path'] . '/provision/' . $this->type . '.' . $this->name . '.yml';
 
