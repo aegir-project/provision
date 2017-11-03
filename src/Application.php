@@ -194,8 +194,6 @@ class Application extends BaseApplication
                 'file' => $file,
             ];
         }
-        print "FIND ALL CONTEXTS: ";
-        print_r($contexts);
         return $contexts;
     }
 
