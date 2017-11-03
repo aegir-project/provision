@@ -93,7 +93,7 @@ class Context
      */
     private function loadContextConfig($console_config, $options = []) {
         $this->console_config = $this->application->getConfig()->all();
-        $this->config_path = $console_config['config_path'] . '/provision/' . $this->type . '.' . $this->name . '.yml';
+        $this->config_path = $this->console_config['config_path'] . '/provision/' . $this->type . '.' . $this->name . '.yml';
 
         $configs = [];
 
