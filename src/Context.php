@@ -6,6 +6,7 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Console\Config;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Psr\Log\LoggerInterface;
@@ -72,7 +73,6 @@ class Context
      * Context constructor.
      *
      * @param $name
-     * @param $console_config
      * @param array $options
      */
     function __construct($name, Application $application = NULL, $options = [])
@@ -86,14 +86,19 @@ class Context
     /**
      * Load and process the Config object for this context.
      *
-     * @param $console_config
      * @param array $options
      *
      * @throws \Exception
      */
     private function loadContextConfig($options = []) {
-        $this->console_config = $this->application->getConfig()->all();
-        $this->config_path = $this->console_config['config_path'] . '/provision/' . $this->type . '.' . $this->name . '.yml';
+
+        if ($this->application) {
+            $this->config_path = $this->application->getConfig()->get('config_path') . '/provision/' . $this->type . '.' . $this->name . '.yml';
+        }
+        else {
+            $config = new Config();
+            $this->config_path = $config->get('config_path') . '/provision/' . $this->type . '.' . $this->name . '.yml';
+        }
 
         $configs = [];
 

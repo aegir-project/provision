@@ -156,13 +156,25 @@ class Application extends BaseApplication
      *
      * @return array
      */
-    function getAllContexts($name = '') {
+    static function getAllContexts($name = '', $application = NULL) {
         $contexts = [];
-        $context_files = $this::findAllContexts($name);
+        $config = new Config();
+
+        $context_files = [];
+        $finder = new \Symfony\Component\Finder\Finder();
+        $finder->files()->name('*' . $name . '.yml')->in($config->get('config_path') . '/provision');
+        foreach ($finder as $file) {
+            list($context_type, $context_name) = explode('.', $file->getFilename());
+            $context_files[$context_name] = [
+                'name' => $context_name,
+                'type' => $context_type,
+                'file' => $file,
+            ];
+        }
+
         foreach ($context_files as $context) {
             $class = Context::getClassName($context['type']);
-            $contexts[$context['name']] = new $class($context['name'], $this);
-            $contexts[$context['name']]->logger = $this->logger;
+            $contexts[$context['name']] = new $class($context['name'], $application);
         }
 
         if ($name && isset($contexts[$name])) {
@@ -177,24 +189,24 @@ class Application extends BaseApplication
     }
 
     /**
-     * Load all context files.
-     * @param string $name
+     * Load all server contexts.
+     *
+     * @param null $service
+     * @return mixed
+     * @throws \Exception
      */
-    static function findAllContexts($name = '') {
-        $config = new Config();
-
-        $contexts = [];
-        $finder = new \Symfony\Component\Finder\Finder();
-        $finder->files()->name('*' . $name . '.yml')->in($config->get('config_path') . '/provision');
-        foreach ($finder as $file) {
-            list($context_type, $context_name) = explode('.', $file->getFilename());
-            $contexts[$context_name] = [
-                'name' => $context_name,
-                'type' => $context_type,
-                'file' => $file,
-            ];
+    static public function getAllServers($service = NULL) {
+        $servers = [];
+        $context_files = self::getAllContexts();
+        if (empty($context_files)) {
+            throw new \Exception('No server contexts found. Use `provision save` to create one.');
         }
-        return $contexts;
+        foreach ($context_files as $context) {
+            if ($context->type == 'server') {
+                $servers[$context->name] = $context;
+            }
+        }
+        return $servers;
     }
 
     /**
@@ -217,34 +229,11 @@ class Application extends BaseApplication
      * @return \Aegir\Provision\Context
      * @throws \Exception
      */
-    function getContext($name) {
-        if (empty($this->getAllContexts($name))) {
+    static public function getContext($name) {
+        if (empty(Application::getAllContexts($name))) {
             throw new \Exception('Context not found with name: ' . $name);
         }
-        return $this->getAllContexts($name);
-    }
-
-
-    /**
-     * Load all server contexts.
-     *
-     * @param null $service
-     * @return mixed
-     * @throws \Exception
-     */
-    static public function getAllServers($service = NULL) {
-        $servers = [];
-        $contexts = self::findAllContexts();
-        if (empty($contexts)) {
-            throw new \Exception('No contexts found. Use `provision save` to create one.');
-        }
-
-        foreach ($contexts as $name => &$context) {
-            if ($context->type == 'server') {
-                $servers[$name] = $context;
-            }
-        }
-        return $servers;
+        return Application::getAllContexts($name);
     }
 
     /**

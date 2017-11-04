@@ -25,7 +25,7 @@ class SiteConfiguration extends Configuration {
       $file = $this->uri . '.conf';
 
 //      return $this->service->properties['http_platformd_path'] . '/' . ltrim($this->context->name, '@') . '.conf';
-      return $this->context->console_config['config_path'] . '/' . $this->context->name . '/' . $file;
+      return $this->context->application->getConfig()->get('config_path') . '/' . $this->context->name . '/' . $file;
 
 //      return $this->context->config['config_path'];
 //    if (drush_get_option('provision_apache_conf_suffix', FALSE)) {
@@ -55,7 +55,7 @@ class SiteConfiguration extends Configuration {
       $this->template = $this->disabled_template;
     }
 
-    $app_dir = $this->context->console_config['config_path'] . '/' . $this->service->getType();
+    $app_dir = $this->context->application->getConfig()->get('config_path') . '/' . $this->service->getType();
 
 //    $this->data['http_port'] = $this->service->properties['http_port'];
 //    $this->data['include_statement'] = '# INCLUDE STATEMENT';

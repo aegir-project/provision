@@ -27,19 +27,18 @@ class PlatformContext extends Context implements ConfigurationInterface
      * @var \Aegir\Provision\Context\ServerContext;
      */
     public $web_server;
-    
+
     /**
      * PlatformContext constructor.
      *
      * @param $name
-     * @param $console_config
      * @param Application $application
      * @param array $options
      */
-    function __construct($name, $console_config, Application $application, array $options = [])
+    function __construct($name, Application $application = NULL, array $options = [])
     {
-        parent::__construct($name, $console_config, $application, $options);
-        
+        parent::__construct($name, $application, $options);
+
         // Load "web_server" context.
         // There is no need to validate for $this->properties['web_server'] because the config system does that.
         $this->web_server = $application->getContext($this->properties['web_server']);

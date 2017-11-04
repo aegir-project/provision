@@ -22,16 +22,15 @@ class SiteContext extends Context implements ConfigurationInterface
     public $type = 'site';
 
     /**
-     * PlatformContext constructor.
+     * SiteContext constructor.
      *
      * @param $name
-     * @param $console_config
      * @param Application $application
      * @param array $options
      */
-    function __construct($name, $console_config, Application $application, array $options = [])
+    function __construct($name, Application $application = NULL, array $options = [])
     {
-        parent::__construct($name, $console_config, $application, $options);
+        parent::__construct($name, $application, $options);
 
         // Load "web_server" and "platform" contexts.
         // There is no need to check if the property exists because the config system does that.

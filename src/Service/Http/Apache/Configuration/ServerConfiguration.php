@@ -26,7 +26,7 @@ class ServerConfiguration extends Configuration {
   function filename() {
     if ($this->service->getType()) {
       $file = $this->service->getType() . '.conf';
-      return $this->context->console_config['config_path'] . '/' . $this->context->name . '/' . $file;
+      return $this->context->application->getConfig()->get('config_path') . '/' . $this->context->name . '/' . $file;
     }
     else {
       return FALSE;
@@ -35,7 +35,7 @@ class ServerConfiguration extends Configuration {
   function process()
   {
       parent::process();
-      $app_dir = $this->context->console_config['config_path'] . '/' . $this->service->getType();
+      $app_dir = $this->context->application->getConfig()->get('config_path') . '/' . $this->service->getType();
       $this->data['http_port'] = $this->service->properties['http_port'];
       $this->data['include_statement'] = '# INCLUDE STATEMENT';
       $this->data['http_pred_path'] = "{$app_dir}/pre.d";
