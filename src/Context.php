@@ -141,7 +141,7 @@ class Context
         }
         elseif (isset($this->config['service_subscriptions'])) {
             foreach ($this->config['service_subscriptions'] as $service_name => $service) {
-                $this->servers[$service_name] = $server = $this->application->getContext($service['server']);
+                $this->servers[$service_name] = $server = Application::getContext($service['server']);
                 $this->services[$service_name] = new ServiceSubscription($this, $server, $service_name);
             }
         }
@@ -324,7 +324,7 @@ class Context
 
                 // If type is empty, it's because it's in the ServerContext
                 if (empty($info['type'])) {
-                    $server = $this->application->getContext($info['server']);
+                    $server = Application::getContext($info['server']);
                     $service_type = ucfirst($server->getService($service)->type);
                 }
                 else {
