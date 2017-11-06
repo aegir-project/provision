@@ -41,7 +41,7 @@ class PlatformContext extends Context implements ConfigurationInterface
 
         // Load "web_server" context.
         // There is no need to validate for $this->properties['web_server'] because the config system does that.
-        $this->web_server = $application->getContext($this->properties['web_server']);
+//        $this->web_server = $application->getContext($this->properties['web_server']);
     }
     
     static function option_documentation()
