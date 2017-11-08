@@ -71,16 +71,26 @@ class SaveCommand extends Command
 
       // Load all Aegir\Provision\Context and inject their options.
       // @TODO: Use CommandFileDiscovery to include all classes that inherit Aegir\Provision\Context
-      $contexts[] = SiteContext::option_documentation();
-      $contexts[] = PlatformContext::option_documentation();
-      $contexts[] = ServerContext::option_documentation();
-      
-      foreach ($contexts as $context_options) {
-        foreach ($context_options as $option => $description) {
+      $contexts[] = SiteContext::class;
+      $contexts[] = PlatformContext::class;
+      $contexts[] = ServerContext::class;
+
+      // For each context type...
+      foreach ($contexts as $Context) {
+
+          // Load serviceRequirements into input options.
+          $all_services = $Context::getServiceOptions();
+          foreach ($Context::serviceRequirements() as $type) {
+              $option = "server_{$type}";
+              $description = $Context::TYPE . ": " . $all_services[$type];
+              $inputDefinition[] = new InputOption($option, NULL, InputOption::VALUE_OPTIONAL, $description);
+          }
+
+          // Load option_documentation() into input options.
+          foreach ($Context::option_documentation() as $option => $description) {
           $inputDefinition[] = new InputOption($option, NULL, InputOption::VALUE_OPTIONAL, $description);
         }
       }
-      
       return new InputDefinition($inputDefinition);
     }
     

@@ -20,6 +20,7 @@ class SiteContext extends Context implements ConfigurationInterface
      * @var string
      */
     public $type = 'site';
+    const TYPE = 'site';
 
     /**
      * SiteContext constructor.

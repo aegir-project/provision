@@ -23,6 +23,8 @@ class ServerContext extends Context implements ConfigurationInterface
      * 'server', 'platform', or 'site'.
      */
     public $type = 'server';
+    const TYPE = 'server';
+
 
     static function option_documentation()
     {

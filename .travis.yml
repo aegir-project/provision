@@ -48,7 +48,7 @@ script:
   - provision save platform_hostmaster -n
     --context_type=platform
     --root=/home/travis/hostmaster
-    --server=server_master
+#    --server=server_master
     --web_server=server_master
     --makefile=https://raw.githubusercontent.com/aegir-project/provision/4.x/aegir.make
     --make_working_copy=1
