@@ -167,6 +167,7 @@ class SaveCommand extends Command
         }
 
         foreach ($this->context->getProperties() as $name => $value) {
+            $value = is_array($value)? implode(', ', $value): $value;
             $rows[] = [$name, $value];
         }
         
@@ -188,19 +189,21 @@ class SaveCommand extends Command
 //        $this->process($command);
 
         // Offer to add services.
-        if ($this->input->isInteractive()) {
-            $command = $this->getApplication()->find('services');
-            $arguments = [
-                'context_name' => $this->input->getArgument('context_name'),
-                'sub_command' => 'add',
-            ];
-            while ($this->io->confirm('Add a service?')) {
-
-                $greetInput = new ArrayInput($arguments);
-                $returnCode = $command->run($greetInput, $output);
-                $returnCodes[$returnCode] = $returnCode;
-            }
-        }
+        $this->askForServers();
+//
+//        if ($this->input->isInteractive()) {
+//            $command = $this->getApplication()->find('services');
+//            $arguments = [
+//                'context_name' => $this->input->getArgument('context_name'),
+//                'sub_command' => 'add',
+//            ];
+//            while ($this->io->confirm('Add a service?')) {
+//
+//                $greetInput = new ArrayInput($arguments);
+//                $returnCode = $command->run($greetInput, $output);
+//                $returnCodes[$returnCode] = $returnCode;
+//            }
+//        }
     }
 
     /**
@@ -235,14 +238,14 @@ class SaveCommand extends Command
         if (empty($this->input->getOption('context_type'))) {
             throw new InvalidOptionException('context_type option is required.');
         }
-        
+
         $this->io->comment("Please input context properties.");
-    
+
         $class = '\Aegir\Provision\Context\\' . ucfirst($this->input->getOption('context_type')) . "Context";
         $options = $class::option_documentation();
         $properties = [];
         foreach ($options as $name => $description) {
-          
+
             // If option does not exist, ask for it.
             if (!empty($this->input->getOption($name))) {
                 $properties[$name] = $this->input->getOption($name);
@@ -253,5 +256,44 @@ class SaveCommand extends Command
             }
         }
         return $properties;
+    }
+
+    protected function askForServers() {
+
+        // Lookup servers.
+        $all_services = Context::getServiceOptions();
+        $class = '\Aegir\Provision\Context\\' . ucfirst($this->input->getOption('context_type')) . "Context";
+        foreach ($class::serviceRequirements() as $type) {
+            $option = "server_{$type}";
+
+            if (!empty($this->input->getOption($option))) {
+                $context_name = $this->input->getOption($option);
+
+            }
+            else {
+                $context_name = $this->io->ask($all_services[$type]);
+            }
+
+            $context = Application::getContext($context_name);
+//
+//            $command = $this->getApplication()->find('services');
+//            $arguments = [
+//                'context_name' => $this->input->getArgument('context_name'),
+//                'sub_command' => 'add',
+//            ];
+//            while ($this->io->confirm("Use server $context_name for service $type?")) {
+//
+//                $greetInput = new ArrayInput($arguments);
+//                $returnCode = $command->run($greetInput, $this->output);
+//                $returnCodes[$returnCode] = $returnCode;
+//            }
+
+
+            if ($context::TYPE != 'server') {
+                throw new \Exception("Specified context '{$context->name}' is not a server.");
+            }
+
+            $this->io->comment("Using server $context_name for service $type.");
+        }
     }
 }
