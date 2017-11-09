@@ -138,10 +138,8 @@ class Context
         if (isset($this->config['services'])) {
 
             foreach ($this->config['services'] as $service_name => $service) {
-                $service_name = ucfirst($service_name);
-                $service_type = ucfirst($service['type']);
-                $service_class = "\\Aegir\\Provision\\Service\\{$service_name}\\{$service_name}{$service_type}Service";
-                $this->services[strtolower($service_name)] = new $service_class($service, $this);
+                $service_class = Service::getClassName($service_name, $service['type']);
+                $this->services[$service_name] = new $service_class($service, $this);
             }
         }
         elseif (isset($this->config['service_subscriptions'])) {
