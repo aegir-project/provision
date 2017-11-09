@@ -8,7 +8,7 @@ php:
 sudo: required
 
 services:
-  - docker
+  - mysql
 
 # Only run test when committing to master branch.
 branches:
@@ -34,9 +34,6 @@ install:
   - mkdir /home/travis/config
   - ls -la
 
-before_install:
-  - docker run --name provision_db -e MYSQL_ROOT_PASSWORD=root -d -p 3307:3306 mariadb
-
 script:
 
   - provision
@@ -61,7 +58,7 @@ script:
 
   - provision services server_master add db -n
     --service_type=mysql
-    --master_db="mysql://root:root@0.0.0.0:3307"
+    --master_db="mysql://travis@127.0.0.1"
     --db_grant_all_hosts=0
 
   - provision services server_master
