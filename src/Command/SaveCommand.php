@@ -116,11 +116,7 @@ class SaveCommand extends Command
             $this->io->comment("No context named '$this->context_name'. Creating a new one...");
 
             if (empty($this->input->getOption('context_type'))) {
-                $context_type = $this->io->choice('Context Type?', [
-                    'server',
-                    'platform',
-                    'site'
-                ]);
+                $context_type = $this->io->choice('Context Type?', Context::getContextTypeOptions());
                 $this->input->setOption('context_type', $context_type);
             }
             else {
@@ -130,6 +126,16 @@ class SaveCommand extends Command
             // If context_type is still empty, throw an exception. Happens if using -n
             if (empty($context_type)) {
                 throw new \Exception('Option --context_type must be specified.');
+            }
+    
+            // Handle invalid context_type.
+            if (!class_exists(Context::getClassName($context_type))) {
+                $types = Context::getContextTypeOptions();
+                throw new \Exception(strtr("Context type !type is invalid. Valid options are: !types", [
+                    '!type' => $context_type,
+                    '!types' => implode(", ", array_keys($types))
+                ]));
+        
             }
 
             // Check for context type service requirements.

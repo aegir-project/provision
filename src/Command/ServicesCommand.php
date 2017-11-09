@@ -74,6 +74,12 @@ class ServicesCommand extends Command
           InputArgument::OPTIONAL,
           'The name of the server context to use for this service.'
         );
+        $inputDefinition[] = new InputOption(
+          'service_type',
+          NULL,
+          InputOption::VALUE_OPTIONAL,
+          'The name of the service type to use.'
+        );
         
         // Load all service options
         $options = Context::getServiceOptions();
@@ -164,7 +170,30 @@ class ServicesCommand extends Command
                 throw new \Exception("There was no class found for service $service. Create one named \\Aegir\\Provision\\Service\\{$service}Service");
             }
             
-            $service_type = $this->io->choice('Which service type?', $this->context->getServiceTypeOptions($service));
+            // Check or ask for service_type option.
+            if ($this->input->getOption('service_type')) {
+                $service_type = $this->input->getOption('service_type');
+                $this->io->comment("Using option service_type=". $service_type);
+            }
+            else {
+                $service_type = $this->io->choice('Which service type?', $this->context->getServiceTypeOptions($service));
+            }
+    
+            // If $service_type is still empty, throw an exception. Happens if using -n
+            if (empty($service_type)) {
+                throw new \Exception('Option --service_type must be specified.');
+            }
+            
+            // Handle invalid service_type.
+            if (!class_exists(Service::getClassName($service, $service_type))) {
+                $types = Context::getServiceTypeOptions($service);
+                throw new \Exception(strtr("Service type !type is invalid for service !service. Valid options are: !types", [
+                    '!service' => $service,
+                    '!type' => $service_type,
+                    '!types' => implode(", ", array_keys($types))
+                ]));
+    
+            }
 
             // Then ask for all options.
             $properties = $this->askForServiceProperties($service);
