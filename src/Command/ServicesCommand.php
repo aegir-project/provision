@@ -7,6 +7,7 @@ use Aegir\Provision\Context;
 use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Context\SiteContext;
+use Aegir\Provision\Service;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Symfony\Component\Console\Exception\LogicException;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -73,6 +74,30 @@ class ServicesCommand extends Command
           InputArgument::OPTIONAL,
           'The name of the server context to use for this service.'
         );
+        
+        // Load all service options
+        $options = Context::getServiceOptions();
+    
+        // For each service type...
+        $types[] = 'server';
+        $types[] = 'platform';
+        $types[] = 'site';
+        foreach ($options as $service => $service_name) {
+        
+            $class = Service::getClassName($service);
+            
+            // Load option_documentation() into input options.
+            foreach ($types as $type) {
+                $method = "{$type}_options";
+                foreach ($class::$method() as $option => $description) {
+                    $description = "$service_name: $description";
+                    $inputDefinition[] = new InputOption($option, NULL, InputOption::VALUE_OPTIONAL, $description);
+                }
+            }
+
+        }
+        
+        
         return new InputDefinition($inputDefinition);
     }
 
