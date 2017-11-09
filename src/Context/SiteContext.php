@@ -57,6 +57,12 @@ class SiteContext extends Context implements ConfigurationInterface
     public static function serviceRequirements() {
         return ['db'];
     }
+    
+    public static function relatedContexts() {
+        return [
+            'platform' => 'platform'
+        ];
+    }
 
 //    /**
 //     * @TODO: Come up with another method to let Context nodes specify related contexts with ability to validate.
