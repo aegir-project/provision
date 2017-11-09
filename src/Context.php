@@ -120,7 +120,12 @@ class Context
             
         } catch (\Exception $e) {
             throw new \Exception(
-                "There is an error with the configuration for $this->type $this->name: " . $e->getMessage()
+                strtr("There is an error with the configuration for !type '!name'. Check the file !file and try again. \n \nError: !message", [
+                    '!type' => $this->type,
+                    '!name' => $this->name,
+                    '!message' => $e->getMessage(),
+                    '!file' => $this->config_path,
+                ])
             );
         }
     }
