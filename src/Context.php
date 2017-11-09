@@ -255,7 +255,7 @@ class Context
             return $this->services[$type];
         }
         else {
-            throw new \Exception("Service '$type' does not exist.");
+            throw new \Exception("Service '$type' does not exist in the context '{$this->name}'.");
         }
     }
 
