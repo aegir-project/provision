@@ -527,7 +527,12 @@ class Context
         // Run verify method on all services.
         foreach ($this->getServices() as $service) {
             $this->application->io->title("Verify " .  $service::SERVICE_NAME);
-            $service->verify();
+            $return_codes[] = $service->verify()? 0: 1;
+        }
+        
+        // If any service verify failed, exit with a non-zero code.
+        if (count(array_filter($return_codes))) {
+            throw new \Exception('Some services did not verify. Check your configuration and try again.');
         }
     }
 
