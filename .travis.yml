@@ -64,14 +64,13 @@ script:
   - provision save platform_hostmaster -n
     --context_type=platform
     --root=/home/travis/hostmaster
-    --server_web=server_master
+    --server_http=server_master
     --makefile=https://raw.githubusercontent.com/aegir-project/provision/4.x/aegir.make
     --make_working_copy=1
 
   # Add site context
   - provision save hostmaster -n
     --context_type=site
-    --platform=platform_hostmaster
     --server_db=server_master
     --uri=provision.local.computer
     --language=en
