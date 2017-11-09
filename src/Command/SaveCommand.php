@@ -126,6 +126,11 @@ class SaveCommand extends Command
             else {
                 $context_type = $this->input->getOption('context_type');
             }
+            
+            // If context_type is still empty, throw an exception. Happens if using -n
+            if (empty($context_type)) {
+                throw new \Exception('Option --context-type must be specified.');
+            }
 
             // Check for context type service requirements.
             $exit = FALSE;
