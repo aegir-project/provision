@@ -285,8 +285,8 @@ class SaveCommand extends Command
                 'service' => $type,
             ];
 
-            $greetInput = new ArrayInput($arguments);
-            $returnCode = $command->run($greetInput, $this->output);
+            $input = new ArrayInput($arguments);
+            $returnCode = $command->run($input, $this->output);
             $returnCodes[$returnCode] = $returnCode;
 
 //            if ($context::TYPE != 'server') {
