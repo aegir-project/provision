@@ -276,6 +276,8 @@ class SaveCommand extends Command
 
 //            $context = Application::getContext($context_name);
 
+            $this->io->info("Adding required service $type...");
+
             $command = $this->getApplication()->find('services');
             $arguments = [
                 'context_name' => $this->input->getArgument('context_name'),
