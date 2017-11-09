@@ -44,6 +44,22 @@ script:
     --script_user=travis
     --master_url=provision.local.computer
 
+  # Add services to server_master context.
+  - provision services server_master add http -n
+    --service_type=apache
+    --http_port=80
+    --web_group=www-data
+    --web_disable_url=http://localhost/disabled
+    --web_maintenance_url=http://localhost/maintenance
+    --restart_command="sudo apache2ctl graceful"
+
+  - provision services server_master add db -n
+    --service_type=mysql
+    --master_db="mysql://root:root@localhost"
+    --db_grant_all_hosts=0
+
+  - provision services server_master
+
   # Add platform context
   - provision save platform_hostmaster -n
     --context_type=platform
