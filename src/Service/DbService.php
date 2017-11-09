@@ -76,7 +76,7 @@ class DbService extends Service
      */
     function verify() {
         $this->creds = array_map('urldecode', parse_url($this->properties['master_db']));
-        $this->dsn = sprintf("%s:host=%s", $this::SERVICE_TYPE,  $this->creds['host']);
+        $this->dsn = sprintf("%s:host=%s;port=%s", $this::SERVICE_TYPE,  $this->creds['host'], $this->creds['port']);
     
         try {
             $this->connect();
