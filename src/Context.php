@@ -142,12 +142,17 @@ class Context
                 $this->services[$service_name] = new $service_class($service, $this);
             }
         }
-        elseif (isset($this->config['service_subscriptions'])) {
-            // Running Application::getContext() results in runaway recursion. Only load when needed..
-//            foreach ($this->config['service_subscriptions'] as $service_name => $service) {
-//                $this->servers[$service_name] = $server = Application::getContext($service['server']);
-//                $this->services[$service_name] = new ServiceSubscription($this, $server, $service_name);
-//            }
+        // @TODO: Since we switched to Config ContextNodeDefinition, it's not returning the context name in $context. So we have to look for $this->properties instead of $this->config.
+        // We should figure out how to alter ContextNodeDefinition so it returns the string name or the server class.
+        elseif (isset($this->properties['service_subscriptions'])) {
+            foreach ($this->properties['service_subscriptions'] as $service_name => $service) {
+                // Check for an empty server.
+                if (empty($service['server'])) {
+                  throw new \Exception("Item 'server' cannot be empty.");
+                }
+                $this->servers[$service_name] = $server = Application::getContext($service['server']);
+                $this->services[$service_name] = new ServiceSubscription($this, $server, $service_name);
+            }
         }
         else {
             $this->services = [];
