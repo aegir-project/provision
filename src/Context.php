@@ -257,13 +257,27 @@ class Context
      * Lists all available services as a simple service => name array.
      * @return array
      */
-    public function getServiceTypeOptions($service) {
+    static public function getServiceTypeOptions($service) {
         $options = [];
-        $service_types = $this->getAvailableServiceTypes($service);
+        $service_types = self::getAvailableServiceTypes($service);
         foreach ($service_types as $service_type => $class) {
             $options[$service_type] = $class::SERVICE_TYPE_NAME;
         }
         return $options;
+    }
+
+    /**
+     * Lists all available context types as a simple service => name array.
+     *
+     * @TODO: Make this dynamically load from classes, like getServiceTypeOptions()
+     * @return array
+     */
+    static public function getContextTypeOptions() {
+        return [
+            'server' => 'Server',
+            'platform' => 'Platform',
+            'site' => 'Site',
+        ];
     }
 
 
