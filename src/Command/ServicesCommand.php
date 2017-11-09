@@ -52,7 +52,7 @@ class ServicesCommand extends Command
      */
     protected function getCommandDefinition()
     {
-        $inputDefinition = [];
+        $inputDefinition = $this::getCommandOptions();
         $inputDefinition[] = new InputArgument(
           'context_name',
           InputArgument::REQUIRED,
@@ -81,30 +81,38 @@ class ServicesCommand extends Command
           'The name of the service type to use.'
         );
         
+        return new InputDefinition($inputDefinition);
+    }
+    
+    /**
+     * Load all server_options, site_options, and platform_options from Service classes.
+     *
+     * Invoked from SaveCommand as well.
+     * @return array
+     */
+    public static function getCommandOptions() {
+        $inputDefinition = [];
+    
         // Load all service options
         $options = Context::getServiceOptions();
     
         // For each service type...
-        $types[] = 'server';
-        $types[] = 'platform';
-        $types[] = 'site';
         foreach ($options as $service => $service_name) {
         
             $class = Service::getClassName($service);
-            
+        
             // Load option_documentation() into input options.
-            foreach ($types as $type) {
+            foreach (Context::getContextTypeOptions() as $type => $type_name) {
                 $method = "{$type}_options";
                 foreach ($class::$method() as $option => $description) {
-                    $description = "$service_name: $description";
+                    $description = "$type_name $service service: $description";
                     $inputDefinition[] = new InputOption($option, NULL, InputOption::VALUE_OPTIONAL, $description);
                 }
             }
-
+        
         }
         
-        
-        return new InputDefinition($inputDefinition);
+        return $inputDefinition;
     }
 
     /**

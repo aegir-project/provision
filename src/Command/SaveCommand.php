@@ -8,6 +8,7 @@ use Aegir\Provision\Context;
 use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Context\SiteContext;
+use Aegir\Provision\Service;
 use Symfony\Component\Console\Exception\InvalidOptionException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -50,7 +51,7 @@ class SaveCommand extends Command
      */
     protected function getCommandDefinition()
     {
-        $inputDefinition = [];
+        $inputDefinition = ServicesCommand::getCommandOptions();
         $inputDefinition[] = new InputArgument(
           'context_name',
           InputArgument::REQUIRED,
@@ -126,6 +127,9 @@ class SaveCommand extends Command
             // If context_type is still empty, throw an exception. Happens if using -n
             if (empty($context_type)) {
                 throw new \Exception('Option --context_type must be specified.');
+            }
+            else {
+                $this->input->setOption('context_type', $context_type);
             }
     
             // Handle invalid context_type.
@@ -281,7 +285,7 @@ class SaveCommand extends Command
 
         // Lookup servers.
         $all_services = Context::getServiceOptions();
-        $class = '\Aegir\Provision\Context\\' . ucfirst($this->input->getOption('context_type')) . "Context";
+        $class = Context::getClassName($this->input->getOption('context_type'));
         foreach ($class::serviceRequirements() as $type) {
             $option = "server_{$type}";
 //            else {
@@ -302,6 +306,13 @@ class SaveCommand extends Command
             // Pass option down to services command.
             if (!empty($this->input->getOption($option))) {
                 $arguments['server'] = $this->input->getOption($option);
+            }
+            
+            // Pass all options for this service to the services command.
+            $service_class = Service::getClassName($type);
+            $options_method = $this->input->getOption('context_type') . "_options";
+            foreach ($service_class::$options_method() as $option => $help) {
+                $arguments["--{$option}"] = $this->input->getOption($option);
             }
 
             $input = new ArrayInput($arguments);
