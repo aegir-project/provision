@@ -35,7 +35,7 @@ install:
   - ls -la
 
 before_install:
-  - docker run --name provision_db -e MYSQL_ROOT_PASSWORD=root -d -p 3306:3306 mariadb
+  - docker run --name provision_db -e MYSQL_ROOT_PASSWORD=root -d -p 3307:3306 mariadb
 
 script:
 
