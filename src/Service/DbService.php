@@ -94,6 +94,10 @@ class DbService extends Service
             $this->creds['port'] = '3306';
         }
         
+        if (!isset($this->creds['pass'])) {
+            $this->creds['pass'] = '';
+        }
+        
         $this->dsn = sprintf("%s:host=%s;port=%s", $this::SERVICE_TYPE,  $this->creds['host'], $this->creds['port']);
     
         try {
