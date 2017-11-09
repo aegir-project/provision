@@ -58,7 +58,7 @@ script:
 
   - provision services server_master add db -n
     --service_type=mysql
-    --master_db="mysql://travis@127.0.0.1"
+    --master_db="mysql://root@127.0.0.1"
     --db_grant_all_hosts=0
 
   - provision services server_master
