@@ -129,7 +129,7 @@ class SaveCommand extends Command
             
             // If context_type is still empty, throw an exception. Happens if using -n
             if (empty($context_type)) {
-                throw new \Exception('Option --context-type must be specified.');
+                throw new \Exception('Option --context_type must be specified.');
             }
 
             // Check for context type service requirements.
