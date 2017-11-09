@@ -61,7 +61,7 @@ script:
 
   - provision services server_master add db -n
     --service_type=mysql
-    --master_db="mysql://root:root@0.0.0.0"
+    --master_db="mysql://root:root@0.0.0.0:3307"
     --db_grant_all_hosts=0
 
   - provision services server_master
