@@ -143,10 +143,11 @@ class Context
             }
         }
         elseif (isset($this->config['service_subscriptions'])) {
-            foreach ($this->config['service_subscriptions'] as $service_name => $service) {
-                $this->servers[$service_name] = $server = Application::getContext($service['server']);
-                $this->services[$service_name] = new ServiceSubscription($this, $server, $service_name);
-            }
+            // Running Application::getContext() results in runaway recursion. Only load when needed..
+//            foreach ($this->config['service_subscriptions'] as $service_name => $service) {
+//                $this->servers[$service_name] = $server = Application::getContext($service['server']);
+//                $this->services[$service_name] = new ServiceSubscription($this, $server, $service_name);
+//            }
         }
         else {
             $this->services = [];
@@ -272,28 +273,38 @@ class Context
                 ->end()
             ->end();
 
-        // Load Services
+        // Load Services.
         if ($this->type == 'server') {
-            $services_key = 'services';
-            $services_property = 'type';
-        }
-        else {
-            $services_key = 'service_subscriptions';
-            $services_property = 'server';
-        }
-
-        $root_node
-            ->attribute('context', $this)
-            ->children()
-                ->arrayNode($services_key)
+            $root_node
+                ->attribute('context', $this)
+                ->children()
+                    ->arrayNode('services')
                     ->prototype('array')
-                    ->children()
-                        ->scalarNode($services_property)
-                        ->isRequired(true)
+                        ->children()
+                            ->scalarNode('type')
+                            ->isRequired(true)
+                        ->end()
+                        ->append($this->addServiceProperties('services'))
                     ->end()
-                    ->append($this->addServiceProperties($services_key))
-                ->end()
-            ->end();
+                ->end();
+        }
+        // Load service subscriptions.
+        else {
+            $root_node
+                ->attribute('context', $this)
+                ->children()
+                    ->arrayNode('service_subscriptions')
+                    ->prototype('array')
+                        ->children()
+                        ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
+                        ->node('server', 'context')
+                            ->isRequired()
+                            ->attribute('context_type', 'server')
+                        ->end()
+                        ->append($this->addServiceProperties('service_subscriptions'))
+                    ->end()
+                ->end();
+        }
 
         // @TODO: Figure out how we can let other classes add to Context properties.
         foreach ($this->option_documentation() as $name => $description) {
