@@ -40,7 +40,7 @@ class ServicesCommand extends Command
           ->setName('services')
           ->setDescription('Manage the services attached to servers.')
           ->setHelp(
-            'Saves a ProvisionContext object to file. Currently just passes to "drush provision-save".'
+            'Use this command to add new services to servers, or to add service subscriptions to platforms and sites.'
           )
           ->setDefinition($this->getCommandDefinition());
     }
