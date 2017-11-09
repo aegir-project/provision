@@ -56,10 +56,16 @@ class Service
      *
      * @return string
      */
-    static function getClassName($service, $type) {
+    static function getClassName($service, $type = NULL) {
         $service = ucfirst($service);
         $type = ucfirst($type);
-        return "\Aegir\Provision\Service\\{$service}\\{$service}{$type}Service";
+        
+        if ($type) {
+            return "\Aegir\Provision\Service\\{$service}\\{$service}{$type}Service";
+        }
+        else {
+            return "\Aegir\Provision\Service\\{$service}Service";
+        }
     }
     
     /**
