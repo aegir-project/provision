@@ -22,7 +22,8 @@ class PlatformContext extends Context implements ConfigurationInterface
      * @var string
      */
     public $type = 'platform';
-    
+    const TYPE = 'platform';
+
     /**
      * @var \Aegir\Provision\Context\ServerContext;
      */

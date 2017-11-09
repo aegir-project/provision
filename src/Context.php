@@ -38,6 +38,7 @@ class Context
      * 'server', 'platform', or 'site'.
      */
     public $type = null;
+    const TYPE = null;
 
     /**
      * @var string
@@ -164,7 +165,7 @@ class Context
      *
      * @return array
      */
-    public function getAvailableServices($service = '') {
+    static public function findAvailableServices($service = '') {
 
         // Load all service classes
         $classes = [];
@@ -173,29 +174,54 @@ class Context
         $servicesFiles = $discovery->discover(__DIR__ .'/Service', '\Aegir\Provision\Service');
         foreach ($servicesFiles as $serviceClass) {
             // If this is a server, show all services. If it is not, but service allows this type of context, load it.
-            if ($this->type == 'server' || in_array($this->type, $serviceClass::allowedContexts())) {
+//            if (self::TYPE == 'server' || in_array(self::TYPE, $serviceClass::allowedContexts())) {
                 $classes[$serviceClass::SERVICE] = $serviceClass;
+//            }
+        }
+        return $classes;
+//
+//        if ($service && isset($classes[$service])) {
+//            return $classes[$service];
+//        }
+//        elseif ($service && !isset($classes[$service])) {
+//            throw new \Exception("No service with name $service was found.");
+//        }
+//        else {
+//            return $classes;
+//        }
+    }
+
+    /**
+     * @param string $service
+     */
+    public function getAvailableServices($service = '')
+    {
+        $services_return = [];
+        $services = $this->findAvailableServices();
+        foreach ($services as $serviceClass) {
+            // If this is a server, show all services. If it is not, but service allows this type of context, load it.
+            if ($this::TYPE == 'server' || in_array($this::TYPE, $serviceClass::allowedContexts())) {
+                $services_return[$serviceClass::SERVICE] = $serviceClass;
             }
         }
 
-        if ($service && isset($classes[$service])) {
-            return $classes[$service];
+        if ($service && isset($services_return[$service])) {
+            return $services_return[$service];
         }
-        elseif ($service && !isset($classes[$service])) {
+        elseif ($service && !isset($services_return[$service])) {
             throw new \Exception("No service with name $service was found.");
         }
         else {
-            return $classes;
+            return $services_return;
         }
     }
-
     /**
      * Lists all available services as a simple service => name array.
      * @return array
      */
-    public function getServiceOptions() {
+    static public function getServiceOptions() {
         $options = [];
-        $services = $this->getAvailableServices();
+        $services = self::findAvailableServices();
         foreach ($services as $service => $class) {
             $options[$service] = $class::SERVICE_NAME;
         }
@@ -205,7 +231,7 @@ class Context
     /**
      * @return array
      */
-    protected function getAvailableServiceTypes($service, $service_type = NULL) {
+    static function getAvailableServiceTypes($service, $service_type = NULL) {
 
         // Load all service classes
         $classes = [];

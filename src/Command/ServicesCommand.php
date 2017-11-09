@@ -63,6 +63,16 @@ class ServicesCommand extends Command
           '"list" (default), "add", "remove", or "configure".',
           'list'
         );
+        $inputDefinition[] = new InputArgument(
+          'service',
+          InputArgument::OPTIONAL,
+          'http, db, etc.'
+        );
+        $inputDefinition[] = new InputArgument(
+          'server',
+          InputArgument::OPTIONAL,
+          'The name of the server context to use for this service.'
+        );
         return new InputDefinition($inputDefinition);
     }
 
@@ -119,8 +129,9 @@ class ServicesCommand extends Command
     {
         // Ask which service.
         $this->io->comment("Add Services");
-        $service = $this->io->choice('Which service?', $this->context->getServiceOptions());
-
+        $service = $this->input->getArgument('service')?
+            $this->input->getArgument('service'):
+            $this->io->choice('Which service?', $this->context->getServiceOptions());
 
         // If server, ask which service type.
         if ($this->context->type == 'server') {
@@ -146,7 +157,9 @@ class ServicesCommand extends Command
                 throw new \Exception("No servers providing $service service were found. Create one with `provision save` or use `provision services` to add to an existing server.");
             }
             
-            $server = $this->io->choice('Which server?', $this->getApplication()->getServerOptions($service));
+            $server = $this->input->getArgument('server')?
+                $this->input->getArgument('server'):
+                $this->io->choice('Which server?', $this->getApplication()->getServerOptions($service));
 
             // Then ask for all options.
             $server_context = $this->getApplication()->getContext($server);
