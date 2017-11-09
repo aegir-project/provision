@@ -303,7 +303,17 @@ class Context
             throw new \Exception("Service '$type' does not exist in the context '{$this->name}'.");
         }
     }
-
+    
+    /**
+     * Return all services for this context.
+     *
+     * @return \Aegir\Provision\Service
+     */
+    public function service($type)
+    {
+        return $this->getService($type);
+    }
+    
     /**
      * {@inheritdoc}
      */
