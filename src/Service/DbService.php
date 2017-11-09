@@ -25,7 +25,15 @@ class DbService extends Service
 
     const SERVICE_NAME = 'Database Server';
     
-    public $dsn = '';
+    /**
+     * @var \PDO
+     */
+    public $conn;
+    
+    /**
+     * @var string
+     */
+    protected $dsn = '';
     
     /**
      * The list credentials to login to the database server. Loaded from master_db URL or a service subscription properties.
@@ -34,6 +42,11 @@ class DbService extends Service
      */
     protected $creds;
 
+    /**
+     * Indicates the place holders that should be replaced in _db_query_callback().
+     */
+    const PROVISION_QUERY_REGEXP = '/(%d|%s|%%|%f|%b)/';
+    
     /**
      * Implements Service::server_options()
      *
@@ -85,8 +98,23 @@ class DbService extends Service
     
         try {
             $this->connect();
+            $return = TRUE;
             $this->context->application->io->successLite('Successfully connected to database server!');
-            return TRUE;
+    
+            if ($this->can_create_database()) {
+                $this->context->application->io->successLite('Provision can create new databases.');
+            } else {
+                $this->context->application->io->errorLite('Provision is unable to create databases.');
+                $return = FALSE;
+            }
+            if ($this->can_grant_privileges()) {
+                $this->context->application->io->successLite('Provision can grant privileges on database users.');
+            } else {
+                $this->context->application->io->errorLite('Provision is unable to grant privileges on database users.');
+                $return = FALSE;
+            }
+            
+            return $return;
         }
         catch (\PDOException $e) {
             $this->context->application->io->errorLite($e->getMessage());
@@ -110,7 +138,7 @@ class DbService extends Service
             $this->creds['port'] = '3306';
         }
     
-        $this->dsn = sprintf("%s:host=%s;port=%s;name=%s", $this::SERVICE_TYPE,  $this->creds['host'], $this->creds['port'], $this->subscription->properties['db_name']);
+        $this->dsn = sprintf("%s:host=%s;port=%s;dbname=%s", $this::SERVICE_TYPE,  $this->creds['host'], $this->creds['port'], $this->subscription->properties['db_name']);
     
         try {
             $this->connect();
@@ -139,7 +167,56 @@ class DbService extends Service
             throw new \PDOException("Unable to connect to database server: " . $e->getMessage());
         }
     }
-  
+    
+    function ensure_connected() {
+        if (is_null($this->conn)) {
+            $this->connect();
+        }
+    }
+    
+    function query($query) {
+        $args = func_get_args();
+        array_shift($args);
+        if (isset($args[0]) and is_array($args[0])) { // 'All arguments in one array' syntax
+            $args = $args[0];
+        }
+        $this->ensure_connected();
+        $this->query_callback($args, TRUE);
+        $query = preg_replace_callback($this::PROVISION_QUERY_REGEXP, array($this, 'query_callback'), $query);
+        
+        try {
+            $result = $this->conn->query($query);
+        }
+        catch (\PDOException $e) {
+            $this->context->application->io->errorLite($e->getMessage());
+            return FALSE;
+        }
+        
+        return $result;
+        
+    }
+    
+    function query_callback($match, $init = FALSE) {
+        static $args = NULL;
+        if ($init) {
+            $args = $match;
+            return;
+        }
+        
+        switch ($match[1]) {
+            case '%d': // We must use type casting to int to convert FALSE/NULL/(TRUE?)
+                return (int) array_shift($args); // We don't need db_escape_string as numbers are db-safe
+            case '%s':
+                return substr($this->conn->quote(array_shift($args)), 1, -1);
+            case '%%':
+                return '%';
+            case '%f':
+                return (float) array_shift($args);
+            case '%b': // binary data
+                return $this->conn->quote(array_shift($args));
+        }
+        
+    }
     
     //
 //    /**
