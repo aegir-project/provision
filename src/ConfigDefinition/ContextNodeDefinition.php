@@ -62,16 +62,15 @@ class ContextNodeDefinition extends ScalarNodeDefinition
             ]));
         }
 
-        // If service_requirement is specified, validate that the context has the service.
-        if ($this->getNode()->getAttribute('service_requirement')) {
-            $service = $this->getNode()->getAttribute('service_requirement');
-
-            try {
-                Application::getContext($value)->getService($service);
-            }
-            catch (\Exception $e) {
-                throw new \Exception("Service '$service' does not exist in the specified context '$value'.");
-            }
+        // If service_requirement is specified, or item is in service_subscription, validate that the context has the service available.
+        $path = explode('.', $this->getNode()->getPath());
+        if ($this->getNode()->getAttribute('service_requirement') || $path[1] == 'service_subscription') {
+            $service = $this->getNode()->getAttribute('service_requirement')?
+                $this->getNode()->getAttribute('service_requirement'):
+                $path[2]
+            ;
+            
+            Application::getContext($value)->getService($service);
         }
     }
 }
