@@ -270,30 +270,27 @@ class SaveCommand extends Command
                 $context_name = $this->input->getOption($option);
 
             }
-            else {
-                $context_name = $this->io->ask($all_services[$type]);
-            }
-
-            $context = Application::getContext($context_name);
-//
-//            $command = $this->getApplication()->find('services');
-//            $arguments = [
-//                'context_name' => $this->input->getArgument('context_name'),
-//                'sub_command' => 'add',
-//            ];
-//            while ($this->io->confirm("Use server $context_name for service $type?")) {
-//
-//                $greetInput = new ArrayInput($arguments);
-//                $returnCode = $command->run($greetInput, $this->output);
-//                $returnCodes[$returnCode] = $returnCode;
+//            else {
+//                $context_name = $this->io->ask($all_services[$type]);
 //            }
 
+//            $context = Application::getContext($context_name);
 
-            if ($context::TYPE != 'server') {
-                throw new \Exception("Specified context '{$context->name}' is not a server.");
-            }
+            $command = $this->getApplication()->find('services');
+            $arguments = [
+                'context_name' => $this->input->getArgument('context_name'),
+                'sub_command' => 'add',
+                'service' => $type,
+            ];
 
-            $this->io->comment("Using server $context_name for service $type.");
+            $greetInput = new ArrayInput($arguments);
+            $returnCode = $command->run($greetInput, $this->output);
+            $returnCodes[$returnCode] = $returnCode;
+
+//            if ($context::TYPE != 'server') {
+//                throw new \Exception("Specified context '{$context->name}' is not a server.");
+//            }
+//            $this->io->comment("Using server $context_name for service $type.");
         }
     }
 }

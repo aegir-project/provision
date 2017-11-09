@@ -63,6 +63,11 @@ class ServicesCommand extends Command
           '"list" (default), "add", "remove", or "configure".',
           'list'
         );
+        $inputDefinition[] = new InputArgument(
+          'service',
+          InputArgument::OPTIONAL,
+          'http, db, etc.'
+        );
         return new InputDefinition($inputDefinition);
     }
 
@@ -119,8 +124,9 @@ class ServicesCommand extends Command
     {
         // Ask which service.
         $this->io->comment("Add Services");
-        $service = $this->io->choice('Which service?', $this->context->getServiceOptions());
-
+        $service = $this->input->getArgument('service')?
+            $this->input->getArgument('service'):
+            $this->io->choice('Which service?', $this->context->getServiceOptions());
 
         // If server, ask which service type.
         if ($this->context->type == 'server') {
