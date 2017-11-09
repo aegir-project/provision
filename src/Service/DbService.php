@@ -72,7 +72,7 @@ class DbService extends Service
     }
     
     /**
-     * React to the `provision verify` command.
+     * React to the `provision verify` command on Server contexts
      */
     function verify() {
         $this->creds = array_map('urldecode', parse_url($this->properties['master_db']));
