@@ -34,8 +34,8 @@ class SiteContext extends Context implements ConfigurationInterface
 
         // Load "web_server" and "platform" contexts.
         // There is no need to check if the property exists because the config system does that.
-        $this->db_server = $application->getContext($this->properties['db_server']);
-        $this->platform = $application->getContext($this->properties['platform']);
+//        $this->db_server = $application->getContext($this->properties['db_server']);
+//        $this->platform = $application->getContext($this->properties['platform']);
     }
 
     static function option_documentation()
@@ -58,25 +58,25 @@ class SiteContext extends Context implements ConfigurationInterface
         return ['db'];
     }
 
-    /**
-     * @TODO: Come up with another method to let Context nodes specify related contexts with ability to validate.
-     * @param $root_node
-     */
-    function configTreeBuilder(ArrayNodeDefinition &$root_node) {
-        $root_node
-            ->children()
-                ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
-                ->node('db_server', 'context')
-                    ->isRequired()
-                    ->attribute('context_type', 'server')
-                    ->attribute('service_requirement', 'db')
-                ->end()
-                ->node('platform', 'context')
-                    ->isRequired()
-                    ->attribute('context_type', 'platform')
-                ->end()
-        ->end();
-    }
+//    /**
+//     * @TODO: Come up with another method to let Context nodes specify related contexts with ability to validate.
+//     * @param $root_node
+//     */
+//    function configTreeBuilder(ArrayNodeDefinition &$root_node) {
+//        $root_node
+//            ->children()
+//                ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
+//                ->node('db_server', 'context')
+//                    ->isRequired()
+//                    ->attribute('context_type', 'server')
+//                    ->attribute('service_requirement', 'db')
+//                ->end()
+//                ->node('platform', 'context')
+//                    ->isRequired()
+//                    ->attribute('context_type', 'platform')
+//                ->end()
+//        ->end();
+//    }
 
     public function verify() {
         parent::verify();
