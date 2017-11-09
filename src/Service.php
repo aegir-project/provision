@@ -153,6 +153,16 @@ class Service
     }
     
     /**
+     * Return the SERVICE_TYPE
+     *
+     * @return mixed
+     */
+    public function getFriendlyName()
+    {
+        return $this::SERVICE_NAME;
+    }
+    
+    /**
      * Return a list of user configurable options that this service provides to Server Context objects.
      */
     static function server_options()

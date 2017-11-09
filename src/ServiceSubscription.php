@@ -29,6 +29,10 @@ class ServiceSubscription {
   }
   
   public function verify() {
-      $this->service->verifySubscription($this);
+      return $this->service->verifySubscription($this);
+  }
+  
+  public function getFriendlyName() {
+      return $this->service->getFriendlyName();
   }
 }

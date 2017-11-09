@@ -523,10 +523,10 @@ class Context
      * Collect all services for the context and run the verify() method on them
      */
     public function verify() {
-
+        $return_codes = [];
         // Run verify method on all services.
         foreach ($this->getServices() as $service) {
-            $this->application->io->title("Verify " .  $service::SERVICE_NAME);
+            $this->application->io->title("Verify " .  $service->getFriendlyName());
             $return_codes[] = $service->verify()? 0: 1;
         }
         
