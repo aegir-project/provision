@@ -106,9 +106,17 @@ class Service
             $this->getConfigurations()[$this->context->type] as
             $configuration_class
         ) {
-            $config = new $configuration_class($this->context, $this);
-            $config->write();
-            $this->context->application->logger->info(
+            try {
+                $config = new $configuration_class($this->context, $this);
+                $config->write();
+            }
+            catch (\Exception $e) {
+                $this->context->application->io->errorLite(
+                    'Unable to write '.$config->description.' to '.$config->filename()
+                );
+            }
+            
+            $this->context->application->io->successLite(
                 'Wrote '.$config->description.' to '.$config->filename()
             );
         }

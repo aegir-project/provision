@@ -8,6 +8,7 @@ use Aegir\Provision\Command\ShellCommand;
 use Aegir\Provision\Command\StatusCommand;
 use Aegir\Provision\Command\VerifyCommand;
 use Aegir\Provision\Console\Config;
+use Drupal\Console\Core\Style\DrupalStyle;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\Console\Command\HelpCommand;
@@ -59,6 +60,11 @@ class Application extends BaseApplication
     public $logger;
     
     /**
+     * @var DrupalStyle
+     */
+    public $io;
+    
+    /**
      * Application constructor.
      *
      * @param \Symfony\Component\Console\Input\InputInterface   $input
@@ -71,6 +77,7 @@ class Application extends BaseApplication
         $this->logger = new ConsoleLogger($output,
             [LogLevel::INFO => OutputInterface::VERBOSITY_NORMAL]
         );
+        $this->io = new DrupalStyle($input, $output);
     
         // If no timezone is set, set Default.
         if (empty(ini_get('date.timezone'))) {

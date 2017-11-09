@@ -26,6 +26,13 @@ class DbService extends Service
     const SERVICE_NAME = 'Database Server';
     
     public $dsn = '';
+    
+    /**
+     * The list credentials to login to the database server. Loaded from master_db URL or a service subscription properties.
+     *
+     * @var array
+     */
+    protected $creds;
 
     /**
      * Implements Service::server_options()
@@ -68,9 +75,18 @@ class DbService extends Service
      * React to the `provision verify` command.
      */
     function verify() {
-        $this->connect();
-        
-        $this->context->logger->warning('Hello DB SERVER!');
+        $this->creds = array_map('urldecode', parse_url($this->properties['master_db']));
+        $this->dsn = sprintf("%s:host=%s", $this::SERVICE_TYPE,  $this->creds['host']);
+    
+        try {
+            $this->connect();
+            $this->context->application->io->successLite('Successfully connected to database server!');
+            return TRUE;
+        }
+        catch (\PDOException $e) {
+            $this->context->application->io->errorLite($e->getMessage());
+            return FALSE;
+        }
     }
     
     /**
@@ -82,19 +98,20 @@ class DbService extends Service
         $this->subscription->context->logger->warning('Hi Subscriber. Is your DB ok?');
     }
     
+    /**
+     * Attempt to connect to the database server using $this->creds
+     * @return \PDO
+     * @throws \Exception
+     */
     function connect() {
-        $host = $this->subscription->server->getProperty('remote_host');
-        $db = $this->subscription->properties['db_name'];
-        $this->dsn = "mysql:dbname=$db;host=$host";
-        $user = isset($this->subscription->properties['db_user']) ? $this->subscription->properties['db_user'] : '';
-        $pass = isset($this->subscription->properties['db_pass']) ? $this->subscription->properties['db_pass'] : '';
+        $user = isset($this->creds['user']) ? $this->creds['user'] : '';
+        $pass = isset($this->creds['pass']) ? $this->creds['pass'] : '';
         try {
             $this->conn = new \PDO($this->dsn, $user, $pass);
             return $this->conn;
         }
         catch (\PDOException $e) {
-    
-            throw new \Exception("Unable to connect. Check database connection info with `provision status {$this->subscription->context->name}`: " . $e->getMessage());
+            throw new \PDOException("Unable to connect to database server: " . $e->getMessage());
         }
     }
   

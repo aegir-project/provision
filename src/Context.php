@@ -526,6 +526,7 @@ class Context
 
         // Run verify method on all services.
         foreach ($this->getServices() as $service) {
+            $this->application->io->title("Verify " .  $service::SERVICE_NAME);
             $service->verify();
         }
     }
