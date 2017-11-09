@@ -265,11 +265,6 @@ class SaveCommand extends Command
         $class = '\Aegir\Provision\Context\\' . ucfirst($this->input->getOption('context_type')) . "Context";
         foreach ($class::serviceRequirements() as $type) {
             $option = "server_{$type}";
-
-            if (!empty($this->input->getOption($option))) {
-                $context_name = $this->input->getOption($option);
-
-            }
 //            else {
 //                $context_name = $this->io->ask($all_services[$type]);
 //            }
@@ -284,6 +279,11 @@ class SaveCommand extends Command
                 'sub_command' => 'add',
                 'service' => $type,
             ];
+
+            // Pass option down to services command.
+            if (!empty($this->input->getOption($option))) {
+                $arguments['server'] = $this->input->getOption($option);
+            }
 
             $input = new ArrayInput($arguments);
             $returnCode = $command->run($input, $this->output);
