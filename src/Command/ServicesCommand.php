@@ -225,7 +225,7 @@ class ServicesCommand extends Command
         $properties = [];
         foreach ($options as $name => $description) {
             // If option does not exist, ask for it.
-            if (!empty($this->input->hasOption($name))) {
+            if (!empty($this->input->getOption($name))) {
                 $properties[$name] = $this->input->getOption($name);
                 $this->io->comment("Using option {$name}={$properties[$name]}");
             }
