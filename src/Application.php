@@ -229,11 +229,11 @@ class Application extends BaseApplication
      * @return \Aegir\Provision\Context
      * @throws \Exception
      */
-    static public function getContext($name) {
-        if (empty(Application::getAllContexts($name))) {
+    static public function getContext($name, Application $application = NULL) {
+        if (empty(Application::getAllContexts($name, $application))) {
             throw new \Exception('Context not found with name: ' . $name);
         }
-        return Application::getAllContexts($name);
+        return Application::getAllContexts($name, $application);
     }
 
     /**
