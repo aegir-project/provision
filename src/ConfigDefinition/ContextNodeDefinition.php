@@ -2,6 +2,7 @@
 
 namespace Aegir\Provision\ConfigDefinition;
 
+use Aegir\Provision\Application;
 use Symfony\Component\Config\Definition\Builder\ScalarNodeDefinition;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
@@ -51,26 +52,25 @@ class ContextNodeDefinition extends ScalarNodeDefinition
     {
         // No need to do anything else.
         // If there is no context named $value, getContext() throws an exception for us.
-        $this->parent->getAttribute('application')->getContext($value);
+        Application::getContext($value);
 
         // If context_type is specified, Validate that the desired context is the right type.
-        if ($this->getNode()->getAttribute('context_type') && $this->parent->getAttribute('application')->getContext($value)->type != $this->getNode()->getAttribute('context_type')) {
+        if ($this->getNode()->getAttribute('context_type') && Application::getContext($value)->type != $this->getNode()->getAttribute('context_type')) {
             throw new InvalidConfigurationException(strtr('The context specified for !name must be type !type.', [
                 '!name' => $this->name,
                 '!type' => $this->getNode()->getAttribute('context_type'),
             ]));
         }
 
-        // If service_requirement is specified, validate that the context has the service.
-        if ($this->getNode()->getAttribute('service_requirement')) {
-            $service = $this->getNode()->getAttribute('service_requirement');
-
-            try {
-                $this->parent->getAttribute('application')->getContext($value)->getService($service);
-            }
-            catch (\Exception $e) {
-                throw new \Exception("Service '$service' does not exist in the specified context '$value'.");
-            }
+        // If service_requirement is specified, or item is in service_subscription, validate that the context has the service available.
+        $path = explode('.', $this->getNode()->getPath());
+        if ($this->getNode()->getAttribute('service_requirement') || $path[1] == 'service_subscription') {
+            $service = $this->getNode()->getAttribute('service_requirement')?
+                $this->getNode()->getAttribute('service_requirement'):
+                $path[2]
+            ;
+            
+            Application::getContext($value)->getService($service);
         }
     }
 }

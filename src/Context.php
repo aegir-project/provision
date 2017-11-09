@@ -121,7 +121,12 @@ class Context
             
         } catch (\Exception $e) {
             throw new \Exception(
-                "There is an error with the configuration for $this->type $this->name: " . $e->getMessage()
+                strtr("There is an error with the configuration for !type '!name'. Check the file !file and try again. \n \nError: !message", [
+                    '!type' => $this->type,
+                    '!name' => $this->name,
+                    '!message' => $e->getMessage(),
+                    '!file' => $this->config_path,
+                ])
             );
         }
     }
@@ -134,15 +139,18 @@ class Context
         if (isset($this->config['services'])) {
 
             foreach ($this->config['services'] as $service_name => $service) {
-                $service_name = ucfirst($service_name);
-                $service_type = ucfirst($service['type']);
-                $service_class = "\\Aegir\\Provision\\Service\\{$service_name}\\{$service_name}{$service_type}Service";
-                $this->services[strtolower($service_name)] = new $service_class($service, $this);
+                $service_class = Service::getClassName($service_name, $service['type']);
+                $this->services[$service_name] = new $service_class($service, $this);
             }
         }
-        elseif (isset($this->config['service_subscriptions'])) {
-            unset($this->properties['service_subscriptions']);
-            foreach ($this->config['service_subscriptions'] as $service_name => $service) {
+        // @TODO: Since we switched to Config ContextNodeDefinition, it's not returning the context name in $context. So we have to look for $this->properties instead of $this->config.
+        // We should figure out how to alter ContextNodeDefinition so it returns the string name or the server class.
+        elseif (isset($this->properties['service_subscriptions'])) {
+            foreach ($this->properties['service_subscriptions'] as $service_name => $service) {
+                // Check for an empty server.
+                if (empty($service['server'])) {
+                  throw new \Exception("Item 'server' cannot be empty.");
+                }
                 $this->servers[$service_name] = $server = Application::getContext($service['server']);
                 $this->services[$service_name] = new ServiceSubscription($this, $server, $service_name);
             }
@@ -278,7 +286,7 @@ class Context
             return $this->services[$type];
         }
         else {
-            throw new \Exception("Service '$type' does not exist.");
+            throw new \Exception("Service '$type' does not exist in the context '{$this->name}'.");
         }
     }
 
@@ -296,29 +304,38 @@ class Context
                 ->end()
             ->end();
 
-        // Load Services
+        // Load Services.
         if ($this->type == 'server') {
-            $services_key = 'services';
-            $services_property = 'type';
-        }
-        else {
-            $services_key = 'service_subscriptions';
-            $services_property = 'server';
-        }
-
-        $root_node
-            ->attribute('context', $this)
-            ->attribute('application', $this->application)
-            ->children()
-                ->arrayNode($services_key)
+            $root_node
+                ->attribute('context', $this)
+                ->children()
+                    ->arrayNode('services')
                     ->prototype('array')
-                    ->children()
-                        ->scalarNode($services_property)
-                        ->isRequired(true)
+                        ->children()
+                            ->scalarNode('type')
+                            ->isRequired(true)
+                        ->end()
+                        ->append($this->addServiceProperties('services'))
                     ->end()
-                    ->append($this->addServiceProperties($services_key))
-                ->end()
-            ->end();
+                ->end();
+        }
+        // Load service subscriptions.
+        else {
+            $root_node
+                ->attribute('context', $this)
+                ->children()
+                    ->arrayNode('service_subscriptions')
+                    ->prototype('array')
+                        ->children()
+                        ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
+                        ->node('server', 'context')
+                            ->isRequired()
+                            ->attribute('context_type', 'server')
+                        ->end()
+                        ->append($this->addServiceProperties('service_subscriptions'))
+                    ->end()
+                ->end();
+        }
 
         // @TODO: Figure out how we can let other classes add to Context properties.
         foreach ($this->option_documentation() as $name => $description) {
@@ -357,8 +374,7 @@ class Context
                 else {
                     $service_type = ucfirst($info['type']);
                 }
-                $service = ucfirst($service);
-                $class = "\Aegir\Provision\Service\\{$service}\\{$service}{$service_type}Service";
+                $class = Service::getClassName($service, $service_type);
                 $method = "{$this->type}_options";
 
                 foreach ($class::{$method}() as $name => $description) {
@@ -467,7 +483,16 @@ class Context
             return false;
         }
     }
-
+    
+    /**
+     * Retrieve the class name of a specific context type.
+     *
+     * @param $type
+     *   The type of context, typically server, platform, site.
+     *
+     * @return string
+     *   The fully-qualified class name for this type.
+     */
     static function getClassName($type) {
         return '\Aegir\Provision\Context\\' . ucfirst($type) . "Context";
     }
