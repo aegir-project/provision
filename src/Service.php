@@ -73,7 +73,7 @@ class Service
      */
     function verify()
     {
-        $this->writeConfigurations();
+        return $this->writeConfigurations();
     }
     
     /**
@@ -100,8 +100,9 @@ class Service
     protected function writeConfigurations()
     {
         if (empty($this->getConfigurations()[$this->context->type])) {
-            return;
+            return TRUE;
         }
+        $success = TRUE;
         foreach (
             $this->getConfigurations()[$this->context->type] as
             $configuration_class
@@ -109,17 +110,18 @@ class Service
             try {
                 $config = new $configuration_class($this->context, $this);
                 $config->write();
+                $this->context->application->io->successLite(
+                    'Wrote '.$config->description.' to '.$config->filename()
+                );
             }
             catch (\Exception $e) {
                 $this->context->application->io->errorLite(
                     'Unable to write '.$config->description.' to '.$config->filename()
                 );
+                $success = FALSE;
             }
-            
-            $this->context->application->io->successLite(
-                'Wrote '.$config->description.' to '.$config->filename()
-            );
         }
+        return $success;
     }
     
     /**

@@ -34,12 +34,4 @@ class HttpApacheService extends HttpService
     $configs['site'][] = '\Aegir\Provision\Service\Http\Apache\Configuration\SiteConfiguration';
     return $configs;
   }
-  
-  /**
-   * Respond to the `provision verify` command.
-   */
-  public function verify() {
-//      print "VERIFY APACHE SERVER!";
-      parent::verify();
-  }
 }
