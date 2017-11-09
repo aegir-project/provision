@@ -200,21 +200,12 @@ class SaveCommand extends Command
 //        $this->process($command);
 
         // Offer to add services.
-        $this->askForServers();
-//
-//        if ($this->input->isInteractive()) {
-//            $command = $this->getApplication()->find('services');
-//            $arguments = [
-//                'context_name' => $this->input->getArgument('context_name'),
-//                'sub_command' => 'add',
-//            ];
-//            while ($this->io->confirm('Add a service?')) {
-//
-//                $greetInput = new ArrayInput($arguments);
-//                $returnCode = $command->run($greetInput, $output);
-//                $returnCodes[$returnCode] = $returnCode;
-//            }
-//        }
+        if ($context_type == 'server') {
+            $this->askForServices();
+        }
+        else {
+            $this->askForServiceSubscriptions();
+        }
     }
 
     /**
@@ -268,8 +259,22 @@ class SaveCommand extends Command
         }
         return $properties;
     }
+    
+    protected function askForServices() {
+        $command = $this->getApplication()->find('services');
+        $arguments = [
+            'context_name' => $this->input->getArgument('context_name'),
+            'sub_command' => 'add',
+        ];
+        while ($this->io->confirm('Add a service?')) {
 
-    protected function askForServers() {
+            $greetInput = new ArrayInput($arguments);
+            $returnCode = $command->run($greetInput, $this->output);
+            $returnCodes[$returnCode] = $returnCode;
+        }
+    }
+
+    protected function askForServiceSubscriptions() {
 
         // Lookup servers.
         $all_services = Context::getServiceOptions();
