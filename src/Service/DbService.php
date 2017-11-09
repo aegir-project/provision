@@ -95,12 +95,32 @@ class DbService extends Service
     }
     
     /**
-     * React to the `provision verify` command.
+     * React to the `provision verify` command on subscriber contexts (sites and platforms)
      */
     function verifySubscription(ServiceSubscription $serviceSubscription) {
         $this->subscription = $serviceSubscription;
-        $this->connect();
-        $this->subscription->context->logger->warning('Hi Subscriber. Is your DB ok?');
+        $this->creds_root = array_map('urldecode', parse_url($this->properties['master_db']));
+    
+        // Use the credentials from the subscription properties.
+        $this->creds = $this->creds_root;
+        $this->creds['user'] = $this->subscription->properties['db_user'];
+        $this->creds['pass'] = $this->subscription->properties['db_password'];
+    
+        if (!isset($this->creds['port'])) {
+            $this->creds['port'] = '3306';
+        }
+    
+        $this->dsn = sprintf("%s:host=%s;port=%s;name=%s", $this::SERVICE_TYPE,  $this->creds['host'], $this->creds['port'], $this->subscription->properties['db_name']);
+    
+        try {
+            $this->connect();
+            $this->subscription->context->application->io->successLite('Successfully connected to database server!');
+            return TRUE;
+        }
+        catch (\PDOException $e) {
+            $this->subscription->context->application->io->errorLite($e->getMessage());
+            return FALSE;
+        }
     }
     
     /**
