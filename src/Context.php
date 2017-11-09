@@ -335,8 +335,7 @@ class Context
                 else {
                     $service_type = ucfirst($info['type']);
                 }
-                $service = ucfirst($service);
-                $class = "\Aegir\Provision\Service\\{$service}\\{$service}{$service_type}Service";
+                $class = Service::getClassName($service, $service_type);
                 $method = "{$this->type}_options";
 
                 foreach ($class::{$method}() as $name => $description) {
@@ -445,7 +444,16 @@ class Context
             return false;
         }
     }
-
+    
+    /**
+     * Retrieve the class name of a specific context type.
+     *
+     * @param $type
+     *   The type of context, typically server, platform, site.
+     *
+     * @return string
+     *   The fully-qualified class name for this type.
+     */
     static function getClassName($type) {
         return '\Aegir\Provision\Context\\' . ucfirst($type) . "Context";
     }

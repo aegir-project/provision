@@ -46,6 +46,23 @@ class Service
     }
     
     /**
+     * Retrieve the class name of a specific service type.
+     *
+     * @param $service
+     *   The service requested. Typically http, db.
+     *
+     * @param $type
+     *   The type of service requested. For example: apache, nginx, mysql.
+     *
+     * @return string
+     */
+    static function getClassName($service, $type) {
+        $service = ucfirst($service);
+        $type = ucfirst($type);
+        return "\Aegir\Provision\Service\\{$service}\\{$service}{$type}Service";
+    }
+    
+    /**
      * React to the `provision verify` command.
      */
     function verify()
