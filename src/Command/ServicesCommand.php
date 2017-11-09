@@ -163,6 +163,10 @@ class ServicesCommand extends Command
         $service = $this->input->getArgument('service')?
             $this->input->getArgument('service'):
             $this->io->choice('Which service?', $this->context->getServiceOptions());
+        
+        if (empty($service)) {
+            throw new \Exception("Argument 'service' must not be empty.");
+        }
 
         // If server, ask which service type.
         if ($this->context->type == 'server') {
