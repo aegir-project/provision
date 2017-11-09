@@ -200,13 +200,11 @@ class SaveCommand extends Command
 //        $this->process($command);
 
         // Offer to add services.
-        if ($input->isInteractive()) {
-            if ($context_type == 'server') {
-                $this->askForServices();
-            }
-            else {
-                $this->askForServiceSubscriptions();
-            }
+        if ($context_type == 'server') {
+            $this->askForServices();
+        }
+        else {
+            $this->askForServiceSubscriptions();
         }
     }
 
@@ -263,6 +261,9 @@ class SaveCommand extends Command
     }
     
     protected function askForServices() {
+        if (!$this->input->isInteractive()){
+            return;
+        }
         $command = $this->getApplication()->find('services');
         $arguments = [
             'context_name' => $this->input->getArgument('context_name'),
