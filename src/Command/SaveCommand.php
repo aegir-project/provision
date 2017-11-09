@@ -200,11 +200,13 @@ class SaveCommand extends Command
 //        $this->process($command);
 
         // Offer to add services.
-        if ($context_type == 'server') {
-            $this->askForServices();
-        }
-        else {
-            $this->askForServiceSubscriptions();
+        if ($input->isInteractive()) {
+            if ($context_type == 'server') {
+                $this->askForServices();
+            }
+            else {
+                $this->askForServiceSubscriptions();
+            }
         }
     }
 
