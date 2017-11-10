@@ -40,7 +40,7 @@ install:
 script:
 
   - provision
-  - provision status
+  - provision status -n
 
   # Add server context.
   - provision save server_master -n
@@ -85,7 +85,7 @@ script:
     --db_user=drupal
     --db_password=drupal
 
-  - provision status
+  - provision status -n
   - provision status server_master
   - provision status platform_hostmaster
   - provision status hostmaster
