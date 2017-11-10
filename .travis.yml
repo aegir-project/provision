@@ -34,6 +34,9 @@ install:
   - mkdir /home/travis/config
   - ls -la
 
+before_script:
+  - mysql -u root -e "CREATE USER 'aegir'@'localhost' IDENTIFIED BY 'aegir'"
+
 script:
 
   - provision
