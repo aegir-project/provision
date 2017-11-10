@@ -8,6 +8,9 @@
 
 namespace Aegir\Provision\Service\Http;
 
+use Aegir\Provision\Service\Http\Apache\Configuration\PlatformConfiguration;
+use Aegir\Provision\Service\Http\Apache\Configuration\ServerConfiguration;
+use Aegir\Provision\Service\Http\Apache\Configuration\SiteConfiguration;
 use Aegir\Provision\Service\HttpService;
 
 /**
@@ -29,9 +32,9 @@ class HttpApacheService extends HttpService
    */
   public function getConfigurations()
   {
-    $configs['server'][] = '\Aegir\Provision\Service\Http\Apache\Configuration\ServerConfiguration';
-    $configs['platform'][] = '\Aegir\Provision\Service\Http\Apache\Configuration\PlatformConfiguration';
-    $configs['site'][] = '\Aegir\Provision\Service\Http\Apache\Configuration\SiteConfiguration';
+    $configs['server'][] = ServerConfiguration::class;
+    $configs['platform'][] = PlatformConfiguration::class;
+    $configs['site'][] = SiteConfiguration::class;
     return $configs;
   }
 }
