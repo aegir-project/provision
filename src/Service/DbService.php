@@ -190,7 +190,7 @@ class DbService extends Service
         $query = preg_replace_callback($this::PROVISION_QUERY_REGEXP, array($this, 'query_callback'), $query);
         
         try {
-            $this->context->application->logger->debug("Running Query: {$query}");
+            $this->context->application->logger->notice("Running Query: {$query}");
             $result = $this->conn->query($query);
         }
         catch (\PDOException $e) {
