@@ -66,8 +66,6 @@ script:
 
   - provision services server_master
 
-  - provision verify server_master -v
-
   # Add platform context
   - provision save platform_hostmaster -n
     --context_type=platform
@@ -91,3 +89,6 @@ script:
   - provision status server_master
   - provision status platform_hostmaster
   - provision status hostmaster
+
+
+  - provision verify server_master -v
