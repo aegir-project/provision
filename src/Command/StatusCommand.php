@@ -4,6 +4,7 @@ namespace Aegir\Provision\Command;
 
 use Aegir\Provision\Command;
 use Drupal\Console\Core\Style\DrupalStyle;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
@@ -72,7 +73,17 @@ class StatusCommand extends Command
             $headers = ['Contexts'];
             $this->io->table($headers, $rows);
     
-            $this->io->info('Use the command `provision status CONTEXT_NAME` to show more information about that context.');
+            // Offer to output a context status.
+            $options = $this->getApplication()->getAllContextsOptions();
+            $options['none'] = 'none';
+            $context = $this->io->choiceNoList('Get status for', $options, 'none');
+            
+            if ($context != 'none') {
+                $command = $this->getApplication()->find('status');
+                $arguments['context_name'] = $context;
+                $input = new ArrayInput($arguments);
+                exit($command->run($input, $this->output));
+            }
         }
     }
 }
