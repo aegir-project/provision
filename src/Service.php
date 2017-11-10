@@ -96,8 +96,12 @@ class Service
     
     /**
      * Write this service's configurations.
+     *
+     * @param \Aegir\Provision\ServiceSubscription|null $serviceSubscription
+     *
+     * @return bool
      */
-    protected function writeConfigurations()
+    protected function writeConfigurations(ServiceSubscription $serviceSubscription = NULL)
     {
         if (empty($this->getConfigurations()[$this->context->type])) {
             return TRUE;
@@ -107,15 +111,24 @@ class Service
             $this->getConfigurations()[$this->context->type] as
             $configuration_class
         ) {
+            
+            // If we are writing for a serviceSubscription, use the server context.
+            if ($serviceSubscription && $serviceSubscription->context) {
+                $context = $serviceSubscription->context;
+            }
+            else {
+                $context = $this->context;
+            }
+    
             try {
-                $config = new $configuration_class($this->context, $this);
+                $config = new $configuration_class($context, $this);
                 $config->write();
-                $this->context->application->io->successLite(
+                $context->application->io->successLite(
                     'Wrote '.$config->description.' to '.$config->filename()
                 );
             }
             catch (\Exception $e) {
-                $this->context->application->io->errorLite(
+                $context->application->io->errorLite(
                     'Unable to write '.$config->description.' to '.$config->filename()
                 );
                 $success = FALSE;
