@@ -336,6 +336,7 @@ class SaveCommand extends Command
     }
     
     private function askForRequiredContexts() {
+        $contexts = [];
         $class = Context::getClassName($this->input->getOption('context_type'));
         foreach ($class::contextRequirements() as $property => $context_type) {
             
