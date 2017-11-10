@@ -56,7 +56,7 @@ class Context
 
     /**
      * @var array
-     * A list of services associated with this context.
+     * A list of services provided by this server.
      */
     protected $services = [];
 
@@ -155,9 +155,6 @@ class Context
                 $this->servers[$service_name] = $server = Application::getContext($service['server']);
                 $this->services[$service_name] = new ServiceSubscription($this, $server, $service_name);
             }
-        }
-        else {
-            $this->services = [];
         }
     }
 
@@ -549,7 +546,15 @@ class Context
         $return_codes = [];
         // Run verify method on all services.
         foreach ($this->getServices() as $service) {
-            $this->application->io->title("Verify " .  $service->getFriendlyName());
+            $friendlyName = $service->getFriendlyName();
+            // If service is a service subscription
+            if (get_class($service) == ServiceSubscription::class) {
+                $prep = 'for';
+            }
+            else {
+                $prep = 'on';
+            }
+            $this->application->io->title("Verify {$friendlyName} {$prep} {$service->context->name}");
             $return_codes[] = $service->verify()? 0: 1;
         }
         
