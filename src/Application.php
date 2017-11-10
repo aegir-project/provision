@@ -244,10 +244,17 @@ class Application extends BaseApplication
      * Get a simple array of all contexts, for use in an options list.
      * @return array
      */
-    public function getAllContextsOptions() {
+    public function getAllContextsOptions($type = NULL) {
         $options = [];
         foreach ($this->getAllContexts() as $name => $context) {
-            $options[$name] = $context->type . ' ' . $context->name;
+            if ($type) {
+                if ($context->type == $type) {
+                    $options[$name] = $context->name;
+                }
+            }
+            else {
+                $options[$name] = $context->type . ' ' . $context->name;
+            }
         }
         return $options;
     }
