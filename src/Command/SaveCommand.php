@@ -353,8 +353,6 @@ class SaveCommand extends Command
                 if ($context->type != $context_type){
                     throw new \Exception("Context set by option --{$property} is a {$context->type}, should be of type {$context_type}.");
                 }
-                
-                $this->io->comment("Using option {$property}={$contexts[$property] }");
             }
             else {
                 $contexts[$property] = $this->io->choice("Select $property context", $this->getApplication()->getAllContextsOptions($context_type));
