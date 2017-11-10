@@ -81,7 +81,7 @@ class Service
      */
     function verifySubscription(ServiceSubscription $serviceSubscription)
     {
-        $this->writeConfigurations($serviceSubscription);
+        return $this->writeConfigurations($serviceSubscription);
     }
     
     /**
