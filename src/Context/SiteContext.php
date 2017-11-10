@@ -42,7 +42,7 @@ class SiteContext extends Context implements ConfigurationInterface
     static function option_documentation()
     {
         return [
-//          'platform' => 'site: the platform the site is run on',
+          'platform' => 'site: the platform the site is run on',
 //          'db_server' => 'site: the db server the site is run on',
           'uri' => 'site: example.com URI, no http:// or trailing /',
           'language' => 'site: site language; default en',
@@ -59,7 +59,7 @@ class SiteContext extends Context implements ConfigurationInterface
         return ['db'];
     }
     
-    public static function relatedContexts() {
+    public static function contextRequirements() {
         return [
             'platform' => 'platform'
         ];

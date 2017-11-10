@@ -370,7 +370,19 @@ class Context
                     ->end()
                 ->end();
         }
-
+    
+        // Load contextRequirements into config as ContextNodes.
+        foreach ($this->contextRequirements() as $property => $type) {
+            $root_node
+                ->children()
+                    ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
+                    ->node($property, 'context')
+                        ->isRequired()
+                        ->attribute('context_type', $type)
+                    ->end()
+                ->end();
+        }
+        
         if (method_exists($this, 'configTreeBuilder')) {
             $this->configTreeBuilder($root_node);
         }
@@ -552,6 +564,16 @@ class Context
      *   return ['http'];
      */
     public static function serviceRequirements() {
+        return [];
+    }
+
+    /**
+     * Return an array of required contexts in the format PROPERTY_NAME => CONTEXT_TYPE.
+     *
+     * Example:
+     *   return ['platform' => 'platform'];
+     */
+    public static function contextRequirements() {
         return [];
     }
 

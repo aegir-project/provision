@@ -86,11 +86,18 @@ class SaveCommand extends Command
               $description = $Context::TYPE . ": " . $all_services[$type];
               $inputDefinition[] = new InputOption($option, NULL, InputOption::VALUE_OPTIONAL, $description);
           }
+          
+          // Load contextRequirements into input options.
+          $this_type = $Context::TYPE;
+          foreach ($Context::contextRequirements() as $option => $context_type) {
+              $description = "{$this_type}: {$option} context name (Must be type: {$context_type}.)";
+              $inputDefinition[] = new InputOption($option, NULL, InputOption::VALUE_OPTIONAL, $description);
+          }
 
           // Load option_documentation() into input options.
           foreach ($Context::option_documentation() as $option => $description) {
-          $inputDefinition[] = new InputOption($option, NULL, InputOption::VALUE_OPTIONAL, $description);
-        }
+              $inputDefinition[] = new InputOption($option, NULL, InputOption::VALUE_OPTIONAL, $description);
+          }
       }
       return new InputDefinition($inputDefinition);
     }
@@ -185,7 +192,9 @@ class SaveCommand extends Command
             $value = is_array($value)? implode(', ', $value): $value;
             $rows[] = [$name, $value];
         }
-        
+    
+    
+    
         $this->io->table(['Saving Context:', $this->context->name], $rows);
         
         if ($this->io->confirm("Write configuration for <question>{$this->context->type}</question> context <question>{$this->context->name}</question> to <question>{$this->context->config_path}</question>?")) {
@@ -249,7 +258,7 @@ class SaveCommand extends Command
 
         $class = '\Aegir\Provision\Context\\' . ucfirst($this->input->getOption('context_type')) . "Context";
         $options = $class::option_documentation();
-        $properties = [];
+        $properties = $this->askForRequiredContexts();
         foreach ($options as $name => $description) {
 
             // If option does not exist, ask for it.
@@ -324,5 +333,32 @@ class SaveCommand extends Command
 //            }
 //            $this->io->comment("Using server $context_name for service $type.");
         }
+    }
+    
+    private function askForRequiredContexts() {
+        $class = Context::getClassName($this->input->getOption('context_type'));
+        foreach ($class::contextRequirements() as $property => $context_type) {
+            
+            if ($this->input->getOption($property)) {
+                $contexts[$property] = $this->input->getOption($property);
+                
+                try {
+                    $context = Application::getContext($contexts[$property]);
+                }
+                catch (\Exception $e) {
+                    throw new \Exception("Context set by option --{$property} does not exist.");
+                }
+                
+                if ($context->type != $context_type){
+                    throw new \Exception("Context set by option --{$property} is a {$context->type}, should be of type {$context_type}.");
+                }
+                
+                $this->io->comment("Using option {$property}={$contexts[$property] }");
+            }
+            else {
+                $contexts[$property] = $this->io->choice("Select $property context", $this->getApplication()->getAllContextsOptions($context_type));
+            }
+        }
+        return $contexts;
     }
 }
