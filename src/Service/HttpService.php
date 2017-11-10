@@ -11,6 +11,7 @@ namespace Aegir\Provision\Service;
 //require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
 use Aegir\Provision\Service;
+use Aegir\Provision\ServiceSubscription;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 
 /**
@@ -50,38 +51,55 @@ class HttpService extends Service {
             'platform'
         ];
     }
-
+    
     /**
-   * Support the ability to cloak the database credentials using environment variables.
-   */
-  function cloaked_db_creds() {
-    return FALSE;
-  }
-
-
-  function verify_server_cmd() {
-    $this->create_config($this->context->type);
-    $this->parse_configs();
-  }
-
-  function verify_platform_cmd() {
-    $this->create_config($this->context->type);
-    $this->parse_configs();
-  }
-
-  function verify_site_cmd() {
-    $this->create_config($this->context->type);
-    $this->parse_configs();
-  }
-
-
-  /**
-   * Register the http handler for platforms, based on the web_server option.
-   */
-  static function subscribe_platform($context) {
-    $context->setProperty('web_server', '@server_master');
-    $context->is_oid('web_server');
-    $context->service_subscribe('http', $context->web_server->name);
-  }
+     * React to the `provision verify` command on Server contexts
+     */
+    function verify() {
+        $this->context->application->io->successLite('Verifying HTTP');
+        return parent::verify();
+    }
+    
+    /**
+     * React to the `provision verify` command on Server contexts
+     */
+    function verifySubscription(ServiceSubscription $serviceSubscription) {
+        $this->subscription = $serviceSubscription;
+        $this->subscription->context->application->io->customLite('Verifying HTTP Server ' . $this->subscription->server->name, '>');
+        return parent::verifySubscription($serviceSubscription);
+    }
+//
+//    /**
+//   * Support the ability to cloak the database credentials using environment variables.
+//   */
+//  function cloaked_db_creds() {
+//    return FALSE;
+//  }
+//
+//
+//  function verify_server_cmd() {
+//    $this->create_config($this->context->type);
+//    $this->parse_configs();
+//  }
+//
+//  function verify_platform_cmd() {
+//    $this->create_config($this->context->type);
+//    $this->parse_configs();
+//  }
+//
+//  function verify_site_cmd() {
+//    $this->create_config($this->context->type);
+//    $this->parse_configs();
+//  }
+//
+//
+//  /**
+//   * Register the http handler for platforms, based on the web_server option.
+//   */
+//  static function subscribe_platform($context) {
+//    $context->setProperty('web_server', '@server_master');
+//    $context->is_oid('web_server');
+//    $context->service_subscribe('http', $context->web_server->name);
+//  }
 
 }
