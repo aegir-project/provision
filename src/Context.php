@@ -107,7 +107,6 @@ class Context
             $processor = new Processor();
             if (file_exists($this->config_path)) {
                 $this->properties = Yaml::parse(file_get_contents($this->config_path));
-                $configs[] = $this->properties;
             }
             else {
                 // Load command line options into properties
@@ -115,6 +114,8 @@ class Context
                     $this->properties[$option] = $options[$option];
                 }
             }
+            $configs[] = $this->properties;
+
             $this->properties['context_type'] = $this->type;
 
             $this->config = $processor->processConfiguration($this, $configs);
