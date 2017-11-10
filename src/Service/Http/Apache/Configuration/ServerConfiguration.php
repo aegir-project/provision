@@ -26,7 +26,7 @@ class ServerConfiguration extends Configuration {
   function filename() {
     if ($this->service->getType()) {
       $file = $this->service->getType() . '.conf';
-      return $this->context->application->getConfig()->get('config_path') . '/' . $this->context->name . '/' . $file;
+      return $this->context->application->getConfig()->get('config_path') . '/' . $this->service->context->name . '/' . $file;
     }
     else {
       return FALSE;
