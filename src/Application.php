@@ -65,6 +65,16 @@ class Application extends BaseApplication
     public $io;
     
     /**
+     * @var \Symfony\Component\Console\Input\InputInterface
+     */
+    public $input;
+    
+    /**
+     * @var \Symfony\Component\Console\Output\OutputInterface
+     */
+    public $output;
+    
+    /**
      * Application constructor.
      *
      * @param \Symfony\Component\Console\Input\InputInterface   $input
@@ -78,6 +88,8 @@ class Application extends BaseApplication
             [LogLevel::INFO => OutputInterface::VERBOSITY_NORMAL]
         );
         $this->io = new DrupalStyle($input, $output);
+        $this->input = $input;
+        $this->output = $output;
     
         // If no timezone is set, set Default.
         if (empty(ini_get('date.timezone'))) {
