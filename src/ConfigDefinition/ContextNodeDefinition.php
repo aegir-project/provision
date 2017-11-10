@@ -72,5 +72,6 @@ class ContextNodeDefinition extends ScalarNodeDefinition
             
             Application::getContext($value)->getService($service);
         }
+        return $value;
     }
 }
