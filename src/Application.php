@@ -84,13 +84,6 @@ class Application extends BaseApplication
      */
     public function __construct(InputInterface $input, OutputInterface $output)
     {
-        $this->logger = new ConsoleLogger($output,
-            [LogLevel::INFO => OutputInterface::VERBOSITY_NORMAL]
-        );
-        $this->io = new DrupalStyle($input, $output);
-        $this->input = $input;
-        $this->output = $output;
-    
         // If no timezone is set, set Default.
         if (empty(ini_get('date.timezone'))) {
             date_default_timezone_set($this::DEFAULT_TIMEZONE);
@@ -105,6 +98,25 @@ class Application extends BaseApplication
         }
 
         parent::__construct($this::NAME, $this::VERSION);
+    }
+    
+    /**
+     * Prepare input and output arguments. Use this to extend the Application object so that $input and $output is fully populated.
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface   $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     */
+    public function configureIO(InputInterface $input, OutputInterface $output) {
+        parent::configureIO($input, $output);
+        
+        $this->io = new DrupalStyle($input, $output);
+        
+        $this->input = $input;
+        $this->output = $output;
+    
+        $this->logger = new ConsoleLogger($output,
+            [LogLevel::INFO => OutputInterface::VERBOSITY_NORMAL]
+        );
     }
 
     /**
