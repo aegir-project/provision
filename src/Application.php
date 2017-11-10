@@ -268,6 +268,9 @@ class Application extends BaseApplication
      * @throws \Exception
      */
     static public function getContext($name, Application $application = NULL) {
+        if (empty($name)) {
+            throw new \Exception('Context name must not be empty.');
+        }
         if (empty(Application::getAllContexts($name, $application))) {
             throw new \Exception('Context not found with name: ' . $name);
         }
