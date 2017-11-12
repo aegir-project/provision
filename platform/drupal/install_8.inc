@@ -117,7 +117,7 @@ function install_main() {
   $settings = array(
     'parameters' => array(
       'profile' => $profile,
-      'locale' => $install_locale,
+      'langcode' => $install_locale,
     ),
     'settings_verified' => TRUE,
     'forms' => array(
@@ -142,7 +142,8 @@ function install_main() {
     ),
   );
   try {
-    install_drupal($settings);
+    $class_loader = drush_drupal_load_autoloader(DRUPAL_ROOT);
+    install_drupal($class_loader, $settings);
   }
   catch (Exception $e) {
     drush_set_error('DRUPAL_INSTALL_FAILED');
