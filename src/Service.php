@@ -106,23 +106,20 @@ class Service
      */
     protected function writeConfigurations(ServiceSubscription $serviceSubscription = NULL)
     {
-        if (empty($this->getConfigurations()[$this->provider->type])) {
+        // If we are writing for a serviceSubscription, use the provider context.
+        if ($serviceSubscription) {
+            $context = $serviceSubscription->context;
+        }
+        else {
+            $context = $this->provider;
+        }
+        
+        if (empty($this->getConfigurations()[$context->type])) {
             return TRUE;
         }
+        
         $success = TRUE;
-        foreach (
-            $this->getConfigurations()[$this->provider->type] as
-            $configuration_class
-        ) {
-            
-            // If we are writing for a serviceSubscription, use the server context.
-            if ($serviceSubscription && $serviceSubscription->context) {
-                $context = $serviceSubscription->context;
-            }
-            else {
-                $context = $this->provider;
-            }
-    
+        foreach ($this->getConfigurations()[$context->type] as $configuration_class) {
             try {
                 $config = new $configuration_class($context, $this);
                 $config->write();
