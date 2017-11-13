@@ -3,8 +3,7 @@
 namespace Aegir\Provision\Context;
 
 use Aegir\Provision\Application;
-use Aegir\Provision\Context;
-use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
+use Aegir\Provision\ContextSubscriber;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
@@ -14,7 +13,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  *
  * @see \Provision_Context_site
  */
-class SiteContext extends Context implements ConfigurationInterface
+class SiteContext extends ContextSubscriber implements ConfigurationInterface
 {
     /**
      * @var string

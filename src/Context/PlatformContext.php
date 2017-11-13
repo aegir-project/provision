@@ -3,12 +3,9 @@
 namespace Aegir\Provision\Context;
 
 use Aegir\Provision\Application;
-use Aegir\Provision\Context;
-use Aegir\Provision\Service\Http\Apache\Configuration\PlatformConfiguration;
-use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
+use Aegir\Provision\ContextSubscriber;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-use Aegir\Provision\ConfigDefinition\ContextNodeDefinition;
 /**
  * Class PlatformContext
  *
@@ -16,7 +13,7 @@ use Aegir\Provision\ConfigDefinition\ContextNodeDefinition;
  *
  * @see \Provision_Context_platform
  */
-class PlatformContext extends Context implements ConfigurationInterface
+class PlatformContext extends ContextSubscriber implements ConfigurationInterface
 {
     /**
      * @var string

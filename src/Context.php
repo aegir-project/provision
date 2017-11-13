@@ -39,6 +39,13 @@ class Context
      */
     public $type = null;
     const TYPE = null;
+    
+    /**
+     * The role of this context, either 'subscriber' or 'provider'.
+     *
+     * @var string
+     */
+    const ROLE = null;
 
     /**
      * @var string
@@ -53,12 +60,6 @@ class Context
      * init(), set defaults with setProperty().
      */
     protected $properties = [];
-
-    /**
-     * @var array
-     * A list of services provided by this server.
-     */
-    protected $services = [];
 
     /**
      * @var \Aegir\Provision\Application;
@@ -133,30 +134,9 @@ class Context
     }
 
     /**
-     * Load Service classes from config into Context..
+     * Load Service classes from config into Context services or serviceSubscriptions.
      */
-    protected function prepareServices() {
-        // Only servers have config['services']
-        if (isset($this->config['services'])) {
-
-            foreach ($this->config['services'] as $service_name => $service) {
-                $service_class = Service::getClassName($service_name, $service['type']);
-                $this->services[$service_name] = new $service_class($service, $this);
-            }
-        }
-        // @TODO: Since we switched to Config ContextNodeDefinition, it's not returning the context name in $context. So we have to look for $this->properties instead of $this->config.
-        // We should figure out how to alter ContextNodeDefinition so it returns the string name or the server class.
-        elseif (isset($this->properties['service_subscriptions'])) {
-            foreach ($this->properties['service_subscriptions'] as $service_name => $service) {
-                // Check for an empty server.
-                if (empty($service['server'])) {
-                  throw new \Exception("Item 'server' cannot be empty.");
-                }
-                $this->servers[$service_name] = $server = Application::getContext($service['server']);
-                $this->services[$service_name] = new ServiceSubscription($this, $server, $service_name);
-            }
-        }
-    }
+    protected function prepareServices() {}
 
     /**
      * Loads all available \Aegir\Provision\Service classes
@@ -278,40 +258,6 @@ class Context
         ];
     }
 
-
-    /**
-     * Return all services for this context.
-     *
-     * @return array
-     */
-    public function getServices() {
-        return $this->services;
-    }
-
-    /**
-     * Return all services for this context.
-     *
-     * @return array
-     */
-    public function getService($type) {
-        if (isset($this->services[$type])) {
-            return $this->services[$type];
-        }
-        else {
-            throw new \Exception("Service '$type' does not exist in the context '{$this->name}'.");
-        }
-    }
-    
-    /**
-     * Return all services for this context.
-     *
-     * @return \Aegir\Provision\Service
-     */
-    public function service($type)
-    {
-        return $this->getService($type);
-    }
-    
     /**
      * {@inheritdoc}
      */
@@ -327,37 +273,7 @@ class Context
             ->end();
 
         // Load Services.
-        if ($this->type == 'server') {
-            $root_node
-                ->attribute('context', $this)
-                ->children()
-                    ->arrayNode('services')
-                    ->prototype('array')
-                        ->children()
-                            ->scalarNode('type')
-                            ->isRequired(true)
-                        ->end()
-                        ->append($this->addServiceProperties('services'))
-                    ->end()
-                ->end();
-        }
-        // Load service subscriptions.
-        else {
-            $root_node
-                ->attribute('context', $this)
-                ->children()
-                    ->arrayNode('service_subscriptions')
-                    ->prototype('array')
-                        ->children()
-                        ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
-                        ->node('server', 'context')
-                            ->isRequired()
-                            ->attribute('context_type', 'server')
-                        ->end()
-                        ->append($this->addServiceProperties('service_subscriptions'))
-                    ->end()
-                ->end();
-        }
+        $this->servicesConfigTree($root_node);
 
         // @TODO: Figure out how we can let other classes add to Context properties.
         foreach ($this->option_documentation() as $name => $description) {
@@ -387,6 +303,11 @@ class Context
 
         return $tree_builder;
     }
+    
+    /**
+     * Prepare either services or service subscriptions config tree.
+     */
+    protected function servicesConfigTree(&$root_node) {}
 
     /**
      * Append Service class options_documentation to config tree.
@@ -427,16 +348,17 @@ class Context
      * Output a list of all services for this context.
      */
     public function showServices(DrupalStyle $io) {
-        if (!empty($this->getServices())) {
-            $is_server = $this->type == 'server';
+        
+        $services = $this->isProvider()? $this->getServices(): $this->getSubscriptions();
+        if (!empty($services)) {
             $rows = [];
             
-            $headers = $is_server?
+            $headers = $this->isProvider()?
                 ['Services']:
                 ['Service', 'Server', 'Type'];
             
-            foreach ($this->getServices() as $name => $service) {
-                if ($is_server) {
+            foreach ($services as $name => $service) {
+                if ($this::ROLE == 'provider') {
                     $rows[] = [$name, $service->type];
                 }
                 else {
@@ -581,6 +503,24 @@ class Context
      */
     public static function contextRequirements() {
         return [];
+    }
+    
+    /**
+     * Whether or not this context is a provider.
+     *
+     * @return bool
+     */
+    public function isProvider(){
+        return $this::ROLE == 'provider';
+    }
+
+    /**
+     * Whether or not this context is a provider.
+     *
+     * @return bool
+     */
+    public function isSubscriber(){
+        return $this::ROLE == 'subscriber';
     }
 
 //    /**

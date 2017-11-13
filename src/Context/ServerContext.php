@@ -2,11 +2,7 @@
 
 namespace Aegir\Provision\Context;
 
-use Aegir\Provision\Application;
-use Aegir\Provision\Context;
-use Consolidation\AnnotatedCommand\CommandFileDiscovery;
-use Drupal\Console\Core\Style\DrupalStyle;
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Aegir\Provision\ContextProvider;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
@@ -16,7 +12,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  *
  * @see \Provision_Context_server
  */
-class ServerContext extends Context implements ConfigurationInterface
+class ServerContext extends ContextProvider implements ConfigurationInterface
 {
     /**
      * @var string
