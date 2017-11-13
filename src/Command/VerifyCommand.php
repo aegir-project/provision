@@ -60,7 +60,10 @@ class VerifyCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->io->info('Provision Verify: ' . $this->context_name);
+        $this->io->title(strtr("Verify %type: %name", [
+            '%name' => $this->context_name,
+            '%type' => $this->context->type,
+        ]));
 
         /**
          * The provision-verify command function looks like:

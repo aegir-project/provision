@@ -469,14 +469,13 @@ class Context
         // Run verify method on all services.
         foreach ($this->getServices() as $service) {
             $friendlyName = $service->getFriendlyName();
-            // If service is a service subscription
-            if (get_class($service) == ServiceSubscription::class) {
-                $prep = 'for';
+
+            if ($this->isProvider()) {
+                $this->application->io->section("Verify service: {$friendlyName}");
             }
             else {
-                $prep = 'on';
+                $this->application->io->section("Verify service: {$friendlyName} on {$service->provider->name}");
             }
-            $this->application->io->title("Verify {$friendlyName} {$prep} {$service->provider->name}");
             $return_codes[] = $service->verify()? 0: 1;
         }
         
