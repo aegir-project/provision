@@ -55,17 +55,8 @@ class HttpService extends Service {
     /**
      * React to the `provision verify` command on Server contexts
      */
-    function verify() {
-        $this->provider->application->io->successLite('Verifying HTTP');
-        return parent::verify();
-    }
-    
-    /**
-     * React to the `provision verify` command on Server contexts
-     */
     function verifySubscription(ServiceSubscription $serviceSubscription) {
         $this->subscription = $serviceSubscription;
-        $this->subscription->context->application->io->customLite('Verifying HTTP Server ' . $this->subscription->server->name, '>');
         return parent::verifySubscription($serviceSubscription);
     }
 //
