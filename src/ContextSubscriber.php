@@ -61,6 +61,18 @@ class ContextSubscriber extends Context
         }
     }
     
+    /**
+     * Return an array of Service classes.
+     * @return array
+     */
+    public function getServices() {
+        $services = [];
+        foreach ($this->getSubscriptions() as $service => $subscription) {
+            $services[$service] = $subscription->service;
+        }
+        return $services;
+    }
+    
     protected function servicesConfigTree(&$root_node) {
         $root_node
             ->attribute('context', $this)
