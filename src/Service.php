@@ -17,14 +17,16 @@ class Service
     
     /**
      * @var Context;
-     * The context in which this service stores its data
+     * The context that provides this service.
      *
-     * This is usually an object made from a class derived from the
-     * Provision_Context base class
-     *
-     * @see Provision_Context
+     * @see \Aegir\Provision\Context
      */
-    public $context;
+    public $provider;
+    
+    /**
+     * @var \Aegir\Provision\Application;
+     */
+    public $application;
     
     /**
      * @var string
@@ -38,9 +40,10 @@ class Service
      */
     const SERVICE_NAME = 'Service Name';
     
-    function __construct($service_config, $context)
+    function __construct($service_config, $provider_context)
     {
-        $this->context = $context;
+        $this->provider = $provider_context;
+        $this->application = $provider_context->application;
         $this->type = $service_config['type'];
         $this->properties = $service_config['properties'];
     }
@@ -103,12 +106,12 @@ class Service
      */
     protected function writeConfigurations(ServiceSubscription $serviceSubscription = NULL)
     {
-        if (empty($this->getConfigurations()[$this->context->type])) {
+        if (empty($this->getConfigurations()[$this->provider->type])) {
             return TRUE;
         }
         $success = TRUE;
         foreach (
-            $this->getConfigurations()[$this->context->type] as
+            $this->getConfigurations()[$this->provider->type] as
             $configuration_class
         ) {
             
@@ -117,7 +120,7 @@ class Service
                 $context = $serviceSubscription->context;
             }
             else {
-                $context = $this->context;
+                $context = $this->provider;
             }
     
             try {

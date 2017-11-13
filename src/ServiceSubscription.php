@@ -19,7 +19,7 @@ class ServiceSubscription {
   
   function __construct($context, $server, $service_name) {
       $this->context = $context;
-      $this->server = Application::getContext($server);
+      $this->server = Application::getContext($server, $context->application);
       $this->service = $this->server->getService($service_name);
       $this->type = $this->server->getService($service_name)->type;
       

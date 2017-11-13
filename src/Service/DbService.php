@@ -104,25 +104,25 @@ class DbService extends Service
         try {
             $this->connect();
             $return = TRUE;
-            $this->context->application->io->successLite('Successfully connected to database server!');
+            $this->provider->application->io->successLite('Successfully connected to database server!');
     
             if ($this->can_create_database()) {
-                $this->context->application->io->successLite('Provision can create new databases.');
+                $this->provider->application->io->successLite('Provision can create new databases.');
             } else {
-                $this->context->application->io->errorLite('Provision is unable to create databases.');
+                $this->provider->application->io->errorLite('Provision is unable to create databases.');
                 $return = FALSE;
             }
             if ($this->can_grant_privileges()) {
-                $this->context->application->io->successLite('Provision can grant privileges on database users.');
+                $this->provider->application->io->successLite('Provision can grant privileges on database users.');
             } else {
-                $this->context->application->io->errorLite('Provision is unable to grant privileges on database users.');
+                $this->provider->application->io->errorLite('Provision is unable to grant privileges on database users.');
                 $return = FALSE;
             }
             
             return $return;
         }
         catch (\PDOException $e) {
-            $this->context->application->io->errorLite($e->getMessage());
+            $this->provider->application->io->errorLite($e->getMessage());
             return FALSE;
         }
     }
@@ -190,11 +190,11 @@ class DbService extends Service
         $query = preg_replace_callback($this::PROVISION_QUERY_REGEXP, array($this, 'query_callback'), $query);
         
         try {
-            $this->context->application->logger->notice("Running Query: {$query}");
+            $this->provider->application->logger->notice("Running Query: {$query}");
             $result = $this->conn->query($query);
         }
         catch (\PDOException $e) {
-            $this->context->application->io->errorLite($e->getMessage());
+            $this->provider->application->io->errorLite($e->getMessage());
             return FALSE;
         }
         

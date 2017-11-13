@@ -476,7 +476,7 @@ class Context
             else {
                 $prep = 'on';
             }
-            $this->application->io->title("Verify {$friendlyName} {$prep} {$service->context->name}");
+            $this->application->io->title("Verify {$friendlyName} {$prep} {$service->provider->name}");
             $return_codes[] = $service->verify()? 0: 1;
         }
         
