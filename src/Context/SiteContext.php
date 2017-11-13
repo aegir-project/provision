@@ -63,45 +63,4 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
             'platform' => 'platform'
         ];
     }
-
-//    /**
-//     * @TODO: Come up with another method to let Context nodes specify related contexts with ability to validate.
-//     * @param $root_node
-//     */
-//    function configTreeBuilder(ArrayNodeDefinition &$root_node) {
-//        $root_node
-//            ->children()
-//                ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
-//                ->node('db_server', 'context')
-//                    ->isRequired()
-//                    ->attribute('context_type', 'server')
-//                    ->attribute('service_requirement', 'db')
-//                ->end()
-//                ->node('platform', 'context')
-//                    ->isRequired()
-//                    ->attribute('context_type', 'platform')
-//                ->end()
-//        ->end();
-//    }
-
-    public function verify() {
-        parent::verify();
-
-        // $this->db_server->service('db')->verify();
-//        $this->platform->verify();
-
-//        return "Site Context Verified: " . $this->name;
-    }
-
-    //  /**
-    //   * Write out this named context to an alias file.
-    //   */
-    //  function write_alias() {
-    //    $config = new Provision_Config_Drushrc_Alias($this->name, $this->properties);
-    //    $config->write();
-    //    foreach ($this->drush_aliases as $drush_alias) {
-    //      $config = new Provision_Config_Drushrc_Alias($drush_alias, $this->properties);
-    //      $config->write();
-    //    }
-    //  }
 }

@@ -65,29 +65,4 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
     public static function serviceRequirements() {
         return ['http'];
     }
-
-//
-//    /**
-//     * @TODO: Remove in favor of a simpler method like $this->relatedContexts()
-//     * @param $root_node
-//     */
-//    function configTreeBuilder(ArrayNodeDefinition &$root_node) {
-//        $root_node
-//            ->children()
-//                ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
-//                ->node('web_server', 'context')
-//                    ->isRequired()
-//                    ->attribute('context_type', 'server')
-//                    ->attribute('service_requirement', 'http')
-//                ->end()
-//            ->end()
-//        ->end();
-//    }
-
-// @TODO: Remove. This should be handled by Services now.
-//    public function verify() {
-//        parent::verify();
-//        $this->logger->info('Verifying Web Server...');
-//        $this->web_server->verify();
-//    }
 }
