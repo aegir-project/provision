@@ -462,21 +462,26 @@ class Context
      *
      * Running `provision verify CONTEXT` triggers this method.
      *
-     * Collect all services for the context and run the verify() method on them
+     * Collect all services for the context and run the verify() method on them.
+     *
+     * If this context is a Service Subscriber, the provider service will be verified first.
      */
     public function verify() {
         $return_codes = [];
         // Run verify method on all services.
-        foreach ($this->getServices() as $service) {
+        foreach ($this->getServices() as $type => $service) {
             $friendlyName = $service->getFriendlyName();
 
             if ($this->isProvider()) {
                 $this->application->io->section("Verify service: {$friendlyName}");
+                $return_codes[] = $service->verify()? 0: 1;
             }
             else {
                 $this->application->io->section("Verify service: {$friendlyName} on {$service->provider->name}");
+    
+                $return_codes[] = $service->verify()? 0: 1;
+                $return_codes[] = $this->getSubscription($type)->verify()? 0: 1;
             }
-            $return_codes[] = $service->verify()? 0: 1;
         }
         
         // If any service verify failed, exit with a non-zero code.
