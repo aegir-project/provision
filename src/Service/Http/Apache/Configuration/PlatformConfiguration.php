@@ -20,6 +20,14 @@ class PlatformConfiguration extends Configuration {
   public $description = 'platform configuration file';
   
   function filename() {
-      return $this->service->properties['http_platformd_path'] . '/' . ltrim($this->context->name, '@') . '.conf';
+      $path = $this->context->application->getConfig()->get('config_path') . '/' . $this->service->getType() . '/platform.d/';
+    
+      return $path . $this->context->name . '.conf';
   }
+    
+    function process()
+    {
+        $this->data['http_port']['root'] = 'yeahhh';
+        parent::process();
+    }
 }
