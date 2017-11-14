@@ -387,6 +387,9 @@ class DbService extends Service
         }
         else {
             $this->create_database($db_name);
+            $this->application->io->successLite(strtr("Created database '@name'.", [
+                '@name' => $db_name,
+            ]));
         }
 
         foreach ($this->grant_host_list() as $db_grant_host) {
