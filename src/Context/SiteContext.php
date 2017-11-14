@@ -22,6 +22,12 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
     const TYPE = 'site';
 
     /**
+     * @var \Aegir\Provision\Context\SiteContext
+     */
+    public $platform;
+
+
+    /**
      * SiteContext constructor.
      *
      * @param $name
@@ -35,7 +41,8 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
         // Load "web_server" and "platform" contexts.
         // There is no need to check if the property exists because the config system does that.
 //        $this->db_server = $application->getContext($this->properties['db_server']);
-//        $this->platform = $application->getContext($this->properties['platform']);
+
+        $this->platform = Application::getContext($this->properties['platform'], $application);
     }
 
     static function option_documentation()
