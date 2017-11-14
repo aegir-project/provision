@@ -35,7 +35,12 @@ class ContextSubscriber extends Context
         }
 
         foreach ($this->properties['service_subscriptions'] as $service_name => $service) {
+
+            // Load into serviceSubscriptions property.
             $this->serviceSubscriptions[$service_name] = new ServiceSubscription($this, $service['server'], $service_name);
+
+            // Also load into services property for easy access.
+            $this->services[$service_name] = $this->serviceSubscriptions[$service_name]->service;
         }
     }
     
@@ -61,7 +66,7 @@ class ContextSubscriber extends Context
             return $this->serviceSubscriptions[$type];
         }
         else {
-            throw new \Exception("Service '$type' does not exist in the context '{$this->name}'.");
+            throw new \Exception("Service subscription '$type' does not exist in the context '{$this->name}'.");
         }
     }
     

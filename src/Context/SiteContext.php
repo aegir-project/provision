@@ -43,6 +43,11 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
 //        $this->db_server = $application->getContext($this->properties['db_server']);
 
         $this->platform = Application::getContext($this->properties['platform'], $application);
+
+
+        // Add platform http service subscription.
+        $this->serviceSubscriptions['http'] = $this->platform->getSubscription('http');
+
     }
 
     static function option_documentation()
@@ -69,5 +74,21 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
         return [
             'platform' => 'platform'
         ];
+    }
+
+    /**
+     * Overrides ContextSubscriber::getSubscriptions() to add in the platform's subscriptions.
+     *
+     * @return array
+     */
+    public function getSubscriptions() {
+
+        // Load this context's subscriptions.
+        $subscriptions = parent::getSubscriptions();
+
+        // Load the platform's subscriptions.
+        $subscriptions += $this->platform->getSubscriptions();
+
+        return $subscriptions;
     }
 }
