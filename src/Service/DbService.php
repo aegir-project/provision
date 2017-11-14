@@ -152,11 +152,15 @@ class DbService extends Service
         try {
             $this->connect();
             $this->subscription->context->application->io->successLite('Successfully connected to database server!');
-            return TRUE;
+            return [
+                'service' => TRUE
+            ];
         }
         catch (\PDOException $e) {
             $this->subscription->context->application->io->errorLite($e->getMessage());
-            return FALSE;
+            return [
+                'service' => FALSE
+            ];
         }
     }
     
