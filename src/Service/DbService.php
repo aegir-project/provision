@@ -163,7 +163,19 @@ class DbService extends Service
             ];
         }
     }
-    
+
+    /**
+     * React to `provision verify` command when run on a subscriber, to verify the service's provider.
+     *
+     * This is used to verify the database server when a subscriber is verified.
+     */
+    function verifyProvider()
+    {
+        return [
+            'service' => $this->verify(),
+        ];
+    }
+
     /**
      * Attempt to connect to the database server using $this->creds
      * @return \PDO
