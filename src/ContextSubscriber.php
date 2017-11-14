@@ -30,6 +30,10 @@ class ContextSubscriber extends Context
      * Load ServiceSubscription classes from config into Context..
      */
     protected function prepareServices() {
+        if (!isset($this->properties['service_subscriptions']) || count($this->properties['service_subscriptions']) == 0) {
+            return;
+        }
+
         foreach ($this->properties['service_subscriptions'] as $service_name => $service) {
             $this->serviceSubscriptions[$service_name] = new ServiceSubscription($this, $service['server'], $service_name);
         }
