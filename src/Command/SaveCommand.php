@@ -261,6 +261,10 @@ class SaveCommand extends Command
         $properties = $this->askForRequiredContexts();
         foreach ($options as $name => $description) {
 
+            if (!empty($properties[$name])) {
+                continue;
+            }
+
             // If option does not exist, ask for it.
             if (!empty($this->input->getOption($name))) {
                 $properties[$name] = $this->input->getOption($name);
