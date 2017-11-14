@@ -10,6 +10,7 @@ namespace Aegir\Provision\Service;
 
 //require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
+use Aegir\Provision\Context\SiteContext;
 use Aegir\Provision\Service;
 use Aegir\Provision\ServiceSubscription;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -136,6 +137,10 @@ class DbService extends Service
      */
     function verifySubscription(ServiceSubscription $serviceSubscription) {
         $this->subscription = $serviceSubscription;
+
+        // Check for database
+        $this->create_site_database($serviceSubscription->context);
+
         $this->creds_root = array_map('urldecode', parse_url($this->properties['master_db']));
     
         // Use the credentials from the subscription properties.
@@ -151,7 +156,7 @@ class DbService extends Service
     
         try {
             $this->connect();
-            $this->subscription->context->application->io->successLite('Successfully connected to database server!');
+            $this->subscription->context->application->io->successLite('Successfully connected to database server.');
             return [
                 'service' => TRUE
             ];
@@ -359,75 +364,59 @@ class DbService extends Service
 //
 //        return false;
 //    }
-//
-//    /**
-//     * Generate a new mysql database and user account for the specified
-//     * credentials
-//     */
-//    function create_site_database($creds = [])
-//    {
-//        if (!sizeof($creds)) {
-//            $creds = $this->generate_site_credentials();
-//        }
-//        extract($creds);
-//
-//        if (drush_get_error() || !$this->can_create_database()) {
-//            drush_set_error('PROVISION_CREATE_DB_FAILED');
-//            drush_log("Database could not be created.", 'error');
-//
-//            return false;
-//        }
-//
-//        foreach ($this->grant_host_list() as $db_grant_host) {
-//            drush_log(
-//                dt(
-//                    "Granting privileges to %user@%client on %database",
-//                    [
-//                        '%user' => $db_user,
-//                        '%client' => $db_grant_host,
-//                        '%database' => $db_name,
-//                    ]
-//                )
-//            );
-//            if (!$this->grant($db_name, $db_user, $db_passwd, $db_grant_host)) {
-//                drush_set_error(
-//                    'PROVISION_CREATE_DB_FAILED',
-//                    dt(
-//                        "Could not create database user @user",
-//                        ['@user' => $db_user]
-//                    )
-//                );
-//            }
-//            drush_log(
-//                dt(
-//                    "Granted privileges to %user@%client on %database",
-//                    [
-//                        '%user' => $db_user,
-//                        '%client' => $db_grant_host,
-//                        '%database' => $db_name,
-//                    ]
-//                ),
-//                'success'
-//            );
-//        }
-//
-//        $this->create_database($db_name);
-//        $status = $this->database_exists($db_name);
-//
-//        if ($status) {
-//            drush_log(
-//                dt('Created @name database', ["@name" => $db_name]),
-//                'success'
-//            );
-//        } else {
-//            drush_set_error(
-//                'PROVISION_CREATE_DB_FAILED',
-//                dt("Could not create @name database", ["@name" => $db_name])
-//            );
-//        }
-//
-//        return $status;
-//    }
+
+    /**
+     * Generate a new mysql database and user account for the specified
+     * credentials
+     */
+    function create_site_database(SiteContext $site)
+    {
+
+        $db_name = $site->getSubscription('db')->getProperty('db_name');
+        $db_user = $site->getSubscription('db')->getProperty('db_user');
+        $db_passwd = $site->getSubscription('db')->getProperty('db_password');
+
+        if (!$this->can_create_database()) {
+            throw new \Exception("Unable to create a database for the site {$site->name}");
+        }
+
+        if ($this->database_exists($db_name)) {
+            $this->application->io->successLite(strtr("Database '@name' already exists.", [
+                '@name' => $db_name
+            ]));
+        }
+        else {
+            $this->create_database($db_name);
+        }
+
+        foreach ($this->grant_host_list() as $db_grant_host) {
+            if (!$this->grant($db_name, $db_user, $db_passwd, $db_grant_host)) {
+                throw new \Exception(strtr("Could not create database user @user", [
+                    '@user' => $db_user
+                ]));
+            }
+            $this->application->io->successLite(strtr("Granted privileges to user '@user@@host' for database '@name'.", [
+                '@user' => $db_user,
+                '@host' => $db_grant_host,
+                '@name' => $db_name,
+            ]));
+        }
+
+        $status = $this->database_exists($db_name);
+
+        if ($status) {
+            $this->application->io->successLite(strtr("Database service configured for site @name.", [
+                '@name' => $site->name,
+            ]));
+        }
+        else {
+            throw new \Exception(strtr("Could not create @name database", [
+                "@name" => $db_name
+            ]));
+        }
+
+        return $status;
+    }
 //
 //    /**
 //     * Remove the database and user account for the supplied credentials
@@ -585,15 +574,15 @@ class DbService extends Service
 //        return false;
 //    }
 //
-//    function can_create_database()
-//    {
-//        return false;
-//    }
-//
-//    function can_grant_privileges()
-//    {
-//        return false;
-//    }
+    function can_create_database()
+    {
+        return false;
+    }
+
+    function can_grant_privileges()
+    {
+        return false;
+    }
 //
 //    function grant($name, $username, $password, $host = '')
 //    {
@@ -614,25 +603,30 @@ class DbService extends Service
 //    {
 //        return false;
 //    }
-//
-//    /**
-//     * Return a list of hosts, as seen by the db server, which should be granted
-//     * access to the site database. If server property 'db_grant_all_hosts' is
-//     * TRUE, use the MySQL wildcard '%' instead of
-//     */
-//    function grant_host_list()
-//    {
-//        if ($this->server->db_grant_all_hosts) {
+
+    /**
+     * Return a list of hosts, as seen by the db server, which should be granted
+     * access to the site database. If server property 'db_grant_all_hosts' is
+     * TRUE, use the MySQL wildcard '%' instead of
+     */
+    function grant_host_list()
+    {
+
+        // @TODO: Implement grant_server_list by injecting $service->subscription. Right now we don't have access to the site context inside a service class.
+        return ['%'];
+
+//        if ($this->getProperty('db_grant_all_hosts')) {
 //            return ['%'];
 //        } else {
+//
 //            return array_unique(
 //                array_map(
 //                    [$this, 'grant_host'],
-//                    $this->context->service('http')->grant_server_list()
+//                    $this->platform->service('http')->grant_server_list()
 //                )
 //            );
 //        }
-//    }
+    }
 //
 //    /**
 //     * Return a hostname suitable for database grants from a server object.
