@@ -480,9 +480,13 @@ class Context
             }
             else {
                 $this->application->io->section("Verify service: {$friendlyName} on {$service->provider->name}");
+
+                // First verify the service provider.
                 foreach ($service->verifyProvider() as $verify_part => $verify_success) {
                     $return_codes[] = $verify_success? 0: 1;
                 }
+
+                // Then run "verify" on the subscriptions.
                 foreach ($this->getSubscription($type)->verify() as $type => $verify_success) {
                     $return_codes[] = $verify_success? 0: 1;
                 }
