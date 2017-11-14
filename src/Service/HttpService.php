@@ -51,7 +51,19 @@ class HttpService extends Service {
             'platform'
         ];
     }
-    
+
+    /**
+     * React to `provision verify` command when run on a subscriber, to verify the service's provider.
+     *
+     * This is used to allow skipping of the service restart.
+     */
+    function verifyProvider()
+    {
+        return [
+            'configuration' => $this->writeConfigurations(),
+        ];
+    }
+
     /**
      * React to the `provision verify` command on Server contexts
      */
@@ -59,7 +71,7 @@ class HttpService extends Service {
         $this->subscription = $serviceSubscription;
         return [
             'configuration' => $this->writeConfigurations($serviceSubscription),
-            'service' => $this->restartServices(),
+            'service' => $this->restartService(),
         ];
     }
 //
