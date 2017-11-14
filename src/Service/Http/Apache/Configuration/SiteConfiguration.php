@@ -22,49 +22,57 @@ class SiteConfiguration extends Configuration {
   
   
   function filename() {
-      $file = $this->uri . '.conf';
-
-//      return $this->service->properties['http_platformd_path'] . '/' . ltrim($this->context->name, '@') . '.conf';
-      return $this->context->application->getConfig()->get('config_path') . '/' . $this->context->name . '/' . $file;
-
-//      return $this->context->config['config_path'];
-//    if (drush_get_option('provision_apache_conf_suffix', FALSE)) {
-//      return $this->data['http_vhostd_path'] . '/' . $this->uri . '.conf';
-//    }
-//    else {
-//      return $this->data['http_vhostd_path'] . '/' . $this->uri;
-//    }
+      $file = $this->context->getProperty('uri') . '.conf';
+      return $this->context->application->getConfig()->get('config_path') . '/' . $this->service->provider->name . '/' . $this->service->getType() . '/vhost.d/' . $file;
   }
   
   function process() {
-    parent::process();
-    
-    if ($this->aliases && !is_array($this->aliases)) {
-      $this->aliases = explode(",", $this->aliases);
-    }
-    
-    $this->aliases = array_filter($this->aliases, 'trim');
-    
-    if ($this->drush_aliases && !is_array($this->drush_aliases)) {
-      $this->drush_aliases = explode(",", $this->drush_aliases);
-    }
-    
-    $this->drush_aliases = array_filter($this->drush_aliases, 'trim');
-    
-    if (!$this->site_enabled) {
-      $this->template = $this->disabled_template;
-    }
+      parent::process();
+      $this->data['http_port'] = $this->context->platform->getSubscription('http')->service->getProperty('http_port');
+      $this->data['root'] = $this->context->platform->getProperty('root');
+      $this->data['uri'] = $this->context->getProperty('uri');
 
-    $app_dir = $this->context->application->getConfig()->get('config_path') . '/' . $this->service->getType();
+      $this->data['site_path'] = $this->data['root'] . '/sites/' . $this->data['uri'];
 
-//    $this->data['http_port'] = $this->service->properties['http_port'];
-//    $this->data['include_statement'] = '# INCLUDE STATEMENT';
-//    $this->data['http_pred_path'] = "{$app_dir}/pre.d";
-//    $this->data['http_postd_path'] = "{$app_dir}/post.d";
-//    $this->data['http_platformd_path'] = "{$app_dir}/platform.d";
-//    $this->data['extra_config'] = "";
+      $this->data['db_type'] = $this->context->getSubscription('db')->service->getType();
 
-    $this->data['http_vhostd_path'] = "{$app_dir}/vhost.d";
+//      print_r($this->context->getSubscription('db'));
 
+      $this->data['db_name'] = $this->context->getSubscription('db')->getProperty('db_name');
+      $this->data['db_user'] = $this->context->getSubscription('db')->getProperty('db_user');
+      $this->data['db_passwd'] = $this->context->getSubscription('db')->getProperty('db_password');
+      $this->data['db_host'] = $this->context->getSubscription('db')->service->provider->getProperty('remote_host');
+
+      $this->data['db_port'] = $this->context->getSubscription('db')->service->getCreds()['port'];
+
+      $this->data['extra_config'] = '';
+
+//    if ($this->aliases && !is_array($this->aliases)) {
+//      $this->aliases = explode(",", $this->aliases);
+//    }
+//
+//    $this->aliases = array_filter($this->aliases, 'trim');
+//
+//    if ($this->drush_aliases && !is_array($this->drush_aliases)) {
+//      $this->drush_aliases = explode(",", $this->drush_aliases);
+//    }
+//
+//    $this->drush_aliases = array_filter($this->drush_aliases, 'trim');
+//
+//    if (!$this->site_enabled) {
+//      $this->template = $this->disabled_template;
+//    }
+//
+//    $app_dir = $this->context->application->getConfig()->get('config_path') . '/' . $this->service->getType();
+//
+////    $this->data['http_port'] = $this->service->properties['http_port'];
+////    $this->data['include_statement'] = '# INCLUDE STATEMENT';
+////    $this->data['http_pred_path'] = "{$app_dir}/pre.d";
+////    $this->data['http_postd_path'] = "{$app_dir}/post.d";
+////    $this->data['http_platformd_path'] = "{$app_dir}/platform.d";
+////    $this->data['extra_config'] = "";
+//
+//    $this->data['http_vhostd_path'] = "{$app_dir}/vhost.d";
+//
   }
 }

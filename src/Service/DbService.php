@@ -231,6 +231,15 @@ class DbService extends Service
         }
         
     }
+
+    /**
+     * Return the credentials array.
+     *
+     * @return array
+     */
+    public function getCreds() {
+        return $this->creds;
+    }
     
     //
 //    /**

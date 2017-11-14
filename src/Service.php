@@ -167,7 +167,7 @@ class Service
             }
             catch (\Exception $e) {
                 $context->application->io->errorLite(
-                    'Unable to write '.$config->description.' to '.$config->filename()
+                    'Unable to write '.$config->description.' to '.$config->filename() . ': ' . $e->getMessage()
                 );
                 $success = FALSE;
             }
@@ -201,6 +201,23 @@ class Service
     public function getName()
     {
         return $this::SERVICE;
+    }
+
+
+    /**
+     * Get a specific property.
+     *
+     * @param $name
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getProperty($name) {
+        if (isset($this->properties[$name])) {
+            return $this->properties[$name];
+        }
+        else {
+            throw new \Exception("Property '$name' on service '$this->type' does not exist.");
+        }
     }
     
     /**

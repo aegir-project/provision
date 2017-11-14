@@ -35,4 +35,21 @@ class ServiceSubscription {
   public function getFriendlyName() {
       return $this->service->getFriendlyName();
   }
+
+
+    /**
+     * Get a specific property.
+     *
+     * @param $name
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getProperty($name) {
+        if (isset($this->properties[$name])) {
+            return $this->properties[$name];
+        }
+        else {
+            throw new \Exception("Property '$name' on Service Subscription does not exist.");
+        }
+    }
 }

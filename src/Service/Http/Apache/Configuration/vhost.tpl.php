@@ -1,18 +1,18 @@
 <VirtualHost *:<?php print $http_port; ?>>
-<?php if ($this->site_mail) : ?>
-  ServerAdmin <?php  print $this->site_mail; ?>
+<?php if (isset($site_mail)) : ?>
+  ServerAdmin <?php  print $site_mail; ?>
 <?php endif;?>
 
 <?php
-$aegir_root = drush_get_option('aegir_root');
-if (!$aegir_root && $server->aegir_root) {
-  $aegir_root = $server->aegir_root;
-}
+//$aegir_root = drush_get_option('aegir_root');
+//if (!$aegir_root && $server->aegir_root) {
+//  $aegir_root = $server->aegir_root;
+//}
 ?>
 
-  DocumentRoot <?php print $this->root; ?>
+  DocumentRoot <?php print $root; ?>
 
-  ServerName <?php print $this->uri; ?>
+  ServerName <?php print $uri; ?>
 
   SetEnv db_type  <?php print urlencode($db_type); ?>
 
@@ -28,36 +28,36 @@ if (!$aegir_root && $server->aegir_root) {
 
 
 <?php
-if (sizeof($this->aliases)) {
-  foreach ($this->aliases as $alias) {
-    print "  ServerAlias " . $alias . "\n";
-  }
-}
+//if (sizeof($this->aliases)) {
+//  foreach ($this->aliases as $alias) {
+//    print "  ServerAlias " . $alias . "\n";
+//  }
+//}
 ?>
 
 <IfModule mod_rewrite.c>
   RewriteEngine on
 <?php
-if ($this->redirection || $ssl_redirection) {
-
-  if ($ssl_redirection && !$this->redirection) {
-    print " # Redirect aliases in non-ssl to the same alias on ssl.\n";
-    print " RewriteRule ^/*(.*)$ https://%{HTTP_HOST}/$1 [NE,L,R=301]\n";
-  }
-  elseif ($ssl_redirection && $this->redirection) {
-    print " # Redirect all aliases + main uri to the main https uri.\n";
-    print " RewriteRule ^/*(.*)$ https://{$this->uri}/$1 [NE,L,R=301]\n";
-  }
-  elseif (!$ssl_redirection && $this->redirection) {
-    print " # Redirect all aliases to the main http url.\n";
-    print " RewriteCond %{HTTP_HOST} !^{$this->redirection}$ [NC]\n";
-    print " RewriteRule ^/*(.*)$ http://{$this->redirection}/$1 [NE,L,R=301]\n";
-  }
-}
+//if ($this->redirection || $ssl_redirection) {
+//
+//  if ($ssl_redirection && !$this->redirection) {
+//    print " # Redirect aliases in non-ssl to the same alias on ssl.\n";
+//    print " RewriteRule ^/*(.*)$ https://%{HTTP_HOST}/$1 [NE,L,R=301]\n";
+//  }
+//  elseif ($ssl_redirection && $this->redirection) {
+//    print " # Redirect all aliases + main uri to the main https uri.\n";
+//    print " RewriteRule ^/*(.*)$ https://{$this->uri}/$1 [NE,L,R=301]\n";
+//  }
+//  elseif (!$ssl_redirection && $this->redirection) {
+//    print " # Redirect all aliases to the main http url.\n";
+//    print " RewriteCond %{HTTP_HOST} !^{$this->redirection}$ [NC]\n";
+//    print " RewriteRule ^/*(.*)$ http://{$this->redirection}/$1 [NE,L,R=301]\n";
+//  }
+//}
 ?>
-  RewriteRule ^/files/(.*)$ /sites/<?php print $this->uri; ?>/files/$1 [L]
-  RewriteCond <?php print $this->site_path; ?>/files/robots.txt -f
-  RewriteRule ^/robots.txt /sites/<?php print $this->uri; ?>/files/robots.txt [L]
+  RewriteRule ^/files/(.*)$ /sites/<?php print $uri; ?>/files/$1 [L]
+  RewriteCond <?php print $site_path; ?>/files/robots.txt -f
+  RewriteRule ^/robots.txt /sites/<?php print $uri; ?>/files/robots.txt [L]
 </IfModule>
 
 <?php print $extra_config; ?>
@@ -79,7 +79,7 @@ if ($this->redirection || $ssl_redirection) {
     # Prevent direct reading of files in the private dir.
     # This is for Drupal7 compatibility, which would normally drop
     # a .htaccess in those directories, but we explicitly ignore those
-    <Directory "<?php print $this->site_path; ?>/private/" >
+    <Directory "<?php print $site_path; ?>/private/" >
       <Files *>
         SetHandler This_is_a_Drupal_security_line_do_not_remove
       </Files>
@@ -94,10 +94,10 @@ if ($this->redirection || $ssl_redirection) {
     </Directory>
 
 <?php
-$if_subsite = $this->data['http_subdird_path'] . '/' . $this->uri;
-if (provision_hosting_feature_enabled('subdirs') && provision_file()->exists($if_subsite)->status()) {
-  print "  Include " . $if_subsite . "/*.conf\n";
-}
+//$if_subsite = $this->data['http_subdird_path'] . '/' . $this->uri;
+//if (provision_hosting_feature_enabled('subdirs') && provision_file()->exists($if_subsite)->status()) {
+//  print "  Include " . $if_subsite . "/*.conf\n";
+//}
 ?>
 
 </VirtualHost>
