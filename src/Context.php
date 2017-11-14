@@ -474,16 +474,21 @@ class Context
 
             if ($this->isProvider()) {
                 $this->application->io->section("Verify service: {$friendlyName}");
-                $return_codes[] = $service->verify()? 0: 1;
+                foreach ($service->verify() as $type => $verify_success) {
+                    $return_codes[] = $verify_success? 0: 1;
+                }
             }
             else {
                 $this->application->io->section("Verify service: {$friendlyName} on {$service->provider->name}");
-    
-                $return_codes[] = $service->verify()? 0: 1;
-                $return_codes[] = $this->getSubscription($type)->verify()? 0: 1;
+                foreach ($service->verify() as $type => $verify_success) {
+                    $return_codes[] = $verify_success? 0: 1;
+                }
+                foreach ($this->getSubscription($type)->verify() as $type => $verify_success) {
+                    $return_codes[] = $verify_success? 0: 1;
+                }
             }
         }
-        
+
         // If any service verify failed, exit with a non-zero code.
         if (count(array_filter($return_codes))) {
             throw new \Exception('Some services did not verify. Check your configuration and try again.');

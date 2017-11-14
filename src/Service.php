@@ -76,15 +76,41 @@ class Service
      */
     function verify()
     {
-        return $this->writeConfigurations();
+        return [
+            'configuration' => $this->writeConfigurations(),
+            'service' => $this->restartService(),
+        ];
     }
-    
+
+    /**
+     * Run the services "restart_command".
+     * @return bool
+     */
+    protected function restartService() {
+        if (empty($this->properties['restart_command'])) {
+            return TRUE;
+        }
+        else {
+            try {
+                $output = $this->provider->shell_exec($this->properties['restart_command']);
+                $this->application->io->successLite('Service restarted.');
+                return TRUE;
+            }
+            catch (\Exception $e) {
+                $this->application->io->errorLite('Unable to restart service: ' . $e->getMessage());
+            }
+        }
+        return FALSE;
+    }
+
     /**
      * React to the `provision verify` command.
      */
     function verifySubscription(ServiceSubscription $serviceSubscription)
     {
-        return $this->writeConfigurations($serviceSubscription);
+        return [
+            'configuration' => $this->writeConfigurations($serviceSubscription),
+        ];
     }
     
     /**

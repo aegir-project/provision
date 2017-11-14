@@ -57,7 +57,10 @@ class HttpService extends Service {
      */
     function verifySubscription(ServiceSubscription $serviceSubscription) {
         $this->subscription = $serviceSubscription;
-        return parent::verifySubscription($serviceSubscription);
+        return [
+            'configuration' => $this->writeConfigurations($serviceSubscription),
+            'service' => $this->restartServices(),
+        ];
     }
 //
 //    /**

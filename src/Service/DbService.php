@@ -119,11 +119,15 @@ class DbService extends Service
                 $return = FALSE;
             }
             
-            return $return;
+            return [
+                'service' => $return
+            ];
         }
         catch (\PDOException $e) {
             $this->provider->application->io->errorLite($e->getMessage());
-            return FALSE;
+            return [
+                'service' => FALSE
+            ];
         }
     }
     

@@ -34,4 +34,25 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
         return $options;
     }
 
+
+    /**
+     * Run a shell command on this server.
+     *
+     * @TODO: Run remote commands correctly.
+     *
+     * @param $cmd
+     * @return string
+     * @throws \Exception
+     */
+    public function shell_exec($cmd) {
+        $output = '';
+        $exit = 0;
+        exec($cmd, $output, $exit);
+
+        if ($exit != 0) {
+            throw new \Exception("Command failed: $cmd");
+        }
+
+        return implode("\n", $output);
+    }
 }
