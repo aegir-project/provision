@@ -48,7 +48,7 @@ class ConsoleOutput extends BaseConsoleOutput
      *
      * @return bool
      */
-    public function exec($cmd, $start_message = 'Running command...', $end_message = 'Command complete.') {
+    public function exec($cmd, $start_message = 'Running command...') {
         $spinPos = 0;
         $this->process = new Process($cmd);
         $this->process->start();
@@ -59,7 +59,11 @@ class ConsoleOutput extends BaseConsoleOutput
         }
         
         if ($this->process->isSuccessful()) {
-            $this->writeln($end_message);
+            // Move the cursor to the beginning of the line
+            $this->write("\x0D");
+    
+            // Erase the line
+            $this->write("\x1B[2K");
             return true;
         }
         else {
