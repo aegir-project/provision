@@ -1,11 +1,11 @@
 <?php
 
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Input\ArrayInput;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Drupal\Console\Core\Utils\ArgvInputReader;
 
 use Aegir\Provision\Application;
+use Aegir\Provision\Console\ConsoleOutput;
 
 set_time_limit(0);
 ini_set('display_errors', 1);

@@ -104,8 +104,9 @@ class Service
         }
         else {
             try {
-                $output = $this->provider->shell_exec($this->properties['restart_command']);
+                $this->application->console->exec($this->properties['restart_command'], 'Restarting service...');
                 $this->application->io->successLite('Service restarted.');
+                sleep(1);
                 return TRUE;
             }
             catch (\Exception $e) {

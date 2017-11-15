@@ -8,6 +8,7 @@ use Aegir\Provision\Command\ShellCommand;
 use Aegir\Provision\Command\StatusCommand;
 use Aegir\Provision\Command\VerifyCommand;
 use Aegir\Provision\Console\Config;
+use Aegir\Provision\Console\ConsoleOutput;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -75,10 +76,15 @@ class Application extends BaseApplication
     public $output;
     
     /**
+     * @var ConsoleOutput
+     */
+    public $console;
+    
+    /**
      * Application constructor.
      *
      * @param \Symfony\Component\Console\Input\InputInterface   $input
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param \Aegir\Provision\Console\OutputInterface
      *
      * @throws \Exception
      */
@@ -97,6 +103,7 @@ class Application extends BaseApplication
             throw new \Exception($e->getMessage());
         }
 
+        $this->console = $output;
         parent::__construct($this::NAME, $this::VERSION);
     }
     
@@ -113,7 +120,7 @@ class Application extends BaseApplication
         
         $this->input = $input;
         $this->output = $output;
-    
+        
         $this->logger = new ConsoleLogger($output,
             [LogLevel::INFO => OutputInterface::VERBOSITY_NORMAL]
         );
