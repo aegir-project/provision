@@ -20,9 +20,8 @@ class PlatformConfiguration extends Configuration {
   public $description = 'platform configuration file';
   
   function filename() {
-      $path = $this->context->application->getConfig()->get('config_path') . '/' . $this->service->getType() . '/platform.d/';
-    
-      return $path . $this->context->name . '.conf';
+      $file = $this->context->name . '.conf';
+      return $this->context->application->getConfig()->get('config_path') . '/' . $this->service->provider->name . '/' . $this->service->getType() . '/platform.d/' . $file;
   }
     
     function process()
