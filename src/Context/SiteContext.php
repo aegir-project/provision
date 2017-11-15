@@ -76,4 +76,16 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
             'platform' => 'platform'
         ];
     }
+    
+    /**
+     * Output extra info before verifying.
+     */
+    public function verify()
+    {
+        $this->application->io->customLite($this->getProperty('uri'), 'Site URL: ', 'info');
+        $this->application->io->customLite($this->platform->getProperty('root'), 'Root: ', 'info');
+        $this->application->io->customLite($this->config_path, 'Configuration File: ', 'info');
+
+        return parent::verify();
+    }
 }

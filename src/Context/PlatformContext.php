@@ -65,4 +65,15 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
     public static function serviceRequirements() {
         return ['http'];
     }
+    
+    /**
+     * Output extra info before verifying.
+     */
+    public function verify()
+    {
+        $this->application->io->customLite($this->getProperty('root'), 'Root: ', 'info');
+        $this->application->io->customLite($this->config_path, 'Configuration File: ', 'info');
+        
+        return parent::verify();
+    }
 }
