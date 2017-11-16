@@ -37,7 +37,8 @@ class Config implements ConfigurationInterface
      * @var string
      */
     private $config_filename = '.provision.yml';
-
+    const CONFIG_FILENAME = '.provision.yml';
+    
     /**
      * {@inheritdoc}
      */

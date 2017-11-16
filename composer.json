@@ -6,6 +6,7 @@
     "type": "library",
     "license": "GPL-2.0+",
     "require": {
+        "consolidation/Robo": "^1.1",
         "consolidation/annotated-command": "~2",
         "drupal/console-core": "1.0.2",
         "psr/log": "^1.0",

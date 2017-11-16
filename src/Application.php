@@ -34,17 +34,6 @@ use Symfony\Component\Console\Application as BaseApplication;
  */
 class Application extends BaseApplication
 {
-
-    /**
-     * @var string
-     */
-    const NAME = 'Aegir Provision';
-
-    /**
-     * @var string
-     */
-    const VERSION = '4.x';
-
     /**
      * @var string
      */
@@ -54,6 +43,11 @@ class Application extends BaseApplication
      * @var string
      */
     const DEFAULT_TIMEZONE = 'America/New_York';
+    
+    /**
+     * @var \Aegir\Provision\Tasks
+     */
+    public $robo;
     
     /**
      * @var LoggerInterface
@@ -88,23 +82,22 @@ class Application extends BaseApplication
      *
      * @throws \Exception
      */
-    public function __construct(InputInterface $input, OutputInterface $output)
+    public function __construct($name = 'UNKNOWN', $version = 'UNKNOWN')
     {
         // If no timezone is set, set Default.
         if (empty(ini_get('date.timezone'))) {
             date_default_timezone_set($this::DEFAULT_TIMEZONE);
         }
+//
+//        // Load Configs
+//        try {
+//            $this->config = new Config();
+//        }
+//        catch (\Exception $e) {
+//            throw new \Exception($e->getMessage());
+//        }
 
-        // Load Configs
-        try {
-            $this->config = new Config();
-        }
-        catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
-        }
-
-        $this->console = $output;
-        parent::__construct($this::NAME, $this::VERSION);
+        parent::__construct($name, $version);
     }
     
     /**
