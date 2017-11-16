@@ -6,6 +6,7 @@ namespace Aegir\Provision;
 use Aegir\Provision\Commands\ExampleCommands;
 use Aegir\Provision\Console\Config as ConsoleConfig;
 
+use Consolidation\Config\Loader\ConfigProcessor;
 use Robo\Common\ConfigAwareTrait;
 use Robo\Config\Config;
 use Robo\Robo;
@@ -29,17 +30,17 @@ class Provision {
         OutputInterface $output = NULL
     ) {
         
-        // Create Robo configuration.
-        $config = Robo::createConfiguration([ConsoleConfig::getHomeDir() . DIRECTORY_SEPARATOR . ConsoleConfig::CONFIG_FILENAME]);
-        $config->setDefault('aegir_root', ConsoleConfig::getHomeDir());
-        $config->setDefault('script_user', ConsoleConfig::getScriptUser());
-        $config->setDefault('config_path', ConsoleConfig::getHomeDir() . '/config');
+        // Prepare Console configuration and import it into Robo config.
+        $consoleConfig = new \Aegir\Provision\Console\Config();
+
+        $config = new Config();
+        $config->import($consoleConfig->all());
         
         $this->setConfig($config);
 
         // Create Application.
         $application = new \Aegir\Provision\Application(self::APPLICATION_NAME, $config->get('version'));
-        $application->setConfig(new \Aegir\Provision\Console\Config());
+        $application->setConfig($consoleConfig);
         
         // Create and configure container.
         $container = Robo::createDefaultContainer($input, $output, $application, $config);
