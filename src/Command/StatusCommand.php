@@ -58,8 +58,9 @@ class StatusCommand extends Command
         }
         else {
             $headers = ['Provision CLI Configuration'];
-            $rows = [['Configuration File', $this->getApplication()->getConfig()->getConfigPath()]];
-            $config = $this->getApplication()->getConfig()->all();
+            $rows = [];
+            $config = $this->getApplication()->getConfig()->toArray();
+            unset($config['options']);
             foreach ($config as $key => $value) {
                 $rows[] = [$key, $value];
             }

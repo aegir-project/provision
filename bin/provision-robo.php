@@ -1,9 +1,5 @@
 <?php
 
-use League\Container\Container;
-use Robo\Robo;
-use Robo\Common\TimeKeeper;
-
 // We use PWD if available because getcwd() resolves symlinks, which
 // could take us outside of the Drupal root, making it impossible to find.
 $cwd = empty($_SERVER['PWD']) ? getcwd() : $_SERVER['PWD'];
@@ -20,14 +16,32 @@ if (file_exists($autoloadFile = __DIR__ . '/vendor/autoload.php')
     throw new \Exception("Could not locate autoload.php. cwd is $cwd; __DIR__ is " . __DIR__);
 }
 
+
+use Aegir\Provision\Console\ConsoleOutput;
+use Aegir\Provision\Console\DefaultsConfig;
+use Aegir\Provision\Console\DotEnvConfig;
+use Aegir\Provision\Console\EnvConfig;
+use Aegir\Provision\Console\YamlConfig;
+use Robo\Common\TimeKeeper;
+use Symfony\Component\Console\Input\ArgvInput;
+
 // Start Timer.
 $timer = new TimeKeeper();
 $timer->start();
 
-$input = new \Symfony\Component\Console\Input\ArgvInput($argv);
-$output = new \Aegir\Provision\Console\ConsoleOutput();
+// Create input output objects.
+$input = new ArgvInput($argv);
+$output = new ConsoleOutput();
 
-$app = new \Aegir\Provision\Provision($input, $output);
+// Create a config object.
+
+$config = new DefaultsConfig();
+$config->extend(new YamlConfig($config->get('user_home') . '/.provision.yml'));
+$config->extend(new DotEnvConfig(getcwd()));
+$config->extend(new EnvConfig());
+
+// Create the app.
+$app = new \Aegir\Provision\Provision($config, $input, $output);
 
 $status_code = $app->run($input, $output);
 

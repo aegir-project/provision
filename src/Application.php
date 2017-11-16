@@ -72,7 +72,7 @@ class Application extends BaseApplication
      *
      * @throws \Exception
      */
-    public function __construct($name = 'UNKNOWN', $version = 'UNKNOWN')
+    public function __construct($name = 'UNKNOWN', $version = 'UNKNOWN', Provision $provision = NULL)
     {
         // If no timezone is set, set Default.
         if (empty(ini_get('date.timezone'))) {
@@ -87,6 +87,7 @@ class Application extends BaseApplication
 //            throw new \Exception($e->getMessage());
 //        }
 
+        $this->provision = $provision;
         parent::__construct($name, $version);
     }
     
@@ -110,30 +111,14 @@ class Application extends BaseApplication
     }
 
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
      * Getter for Configuration.
      *
-     * @return Config
+     * @return \Aegir\Provision\Console\ProvisionConfig
      *                Configuration object.
      */
     public function getConfig()
     {
-        return $this->config;
-    }
-
-    /**
-     * Setter for Configuration.
-     *
-     * @param Config $config
-     *                       Configuration object.
-     */
-    public function setConfig(Config $config)
-    {
-        $this->config = $config;
+        return $this->provision->getConfig();
     }
 
     /**
