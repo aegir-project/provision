@@ -40,6 +40,7 @@ class Provision {
 
         // Create Application.
         $application = new \Aegir\Provision\Application(self::APPLICATION_NAME, $config->get('version'));
+        $application->console = $output;
         $application->setConfig($consoleConfig);
         
         // Create and configure container.

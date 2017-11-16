@@ -25,7 +25,7 @@ $timer = new TimeKeeper();
 $timer->start();
 
 $input = new \Symfony\Component\Console\Input\ArgvInput($argv);
-$output = new \Symfony\Component\Console\Output\ConsoleOutput();
+$output = new \Aegir\Provision\Console\ConsoleOutput();
 
 $app = new \Aegir\Provision\Provision($input, $output);
 
