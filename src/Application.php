@@ -45,11 +45,6 @@ class Application extends BaseApplication
     const DEFAULT_TIMEZONE = 'America/New_York';
     
     /**
-     * @var \Aegir\Provision\Tasks
-     */
-    public $robo;
-    
-    /**
      * @var LoggerInterface
      */
     public $logger;
@@ -60,14 +55,9 @@ class Application extends BaseApplication
     public $io;
     
     /**
-     * @var \Symfony\Component\Console\Input\InputInterface
+     * @var \Aegir\Provision\Provision
      */
-    public $input;
-    
-    /**
-     * @var \Symfony\Component\Console\Output\OutputInterface
-     */
-    public $output;
+    public $provision;
     
     /**
      * @var ConsoleOutput
