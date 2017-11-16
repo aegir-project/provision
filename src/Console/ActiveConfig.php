@@ -8,7 +8,7 @@ namespace Aegir\Provision\Console;
  *
  * Many thanks to pantheon-systems/terminus.
  */
-class DefaultsConfig extends ProvisionConfig
+class ActiveConfig extends ProvisionConfig
 {
     /**
      * DefaultsConfig constructor.
@@ -29,6 +29,10 @@ class DefaultsConfig extends ProvisionConfig
         $this->set('config_path', $this->getHomeDir() . '/config');
     
         $this->validateConfig();
+    
+        $this->extend(new YamlConfig($this->get('user_home') . '/.provision.yml'));
+        $this->extend(new DotEnvConfig(getcwd()));
+        $this->extend(new EnvConfig());
     }
     
     /**

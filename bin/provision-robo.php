@@ -18,7 +18,7 @@ if (file_exists($autoloadFile = __DIR__ . '/vendor/autoload.php')
 
 
 use Aegir\Provision\Console\ConsoleOutput;
-use Aegir\Provision\Console\DefaultsConfig;
+use Aegir\Provision\Console\ActiveConfig;
 use Aegir\Provision\Console\DotEnvConfig;
 use Aegir\Provision\Console\EnvConfig;
 use Aegir\Provision\Console\YamlConfig;
@@ -34,11 +34,7 @@ $input = new ArgvInput($argv);
 $output = new ConsoleOutput();
 
 // Create a config object.
-
-$config = new DefaultsConfig();
-$config->extend(new YamlConfig($config->get('user_home') . '/.provision.yml'));
-$config->extend(new DotEnvConfig(getcwd()));
-$config->extend(new EnvConfig());
+$config = new ActiveConfig();
 
 // Create the app.
 $app = new \Aegir\Provision\Provision($config, $input, $output);

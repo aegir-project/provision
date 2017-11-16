@@ -7,8 +7,10 @@ use Aegir\Provision\Command\ServicesCommand;
 use Aegir\Provision\Command\ShellCommand;
 use Aegir\Provision\Command\StatusCommand;
 use Aegir\Provision\Command\VerifyCommand;
+use Aegir\Provision\Console\ActiveConfig;
 use Aegir\Provision\Console\Config;
 use Aegir\Provision\Console\ConsoleOutput;
+use Aegir\Provision\Console\DefaultsConfig;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -164,7 +166,7 @@ class Application extends BaseApplication
      */
     static function getAllContexts($name = '', $application = NULL) {
         $contexts = [];
-        $config = new Config();
+        $config = new ActiveConfig();
 
         $context_files = [];
         $finder = new \Symfony\Component\Finder\Finder();
