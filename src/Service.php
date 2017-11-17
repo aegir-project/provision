@@ -8,8 +8,14 @@
 
 namespace Aegir\Provision;
 
-class Service
+use Robo\Common\BuilderAwareTrait;
+use Robo\Common\OutputAdapter;
+use Robo\Contract\BuilderAwareInterface;
+
+class Service implements BuilderAwareInterface
 {
+    
+    use BuilderAwareTrait;
     
     public $type;
     
@@ -40,12 +46,15 @@ class Service
      */
     const SERVICE_NAME = 'Service Name';
     
-    function __construct($service_config, $provider_context)
+    function __construct($service_config, Context $provider_context)
     {
         $this->provider = $provider_context;
         $this->application = $provider_context->application;
         $this->type = $service_config['type'];
         $this->properties = $service_config['properties'];
+        if ($provider_context->getBuilder()) {
+            $this->setBuilder($provider_context->getBuilder());
+        }
     }
     
     /**
@@ -103,14 +112,19 @@ class Service
             return TRUE;
         }
         else {
-            try {
-                $this->application->provision->getOutput()->exec($this->properties['restart_command'], 'Restarting service...');
+            $task = $this->application->provision->getBuilder()->taskExec($this->properties['restart_command'])
+                ->silent(!$this->application->io->isVerbose())
+            ;
+            
+            /** @var \Robo\Result $result */
+            $result = $task->run();
+            if ($result->wasSuccessful()) {
                 $this->application->io->successLite('Service restarted.');
                 sleep(1);
                 return TRUE;
             }
-            catch (\Exception $e) {
-                $this->application->io->errorLite('Unable to restart service: ' . $e->getMessage());
+            else {
+                    $this->application->io->errorLite('Unable to restart service:' . $result->getOutputData());
             }
         }
         return FALSE;
@@ -265,4 +279,12 @@ class Service
         //      ];
     }
     
+    
+    /**
+     * @return \Aegir\Provision\Robo\ProvisionBuilder
+     */
+    function getBuilder()
+    {
+        return $this->builder;
+    }
 }

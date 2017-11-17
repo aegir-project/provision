@@ -6,6 +6,7 @@ namespace Aegir\Provision;
 use Aegir\Provision\Console\Config;
 use Aegir\Provision\Commands\ExampleCommands;
 
+use Aegir\Provision\Robo\ProvisionCollectionBuilder;
 use Aegir\Provision\Robo\ProvisionExecutor;
 use Aegir\Provision\Robo\ProvisionTasks;
 use League\Container\Container;
@@ -110,7 +111,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         // in the container. "collectionBuilder" used for the actual command that
         // was executed, and "builder" to be used with non-command classes.
         $tasks = new ProvisionTasks();
-        $builder = new CollectionBuilder($tasks);
+        $builder = new ProvisionCollectionBuilder($tasks);
         $tasks->setBuilder($builder);
         $container->add('builder', $builder);
         $container->add('executor', ProvisionExecutor::class)
@@ -125,5 +126,15 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     public function getOutput()
     {
         return $this->output();
+    }
+    
+    /**
+     * Temporary helper to allow public access to input.
+     *
+     * @return \Symfony\Component\Console\Input\InputInterface
+     */
+    public function getInput()
+    {
+        return $this->input();
     }
 }
