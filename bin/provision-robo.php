@@ -16,30 +16,39 @@ if (file_exists($autoloadFile = __DIR__ . '/vendor/autoload.php')
     throw new \Exception("Could not locate autoload.php. cwd is $cwd; __DIR__ is " . __DIR__);
 }
 
-
 use Aegir\Provision\Console\ConsoleOutput;
-use Aegir\Provision\Console\ActiveConfig;
-use Aegir\Provision\Console\DotEnvConfig;
-use Aegir\Provision\Console\EnvConfig;
-use Aegir\Provision\Console\YamlConfig;
+use Aegir\Provision\Console\Config;
+
+use Drupal\Console\Core\Style\DrupalStyle;
 use Robo\Common\TimeKeeper;
 use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Exception\InvalidOptionException;
+use Symfony\Component\Console\Exception\CommandNotFoundException;
 
 // Start Timer.
 $timer = new TimeKeeper();
 $timer->start();
 
-// Create input output objects.
-$input = new ArgvInput($argv);
-$output = new ConsoleOutput();
-
-// Create a config object.
-$config = new ActiveConfig();
-
-// Create the app.
-$app = new \Aegir\Provision\Provision($config, $input, $output);
-
-$status_code = $app->run($input, $output);
+try {
+    // Create input output objects.
+    $input = new ArgvInput($argv);
+    $output = new ConsoleOutput();
+    $io = new DrupalStyle($input, $output);
+    
+    // Create a config object.
+    $config = new Config();
+    
+    // Create the app.
+    $app = new \Aegir\Provision\Provision($config, $input, $output);
+    
+    // Run the app.
+    $status_code = $app->run($input, $output);
+    
+}
+catch (InvalidOptionException $e) {
+    $io->error("There was a problem with your console configuration: " . $e->getMessage(), 1);
+    $status_code = 1;
+}
 
 // Stop timer.
 $timer->stop();

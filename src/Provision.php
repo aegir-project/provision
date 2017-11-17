@@ -3,9 +3,9 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Console\Config;
 use Aegir\Provision\Commands\ExampleCommands;
 
-use Consolidation\Config\Loader\ConfigProcessor;
 use League\Container\Container;
 use League\Container\ContainerAwareInterface;
 use League\Container\ContainerAwareTrait;
@@ -13,15 +13,15 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Robo\Collection\CollectionBuilder;
 use Robo\Common\ConfigAwareTrait;
-use Robo\Config\Config;
+use Robo\Common\IO;
 use Robo\Contract\ConfigAwareInterface;
+use Robo\Contract\IOAwareInterface;
 use Robo\Robo;
 use Robo\Runner as RoboRunner;
-use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Provision implements ConfigAwareInterface, ContainerAwareInterface, LoggerAwareInterface {
+class Provision implements ConfigAwareInterface, ContainerAwareInterface, LoggerAwareInterface, IOAwareInterface {
     
     const APPLICATION_NAME = 'Aegir Provision';
     const VERSION = '4.x-dev';
@@ -30,6 +30,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     use ConfigAwareTrait;
     use ContainerAwareTrait;
     use LoggerAwareTrait;
+    use IO;
     
     /**
      * @var \Robo\Runner
@@ -41,23 +42,24 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      */
     private $commands = [];
     
+    /**
+     * Provision constructor.
+     *
+     * @param \Aegir\Provision\Console\Config                        $config
+     * @param \Symfony\Component\Console\Input\InputInterface|null   $input
+     * @param \Symfony\Component\Console\Output\OutputInterface|null $output
+     */
     public function __construct(
         Config $config,
         InputInterface $input = NULL,
         OutputInterface $output = NULL
     ) {
-//
-//        // Prepare Console configuration and import it into Robo config.
-//        $consoleConfig = new \Aegir\Provision\Console\Config();
-//
-//        $config = new Config();
-//        $config->import($consoleConfig->all());
-        
         $this->setConfig($config);
+        $this->setInput($input);
+        $this->setOutput($output);
 
         // Create Application.
-        $application = new \Aegir\Provision\Application(self::APPLICATION_NAME, self::VERSION, $this);
-        $application->console = $output;
+        $application = new Application(self::APPLICATION_NAME, self::VERSION, $this);
 //        $application->setConfig($consoleConfig);
         
         // Create and configure container.
@@ -95,5 +97,15 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         $tasks->setBuilder($builder);
         $container->add('builder', $builder);
     
+    }
+    
+    /**
+     * Temporary helper to allow public access to output.
+     *
+     * @return \Symfony\Component\Console\Output\OutputInterface
+     */
+    public function getOutput()
+    {
+        return $this->output();
     }
 }

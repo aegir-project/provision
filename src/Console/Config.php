@@ -2,66 +2,48 @@
 
 namespace Aegir\Provision\Console;
 
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
-use Symfony\Component\Config\Definition\ConfigurationInterface;
-use Symfony\Component\Config\Definition\Processor;
-use Symfony\Component\Yaml\Dumper;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
-use Symfony\Component\Yaml\Yaml;
-
+use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Console\Exception\InvalidOptionException;
 
 /**
- * Class Config.
+ * Class Config
+ * @package Aegir\Provision\Console
+ *
+ * Many thanks to pantheon-systems/terminus. Inspired by DefaultConfig
  */
-class Config implements ConfigurationInterface
+class Config extends ProvisionConfig
 {
-
-    /**
-     * Configuration values array.
-     *
-     * @var array
-     */
-    protected $config = [];
-
-    /**
-     * Path to config YML file.
-     *
-     * @var string
-     */
-    private $config_path = '';
-
-    /**
-     * Filename of config YML file.
-     *
-     * @var string
-     */
-    private $config_filename = '.provision.yml';
     const CONFIG_FILENAME = '.provision.yml';
     
     /**
-     * {@inheritdoc}
+     * DefaultsConfig constructor.
      */
     public function __construct()
     {
-        $this->config_path = $this->getHomeDir().'/'.$this->config_filename;
-
-        try {
-            $processor = new Processor();
-            $configs = func_get_args();
-            if (file_exists($this->config_path)) {
-                $configs[] = Yaml::parse(file_get_contents($this->config_path));
-            }
-            $this->config = $processor->processConfiguration($this, $configs);
-        } catch (\Exception $e) {
-            throw new Exception(
-              'There is an error with your configuration: '.$e->getMessage()
-            );
-        }
+        parent::__construct();
+        
+        $this->set('root', $this->getProvisionRoot());
+        $this->set('php', $this->getPhpBinary());
+        $this->set('php_version', PHP_VERSION);
+        $this->set('php_ini', get_cfg_var('cfg_file_path'));
+        $this->set('script', $this->getProvisionScript());
+        $this->set('os_version', php_uname('v'));
+        $this->set('user_home', $this->getHomeDir());
+        
+        $this->set('aegir_root', $this->getHomeDir());
+        $this->set('script_user', $this->getScriptUser());
+        $this->set('config_path', $this->getHomeDir() . '/config');
+        
+        $file = $this->get('user_home') . DIRECTORY_SEPARATOR . Config::CONFIG_FILENAME;
+        $this->set('console_config_file', $file);
+        
+        $this->extend(new YamlConfig($this->get('user_home') . DIRECTORY_SEPARATOR . Config::CONFIG_FILENAME));
+        $this->extend(new DotEnvConfig(getcwd()));
+        $this->extend(new EnvConfig());
 
         $this->validateConfig();
     }
-
+    
     /**
      * Check configuration values against the current system.
      *
@@ -70,204 +52,108 @@ class Config implements ConfigurationInterface
     protected function validateConfig() {
         // Check that aegir_root is writable.
         // @TODO: Create some kind of Setup functionality.
-        if (!is_writable($this->config['aegir_root'])) {
-            throw new \Exception(
-              "There is an error with your configuration. The folder set to 'aegir_root' ({$this->config['aegir_root']}) is not writable. Fix this or change the aegir_root value in the file {$this->config_path}."
+        if (!is_writable($this->get('aegir_root'))) {
+            throw new InvalidOptionException(
+                "The folder set to 'aegir_root' ({$this->get('aegir_root')}) is not writable. Fix this or change the aegir_root value in the file {$this->get('console_config_file')}"
             );
         }
-        // Check that config_path exists and is writable.
-        if (!file_exists($this->config['config_path'])) {
-            throw new \Exception(
-              "There is an error with your configuration. The folder set to 'config_path' ({$this->config['config_path']}) does not exist. Create it or change the config_path value in the file {$this->config_path}."
+        // If config_path does not exist and we cannot create it...
+        if (!file_exists($this->get('config_path')) && !mkdir($this->get('config_path'))) {
+            throw new InvalidOptionException(
+                "The folder set to 'config_path' ({$this->get('config_path')}) does not exist, and cannot be created. Create it manually or change the 'config_path' value in the file {$this->get('console_config_file')}."
             );
         }
-        elseif (!is_writable($this->config['config_path'])) {
-            throw new \Exception(
-              "There is an error with your configuration. The folder set to 'config_path' ({$this->config['config_path']}) is not writable. Fix this or change the config_path value in the file {$this->config_path}."
+        elseif (!is_writable($this->get('config_path'))) {
+            throw new InvalidOptionException(
+                "The folder set to 'config_path' ({$this->get('config_path')}) is not writable. Fix this or change the config_path value in the file {$this->get('console_config_file')}."
             );
         }
-        elseif (!file_exists($this->config['config_path'] . '/provision')) {
-          mkdir($this->config['config_path'] . '/provision');
+        elseif (!file_exists($this->get('config_path') . '/provision')) {
+            mkdir($this->get('config_path') . '/provision');
         }
-
+        
         // Ensure that script_user is the user.
         $real_script_user = $this->getScriptUser();
-        if ($this->config['script_user'] != $real_script_user) {
-            throw new \Exception(
-              "There is an error with your configuration. The user set as 'script_user' ({$this->config['script_user']}) is not the currently running user ({$real_script_user}). Change to user {$this->config['script_user']} or change the script_user value in the file {$this->config_path}."
+        if ($this->get('script_user') != $real_script_user) {
+            throw new InvalidOptionException(
+                "The user set as 'script_user' ({$this->get('script_user')}) is not the currently running user ({$real_script_user}). Change to user {$this->config->get('script_user')} or change the script_user value in the file {{$this->get('console_config_file')}}."
             );
         }
     }
-
+    
+    
     /**
-     * {@inheritdoc}
+     * Get the name of the source for this configuration object.
+     *
+     * @return string
      */
-    public function getConfigTreeBuilder()
+    public function getSourceName()
     {
-        $tree_builder = new TreeBuilder();
-        $root_node = $tree_builder->root('aegir');
-        $root_node
-            ->children()
-                ->scalarNode('aegir_root')
-                    ->defaultValue(Config::getHomeDir())
-                ->end()
-                ->scalarNode('script_user')
-                    ->defaultValue(Config::getScriptUser())
-                ->end()
-                ->scalarNode('config_path')
-                    ->defaultValue(Config::getHomeDir() . '/config')
-                ->end()
-            ->end();;
-
-        return $tree_builder;
+        return 'Default';
     }
-
+    
     /**
-     * Get a config param value.
+     * Returns location of PHP with which to run Terminus
      *
-     * @param string $key
-     *                    Key of the param to get.
-     *
-     * @return mixed|null
-     *                    Value of the config param, or NULL if not present.
+     * @return string
      */
-    public function get($key, $name = null)
+    protected function getPhpBinary()
     {
-        if ($name) {
-            return array_key_exists(
-              $name,
-              $this->config[$key]
-            ) ? $this->config[$key][$name] : null;
-        } else {
-            return $this->has($key) ? $this->config[$key] : null;
+        return defined('PHP_BINARY') ? PHP_BINARY : 'php';
+    }
+    
+    /**
+     * Finds and returns the root directory of Provision
+     *
+     * @param string $current_dir Directory to start searching at
+     * @return string
+     * @throws \Exception
+     */
+    protected function getProvisionRoot($current_dir = null)
+    {
+        if (is_null($current_dir)) {
+            $current_dir = dirname(__DIR__);
         }
-    }
-
-    /**
-     * Check if config param is present.
-     *
-     * @param string $key
-     *                    Key of the param to check.
-     *
-     * @return bool
-     *              TRUE if key exists.
-     */
-    public function has($key)
-    {
-        return array_key_exists($key, $this->config);
-    }
-
-    /**
-     * Set a config param value.
-     *
-     * @param string $key
-     *                    Key of the param to get.
-     * @param mixed $val
-     *                    Value of the param to set.
-     *
-     * @return bool
-     */
-    public function set($key, $val)
-    {
-        return $this->config[$key] = $val;
-    }
-
-    /**
-     * Get all config values.
-     *
-     * @return array
-     *               All config galues.
-     */
-    public function all()
-    {
-        return $this->config;
-    }
-
-    /**
-     * Add a config param value to a config array.
-     *
-     * @param string $key
-     *                            Key of the group to set to.
-     * @param string|array $names
-     *                            Name of the new object to set.
-     * @param mixed $val
-     *                            Value of the new object to set.
-     *
-     * @return bool
-     */
-    public function add($key, $names, $val)
-    {
-        if (is_array($names)) {
-            $array_piece = &$this->config[$key];
-            foreach ($names as $name_key) {
-                $array_piece = &$array_piece[$name_key];
-            }
-
-            return $array_piece = $val;
-        } else {
-            return $this->config[$key][$names] = $val;
+        if (file_exists($current_dir . DIRECTORY_SEPARATOR . 'composer.json')) {
+            return $current_dir;
         }
-    }
-
-    /**
-     * Remove a config param from a config array.
-     *
-     * @param $key
-     * @param $name
-     *
-     * @return bool
-     */
-    public function remove($key, $name)
-    {
-        if (isset($this->config[$key][$name])) {
-            unset($this->config[$key][$name]);
-
-            return true;
-        } else {
-            return false;
+        $dir = explode(DIRECTORY_SEPARATOR, $current_dir);
+        array_pop($dir);
+        if (empty($dir)) {
+            throw new \Exception('Could not locate root to set PROVISION_ROOT.');
         }
+        $dir = implode(DIRECTORY_SEPARATOR, $dir);
+        $root_dir = $this->getProvisionRoot($dir);
+        return $root_dir;
     }
-
+    
     /**
-     * Saves the config class to file.
+     * Finds and returns the name of the script running Terminus functions
      *
-     * @return bool
+     * @return string
      */
-    public function save()
+    protected function getProvisionScript()
     {
-
-        // Create config folder if it does not exist.
-        $fs = new Filesystem();
-        $dumper = new Dumper();
-
-        try {
-            $fs->dumpFile($this->config_path, $dumper->dump($this->config, 10));
-
-            return true;
-        } catch (IOExceptionInterface $e) {
-            return false;
-        }
+        $debug           = debug_backtrace();
+        $script_location = array_pop($debug);
+        $script_name     = str_replace(
+            $this->getProvisionRoot() . DIRECTORY_SEPARATOR,
+            '',
+            $script_location['file']
+        );
+        return $script_name;
     }
-
-    /**
-     * Determine the user running provision.
-     */
-    static function getScriptUser() {
-        $real_script_user = posix_getpwuid(posix_geteuid());
-        return $real_script_user['name'];
-    }
-
+    
     /**
      * Returns the appropriate home directory.
      *
      * Adapted from Terminus Package Manager by Ed Reel
-     *
      * @author Ed Reel <@uberhacker>
      * @url    https://github.com/uberhacker/tpm
      *
      * @return string
      */
-    static function getHomeDir()
+    protected function getHomeDir()
     {
         $home = getenv('HOME');
         if (!$home) {
@@ -279,14 +165,14 @@ class Config implements ConfigurationInterface
                 $home = getenv('HOMEPATH');
             }
         }
-
         return $home;
     }
     
     /**
      * Determine the user running provision.
      */
-    public function getConfigPath() {
-        return $this->config_path;
+    protected function getScriptUser() {
+        $real_script_user = posix_getpwuid(posix_geteuid());
+        return $real_script_user['name'];
     }
 }
