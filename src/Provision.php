@@ -25,6 +25,16 @@ use Robo\Runner as RoboRunner;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Class Provision
+ *
+ * Uses BuilderAwareTrait to allow access to Robo Tasks:
+ *
+ * $this->getBuilder()->taskExec('ls -la')
+ *   ->run()
+ *
+ * @package Aegir\Provision
+ */
 class Provision implements ConfigAwareInterface, ContainerAwareInterface, LoggerAwareInterface, IOAwareInterface, BuilderAwareInterface {
     
     const APPLICATION_NAME = 'Aegir Provision';
@@ -90,7 +100,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     }
     
     /**
-     * Register the necessary classes for BLT.
+     * Register the necessary classes for Provision.
      */
     public function configureContainer(Container $container) {
     
