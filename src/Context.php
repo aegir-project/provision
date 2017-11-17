@@ -10,6 +10,8 @@ use Aegir\Provision\Console\Config;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Psr\Log\LoggerInterface;
+use Robo\Common\BuilderAwareTrait;
+use Robo\Contract\BuilderAwareInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Filesystem\Exception\IOException;
@@ -24,9 +26,11 @@ use Symfony\Component\Yaml\Yaml;
  *
  * @package Aegir\Provision
  */
-class Context
+class Context implements BuilderAwareInterface
 {
 
+    use BuilderAwareTrait;
+    
     /**
      * @var string
      * Name for saving aliases and referencing.
@@ -83,6 +87,10 @@ class Context
         $this->application = $application;
         $this->loadContextConfig($options);
         $this->prepareServices();
+        
+        if ($this->application) {
+            $this->setBuilder($this->application->provision->getBuilder());
+        }
     }
 
     /**

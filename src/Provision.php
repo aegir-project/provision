@@ -6,14 +6,18 @@ namespace Aegir\Provision;
 use Aegir\Provision\Console\Config;
 use Aegir\Provision\Commands\ExampleCommands;
 
+use Aegir\Provision\Robo\ProvisionExecutor;
+use Aegir\Provision\Robo\ProvisionTasks;
 use League\Container\Container;
 use League\Container\ContainerAwareInterface;
 use League\Container\ContainerAwareTrait;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Robo\Collection\CollectionBuilder;
+use Robo\Common\BuilderAwareTrait;
 use Robo\Common\ConfigAwareTrait;
 use Robo\Common\IO;
+use Robo\Contract\BuilderAwareInterface;
 use Robo\Contract\ConfigAwareInterface;
 use Robo\Contract\IOAwareInterface;
 use Robo\Robo;
@@ -21,12 +25,13 @@ use Robo\Runner as RoboRunner;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Provision implements ConfigAwareInterface, ContainerAwareInterface, LoggerAwareInterface, IOAwareInterface {
+class Provision implements ConfigAwareInterface, ContainerAwareInterface, LoggerAwareInterface, IOAwareInterface, BuilderAwareInterface {
     
     const APPLICATION_NAME = 'Aegir Provision';
     const VERSION = '4.x-dev';
     const REPOSITORY = 'aegir-project/provision';
     
+    use BuilderAwareTrait;
     use ConfigAwareTrait;
     use ContainerAwareTrait;
     use LoggerAwareTrait;
@@ -57,7 +62,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         $this->setConfig($config);
         $this->setInput($input);
         $this->setOutput($output);
-
+        
         // Create Application.
         $application = new Application(self::APPLICATION_NAME, self::VERSION, $this);
 //        $application->setConfig($consoleConfig);
@@ -74,6 +79,8 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         
         $this->runner->setContainer($container);
         $this->runner->setSelfUpdateRepository(self::REPOSITORY);
+    
+        $this->setBuilder($container->get('builder'));
     }
     
     public function run(InputInterface $input, OutputInterface $output) {
@@ -96,7 +103,8 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         $builder = new CollectionBuilder($tasks);
         $tasks->setBuilder($builder);
         $container->add('builder', $builder);
-    
+        $container->add('executor', ProvisionExecutor::class)
+            ->withArgument('builder');
     }
     
     /**
