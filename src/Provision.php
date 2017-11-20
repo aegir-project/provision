@@ -6,24 +6,25 @@ namespace Aegir\Provision;
 use Aegir\Provision\Console\Config;
 use Aegir\Provision\Commands\ExampleCommands;
 
+use Aegir\Provision\Console\ConsoleOutput;
 use Aegir\Provision\Robo\ProvisionCollectionBuilder;
 use Aegir\Provision\Robo\ProvisionExecutor;
 use Aegir\Provision\Robo\ProvisionTasks;
+use Drupal\Console\Core\Style\DrupalStyle;
 use League\Container\Container;
 use League\Container\ContainerAwareInterface;
 use League\Container\ContainerAwareTrait;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Robo\Collection\CollectionBuilder;
 use Robo\Common\BuilderAwareTrait;
 use Robo\Common\ConfigAwareTrait;
 use Robo\Common\IO;
 use Robo\Contract\BuilderAwareInterface;
 use Robo\Contract\ConfigAwareInterface;
 use Robo\Contract\IOAwareInterface;
-use Robo\Log\RoboLogger;
 use Robo\Robo;
 use Robo\Runner as RoboRunner;
+use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -142,6 +143,40 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         return $this->input();
     }
     
+    /**
+     * Gets Logger object.
+     * Returns the currently active Logger instance.
+     *
+     * @return \Psr\Log\LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+    
+    /**
+     * Provide access to DrupalStyle object.
+     *
+     * @return \Drupal\Console\Core\Style\DrupalStyle
+     */
+    public function io()
+    {
+        if (!$this->io) {
+            $this->io = new DrupalStyle($this->input(), $this->output());
+        }
+        return $this->io;
+    }
+    
+    /**
+     * Get a new Provision
+     * @return \Aegir\Provision\Provision
+     */
+    static function getProvision() {
+        $input = new ArgvInput();
+        $output = new ConsoleOutput();
+        $config = new Config();
+        return new Provision($config, $input, $output);
+    }
     
     /**
      * Load all contexts into Context objects.

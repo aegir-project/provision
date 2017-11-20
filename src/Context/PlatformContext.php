@@ -75,14 +75,14 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
      */
     public function verify()
     {
-        $this->application->io->customLite($this->getProperty('root'), 'Root: ', 'info');
-        $this->application->io->customLite($this->config_path, 'Configuration File: ', 'info');
+        $this->getProvision()->io()->customLite($this->getProperty('root'), 'Root: ', 'info');
+        $this->getProvision()->io()->customLite($this->config_path, 'Configuration File: ', 'info');
         
         // This is how you can use Robo Tasks in a platform verification call.
         // The "silent" method actually works here.
         // It only partially works in Service::restartServices()!
         $this->getBuilder()->taskExec('env')
-            ->silent(!$this->application->io->isVerbose())
+            ->silent(!$this->getProvision()->io()->isVerbose())
             ->run();
         
         return parent::verify();

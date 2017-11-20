@@ -105,18 +105,18 @@ class DbService extends Service
         try {
             $this->connect();
             $return = TRUE;
-            $this->provider->application->io->successLite('Successfully connected to database server!');
+            $this->provider->getProvision()->io()->successLite('Successfully connected to database server!');
     
             if ($this->can_create_database()) {
-                $this->provider->application->io->successLite('Provision can create new databases.');
+                $this->provider->getProvision()->io()->successLite('Provision can create new databases.');
             } else {
-                $this->provider->application->io->errorLite('Provision is unable to create databases.');
+                $this->provider->getProvision()->io()->errorLite('Provision is unable to create databases.');
                 $return = FALSE;
             }
             if ($this->can_grant_privileges()) {
-                $this->provider->application->io->successLite('Provision can grant privileges on database users.');
+                $this->provider->getProvision()->io()->successLite('Provision can grant privileges on database users.');
             } else {
-                $this->provider->application->io->errorLite('Provision is unable to grant privileges on database users.');
+                $this->provider->getProvision()->io()->errorLite('Provision is unable to grant privileges on database users.');
                 $return = FALSE;
             }
             
@@ -125,7 +125,7 @@ class DbService extends Service
             ];
         }
         catch (\PDOException $e) {
-            $this->provider->application->io->errorLite($e->getMessage());
+            $this->provider->getProvision()->io()->errorLite($e->getMessage());
             return [
                 'service' => FALSE
             ];
@@ -156,13 +156,13 @@ class DbService extends Service
     
         try {
             $this->connect();
-            $this->subscription->context->application->io->successLite('Successfully connected to database server.');
+            $this->subscription->context->getProvision()->io()->successLite('Successfully connected to database server.');
             return [
                 'service' => TRUE
             ];
         }
         catch (\PDOException $e) {
-            $this->subscription->context->application->io->errorLite($e->getMessage());
+            $this->subscription->context->getProvision()->io()->errorLite($e->getMessage());
             return [
                 'service' => FALSE
             ];
@@ -215,11 +215,11 @@ class DbService extends Service
         $query = preg_replace_callback($this::PROVISION_QUERY_REGEXP, array($this, 'query_callback'), $query);
         
         try {
-            $this->provider->application->logger->notice("Running Query: {$query}");
+            $this->provider->getProvision()->getLogger()->info("Running Query: {$query}");
             $result = $this->conn->query($query);
         }
         catch (\PDOException $e) {
-            $this->provider->application->io->errorLite($e->getMessage());
+            $this->provider->getProvision()->getLogger()->error($e->getMessage());
             return FALSE;
         }
         
@@ -381,13 +381,13 @@ class DbService extends Service
         }
 
         if ($this->database_exists($db_name)) {
-            $this->application->io->successLite(strtr("Database '@name' already exists.", [
+            $this->getProvision()->io()->successLite(strtr("Database '@name' already exists.", [
                 '@name' => $db_name
             ]));
         }
         else {
             $this->create_database($db_name);
-            $this->application->io->successLite(strtr("Created database '@name'.", [
+            $this->getProvision()->io()->successLite(strtr("Created database '@name'.", [
                 '@name' => $db_name,
             ]));
         }
@@ -398,7 +398,7 @@ class DbService extends Service
                     '@user' => $db_user
                 ]));
             }
-            $this->application->io->successLite(strtr("Granted privileges to user '@user@@host' for database '@name'.", [
+            $this->getProvision()->io()->successLite(strtr("Granted privileges to user '@user@@host' for database '@name'.", [
                 '@user' => $db_user,
                 '@host' => $db_grant_host,
                 '@name' => $db_name,
@@ -408,7 +408,7 @@ class DbService extends Service
         $status = $this->database_exists($db_name);
 
         if ($status) {
-            $this->application->io->successLite(strtr("Database service configured for site @name.", [
+            $this->getProvision()->io()->successLite(strtr("Database service configured for site @name.", [
                 '@name' => $site->name,
             ]));
         }

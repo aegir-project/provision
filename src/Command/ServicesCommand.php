@@ -219,7 +219,7 @@ class ServicesCommand extends Command
         }
         // All other context types are associating with servers that provide the service.
         else {
-            if (empty($this->getApplication()->getServerOptions($service))) {
+            if (empty($this->getProvision()->getServerOptions($service))) {
                 throw new \Exception("No servers providing $service service were found. Create one with `provision save` or use `provision services` to add to an existing server.");
             }
             
@@ -228,7 +228,7 @@ class ServicesCommand extends Command
                 $this->io->choice('Which server?', $this->getApplication()->getServerOptions($service));
 
             // Then ask for all options.
-            $server_context = $this->getApplication()->getContext($server);
+            $server_context = $this->getProvision()->getContext($server);
             $properties = $this->askForServiceProperties($service);
 
             $this->io->info("Using $service service from server $server...");

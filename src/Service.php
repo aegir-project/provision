@@ -110,19 +110,19 @@ class Service implements BuilderAwareInterface
             return TRUE;
         }
         else {
-            $task = $this->application->getProvision()->getBuilder()->taskExec($this->properties['restart_command'])
-                ->silent(!$this->application->io->isVerbose())
+            $task = $this->getProvision()->getBuilder()->taskExec($this->properties['restart_command'])
+                ->silent(!$this->getProvision()->io()->isVerbose())
             ;
             
             /** @var \Robo\Result $result */
             $result = $task->run();
             if ($result->wasSuccessful()) {
-                $this->application->io->successLite('Service restarted.');
+                $this->getProvision()->io()->successLite('Service restarted.');
                 sleep(1);
                 return TRUE;
             }
             else {
-                    $this->application->io->errorLite('Unable to restart service:' . $result->getOutputData());
+                    $this->getProvision()->io()->errorLite('Unable to restart service:' . $result->getOutputData());
             }
         }
         return FALSE;
@@ -174,12 +174,12 @@ class Service implements BuilderAwareInterface
             try {
                 $config = new $configuration_class($context, $this);
                 $config->write();
-                $context->application->io->successLite(
+                $context->getProvision()->io()->successLite(
                     'Wrote '.$config->description.' to '.$config->filename()
                 );
             }
             catch (\Exception $e) {
-                $context->application->io->errorLite(
+                $context->getProvision()->io()->errorLite(
                     'Unable to write '.$config->description.' to '.$config->filename() . ': ' . $e->getMessage()
                 );
                 $success = FALSE;

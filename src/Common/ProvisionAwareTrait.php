@@ -28,6 +28,11 @@ trait ProvisionAwareTrait
      */
     public function getProvision()
     {
+    
+        if (is_null($this->provision)) {
+            return Provision::getProvision();
+        }
+    
         return $this->provision;
     }
 }

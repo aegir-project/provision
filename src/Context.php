@@ -10,7 +10,6 @@ use Aegir\Provision\Common\ProvisionAwareTrait;
 use Aegir\Provision\Console\Config;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Drupal\Console\Core\Style\DrupalStyle;
-use Psr\Log\LoggerInterface;
 use Robo\Common\BuilderAwareTrait;
 use Robo\Contract\BuilderAwareInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -67,11 +66,6 @@ class Context implements BuilderAwareInterface
      */
     protected $properties = [];
     
-    /**
-     * @var LoggerInterface
-     */
-    public $logger;
-
     /**
      * Context constructor.
      *
