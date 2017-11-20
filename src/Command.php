@@ -4,6 +4,8 @@ namespace Aegir\Provision;
 
 use Aegir\Provision\Common\ProvisionAwareTrait;
 use Drupal\Console\Core\Style\DrupalStyle;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\Console\Command\Command as BaseCommand;
 use Drupal\Console\Core\Command\Shared\CommandTrait;
@@ -21,6 +23,7 @@ abstract class Command extends BaseCommand
 
     use CommandTrait;
     use ProvisionAwareTrait;
+    use LoggerAwareTrait;
 
     /**
      * @var \Symfony\Component\Console\Input\InputInterface
@@ -51,18 +54,6 @@ abstract class Command extends BaseCommand
      * @var string
      */
     public $context_name;
-    
-    
-    /**
-     * Command constructor.
-     *
-     * @param \Aegir\Provision\Provision $provision
-     */
-    function __construct(Provision $provision)
-    {
-        $this->setProvision($provision);
-        parent::__construct();
-    }
     
     /**
      * @param InputInterface $input An InputInterface instance

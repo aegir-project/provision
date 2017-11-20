@@ -11,6 +11,7 @@ use Aegir\Provision\Common\ProvisionAwareTrait;
 use Aegir\Provision\Console\Config;
 use Aegir\Provision\Console\ConsoleOutput;
 use Drupal\Console\Core\Style\DrupalStyle;
+use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\Console\Command\HelpCommand;
@@ -21,6 +22,7 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Application as BaseApplication;
+use Symfony\Component\Console\Command\Command as BaseCommand;
 
 //use Symfony\Component\DependencyInjection\ContainerInterface;
 //use Drupal\Console\Annotations\DrupalCommandAnnotationReader;
@@ -46,6 +48,7 @@ class Application extends BaseApplication
     const DEFAULT_TIMEZONE = 'America/New_York';
 
     use ProvisionAwareTrait;
+    use LoggerAwareTrait;
     
     /**
      * @var ConsoleOutput
@@ -66,46 +69,8 @@ class Application extends BaseApplication
         if (empty(ini_get('date.timezone'))) {
             date_default_timezone_set($this::DEFAULT_TIMEZONE);
         }
-//
-//        // Load Configs
-//        try {
-//            $this->config = new Config();
-//        }
-//        catch (\Exception $e) {
-//            throw new \Exception($e->getMessage());
-//        }
-
+        
         parent::__construct($name, $version);
-    }
-    
-    /**
-     * Prepare input and output arguments. Use this to extend the Application object so that $input and $output is fully populated.
-     *
-     * @param \Symfony\Component\Console\Input\InputInterface   $input
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
-     */
-    public function configureIO(InputInterface $input, OutputInterface $output) {
-        parent::configureIO($input, $output);
-        
-        $this->io = new DrupalStyle($input, $output);
-        
-        $this->input = $input;
-        $this->output = $output;
-        
-        $this->logger = new ConsoleLogger($output,
-            [LogLevel::INFO => OutputInterface::VERBOSITY_NORMAL]
-        );
-    }
-
-    /**
-     * Getter for Configuration.
-     *
-     * @return \Aegir\Provision\Console\ProvisionConfig
-     *                Configuration object.
-     */
-    public function getConfig()
-    {
-        return $this->getProvision()->getConfig();
     }
 
     /**
@@ -115,15 +80,34 @@ class Application extends BaseApplication
     {
         $commands[] = new HelpCommand();
         $commands[] = new ListCommand();
-        $commands[] = new SaveCommand($this->getProvision());
-        $commands[] = new ServicesCommand($this->getProvision());
+        $commands[] = new SaveCommand();
+        $commands[] = new ServicesCommand();
 //        $commands[] = new ShellCommand();
-        $commands[] = new StatusCommand($this->getProvision());
-        $commands[] = new VerifyCommand($this->getProvision());
+        $commands[] = new StatusCommand();
+        $commands[] = new VerifyCommand();
 
         return $commands;
     }
-
+    
+    /**
+     * Interrupts Command execution to add services like provision and logger.
+     *
+     * @param \Symfony\Component\Console\Command\Command        $command
+     * @param \Symfony\Component\Console\Input\InputInterface   $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     *
+     * @return int
+     */
+    protected function doRunCommand( BaseCommand $command, InputInterface $input, OutputInterface $output)
+    {
+        $command
+            ->setProvision($this->getProvision())
+            ->setLogger($this->logger)
+        ;
+        $exitCode = parent::doRunCommand($command, $input, $output);
+        return $exitCode;
+    }
+    
     /**
      * {@inheritdoc}
      *

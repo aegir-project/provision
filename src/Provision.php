@@ -16,6 +16,7 @@ use League\Container\ContainerAwareInterface;
 use League\Container\ContainerAwareTrait;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LogLevel;
 use Robo\Common\BuilderAwareTrait;
 use Robo\Common\ConfigAwareTrait;
 use Robo\Common\IO;
@@ -26,6 +27,7 @@ use Robo\Robo;
 use Robo\Runner as RoboRunner;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -72,21 +74,26 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         InputInterface $input = NULL,
         OutputInterface $output = NULL
     ) {
-        $this->setConfig($config);
-        $this->setInput($input);
-        $this->setOutput($output);
+    
+        $logger = new ConsoleLogger($output);
+        
+        $this
+            ->setConfig($config)
+            ->setInput($input)
+            ->setOutput($output)
+        ;
         
         // Create Application.
         $application = new Application(self::APPLICATION_NAME, self::VERSION);
-        $application->setProvision($this);
-        
-//        $application->setConfig($consoleConfig);
+        $application
+            ->setProvision($this)
+            ->setLogger($logger);
         
         // Create and configure container.
         $container = Robo::createDefaultContainer($input, $output, $application, $config);
         $this->setContainer($container);
         $this->configureContainer($container);
-        
+    
         // Instantiate Robo Runner.
         $this->runner = new RoboRunner([
             ExampleCommands::class
@@ -260,7 +267,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      *
      * @param $name
      *
-     * @return \Aegir\Provision\Context
+     * @return array|\Aegir\Provision\Context
      * @throws \Exception
      */
     static public function getContext($name, Provision $provision = NULL) {
