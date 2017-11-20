@@ -228,7 +228,7 @@ class SaveCommand extends Command
      */
     public function askForContext($question = 'Choose a context')
     {
-        $options = $this->getApplication()->getAllContextsOptions();
+        $options = $this->getProvision()->getAllContextsOptions();
 
         // If there are options, add "new" to the list.
         if (count($options)) {
@@ -360,7 +360,7 @@ class SaveCommand extends Command
                 }
             }
             else {
-                $contexts[$property] = $this->io->choice("Select $property context", $this->getApplication()->getAllContextsOptions($context_type));
+                $contexts[$property] = $this->io->choice("Select $property context", $this->getProvision()->getAllContextsOptions($context_type));
             }
         }
         return $contexts;
