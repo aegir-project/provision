@@ -100,10 +100,13 @@ class Application extends BaseApplication
      */
     protected function doRunCommand( BaseCommand $command, InputInterface $input, OutputInterface $output)
     {
-        $command
-            ->setProvision($this->getProvision())
-            ->setLogger($this->logger)
-        ;
+        // Only setProvision if the command is using the trait.
+        if (method_exists($command, 'setProvision')) {
+            $command
+                ->setProvision($this->getProvision())
+                ->setLogger($this->logger)
+            ;
+        }
         $exitCode = parent::doRunCommand($command, $input, $output);
         return $exitCode;
     }
