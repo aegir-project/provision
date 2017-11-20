@@ -89,7 +89,7 @@ class Context implements BuilderAwareInterface
         $this->prepareServices();
         
         if ($this->application) {
-            $this->setBuilder($this->application->provision->getBuilder());
+            $this->setBuilder($this->application->getProvision()->getBuilder());
         }
     }
 
@@ -331,7 +331,7 @@ class Context implements BuilderAwareInterface
 
                 // If type is empty, it's because it's in the ServerContext
                 if (empty($info['type'])) {
-                    $server = Application::getContext($info['server']);
+                    $server = Provision::getContext($info['server']);
                     $service_type = ucfirst($server->getService($service)->type);
                 }
                 else {

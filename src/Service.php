@@ -112,7 +112,7 @@ class Service implements BuilderAwareInterface
             return TRUE;
         }
         else {
-            $task = $this->application->provision->getBuilder()->taskExec($this->properties['restart_command'])
+            $task = $this->application->getProvision()->getBuilder()->taskExec($this->properties['restart_command'])
                 ->silent(!$this->application->io->isVerbose())
             ;
             

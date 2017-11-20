@@ -77,6 +77,5 @@ class VerifyCommand extends Command
 
         $message = $this->context->verify();
 
-        $this->io->comment($message);
     }
 }

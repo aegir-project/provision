@@ -8,6 +8,7 @@ use Aegir\Provision\Context;
 use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Context\SiteContext;
+use Aegir\Provision\Provision;
 use Aegir\Provision\Service;
 use Symfony\Component\Console\Exception\InvalidOptionException;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -152,7 +153,7 @@ class SaveCommand extends Command
             // Check for context type service requirements.
             $exit = FALSE;
             $this->io->comment("Checking service requirements for context type {$context_type}...");
-            $reqs = Application::checkServiceRequirements($context_type);
+            $reqs = Provision::checkServiceRequirements($context_type);
             foreach ($reqs as $service => $available) {
                 if ($available) {
                     $this->io->successLite("Service $service: Available");
@@ -305,7 +306,7 @@ class SaveCommand extends Command
 //                $context_name = $this->io->ask($all_services[$type]);
 //            }
 
-//            $context = Application::getContext($context_name);
+//            $context = Provision::getContext($context_name);
 
             $this->io->info("Adding required service $type...");
 
@@ -348,7 +349,7 @@ class SaveCommand extends Command
                 $contexts[$property] = $this->input->getOption($property);
                 
                 try {
-                    $context = Application::getContext($contexts[$property]);
+                    $context = Provision::getContext($contexts[$property]);
                 }
                 catch (\Exception $e) {
                     throw new \Exception("Context set by option --{$property} does not exist.");

@@ -2,6 +2,7 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Common\ProvisionAwareTrait;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Psr\Log\LogLevel;
 use Symfony\Component\Console\Command\Command as BaseCommand;
@@ -19,7 +20,7 @@ abstract class Command extends BaseCommand
 {
 
     use CommandTrait;
-
+    use ProvisionAwareTrait;
 
     /**
      * @var \Symfony\Component\Console\Input\InputInterface
@@ -50,7 +51,19 @@ abstract class Command extends BaseCommand
      * @var string
      */
     public $context_name;
-
+    
+    
+    /**
+     * Command constructor.
+     *
+     * @param \Aegir\Provision\Provision $provision
+     */
+    function __construct(Provision $provision)
+    {
+        $this->setProvision($provision);
+        parent::__construct();
+    }
+    
     /**
      * @param InputInterface $input An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
@@ -70,7 +83,7 @@ abstract class Command extends BaseCommand
             try {
                 // Load context from context_name argument.
                 $this->context_name = $this->input->getArgument('context_name');
-                $this->context = Application::getContext($this->context_name, $this->getApplication());
+                $this->context = Provision::getContext($this->context_name, $this->getApplication());
             }
             catch (\Exception $e) {
 
@@ -92,7 +105,7 @@ abstract class Command extends BaseCommand
             $this->input->setArgument('context_name', $this->context_name);
 
             try {
-                $this->context = Application::getContext($this->context_name, $this->getApplication());
+                $this->context = Provision::getContext($this->context_name, $this->getApplication());
             }
             catch (\Exception $e) {
                 $this->context = NULL;

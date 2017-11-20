@@ -59,7 +59,7 @@ class StatusCommand extends Command
         else {
             $headers = ['Provision CLI Configuration'];
             $rows = [];
-            $config = $this->getApplication()->getConfig()->toArray();
+            $config = $this->getProvision()->getConfig()->toArray();
             unset($config['options']);
             foreach ($config as $key => $value) {
                 $rows[] = [$key, $value];
@@ -68,14 +68,14 @@ class StatusCommand extends Command
     
             // Lookup all contexts
             $rows = [];
-            foreach ($this->getApplication()->getAllContexts() as $context) {
+            foreach ($this->getProvision()->getAllContexts() as $context) {
                 $rows[] = [$context->name, $context->type];
             }
             $headers = ['Contexts'];
             $this->io->table($headers, $rows);
     
             // Offer to output a context status.
-            $options = $this->getApplication()->getAllContextsOptions();
+            $options = $this->getProvision()->getAllContextsOptions();
             $options['none'] = 'none';
             $context = $this->io->choiceNoList('Get status for', $options, 'none');
             
