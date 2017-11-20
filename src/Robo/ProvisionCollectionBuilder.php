@@ -29,6 +29,4 @@ class ProvisionCollectionBuilder extends CollectionBuilder {
      */
     protected $currentTask;
     
-    use TaskIO;
-
 }
