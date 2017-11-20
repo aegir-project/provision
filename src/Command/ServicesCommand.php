@@ -225,7 +225,7 @@ class ServicesCommand extends Command
             
             $server = $this->input->getArgument('server')?
                 $this->input->getArgument('server'):
-                $this->io->choice('Which server?', $this->getApplication()->getServerOptions($service));
+                $this->io->choice('Which server?', $this->getProvision()->getServerOptions($service));
 
             // Then ask for all options.
             $server_context = $this->getProvision()->getContext($server);
