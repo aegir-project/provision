@@ -9,6 +9,8 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Common\ProvisionAwareTrait;
+
 class ServiceSubscription {
   
    public $context;
@@ -16,16 +18,24 @@ class ServiceSubscription {
    public $server;
    public $type;
    public $properties = [];
+   
+   use ProvisionAwareTrait;
   
-  function __construct($context, $server, $service_name) {
+  function __construct(
+      Context $context,
+      $server,
+      $service_name
+  ) {
       $this->context = $context;
-      $this->server = Provision::getContext($server, $context->application);
+      $this->server = Provision::getContext($server, $context->getProvision());
       $this->service = $this->server->getService($service_name);
       $this->type = $this->server->getService($service_name)->type;
       
       if (isset($context->config['service_subscriptions'][$service_name]['properties'])) {
           $this->properties = $context->config['service_subscriptions'][$service_name]['properties'];
       }
+      
+      $this->setProvision($context->getProvision());
   }
   
   public function verify() {

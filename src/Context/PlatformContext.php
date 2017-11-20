@@ -4,6 +4,7 @@ namespace Aegir\Provision\Context;
 
 use Aegir\Provision\Application;
 use Aegir\Provision\ContextSubscriber;
+use Aegir\Provision\Provision;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
@@ -30,12 +31,15 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
      * PlatformContext constructor.
      *
      * @param $name
-     * @param Application $application
+     * @param Provision $provision
      * @param array $options
      */
-    function __construct($name, Application $application = NULL, array $options = [])
-    {
-        parent::__construct($name, $application, $options);
+    function __construct(
+        $name,
+        Provision $provision = NULL,
+        $options = []
+    ) {
+        parent::__construct($name, $provision, $options);
 
         // Load "web_server" context.
         // There is no need to validate for $this->properties['web_server'] because the config system does that.

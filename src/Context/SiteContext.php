@@ -35,15 +35,18 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
      * @param Application $application
      * @param array $options
      */
-    function __construct($name, Application $application = NULL, array $options = [])
-    {
-        parent::__construct($name, $application, $options);
+    function __construct(
+        $name,
+        Provision $provision = NULL,
+        $options = []
+    ) {
+        parent::__construct($name, $provision, $options);
 
         // Load "web_server" and "platform" contexts.
         // There is no need to check if the property exists because the config system does that.
 //        $this->db_server = $application->getContext($this->properties['db_server']);
 
-        $this->platform = Provision::getContext($this->properties['platform'], $application);
+        $this->platform = Provision::getContext($this->properties['platform'], $provision);
 
 
         // Add platform http service subscription.

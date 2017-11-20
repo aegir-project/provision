@@ -9,14 +9,14 @@ trait ProvisionAwareTrait
     /**
      * @var Provision
      */
-    protected $provision;
+    protected $provision = NULL;
     
     /**
      * @param Provision $provision
      *
      * @return $this
      */
-    public function setProvision(Provision $provision)
+    public function setProvision(Provision $provision = NULL)
     {
         $this->provision = $provision;
         

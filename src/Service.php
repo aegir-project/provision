@@ -8,6 +8,7 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Common\ProvisionAwareTrait;
 use Robo\Common\BuilderAwareTrait;
 use Robo\Common\OutputAdapter;
 use Robo\Contract\BuilderAwareInterface;
@@ -16,6 +17,7 @@ class Service implements BuilderAwareInterface
 {
     
     use BuilderAwareTrait;
+    use ProvisionAwareTrait;
     
     public $type;
     
@@ -28,11 +30,6 @@ class Service implements BuilderAwareInterface
      * @see \Aegir\Provision\Context
      */
     public $provider;
-    
-    /**
-     * @var \Aegir\Provision\Application;
-     */
-    public $application;
     
     /**
      * @var string
@@ -49,7 +46,8 @@ class Service implements BuilderAwareInterface
     function __construct($service_config, Context $provider_context)
     {
         $this->provider = $provider_context;
-        $this->application = $provider_context->application;
+        $this->setProvision($provider_context->getProvision());
+        
         $this->type = $service_config['type'];
         $this->properties = $service_config['properties'];
         if ($provider_context->getBuilder()) {

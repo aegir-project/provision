@@ -148,7 +148,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      *
      * @return array
      */
-    static function getAllContexts($name = '', $application = NULL) {
+    static function getAllContexts($name = '', Provision $provision = NULL) {
         $contexts = [];
         $config = new Config();
         
@@ -166,7 +166,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         
         foreach ($context_files as $context) {
             $class = Context::getClassName($context['type']);
-            $contexts[$context['name']] = new $class($context['name'], $application);
+            $contexts[$context['name']] = new $class($context['name'], $provision);
         }
         
         if ($name && isset($contexts[$name])) {
@@ -228,14 +228,14 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      * @return \Aegir\Provision\Context
      * @throws \Exception
      */
-    static public function getContext($name, Application $application = NULL) {
+    static public function getContext($name, Provision $provision = NULL) {
         if (empty($name)) {
             throw new \Exception('Context name must not be empty.');
         }
-        if (empty(Provision::getAllContexts($name, $application))) {
+        if (empty(Provision::getAllContexts($name, $provision))) {
             throw new \Exception('Context not found with name: ' . $name);
         }
-        return Provision::getAllContexts($name, $application);
+        return Provision::getAllContexts($name, $provision);
     }
     
     /**

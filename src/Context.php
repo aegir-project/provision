@@ -6,6 +6,7 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Common\ProvisionAwareTrait;
 use Aegir\Provision\Console\Config;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Drupal\Console\Core\Style\DrupalStyle;
@@ -30,6 +31,7 @@ class Context implements BuilderAwareInterface
 {
 
     use BuilderAwareTrait;
+    use ProvisionAwareTrait;
     
     /**
      * @var string
@@ -64,11 +66,6 @@ class Context implements BuilderAwareInterface
      * init(), set defaults with setProperty().
      */
     protected $properties = [];
-
-    /**
-     * @var \Aegir\Provision\Application;
-     */
-    public $application;
     
     /**
      * @var LoggerInterface
@@ -81,15 +78,18 @@ class Context implements BuilderAwareInterface
      * @param $name
      * @param array $options
      */
-    function __construct($name, Application $application = NULL, $options = [])
+    function __construct(
+        $name,
+        Provision $provision = NULL,
+        $options = [])
     {
         $this->name = $name;
-        $this->application = $application;
         $this->loadContextConfig($options);
         $this->prepareServices();
         
-        if ($this->application) {
-            $this->setBuilder($this->application->getProvision()->getBuilder());
+        if ($provision) {
+            $this->setProvision($provision);
+            $this->setBuilder($this->getProvision()->getBuilder());
         }
     }
 
@@ -102,8 +102,8 @@ class Context implements BuilderAwareInterface
      */
     private function loadContextConfig($options = []) {
 
-        if ($this->application) {
-            $this->config_path = $this->application->getConfig()->get('config_path') . '/provision/' . $this->type . '.' . $this->name . '.yml';
+        if ($this->getProvision()) {
+            $this->config_path = $this->getProvision()->getConfig()->get('config_path') . '/provision/' . $this->type . '.' . $this->name . '.yml';
         }
         else {
             $config = new Config();
@@ -481,13 +481,13 @@ class Context implements BuilderAwareInterface
             $friendlyName = $service->getFriendlyName();
 
             if ($this->isProvider()) {
-                $this->application->io->section("Verify service: {$friendlyName}");
+                $this->getProvision()->io()->section("Verify service: {$friendlyName}");
                 foreach ($service->verify() as $type => $verify_success) {
                     $return_codes[] = $verify_success? 0: 1;
                 }
             }
             else {
-                $this->application->io->section("Verify service: {$friendlyName} on {$service->provider->name}");
+                $this->getProvision()->io()->section("Verify service: {$friendlyName} on {$service->provider->name}");
 
                 // First verify the service provider.
                 foreach ($service->verifyProvider() as $verify_part => $verify_success) {
