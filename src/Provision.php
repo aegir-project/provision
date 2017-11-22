@@ -198,7 +198,9 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         $finder = new \Symfony\Component\Finder\Finder();
         $finder->files()->name('*' . $name . '.yml')->in($config->get('config_path') . '/provision');
         foreach ($finder as $file) {
-            list($context_type, $context_name) = explode('.', $file->getFilename());
+            $context_type = substr($file->getFilename(), 0, strpos($file->getFilename(), '.'));
+            $context_name = substr($file->getFilename(), strpos($file->getFilename(), '.') + 1, strlen($file->getFilename()) - strlen($context_type) - 5);
+
             $context_files[$context_name] = [
                 'name' => $context_name,
                 'type' => $context_type,
