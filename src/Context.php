@@ -468,32 +468,33 @@ class Context implements BuilderAwareInterface
      *
      * If this context is a Service Subscriber, the provider service will be verified first.
      */
-    public function verify() {
+    public function verifyCommand() {
         $return_codes = [];
         // Run verify method on all services.
         foreach ($this->getServices() as $type => $service) {
-            $friendlyName = $service->getFriendlyName();
-
-            if ($this->isProvider()) {
-                $this->getProvision()->io()->section("Verify service: {$friendlyName}");
-                foreach ($service->verify() as $type => $verify_success) {
-                    $return_codes[] = $verify_success? 0: 1;
-                }
-            }
-            else {
-                $this->getProvision()->io()->section("Verify service: {$friendlyName} on {$service->provider->name}");
-
-                // First verify the service provider.
-                foreach ($service->verifyProvider() as $verify_part => $verify_success) {
-                    $return_codes[] = $verify_success? 0: 1;
-                }
-
-                // Then run "verify" on the subscriptions.
-                foreach ($this->getSubscription($type)->verify() as $type => $verify_success) {
-                    $return_codes[] = $verify_success? 0: 1;
-                }
-            }
+            $return_codes[] = $service->verify() ? 0 : 1;
         }
+//
+//            if ($this->isProvider()) {
+//                $this->getProvision()->io()->section("Verify service: {$friendlyName}");
+//                foreach ($service->verify() as $type => $verify_success) {
+//                    $return_codes[] = $verify_success? 0: 1;
+//                }
+//            }
+//            else {
+//                $this->getProvision()->io()->section("Verify service: {$friendlyName} on {$service->provider->name}");
+//
+//                // First verify the service provider.
+//                foreach ($service->verifyProvider() as $verify_part => $verify_success) {
+//                    $return_codes[] = $verify_success? 0: 1;
+//                }
+//
+//                // Then run "verify" on the subscriptions.
+//                foreach ($this->getSubscription($type)->verify() as $type => $verify_success) {
+//                    $return_codes[] = $verify_success? 0: 1;
+//                }
+//            }
+//        }
 
         // If any service verify failed, exit with a non-zero code.
         if (count(array_filter($return_codes))) {

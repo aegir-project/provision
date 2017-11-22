@@ -79,16 +79,18 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         
         $this
             ->setConfig($config)
-            ->setInput($input)
-            ->setOutput($output)
         ;
-        
+
         // Create Application.
         $application = new Application(self::APPLICATION_NAME, self::VERSION);
         $application
             ->setProvision($this)
-            ->setLogger($logger);
-        
+            ->setLogger($logger)
+        ;
+        $application->configureIO($input, $output);
+        $this->setInput($input);
+        $this->setOutput($output);
+
         // Create and configure container.
         $container = Robo::createDefaultContainer($input, $output, $application, $config);
         $this->setContainer($container);
@@ -108,7 +110,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     
     public function run(InputInterface $input, OutputInterface $output) {
         $status_code = $this->runner->run($input, $output);
-        
+
         return $status_code;
     }
     

@@ -9,6 +9,7 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Common\ContextAwareTrait;
 use Aegir\Provision\Common\ProvisionAwareTrait;
 
 class ServiceSubscription {
@@ -20,13 +21,14 @@ class ServiceSubscription {
    public $properties = [];
    
    use ProvisionAwareTrait;
+   use ContextAwareTrait;
   
   function __construct(
       Context $context,
       $server,
       $service_name
   ) {
-      $this->context = $context;
+      $this->setContext($context);
       $this->server = Provision::getContext($server, $context->getProvision());
       $this->service = $this->server->getService($service_name);
       $this->type = $this->server->getService($service_name)->type;
