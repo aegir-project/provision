@@ -8,17 +8,20 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Common\ContextAwareTrait;
 use Aegir\Provision\Common\ProvisionAwareTrait;
+use Psr\Log\LoggerAwareTrait;
 use Robo\Common\BuilderAwareTrait;
 use Robo\Common\OutputAdapter;
 use Robo\Contract\BuilderAwareInterface;
 
 class Service implements BuilderAwareInterface
 {
-    
     use BuilderAwareTrait;
     use ProvisionAwareTrait;
-    
+    use ContextAwareTrait;
+    use LoggerAwareTrait;
+
     public $type;
     
     public $properties;
@@ -46,7 +49,9 @@ class Service implements BuilderAwareInterface
     function __construct($service_config, Context $provider_context)
     {
         $this->provider = $provider_context;
+        $this->setContext($provider_context);
         $this->setProvision($provider_context->getProvision());
+        $this->setLogger($provider_context->getProvision()->getLogger());
         
         $this->type = $service_config['type'];
         $this->properties = $service_config['properties'];
@@ -77,32 +82,53 @@ class Service implements BuilderAwareInterface
             return "\Aegir\Provision\Service\\{$service}Service";
         }
     }
-    
+
     /**
-     * React to the `provision verify` command.
+     * React to the verify command. Passes off to the method verifySite, verifyServer, verifyPlatform.
+     * @return mixed
      */
-    function verify()
-    {
-    
-    
-    
+    public function verify() {
+        $method = 'verify' . ucfirst($this->getContext()->type);
+        $this->getProvision()->getLogger()->info("Running {method}", [
+            'method' => $method
+        ]);
+        return $this::$method();
+    }
+
+//
+//    /**
+//     * React to the `provision verify` command.
+//     */
+//    function verifySite()
+//    {
 //        return [
 //            'configuration' => $this->writeConfigurations(),
 //            'service' => $this->restartService(),
 //        ];
-    }
-
-    /**
-     * React to `provision verify` command when run on a subscriber, to verify the service's provider.
-     *
-     * This is used to allow skipping of the service restart.
-     */
-    function verifyProvider()
-    {
-        return [
-            'configuration' => $this->writeConfigurations(),
-        ];
-    }
+//    }
+//
+//    /**
+//     * React to the `provision verify` command.
+//     */
+//    function verifyPlatform()
+//    {
+//        return [
+//            'configuration' => $this->writeConfigurations(),
+//            'service' => $this->restartService(),
+//        ];
+//    }
+//
+//    /**
+//     * React to `provision verify` command when run on a subscriber, to verify the service's provider.
+//     *
+//     * This is used to allow skipping of the service restart.
+//     */
+//    function verifyServer()
+//    {
+//        return [
+//            'configuration' => $this->writeConfigurations(),
+//        ];
+//    }
 
     /**
      * Run the services "restart_command".

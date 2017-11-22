@@ -74,6 +74,17 @@ class Application extends BaseApplication
     }
 
     /**
+     * Make configureIO public so we can run it before ->run()
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     */
+    public function configureIO(InputInterface $input, OutputInterface $output)
+    {
+        parent::configureIO($input, $output);
+    }
+
+    /**
      * Initializes all the default commands.
      */
     protected function getDefaultCommands()

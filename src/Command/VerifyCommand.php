@@ -80,7 +80,7 @@ class VerifyCommand extends Command
         }
          */
 
-        $message = $this->context->verify();
+        $message = $this->context->verifyCommand();
 
     }
 }

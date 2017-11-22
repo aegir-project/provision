@@ -12,6 +12,7 @@ namespace Aegir\Provision\Service;
 
 use Aegir\Provision\Context\SiteContext;
 use Aegir\Provision\Service;
+use Aegir\Provision\ServiceInterface;
 use Aegir\Provision\ServiceSubscription;
 use Aegir\Provision\Task;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -21,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * @package Aegir\Provision\Service
  */
-class DbService extends Service
+class DbService extends Service implements ServiceInterface
 {
 
     const SERVICE = 'db';
@@ -90,7 +91,7 @@ class DbService extends Service
     /**
      * React to the `provision verify` command on Server contexts
      */
-    function verify() {
+    function verifyServer() {
         $this->creds = array_map('urldecode', parse_url($this->properties['master_db']));
         
         if (!isset($this->creds['port'])) {
@@ -167,11 +168,11 @@ class DbService extends Service
     /**
      * React to the `provision verify` command on subscriber contexts (sites and platforms)
      */
-    function verifySubscription(ServiceSubscription $serviceSubscription) {
-        $this->subscription = $serviceSubscription;
+    function verifySite() {
+        $this->subscription = $this->getContext()->getSubscription($this->type);
 
         // Check for database
-        $this->create_site_database($serviceSubscription->context);
+        $this->create_site_database($this->getContext());
 
         $this->creds_root = array_map('urldecode', parse_url($this->properties['master_db']));
     
@@ -199,6 +200,10 @@ class DbService extends Service
                 'service' => FALSE
             ];
         }
+    }
+
+    public function verifyPlatform() {
+
     }
 
     /**

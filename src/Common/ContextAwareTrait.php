@@ -2,7 +2,6 @@
 
 namespace Aegir\Provision\Common;
 
-use Aegir\Provision;
 use Aegir\Provision\Context;
 
 trait ContextAwareTrait
@@ -29,11 +28,6 @@ trait ContextAwareTrait
      */
     public function getContext()
     {
-    
-        if (is_null($this->context)) {
-            return Provision::getContext()();
-        }
-    
         return $this->context;
     }
 }

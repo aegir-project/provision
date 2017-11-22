@@ -11,6 +11,7 @@ namespace Aegir\Provision\Service;
 //require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
 use Aegir\Provision\Service;
+use Aegir\Provision\ServiceInterface;
 use Aegir\Provision\ServiceSubscription;
 use Aegir\Provision\Task;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
@@ -20,7 +21,7 @@ use Consolidation\AnnotatedCommand\CommandFileDiscovery;
  *
  * @package Aegir\Provision\Service
  */
-class HttpService extends Service {
+class HttpService extends Service implements ServiceInterface {
   const SERVICE = 'http';
   const SERVICE_NAME = 'Web Server';
 
@@ -58,7 +59,7 @@ class HttpService extends Service {
      *
      * This is used to allow skipping of the service restart.
      */
-    function verify()
+    function verifyServer()
     {
         return [
             'http.configuration' => $this->getProvision()->newTask()
@@ -80,14 +81,18 @@ class HttpService extends Service {
     /**
      * React to the `provision verify` command on Server contexts
      */
-    function verifySubscription(ServiceSubscription $serviceSubscription) {
-        $this->subscription = $serviceSubscription;
+    function verifySite() {
+        $this->subscription = $this->getContext()->getSubscription();
         return [
-            'configuration' => $this->writeConfigurations($serviceSubscription),
+            'configuration' => $this->writeConfigurations($this->subscription),
             'service' => $this->restartService(),
         ];
     }
-//
+
+    function verifyPlatform() {
+    }
+
+    //
 //    /**
 //   * Support the ability to cloak the database credentials using environment variables.
 //   */

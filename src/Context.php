@@ -487,7 +487,7 @@ class Context implements BuilderAwareInterface
      *
      * If this context is a Service Subscriber, the provider service will be verified first.
      */
-    public function verify()
+    public function verifyCommand()
     {
         $collection = $this->getProvision()->getBuilder();
     
