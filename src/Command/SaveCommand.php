@@ -170,9 +170,12 @@ class SaveCommand extends Command
             }
 
 
-            $properties = $this->askForContextProperties();
+            $options = $this->askForContextProperties();
+            $options['name'] = $this->context_name;
+            $options['type'] = $this->context_type;
+            
             $class = Context::getClassName($this->input->getOption('context_type'));
-            $this->context = new $class($input->getArgument('context_name'), $this->getProvision(), $properties);
+            $this->context = new $class($input->getArgument('context_name'), $this->getProvision(), $options);
         }
 
         // Delete context config.

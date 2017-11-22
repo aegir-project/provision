@@ -117,9 +117,11 @@ class Context implements BuilderAwareInterface
                     $this->properties[$option] = $options[$option];
                 }
             }
+            
+            $this->properties['type'] = $this->type;
+            $this->properties['name'] = $this->name;
+            
             $configs[] = $this->properties;
-
-            $this->properties['context_type'] = $this->type;
 
             $this->config = $processor->processConfiguration($this, $configs);
             
@@ -271,6 +273,11 @@ class Context implements BuilderAwareInterface
             ->children()
                 ->scalarNode('name')
                     ->defaultValue($this->name)
+                    ->isRequired()
+                ->end()
+                ->scalarNode('type')
+                    ->defaultValue($this->type)
+                    ->isRequired()
                 ->end()
             ->end();
 
