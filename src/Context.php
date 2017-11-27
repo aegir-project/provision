@@ -10,6 +10,7 @@ use Aegir\Provision\Common\ProvisionAwareTrait;
 use Aegir\Provision\Console\Config;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Drupal\Console\Core\Style\DrupalStyle;
+use Robo\Collection\CollectionBuilder;
 use Robo\Common\BuilderAwareTrait;
 use Robo\Contract\BuilderAwareInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -484,8 +485,18 @@ class Context implements BuilderAwareInterface
 
             if ($this->isProvider()) {
                 $this->getProvision()->io()->section("Verify service: {$friendlyName}");
-                foreach ($service->verify() as $type => $verify_success) {
-                    $return_codes[] = $verify_success? 0: 1;
+                
+                // @TODO: Make every service use collections
+                $verify = $service->verify();
+                if ($verify instanceof CollectionBuilder) {
+                    $result = $verify->run();
+                    $return_codes[] = $result->getExitCode();
+                }
+                // @TODO: Remove this once all services use CollectionBuilders.
+                elseif (is_array($verify)) {
+                    foreach ($service->verify() as $type => $verify_success) {
+                        $return_codes[] = $verify_success? 0: 1;
+                    }
                 }
             }
             else {

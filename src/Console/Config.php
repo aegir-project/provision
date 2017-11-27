@@ -171,7 +171,7 @@ class Config extends ProvisionConfig
     /**
      * Determine the user running provision.
      */
-    protected function getScriptUser() {
+    public function getScriptUser() {
         $real_script_user = posix_getpwuid(posix_geteuid());
         return $real_script_user['name'];
     }

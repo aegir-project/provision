@@ -377,4 +377,11 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         }
         return $services;
     }
+    
+    /**
+     * Determine the user running provision.
+     */
+    public function getScriptUid() {
+        return posix_getuid();
+    }
 }

@@ -1,0 +1,1 @@
+aegir ALL=NOPASSWD: /usr/sbin/apache2ctl
