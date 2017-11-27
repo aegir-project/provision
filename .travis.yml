@@ -46,13 +46,13 @@ script:
   - provision save server_master -n
     --context_type=server
     --remote_host=provision.local.computer
-    --aegir_root=/home/travis
-    --script_user=travis
+    --aegir_root=/var/aegir
+    --script_user=aegir
     --master_url=provision.local.computer
 
   # Add services to server_master context.
   - provision services server_master add http -n
-    --service_type=apache
+    --service_type=apacheDocker
     --http_port=80
     --web_group=www-data
     --web_disable_url=http://localhost/disabled
