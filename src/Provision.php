@@ -259,9 +259,9 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      * @return mixed
      * @throws \Exception
      */
-    static public function getAllServers($service = NULL) {
+    protected function getAllServers($service = NULL) {
         $servers = [];
-        $context_files = self::getAllContexts();
+        $context_files = $this->getAllContexts();
         if (empty($context_files)) {
             throw new \Exception('No server contexts found. Use `provision save` to create one.');
         }
@@ -356,7 +356,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      * @param $type
      * @return array
      */
-    static function checkServiceRequirements($type) {
+    public function checkServiceRequirements($type) {
         $class_name = Context::getClassName($type);
         
         // @var $context Context
@@ -365,7 +365,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         $services = [];
         foreach ($service_requirements as $service) {
             try {
-                if (empty(Provision::getAllServers($service))) {
+                if (empty($this->getAllServers($service))) {
                     $services[$service] = 0;
                 }
                 else {

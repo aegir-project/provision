@@ -153,7 +153,7 @@ class SaveCommand extends Command
             // Check for context type service requirements.
             $exit = FALSE;
             $this->io->comment("Checking service requirements for context type {$context_type}...");
-            $reqs = Provision::checkServiceRequirements($context_type);
+            $reqs = $this->getProvision()->checkServiceRequirements($context_type);
             foreach ($reqs as $service => $available) {
                 if ($available) {
                     $this->io->successLite("Service $service: Available");
