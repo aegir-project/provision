@@ -199,12 +199,11 @@ class ServicesCommand extends Command
             // Handle invalid service_type.
             if (!class_exists(Service::getClassName($service, $service_type))) {
                 $types = Context::getServiceTypeOptions($service);
-                throw new \Exception(strtr("Service type !type is invalid for service !service. Valid options are: !types", [
+                throw new \Exception(strtr("Class not found for service type !type !service. Expecting !class. Check your Class::SERVICE_TYPE constant.", [
                     '!service' => $service,
                     '!type' => $service_type,
-                    '!types' => implode(", ", array_keys($types))
+                    '!class' => Service::getClassName($service, $service_type),
                 ]));
-    
             }
 
             // Then ask for all options.
