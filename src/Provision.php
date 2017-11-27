@@ -238,7 +238,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     /**
      * Return all available contexts.
      *
-     * @return array
+     * @return array|Context
      */
     public function getAllContexts($name = '') {
         if ($name && isset($this->contexts[$name])) {
