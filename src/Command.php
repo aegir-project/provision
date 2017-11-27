@@ -74,7 +74,7 @@ abstract class Command extends BaseCommand
             try {
                 // Load context from context_name argument.
                 $this->context_name = $this->input->getArgument('context_name');
-                $this->context = Provision::getContext($this->context_name, $this->getProvision());
+                $this->context = $this->getProvision()->getContext($this->context_name);
             }
             catch (\Exception $e) {
 
@@ -96,7 +96,7 @@ abstract class Command extends BaseCommand
             $this->input->setArgument('context_name', $this->context_name);
 
             try {
-                $this->context = Provision::getContext($this->context_name, $this->getProvision());
+                $this->context = $this->getProvision()->getContext($this->context_name);
             }
             catch (\Exception $e) {
                 $this->context = NULL;

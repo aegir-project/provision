@@ -352,7 +352,7 @@ class SaveCommand extends Command
                 $contexts[$property] = $this->input->getOption($property);
                 
                 try {
-                    $context = Provision::getContext($contexts[$property]);
+                    $context = $this->getProvision()->getContext($contexts[$property]);
                 }
                 catch (\Exception $e) {
                     throw new \Exception("Context set by option --{$property} does not exist.");

@@ -93,6 +93,7 @@ class ContextSubscriber extends Context
                     ->node('server', 'context')
                         ->isRequired()
                         ->attribute('context_type', 'server')
+                        ->attribute('provision', $this->getProvision())
                     ->end()
                     ->append($this->addServiceProperties('service_subscriptions'))
                 ->end()
