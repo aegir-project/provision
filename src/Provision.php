@@ -63,6 +63,16 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     private $commands = [];
     
     /**
+     * @var \Aegir\Provision\Context[]
+     */
+    private $contexts = [];
+    
+    /**
+     * @var array[]
+     */
+    private $context_files = [];
+    
+    /**
      * Provision constructor.
      *
      * @param \Aegir\Provision\Console\Config                        $config
@@ -106,6 +116,46 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     
         $this->setBuilder($container->get('builder'));
         $this->setLogger($container->get('logger'));
+        
+        $this->loadAllContexts();
+    }
+    
+    /**
+     * Lookup all context yml files and load into Context classes.
+     */
+    private function loadAllContexts()
+    {
+        $folder = $this->getConfig()->get('config_path') . '/provision';
+        $finder = new \Symfony\Component\Finder\Finder();
+        $finder->files()->name("*.yml")->in($folder);
+        foreach ($finder as $file) {
+            $context_type = substr($file->getFilename(), 0, strpos($file->getFilename(), '.'));
+            $context_name = substr($file->getFilename(), strpos($file->getFilename(), '.') + 1, strlen($file->getFilename()) - strlen($context_type) - 5);
+        
+            $this->context_files[$context_name] = [
+                'name' => $context_name,
+                'type' => $context_type,
+                'file' => $file,
+            ];
+        }
+
+        // Load Context classes from files metadata.
+        foreach ($this->context_files as $context) {
+            $class = Context::getClassName($context['type']);
+            $this->contexts[$context['name']] = new $class($context['name'], $this);
+        }
+    }
+    
+    /**
+     * Loads a single context from file into $this->contexts[$name].
+     *
+     * Used to load dependant contexts that might not be instantiated yet.
+     *
+     * @param $name
+     */
+    public function loadContext($name) {
+        $class = Context::getClassName($this->context_files[$name]['type']);
+        $this->contexts[$this->context_files[$name]['name']] = new $class($this->context_files[$name]['name'], $this);
     }
     
     public function run(InputInterface $input, OutputInterface $output) {
@@ -188,39 +238,19 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     }
     
     /**
-     * Load all contexts into Context objects.
+     * Return all available contexts.
      *
-     * @return array
+     * @return array|Context
      */
-    static function getAllContexts($name = '', Provision $provision = NULL) {
-        $contexts = [];
-        $config = new Config();
-        
-        $context_files = [];
-        $finder = new \Symfony\Component\Finder\Finder();
-        $finder->files()->name('*' . $name . '.yml')->in($config->get('config_path') . '/provision');
-        foreach ($finder as $file) {
-            list($context_type, $context_name) = explode('.', $file->getFilename());
-            $context_files[$context_name] = [
-                'name' => $context_name,
-                'type' => $context_type,
-                'file' => $file,
-            ];
+    public function getAllContexts($name = '') {
+        if ($name && isset($this->contexts[$name])) {
+            return $this->contexts[$name];
         }
-        
-        foreach ($context_files as $context) {
-            $class = Context::getClassName($context['type']);
-            $contexts[$context['name']] = new $class($context['name'], $provision);
-        }
-        
-        if ($name && isset($contexts[$name])) {
-            return $contexts[$name];
-        }
-        elseif ($name && !isset($contexts[$name])) {
+        elseif ($name && !isset($this->contexts[$name])) {
             return NULL;
         }
         else {
-            return $contexts;
+            return $this->contexts;
         }
     }
     
@@ -231,9 +261,9 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      * @return mixed
      * @throws \Exception
      */
-    static public function getAllServers($service = NULL) {
+    protected function getAllServers($service = NULL) {
         $servers = [];
-        $context_files = self::getAllContexts();
+        $context_files = $this->getAllContexts();
         if (empty($context_files)) {
             throw new \Exception('No server contexts found. Use `provision save` to create one.');
         }
@@ -272,14 +302,36 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      * @return array|\Aegir\Provision\Context
      * @throws \Exception
      */
-    static public function getContext($name, Provision $provision = NULL) {
+    public function getContext($name) {
+        // Check if $name is empty.
         if (empty($name)) {
             throw new \Exception('Context name must not be empty.');
         }
-        if (empty(Provision::getAllContexts($name, $provision))) {
+        
+        // If context exists but hasn't been loaded, load it.
+        if (empty($this->contexts[$name]) && !empty($this->context_files[$name])) {
+            $this->loadContext($name);
+        }
+        
+        // Check if context still isn't found.
+        if (empty($this->contexts[$name])) {
             throw new \Exception('Context not found with name: ' . $name);
         }
-        return Provision::getAllContexts($name, $provision);
+        return $this->contexts[$name];
+    }
+    
+    /**
+     * Look for a context file being present. This is available before Context
+     * objects are bootstrapped.
+     */
+    public function getContextFile($name) {
+        if (empty($name)) {
+            throw new \Exception('Context name must not be empty.');
+        }
+        if (empty($this->context_files[$name])) {
+            throw new \Exception('Context not found with name: ' . $name);
+        }
+        return$this->context_files[$name];
     }
     
     /**
@@ -306,7 +358,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      * @param $type
      * @return array
      */
-    static function checkServiceRequirements($type) {
+    public function checkServiceRequirements($type) {
         $class_name = Context::getClassName($type);
         
         // @var $context Context
@@ -315,7 +367,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         $services = [];
         foreach ($service_requirements as $service) {
             try {
-                if (empty(Provision::getAllServers($service))) {
+                if (empty($this->getAllServers($service))) {
                     $services[$service] = 0;
                 }
                 else {

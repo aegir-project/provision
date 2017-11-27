@@ -29,15 +29,15 @@ class ServiceSubscription {
       $service_name
   ) {
       $this->setContext($context);
-      $this->server = Provision::getContext($server, $context->getProvision());
+      $this->setProvision($context->getProvision());
+
+      $this->server = $this->getProvision()->getContext($server);
       $this->service = $this->server->getService($service_name);
       $this->type = $this->server->getService($service_name)->type;
       
       if (isset($context->config['service_subscriptions'][$service_name]['properties'])) {
           $this->properties = $context->config['service_subscriptions'][$service_name]['properties'];
       }
-      
-      $this->setProvision($context->getProvision());
   }
   
   public function verify() {

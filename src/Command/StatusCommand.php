@@ -43,6 +43,7 @@ class StatusCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->getProvision();
         
         if ($input->getArgument('context_name')) {
             $rows = [['Configuration File', $this->context->config_path]];

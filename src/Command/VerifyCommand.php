@@ -60,6 +60,11 @@ class VerifyCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        
+        if (empty($this->context)) {
+            throw new \Exception("You must specify a context to verify.");
+        }
+        
         $this->io->title(strtr("Verify %type: %name", [
             '%name' => $this->context_name,
             '%type' => $this->context->type,

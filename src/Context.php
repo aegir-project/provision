@@ -14,6 +14,7 @@ use Robo\Common\BuilderAwareTrait;
 use Robo\Contract\BuilderAwareInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Console\Exception\InvalidOptionException;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Dumper;
@@ -74,17 +75,16 @@ class Context implements BuilderAwareInterface
      */
     function __construct(
         $name,
-        Provision $provision = NULL,
+        Provision $provision,
         $options = [])
     {
         $this->name = $name;
+    
+        $this->setProvision($provision);
+        $this->setBuilder($this->getProvision()->getBuilder());
+        
         $this->loadContextConfig($options);
         $this->prepareServices();
-        
-        if ($provision) {
-            $this->setProvision($provision);
-            $this->setBuilder($this->getProvision()->getBuilder());
-        }
     }
 
     /**
@@ -117,14 +117,16 @@ class Context implements BuilderAwareInterface
                     $this->properties[$option] = $options[$option];
                 }
             }
+            
+            $this->properties['type'] = $this->type;
+            $this->properties['name'] = $this->name;
+            
             $configs[] = $this->properties;
-
-            $this->properties['context_type'] = $this->type;
 
             $this->config = $processor->processConfiguration($this, $configs);
             
         } catch (\Exception $e) {
-            throw new \Exception(
+            throw new InvalidOptionException(
                 strtr("There is an error with the configuration for !type '!name'. Check the file !file and try again. \n \nError: !message", [
                     '!type' => $this->type,
                     '!name' => $this->name,
@@ -271,6 +273,11 @@ class Context implements BuilderAwareInterface
             ->children()
                 ->scalarNode('name')
                     ->defaultValue($this->name)
+                    ->isRequired()
+                ->end()
+                ->scalarNode('type')
+                    ->defaultValue($this->type)
+                    ->isRequired()
                 ->end()
             ->end();
 
@@ -295,6 +302,7 @@ class Context implements BuilderAwareInterface
                     ->node($property, 'context')
                         ->isRequired()
                         ->attribute('context_type', $type)
+                        ->attribute('provision', $this->getProvision())
                     ->end()
                 ->end();
         }
@@ -325,7 +333,7 @@ class Context implements BuilderAwareInterface
 
                 // If type is empty, it's because it's in the ServerContext
                 if (empty($info['type'])) {
-                    $server = Provision::getContext($info['server']);
+                    $server = $this->getProvision()->getContext($info['server']);
                     $service_type = ucfirst($server->getService($service)->type);
                 }
                 else {

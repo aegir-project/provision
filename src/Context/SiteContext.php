@@ -3,6 +3,7 @@
 namespace Aegir\Provision\Context;
 
 use Aegir\Provision\Application;
+use Aegir\Provision\Context;
 use Aegir\Provision\ContextSubscriber;
 use Aegir\Provision\Provision;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -46,9 +47,9 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
         // There is no need to check if the property exists because the config system does that.
 //        $this->db_server = $application->getContext($this->properties['db_server']);
 
-        $this->platform = Provision::getContext($this->properties['platform'], $provision);
-
-
+        // Load platform context... @TODO: Automatically do this for required contexts?
+        $this->platform = $this->getProvision()->getContext($this->properties['platform']);
+    
         // Add platform http service subscription.
         $this->serviceSubscriptions['http'] = $this->platform->getSubscription('http');
         $this->serviceSubscriptions['http']->context = $this;

@@ -153,7 +153,7 @@ class SaveCommand extends Command
             // Check for context type service requirements.
             $exit = FALSE;
             $this->io->comment("Checking service requirements for context type {$context_type}...");
-            $reqs = Provision::checkServiceRequirements($context_type);
+            $reqs = $this->getProvision()->checkServiceRequirements($context_type);
             foreach ($reqs as $service => $available) {
                 if ($available) {
                     $this->io->successLite("Service $service: Available");
@@ -170,9 +170,12 @@ class SaveCommand extends Command
             }
 
 
-            $properties = $this->askForContextProperties();
+            $options = $this->askForContextProperties();
+            $options['name'] = $this->context_name;
+            $options['type'] = $this->context_type;
+            
             $class = Context::getClassName($this->input->getOption('context_type'));
-            $this->context = new $class($input->getArgument('context_name'), $this->getProvision(), $properties);
+            $this->context = new $class($input->getArgument('context_name'), $this->getProvision(), $options);
         }
 
         // Delete context config.
@@ -349,7 +352,7 @@ class SaveCommand extends Command
                 $contexts[$property] = $this->input->getOption($property);
                 
                 try {
-                    $context = Provision::getContext($contexts[$property]);
+                    $context = $this->getProvision()->getContext($contexts[$property]);
                 }
                 catch (\Exception $e) {
                     throw new \Exception("Context set by option --{$property} does not exist.");
