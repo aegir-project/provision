@@ -122,7 +122,7 @@ class Service implements BuilderAwareInterface
                 return TRUE;
             }
             else {
-                    $this->getProvision()->io()->errorLite('Unable to restart service using command:' . $this->getProperty('restart_command'));
+                $this->getProvision()->io()->errorLite('Unable to restart service using command: ' . $this->getProperty('restart_command'));
             }
         }
         return FALSE;
