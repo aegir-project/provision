@@ -110,7 +110,7 @@ class Service implements BuilderAwareInterface
             return TRUE;
         }
         else {
-            $task = $this->getProvision()->getBuilder()->taskExec($this->properties['restart_command'])
+            $task = $this->getProvision()->getTasks()->taskExec($this->getProperty('restart_command'))
                 ->silent(!$this->getProvision()->io()->isVerbose())
             ;
             
@@ -122,7 +122,7 @@ class Service implements BuilderAwareInterface
                 return TRUE;
             }
             else {
-                    $this->getProvision()->io()->errorLite('Unable to restart service:' . $result->getOutputData());
+                    $this->getProvision()->io()->errorLite('Unable to restart service using command:' . $this->getProperty('restart_command'));
             }
         }
         return FALSE;
