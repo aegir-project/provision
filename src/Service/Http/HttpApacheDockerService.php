@@ -55,35 +55,35 @@ class HttpApacheDockerService extends HttpApacheService
       
       $tag = "provision/http:{$this->provider->name}";
       $name = "provision_http_{$this->provider->name}";
+      $build_dir = __DIR__ . DIRECTORY_SEPARATOR . '/ApacheDocker/';
       
-      # Build Docker
-      $dockerBuild = new \Robo\Task\Docker\Build(__DIR__ . DIRECTORY_SEPARATOR . '/ApacheDocker/');
-      $dockerBuild->tag($tag);
-      $dockerBuild->option('-f', __DIR__ . DIRECTORY_SEPARATOR . '/ApacheDocker/http.Dockerfile');
-      $dockerBuild->option('--build-arg', "AEGIR_SERVER_NAME={$this->provider->name}");
-      $dockerBuild->option('--build-arg', "AEGIR_UID=" . posix_getuid());
-      $dockerBuild->silent(!$this->getProvision()->getOutput()->isVerbose());
-      
-      $collection->addTaskList([
-          $dockerBuild,
-      ]);
+      # Build Docker Image
+      $collection->addTask(
+          $this->getProvision()->getTasks()->taskDockerBuild($build_dir)
+              ->tag($tag)
+              ->option('-f', __DIR__ . DIRECTORY_SEPARATOR . '/ApacheDocker/http.Dockerfile')
+              ->option('--build-arg', "AEGIR_SERVER_NAME={$this->provider->name}")
+              ->option('--build-arg', "AEGIR_UID=" . posix_getuid())
+              ->silent(!$this->getProvision()->getOutput()->isVerbose())
+      );
       
       $collection->addCode(function () use ($provision, $tag) {
           $provision->io()->successLite('Built new Docker image for Apache: ' . $tag);
       });
       
-      # Run Docker
-      $dockerRun = new \Robo\Task\Docker\Run($tag);
-      $dockerRun
-          ->detached()
-          ->publish(80)
-          ->name($name)
-          ->volume($this->getProvision()->getConfig()->get('config_path') . DIRECTORY_SEPARATOR . $this->provider->name . DIRECTORY_SEPARATOR . '/apache',$this->provider->getProperty('aegir_root') . '/config/' . $this->provider->name . DIRECTORY_SEPARATOR . '/apache')
-          ->interactive();
-      
-      $collection->addTaskList([
-          $dockerRun,
-      ]);
+      # Run Docker Image
+      $configVolumeHost = $this->getProvision()->getConfig()->get('config_path') . DIRECTORY_SEPARATOR . $this->provider->name . DIRECTORY_SEPARATOR . '/apache';
+      $configVolumeGuest = $this->provider->getProperty('aegir_root') . '/config/' . $this->provider->name . DIRECTORY_SEPARATOR . '/apache';
+
+      $collection->addTask(
+          $this->getProvision()->getTasks()->taskDockerRun($tag)
+              ->detached()
+              ->publish(80)
+              ->name($name)
+              ->volume($configVolumeHost, $configVolumeGuest)
+              ->silent(!$this->getProvision()->getOutput()->isVerbose())
+              ->interactive()
+      );
     
       $collection->addCode(function () use ($provision, $tag) {
           $provision->io()->successLite('Running Docker image ' . $tag);

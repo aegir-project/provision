@@ -23,6 +23,7 @@ use Robo\Common\IO;
 use Robo\Contract\BuilderAwareInterface;
 use Robo\Contract\ConfigAwareInterface;
 use Robo\Contract\IOAwareInterface;
+use Robo\LoadAllTasks;
 use Robo\Robo;
 use Robo\Runner as RoboRunner;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -57,6 +58,11 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      * @var \Robo\Runner
      */
     private $runner;
+    
+    /**
+     * @var ProvisionTasks
+     */
+    private $tasks;
     
     /**
      * @var string[]
@@ -115,6 +121,8 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     
         $this->setBuilder($container->get('builder'));
         $this->setLogger($container->get('logger'));
+        
+        $this->tasks = $container->get('tasks');
         
         $this->loadAllContexts();
     }
@@ -176,6 +184,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         $tasks = new ProvisionTasks();
         $builder = new ProvisionCollectionBuilder($tasks);
         $tasks->setBuilder($builder);
+        $container->add('tasks', $tasks);
         $container->add('builder', $builder);
         $container->add('executor', ProvisionExecutor::class)
             ->withArgument('builder');
@@ -210,6 +219,14 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     public function getLogger()
     {
         return $this->logger;
+    }
+    
+    /**
+     * @return ProvisionTasks
+     */
+    public function getTasks()
+    {
+        return $this->tasks;
     }
     
     /**
