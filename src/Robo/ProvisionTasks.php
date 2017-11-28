@@ -15,9 +15,14 @@ use Robo\Contract\ConfigAwareInterface;
 use Robo\Contract\IOAwareInterface;
 use Robo\LoadAllTasks;
 
+use Robo\Task\Base\Exec;
+use Robo\Task\Base\ExecStack;
+use Robo\Task\Base\ParallelExec;
+use Robo\Task\Base\SymfonyCommand;
+use Robo\Task\Base\Watch;
 use Robo\Task\Docker\Build;
 use Robo\Task\Docker\Commit;
-use Robo\Task\Docker\Exec;
+use Robo\Task\Docker\Exec as DockerExec;
 use Robo\Task\Docker\Pull;
 use Robo\Task\Docker\Remove;
 use Robo\Task\Docker\Run;
@@ -39,6 +44,49 @@ class ProvisionTasks implements ConfigAwareInterface, LoggerAwareInterface, Buil
     /**
      * Public Overrides
      */
+    
+    /**
+     * @param string|\Robo\Contract\CommandInterface $command
+     *
+     * @return Exec
+     */
+    public function taskExec($command)
+    {
+        return $this->task(\Robo\Task\Base\Exec::class, $command);
+    }
+    
+    /**
+     * @return ExecStack
+     */
+    public function taskExecStack()
+    {
+        return $this->task(ExecStack::class);
+    }
+    
+    /**
+     * @return ParallelExec
+     */
+    public function taskParallelExec()
+    {
+        return $this->task(ParallelExec::class);
+    }
+    
+    /**
+     * @param $command
+     * @return SymfonyCommand
+     */
+    public function taskSymfonyCommand($command)
+    {
+        return $this->task(SymfonyCommand::class, $command);
+    }
+    
+    /**
+     * @return Watch
+     */
+    public function taskWatch()
+    {
+        return $this->task(Watch::class, $this);
+    }
     
     /**
      * @param string $image
@@ -117,6 +165,6 @@ class ProvisionTasks implements ConfigAwareInterface, LoggerAwareInterface, Buil
      */
     public function taskDockerExec($cidOrResult)
     {
-        return $this->task(Exec::class, $cidOrResult);
+        return $this->task(DockerExec::class, $cidOrResult);
     }
 }
