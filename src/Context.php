@@ -487,6 +487,7 @@ class Context implements BuilderAwareInterface
                 $this->getProvision()->io()->section("Verify service: {$friendlyName}");
                 
                 // @TODO: Make every service use collections
+                $this->getProvision()->getLogger()->info('Verify service: ' . get_class($service));
                 $verify = $service->verify();
                 if ($verify instanceof CollectionBuilder) {
                     $result = $verify->run();
