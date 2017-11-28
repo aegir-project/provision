@@ -93,6 +93,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     ) {
     
         $logger = new ConsoleLogger($output);
+        $this->setLogger($logger);
         
         $this
             ->setConfig($config)
@@ -182,6 +183,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         // in the container. "collectionBuilder" used for the actual command that
         // was executed, and "builder" to be used with non-command classes.
         $tasks = new ProvisionTasks();
+        $tasks->setLogger($this->logger);
         $builder = new ProvisionCollectionBuilder($tasks);
         $tasks->setBuilder($builder);
         $container->add('tasks', $tasks);
