@@ -42,7 +42,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Provision implements ConfigAwareInterface, ContainerAwareInterface, LoggerAwareInterface, IOAwareInterface, BuilderAwareInterface {
     
-    const APPLICATION_NAME = 'Aegir Provision';
+    const APPLICATION_NAME = 'Provision';
+    const APPLICATION_FUN_NAME = '𝙋𝙍𝙊𝙑𝙄𝙎𝙄𝙊𝙉';
     const VERSION = '4.x-dev';
     const REPOSITORY = 'aegir-project/provision';
     
