@@ -81,9 +81,9 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
         // This is how you can use Robo Tasks in a platform verification call.
         // The "silent" method actually works here.
         // It only partially works in Service::restartServices()!
-        $this->getBuilder()->taskExec('env')
-            ->silent(!$this->getProvision()->io()->isVerbose())
-            ->run();
+//        $this->getBuilder()->taskExec('env')
+//            ->silent(!$this->getProvision()->io()->isVerbose())
+//            ->run();
         
         return parent::verify();
     }
