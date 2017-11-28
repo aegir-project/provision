@@ -2,11 +2,15 @@
 
 namespace Aegir\Provision\Robo;
 
+use Aegir\Provision\Robo\Task\Log;
 use Consolidation\Config\ConfigInterface;
 use League\Container\ContainerAwareInterface;
 use League\Container\ContainerAwareTrait;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerTrait;
+use Psr\Log\LogLevel;
 use Robo\Collection\CollectionBuilder;
 use Robo\Common\ConfigAwareTrait;
 use Robo\Common\IO;
@@ -40,6 +44,16 @@ class ProvisionTasks implements ConfigAwareInterface, LoggerAwareInterface, Buil
 //    use InspectorAwareTrait;
     use IO;
     use LoggerAwareTrait;
+    
+    /**
+     * @param string|\Robo\Contract\CommandInterface $command
+     *
+     * @return Log
+     */
+    public function taskLog($message, $level = LogLevel::INFO) {
+        
+        return $this->task(Log::class, $this->logger, $message, $level);
+    }
     
     /**
      * Public Overrides
