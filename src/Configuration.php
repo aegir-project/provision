@@ -146,13 +146,15 @@ class Configuration {
   }
 
   /**
-   * Load template from filename().
+   * Load template from filename() and directory containing
+   * Configuration class.
    *
    * @see hook_provision_config_load_templates()
    * @see hook_provision_config_load_templates_alter()
    */
   private function load_template() {
-    return file_get_contents(__DIR__ . '/Service/' . ucfirst($this->service->getName()) . '/' . ucfirst($this->service->getType()) . '/Configuration/' . $this->template);
+      $class = new \ReflectionClass(get_class($this));
+      return file_get_contents(dirname($class->getFileName()) . DIRECTORY_SEPARATOR . $this->template);
 
     // Allow other Drush commands to change the template used first.
 //    $templates = drush_command_invoke_all('provision_config_load_templates', $this);
