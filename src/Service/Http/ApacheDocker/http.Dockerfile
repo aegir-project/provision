@@ -1,6 +1,6 @@
 FROM ubuntu:14.04
 
-RUN apt-get -qq update && apt-get -qq install -y\
+RUN apt-get -qq update && apt-get -qq -o Dpkg::Use-Pty=0 install \
   apache2 \
   php5 \
   php5-cli \
