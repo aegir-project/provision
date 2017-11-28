@@ -491,7 +491,7 @@ class Context implements BuilderAwareInterface
                 $verify = $service->verify();
                 if ($verify instanceof CollectionBuilder) {
                     $result = $verify->run();
-                    $return_codes[] = $result->getExitCode();
+                    $return_codes[] = $result->wasSuccessful()? 0: 1;
                 }
                 // @TODO: Remove this once all services use CollectionBuilders.
                 elseif (is_array($verify)) {
