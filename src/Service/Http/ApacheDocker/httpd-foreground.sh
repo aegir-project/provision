@@ -1,9 +1,5 @@
 #!/bin/bash
 
-RED='\033[0;33m'
-GRAY='\033[0;37m'
-NC='\033[0m' # No Color
-
 # Copied from official httpd container: https://github.com/docker-library/httpd/blob/fa5223d83a5225aa3fd5b23229b785c7764142bf/2.2/httpd-foreground
 
 set -e
@@ -14,10 +10,10 @@ set -e
 #exec apache2 -DFOREGROUND
 
 # Add symlink from our server's config to the apache include target.
-echo "${RED}𝙋 ║${NC} Checking folder  ${GRAY}$AEGIR_ROOT/config${NC}"
+echo "𝙋𝙍𝙊 ║ Checking folder  $AEGIR_ROOT/config"
 ls -la $AEGIR_ROOT/config/
 
-echo "${RED}𝙋 ║${NC} Checking folder  ${GRAY}$AEGIR_ROOT/config/$AEGIR_SERVER_NAME:${NC}"
+echo "𝙋𝙍𝙊 ║ Checking folder $AEGIR_ROOT/config/$AEGIR_SERVER_NAME:"
 ls -la $AEGIR_ROOT/config/$AEGIR_SERVER_NAME
 
 # If there are no platforms assigned to the server, docker.conf and the docker config folders are never created.
@@ -26,14 +22,14 @@ ls -la $AEGIR_ROOT/config/$AEGIR_SERVER_NAME
 #fi
 #
 
-echo "${RED}𝙋 ║${NC} Running ${GRAY}ln -sf $AEGIR_ROOT/config/$AEGIR_SERVER_NAME/apache.conf $AEGIR_ROOT/config/provision.conf${NC}"
+echo "𝙋𝙍𝙊 ║ Running ln -sf $AEGIR_ROOT/config/$AEGIR_SERVER_NAME/apache.conf $AEGIR_ROOT/config/provision.conf"
 ln -sf $AEGIR_ROOT/config/$AEGIR_SERVER_NAME/apache.conf $AEGIR_ROOT/config/provision.conf
 
-echo "${RED}𝙋 ║${NC} Running ${GRAY}sudo /usr/sbin/apache2ctl start${NC}"
+echo "𝙋𝙍𝙊 ║ Running sudo /usr/sbin/apache2ctl start"
 sudo /usr/sbin/apache2ctl start
 
-echo "${RED}𝙋 ║${NC} Running ${GRAY}sudo /usr/sbin/apache2ctl start${NC}"
+echo "𝙋𝙍𝙊 ║ Running sudo /usr/sbin/apache2ctl start"
 sudo /usr/sbin/apache2ctl start
 
-echo "${RED}𝙋 ║${NC} Running ${GRAY}tail -f /var/log/aegir/system.log${NC}"
+echo "𝙋𝙍𝙊 ║ Running tail -f /var/log/aegir/system.log"
 tail -f /var/log/aegir/system.log
