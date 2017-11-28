@@ -70,6 +70,11 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     private $commands = [];
     
     /**
+     * @var \Aegir\Provision\Application
+     */
+    private $application;
+    
+    /**
      * @var \Aegir\Provision\Context[]
      */
     private $contexts = [];
@@ -78,6 +83,11 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      * @var array[]
      */
     private $context_files = [];
+    
+    /**
+     * @var ConsoleOutput
+     */
+    public $console;
     
     /**
      * Provision constructor.
@@ -107,6 +117,8 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
             ->setProvision($this)
             ->setLogger($logger);
         
+        $this->application = $application;
+        
         // Create and configure container.
         $container = Robo::createDefaultContainer($input, $output, $application, $config);
         $this->setContainer($container);
@@ -124,6 +136,8 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         $this->setLogger($container->get('logger'));
         
         $this->tasks = $container->get('tasks');
+        $this->console = new ConsoleOutput($output->getVerbosity());
+        $this->console->setProvision($this);
         
         $this->loadAllContexts();
     }
@@ -185,6 +199,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         $tasks = new ProvisionTasks();
         $tasks->setLogger($this->logger);
         $builder = new ProvisionCollectionBuilder($tasks);
+        $builder->setProvision($this);
         $tasks->setBuilder($builder);
         $container->add('tasks', $tasks);
         $container->add('builder', $builder);
@@ -212,6 +227,15 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         return $this->input();
     }
     
+    /**
+     * Gets Application object.
+     *
+     * @return \Aegir\Provision\Application
+     */
+    public function getApplication()
+    {
+        return $this->application;
+    }
     /**
      * Gets Logger object.
      * Returns the currently active Logger instance.

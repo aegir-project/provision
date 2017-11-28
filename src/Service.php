@@ -83,10 +83,13 @@ class Service implements BuilderAwareInterface
      */
     function verify()
     {
-        return [
-            'configuration' => $this->writeConfigurations(),
-            'service' => $this->restartService(),
-        ];
+    
+    
+    
+//        return [
+//            'configuration' => $this->writeConfigurations(),
+//            'service' => $this->restartService(),
+//        ];
     }
 
     /**

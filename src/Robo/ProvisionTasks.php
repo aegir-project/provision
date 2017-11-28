@@ -46,11 +46,37 @@ class ProvisionTasks implements ConfigAwareInterface, LoggerAwareInterface, Buil
     use LoggerAwareTrait;
     
     /**
+     * Make task() public.
+     *
+     * Alternative access to instantiate. Use:
+     *
+     *   $this->task(Foo::class, $a, $b);
+     *
+     * instead of:
+     *
+     *   $this->taskFoo($a, $b);
+     *
+     * The later form is preferred.
+     *
+     * @return \Robo\Collection\CollectionBuilder
+     *
+     * @see
+     */
+    public function task()
+    {
+        $args = func_get_args();
+        $name = array_shift($args);
+        
+        $collectionBuilder = $this->collectionBuilder();
+        return $collectionBuilder->build($name, $args);
+    }
+    
+    /**
      * @param string|\Robo\Contract\CommandInterface $command
      *
      * @return Log
      */
-    public function taskLog($message, $level = LogLevel::INFO) {
+    public function taskLog($message, $level = LogLevel::NOTICE) {
         
         return $this->task(Log::class, $this->logger, $message, $level);
     }

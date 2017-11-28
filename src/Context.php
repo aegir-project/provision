@@ -12,10 +12,13 @@ use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Robo\Collection\CollectionBuilder;
 use Robo\Common\BuilderAwareTrait;
+use Robo\Common\ProgressIndicator;
 use Robo\Contract\BuilderAwareInterface;
+use Robo\Tasks;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Console\Exception\InvalidOptionException;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Dumper;
@@ -477,49 +480,87 @@ class Context implements BuilderAwareInterface
      *
      * If this context is a Service Subscriber, the provider service will be verified first.
      */
-    public function verify() {
-        $return_codes = [];
-        // Run verify method on all services.
+    public function verify()
+    {
+        $collection = $this->getProvision()->getBuilder();
+    
         foreach ($this->getServices() as $type => $service) {
             $friendlyName = $service->getFriendlyName();
-
-            if ($this->isProvider()) {
-                $this->getProvision()->io()->section("Verify service: {$friendlyName}");
-                
-                // @TODO: Make every service use collections
-                $this->getProvision()->getLogger()->info('Verify service: ' . get_class($service));
-                $verify = $service->verify();
-                if ($verify instanceof CollectionBuilder) {
-                    $result = $verify->run();
-                    $return_codes[] = $result->wasSuccessful()? 0: 1;
+            $this->getProvision()->io()->section("Verify service: {$friendlyName}");
+    
+            $tasks = $service->verify();
+            foreach ($tasks as $title => $task) {
+                if ($task instanceof \Robo\Task || $task instanceof \Robo\Collection\CollectionBuilder) {
+                    $collection->getCollection()->add($task, $title);
                 }
-                // @TODO: Remove this once all services use CollectionBuilders.
-                elseif (is_array($verify)) {
-                    foreach ($service->verify() as $type => $verify_success) {
-                        $return_codes[] = $verify_success? 0: 1;
-                    }
+                elseif (is_callable($task)) {
+                    $collection->addCode($task, $title);
                 }
-            }
-            else {
-                $this->getProvision()->io()->section("Verify service: {$friendlyName} on {$service->provider->name}");
-
-                // First verify the service provider.
-                foreach ($service->verifyProvider() as $verify_part => $verify_success) {
-                    $return_codes[] = $verify_success? 0: 1;
-                }
-
-                // Then run "verify" on the subscriptions.
-                foreach ($this->getSubscription($type)->verify() as $type => $verify_success) {
-                    $return_codes[] = $verify_success? 0: 1;
+                else {
+                    $class = get_class($task);
+                    throw new \Exception("Task '$title' in service '$friendlyName' must be a callable or \\Robo\\Collection\\CollectionBuilder. Is class '$class'");
                 }
             }
         }
-
-        // If any service verify failed, exit with a non-zero code.
-        if (count(array_filter($return_codes))) {
+        
+        $result = $collection->run();
+        
+        if ($result->wasSuccessful()) {
+            $this->getProvision()->io()->success('Verification Complete!');
+        }
+        else {
             throw new \Exception('Some services did not verify. Check your configuration and try again.');
         }
     }
+        
+//
+//
+//        $return_codes = [];
+//        // Run verify method on all services.
+//        foreach ($this->getServices() as $type => $service) {
+//            $friendlyName = $service->getFriendlyName();
+//
+//            if ($this->isProvider()) {
+//                $this->getProvision()->io()->section("Verify service: {$friendlyName}");
+//
+//                // @TODO: Make every service use collections
+//                $this->getProvision()->getLogger()->info('Verify service: ' . get_class($service));
+//                $verify = $service->verify();
+//                if ($verify instanceof CollectionBuilder) {
+////                    $this->getProvision()->console->runCollection($verify);
+//
+//                    $collection->addIterable($verify);
+//
+//                    $result = $verify->run();
+//                    $return_codes[] = $result->wasSuccessful()? 0: 1;
+//                }
+//                // @TODO: Remove this once all services use CollectionBuilders.
+//                elseif (is_array($verify)) {
+//                    foreach ($service->verify() as $type => $verify_success) {
+//                        $return_codes[] = $verify_success? 0: 1;
+//                    }
+//                }
+//            }
+//            else {
+//                $this->getProvision()->io()->section("Verify service: {$friendlyName} on {$service->provider->name}");
+//
+//                // First verify the service provider.
+//                foreach ($service->verifyProvider() as $verify_part => $verify_success) {
+//                    $return_codes[] = $verify_success? 0: 1;
+//                }
+//
+//                // Then run "verify" on the subscriptions.
+//                foreach ($this->getSubscription($type)->verify() as $type => $verify_success) {
+//                    $return_codes[] = $verify_success? 0: 1;
+//                }
+//            }
+//        }
+//
+//        // If any service verify failed, exit with a non-zero code.
+//        if (count(array_filter($return_codes))) {
+//            throw new \Exception('Some services did not verify. Check your configuration and try again.');
+//        }
+//    }
 
     /**
      * Return an array of required services for this context.
