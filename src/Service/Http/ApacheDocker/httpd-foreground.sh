@@ -23,7 +23,7 @@ ls -la $AEGIR_ROOT/config/$AEGIR_SERVER_NAME
 #
 
 echo "𝙋𝙍𝙊 ║ Running ln -sf $AEGIR_ROOT/config/$AEGIR_SERVER_NAME/apache.conf $AEGIR_ROOT/config/provision.conf"
-ln -sf $AEGIR_ROOT/config/$AEGIR_SERVER_NAME/apache.conf $AEGIR_ROOT/config/provision.conf
+ln -sf $AEGIR_ROOT/config/$AEGIR_SERVER_NAME/apacheDocker.conf $AEGIR_ROOT/config/provision.conf
 
 echo "𝙋𝙍𝙊 ║ Running sudo /usr/sbin/apache2ctl start"
 sudo /usr/sbin/apache2ctl start
