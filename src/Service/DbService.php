@@ -119,7 +119,7 @@ class DbService extends Service
             ->success('Provision can create new databases.')
             ->failure('Unable to create new databases.')
             ->execute(function () {
-                return $this->can_create_database();
+                return $this->can_create_database()? 0: 1;
             })
         ;
         
@@ -128,7 +128,7 @@ class DbService extends Service
             ->success('Provision can grant privileges on database users.')
             ->failure('unable to grant privileges on database users.')
             ->execute(function () {
-                return $this->can_grant_privileges();
+                return $this->can_grant_privileges()? 0: 1;
             })
         ;
         
