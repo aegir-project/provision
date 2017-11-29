@@ -490,6 +490,19 @@ class Context implements BuilderAwareInterface
     
             $tasks = $service->verify();
             foreach ($tasks as $title => $task) {
+                $collection->getConfig()->set('success', '');
+                $collection->getConfig()->set('failure', '');
+    
+                if ($task instanceof Task) {
+                    if (!empty($task->success)) {
+                        $collection->getConfig()->set($title . '.success', $task->success);
+                    }
+                    if (!empty($task->failure)) {
+                        $collection->getConfig()->set($title . '.failure', $task->failure);
+                    }
+                    $task = $task->callable;
+                }
+                
                 if ($task instanceof \Robo\Task || $task instanceof \Robo\Collection\CollectionBuilder) {
                     $collection->getCollection()->add($task, $title);
                 }

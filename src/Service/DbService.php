@@ -13,6 +13,7 @@ namespace Aegir\Provision\Service;
 use Aegir\Provision\Context\SiteContext;
 use Aegir\Provision\Service;
 use Aegir\Provision\ServiceSubscription;
+use Aegir\Provision\Task;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -101,35 +102,66 @@ class DbService extends Service
         }
         
         $this->dsn = sprintf("%s:host=%s;port=%s", $this::SERVICE_TYPE,  $this->creds['host'], $this->creds['port']);
-    
-        try {
-            $this->connect();
-            $return = TRUE;
-            $this->provider->getProvision()->io()->successLite('Successfully connected to database server!');
-    
-            if ($this->can_create_database()) {
-                $this->provider->getProvision()->io()->successLite('Provision can create new databases.');
-            } else {
-                $this->provider->getProvision()->io()->errorLite('Provision is unable to create databases.');
-                $return = FALSE;
-            }
-            if ($this->can_grant_privileges()) {
-                $this->provider->getProvision()->io()->successLite('Provision can grant privileges on database users.');
-            } else {
-                $this->provider->getProvision()->io()->errorLite('Provision is unable to grant privileges on database users.');
-                $return = FALSE;
-            }
-            
-            return [
-                'service' => $return
-            ];
-        }
-        catch (\PDOException $e) {
-            $this->provider->getProvision()->io()->errorLite($e->getMessage());
-            return [
-                'service' => FALSE
-            ];
-        }
+
+        $tasks = [];
+        
+        // Confirm we can connect to the database server as root.
+        $tasks['db_connect'] = Task::new()
+            ->success('Provision can connect to Database server.')
+            ->failure('Unable to connect to database using credentials saved in context ' . $this->provider->name . '.')
+            ->execute(function () {
+                $this->connect();
+            })
+        ;
+        
+        // Confirm we have access to create databases.
+        $tasks['db_create'] = Task::new()
+            ->success('Provision can create new databases.')
+            ->failure('Unable to create new databases.')
+            ->execute(function () {
+                return $this->can_create_database();
+            })
+        ;
+        
+        // Confirm we can create database users.
+        $tasks['db_grant'] = Task::new()
+            ->success('Provision can grant privileges on database users.')
+            ->failure('unable to grant privileges on database users.')
+            ->execute(function () {
+                return $this->can_grant_privileges();
+            })
+        ;
+        
+        return $tasks;
+        //
+//        try {
+//            $this->connect();
+//            $return = TRUE;
+//            $this->provider->getProvision()->io()->successLite('Successfully connected to database server!');
+//
+//            if ($this->can_create_database()) {
+//                $this->provider->getProvision()->io()->successLite('Provision can create new databases.');
+//            } else {
+//                $this->provider->getProvision()->io()->errorLite('Provision is unable to create databases.');
+//                $return = FALSE;
+//            }
+//            if ($this->can_grant_privileges()) {
+//                $this->provider->getProvision()->io()->successLite('Provision can grant privileges on database users.');
+//            } else {
+//                $this->provider->getProvision()->io()->errorLite('Provision is unable to grant privileges on database users.');
+//                $return = FALSE;
+//            }
+//
+//            return [
+//                'service' => $return
+//            ];
+//        }
+//        catch (\PDOException $e) {
+//            $this->provider->getProvision()->io()->errorLite($e->getMessage());
+//            return [
+//                'service' => FALSE
+//            ];
+//        }
     }
     
     /**
@@ -194,7 +226,7 @@ class DbService extends Service
             return $this->conn;
         }
         catch (\PDOException $e) {
-            throw new \PDOException("Unable to connect to database server: " . $e->getMessage());
+            throw new \PDOException("Unable to connect to database server using DSN {$this->dsn}: " . $e->getMessage());
         }
     }
     

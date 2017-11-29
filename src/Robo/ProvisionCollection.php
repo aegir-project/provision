@@ -41,17 +41,31 @@ class ProvisionCollection extends Collection {
                 if ($this->getProvision()->getOutput()->isVerbose()) {
                     $this->getProvision()->io()->customLite('STARTED ' . $name, '○');
                 }
+                
                 // ROBO
                 $taskList = $taskGroup->getTaskList();
                 $result = $this->runTaskList($name, $taskList, $result);
                 // END ROBO
     
                 if (!$result->wasSuccessful()) {
-                    $this->getProvision()->io()->errorLite('<options=bold>FAILED </> ' . $name);
+                    if (!empty($this->getConfig()->get($name . '.failure'))) {
+                        $name = $this->getConfig()->get($name . '.failure');
+                    }
+    
+                    if ($this->getProvision()->getOutput()->isVerbose()) {
+                        $this->getProvision()->io()->errorLite('<options=bold>FAILED </> ' . $name);
+                    }
+                    else {
+                        $this->getProvision()->io()->errorLite($name);
+                    }
                     $this->fail();
                     return $result;
                 }
                 else {
+    
+                    if (!empty($this->getConfig()->get($name . '.success'))) {
+                        $name = $this->getConfig()->get($name . '.success');
+                    }
                     if ($this->getProvision()->getOutput()->isVerbose()) {
                         $this->getProvision()->io()->successLite('<fg=green>SUCCESS</> '.$name);
                     }
