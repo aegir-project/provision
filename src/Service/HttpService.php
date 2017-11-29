@@ -12,6 +12,7 @@ namespace Aegir\Provision\Service;
 
 use Aegir\Provision\Service;
 use Aegir\Provision\ServiceSubscription;
+use Aegir\Provision\Task;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 
 /**
@@ -57,10 +58,15 @@ class HttpService extends Service {
      *
      * This is used to allow skipping of the service restart.
      */
-    function verifyProvider()
+    function verify()
     {
         return [
-            'configuration' => $this->writeConfigurations(),
+            'configuration' => Task::new()
+                ->execute(function() {
+                    $this->writeConfigurations();
+                })
+                ->success('Configuration file written for service...')
+                ->failure('Unable to write config file for service...')
         ];
     }
 
