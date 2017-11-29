@@ -62,6 +62,11 @@ class ProvisionCollection extends Collection {
                     return $result;
                 }
                 else {
+                    
+                    // Skip the logging tasks.
+                    if (strpos($name, 'logging.') === 0) {
+                        continue;
+                    }
     
                     if (!empty($this->getConfig()->get($name . '.success'))) {
                         $name = $this->getConfig()->get($name . '.success');

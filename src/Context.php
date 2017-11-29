@@ -487,9 +487,9 @@ class Context implements BuilderAwareInterface
         foreach ($this->getServices() as $type => $service) {
             $friendlyName = $service->getFriendlyName();
     
-            $collection->addCode(function() use ($friendlyName) {
+            $collection->addCode(function() use ($friendlyName, $type) {
                 $this->getProvision()->io()->section("Verify service: {$friendlyName}");
-            });
+            }, 'logging.' . $type);
             
             $tasks = $service->verify();
             foreach ($tasks as $title => $task) {
