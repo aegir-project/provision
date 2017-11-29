@@ -18,6 +18,7 @@ class ProvisionCollection extends Collection {
      */
     public function run()
     {
+        $this->disableProgressIndicator();
         $result = $this->runWithoutCompletion();
         $this->complete();
         return $result;
@@ -34,47 +35,51 @@ class ProvisionCollection extends Collection {
             return $result;
         }
         
-        $this->startProgressIndicator();
         if ($result->wasSuccessful()) {
             foreach ($this->taskList as $name => $taskGroup) {
+    
+                if ($this->getProvision()->getOutput()->isVerbose()) {
+                    $this->getProvision()->io()->customLite('STARTED ' . $name, '○');
+                }
+                // ROBO
                 $taskList = $taskGroup->getTaskList();
                 $result = $this->runTaskList($name, $taskList, $result);
+                // END ROBO
+    
                 if (!$result->wasSuccessful()) {
+                    $this->getProvision()->io()->errorLite('<options=bold>FAILED </> ' . $name);
                     $this->fail();
                     return $result;
+                }
+                else {
+                    if ($this->getProvision()->getOutput()->isVerbose()) {
+                        $this->getProvision()->io()->successLite('<fg=green>SUCCESS</> '.$name);
+                    }
+                    else {
+                        $this->getProvision()->io()->successLite($name);
+                    }
                 }
             }
             $this->taskList = [];
         }
-        $this->stopProgressIndicator();
         $result['time'] = $this->getExecutionTime();
         
         return $result;
     }
     
     /**
-     * Run every task in a list, but only up to the first failure.
-     * Return the failing result, or success if all tasks run.
+     * {@inheritdoc}
      *
-     * @param string $name
-     * @param TaskInterface[] $taskList
-     * @param \Robo\Result $result
-     *
-     * @return \Robo\Result
-     *
-     * @throws \Robo\Exception\TaskExitException
+     * An exact copy of Collection::runTaskList(), because it is private and we need access.
      */
     private function runTaskList($name, array $taskList, Result $result)
     {
         try {
             foreach ($taskList as $taskName => $task) {
-                $this->getProvision()->io()->customLite($name, '☐');
                 $taskResult = $this->runSubtask($task);
-                $this->advanceProgressIndicator();
                 // If the current task returns an error code, then stop
                 // execution and signal a rollback.
                 if (!$taskResult->wasSuccessful()) {
-                    $this->getProvision()->io()->errorLite($name);
                     return $taskResult;
                 }
                 // We accumulate our results into a field so that tasks that
@@ -84,8 +89,6 @@ class ProvisionCollection extends Collection {
                 $result->accumulate($key, $taskResult);
                 // The result message will be the message of the last task executed.
                 $result->setMessage($taskResult->getMessage());
-                
-                $this->getProvision()->io()->successLite($name);
             }
         } catch (TaskExitException $exitException) {
             $this->fail();

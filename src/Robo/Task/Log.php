@@ -40,6 +40,10 @@ class Log extends BaseTask
     
     public function run() {
         $this->logger()->log($this->level, $this->message);
+        return new Result(
+            $this,
+            0
+        );
     }
 
 }

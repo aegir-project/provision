@@ -35,7 +35,7 @@ class ProvisionCollectionBuilder extends CollectionBuilder {
             $this->collection->setProvision($this->getProvision());
             $this->collection->inflect($this);
             $this->collection->setState($this->getState());
-            $this->collection->setProgressBarAutoDisplayInterval($this->getConfig()->get(Config::PROGRESS_BAR_AUTO_DISPLAY_INTERVAL));
+//            $this->collection->setProgressBarAutoDisplayInterval($this->getConfig()->get(Config::PROGRESS_BAR_AUTO_DISPLAY_INTERVAL));
             
             if (isset($this->currentTask)) {
                 $this->collection->add($this->currentTask);
