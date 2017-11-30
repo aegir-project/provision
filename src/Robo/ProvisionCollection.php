@@ -48,10 +48,17 @@ class ProvisionCollection extends Collection {
                 // END ROBO
     
                 if (!$result->wasSuccessful()) {
+                    
+                    // Override output with failure() message.
                     if (!empty($this->getConfig()->get($name . '.failure'))) {
                         $name = $this->getConfig()->get($name . '.failure');
                     }
-    
+                    
+                    // If task failed and there is getMessage, it is the exception message.
+                    if (!empty($result->getMessage())) {
+                        $name = $result->getMessage();
+                    }
+                    
                     if ($this->getProvision()->getOutput()->isVerbose()) {
                         $this->getProvision()->io()->errorLite('<options=bold>FAILED </> ' . $name);
                     }
