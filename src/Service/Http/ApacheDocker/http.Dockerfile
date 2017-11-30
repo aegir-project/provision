@@ -42,7 +42,8 @@ RUN a2enmod rewrite
 
 # Save a symlink to the /var/aegir/config/docker.conf file.
 RUN mkdir -p /var/aegir/config
-RUN chown aegir:aegir /var/aegir/config -R
+RUN mkdir -p /var/aegir/platforms
+RUN chown aegir:aegir /var/aegir -R
 RUN ln -sf /var/aegir/config/provision.conf /etc/apache2/conf-available/provision.conf
 RUN ln -sf /etc/apache2/conf-available/provision.conf /etc/apache2/conf-enabled/provision.conf
 
