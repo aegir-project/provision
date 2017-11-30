@@ -23,13 +23,14 @@ prompt_yes_no() {
 }
 
 version=$1
+oldversion=$2
 major="7.x"
 
-if [ $# -lt 1 -o "$version" = "-h" ]; then
+if [ $# -lt 2 -o "$version" = "-h" ]; then
     cat <<EOF 
 not enough arguments
 
-Usage: $0 <new_version>
+Usage: $0 <new_version> <old_version>
 EOF
     exit 1
 fi
@@ -108,6 +109,7 @@ fi
 
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 NEW_TAG="$major-$version"
+OLD_TAG="$major-$oldversion"
 commitmsg=`git commit -m"change version information for release $version"`
 echo $commitmsg
 commitid=`echo $commitmsg | sed 's/^\[[^ ]* \([a-z0-9]*\)\].*$/\1/'`
@@ -129,6 +131,10 @@ rm -rf build-area/hostmaster
 git clone --branch $CURRENT_BRANCH `git config remote.origin.url | sed 's/provision/hostmaster/'` build-area/hostmaster
 
 cd build-area/hostmaster
+echo changing golden contrib versions in drupal-org.make
+sed -i'.tmp' -e "s/$major-$oldversion/$major-$version/" drupal-org.make && git add drupal-org.make && rm drupal-org.make.tmp
+git commit -m"Update version information for release $version"
+
 echo changing hostmaster.make versions
 ln -sf drupal-org.make hostmaster.make && git add hostmaster.make
 cd -
