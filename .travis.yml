@@ -57,7 +57,7 @@ script:
     --web_group=www-data
     --web_disable_url=http://localhost/disabled
     --web_maintenance_url=http://localhost/maintenance
-    --restart_command="echo 'Restarting web server...'; sleep 3"
+    --restart_command="sudo apache2ctl graceful"
 
   - provision services server_master add db -n
     --service_type=mysql
