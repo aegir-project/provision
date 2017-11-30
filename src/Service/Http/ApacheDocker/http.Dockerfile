@@ -62,7 +62,7 @@ RUN chmod +x /usr/local/bin/httpd-foreground
 USER aegir
 WORKDIR /var/aegir
 
-VOLUME /var/aegir/config/$AEGIR_SERVER_NAME/apache
+VOLUME /var/aegir/config/$AEGIR_SERVER_NAME
 VOLUME /var/aegir/platforms
 
 EXPOSE 80
