@@ -62,6 +62,8 @@ RUN chmod +x /usr/local/bin/httpd-foreground
 USER aegir
 WORKDIR /var/aegir
 
+RUN mkdir /var/aegir/config/$AEGIR_SERVER_NAME
+
 VOLUME /var/aegir/config/$AEGIR_SERVER_NAME
 VOLUME /var/aegir/platforms
 

@@ -144,8 +144,8 @@ class HttpApacheDockerService extends HttpApacheService
                     
                       # Docker container not found. Start it.
                       else {
-                          $configVolumeHost = $provision->getConfig()->get('config_path') . DIRECTORY_SEPARATOR . $this->provider->name . DIRECTORY_SEPARATOR . '/apache';
-                          $configVolumeGuest = $this->provider->getProperty('aegir_root') . '/config/' . $this->provider->name . DIRECTORY_SEPARATOR . '/apache';
+                          $configVolumeHost = $provision->getConfig()->get('config_path') . DIRECTORY_SEPARATOR . $this->provider->name;
+                          $configVolumeGuest = $this->provider->getProperty('aegir_root') . '/config/' . $this->provider->name;
                         
                           $result = $provision->getTasks()->taskDockerRun($tag)
                               ->detached()
