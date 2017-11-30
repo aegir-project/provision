@@ -175,6 +175,14 @@ class HttpApacheDockerService extends HttpApacheService
           }
       };
       
+      $tasks['http.restart'] = $this->getProvision()->newTask()
+          ->execute(function() use ($name) {
+              $this->properties['restart_command'] = "docker exec {$name}  {$this->properties['restart_command']}";
+              $this->restartService();
+          })
+          ->success('Restarted web service.')
+          ->failure('Unable to restart web service.');
+      
       return $tasks;
   }
 //
