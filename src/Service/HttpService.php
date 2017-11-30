@@ -61,12 +61,19 @@ class HttpService extends Service {
     function verify()
     {
         return [
-            'configuration' => Task::new()
+            'http.configuration' => $this->getProvision()->newTask()
                 ->execute(function() {
                     $this->writeConfigurations();
                 })
-                ->success('Configuration file written for service...')
-                ->failure('Unable to write config file for service...')
+                ->success('Wrote web server configuration files.')
+                ->failure('Unable to write config files for this service.'),
+            
+            'http.restart' => $this->getProvision()->newTask()
+                ->execute(function() {
+                    $this->restartService();
+                })
+                ->success('Web service restarted.')
+                ->failure('Never shown: exception message used instead.'),
         ];
     }
 

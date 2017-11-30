@@ -119,16 +119,10 @@ class Service implements BuilderAwareInterface
             
             /** @var \Robo\Result $result */
             $result = $task->run();
-            if ($result->wasSuccessful()) {
-                $this->getProvision()->io()->successLite('Service restarted.');
-                sleep(1);
-                return TRUE;
-            }
-            else {
-                $this->getProvision()->io()->errorLite('Unable to restart service using command: ' . $this->getProperty('restart_command'));
+            if (!$result->wasSuccessful()) {
+                throw new \Exception('Unable to restart service using command: ' . $this->getProperty('restart_command'));
             }
         }
-        return FALSE;
     }
 
     /**
@@ -177,14 +171,14 @@ class Service implements BuilderAwareInterface
             try {
                 $config = new $configuration_class($context, $this);
                 $config->write();
-                $context->getProvision()->io()->successLite(
-                    'Wrote '.$config->description.' to '.$config->filename()
-                );
+//                $context->getProvision()->io()->successLite(
+//                    'Wrote '.$config->description.' to '.$config->filename()
+//                );
             }
             catch (\Exception $e) {
-                $context->getProvision()->io()->errorLite(
-                    'Unable to write '.$config->description.' to '.$config->filename() . ': ' . $e->getMessage()
-                );
+//                $context->getProvision()->io()->errorLite(
+//                    'Unable to write '.$config->description.' to '.$config->filename() . ': ' . $e->getMessage()
+//                );
                 $success = FALSE;
             }
         }

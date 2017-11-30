@@ -106,25 +106,25 @@ class DbService extends Service
         $tasks = [];
         
         // Confirm we can connect to the database server as root.
-        $tasks['db_connect'] = Task::new()
-            ->success('Provision can connect to Database server.')
-            ->failure('Unable to connect to database using credentials saved in context ' . $this->provider->name . '.')
+        $tasks['db_connect'] = $this->getProvision()->newTask()
             ->execute(function () {
                 $this->connect();
             })
+            ->success('Provision can connect to Database server.')
+            ->failure('Unable to connect to database using credentials saved in context ' . $this->provider->name . '.')
         ;
-        
+    
         // Confirm we have access to create databases.
-        $tasks['db_create'] = Task::new()
-            ->success('Provision can create new databases.')
-            ->failure('Unable to create new databases.')
+        $tasks['db_create'] = $this->getProvision()->newTask()
             ->execute(function () {
                 return $this->can_create_database()? 0: 1;
             })
+            ->success('Provision can create new databases.')
+            ->failure('Unable to create new databases.')
         ;
-        
+    
         // Confirm we can create database users.
-        $tasks['db_grant'] = Task::new()
+        $tasks['db_grant'] = $this->getProvision()->newTask()
             ->success('Provision can grant privileges on database users.')
             ->failure('unable to grant privileges on database users.')
             ->execute(function () {
