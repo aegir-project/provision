@@ -18,9 +18,4 @@ class Task {
         $this->failure = $message;
         return $this;
     }
-    
-    static function new() {
-        return new Task();
-    }
-    
 }
