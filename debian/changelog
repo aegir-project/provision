@@ -1,3 +1,9 @@
+aegir3-provision (3.130) unstable; urgency=medium
+
+  * Bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.13
+
+ -- Herman van Rink <helmo@initfour.nl>  Thu, 30 Nov 2017 19:46:04 +0100
+
 aegir3-provision (3.121) testing; urgency=medium
 
   * Support Drupal 8.4 - See https://www.drupal.org/node/2911855
