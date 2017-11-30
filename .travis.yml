@@ -95,3 +95,5 @@ script:
   - provision verify server_master -v
   - provision verify platform_hostmaster -v
   - provision verify hostmaster -v
+  
+  - provision verify server_master
