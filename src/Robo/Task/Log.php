@@ -23,8 +23,6 @@ use Robo\Result;
  */
 class Log extends BaseTask
 {
-    use LoggerAwareTrait;
-    
     /**
      * Log constructor.
      *
