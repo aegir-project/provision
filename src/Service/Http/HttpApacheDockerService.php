@@ -137,7 +137,7 @@ class HttpApacheDockerService extends HttpApacheService
                         
                           $result = $provision->getTasks()->taskDockerRun($tag)
                               ->detached()
-                              ->publish(80)
+                              ->publish($this->getProperty('http_port'), 80)
                               ->name($name)
                               ->volume($configVolumeHost, $configVolumeGuest)
                               ->silent(!$provision->getOutput()->isVerbose())
