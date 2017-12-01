@@ -72,6 +72,11 @@ class Context implements BuilderAwareInterface
     protected $properties = [];
     
     /**
+     * @var \Symfony\Component\Filesystem\Filesystem
+     */
+    public $fs;
+    
+    /**
      * Context constructor.
      *
      * @param $name
@@ -89,6 +94,8 @@ class Context implements BuilderAwareInterface
         
         $this->loadContextConfig($options);
         $this->prepareServices();
+        
+        $this->fs = new Filesystem();
     }
 
     /**
