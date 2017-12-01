@@ -14,7 +14,6 @@ use Aegir\Provision\Common\ProvisionAwareTrait;
 
 class ServiceSubscription {
   
-   public $context;
    public $service;
    public $server;
    public $type;

@@ -52,7 +52,7 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
     
         // Add platform http service subscription.
         $this->serviceSubscriptions['http'] = $this->platform->getSubscription('http');
-        $this->serviceSubscriptions['http']->context = $this;
+        $this->serviceSubscriptions['http']->setContext($this);
 
     }
 
