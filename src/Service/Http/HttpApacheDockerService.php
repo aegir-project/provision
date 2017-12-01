@@ -54,22 +54,18 @@ class HttpApacheDockerService extends HttpApacheService
       $tag = "provision/http:{$this->provider->name}";
       $name = "provision_http_{$this->provider->name}";
       $build_dir = __DIR__ . DIRECTORY_SEPARATOR . '/ApacheDocker/';
-    
-      $tasks['Saying something special.'] = $robo->taskExec('echo "Hello exec"')
-                ->silent(TRUE)
-                ->printOutput(FALSE);
-      
-      $tasks['boom'] = $robo->taskLog('hello world.')
-      ;
       
       // Write Apache configuration files.
-      $tasks['Save configuration files.'] = function () use ($provision) {
+      $tasks['Saved Apache configuration files.'] = function () use ($provision) {
           $this->writeConfigurations();
       };
       
       // Build Docker image.
-      $tasks['Build docker image.'] = function () use ($provision, $build_dir, $tag) {
-          $buildResult = $this->getProvision()->getTasks()->taskDockerBuild($build_dir)
+      $tasks['http.docker.build'] = $this->getProvision()->newTask()
+          ->success('Built new Docker image for Apache: ' . $tag)
+          ->failure('Unable to build docker container with tag: ' . $tag)
+          ->execute(function () use ($provision, $build_dir, $tag) {
+          $this->getProvision()->getTasks()->taskDockerBuild($build_dir)
               ->tag($tag)
               ->option(
                   '-f',
@@ -83,15 +79,7 @@ class HttpApacheDockerService extends HttpApacheService
               ->silent(!$this->getProvision()->getOutput()->isVerbose())
               ->run()
           ;
-    
-          if ($buildResult->wasSuccessful()) {
-              $provision->io()->successLite('Built new Docker image for Apache: ' . $tag);
-          }
-          else {
-              $provision->io()->errorLite('Unable to build docker container with tag: ' . $tag);
-              throw new \Exception('Unable to build docker container with tag: ' . $tag);
-          }
-      };
+      });
       
       // Docker run
       $tasks['Run docker image.'] = function () use ($provision, $tag, $name, $provider) {
