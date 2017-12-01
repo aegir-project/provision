@@ -97,3 +97,5 @@ script:
   - provision verify hostmaster -v
   
   - provision verify server_master
+
+  - docker ps
