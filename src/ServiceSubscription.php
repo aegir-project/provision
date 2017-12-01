@@ -38,7 +38,6 @@ class ServiceSubscription {
       if (isset($context->config['service_subscriptions'][$service_name]['properties'])) {
           $this->properties = $context->config['service_subscriptions'][$service_name]['properties'];
       }
-      
   }
   
   public function verify() {

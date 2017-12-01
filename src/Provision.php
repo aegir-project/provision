@@ -116,9 +116,6 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
             ->setLogger($logger)
         ;
         $application->configureIO($input, $output);
-
-        $this->application = $application;
-
         $this->setInput($input);
         $this->setOutput($output);
 
