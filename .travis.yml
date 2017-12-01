@@ -99,3 +99,4 @@ script:
   - provision verify server_master
 
   - docker ps
+  - docker logs provision_http_server_master
