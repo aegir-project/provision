@@ -90,6 +90,17 @@ class HttpService extends Service implements ServiceInterface {
     }
 
     function verifyPlatform() {
+        $tasks = [];
+        $tasks['http.platform.configuration'] =  $this->getProvision()->newTask()
+                ->success('Wrote platform configuration to ...')
+                ->failure('Unable to write platform configuration file.')
+                ->execute(function () {
+                    $this->writeConfigurations($this->getContext()->getSubscription('http'));
+
+                })
+        ;
+        $tasks = array_merge($tasks, $this->verifyServer());
+        return $tasks;
     }
 
     //
