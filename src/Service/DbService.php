@@ -10,6 +10,7 @@ namespace Aegir\Provision\Service;
 
 //require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
+use Aegir\Provision\Context;
 use Aegir\Provision\Context\SiteContext;
 use Aegir\Provision\Service;
 use Aegir\Provision\ServiceInterface;
@@ -26,6 +27,7 @@ class DbService extends Service implements ServiceInterface
 {
 
     const SERVICE = 'db';
+    const SERVICE_TYPE = NULL;
 
     const SERVICE_NAME = 'Database Server';
     
@@ -50,7 +52,33 @@ class DbService extends Service implements ServiceInterface
      * Indicates the place holders that should be replaced in _db_query_callback().
      */
     const PROVISION_QUERY_REGEXP = '/(%d|%s|%%|%f|%b)/';
-    
+
+    /**
+     * DbService constructor.
+     *
+     * Set dsn based on context's service config.
+     *
+     * @param $service_config
+     * @param Context $provider_context
+     */
+    function __construct($service_config, Context $provider_context)
+    {
+        parent::__construct($service_config, $provider_context);
+
+        $this->creds = array_map('urldecode', parse_url($this->properties['master_db']));
+
+        if (!isset($this->creds['port'])) {
+            $this->creds['port'] = '3306';
+        }
+
+        if (!isset($this->creds['pass'])) {
+            $this->creds['pass'] = '';
+        }
+
+        $this->dsn = sprintf("%s:host=%s;port=%s", $this::SERVICE_TYPE,  $this->creds['host'], $this->creds['port']);
+
+    }
+
     /**
      * Implements Service::server_options()
      *
@@ -92,18 +120,6 @@ class DbService extends Service implements ServiceInterface
      * React to the `provision verify` command on Server contexts
      */
     function verifyServer() {
-        $this->creds = array_map('urldecode', parse_url($this->properties['master_db']));
-        
-        if (!isset($this->creds['port'])) {
-            $this->creds['port'] = '3306';
-        }
-        
-        if (!isset($this->creds['pass'])) {
-            $this->creds['pass'] = '';
-        }
-        
-        $this->dsn = sprintf("%s:host=%s;port=%s", $this::SERVICE_TYPE,  $this->creds['host'], $this->creds['port']);
-
         $tasks = [];
         
         // Confirm we can connect to the database server as root.
@@ -169,7 +185,11 @@ class DbService extends Service implements ServiceInterface
      * React to the `provision verify` command on subscriber contexts (sites and platforms)
      */
     function verifySite() {
-        $this->subscription = $this->getContext()->getSubscription($this->type);
+
+        return [
+            'Prepared site database.' => function () {
+
+        $this->subscription = $this->getContext()->getSubscription($this::SERVICE);
 
         // Check for database
         $this->create_site_database($this->getContext());
@@ -189,34 +209,21 @@ class DbService extends Service implements ServiceInterface
     
         try {
             $this->connect();
-            $this->subscription->context->getProvision()->io()->successLite('Successfully connected to database server.');
-            return [
-                'service' => TRUE
-            ];
+            $this->subscription->getContext()->getProvision()->io()->successLite('Successfully connected to database server.');
         }
         catch (\PDOException $e) {
             $this->subscription->context->getProvision()->io()->errorLite($e->getMessage());
-            return [
-                'service' => FALSE
-            ];
+            throw new \Exception('Unable to connect to database using service properties: ' . $e->getMessage());
         }
+
+            }
+        ];
     }
 
     public function verifyPlatform() {
 
     }
 
-    /**
-     * React to `provision verify` command when run on a subscriber, to verify the service's provider.
-     *
-     * This is used to verify the database server when a subscriber is verified.
-     */
-    function verifyProvider()
-    {
-        return [
-            'service' => $this->verify(),
-        ];
-    }
 
     /**
      * Attempt to connect to the database server using $this->creds
