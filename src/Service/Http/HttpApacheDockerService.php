@@ -8,6 +8,7 @@
 
 namespace Aegir\Provision\Service\Http;
 
+use Aegir\Provision\Context;
 use Aegir\Provision\Robo\ProvisionExecutor;
 use Aegir\Provision\Robo\ProvisionTasks;
 use Aegir\Provision\Robo\Task\Log;
@@ -29,7 +30,32 @@ class HttpApacheDockerService extends HttpApacheService
 {
   const SERVICE_TYPE = 'apacheDocker';
   const SERVICE_TYPE_NAME = 'Apache on Docker';
-  
+
+
+  /**
+   * @var string The name of this server's container.
+   */
+  private $containerName;
+
+
+  /**
+   * @var string The tag for this server's container.
+   */
+  private $containerTag;
+
+  /**
+   * HttpApacheDockerService constructor.
+   * @param $service_config
+   * @param Context $provider_context
+   */
+  function __construct($service_config, Context $provider_context)
+  {
+      parent::__construct($service_config, $provider_context);
+
+      $this->containerName = "provision_http_{$this->provider->name}";
+      $this->containerTag = "provision/http:{$this->provider->name}";
+  }
+
   /**
    * Returns array of Configuration classes for this service.
    *
@@ -45,14 +71,12 @@ class HttpApacheDockerService extends HttpApacheService
     return $configs;
   }
   
-  public function verify() {
+  public function verifyServer() {
       $tasks = [];
 
       $provision = $this->getProvision();
       $robo = $this->getProvision()->getTasks();
       $provider = $this->provider;
-      $tag = "provision/http:{$this->provider->name}";
-      $name = "provision_http_{$this->provider->name}";
       $build_dir = __DIR__ . DIRECTORY_SEPARATOR . '/ApacheDocker/';
       
       // Write Apache configuration files.
@@ -62,11 +86,11 @@ class HttpApacheDockerService extends HttpApacheService
       
       // Build Docker image.
       $tasks['http.docker.build'] = $this->getProvision()->newTask()
-          ->success('Built new Docker image for Apache: ' . $tag)
-          ->failure('Unable to build docker container with tag: ' . $tag)
-          ->execute(function () use ($provision, $build_dir, $tag) {
+          ->success('Built new Docker image for Apache: ' . $this->containerTag)
+          ->failure('Unable to build docker container with tag: ' . $this->containerTag)
+          ->execute(function () use ($provision, $build_dir) {
           $this->getProvision()->getTasks()->taskDockerBuild($build_dir)
-              ->tag($tag)
+              ->tag($this->containerTag)
               ->option(
                   '-f',
                   __DIR__.DIRECTORY_SEPARATOR.'/ApacheDocker/http.Dockerfile'
@@ -82,47 +106,47 @@ class HttpApacheDockerService extends HttpApacheService
       });
       
       // Docker run
-      $tasks['Run docker image.'] = function () use ($provision, $tag, $name, $provider) {
+      $tasks['Run docker image.'] = function () use ($provision,$provider) {
         
           // Check for existing container.
           $containerExists = $provision->getTasks()
-              ->taskExec("docker ps -a -q -f name={$name}")
+              ->taskExec("docker ps -a -q -f name={$this->containerName}")
               ->silent(!$this->getProvision()->getOutput()->isVerbose())
               ->printOutput(false)
               ->storeState('container_id')
               ->taskFileSystemStack()
               ->defer(
-                  function ($task, $state) use ($provision, $tag, $name, $provider) {
+                  function ($task, $state) use ($provision, $provider) {
                       $container = $state['container_id'];
                       if ($container) {
                         
                           //Check that it is running
                           $provision->getTasks()
-                              ->taskExec("docker inspect -f '{{.State.Running}}' {$name}")
+                              ->taskExec("docker inspect -f '{{.State.Running}}' {$this->containerName}")
                               ->silent(!$provision->getOutput()->isVerbose())
                               ->printOutput(false)
                               ->storeState('running')
                               ->taskFileSystemStack()
                               ->defer(
-                                  function ($task, $state) use ($provision, $tag, $name, $provider) {
+                                  function ($task, $state) use ($provision, $provider) {
                                     
                                       if ($state['running'] == 'true') {
-                                          $provision->io()->successLite('Container is already running: ' . $name);
+                                          $provision->io()->successLite('Container is already running: ' . $this->containerName);
                                       }
                                       // If not running, try to start it.
                                       else {
                                           $startResult = $provision->getTasks()
-                                              ->taskExec("docker start {$name}")
+                                              ->taskExec("docker start {$this->containerName}")
                                               ->silent(!$provision->getOutput()->isVerbose())
                                               ->run()
                                           ;
                                         
                                           if ($startResult->wasSuccessful()) {
-                                              $provision->io()->successLite('Existing container found. Restarted container ' . $name);
+                                              $provision->io()->successLite('Existing container found. Restarted container ' . $this->containerName);
                                           }
                                           else {
-                                              $provision->io()->errorLite('Unable to restart docker container: ' . $name);
-                                              throw new \Exception('Unable to restart docker container: ' . $name);
+                                              $provision->io()->errorLite('Unable to restart docker container: ' . $this->containerName);
+                                              throw new \Exception('Unable to restart docker container: ' . $this->containerName);
                                           }
                                       }
                                   })
@@ -135,21 +159,21 @@ class HttpApacheDockerService extends HttpApacheService
                           $configVolumeHost = $provision->getConfig()->get('config_path') . DIRECTORY_SEPARATOR . $this->provider->name;
                           $configVolumeGuest = $this->provider->getProperty('aegir_root') . '/config/' . $this->provider->name;
                         
-                          $result = $provision->getTasks()->taskDockerRun($tag)
+                          $result = $provision->getTasks()->taskDockerRun($this->containerTag)
                               ->detached()
                               ->publish($this->getProperty('http_port'), 80)
-                              ->name($name)
+                              ->name($this->containerName)
                               ->volume($configVolumeHost, $configVolumeGuest)
                               ->silent(!$provision->getOutput()->isVerbose())
                               ->interactive()
                               ->run();
                         
                           if ($result->wasSuccessful()) {
-                              $provision->io()->successLite('Running Docker image ' . $tag);
+                              $provision->io()->successLite('Running Docker image ' . $this->containerTag);
                           }
                           else {
-                              $provision->io()->errorLite('Unable to run docker container: ' . $name);
-                              throw new \Exception('Unable to run docker container: ' . $name);
+                              $provision->io()->errorLite('Unable to run docker container: ' . $this->containerName);
+                              throw new \Exception('Unable to run docker container: ' . $this->containerName);
                           }
                       }
                   }
@@ -164,14 +188,21 @@ class HttpApacheDockerService extends HttpApacheService
       };
       
       $tasks['http.restart'] = $this->getProvision()->newTask()
-          ->execute(function() use ($name) {
-              $this->properties['restart_command'] = "docker exec {$name}  {$this->properties['restart_command']}";
+          ->execute(function() {
               $this->restartService();
           })
           ->success('Restarted web service.')
           ->failure('Unable to restart web service.');
       
       return $tasks;
+  }
+
+  /**
+   * Override HttpService by adding 'docker exec' in front of it.
+   */
+  public function restartService() {
+      $this->properties['restart_command'] = "docker exec {$this->containerName}  {$this->properties['restart_command']}";
+      parent::restartService();
   }
 //
 //  public function verify2()
