@@ -149,6 +149,9 @@ class Service implements BuilderAwareInterface
             if (!$result->wasSuccessful()) {
                 throw new \Exception('Unable to restart service using command: ' . $this->getProperty('restart_command'));
             }
+            else {
+                return TRUE;
+            }
         }
     }
 
