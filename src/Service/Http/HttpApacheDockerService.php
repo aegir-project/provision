@@ -97,6 +97,9 @@ class HttpApacheDockerService extends HttpApacheService
       if ($this->context instanceof Context\SiteContext) {
           $config->data['site_path'] = $config->data['root'] . '/sites/' . $config->data['uri'];
       }
+      
+      // When running in docker, internal port is always 80.
+      $config->data['http_port'] = 80;
   }
     
     /**
