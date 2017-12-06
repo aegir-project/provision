@@ -92,17 +92,25 @@ class HttpApacheDockerService extends HttpApacheService
           return;
       }
 
-      $path_parts = explode(DIRECTORY_SEPARATOR, $root_on_host);
-      $directory = array_pop($path_parts);
-
-      $root_in_container = $this->provider->getProperty('aegir_root') . DIRECTORY_SEPARATOR . 'platforms' . DIRECTORY_SEPARATOR . $directory;
-
-      $config->data['root'] = $root_in_container;
+      $config->data['root'] = $this->mapContainerPath($root_on_host);
 
       if ($this->context instanceof Context\SiteContext) {
           $config->data['site_path'] = $config->data['root'] . '/sites/' . $config->data['uri'];
       }
   }
+    
+    /**
+     * Convert a path on the host like /home/jon/hostmaster to /var/aegir/hostmaster
+     *
+     * @param $root_on_host
+     *
+     * @return string
+     */
+    function mapContainerPath($root_on_host) {
+        $path_parts = explode(DIRECTORY_SEPARATOR, $root_on_host);
+        $directory = array_pop($path_parts);
+        return $this->provider->getProperty('aegir_root') . DIRECTORY_SEPARATOR . 'platforms' . DIRECTORY_SEPARATOR . $directory;
+    }
   
   public function verifyServer() {
       $tasks = [];
@@ -201,10 +209,11 @@ class HttpApacheDockerService extends HttpApacheService
                               ->option('rm')
                               ->interactive();
 
-
-                          $platforms['/home/jon/Projects/devshop.build'] = '/var/aegir/platforms/devshop.build';
-                          foreach ($platforms as $from => $to) {
-                              $container->volume($from, $to);
+                          // Lookup all subscribers (all platforms that use this web service) and map volumes for root.
+                          foreach ($this->getAllSubscribers() as $platform) {
+                              if (!empty($platform->getProperty('root'))) {
+                                  $container->volume($platform->getProperty('root'), $this->mapContainerPath($platform->getProperty('root')));
+                              }
                           }
 
                           $result = $container->run();

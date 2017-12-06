@@ -10,6 +10,7 @@ namespace Aegir\Provision;
 
 use Aegir\Provision\Common\ContextAwareTrait;
 use Aegir\Provision\Common\ProvisionAwareTrait;
+use Aegir\Provision\Context\ServerContext;
 use Psr\Log\LoggerAwareTrait;
 use Robo\Common\BuilderAwareTrait;
 use Robo\Common\OutputAdapter;
@@ -317,5 +318,27 @@ class Service implements BuilderAwareInterface
     function getBuilder()
     {
         return $this->builder;
+    }
+    
+    /**
+     * Load all contexts that subscribe to this provider's service.
+     *
+     * @return array
+     */
+    public function getAllSubscribers() {
+        $subscribers = [];
+        
+        foreach ($this->getProvision()->getAllContexts() as $context){
+            if (get_class($context) != ServerContext::class) {
+                foreach ($context->getSubscriptions() as $subscription) {
+                    if ($subscription->server->name == $this->provider->name && $subscription->type == $this->type) {
+                        $subscribers[] = $context;
+                    }
+                }
+            }
+            
+        }
+        return $subscribers;
+        
     }
 }
