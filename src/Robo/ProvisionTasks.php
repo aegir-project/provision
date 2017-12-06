@@ -32,16 +32,18 @@ use Robo\Task\Docker\Remove;
 use Robo\Task\Docker\Run;
 use Robo\Task\Docker\Start;
 use Robo\Task\Docker\Stop;
+use Robo\Task\Vcs\GitStack;
 
 /**
  * Base class for BLT Robo commands.
  */
-class ProvisionTasks implements ConfigAwareInterface, LoggerAwareInterface, BuilderAwareInterface, IOAwareInterface, ContainerAwareInterface {
+class ProvisionTasks implements ConfigAwareInterface, LoggerAwareInterface, BuilderAwareInterface, IOAwareInterface, ContainerAwareInterface
+{
     
     use ContainerAwareTrait;
     use LoadAllTasks;
     use ConfigAwareTrait;
-//    use InspectorAwareTrait;
+    //    use InspectorAwareTrait;
     use IO;
     use LoggerAwareTrait;
     
@@ -68,6 +70,7 @@ class ProvisionTasks implements ConfigAwareInterface, LoggerAwareInterface, Buil
         $name = array_shift($args);
         
         $collectionBuilder = $this->collectionBuilder();
+        
         return $collectionBuilder->build($name, $args);
     }
     
@@ -76,7 +79,8 @@ class ProvisionTasks implements ConfigAwareInterface, LoggerAwareInterface, Buil
      *
      * @return Log
      */
-    public function taskLog($message, $level = LogLevel::NOTICE) {
+    public function taskLog($message, $level = LogLevel::NOTICE)
+    {
         
         return $this->task(Log::class, $this->logger, $message, $level);
     }
@@ -113,6 +117,7 @@ class ProvisionTasks implements ConfigAwareInterface, LoggerAwareInterface, Buil
     
     /**
      * @param $command
+     *
      * @return SymfonyCommand
      */
     public function taskSymfonyCommand($command)
@@ -206,5 +211,13 @@ class ProvisionTasks implements ConfigAwareInterface, LoggerAwareInterface, Buil
     public function taskDockerExec($cidOrResult)
     {
         return $this->task(DockerExec::class, $cidOrResult);
+    }
+    
+    /**
+     * @return \Robo\Task\Vcs\GitStack
+     */
+    public function taskGitStack()
+    {
+        return $this->task(GitStack::class);
     }
 }
