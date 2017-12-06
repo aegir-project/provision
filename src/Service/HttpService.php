@@ -64,7 +64,7 @@ class HttpService extends Service implements ServiceInterface {
         return [
             'http.configuration' => $this->getProvision()->newTask()
                 ->execute(function() {
-                    $this->writeConfigurations();
+                    return $this->writeConfigurations()? 0: 1;
                 })
                 ->success('Wrote web server configuration files.')
                 ->failure('Unable to write config files for this service.'),
@@ -89,14 +89,14 @@ class HttpService extends Service implements ServiceInterface {
             ->success('Wrote site configuration files.')
             ->failure('Unable to write site configuration files.')
             ->execute(function () {
-                $this->writeConfigurations($this->subscription);
+                return $this->writeConfigurations($this->subscription)? 0: 1;
             })
         ;
         $tasks['http.site.service'] =  $this->getProvision()->newTask()
             ->success('Restarted web server.')
             ->failure('Unable to restart web service.')
             ->execute(function () {
-                $this->restartService();
+                return $this->restartService()? 0: 1;
             })
         ;
         return $tasks;
