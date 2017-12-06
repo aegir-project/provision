@@ -1,4 +1,4 @@
-<Directory <?php print $this->context->config['root']; ?>>
+<Directory <?php print $root; ?>>
     Order allow,deny
     Allow from all
     Satisfy any
@@ -8,9 +8,9 @@
 
 
 <?php
-  if (is_readable("{$this->context->config['root']}/.htaccess")) {
+  if (is_readable("{$root}/.htaccess")) {
     print "\n# Include the platform's htaccess file\n";
-    print "Include {$this->context->config['root']}/.htaccess\n";
+    print "Include {$root}/.htaccess\n";
   }
 ?>
 
