@@ -183,7 +183,7 @@ class Service implements BuilderAwareInterface
     {
         // If we are writing for a serviceSubscription, use the provider context.
         if ($serviceSubscription) {
-            $context = $serviceSubscription->context;
+            $context = $serviceSubscription->getContext();
         }
         else {
             $context = $this->provider;
