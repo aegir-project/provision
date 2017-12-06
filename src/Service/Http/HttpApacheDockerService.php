@@ -72,6 +72,13 @@ class HttpApacheDockerService extends HttpApacheService
     return $configs;
   }
 
+    /**
+     * Alter the root path because Provision stores the local path.
+     *
+     * Apache config must reflect the path inside the container.
+     *
+     * @param Configuration $config
+     */
   public function processConfiguration(Configuration &$config) {
 
       // Replace platform's stored root with server's root.
