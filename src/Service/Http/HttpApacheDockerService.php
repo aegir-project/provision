@@ -8,6 +8,7 @@
 
 namespace Aegir\Provision\Service\Http;
 
+use Aegir\Provision\Configuration;
 use Aegir\Provision\Context;
 use Aegir\Provision\Robo\ProvisionExecutor;
 use Aegir\Provision\Robo\ProvisionTasks;
@@ -69,6 +70,18 @@ class HttpApacheDockerService extends HttpApacheService
     $configs['platform'][] = PlatformConfiguration::class;
     $configs['site'][] = SiteConfiguration::class;
     return $configs;
+  }
+
+  public function processConfiguration(Configuration &$config) {
+
+      // Replace platform's stored root with server's root.
+      $root_on_host = $this->context->getProperty('root');
+      $path_parts = explode(DIRECTORY_SEPARATOR, $root_on_host);
+      $directory = array_pop($path_parts);
+
+      $root_in_container = $this->provider->getProperty('aegir_root') . DIRECTORY_SEPARATOR . 'platforms' . DIRECTORY_SEPARATOR . $directory;
+
+      $config->data['root'] = $root_in_container;
   }
   
   public function verifyServer() {
