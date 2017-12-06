@@ -21,7 +21,7 @@ class PhpServer extends \Robo\Task\Development\PhpServer {
     /**
      * @var string
      */
-    protected $command = 'php -S %s:%d ';
+    protected $command = 'php -S %s:%d > /dev/null 2>/dev/null &';
 
     /**
      * @param int $port
@@ -75,5 +75,8 @@ class PhpServer extends \Robo\Task\Development\PhpServer {
 
     public function task() {
 
+    }
+
+    function stop() {
     }
 }
