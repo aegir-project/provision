@@ -232,7 +232,7 @@ class Configuration {
    * 5. Render template with $this and $data and write out to filename().
    * 6. If $mode and/or $group are set, apply them for the new file.
    */
-  function write() {
+  function write(Service $service) {
 
     // Make directory structure if it does not exist.
     $filename = $this->filename();
@@ -249,6 +249,7 @@ class Configuration {
     if ($filename && is_writeable(dirname($filename))) {
       // manipulate data before passing to template.
       $this->process();
+      $service->processConfiguration($this);
 
       if ($template = $this->load_template()) {
         // Make sure we can write to the file

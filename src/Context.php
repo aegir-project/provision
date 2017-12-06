@@ -497,8 +497,10 @@ class Context implements BuilderAwareInterface
             $collection->addCode(function() use ($friendlyName, $type) {
                 $this->getProvision()->io()->section("Verify service: {$friendlyName}");
             }, 'logging.' . $type);
-            
+
+            $service->setContext($this);
             $tasks = $service->verify();
+
             foreach ($tasks as $title => $task) {
                 $collection->getConfig()->set('success', '');
                 $collection->getConfig()->set('failure', '');

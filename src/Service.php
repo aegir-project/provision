@@ -89,8 +89,9 @@ class Service implements BuilderAwareInterface
      */
     public function verify() {
         $method = 'verify' . ucfirst($this->getContext()->type);
-        $this->getProvision()->getLogger()->info("Running {method}", [
-            'method' => $method
+        $this->getProvision()->getLogger()->info("Running method {method} on class {class}", [
+            'method' => $method,
+            'class' => get_class($this),
         ]);
         return $this::$method();
     }
@@ -140,13 +141,16 @@ class Service implements BuilderAwareInterface
         }
         else {
             $task = $this->getProvision()->getTasks()->taskExec($this->getProperty('restart_command'))
-                ->silent(!$this->getProvision()->io()->isVerbose())
+                ->silent(!$this->getProvision()->getOutput()->isVerbose())
             ;
-            
+
             /** @var \Robo\Result $result */
             $result = $task->run();
             if (!$result->wasSuccessful()) {
                 throw new \Exception('Unable to restart service using command: ' . $this->getProperty('restart_command'));
+            }
+            else {
+                return TRUE;
             }
         }
     }
@@ -182,7 +186,7 @@ class Service implements BuilderAwareInterface
     {
         // If we are writing for a serviceSubscription, use the provider context.
         if ($serviceSubscription) {
-            $context = $serviceSubscription->context;
+            $context = $serviceSubscription->getContext();
         }
         else {
             $context = $this->provider;
@@ -196,15 +200,21 @@ class Service implements BuilderAwareInterface
         foreach ($this->getConfigurations()[$context->type] as $configuration_class) {
             try {
                 $config = new $configuration_class($context, $this);
-                $config->write();
-//                $context->getProvision()->io()->successLite(
-//                    'Wrote '.$config->description.' to '.$config->filename()
-//                );
+                $config->write($this);
+                $context->getProvision()->getLogger()->info(
+                    'Wrote {description} to {path}.', [
+                        'description' => $config->description,
+                        'path' => $config->filename(),
+                    ]
+                );
             }
             catch (\Exception $e) {
-//                $context->getProvision()->io()->errorLite(
-//                    'Unable to write '.$config->description.' to '.$config->filename() . ': ' . $e->getMessage()
-//                );
+                $context->getProvision()->getLogger()->info(
+                    'Unable to write {description} to {path}.', [
+                        'description' => $config->description,
+                        'path' => $config->filename(),
+                    ]
+                );
                 $success = FALSE;
             }
         }

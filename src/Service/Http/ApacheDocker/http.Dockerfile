@@ -52,8 +52,8 @@ RUN chmod 0440 /etc/sudoers.d/aegir
 
 # Prepare Aegir Logs folder.
 RUN mkdir /var/log/aegir
-RUN chown aegir:aegir /var/log/aegir
 RUN echo 'Hello, Aegir.' > /var/log/aegir/system.log
+RUN chown aegir:aegir /var/log/aegir -R
 
 # Prepare apache foreground script.
 COPY httpd-foreground.sh /usr/local/bin/httpd-foreground

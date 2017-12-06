@@ -64,7 +64,7 @@ class HttpService extends Service implements ServiceInterface {
         return [
             'http.configuration' => $this->getProvision()->newTask()
                 ->execute(function() {
-                    $this->writeConfigurations();
+                    return $this->writeConfigurations()? 0: 1;
                 })
                 ->success('Wrote web server configuration files.')
                 ->failure('Unable to write config files for this service.'),
@@ -82,14 +82,38 @@ class HttpService extends Service implements ServiceInterface {
      * React to the `provision verify` command on Server contexts
      */
     function verifySite() {
-        $this->subscription = $this->getContext()->getSubscription();
-        return [
-            'configuration' => $this->writeConfigurations($this->subscription),
-            'service' => $this->restartService(),
-        ];
+        $this->subscription = $this->getContext()->getSubscription('http');
+
+        $tasks = [];
+        $tasks['http.site.configuration'] =  $this->getProvision()->newTask()
+            ->success('Wrote site configuration files.')
+            ->failure('Unable to write site configuration files.')
+            ->execute(function () {
+                return $this->writeConfigurations($this->subscription)? 0: 1;
+            })
+        ;
+        $tasks['http.site.service'] =  $this->getProvision()->newTask()
+            ->success('Restarted web server.')
+            ->failure('Unable to restart web service.')
+            ->execute(function () {
+                return $this->restartService()? 0: 1;
+            })
+        ;
+        return $tasks;
     }
 
     function verifyPlatform() {
+        $tasks = [];
+        $tasks['http.platform.configuration'] =  $this->getProvision()->newTask()
+                ->success('Wrote platform configuration to ...')
+                ->failure('Unable to write platform configuration file.')
+                ->execute(function () {
+                    $this->writeConfigurations($this->getContext()->getSubscription('http'));
+
+                })
+        ;
+        $tasks = array_merge($tasks, $this->verifyServer());
+        return $tasks;
     }
 
     //

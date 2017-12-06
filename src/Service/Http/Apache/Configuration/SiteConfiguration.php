@@ -28,7 +28,7 @@ class SiteConfiguration extends Configuration {
   
   function process() {
       parent::process();
-      $this->data['http_port'] = $this->context->platform->getSubscription('http')->service->getProperty('http_port');
+      $this->data['http_port'] = $this->context->getSubscription('http')->service->getProperty('http_port');
       $this->data['root'] = $this->context->platform->getProperty('root');
       $this->data['uri'] = $this->context->getProperty('uri');
 
