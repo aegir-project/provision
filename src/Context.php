@@ -297,6 +297,7 @@ class Context implements BuilderAwareInterface
 
         // @TODO: Figure out how we can let other classes add to Context properties.
         foreach ($this->option_documentation() as $name => $description) {
+            $this->properties[$name] = empty($this->properties[$name])? '': $this->properties[$name];
             $root_node
                 ->children()
                     ->scalarNode($name)
@@ -493,13 +494,17 @@ class Context implements BuilderAwareInterface
     
         foreach ($this->getServices() as $type => $service) {
             $friendlyName = $service->getFriendlyName();
-    
-            $collection->addCode(function() use ($friendlyName, $type) {
+            $tasks = $this->verify();
+//
+//            $collection->addCode(function() use ($friendlyName, $type) {
+//                $this->getProvision()->io()->section("Verify service: {$friendlyName}");
+//            }, 'logging.' . $type);
+            $tasks['logging.' . $type] = function() use ($friendlyName, $type) {
                 $this->getProvision()->io()->section("Verify service: {$friendlyName}");
-            }, 'logging.' . $type);
+            };
 
             $service->setContext($this);
-            $tasks = $service->verify();
+            $tasks = array_merge($tasks, $service->verify());
 
             foreach ($tasks as $title => $task) {
                 $collection->getConfig()->set('success', '');
@@ -537,7 +542,16 @@ class Context implements BuilderAwareInterface
             throw new \Exception('Some services did not verify. Check your configuration and try again.');
         }
     }
-        
+    
+    
+    /**
+     * Stub to be implemented by context types.
+     *
+     * Run extra tasks before services take over.
+     */
+    function verify() {
+       return [];
+    }
 //
 //
 //        $return_codes = [];
