@@ -32,37 +32,28 @@ class HttpPhpService extends HttpService
     public function verifyServer()
     {
 
-        $host = $this->getContext()->getProperty('remote_host');
-        $port = $this->getProperty('http_port');
+        $this->host = $this->getContext()->getProperty('remote_host');
+        $this->port = $this->getProperty('http_port');
 
         $this->getProvision()->getLogger()->info('Running server at {host}:{port}', [
-            'host' => $host,
-            'port' => $port,
-        ]);
-//
-
-        $this->getContext()->getBuilder()->build(PhpServer::class, ['port' => $port]);
-
-//        $server = new PhpServer($port);
-
-        /** @var PhpServer $server */
-        $server = $this->getContext()->getBuilder()->task(PhpServer::class, ['port' => $port]);
-
-        $server->host($host);
-        $server->dir(__DIR__ . '/Php/servertest');
-
-        $server->background();
-        $server->run();
-//
-        $pid = $server->getProcess()->getPid();
-
-        $this->getProvision()->getLogger()->info('Server started at {host}:{port} running as process {pid}', [
-            'host' => $host,
-            'port' => $port,
-            'pid' => $pid,
+            'host' => $this->host,
+            'port' => $this->port,
         ]);
 
-
+        $tasks['http.php.launch'] = $this->getProvision()->newTask()
+            ->success('Internal PHP Server has been verified.')
+            ->failure('Something went wrong when launching the server.')
+            ->execute(function () {
+                
+                $process = new Process(sprintf("php -S %s:%d -t %s &",$this->host, $this->port, __DIR__ . '/Php/servertest'));
+                $process->start();
+                
+                $pid = $process->getPid();
+                
+                $this->getProvision()->io()->successLite("PHP server running at http://{$this->host}:{$this->port} on PID {$pid}");
+            });
+        
+        return $tasks;
     }
 
     public function verifySite()
