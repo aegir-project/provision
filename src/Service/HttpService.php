@@ -82,11 +82,24 @@ class HttpService extends Service implements ServiceInterface {
      * React to the `provision verify` command on Server contexts
      */
     function verifySite() {
-        $this->subscription = $this->getContext()->getSubscription();
-        return [
-            'configuration' => $this->writeConfigurations($this->subscription),
-            'service' => $this->restartService(),
-        ];
+        $this->subscription = $this->getContext()->getSubscription('http');
+
+        $tasks = [];
+        $tasks['http.site.configuration'] =  $this->getProvision()->newTask()
+            ->success('Wrote site configuration files.')
+            ->failure('Unable to write site configuration files.')
+            ->execute(function () {
+                $this->writeConfigurations($this->subscription);
+            })
+        ;
+        $tasks['http.site.service'] =  $this->getProvision()->newTask()
+            ->success('Restarted web server.')
+            ->failure('Unable to restart web service.')
+            ->execute(function () {
+                $this->restartService();
+            })
+        ;
+        return $tasks;
     }
 
     function verifyPlatform() {
