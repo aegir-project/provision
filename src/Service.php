@@ -141,9 +141,9 @@ class Service implements BuilderAwareInterface
         }
         else {
             $task = $this->getProvision()->getTasks()->taskExec($this->getProperty('restart_command'))
-                ->silent(!$this->getProvision()->io()->isVerbose())
+                ->silent(!$this->getProvision()->getOutput()->isVerbose())
             ;
-            
+
             /** @var \Robo\Result $result */
             $result = $task->run();
             if (!$result->wasSuccessful()) {
@@ -198,14 +198,20 @@ class Service implements BuilderAwareInterface
             try {
                 $config = new $configuration_class($context, $this);
                 $config->write();
-//                $context->getProvision()->io()->successLite(
-//                    'Wrote '.$config->description.' to '.$config->filename()
-//                );
+                $context->getProvision()->getLogger()->info(
+                    'Wrote {description} to {path}.', [
+                        'description' => $config->description,
+                        'path' => $config->filename(),
+                    ]
+                );
             }
             catch (\Exception $e) {
-//                $context->getProvision()->io()->errorLite(
-//                    'Unable to write '.$config->description.' to '.$config->filename() . ': ' . $e->getMessage()
-//                );
+                $context->getProvision()->getLogger()->info(
+                    'Unable to write {description} to {path}.', [
+                        'description' => $config->description,
+                        'path' => $config->filename(),
+                    ]
+                );
                 $success = FALSE;
             }
         }
