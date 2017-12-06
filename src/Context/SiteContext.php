@@ -90,7 +90,7 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
         $this->getProvision()->io()->customLite($this->getProperty('uri'), 'Site URL: ', 'info');
         $this->getProvision()->io()->customLite($this->platform->getProperty('root'), 'Root: ', 'info');
         $this->getProvision()->io()->customLite($this->config_path, 'Configuration File: ', 'info');
-
-        return parent::verify();
+        
+        return [];
     }
 }
