@@ -74,14 +74,34 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
     {
         $this->getProvision()->io()->customLite($this->getProperty('root'), 'Root: ', 'info');
         $this->getProvision()->io()->customLite($this->config_path, 'Configuration File: ', 'info');
+        $this->getProvision()->io()->newLine();
+    
+        $tasks = [];
+    
+        // If platform files don't exist, but has git url or makefile, build now.
+        if (!$this->fs->exists($this->getProperty('root')) && $this->getProperty('git_url')) {
+    
+            $tasks['platform.git'] = $this->getProvision()->newTask()
+                ->success('Deployed platform from git repository.')
+                ->failure('Unable to clone platform.')
+                ->execute(function () {
+                    $this->getProvision()->io()->warningLite('Root path does not exist. Cloning source code from git repository ' . $this->getProperty('git_url') . ' to ' . $this->getProperty('root'));
+    
+                    $this->getProvision()->getTasks()->taskExec("git clone")
+                        ->arg($this->getProperty('git_url'))
+                        ->arg($this->getProperty('root'))
+                        ->silent(!$this->getProvision()->getOutput()->isVerbose())
+                        ->run()
+                    ;
+            
+                });
+        }
+        elseif (!$this->fs->exists($this->getProperty('root')) && $this->getProperty('makefile')) {
+            $tasks['platform.make'] = $this->getProvision()->getTasks()->taskLog('Building platforms from make not yet supported.', 'warning');
+        }
+    
+        return $tasks;
         
-        // This is how you can use Robo Tasks in a platform verification call.
-        // The "silent" method actually works here.
-        // It only partially works in Service::restartServices()!
-//        $this->getBuilder()->taskExec('env')
-//            ->silent(!$this->getProvision()->io()->isVerbose())
-//            ->run();
-        
-        return parent::verify();
+//        return parent::verify();
     }
 }
