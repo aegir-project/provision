@@ -82,13 +82,26 @@ class HttpApacheDockerService extends HttpApacheService
   public function processConfiguration(Configuration &$config) {
 
       // Replace platform's stored root with server's root.
-      $root_on_host = $this->context->getProperty('root');
+      if ($this->context instanceof Context\SiteContext) {
+          $root_on_host = $this->context->platform->getProperty('root');
+      }
+      elseif ($this->context instanceof Context\PlatformContext) {
+          $root_on_host = $this->context->getProperty('root');
+      }
+      else {
+          return;
+      }
+
       $path_parts = explode(DIRECTORY_SEPARATOR, $root_on_host);
       $directory = array_pop($path_parts);
 
       $root_in_container = $this->provider->getProperty('aegir_root') . DIRECTORY_SEPARATOR . 'platforms' . DIRECTORY_SEPARATOR . $directory;
 
       $config->data['root'] = $root_in_container;
+
+      if ($this->context instanceof Context\SiteContext) {
+          $config->data['site_path'] = $config->data['root'] . '/sites/' . $config->data['uri'];
+      }
   }
   
   public function verifyServer() {
@@ -179,14 +192,21 @@ class HttpApacheDockerService extends HttpApacheService
                           $configVolumeHost = $provision->getConfig()->get('config_path') . DIRECTORY_SEPARATOR . $this->provider->name;
                           $configVolumeGuest = $this->provider->getProperty('aegir_root') . '/config/' . $this->provider->name;
                         
-                          $result = $provision->getTasks()->taskDockerRun($this->containerTag)
+                          $container = $provision->getTasks()->taskDockerRun($this->containerTag)
                               ->detached()
                               ->publish($this->getProperty('http_port'), 80)
                               ->name($this->containerName)
                               ->volume($configVolumeHost, $configVolumeGuest)
                               ->silent(!$provision->getOutput()->isVerbose())
-                              ->interactive()
-                              ->run();
+                              ->interactive();
+
+
+                          $platforms['/home/jon/Projects/devshop.build'] = '/var/aegir/platforms/devshop.build';
+                          foreach ($platforms as $from => $to) {
+                              $container->volume($from, $to);
+                          }
+
+                          $result = $container->run();
                         
                           if ($result->wasSuccessful()) {
                               $provision->io()->successLite('Running Docker image ' . $this->containerTag);
@@ -222,7 +242,7 @@ class HttpApacheDockerService extends HttpApacheService
    */
   public function restartService() {
       $this->properties['restart_command'] = "docker exec {$this->containerName}  {$this->properties['restart_command']}";
-      parent::restartService();
+      return parent::restartService();
   }
 //
 //  public function verify2()
