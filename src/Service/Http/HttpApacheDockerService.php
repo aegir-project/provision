@@ -133,7 +133,7 @@ class HttpApacheDockerService extends HttpApacheService
           ->success('Built new Docker image for Apache: ' . $this->containerTag)
           ->failure('Unable to build docker container with tag: ' . $this->containerTag)
           ->execute(function () use ($provision, $build_dir) {
-          $this->getProvision()->getTasks()->taskDockerBuild($build_dir)
+              return $this->getProvision()->getTasks()->taskDockerBuild($build_dir)
               ->tag($this->containerTag)
               ->option(
                   '-f',
@@ -146,7 +146,7 @@ class HttpApacheDockerService extends HttpApacheService
               ->option('--build-arg', "AEGIR_UID=".posix_getuid())
               ->silent(!$this->getProvision()->getOutput()->isVerbose())
               ->run()
-          ;
+              ->getExitCode();
       });
       
       // Docker run
