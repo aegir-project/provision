@@ -201,7 +201,7 @@ class Service implements BuilderAwareInterface
         foreach ($this->getConfigurations()[$context->type] as $configuration_class) {
             try {
                 $config = new $configuration_class($context, $this);
-                $config->write($this);
+                $config->write();
                 $context->getProvision()->getLogger()->info(
                     'Wrote {description} to {path}.', [
                         'description' => $config->description,

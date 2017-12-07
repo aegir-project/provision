@@ -6,6 +6,7 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Common\ContextAwareTrait;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -16,16 +17,7 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class Configuration {
   
-  /**
-   * Provision 4.x
-   */
-  
-  /**
-   * A \Aegir\Provision\Context object this configuration relates to.
-   *
-   * @var \Aegir\Provision\Context
-   */
-  public $context = NULL;
+  use ContextAwareTrait;
   
   /**
    * A \Aegir\Provision\Service object this configuration relates to.
@@ -98,13 +90,13 @@ class Configuration {
    *   An associative array to potentially manipulate in process() and make
    *   available as variables to the template.
    */
-  function __construct($context, $service, $data = array()) {
+  function __construct($context, $service = NULL, $data = array()) {
     if (is_null($this->template)) {
       throw new Exception(dt("No template specified for: %class", array('%class' => get_class($this))));
     }
 
     // Accept both a reference and an alias name for the context.
-    $this->context = $context;
+    $this->setContext($context);
     $this->service = $service;
     $this->fs = new Filesystem();
 
@@ -232,7 +224,7 @@ class Configuration {
    * 5. Render template with $this and $data and write out to filename().
    * 6. If $mode and/or $group are set, apply them for the new file.
    */
-  function write(Service $service) {
+  function write() {
 
     // Make directory structure if it does not exist.
     $filename = $this->filename();
@@ -249,7 +241,10 @@ class Configuration {
     if ($filename && is_writeable(dirname($filename))) {
       // manipulate data before passing to template.
       $this->process();
-      $service->processConfiguration($this);
+      
+      if ($this->service instanceof Service) {
+          $this->service->processConfiguration($this);
+      }
 
       if ($template = $this->load_template()) {
         // Make sure we can write to the file
