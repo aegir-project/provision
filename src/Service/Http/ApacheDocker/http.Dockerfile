@@ -59,6 +59,10 @@ RUN chown aegir:aegir /var/log/aegir -R
 COPY httpd-foreground.sh /usr/local/bin/httpd-foreground
 RUN chmod +x /usr/local/bin/httpd-foreground
 
+# Prepare Drush & Composer.
+RUN wget https://getcomposer.org/download/1.5.5/composer.phar -O /usr/local/bin/composer && chmod +x /usr/local/bin/composer
+RUN wget https://github.com/drush-ops/drush/releases/download/8.1.15/drush.phar -O /usr/local/bin/drush && chmod +x /usr/local/bin/drush
+
 USER aegir
 WORKDIR /var/aegir
 
