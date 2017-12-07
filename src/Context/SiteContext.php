@@ -97,7 +97,7 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
 
     
         $tasks['site.prepare'] = $this->getProvision()->newTask()
-            ->success('Prepared directories.')
+            ->success('Prepared directories and settings file.')
             ->failure('Failed to prepare directories.')
             
             /**
@@ -172,6 +172,10 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
                         "$path/sites/$uri/private/temp",
                         "$path/sites/$uri/private/temp",
                     ], $this->getSubscription('http')->service->getProperty('web_group'));
+                    
+                    // Copy Drupal's default settings.php file into place.
+                    $this->fs->copy("$path/sites/default/default.settings.php", "$path/sites/$uri/settings.php");
+                    
                 });
     
         $tasks['site.settings'] = $this->getProvision()->newTask()
