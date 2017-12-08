@@ -49,10 +49,83 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
     static function option_documentation()
     {
         $options = [
-          'root' => 'platform: path to a Drupal installation',
-          'makefile' => 'platform: drush makefile to use for building the platform if it doesn\'t already exist',
-          'make_working_copy' => 'platform: Specifiy TRUE to build the platform with the Drush make --working-copy option.',
-          'git_url' => 'platform: Git repository remote URL.',
+            'root' =>
+                Provision::newProperty()
+                    ->description('platform: path to the Drupal installation. You may use a relative or absolute path.')
+                    ->default(getcwd())
+                    ->required(TRUE)
+                    ->validate(function($path) {
+                        if (strpos($path, '/') !== 0) {
+                            $path = getcwd() . DIRECTORY_SEPARATOR . $path;
+                        }
+                        return $path;
+                    })
+                ,
+            'makefile' =>
+                Provision::newProperty()
+                    ->description('platform: Drush makefile to use for building the platform. May be a path or URL.')
+                    ->required(FALSE)
+                    ->validate(function($makefile) {
+                        if (empty($makefile)) {
+                            return $makefile;
+                        }
+                        $parsed = parse_url($makefile);
+
+                        // If parsed is empty, it couldn't be read as a URL or filename.
+                        if (empty($parsed)) {
+                            throw new \RuntimeException("The makefile at {$makefile} could not be read.");
+                        }
+                        // If array is only path, it is a file path.
+                        elseif (count(array_keys($parsed)) == 1 && isset($parsed['path'])) {
+                            if (is_readable($parsed['path'])) {
+                                return $makefile;
+                            }
+                            else {
+                                throw new \RuntimeException("The makefile at {$makefile} could not be read.");
+                            }
+                        }
+                        // Otherwise, makefile is a URL. Check if we can access it.
+                        else {
+                            try {
+                                $content = @file_get_contents($makefile);
+                                if ($content === false) {
+                                    throw new \RuntimeException("The makefile at {$makefile} could not be read.");
+                                } else {
+                                    return $makefile;
+                                }
+                            }
+                            catch (\Exception $e) {
+                                throw new \RuntimeException("The makefile at {$makefile} could not be read.");
+                            }
+                        }
+                        
+                        return $makefile;
+                    })
+            
+            ,
+            'make_working_copy' =>
+                Provision::newProperty()
+                    ->description('platform: Specifiy TRUE to build the platform with the Drush make --working-copy option.')
+                    ->default(TRUE)
+                    ->required(FALSE)
+            ,
+            'git_url' =>
+                Provision::newProperty()
+                    ->description('platform: Git repository remote URL.')
+                    ->required(FALSE)
+                    ->validate(function($git_url) {
+                        
+                        // Use git ls-remote to detect a valid and accessible git URL.
+                        if (!Provision::getProvision()->getTasks()->taskExec('git ls-remote')
+                            ->arg($git_url)
+                            ->silent(!Provision::getProvision()->getOutput()->isVerbose())
+                            ->run()
+                            ->wasSuccessful()) {
+                            throw new \RuntimeException("Unable to connect to git remote $git_url. Please check access and try again.");
+                        }
+                        return $git_url;
+                    })
+            ,
         ];
 
         return $options;
