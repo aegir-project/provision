@@ -52,7 +52,7 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
             'root' =>
                 Provision::newProperty()
                     ->description('platform: path to the Drupal installation. You may use a relative or absolute path.')
-                    ->default(getcwd())
+                    ->defaultValue(getcwd())
                     ->required(TRUE)
                     ->validate(function($path) {
                         if (strpos($path, '/') !== 0) {
