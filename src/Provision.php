@@ -428,8 +428,11 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     public function getScriptUid() {
         return posix_getuid();
     }
-    
-    public function newTask() {
+
+    static public function newTask() {
         return new Task();
+    }
+    static public function newProperty($description = '') {
+        return new Property($description);
     }
 }
