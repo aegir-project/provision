@@ -97,7 +97,22 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
                 });
         }
         elseif (!$this->fs->exists($this->getProperty('root')) && $this->getProperty('makefile')) {
-            $tasks['platform.make'] = $this->getProvision()->getTasks()->taskLog('Building platforms from make not yet supported.', 'warning');
+            $tasks['platform.make'] = $this->getProvision()->newTask()
+                ->success('Deployed platform from makefile.')
+                ->failure('Unable to deploy platform from makefile.')
+                ->execute(function () {
+                    $this->getProvision()->io()->warningLite('Root path does not exist. Creating platform from makefile ' . $this->getProperty('git_url') . ' in ' . $this->getProperty('root'));
+        
+                    $this->getProvision()->getTasks()->taskExec("drush make")
+                        ->arg($this->getProperty('makefile'))
+                        ->arg($this->getProperty('root'))
+                        ->silent(!$this->getProvision()->getOutput()->isVerbose())
+                        ->run()
+                    ;
+        
+                });
+                
+                
         }
     
         return $tasks;
