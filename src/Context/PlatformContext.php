@@ -106,7 +106,6 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
             'make_working_copy' =>
                 Provision::newProperty()
                     ->description('platform: Specifiy TRUE to build the platform with the Drush make --working-copy option.')
-                    ->default(TRUE)
                     ->required(FALSE)
             ,
             'git_url' =>
@@ -115,14 +114,22 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
                     ->required(FALSE)
                     ->validate(function($git_url) {
                         
+                        Provision::getProvision()->io()->comment('Checking git remote...');
+                        
                         // Use git ls-remote to detect a valid and accessible git URL.
-                        if (!Provision::getProvision()->getTasks()->taskExec('git ls-remote')
+                        $result = Provision::getProvision()->getTasks()->taskExec('git ls-remote')
                             ->arg($git_url)
                             ->silent(!Provision::getProvision()->getOutput()->isVerbose())
-                            ->run()
-                            ->wasSuccessful()) {
+                            ->run();
+
+                        if (!$result->wasSuccessful()) {
                             throw new \RuntimeException("Unable to connect to git remote $git_url. Please check access and try again.");
                         }
+    
+                        Provision::getProvision()->io()->successLite('Connected to git remote.');
+
+                        // @TODO: Parse brances and tags.
+                        
                         return $git_url;
                     })
             ,
