@@ -89,7 +89,7 @@ class Property {
      *
      * @return $this
      */
-    public function default($default) {
+    public function defaultValue($default) {
         if (is_callable($default)) {
             $this->default = $default();
         }

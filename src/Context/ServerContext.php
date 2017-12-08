@@ -35,7 +35,7 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
                 Provision::newProperty()
                     ->description('server: host name')
                     ->required(TRUE)
-                    ->default('localhost')
+                    ->defaultValue('localhost')
                     ->validate(function($remote_host) {
                         // If remote_host doesn't resolve to anything, warn the user.
                         $ip = gethostbynamel($remote_host);
@@ -48,12 +48,12 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
                 Provision::newProperty()
                     ->description('server: OS user name')
                     ->required(TRUE)
-                    ->default(Config::getScriptUser()),
+                    ->defaultValue(Config::getScriptUser()),
             'aegir_root' =>
                 Provision::newProperty()
                     ->description('server: aegir user home directory')
                     ->required(TRUE)
-                    ->default(Config::getHomeDir()),
+                    ->defaultValue(Config::getHomeDir()),
             // @TODO: Why do server contexts need a master_url?
             'master_url' =>
                 Provision::newProperty()
