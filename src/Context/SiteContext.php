@@ -97,7 +97,7 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
 
     
         $tasks['site.prepare'] = $this->getProvision()->newTask()
-            ->success('Prepared directories and settings file.')
+            ->success('Prepared directories and settings file. NOT YET.')
             ->failure('Failed to prepare directories.')
             
             /**
@@ -116,6 +116,8 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
                  * @see drush_provision_drupal_pre_provision_verify()
                  */
                 ->execute(function() {
+                    return 0;
+                    
                     $uri = $this->getProperty('uri');
                     $path = $this->platform->getProperty('root');
     
