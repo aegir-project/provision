@@ -8,11 +8,19 @@
 
 
 <?php
-  if (is_readable("{$root}/.htaccess")) {
-    print "\n# Include the platform's htaccess file\n";
-    print "Include {$root}/.htaccess\n";
-  }
+
+// @TODO: This has to be changed, because it's possible $root points to a different folder.
+// $root here is /var/aegir/x because it's inside the container.
+// If the current user is not running at /var/aegir, $root does not exist.
+// So for now, we're adding the include .htaccess directive no matter what.
+
+//  if (is_readable("{$root}/.htaccess")) {
+//    print "\n# Include the platform's htaccess file\n";
+//    print "Include {$root}/.htaccess\n";
+//  }
 ?>
+  # Include the platform's htaccess file
+  Include <?php print $root ?>/.htaccess
 
   # Do not read any .htaccess in the platform
   AllowOverride none
