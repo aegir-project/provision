@@ -133,7 +133,7 @@ class HttpApacheDockerService extends HttpApacheService
           ->success('Built new Docker image for Apache: ' . $this->containerTag)
           ->failure('Unable to build docker container with tag: ' . $this->containerTag)
           ->execute(function () use ($provision, $build_dir) {
-          return $this->getProvision()->getTasks()->taskDockerBuild($build_dir)
+              return $this->getProvision()->getTasks()->taskDockerBuild($build_dir)
               ->tag($this->containerTag)
               ->option(
                   '-f',

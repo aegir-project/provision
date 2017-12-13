@@ -153,7 +153,7 @@ class Config extends ProvisionConfig
      *
      * @return string
      */
-    protected function getHomeDir()
+    static public function getHomeDir()
     {
         $home = getenv('HOME');
         if (!$home) {
@@ -171,7 +171,7 @@ class Config extends ProvisionConfig
     /**
      * Determine the user running provision.
      */
-    public function getScriptUser() {
+    static public function getScriptUser() {
         $real_script_user = posix_getpwuid(posix_geteuid());
         return $real_script_user['name'];
     }

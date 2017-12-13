@@ -32,6 +32,7 @@ use Robo\Task\Docker\Remove;
 use Robo\Task\Docker\Run;
 use Robo\Task\Docker\Start;
 use Robo\Task\Docker\Stop;
+use Robo\Task\Filesystem\FilesystemStack;
 use Robo\Task\Vcs\GitStack;
 
 /**
@@ -211,6 +212,14 @@ class ProvisionTasks implements ConfigAwareInterface, LoggerAwareInterface, Buil
     public function taskDockerExec($cidOrResult)
     {
         return $this->task(DockerExec::class, $cidOrResult);
+    }
+    
+    /**
+     * @return FilesystemStack
+     */
+    public function taskFilesystemStack()
+    {
+        return $this->task(FilesystemStack::class);
     }
     
     /**
