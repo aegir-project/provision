@@ -2,7 +2,10 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Common\ProvisionAwareTrait;
 use Drupal\Console\Core\Style\DrupalStyle;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\Console\Command\Command as BaseCommand;
 use Drupal\Console\Core\Command\Shared\CommandTrait;
@@ -19,7 +22,8 @@ abstract class Command extends BaseCommand
 {
 
     use CommandTrait;
-
+    use ProvisionAwareTrait;
+    use LoggerAwareTrait;
 
     /**
      * @var \Symfony\Component\Console\Input\InputInterface
@@ -50,7 +54,7 @@ abstract class Command extends BaseCommand
      * @var string
      */
     public $context_name;
-
+    
     /**
      * @param InputInterface $input An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
@@ -70,7 +74,7 @@ abstract class Command extends BaseCommand
             try {
                 // Load context from context_name argument.
                 $this->context_name = $this->input->getArgument('context_name');
-                $this->context = Application::getContext($this->context_name, $this->getApplication());
+                $this->context = $this->getProvision()->getContext($this->context_name);
             }
             catch (\Exception $e) {
 
@@ -92,7 +96,7 @@ abstract class Command extends BaseCommand
             $this->input->setArgument('context_name', $this->context_name);
 
             try {
-                $this->context = Application::getContext($this->context_name, $this->getApplication());
+                $this->context = $this->getProvision()->getContext($this->context_name);
             }
             catch (\Exception $e) {
                 $this->context = NULL;
@@ -104,11 +108,11 @@ abstract class Command extends BaseCommand
      * Show a list of Contexts to the user for them to choose from.
      */
     public function askForContext($question = 'Choose a context') {
-        if (empty($this->getApplication()->getAllContextsOptions())) {
+        if (empty($this->getProvision()->getAllContextsOptions())) {
             throw new \Exception('No contexts available! use <comment>provision save</comment> to create one.');
         }
 
-        $this->context_name = $this->io->choice($question, $this->getApplication()->getAllContextsOptions());
+        $this->context_name = $this->io->choice($question, $this->getProvision()->getAllContextsOptions());
     }
     
     /**

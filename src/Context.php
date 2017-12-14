@@ -6,12 +6,19 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Common\ProvisionAwareTrait;
 use Aegir\Provision\Console\Config;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Drupal\Console\Core\Style\DrupalStyle;
-use Psr\Log\LoggerInterface;
+use Robo\Collection\CollectionBuilder;
+use Robo\Common\BuilderAwareTrait;
+use Robo\Common\ProgressIndicator;
+use Robo\Contract\BuilderAwareInterface;
+use Robo\Tasks;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Console\Exception\InvalidOptionException;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Dumper;
@@ -24,9 +31,12 @@ use Symfony\Component\Yaml\Yaml;
  *
  * @package Aegir\Provision
  */
-class Context
+class Context implements BuilderAwareInterface
 {
 
+    use BuilderAwareTrait;
+    use ProvisionAwareTrait;
+    
     /**
      * @var string
      * Name for saving aliases and referencing.
@@ -60,29 +70,32 @@ class Context
      * init(), set defaults with setProperty().
      */
     protected $properties = [];
-
-    /**
-     * @var \Aegir\Provision\Application;
-     */
-    public $application;
     
     /**
-     * @var LoggerInterface
+     * @var \Symfony\Component\Filesystem\Filesystem
      */
-    public $logger;
-
+    public $fs;
+    
     /**
      * Context constructor.
      *
      * @param $name
      * @param array $options
      */
-    function __construct($name, Application $application = NULL, $options = [])
+    function __construct(
+        $name,
+        Provision $provision,
+        $options = [])
     {
         $this->name = $name;
-        $this->application = $application;
+    
+        $this->setProvision($provision);
+        $this->setBuilder($this->getProvision()->getBuilder());
+        
         $this->loadContextConfig($options);
         $this->prepareServices();
+        
+        $this->fs = new Filesystem();
     }
 
     /**
@@ -94,8 +107,8 @@ class Context
      */
     private function loadContextConfig($options = []) {
 
-        if ($this->application) {
-            $this->config_path = $this->application->getConfig()->get('config_path') . '/provision/' . $this->type . '.' . $this->name . '.yml';
+        if ($this->getProvision()) {
+            $this->config_path = $this->getProvision()->getConfig()->get('config_path') . '/provision/' . $this->type . '.' . $this->name . '.yml';
         }
         else {
             $config = new Config();
@@ -115,14 +128,16 @@ class Context
                     $this->properties[$option] = $options[$option];
                 }
             }
+            
+            $this->properties['type'] = $this->type;
+            $this->properties['name'] = $this->name;
+            
             $configs[] = $this->properties;
-
-            $this->properties['context_type'] = $this->type;
 
             $this->config = $processor->processConfiguration($this, $configs);
             
         } catch (\Exception $e) {
-            throw new \Exception(
+            throw new InvalidOptionException(
                 strtr("There is an error with the configuration for !type '!name'. Check the file !file and try again. \n \nError: !message", [
                     '!type' => $this->type,
                     '!name' => $this->name,
@@ -269,6 +284,11 @@ class Context
             ->children()
                 ->scalarNode('name')
                     ->defaultValue($this->name)
+                    ->isRequired()
+                ->end()
+                ->scalarNode('type')
+                    ->defaultValue($this->type)
+                    ->isRequired()
                 ->end()
             ->end();
 
@@ -277,6 +297,7 @@ class Context
 
         // @TODO: Figure out how we can let other classes add to Context properties.
         foreach ($this->option_documentation() as $name => $description) {
+            $this->properties[$name] = empty($this->properties[$name])? '': $this->properties[$name];
             $root_node
                 ->children()
                     ->scalarNode($name)
@@ -293,6 +314,7 @@ class Context
                     ->node($property, 'context')
                         ->isRequired()
                         ->attribute('context_type', $type)
+                        ->attribute('provision', $this->getProvision())
                     ->end()
                 ->end();
         }
@@ -323,7 +345,7 @@ class Context
 
                 // If type is empty, it's because it's in the ServerContext
                 if (empty($info['type'])) {
-                    $server = Application::getContext($info['server']);
+                    $server = $this->getProvision()->getContext($info['server']);
                     $service_type = ucfirst($server->getService($service)->type);
                 }
                 else {
@@ -466,38 +488,118 @@ class Context
      *
      * If this context is a Service Subscriber, the provider service will be verified first.
      */
-    public function verify() {
-        $return_codes = [];
-        // Run verify method on all services.
+    public function verifyCommand()
+    {
+        $collection = $this->getProvision()->getBuilder();
+    
         foreach ($this->getServices() as $type => $service) {
             $friendlyName = $service->getFriendlyName();
+            $tasks = $this->verify();
+//
+//            $collection->addCode(function() use ($friendlyName, $type) {
+//                $this->getProvision()->io()->section("Verify service: {$friendlyName}");
+//            }, 'logging.' . $type);
+            $tasks['logging.' . $type] = function() use ($friendlyName, $type) {
+                $this->getProvision()->io()->section("Verify service: {$friendlyName}");
+            };
 
-            if ($this->isProvider()) {
-                $this->application->io->section("Verify service: {$friendlyName}");
-                foreach ($service->verify() as $type => $verify_success) {
-                    $return_codes[] = $verify_success? 0: 1;
+            $service->setContext($this);
+            $tasks = array_merge($tasks, $service->verify());
+
+            foreach ($tasks as $title => $task) {
+                $collection->getConfig()->set('success', '');
+                $collection->getConfig()->set('failure', '');
+    
+                if ($task instanceof Task) {
+                    if (!empty($task->success)) {
+                        $collection->getConfig()->set($title . '.success', $task->success);
+                    }
+                    if (!empty($task->failure)) {
+                        $collection->getConfig()->set($title . '.failure', $task->failure);
+                    }
+                    $task = $task->callable;
                 }
-            }
-            else {
-                $this->application->io->section("Verify service: {$friendlyName} on {$service->provider->name}");
-
-                // First verify the service provider.
-                foreach ($service->verifyProvider() as $verify_part => $verify_success) {
-                    $return_codes[] = $verify_success? 0: 1;
+                
+                if ($task instanceof \Robo\Task || $task instanceof \Robo\Collection\CollectionBuilder) {
+                    $collection->getCollection()->add($task, $title);
                 }
-
-                // Then run "verify" on the subscriptions.
-                foreach ($this->getSubscription($type)->verify() as $type => $verify_success) {
-                    $return_codes[] = $verify_success? 0: 1;
+                elseif (is_callable($task)) {
+                    $collection->addCode($task, $title);
+                }
+                else {
+                    $class = get_class($task);
+                    throw new \Exception("Task '$title' in service '$friendlyName' must be a callable or \\Robo\\Collection\\CollectionBuilder. Is class '$class'");
                 }
             }
         }
-
-        // If any service verify failed, exit with a non-zero code.
-        if (count(array_filter($return_codes))) {
+        
+        $result = $collection->run();
+        
+        if ($result->wasSuccessful()) {
+            $this->getProvision()->io()->success('Verification Complete!');
+        }
+        else {
             throw new \Exception('Some services did not verify. Check your configuration and try again.');
         }
     }
+    
+    
+    /**
+     * Stub to be implemented by context types.
+     *
+     * Run extra tasks before services take over.
+     */
+    function verify() {
+       return [];
+    }
+//
+//
+//        $return_codes = [];
+//        // Run verify method on all services.
+//        foreach ($this->getServices() as $type => $service) {
+//            $friendlyName = $service->getFriendlyName();
+//
+//            if ($this->isProvider()) {
+//                $this->getProvision()->io()->section("Verify service: {$friendlyName}");
+//
+//                // @TODO: Make every service use collections
+//                $this->getProvision()->getLogger()->info('Verify service: ' . get_class($service));
+//                $verify = $service->verify();
+//                if ($verify instanceof CollectionBuilder) {
+////                    $this->getProvision()->console->runCollection($verify);
+//
+//                    $collection->addIterable($verify);
+//
+//                    $result = $verify->run();
+//                    $return_codes[] = $result->wasSuccessful()? 0: 1;
+//                }
+//                // @TODO: Remove this once all services use CollectionBuilders.
+//                elseif (is_array($verify)) {
+//                    foreach ($service->verify() as $type => $verify_success) {
+//                        $return_codes[] = $verify_success? 0: 1;
+//                    }
+//                }
+//            }
+//            else {
+//                $this->getProvision()->io()->section("Verify service: {$friendlyName} on {$service->provider->name}");
+//
+//                // First verify the service provider.
+//                foreach ($service->verifyProvider() as $verify_part => $verify_success) {
+//                    $return_codes[] = $verify_success? 0: 1;
+//                }
+//
+//                // Then run "verify" on the subscriptions.
+//                foreach ($this->getSubscription($type)->verify() as $type => $verify_success) {
+//                    $return_codes[] = $verify_success? 0: 1;
+//                }
+//            }
+//        }
+//
+//        // If any service verify failed, exit with a non-zero code.
+//        if (count(array_filter($return_codes))) {
+//            throw new \Exception('Some services did not verify. Check your configuration and try again.');
+//        }
+//    }
 
     /**
      * Return an array of required services for this context.

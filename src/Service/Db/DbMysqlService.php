@@ -34,7 +34,7 @@ class DbMysqlService extends DbService
         
         if ($this->database_exists($test)) {
             if (!$this->drop_database($test)) {
-                $this->provider->application->io->errorLite(strtr("Failed to drop database @dbname", ['@dbname' => $test]));
+                $this->provider->getProvision()->io()->errorLite(strtr("Failed to drop database @dbname", ['@dbname' => $test]));
             }
             return TRUE;
         }

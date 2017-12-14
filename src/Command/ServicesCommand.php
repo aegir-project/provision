@@ -199,12 +199,11 @@ class ServicesCommand extends Command
             // Handle invalid service_type.
             if (!class_exists(Service::getClassName($service, $service_type))) {
                 $types = Context::getServiceTypeOptions($service);
-                throw new \Exception(strtr("Service type !type is invalid for service !service. Valid options are: !types", [
+                throw new \Exception(strtr("Class not found for service type !type !service. Expecting !class. Check your Class::SERVICE_TYPE constant.", [
                     '!service' => $service,
                     '!type' => $service_type,
-                    '!types' => implode(", ", array_keys($types))
+                    '!class' => Service::getClassName($service, $service_type),
                 ]));
-    
             }
 
             // Then ask for all options.
@@ -219,16 +218,16 @@ class ServicesCommand extends Command
         }
         // All other context types are associating with servers that provide the service.
         else {
-            if (empty($this->getApplication()->getServerOptions($service))) {
+            if (empty($this->getProvision()->getServerOptions($service))) {
                 throw new \Exception("No servers providing $service service were found. Create one with `provision save` or use `provision services` to add to an existing server.");
             }
             
             $server = $this->input->getArgument('server')?
                 $this->input->getArgument('server'):
-                $this->io->choice('Which server?', $this->getApplication()->getServerOptions($service));
+                $this->io->choice('Which server?', $this->getProvision()->getServerOptions($service));
 
             // Then ask for all options.
-            $server_context = $this->getApplication()->getContext($server);
+            $server_context = $this->getProvision()->getContext($server);
             $properties = $this->askForServiceProperties($service);
 
             $this->io->info("Using $service service from server $server...");

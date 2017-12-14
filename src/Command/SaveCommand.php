@@ -8,6 +8,8 @@ use Aegir\Provision\Context;
 use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Context\SiteContext;
+use Aegir\Provision\Property;
+use Aegir\Provision\Provision;
 use Aegir\Provision\Service;
 use Symfony\Component\Console\Exception\InvalidOptionException;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -152,7 +154,7 @@ class SaveCommand extends Command
             // Check for context type service requirements.
             $exit = FALSE;
             $this->io->comment("Checking service requirements for context type {$context_type}...");
-            $reqs = Application::checkServiceRequirements($context_type);
+            $reqs = $this->getProvision()->checkServiceRequirements($context_type);
             foreach ($reqs as $service => $available) {
                 if ($available) {
                     $this->io->successLite("Service $service: Available");
@@ -169,9 +171,12 @@ class SaveCommand extends Command
             }
 
 
-            $properties = $this->askForContextProperties();
+            $options = $this->askForContextProperties();
+            $options['name'] = $this->context_name;
+            $options['type'] = $this->context_type;
+            
             $class = Context::getClassName($this->input->getOption('context_type'));
-            $this->context = new $class($input->getArgument('context_name'), $this->getApplication(), $properties);
+            $this->context = new $class($input->getArgument('context_name'), $this->getProvision(), $options);
         }
 
         // Delete context config.
@@ -227,7 +232,7 @@ class SaveCommand extends Command
      */
     public function askForContext($question = 'Choose a context')
     {
-        $options = $this->getApplication()->getAllContextsOptions();
+        $options = $this->getProvision()->getAllContextsOptions();
 
         // If there are options, add "new" to the list.
         if (count($options)) {
@@ -259,10 +264,15 @@ class SaveCommand extends Command
         $class = '\Aegir\Provision\Context\\' . ucfirst($this->input->getOption('context_type')) . "Context";
         $options = $class::option_documentation();
         $properties = $this->askForRequiredContexts();
-        foreach ($options as $name => $description) {
+        foreach ($options as $name => $property) {
 
             if (!empty($properties[$name])) {
                 continue;
+            }
+            
+            // Allows option_documentation to return array of strings for simple properties.
+            if ( !$property instanceof Property) {
+                $property = Provision::newProperty($property);
             }
 
             // If option does not exist, ask for it.
@@ -271,7 +281,7 @@ class SaveCommand extends Command
                 $this->io->comment("Using option {$name}={$properties[$name]}");
             }
             else {
-                $properties[$name] = $this->io->ask("$name ($description)");
+                $properties[$name] = $this->io->ask("{$name}({$property->description})", $property->default, $property->validate);
             }
         }
         return $properties;
@@ -305,7 +315,7 @@ class SaveCommand extends Command
 //                $context_name = $this->io->ask($all_services[$type]);
 //            }
 
-//            $context = Application::getContext($context_name);
+//            $context = Provision::getContext($context_name);
 
             $this->io->info("Adding required service $type...");
 
@@ -348,7 +358,7 @@ class SaveCommand extends Command
                 $contexts[$property] = $this->input->getOption($property);
                 
                 try {
-                    $context = Application::getContext($contexts[$property]);
+                    $context = $this->getProvision()->getContext($contexts[$property]);
                 }
                 catch (\Exception $e) {
                     throw new \Exception("Context set by option --{$property} does not exist.");
@@ -359,7 +369,7 @@ class SaveCommand extends Command
                 }
             }
             else {
-                $contexts[$property] = $this->io->choice("Select $property context", $this->getApplication()->getAllContextsOptions($context_type));
+                $contexts[$property] = $this->io->choice("Select $property context", $this->getProvision()->getAllContextsOptions($context_type));
             }
         }
         return $contexts;

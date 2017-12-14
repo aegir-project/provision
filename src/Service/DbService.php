@@ -10,9 +10,12 @@ namespace Aegir\Provision\Service;
 
 //require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
+use Aegir\Provision\Context;
 use Aegir\Provision\Context\SiteContext;
 use Aegir\Provision\Service;
+use Aegir\Provision\ServiceInterface;
 use Aegir\Provision\ServiceSubscription;
+use Aegir\Provision\Task;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -20,10 +23,11 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * @package Aegir\Provision\Service
  */
-class DbService extends Service
+class DbService extends Service implements ServiceInterface
 {
 
     const SERVICE = 'db';
+    const SERVICE_TYPE = NULL;
 
     const SERVICE_NAME = 'Database Server';
     
@@ -48,7 +52,33 @@ class DbService extends Service
      * Indicates the place holders that should be replaced in _db_query_callback().
      */
     const PROVISION_QUERY_REGEXP = '/(%d|%s|%%|%f|%b)/';
-    
+
+    /**
+     * DbService constructor.
+     *
+     * Set dsn based on context's service config.
+     *
+     * @param $service_config
+     * @param Context $provider_context
+     */
+    function __construct($service_config, Context $provider_context)
+    {
+        parent::__construct($service_config, $provider_context);
+
+        $this->creds = array_map('urldecode', parse_url($this->properties['master_db']));
+
+        if (!isset($this->creds['port'])) {
+            $this->creds['port'] = '3306';
+        }
+
+        if (!isset($this->creds['pass'])) {
+            $this->creds['pass'] = '';
+        }
+
+        $this->dsn = sprintf("%s:host=%s;port=%s", $this::SERVICE_TYPE,  $this->creds['host'], $this->creds['port']);
+
+    }
+
     /**
      * Implements Service::server_options()
      *
@@ -89,57 +119,80 @@ class DbService extends Service
     /**
      * React to the `provision verify` command on Server contexts
      */
-    function verify() {
-        $this->creds = array_map('urldecode', parse_url($this->properties['master_db']));
+    function verifyServer() {
+        $tasks = [];
         
-        if (!isset($this->creds['port'])) {
-            $this->creds['port'] = '3306';
-        }
-        
-        if (!isset($this->creds['pass'])) {
-            $this->creds['pass'] = '';
-        }
-        
-        $this->dsn = sprintf("%s:host=%s;port=%s", $this::SERVICE_TYPE,  $this->creds['host'], $this->creds['port']);
+        // Confirm we can connect to the database server as root.
+        $tasks['db_connect'] = $this->getProvision()->newTask()
+            ->execute(function () {
+                $this->connect();
+            })
+            ->success('Provision can connect to Database server.')
+            ->failure('Unable to connect to database using credentials saved in context ' . $this->provider->name . '.')
+        ;
     
-        try {
-            $this->connect();
-            $return = TRUE;
-            $this->provider->application->io->successLite('Successfully connected to database server!');
+        // Confirm we have access to create databases.
+        $tasks['db_create'] = $this->getProvision()->newTask()
+            ->execute(function () {
+                return $this->can_create_database()? 0: 1;
+            })
+            ->success('Provision can create new databases.')
+            ->failure('Unable to create new databases.')
+        ;
     
-            if ($this->can_create_database()) {
-                $this->provider->application->io->successLite('Provision can create new databases.');
-            } else {
-                $this->provider->application->io->errorLite('Provision is unable to create databases.');
-                $return = FALSE;
-            }
-            if ($this->can_grant_privileges()) {
-                $this->provider->application->io->successLite('Provision can grant privileges on database users.');
-            } else {
-                $this->provider->application->io->errorLite('Provision is unable to grant privileges on database users.');
-                $return = FALSE;
-            }
-            
-            return [
-                'service' => $return
-            ];
-        }
-        catch (\PDOException $e) {
-            $this->provider->application->io->errorLite($e->getMessage());
-            return [
-                'service' => FALSE
-            ];
-        }
+        // Confirm we can create database users.
+        $tasks['db_grant'] = $this->getProvision()->newTask()
+            ->success('Provision can grant privileges on database users.')
+            ->failure('unable to grant privileges on database users.')
+            ->execute(function () {
+                return $this->can_grant_privileges()? 0: 1;
+            })
+        ;
+        
+        return $tasks;
+        //
+//        try {
+//            $this->connect();
+//            $return = TRUE;
+//            $this->provider->getProvision()->io()->successLite('Successfully connected to database server!');
+//
+//            if ($this->can_create_database()) {
+//                $this->provider->getProvision()->io()->successLite('Provision can create new databases.');
+//            } else {
+//                $this->provider->getProvision()->io()->errorLite('Provision is unable to create databases.');
+//                $return = FALSE;
+//            }
+//            if ($this->can_grant_privileges()) {
+//                $this->provider->getProvision()->io()->successLite('Provision can grant privileges on database users.');
+//            } else {
+//                $this->provider->getProvision()->io()->errorLite('Provision is unable to grant privileges on database users.');
+//                $return = FALSE;
+//            }
+//
+//            return [
+//                'service' => $return
+//            ];
+//        }
+//        catch (\PDOException $e) {
+//            $this->provider->getProvision()->io()->errorLite($e->getMessage());
+//            return [
+//                'service' => FALSE
+//            ];
+//        }
     }
     
     /**
      * React to the `provision verify` command on subscriber contexts (sites and platforms)
      */
-    function verifySubscription(ServiceSubscription $serviceSubscription) {
-        $this->subscription = $serviceSubscription;
+    function verifySite() {
+
+        return [
+            'Prepared site database.' => function () {
+
+        $this->subscription = $this->getContext()->getSubscription($this::SERVICE);
 
         // Check for database
-        $this->create_site_database($serviceSubscription->context);
+        $this->create_site_database($this->getContext());
 
         $this->creds_root = array_map('urldecode', parse_url($this->properties['master_db']));
     
@@ -156,30 +209,21 @@ class DbService extends Service
     
         try {
             $this->connect();
-            $this->subscription->context->application->io->successLite('Successfully connected to database server.');
-            return [
-                'service' => TRUE
-            ];
+            $this->subscription->getContext()->getProvision()->io()->successLite('Successfully connected to database server.');
         }
         catch (\PDOException $e) {
-            $this->subscription->context->application->io->errorLite($e->getMessage());
-            return [
-                'service' => FALSE
-            ];
+            $this->subscription->context->getProvision()->io()->errorLite($e->getMessage());
+            throw new \Exception('Unable to connect to database using service properties: ' . $e->getMessage());
         }
-    }
 
-    /**
-     * React to `provision verify` command when run on a subscriber, to verify the service's provider.
-     *
-     * This is used to verify the database server when a subscriber is verified.
-     */
-    function verifyProvider()
-    {
-        return [
-            'service' => $this->verify(),
+            }
         ];
     }
+
+    public function verifyPlatform() {
+
+    }
+
 
     /**
      * Attempt to connect to the database server using $this->creds
@@ -194,7 +238,7 @@ class DbService extends Service
             return $this->conn;
         }
         catch (\PDOException $e) {
-            throw new \PDOException("Unable to connect to database server: " . $e->getMessage());
+            throw new \PDOException("Unable to connect to database server using DSN {$this->dsn}: " . $e->getMessage());
         }
     }
     
@@ -215,11 +259,11 @@ class DbService extends Service
         $query = preg_replace_callback($this::PROVISION_QUERY_REGEXP, array($this, 'query_callback'), $query);
         
         try {
-            $this->provider->application->logger->notice("Running Query: {$query}");
+            $this->provider->getProvision()->getLogger()->info("Running Query: {$query}");
             $result = $this->conn->query($query);
         }
         catch (\PDOException $e) {
-            $this->provider->application->io->errorLite($e->getMessage());
+            $this->provider->getProvision()->getLogger()->error($e->getMessage());
             return FALSE;
         }
         
@@ -381,13 +425,13 @@ class DbService extends Service
         }
 
         if ($this->database_exists($db_name)) {
-            $this->application->io->successLite(strtr("Database '@name' already exists.", [
+            $this->getProvision()->io()->successLite(strtr("Database '@name' already exists.", [
                 '@name' => $db_name
             ]));
         }
         else {
             $this->create_database($db_name);
-            $this->application->io->successLite(strtr("Created database '@name'.", [
+            $this->getProvision()->io()->successLite(strtr("Created database '@name'.", [
                 '@name' => $db_name,
             ]));
         }
@@ -398,7 +442,7 @@ class DbService extends Service
                     '@user' => $db_user
                 ]));
             }
-            $this->application->io->successLite(strtr("Granted privileges to user '@user@@host' for database '@name'.", [
+            $this->getProvision()->io()->successLite(strtr("Granted privileges to user '@user@@host' for database '@name'.", [
                 '@user' => $db_user,
                 '@host' => $db_grant_host,
                 '@name' => $db_name,
@@ -408,7 +452,7 @@ class DbService extends Service
         $status = $this->database_exists($db_name);
 
         if ($status) {
-            $this->application->io->successLite(strtr("Database service configured for site @name.", [
+            $this->getProvision()->io()->successLite(strtr("Database service configured for site @name.", [
                 '@name' => $site->name,
             ]));
         }

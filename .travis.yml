@@ -46,18 +46,18 @@ script:
   - provision save server_master -n
     --context_type=server
     --remote_host=provision.local.computer
-    --aegir_root=/home/travis
-    --script_user=travis
+    --aegir_root=/var/aegir
+    --script_user=aegir
     --master_url=provision.local.computer
 
   # Add services to server_master context.
   - provision services server_master add http -n
-    --service_type=apache
+    --service_type=apacheDocker
     --http_port=80
     --web_group=www-data
     --web_disable_url=http://localhost/disabled
     --web_maintenance_url=http://localhost/maintenance
-    --restart_command="echo 'Restarting web server...'; sleep 3"
+    --restart_command="sudo apache2ctl graceful"
 
   - provision services server_master add db -n
     --service_type=mysql
@@ -95,3 +95,9 @@ script:
   - provision verify server_master -v
   - provision verify platform_hostmaster -v
   - provision verify hostmaster -v
+  
+  - provision verify server_master
+
+  - docker ps
+  - docker logs provision_http_server_master
+  - docker exec provision_http_server_master sudo apache2ctl -S

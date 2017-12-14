@@ -11,7 +11,9 @@ namespace Aegir\Provision\Service;
 //require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
 use Aegir\Provision\Service;
+use Aegir\Provision\ServiceInterface;
 use Aegir\Provision\ServiceSubscription;
+use Aegir\Provision\Task;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 
 /**
@@ -19,7 +21,7 @@ use Consolidation\AnnotatedCommand\CommandFileDiscovery;
  *
  * @package Aegir\Provision\Service
  */
-class HttpService extends Service {
+class HttpService extends Service implements ServiceInterface {
   const SERVICE = 'http';
   const SERVICE_NAME = 'Web Server';
 
@@ -57,24 +59,64 @@ class HttpService extends Service {
      *
      * This is used to allow skipping of the service restart.
      */
-    function verifyProvider()
+    function verifyServer()
     {
         return [
-            'configuration' => $this->writeConfigurations(),
+            'http.configuration' => $this->getProvision()->newTask()
+                ->execute(function() {
+                    return $this->writeConfigurations()? 0: 1;
+                })
+                ->success('Wrote web server configuration files.')
+                ->failure('Unable to write config files for this service.'),
+            
+            'http.restart' => $this->getProvision()->newTask()
+                ->execute(function() {
+                    $this->restartService();
+                })
+                ->success('Web service restarted.')
+                ->failure('Never shown: exception message used instead.'),
         ];
     }
 
     /**
      * React to the `provision verify` command on Server contexts
      */
-    function verifySubscription(ServiceSubscription $serviceSubscription) {
-        $this->subscription = $serviceSubscription;
-        return [
-            'configuration' => $this->writeConfigurations($serviceSubscription),
-            'service' => $this->restartService(),
-        ];
+    function verifySite() {
+        $this->subscription = $this->getContext()->getSubscription('http');
+
+        $tasks = [];
+        $tasks['http.site.configuration'] =  $this->getProvision()->newTask()
+            ->success('Wrote site configuration files.')
+            ->failure('Unable to write site configuration files.')
+            ->execute(function () {
+                return $this->writeConfigurations($this->subscription)? 0: 1;
+            })
+        ;
+        $tasks['http.site.service'] =  $this->getProvision()->newTask()
+            ->success('Restarted web server.')
+            ->failure('Unable to restart web service.')
+            ->execute(function () {
+                return $this->restartService()? 0: 1;
+            })
+        ;
+        return $tasks;
     }
-//
+
+    function verifyPlatform() {
+        $tasks = [];
+        $tasks['http.platform.configuration'] =  $this->getProvision()->newTask()
+                ->success('Wrote platform configuration to ...')
+                ->failure('Unable to write platform configuration file.')
+                ->execute(function () {
+                    $this->writeConfigurations($this->getContext()->getSubscription('http'));
+
+                })
+        ;
+        $tasks = array_merge($tasks, $this->verifyServer());
+        return $tasks;
+    }
+
+    //
 //    /**
 //   * Support the ability to cloak the database credentials using environment variables.
 //   */

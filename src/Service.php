@@ -8,9 +8,21 @@
 
 namespace Aegir\Provision;
 
-class Service
+use Aegir\Provision\Common\ContextAwareTrait;
+use Aegir\Provision\Common\ProvisionAwareTrait;
+use Aegir\Provision\Context\ServerContext;
+use Psr\Log\LoggerAwareTrait;
+use Robo\Common\BuilderAwareTrait;
+use Robo\Common\OutputAdapter;
+use Robo\Contract\BuilderAwareInterface;
+
+class Service implements BuilderAwareInterface
 {
-    
+    use BuilderAwareTrait;
+    use ProvisionAwareTrait;
+    use ContextAwareTrait;
+    use LoggerAwareTrait;
+
     public $type;
     
     public $properties;
@@ -24,11 +36,6 @@ class Service
     public $provider;
     
     /**
-     * @var \Aegir\Provision\Application;
-     */
-    public $application;
-    
-    /**
      * @var string
      * The machine name of the service.  ie. http, db
      */
@@ -40,12 +47,18 @@ class Service
      */
     const SERVICE_NAME = 'Service Name';
     
-    function __construct($service_config, $provider_context)
+    function __construct($service_config, Context $provider_context)
     {
         $this->provider = $provider_context;
-        $this->application = $provider_context->application;
+        $this->setContext($provider_context);
+        $this->setProvision($provider_context->getProvision());
+        $this->setLogger($provider_context->getProvision()->getLogger());
+        
         $this->type = $service_config['type'];
         $this->properties = $service_config['properties'];
+        if ($provider_context->getBuilder()) {
+            $this->setBuilder($provider_context->getBuilder());
+        }
     }
     
     /**
@@ -70,29 +83,54 @@ class Service
             return "\Aegir\Provision\Service\\{$service}Service";
         }
     }
-    
-    /**
-     * React to the `provision verify` command.
-     */
-    function verify()
-    {
-        return [
-            'configuration' => $this->writeConfigurations(),
-            'service' => $this->restartService(),
-        ];
-    }
 
     /**
-     * React to `provision verify` command when run on a subscriber, to verify the service's provider.
-     *
-     * This is used to allow skipping of the service restart.
+     * React to the verify command. Passes off to the method verifySite, verifyServer, verifyPlatform.
+     * @return mixed
      */
-    function verifyProvider()
-    {
-        return [
-            'configuration' => $this->writeConfigurations(),
-        ];
+    public function verify() {
+        $method = 'verify' . ucfirst($this->getContext()->type);
+        $this->getProvision()->getLogger()->info("Running method {method} on class {class}", [
+            'method' => $method,
+            'class' => get_class($this),
+        ]);
+        return $this::$method();
     }
+
+//
+//    /**
+//     * React to the `provision verify` command.
+//     */
+//    function verifySite()
+//    {
+//        return [
+//            'configuration' => $this->writeConfigurations(),
+//            'service' => $this->restartService(),
+//        ];
+//    }
+//
+//    /**
+//     * React to the `provision verify` command.
+//     */
+//    function verifyPlatform()
+//    {
+//        return [
+//            'configuration' => $this->writeConfigurations(),
+//            'service' => $this->restartService(),
+//        ];
+//    }
+//
+//    /**
+//     * React to `provision verify` command when run on a subscriber, to verify the service's provider.
+//     *
+//     * This is used to allow skipping of the service restart.
+//     */
+//    function verifyServer()
+//    {
+//        return [
+//            'configuration' => $this->writeConfigurations(),
+//        ];
+//    }
 
     /**
      * Run the services "restart_command".
@@ -103,17 +141,19 @@ class Service
             return TRUE;
         }
         else {
-            try {
-                $this->application->console->exec($this->properties['restart_command'], 'Restarting service...');
-                $this->application->io->successLite('Service restarted.');
-                sleep(1);
+            $task = $this->getProvision()->getTasks()->taskExec($this->getProperty('restart_command'))
+                ->silent(!$this->getProvision()->getOutput()->isVerbose())
+            ;
+
+            /** @var \Robo\Result $result */
+            $result = $task->run();
+            if (!$result->wasSuccessful()) {
+                throw new \Exception('Unable to restart service using command: ' . $this->getProperty('restart_command'));
+            }
+            else {
                 return TRUE;
             }
-            catch (\Exception $e) {
-                $this->application->io->errorLite('Unable to restart service: ' . $e->getMessage());
-            }
         }
-        return FALSE;
     }
 
     /**
@@ -147,7 +187,7 @@ class Service
     {
         // If we are writing for a serviceSubscription, use the provider context.
         if ($serviceSubscription) {
-            $context = $serviceSubscription->context;
+            $context = $serviceSubscription->getContext();
         }
         else {
             $context = $this->provider;
@@ -162,13 +202,19 @@ class Service
             try {
                 $config = new $configuration_class($context, $this);
                 $config->write();
-                $context->application->io->successLite(
-                    'Wrote '.$config->description.' to '.$config->filename()
+                $context->getProvision()->getLogger()->info(
+                    'Wrote {description} to {path}.', [
+                        'description' => $config->description,
+                        'path' => $config->filename(),
+                    ]
                 );
             }
             catch (\Exception $e) {
-                $context->application->io->errorLite(
-                    'Unable to write '.$config->description.' to '.$config->filename() . ': ' . $e->getMessage()
+                $context->getProvision()->getLogger()->info(
+                    'Unable to write {description} to {path}.', [
+                        'description' => $config->description,
+                        'path' => $config->filename(),
+                    ]
                 );
                 $success = FALSE;
             }
@@ -265,4 +311,34 @@ class Service
         //      ];
     }
     
+    
+    /**
+     * @return \Aegir\Provision\Robo\ProvisionBuilder
+     */
+    function getBuilder()
+    {
+        return $this->builder;
+    }
+    
+    /**
+     * Load all contexts that subscribe to this provider's service.
+     *
+     * @return array
+     */
+    public function getAllSubscribers() {
+        $subscribers = [];
+        
+        foreach ($this->getProvision()->getAllContexts() as $context){
+            if (get_class($context) != ServerContext::class) {
+                foreach ($context->getSubscriptions() as $subscription) {
+                    if ($subscription->server->name == $this->provider->name && $subscription->type == $this->type) {
+                        $subscribers[] = $context;
+                    }
+                }
+            }
+            
+        }
+        return $subscribers;
+        
+    }
 }

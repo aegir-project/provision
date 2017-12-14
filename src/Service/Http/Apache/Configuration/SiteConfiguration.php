@@ -23,12 +23,12 @@ class SiteConfiguration extends Configuration {
   
   function filename() {
       $file = $this->context->getProperty('uri') . '.conf';
-      return $this->context->application->getConfig()->get('config_path') . '/' . $this->service->provider->name . '/' . $this->service->getType() . '/vhost.d/' . $file;
+      return $this->context->getProvision()->getConfig()->get('config_path') . '/' . $this->service->provider->name . '/' . $this->service->getType() . '/vhost.d/' . $file;
   }
   
   function process() {
       parent::process();
-      $this->data['http_port'] = $this->context->platform->getSubscription('http')->service->getProperty('http_port');
+      $this->data['http_port'] = $this->context->getSubscription('http')->service->getProperty('http_port');
       $this->data['root'] = $this->context->platform->getProperty('root');
       $this->data['uri'] = $this->context->getProperty('uri');
 

@@ -6,6 +6,7 @@
 
 namespace Aegir\Provision;
 
+use Aegir\Provision\Common\ContextAwareTrait;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -16,16 +17,7 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class Configuration {
   
-  /**
-   * Provision 4.x
-   */
-  
-  /**
-   * A \Aegir\Provision\Context object this configuration relates to.
-   *
-   * @var \Aegir\Provision\Context
-   */
-  public $context = NULL;
+  use ContextAwareTrait;
   
   /**
    * A \Aegir\Provision\Service object this configuration relates to.
@@ -98,13 +90,13 @@ class Configuration {
    *   An associative array to potentially manipulate in process() and make
    *   available as variables to the template.
    */
-  function __construct($context, $service, $data = array()) {
+  function __construct($context, $service = NULL, $data = array()) {
     if (is_null($this->template)) {
       throw new Exception(dt("No template specified for: %class", array('%class' => get_class($this))));
     }
 
     // Accept both a reference and an alias name for the context.
-    $this->context = $context;
+    $this->setContext($context);
     $this->service = $service;
     $this->fs = new Filesystem();
 
@@ -146,13 +138,15 @@ class Configuration {
   }
 
   /**
-   * Load template from filename().
+   * Load template from filename() and directory containing
+   * Configuration class.
    *
    * @see hook_provision_config_load_templates()
    * @see hook_provision_config_load_templates_alter()
    */
   private function load_template() {
-    return file_get_contents(__DIR__ . '/Service/' . ucfirst($this->service->getName()) . '/' . ucfirst($this->service->getType()) . '/Configuration/' . $this->template);
+      $class = new \ReflectionClass(get_class($this));
+      return file_get_contents(dirname($class->getFileName()) . DIRECTORY_SEPARATOR . $this->template);
 
     // Allow other Drush commands to change the template used first.
 //    $templates = drush_command_invoke_all('provision_config_load_templates', $this);
@@ -247,6 +241,10 @@ class Configuration {
     if ($filename && is_writeable(dirname($filename))) {
       // manipulate data before passing to template.
       $this->process();
+      
+      if ($this->service instanceof Service) {
+          $this->service->processConfiguration($this);
+      }
 
       if ($template = $this->load_template()) {
         // Make sure we can write to the file

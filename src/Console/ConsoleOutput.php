@@ -2,7 +2,9 @@
 
 namespace Aegir\Provision\Console;
 
+use Aegir\Provision\Common\ProvisionAwareTrait;
 use BennerInformatics\Spinner\ProcessSpinner;
+use Robo\Collection\CollectionBuilder;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Output\ConsoleOutput as BaseConsoleOutput;
 use Symfony\Component\Process\Process;
@@ -17,6 +19,8 @@ class ConsoleOutput extends BaseConsoleOutput
     protected $process;
     protected $spinFrames = ['/', '-', '\\', '|'];
     protected $spinInterval = 85000;
+    
+    use ProvisionAwareTrait;
     
     /**
      * Overwrites a previous message to the output.
@@ -69,5 +73,26 @@ class ConsoleOutput extends BaseConsoleOutput
         else {
             throw new Exception("Running command {$cmd} failed: " . $this->process->getErrorOutput());
         }
+    }
+    
+    function runCollection(CollectionBuilder $collectionBuilder, $start_message = 'Starting tasks...') {
+        $spinPos = 0;
+        $this->write(" <comment>{$this->spinFrames[$spinPos]} </comment>{$start_message}\r");
+        sleep(2);
+        $result = $collectionBuilder->run();
+
+        if ($result->wasSuccessful()) {
+            // Move the cursor to the beginning of the line
+            $this->write("\x0D");
+        
+            // Erase the line
+            $this->write("\x1B[2K");
+            
+            $this->getProvision()->io()->successLite($start_message);
+        }
+        else {
+            $this->getProvision()->io()->errorLite($start_message);
+        }
+        return $result;
     }
 }

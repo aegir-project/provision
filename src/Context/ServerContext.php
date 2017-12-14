@@ -2,7 +2,10 @@
 
 namespace Aegir\Provision\Context;
 
+use Aegir\Provision\Console\Config;
 use Aegir\Provision\ContextProvider;
+use Aegir\Provision\Property;
+use Aegir\Provision\Provision;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
@@ -20,18 +23,43 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
      */
     public $type = 'server';
     const TYPE = 'server';
-
-
+    
+    
+    /**
+     * @return string|Property[]
+     */
     static function option_documentation()
     {
-        $options = [
-          'remote_host' => 'server: host name; default localhost',
-          'script_user' => 'server: OS user name; default current user',
-          'aegir_root' => 'server: Aegir root; default '.getenv('HOME'),
-          'master_url' => 'server: Hostmaster URL',
+        return [
+            'remote_host' =>
+                Provision::newProperty()
+                    ->description('server: host name')
+                    ->required(TRUE)
+                    ->defaultValue('localhost')
+                    ->validate(function($remote_host) {
+                        // If remote_host doesn't resolve to anything, warn the user.
+                        $ip = gethostbynamel($remote_host);
+                        if (empty($ip)) {
+                            throw new \RuntimeException("Hostname $remote_host does not resolve to an IP address. Please try again.");
+                        }
+                        return $remote_host;
+                  }),
+            'script_user' =>
+                Provision::newProperty()
+                    ->description('server: OS user name')
+                    ->required(TRUE)
+                    ->defaultValue(Config::getScriptUser()),
+            'aegir_root' =>
+                Provision::newProperty()
+                    ->description('server: aegir user home directory')
+                    ->required(TRUE)
+                    ->defaultValue(Config::getHomeDir()),
+            // @TODO: Why do server contexts need a master_url?
+            'master_url' =>
+                Provision::newProperty()
+                    ->description('server: Hostmaster URL')
+                    ->required(FALSE)
         ];
-
-        return $options;
     }
 
 

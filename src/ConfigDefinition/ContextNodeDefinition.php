@@ -2,7 +2,7 @@
 
 namespace Aegir\Provision\ConfigDefinition;
 
-use Aegir\Provision\Application;
+use Aegir\Provision\Common\ProvisionAwareTrait;
 use Symfony\Component\Config\Definition\Builder\ScalarNodeDefinition;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
@@ -28,6 +28,8 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  */
 class ContextNodeDefinition extends ScalarNodeDefinition
 {
+    use ProvisionAwareTrait;
+
     protected function createNode()
     {
         /**
@@ -50,12 +52,13 @@ class ContextNodeDefinition extends ScalarNodeDefinition
      */
     public function validateContext($value)
     {
+        $this->setProvision($this->getNode()->getAttribute('provision'));
+        
         // No need to do anything else.
         // If there is no context named $value, getContext() throws an exception for us.
-        Application::getContext($value);
 
         // If context_type is specified, Validate that the desired context is the right type.
-        if ($this->getNode()->getAttribute('context_type') && Application::getContext($value)->type != $this->getNode()->getAttribute('context_type')) {
+        if ($this->getNode()->getAttribute('context_type') && $this->getProvision()->getContext($value)->type != $this->getNode()->getAttribute('context_type')) {
             throw new InvalidConfigurationException(strtr('The context specified for !name must be type !type.', [
                 '!name' => $this->name,
                 '!type' => $this->getNode()->getAttribute('context_type'),
@@ -69,8 +72,8 @@ class ContextNodeDefinition extends ScalarNodeDefinition
                 $this->getNode()->getAttribute('service_requirement'):
                 $path[2]
             ;
-            
-            Application::getContext($value)->getService($service);
+    
+            $this->getProvision()->getContext($value)->getService($service);
         }
         return $value;
     }

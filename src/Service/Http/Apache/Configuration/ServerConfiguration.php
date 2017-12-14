@@ -26,7 +26,7 @@ class ServerConfiguration extends Configuration {
   function filename() {
     if ($this->service->getType()) {
       $file = $this->service->getType() . '.conf';
-      return $this->service->provider->application->getConfig()->get('config_path') . '/' . $this->service->provider->name . '/' . $file;
+      return $this->service->provider->getProvision()->getConfig()->get('config_path') . '/' . $this->service->provider->name . '/' . $file;
     }
     else {
       return FALSE;
@@ -34,8 +34,7 @@ class ServerConfiguration extends Configuration {
   }
   function process()
   {
-      parent::process();
-      $app_dir = $this->context->application->getConfig()->get('config_path') . '/' . $this->context->name . '/' . $this->service->getType();
+      $app_dir = $this->context->getProvision()->getConfig()->get('config_path') . '/' . $this->context->name . '/' . $this->service->getType();
       $this->data['http_port'] = $this->service->properties['http_port'];
       $this->data['include_statement'] = '# INCLUDE STATEMENT';
       $this->data['http_pred_path'] = "{$app_dir}/pre.d";
@@ -43,5 +42,10 @@ class ServerConfiguration extends Configuration {
       $this->data['http_platformd_path'] = "{$app_dir}/platform.d";
       $this->data['http_vhostd_path'] = "{$app_dir}/vhost.d";
       $this->data['extra_config'] = "";
+    
+      $this->fs->mkdir($this->data['http_pred_path']);
+      $this->fs->mkdir($this->data['http_postd_path']);
+      $this->fs->mkdir($this->data['http_platformd_path']);
+      $this->fs->mkdir($this->data['http_vhostd_path']);
   }
 }
