@@ -5,7 +5,11 @@ NameVirtualHost *:<?php print $http_port; ?>
 
 <VirtualHost *:<?php print $http_port; ?>>
   ServerName default
-  Redirect 404 /
+
+  <IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteRule ^(?!(/\.well-known/acme-challenge/.+)) - [R=404,L,NC]
+  </IfModule>
 </VirtualHost>
 
 
