@@ -507,6 +507,7 @@ class Context implements BuilderAwareInterface
             $tasks = array_merge($tasks, $service->verify());
 
             foreach ($tasks as $title => $task) {
+                $collection->getConfig()->set('start', '');
                 $collection->getConfig()->set('success', '');
                 $collection->getConfig()->set('failure', '');
     
