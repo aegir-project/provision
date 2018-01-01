@@ -130,6 +130,7 @@ class HttpApacheDockerService extends HttpApacheService
       
       // Build Docker image.
       $tasks['http.docker.build'] = $this->getProvision()->newTask()
+          ->start('Building new Docker image for Apache...')
           ->success('Built new Docker image for Apache: ' . $this->containerTag)
           ->failure('Unable to build docker container with tag: ' . $this->containerTag)
           ->execute(function () use ($provision, $build_dir) {
@@ -151,8 +152,12 @@ class HttpApacheDockerService extends HttpApacheService
       });
       
       // Docker run
-      $tasks['Run docker image.'] = function () use ($provision,$provider) {
-        
+      $tasks['Run docker image.'] = $this->getProvision()->newTask()
+          ->start('Running Apache docker image...')
+          ->success('Apache docker container is running: ' . $this->containerName)
+          ->failure('Unable to run docker image with name: ' . $this->containerName)
+          ->execute(function () use ($provision, $build_dir, $provider) {
+
           // Check for existing container.
           $containerExists = $provision->getTasks()
               ->taskExec("docker ps -a -q -f name={$this->containerName}")
@@ -176,7 +181,9 @@ class HttpApacheDockerService extends HttpApacheService
                                   function ($task, $state) use ($provision, $provider) {
                                     
                                       if ($state['running'] == 'true') {
-                                          $provision->io()->successLite('Container is already running: ' . $this->containerName);
+//                                          $provision->io()->successLite('Container is already running: ' . $this->containerName);
+                                          // @TODO: Figure out how to change the "success" message of a task.
+//                                          $this->success('Container is already running: ' . $this->containerName);
                                       }
                                       // If not running, try to start it.
                                       else {
@@ -187,10 +194,10 @@ class HttpApacheDockerService extends HttpApacheService
                                           ;
                                         
                                           if ($startResult->wasSuccessful()) {
-                                              $provision->io()->successLite('Existing container found. Restarted container ' . $this->containerName);
+//                                              $provision->io()->successLite('Existing container found. Restarted container ' . $this->containerName);
                                           }
                                           else {
-                                              $provision->io()->errorLite('Unable to restart docker container: ' . $this->containerName);
+//                                              $provision->io()->errorLite('Unable to restart docker container: ' . $this->containerName);
                                               throw new \Exception('Unable to restart docker container: ' . $this->containerName);
                                           }
                                       }
@@ -222,11 +229,7 @@ class HttpApacheDockerService extends HttpApacheService
 
                           $result = $container->run();
                         
-                          if ($result->wasSuccessful()) {
-                              $provision->io()->successLite('Running Docker image ' . $this->containerTag);
-                          }
-                          else {
-                              $provision->io()->errorLite('Unable to run docker container: ' . $this->containerName);
+                          if (!$result->wasSuccessful()) {
                               throw new \Exception('Unable to run docker container: ' . $this->containerName);
                           }
                       }
@@ -239,7 +242,7 @@ class HttpApacheDockerService extends HttpApacheService
           else {
               throw new \Exception('Something went wrong.');
           }
-      };
+      });
       
       $tasks['http.restart'] = $this->getProvision()->newTask()
           ->execute(function() {

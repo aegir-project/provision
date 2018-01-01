@@ -511,6 +511,9 @@ class Context implements BuilderAwareInterface
                 $collection->getConfig()->set('failure', '');
     
                 if ($task instanceof Task) {
+                    if (!empty($task->start)) {
+                        $collection->getConfig()->set($title . '.start', $task->start);
+                    }
                     if (!empty($task->success)) {
                         $collection->getConfig()->set($title . '.success', $task->success);
                     }
