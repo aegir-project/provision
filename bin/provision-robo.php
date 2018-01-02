@@ -45,8 +45,8 @@ try {
     $status_code = $app->run($input, $output);
     
 }
-catch (InvalidOptionException $e) {
-    $io->error("There was a problem with your console configuration: " . $e->getMessage(), 1);
+catch (Exception $e) {
+    $io->error("Something went wrong with Provision: " . $e->getMessage(), 1);
     $status_code = 1;
 }
 
