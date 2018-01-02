@@ -164,7 +164,7 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
         if (!$this->fs->exists($this->getProperty('root')) && $this->getProperty('git_url')) {
     
             $tasks['platform.git'] = $this->getProvision()->newTask()
-                ->success('Cloning git repository...')
+                ->start('Cloning git repository...')
                 ->execute(function () {
                     $this->getProvision()->io()->warningLite('Root path does not exist. Cloning source code from git repository ' . $this->getProperty('git_url') . ' to ' . $this->getProperty('root'));
     
@@ -180,7 +180,7 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
         }
         elseif (!$this->fs->exists($this->getProperty('root')) && $this->getProperty('makefile')) {
             $tasks['platform.make'] = $this->getProvision()->newTask()
-                ->success('Building platform from makefile...')
+                ->start('Building platform from makefile...')
                 ->execute(function () {
                     $this->getProvision()->io()->warningLite('Root path does not exist. Creating platform from makefile ' . $this->getProperty('git_url') . ' in ' . $this->getProperty('root'));
         
