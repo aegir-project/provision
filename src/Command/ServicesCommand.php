@@ -260,7 +260,7 @@ class ServicesCommand extends Command
      */
     private function askForServiceProperties($service, $service_type = NULL) {
 
-        $class = $this->context->getAvailableServiceTypes($service, $service_type);
+        $class = Service::getClassName($service, $service_type);
         $method = "{$this->context->type}_options";
 
         $options = $class::{$method}();
