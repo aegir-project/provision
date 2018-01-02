@@ -258,7 +258,7 @@ class ServicesCommand extends Command
      *
      * @return array
      */
-    private function askForServiceProperties($service, $service_type) {
+    private function askForServiceProperties($service, $service_type = NULL) {
 
         $class = $this->context->getAvailableServiceTypes($service, $service_type);
         $method = "{$this->context->type}_options";
