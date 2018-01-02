@@ -508,28 +508,20 @@ class Context implements BuilderAwareInterface
             $tasks = array_merge($tasks, $service->verify());
 
             foreach ($tasks as $title => $task) {
-                $collection->getConfig()->set('start', '');
-                $collection->getConfig()->set('success', '');
-                $collection->getConfig()->set('failure', '');
-    
-                if ($task instanceof Task) {
-                    if (!empty($task->start)) {
-                        $collection->getConfig()->set($title . '.start', $task->start);
-                    }
-                    if (!empty($task->success)) {
-                        $collection->getConfig()->set($title . '.success', $task->success);
-                    }
-                    if (!empty($task->failure)) {
-                        $collection->getConfig()->set($title . '.failure', $task->failure);
-                    }
-                    $task = $task->callable;
-                }
                 
+                // If task is just a callable, convert into a Provision Task wrapper.
+                if (is_callable($task)) {
+                    $task = Provision::newTask()
+                      ->execute($task);
+                }
+    
+                $collection->getConfig()->set($title, $task);
+
                 if ($task instanceof \Robo\Task || $task instanceof \Robo\Collection\CollectionBuilder) {
                     $collection->getCollection()->add($task, $title);
                 }
-                elseif (is_callable($task)) {
-                    $collection->addCode($task, $title);
+                elseif ($task instanceof Task) {
+                    $collection->addCode($task->callable, $title);
                 }
                 else {
                     $class = get_class($task);

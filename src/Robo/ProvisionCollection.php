@@ -38,6 +38,9 @@ class ProvisionCollection extends Collection {
         
         if ($result->wasSuccessful()) {
             foreach ($this->taskList as $name => $taskGroup) {
+                
+                /** @var \Aegir\Provision\Task $task */
+                $task = $this->getConfig()->get($name);
     
                 if ($this->getProvision()->getOutput()->isVerbose()) {
                     $this->getProvision()->io()->customLite('STARTED ' . $name, '○');
@@ -45,7 +48,7 @@ class ProvisionCollection extends Collection {
 
                 // Show starting message.
                 if (strpos($name, 'logging.') !== 0) {
-                    $start_message = !empty($this->getConfig()->get($name . '.start'))? $this->getConfig()->get($name . '.start'): $name;
+                    $start_message = !empty($task->start)? $task->start: $name;
                     $this->getProvision()->io()->customLite($start_message , '☐');
                 }
 
@@ -76,8 +79,8 @@ class ProvisionCollection extends Collection {
                 if (!$result->wasSuccessful()) {
 
                     // Override output with failure() message.
-                    if (!empty($this->getConfig()->get($name . '.failure'))) {
-                        $failure_message = $this->getConfig()->get($name . '.failure');
+                    if (!empty($task->failure)) {
+                        $failure_message = $task->failure;
                     }
                     
                     
@@ -101,8 +104,8 @@ class ProvisionCollection extends Collection {
                         continue;
                     }
     
-                    if (!empty($this->getConfig()->get($name . '.success'))) {
-                        $name = $this->getConfig()->get($name . '.success');
+                    if (!empty($task->success)) {
+                        $name = $task->success;
                     }
                     if ($this->getProvision()->getOutput()->isVerbose()) {
                         $this->getProvision()->io()->successLite('<fg=green>SUCCESS</> '.$name);
