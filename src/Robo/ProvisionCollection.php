@@ -56,7 +56,7 @@ class ProvisionCollection extends Collection {
 
                 // ROBO
                 $taskList = $taskGroup->getTaskList();
-                $result = $this->runTaskList($name, $taskList, $result, $print_result);
+                $result = $this->runTaskList($name, $taskList, $result);
                 
                 // END ROBO
     
@@ -124,11 +124,10 @@ class ProvisionCollection extends Collection {
      *
      * An exact copy of Collection::runTaskList(), because it is private and we need access.
      */
-    private function runTaskList($name, array $taskList, Result $result, $print_result = TRUE)
+    private function runTaskList($name, array $taskList, Result $result)
     {
         try {
             foreach ($taskList as $taskName => $task) {
-                $task->printResult = $this->getProvision()->getOutput()->isVerbose();
                 $taskResult = $this->runSubtask($task);
                 // If the current task returns an error code, then stop
                 // execution and signal a rollback.
@@ -149,7 +148,7 @@ class ProvisionCollection extends Collection {
         } catch (\Exception $e) {
             // Tasks typically should not throw, but if one does, we will
             // convert it into an error and roll back.
-            return Result::fromException($task, $e, $result->getData(), $print_result);
+            return Result::fromException($task, $e, $result->getData());
         }
         return $result;
     }
