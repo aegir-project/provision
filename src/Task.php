@@ -9,8 +9,13 @@ class Task {
         $this->callable = $callable;
         return $this;
     }
+    function start($message) {
+
+        $this->start = $message;
+        return $this;
+    }
     function success($message) {
-       
+
         $this->success = $message;
         return $this;
     }

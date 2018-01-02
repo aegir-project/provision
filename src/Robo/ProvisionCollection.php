@@ -41,12 +41,30 @@ class ProvisionCollection extends Collection {
                 if ($this->getProvision()->getOutput()->isVerbose()) {
                     $this->getProvision()->io()->customLite('STARTED ' . $name, '○');
                 }
-                
+
+                // Show starting message.
+                $start_message = !empty($this->getConfig()->get($name . '.start'))? $this->getConfig()->get($name . '.start'): $name;
+                $this->getProvision()->io()->customLite($start_message , '☐');
+
+                // If being run interactively, pause momentarily to let user read start message, and replace start message with success or fail.
+                if ($this->getProvision()->getInput()->isInteractive()) {
+                    sleep(1);
+
+                    // Erase lines
+                    // @TODO: Detect how many lines were output and erase that many.
+                    $lines = 1;
+                    $this->getProvision()->getOutput()->write(["\x0D"]);
+                    $this->getProvision()->getOutput()->write(["\x1B[2K"]);
+                    if ($lines > 0) {
+                        $this->getProvision()->getOutput()->write(str_repeat("\x1B[1A\x1B[2K", $lines));
+                    }
+                }
+
                 // ROBO
                 $taskList = $taskGroup->getTaskList();
                 $result = $this->runTaskList($name, $taskList, $result);
                 // END ROBO
-    
+
                 if (!$result->wasSuccessful()) {
                     
                     // Override output with failure() message.
