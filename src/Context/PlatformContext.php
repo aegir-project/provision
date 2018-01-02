@@ -113,7 +113,9 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
                     ->description('platform: Git repository remote URL.')
                     ->required(FALSE)
                     ->validate(function($git_url) {
-                        
+                        if (empty(trim($git_url))) {
+                            return;
+                        }
                         Provision::getProvision()->io()->comment('Checking git remote...');
                         
                         // Use git ls-remote to detect a valid and accessible git URL.
