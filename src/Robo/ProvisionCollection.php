@@ -4,6 +4,7 @@ namespace Aegir\Provision\Robo;
 
 use Aegir\Provision\Common\ProvisionAwareTrait;
 use Robo\Collection\Collection;
+use Robo\Common\TimeKeeper;
 use Robo\Exception\TaskExitException;
 use Robo\Result;
 
@@ -58,9 +59,12 @@ class ProvisionCollection extends Collection {
                 }
 
                 // ROBO
+                $timer = new TimeKeeper();
                 $taskList = $taskGroup->getTaskList();
+                $timer->start();
                 $result = $this->runTaskList($name, $taskList, $result);
-                
+                $timer->stop();
+
                 // END ROBO
     
                 if ($this->getProvision()->getInput()->isInteractive()) {
@@ -85,10 +89,11 @@ class ProvisionCollection extends Collection {
                     else {
                         $failure_message = $start_message . '<fg=red>FAILED</>';
                     }
-                    
-                    
+
+                    $failure_message .= ' <fg=yellow>' . number_format($timer->elapsed(), 2) . 's</>';
+
                     if ($this->getProvision()->getOutput()->isVerbose()) {
-                        $this->getProvision()->io()->errorLite('<options=bold>FAILED </> ' . $name);
+                        $this->getProvision()->io()->errorLite('<options=bold>FAILED </> in' . $name);
                     }
                     else {
                         $this->getProvision()->io()->errorLite($failure_message);
@@ -111,8 +116,11 @@ class ProvisionCollection extends Collection {
                         $success_message = $task->success;
                     }
                     else {
-                        $success_message = $start_message . '<fg=green>DONE</>';
+                        $success_message = $start_message . '<fg=green>DONE</> in';
                     }
+
+                    $success_message .= ' <fg=yellow>' . number_format($timer->elapsed(), 2) . 's</>';
+
                     if ($this->getProvision()->getOutput()->isVerbose()) {
                         $this->getProvision()->io()->successLite($success_message);
                     }

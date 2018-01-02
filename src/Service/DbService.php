@@ -127,6 +127,7 @@ class DbService extends Service implements ServiceInterface
             ->execute(function () {
                 $this->connect();
             })
+            ->start('Checking connection to database server...')
             ->success('Provision can connect to Database server.')
             ->failure('Unable to connect to database using credentials saved in context ' . $this->provider->name . '.')
         ;
