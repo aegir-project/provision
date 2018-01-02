@@ -131,8 +131,8 @@ class HttpApacheDockerService extends HttpApacheService
       // Build Docker image.
       $tasks['http.docker.build'] = $this->getProvision()->newTask()
           ->start('Building new Docker image for Apache...')
-          ->success('Built new Docker image for Apache: ' . $this->containerTag)
-          ->failure('Unable to build docker container with tag: ' . $this->containerTag)
+          ->success('Building new Docker image for Apache... Done. Container Tag:' . $this->containerTag)
+          ->failure('Building new Docker image for Apache... FAILED. Container Tag:' . $this->containerTag)
           ->execute(function () use ($provision, $build_dir) {
               return $this->getProvision()->getTasks()->taskDockerBuild($build_dir)
               ->tag($this->containerTag)
@@ -154,8 +154,8 @@ class HttpApacheDockerService extends HttpApacheService
       // Docker run
       $tasks['Run docker image.'] = $this->getProvision()->newTask()
           ->start('Running Apache docker image...')
-          ->success('Apache docker container is running: ' . $this->containerName)
-          ->failure('Unable to run docker image with name: ' . $this->containerName)
+          ->success('Running Apache docker image... Done. Container name:' . $this->containerName)
+          ->failure('Running Apache docker image... FAILED. Container name:' . $this->containerName)
           ->execute(function () use ($provision, $build_dir, $provider) {
 
           // Check for existing container.
