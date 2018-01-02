@@ -41,7 +41,9 @@ class Config extends ProvisionConfig
         $this->set('php_version', PHP_VERSION);
         $this->set('php_ini', get_cfg_var('cfg_file_path'));
         $this->set('script', $this->getProvisionScript());
-        $this->set('os_version', php_uname('v'));
+
+        $os = array_shift(explode(' ', php_uname('v')));
+        $this->set('os_version', $os);
         $this->set('user_home', $this->getHomeDir());
         
         $this->set('aegir_root', $this->getHomeDir());
