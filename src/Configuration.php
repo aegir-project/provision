@@ -242,7 +242,7 @@ class Configuration {
       // manipulate data before passing to template.
       $this->process();
       
-      if ($this->service instanceof Service) {
+      if ($this->service instanceof Service && method_exists($this->service, 'processConfiguration')) {
           $this->service->processConfiguration($this);
       }
 
