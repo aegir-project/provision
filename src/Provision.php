@@ -26,6 +26,7 @@ use Robo\Contract\IOAwareInterface;
 use Robo\LoadAllTasks;
 use Robo\Robo;
 use Robo\Runner as RoboRunner;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
@@ -47,6 +48,11 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     const APPLICATION_FUN_NAME = '𝙋𝙍𝙊𝙑𝙄𝙎𝙄𝙊𝙉';
     const VERSION = '4.x-dev';
     const REPOSITORY = 'aegir-project/provision';
+
+    /**
+     * The path within config_path to write contexts to.
+     */
+    const CONTEXTS_PATH = 'contexts';
     
     use BuilderAwareTrait;
     use ConfigAwareTrait;
@@ -147,7 +153,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      */
     private function loadAllContexts()
     {
-        $folder = $this->getConfig()->get('config_path') . '/provision';
+        $folder = $this->getConfig()->get('contexts_path');
         $finder = new \Symfony\Component\Finder\Finder();
         $finder->files()->name("*.yml")->in($folder);
         foreach ($finder as $file) {

@@ -2,8 +2,13 @@
 
 namespace Aegir\Provision\Console;
 
+use Aegir\Provision\Provision;
+use Drupal\Console\Core\Style\DrupalStyle;
+use Robo\Common\IO;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Exception\InvalidOptionException;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 
 /**
  * Class Config
@@ -14,14 +19,23 @@ use Symfony\Component\Console\Exception\InvalidOptionException;
 class Config extends ProvisionConfig
 {
     const CONFIG_FILENAME = '.provision.yml';
-    
+
+    use IO;
+
+    /**
+     * @var Filesystem
+     */
+    private $fs;
+
     /**
      * DefaultsConfig constructor.
      */
-    public function __construct()
+    public function __construct(DrupalStyle $io = null)
     {
         parent::__construct();
-        
+        $this->io = $io;
+        $this->fs = new Filesystem();
+
         $this->set('root', $this->getProvisionRoot());
         $this->set('php', $this->getPhpBinary());
         $this->set('php_version', PHP_VERSION);
@@ -42,6 +56,8 @@ class Config extends ProvisionConfig
             $this->set('config_path', $this->getHomeDir() . '/config');
         }
 
+        $this->set('contexts_path', $this->get('config_path') . DIRECTORY_SEPARATOR . Provision::CONTEXTS_PATH);
+
         $file = $this->get('user_home') . DIRECTORY_SEPARATOR . Config::CONFIG_FILENAME;
         $this->set('console_config_file', $file);
         
@@ -59,27 +75,29 @@ class Config extends ProvisionConfig
      */
     protected function validateConfig() {
         // Check that aegir_root is writable.
-        // @TODO: Create some kind of Setup functionality.
         if (!is_writable($this->get('aegir_root'))) {
             throw new InvalidOptionException(
                 "The folder set to 'aegir_root' ({$this->get('aegir_root')}) is not writable. Fix this or change the aegir_root value in the file {$this->get('console_config_file')}"
             );
         }
         // If config_path does not exist and we cannot create it...
-        if (!file_exists($this->get('config_path')) && !mkdir($this->get('config_path'))) {
+        if (!file_exists($this->get('contexts_path'))) {
+
+            // START: New User!
+            $this->io->title("Welcome to Provision!");
+            $this->io->block("It looks like this is your first time running Provision. You are missing the {$this->get('contexts_path')} folder.");
+
+            if ($this->io->confirm('Would you like to create the folder ' . $this->get('contexts_path') . '?')) {
+                $this->fs->mkdir($this->get('contexts_path'), 0700);
+            }
+        }
+
+        if (!is_writable($this->get('contexts_path'))) {
             throw new InvalidOptionException(
-                "The folder set to 'config_path' ({$this->get('config_path')}) does not exist, and cannot be created. Create it manually or change the 'config_path' value in the file {$this->get('console_config_file')}."
+                "The folder set to 'contexts_path' ({$this->get('contexts_path')}) is not writable. Fix this or change the contexts_path value in the file {$this->get('console_config_file')}."
             );
         }
-        elseif (!is_writable($this->get('config_path'))) {
-            throw new InvalidOptionException(
-                "The folder set to 'config_path' ({$this->get('config_path')}) is not writable. Fix this or change the config_path value in the file {$this->get('console_config_file')}."
-            );
-        }
-        elseif (!file_exists($this->get('config_path') . '/provision')) {
-            mkdir($this->get('config_path') . '/provision');
-        }
-        
+
         // Ensure that script_user is the user.
         $real_script_user = $this->getScriptUser();
         if ($this->get('script_user') != $real_script_user) {

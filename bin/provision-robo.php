@@ -36,7 +36,7 @@ try {
     $io = new DrupalStyle($input, $output);
     
     // Create a config object.
-    $config = new Config();
+    $config = new Config($io);
     
     // Create the app.
     $app = new \Aegir\Provision\Provision($config, $input, $output);

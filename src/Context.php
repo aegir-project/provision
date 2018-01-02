@@ -109,11 +109,11 @@ class Context implements BuilderAwareInterface
     private function loadContextConfig($options = []) {
 
         if ($this->getProvision()) {
-            $this->config_path = $this->getProvision()->getConfig()->get('config_path') . '/provision/' . $this->type . '.' . $this->name . '.yml';
+            $this->config_path = $this->getProvision()->getConfig()->get('contexts_path') . DIRECTORY_SEPARATOR . $this->type . '.' . $this->name . '.yml';
         }
         else {
             $config = new Config();
-            $this->config_path = $config->get('config_path') . '/provision/' . $this->type . '.' . $this->name . '.yml';
+            $this->config_path = $config->get('contexts_path') . DIRECTORY_SEPARATOR . $this->type . '.' . $this->name . '.yml';
         }
 
         $configs = [];
