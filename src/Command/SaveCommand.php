@@ -261,7 +261,7 @@ class SaveCommand extends Command
 
         $this->io->comment("Please input context properties.");
 
-        $class = Service::getClassName($this->input->getOption('context_type'));
+        $class = Context::getClassName($this->input->getOption('context_type'));
         $options = $class::option_documentation();
         $properties = $this->askForRequiredContexts();
         foreach ($options as $name => $property) {
