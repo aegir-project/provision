@@ -18,6 +18,7 @@ use Robo\Tasks;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Console\Exception\InvalidOptionException;
+use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
@@ -543,7 +544,7 @@ class Context implements BuilderAwareInterface
             $this->getProvision()->io()->success('Verification Complete!');
         }
         else {
-            throw new \Exception('Some services did not verify. Check your configuration and try again.');
+            throw new RuntimeException('Some services did not verify. Check your configuration, or run with the verbose option (-v) for more information.');
         }
     }
     
