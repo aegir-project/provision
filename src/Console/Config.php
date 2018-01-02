@@ -87,7 +87,7 @@ class Config extends ProvisionConfig
             $this->io->title("Welcome to Provision!");
             $this->io->block("It looks like this is your first time running Provision. You are missing the {$this->get('contexts_path')} folder.");
 
-            if ($this->io->confirm('Would you like to create the folder ' . $this->get('contexts_path') . '?')) {
+            if ($this->input()->isInteractive() || $this->io->confirm('Would you like to create the folder ' . $this->get('contexts_path') . '?')) {
                 $this->fs->mkdir($this->get('contexts_path'), 0700);
             }
         }
