@@ -32,8 +32,16 @@ class Config extends ProvisionConfig
         
         $this->set('aegir_root', $this->getHomeDir());
         $this->set('script_user', $this->getScriptUser());
-        $this->set('config_path', $this->getHomeDir() . '/config');
-        
+
+        // If user has a ~/.config path, use it.
+        if (file_exists($this->getHomeDir() . '/.config')) {
+            $this->set('config_path', $this->getHomeDir() . '/.config/provision');
+        }
+        // Legacy location: /{$HOME}/config
+        else {
+            $this->set('config_path', $this->getHomeDir() . '/config');
+        }
+
         $file = $this->get('user_home') . DIRECTORY_SEPARATOR . Config::CONFIG_FILENAME;
         $this->set('console_config_file', $file);
         
