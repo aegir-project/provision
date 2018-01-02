@@ -9,6 +9,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\Console\Command\Command as BaseCommand;
 use Drupal\Console\Core\Command\Shared\CommandTrait;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -85,7 +86,7 @@ abstract class Command extends BaseCommand
                 }
                 // If this is any other command, context is required.
                 elseif ($this->getName() != 'save') {
-                    throw new \Exception($e->getMessage());
+                    throw new InvalidArgumentException($e->getMessage());
                 }
             }
         }
