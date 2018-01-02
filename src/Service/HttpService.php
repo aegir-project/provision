@@ -10,6 +10,7 @@ namespace Aegir\Provision\Service;
 
 //require_once DRUSH_BASE_PATH . '/commands/core/rsync.core.inc';
 
+use Aegir\Provision\Provision;
 use Aegir\Provision\Service;
 use Aegir\Provision\ServiceInterface;
 use Aegir\Provision\ServiceSubscription;
@@ -36,11 +37,30 @@ class HttpService extends Service implements ServiceInterface {
     static function server_options()
     {
         return [
-            'http_port' => 'The port which the web service is running on.',
-            'web_group' => 'server with http: OS group for permissions; working default will be attempted',
-            'web_disable_url' => 'server with http: URL disabled sites are redirected to; default {master_url}/hosting/disabled',
-            'web_maintenance_url' => 'server with http: URL maintenance sites are redirected to; default {master_url}/hosting/maintenance',
-            'restart_command' => 'The command to reload the web server configuration;'
+            // @TODO: Add ->validate() that checks if port 80 is available.
+            // See DrupalConsole "server" command.
+            'http_port' => Provision::newProperty()
+                ->description('The port which the web service is running on.')
+                ->defaultValue(80)
+                ->required()
+            ,
+
+            // @TODO: Add->validate() that checks if the web_group exists.
+            'web_group' => Provision::newProperty()
+                ->description('Web server group.')
+                ->defaultValue(Provision::defaultWebGroup())
+                ->required()
+            ,
+
+            // @TODO: Add->validate that tries to run this command.
+            'restart_command' => Provision::newProperty()
+                ->description('The command to reload the web server configuration.')
+                ->defaultValue(function () {
+                    return self::default_restart_cmd();
+                })
+                ->required()
+            ,
+
         ];
     }
     
@@ -114,6 +134,13 @@ class HttpService extends Service implements ServiceInterface {
         ;
         $tasks = array_merge($tasks, $this->verifyServer());
         return $tasks;
+    }
+
+    /**
+     * Return the default restart command for this service.
+     */
+    static function default_restart_cmd() {
+        return '';
     }
 
     //

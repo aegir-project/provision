@@ -7,6 +7,8 @@ use Aegir\Provision\Context;
 use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Context\SiteContext;
+use Aegir\Provision\Property;
+use Aegir\Provision\Provision;
 use Aegir\Provision\Service;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Symfony\Component\Console\Exception\LogicException;
@@ -207,7 +209,7 @@ class ServicesCommand extends Command
             }
 
             // Then ask for all options.
-            $properties = $this->askForServiceProperties($service);
+            $properties = $this->askForServiceProperties($service, $service_type);
 
             $this->io->info("Adding $service service $service_type...");
 
@@ -256,21 +258,27 @@ class ServicesCommand extends Command
      *
      * @return array
      */
-    private function askForServiceProperties($service) {
+    private function askForServiceProperties($service, $service_type) {
 
-        $class = $this->context->getAvailableServices($service);
+        $class = $this->context->getAvailableServiceTypes($service, $service_type);
         $method = "{$this->context->type}_options";
 
         $options = $class::{$method}();
         $properties = [];
-        foreach ($options as $name => $description) {
+        foreach ($options as $name => $property) {
+
+            // Allows option_documentation to return array of strings for simple properties.
+            if ( !$property instanceof Property) {
+                $property = Provision::newProperty($property);
+            }
+
             // If option does not exist, ask for it.
             if (!empty($this->input->getOption($name))) {
                 $properties[$name] = $this->input->getOption($name);
                 $this->io->comment("Using option {$name}={$properties[$name]}");
             }
             else {
-                $properties[$name] = $this->io->ask("$name ($description)");
+                $properties[$name] = $this->io->ask("{$name} ({$property->description})", $property->default, $property->validate);
             }
         }
         return $properties;

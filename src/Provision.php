@@ -441,4 +441,51 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     static public function newProperty($description = '') {
         return new Property($description);
     }
+
+    /**
+     * Determine the web user group on this server.
+     * @return mixed|null
+     */
+    static function defaultWebGroup() {
+        $info = posix_getgrgid(posix_getgid());
+        $common_groups = array(
+            'www-data',
+            'apache',
+            'nginx',
+            'www',
+            '_www',
+            'webservd',
+            'httpd',
+            'nogroup',
+            'nobody',
+            $info['name']);
+
+        foreach ($common_groups as $group) {
+            if (self::provision_posix_groupname($group)) {
+                return $group;
+                break;
+            }
+        }
+        return NULL;
+    }
+
+    /**
+     * Return the valid system groupname for $group.
+     *
+     * @return
+     *   Returns the groupname if found, otherwise returns FALSE
+     */
+    static function provision_posix_groupname($group) {
+        // TODO: make these singletons with static variables for caching.
+        // we do this both ways, so that the function returns NULL if no such user was found.
+        if (is_numeric($group)) {
+            $info = posix_getgrgid($group);
+            $group = $info['name'];
+        }
+        else {
+            $info = posix_getgrnam($group);
+            $group = $info['name'];
+        }
+        return $group;
+    }
 }
