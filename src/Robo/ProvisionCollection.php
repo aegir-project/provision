@@ -82,6 +82,9 @@ class ProvisionCollection extends Collection {
                     if (!empty($task->failure)) {
                         $failure_message = $task->failure;
                     }
+                    else {
+                        $failure_message = $start_message . '<fg=red>FAILED</>';
+                    }
                     
                     
                     if ($this->getProvision()->getOutput()->isVerbose()) {
@@ -105,13 +108,16 @@ class ProvisionCollection extends Collection {
                     }
     
                     if (!empty($task->success)) {
-                        $name = $task->success;
-                    }
-                    if ($this->getProvision()->getOutput()->isVerbose()) {
-                        $this->getProvision()->io()->successLite('<fg=green>SUCCESS</> '.$name);
+                        $success_message = $task->success;
                     }
                     else {
-                        $this->getProvision()->io()->successLite($name);
+                        $success_message = $start_message . '<fg=green>DONE</>';
+                    }
+                    if ($this->getProvision()->getOutput()->isVerbose()) {
+                        $this->getProvision()->io()->successLite($success_message);
+                    }
+                    else {
+                        $this->getProvision()->io()->successLite($success_message);
                     }
                 }
             }

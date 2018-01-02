@@ -83,18 +83,16 @@ class HttpService extends Service implements ServiceInterface {
     {
         return [
             'http.configuration' => $this->getProvision()->newTask()
+                ->start('Writing web server configuration...')
                 ->execute(function() {
                     return $this->writeConfigurations()? 0: 1;
                 })
-                ->success('Wrote web server configuration files.')
-                ->failure('Unable to write config files for this service.'),
-            
+            ,
             'http.restart' => $this->getProvision()->newTask()
+                ->start('Restarting web server...')
                 ->execute(function() {
-                    $this->restartService();
+                    return $this->restartService()? 0: 1;
                 })
-                ->success('Web service restarted.')
-                ->failure('Never shown: exception message used instead.'),
         ];
     }
 
