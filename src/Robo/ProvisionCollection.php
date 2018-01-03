@@ -90,7 +90,7 @@ class ProvisionCollection extends Collection {
                         $failure_message = $start_message;
                     }
 
-                    $failure_message .= '<fg=red>FAILED</> in <fg=yellow>' . number_format($timer->elapsed(), 2) . 's</>';
+                    $failure_message .= ' <fg=red>FAILED</> in <fg=yellow>' . number_format($timer->elapsed(), 2) . 's</>';
 
                     if ($this->getProvision()->getOutput()->isVerbose()) {
                         $this->getProvision()->io()->errorLite('<options=bold>FAILED </> in' . $name);
@@ -116,7 +116,7 @@ class ProvisionCollection extends Collection {
                         $success_message = $task->success;
                     }
                     else {
-                        $success_message = $start_message . '<fg=green>DONE</> in';
+                        $success_message = $start_message . ' <fg=green>DONE</> in';
                     }
 
                     $success_message .= ' <fg=yellow>' . number_format($timer->elapsed(), 2) . 's</>';
