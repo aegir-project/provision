@@ -25,6 +25,7 @@ use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 class HttpService extends Service implements ServiceInterface {
   const SERVICE = 'http';
   const SERVICE_NAME = 'Web Server';
+  const SERVICE_DEFAULT_PORT = 80;
 
   protected $ssl_enabled = FALSE;
 
