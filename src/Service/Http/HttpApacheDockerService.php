@@ -213,7 +213,6 @@ class HttpApacheDockerService extends HttpApacheService
                               ->name($this->containerName)
                               ->volume($configVolumeHost, $configVolumeGuest)
                               ->silent(!$provision->getOutput()->isVerbose())
-                              ->option('rm')
                               ->interactive();
 
                           // Lookup all subscribers (all platforms that use this web service) and map volumes for root.
