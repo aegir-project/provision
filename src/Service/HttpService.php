@@ -107,7 +107,7 @@ class HttpService extends Service implements ServiceInterface {
         $tasks['http.site.configuration'] =  $this->getProvision()->newTask()
             ->start('Writing site web server configuration...')
             ->execute(function () {
-                return $this->writeConfigurations($this->subscription)? 0: 1;
+                return $this->writeConfigurations($this->getContext())? 0: 1;
             })
         ;
         $tasks['http.site.service'] =  $this->getProvision()->newTask()
@@ -125,7 +125,7 @@ class HttpService extends Service implements ServiceInterface {
         $tasks['http.platform.configuration'] =  $this->getProvision()->newTask()
                 ->start('Writing platform web server configuration...')
                 ->execute(function () {
-                    $this->writeConfigurations($this->getContext()->getSubscription('http'))? 0: 1;
+                    $this->writeConfigurations($this->getContext())? 0: 1;
                 })
         ;
         $tasks = array_merge($tasks, $this->verifyServer());

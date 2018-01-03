@@ -183,13 +183,10 @@ class Service implements BuilderAwareInterface
      *
      * @return bool
      */
-    protected function writeConfigurations(ServiceSubscription $serviceSubscription = NULL)
+    protected function writeConfigurations(Context $context = NULL)
     {
         // If we are writing for a serviceSubscription, use the provider context.
-        if ($serviceSubscription) {
-            $context = $serviceSubscription->getContext();
-        }
-        else {
+        if ($context == NULL) {
             $context = $this->provider;
         }
         
