@@ -12,6 +12,7 @@ namespace Aegir\Provision\Service;
 
 use Aegir\Provision\Context;
 use Aegir\Provision\Context\SiteContext;
+use Aegir\Provision\Provision;
 use Aegir\Provision\Service;
 use Aegir\Provision\ServiceInterface;
 use Aegir\Provision\ServiceSubscription;
@@ -28,9 +29,10 @@ class DbService extends Service implements ServiceInterface
 
     const SERVICE = 'db';
     const SERVICE_TYPE = NULL;
+    const SERVICE_DEFAULT_PORT = 3306;
 
     const SERVICE_NAME = 'Database Server';
-    
+
     /**
      * @var \PDO
      */
@@ -75,7 +77,7 @@ class DbService extends Service implements ServiceInterface
             $this->creds['pass'] = '';
         }
 
-        $this->dsn = sprintf("%s:host=%s;port=%s", $this::SERVICE_TYPE,  $this->creds['host'], $this->creds['port']);
+        $this->dsn = sprintf("%s:host=%s;port=%s", 'mysql',  $this->creds['host'], $this->creds['port']);
 
     }
 
