@@ -91,6 +91,7 @@ class DbService extends Service implements ServiceInterface
         return [
             'master_db' => 'server with db: Master database connection info, {type}://{user}:{password}@{host}',
             'db_grant_all_hosts' => 'Grant access to site database users from any web host. If set to TRUE, any host will be allowed to connect to MySQL site databases on this server using the generated username and password. If set to FALSE, web hosts will be granted access by their detected IP address.',
+            'db_port' => 'The port to run the database server on.',
         ];
     }
     

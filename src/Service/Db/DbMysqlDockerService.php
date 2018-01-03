@@ -33,13 +33,6 @@ class DbMysqlDockerService extends DbMysqlService
 
     }
 
-    static function server_options () {
-        $options = parent::server_options();
-        $options['db_port'] = 3306;
-        return $options;
-    }
-
-
     public function verifyServer()
     {
         $tasks = [];
