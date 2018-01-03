@@ -215,7 +215,6 @@ class DbService extends Service implements ServiceInterface
             $this->subscription->getContext()->getProvision()->io()->successLite('Successfully connected to database server.');
         }
         catch (\PDOException $e) {
-            $this->subscription->context->getProvision()->io()->errorLite($e->getMessage());
             throw new \Exception('Unable to connect to database using service properties: ' . $e->getMessage());
         }
 
