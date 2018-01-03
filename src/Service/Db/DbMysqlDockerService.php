@@ -46,7 +46,7 @@ class DbMysqlDockerService extends DbMysqlService
 
         // Docker run
         $provision = $this->getProvision();
-        $tasks['Run docker image.'] = $this->getProvision()->newTask()
+        $tasks['db.docker.run'] = $this->getProvision()->newTask()
             ->start('Running MariaDB docker image...')
             ->execute(function () use ($provision) {
 
