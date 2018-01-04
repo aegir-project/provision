@@ -3,7 +3,14 @@
 namespace Aegir\Provision;
 
 class Task {
-    
+
+    function __construct()
+    {
+        $this->callable = function () {
+            return 0;
+        };
+    }
+
     function execute($callable)
     {
         $this->callable = $callable;

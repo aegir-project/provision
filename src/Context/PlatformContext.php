@@ -155,46 +155,76 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
     public function verify()
     {
         $this->getProvision()->io()->customLite($this->getProperty('root'), 'Root: ', 'info');
+
+        if ($this->getProperty('makefile')) {
+            $this->getProvision()->io()->customLite($this->getProperty('makefile'), 'Makefile: ', 'info');
+        }
+
         $this->getProvision()->io()->customLite($this->config_path, 'Configuration File: ', 'info');
+
         $this->getProvision()->io()->newLine();
     
         $tasks = [];
-    
+
         // If platform files don't exist, but has git url or makefile, build now.
-        if (!$this->fs->exists($this->getProperty('root')) && $this->getProperty('git_url')) {
-    
-            $tasks['platform.git'] = $this->getProvision()->newTask()
-                ->start('Cloning git repository...')
-                ->execute(function () {
-                    $this->getProvision()->io()->warningLite('Root path does not exist. Cloning source code from git repository ' . $this->getProperty('git_url') . ' to ' . $this->getProperty('root'));
-    
-                    return $this->getProvision()->getTasks()->taskExec("git clone")
-                        ->arg($this->getProperty('git_url'))
-                        ->arg($this->getProperty('root'))
-                        ->silent(!$this->getProvision()->getOutput()->isVerbose())
-                        ->run()
-                        ->getExitCode()
-                    ;
-            
-                });
+        if ($this->getProperty('git_url')) {
+
+            if ($this->fs->exists($this->getProperty('root'))) {
+                $tasks['platform.files'] = $this->getProvision()->newTask()
+                    ->success('Cloning git repository... Files already exist.');
+            }
+            else {
+                $tasks['platform.git'] = $this->getProvision()->newTask()
+                    ->start('Cloning git repository...')
+                    ->execute(function () {
+                        if (!$this->fs->exists($this->getProperty('root'))) {
+                            $this->getProvision()->io()->warningLite('Root path does not exist. Cloning source code from git repository ' . $this->getProperty('git_url') . ' to ' . $this->getProperty('root'));
+
+                            return $this->getProvision()->getTasks()->taskExec("git clone")
+                                ->arg($this->getProperty('git_url'))
+                                ->arg($this->getProperty('root'))
+                                ->silent(!$this->getProvision()->getOutput()->isVerbose())
+                                ->run()
+                                ->getExitCode()
+                                ;
+                        }
+                        else {
+                            // @TODO: Check git remote URl to ensure it matches.
+                            return 0;
+                        }
+                    });
+            }
+
         }
-        elseif (!$this->fs->exists($this->getProperty('root')) && $this->getProperty('makefile')) {
-            $tasks['platform.make'] = $this->getProvision()->newTask()
-                ->start('Building platform from makefile...')
-                ->execute(function () {
-                    $this->getProvision()->io()->warningLite('Root path does not exist. Creating platform from makefile ' . $this->getProperty('git_url') . ' in ' . $this->getProperty('root'));
-        
-                    return $this->getProvision()->getTasks()->taskExec("drush make")
-                        ->arg($this->getProperty('makefile'))
-                        ->arg($this->getProperty('root'))
-                        ->silent(!$this->getProvision()->getOutput()->isVerbose())
-                        ->run()
-                        ->getExitCode()
-                    ;
-        
-                });
+        elseif ($this->getProperty('makefile')) {
+
+            if ($this->fs->exists($this->getProperty('root'))) {
+                $tasks['platform.files'] = $this->getProvision()->newTask()
+                    ->start('Building platform from makefile... Files already exist.');
+            }
+            else {
+                $tasks['platform.make'] = $this->getProvision()->newTask()
+                    ->start('Building platform from makefile...')
+                    ->execute(function () {
+                            return $this->getProvision()->getTasks()->taskExec("drush make")
+                                ->arg($this->getProperty('makefile'))
+                                ->arg($this->getProperty('root'))
+                                ->silent(!$this->getProvision()->getOutput()->isVerbose())
+                                ->run()
+                                ->getExitCode()
+                                ;
+                    });
+
+            }
         }
-    
+
+        // If files already exist, say so.
+        $tasks['platform.found'] = $this->getProvision()->newTask()
+            ->start('Checking root path for files...')
+            ->execute(function () {
+                return $this->fs->exists($this->getProperty('root'))? 0: 1;
+            });
+
         return $tasks;
         
 //        return parent::verify();

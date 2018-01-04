@@ -492,10 +492,15 @@ class Context implements BuilderAwareInterface
     public function verifyCommand()
     {
         $collection = $this->getProvision()->getBuilder();
-    
+
+        $pre_tasks = $this->verify();
+        foreach ($pre_tasks as $pre_task_title => $pre_task) {
+            $collection->getConfig()->set($pre_task_title, $pre_task);
+            $this->prepareTask($collection, $pre_task_title, $pre_task);
+        }
         foreach ($this->getServices() as $type => $service) {
             $friendlyName = $service->getFriendlyName();
-            $tasks = $this->verify();
+            $tasks = [];
 //
 //            $collection->addCode(function() use ($friendlyName, $type) {
 //                $this->getProvision()->io()->section("Verify service: {$friendlyName}");
@@ -508,26 +513,9 @@ class Context implements BuilderAwareInterface
             $tasks = array_merge($tasks, $service->verify());
 
             foreach ($tasks as $title => $task) {
-                
-                // If task is just a callable, convert into a Provision Task wrapper.
-                if (is_callable($task)) {
-                    $task = Provision::newTask()
-                      ->execute($task);
-                }
-    
-                $collection->getConfig()->set($title, $task);
-
-                if ($task instanceof \Robo\Task || $task instanceof \Robo\Collection\CollectionBuilder) {
-                    $collection->getCollection()->add($task, $title);
-                }
-                elseif ($task instanceof Task) {
-                    $collection->addCode($task->callable, $title);
-                }
-                else {
-                    $class = get_class($task);
-                    throw new \Exception("Task '$title' in service '$friendlyName' must be a callable or \\Robo\\Collection\\CollectionBuilder. Is class '$class'");
-                }
+                $this->prepareTask($collection, $title, $task, $service);
             }
+            $tasks = [];
         }
         
         $result = $collection->run();
@@ -539,8 +527,42 @@ class Context implements BuilderAwareInterface
             throw new RuntimeException('Some services did not verify. Check your configuration, or run with the verbose option (-v) for more information.');
         }
     }
-    
-    
+
+    /**
+     * Helper to pass tasks to the collection.
+     * @param $collection
+     * @param $title
+     * @param $task
+     * @param $service
+     * @throws \Exception
+     */
+    function prepareTask($collection, $title, $task, $service = NULL) {
+        if (is_callable($task)) {
+            $task = Provision::newTask()
+              ->execute($task);
+        }
+
+        $collection->getConfig()->set($title, $task);
+
+        if ($task instanceof \Robo\Task || $task instanceof \Robo\Collection\CollectionBuilder) {
+            $collection->getCollection()->add($task, $title);
+        }
+        elseif ($task instanceof Task) {
+            $collection->addCode($task->callable, $title);
+        }
+        else {
+            $class = get_class($task);
+            if ($service) {
+                $friendlyName = $service->getFriendlyName();
+                throw new \Exception("Task '$title' in service '$friendlyName' must be a callable or \\Robo\\Collection\\CollectionBuilder. Is class '$class'");
+            }
+            else {
+                throw new \Exception("Task '$title' must be a callable or \\Robo\\Collection\\CollectionBuilder. Is class '$class'");
+            }
+        }
+    }
+
+
     /**
      * Stub to be implemented by context types.
      *
