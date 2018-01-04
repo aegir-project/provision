@@ -124,7 +124,7 @@ class SaveCommand extends Command
         $this->context_name = $input->getArgument('context_name');
         $this->context_type = $input->getOption('context_type');
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -262,7 +262,22 @@ class SaveCommand extends Command
         }
         // If there are no options, just ask for the name to create.
         else {
-            $this->context_name = $this->io->ask('Context name');
+
+            // FIRST CONTEXT!
+            // @TODO: Move this to it's own class and methods for onboarding.
+            $this->io->title('Welcome to Provision!');
+
+            $this->io->block([
+                "The first context you need to create is a server. It is recommended to call this server 'server_master' but you can call it whatever you'd like.",
+            ]);
+
+            $this->io->writeln([
+                " Tip: When Provision asks you <info>a question</info>, it may provide a [<comment>default value</comment>].",
+                "      If you just hit enter, that default value will be used."
+            ]);
+            $this->input->setOption('context_type', 'server');
+
+            $this->context_name = $this->io->ask('Context name', 'server_master');
         }
     }
 
