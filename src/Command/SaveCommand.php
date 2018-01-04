@@ -73,6 +73,13 @@ class SaveCommand extends Command
           'Remove the alias.'
         );
 
+        $inputDefinition[] = new InputOption(
+          'verify',
+          null,
+          InputOption::VALUE_NONE,
+          'Run a verify command after saving the context.'
+        );
+
       // Load all Aegir\Provision\Context and inject their options.
       // @TODO: Use CommandFileDiscovery to include all classes that inherit Aegir\Provision\Context
       $contexts[] = SiteContext::class;
@@ -225,6 +232,15 @@ class SaveCommand extends Command
         else {
             $this->askForServiceSubscriptions();
         }
+
+        // Offer to verify.
+        if ($this->input->getOption('verify') || $this->io->confirm('Would you like to run `provision verify` on this ' . $this->input->getOption('context_type') . '?')) {
+            $command = $this->getApplication()->find('verify');
+            $arguments['context_name'] = $this->context_name;
+            $input = new ArrayInput($arguments);
+            exit($command->run($input, $this->output));
+        }
+
     }
 
     /**
