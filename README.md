@@ -16,6 +16,25 @@ Thoughts welcome.
 
  -JonPugh
 
+
+# Quick TESTING start
+
+- Clone this repo on your Aegir server e.g. in /var/aegir/provision (NOT under .drush)
+- cd into it.
+- run: `composer install`
+- create /var/aegir/config/contexts as empty dir
+- run `bin/provision save` to get your first yml config.
+
+FICTIONAL NEXT STEPS... could also be called ROADMAP
+
+- run ... to import 3.x contexts from ~/.drush
+
+- patch the hosting module with the 2912492-task-command branch
+- host happily ever after
+- clean up legacy 3.x contexts?
+
+END FICTIONAL
+
 # The Aegir system
 
 The Aegir hosting system allows developers and site administrators to

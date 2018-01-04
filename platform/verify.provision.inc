@@ -129,6 +129,8 @@ function drush_provision_drupal_pre_provision_verify() {
     if (d()->root == d('@hostmaster')->root && d()->uri == d('@hostmaster')->uri) {
       $aegir_drushrc = new Provision_Config_Drushrc_Aegir();
       $aegir_drushrc->write();
+
+      drush_invoke_process('@none', "cache-clear", array('drush'));
     }
 
     provision_drupal_push_site(drush_get_option('override_slave_authority', FALSE));
