@@ -92,6 +92,10 @@ script:
 
 
   - provision verify server_master -v
+
+  # Docker creates the host path when docker run happens, in server verify.
+  - sudo rm /home/travis/hostmaster
+
   - provision verify platform_hostmaster -v
   - provision verify hostmaster -v
   
