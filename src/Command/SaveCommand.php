@@ -38,12 +38,13 @@ class SaveCommand extends Command
     protected function configure()
     {
         $this
-          ->setName('save')
-          ->setDescription('Save Provision Context.')
-          ->setHelp(
-            'Saves a ProvisionContext object to file. Currently just passes to "drush provision-save".'
-          )
-          ->setDefinition($this->getCommandDefinition());
+            ->setName('save')
+            ->setAliases(['add'])
+            ->setDescription('Save Provision Context.')
+            ->setHelp(
+                'Saves a ProvisionContext object to file. Currently just passes to "drush provision-save".'
+            )
+            ->setDefinition($this->getCommandDefinition());
     }
 
     /**
