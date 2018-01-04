@@ -102,10 +102,10 @@ class Config extends ProvisionConfig
                 ]);
             }
             else {
-                $this->io->commentBlock([
-                    'If you would like to change the default Config Path, add the following to the file ' . $this->get('console_config_file'),
+                $this->io->block([
+                    'Tip: If you would like to change the default Config Path, add the following to the file ' . $this->get('console_config_file'),
                     '    config_path: /path/to/my/provision/config'
-                ]);
+                ], NULL, 'fg=blue');
             }
 
             // Offer to create the folder for the user.

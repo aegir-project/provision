@@ -130,12 +130,11 @@ class SaveCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $options = $this->getProvision()->getAllContextsOptions();
+        $context_type = $input->getOption('context_type');
 
         // If this is a new context...
         if (empty($this->context)) {
 
-            $context_type = $input->getOption('context_type');
             // If context_type is still empty, throw an exception. Happens if using -n
             if (empty($context_type)) {
                 throw new \Exception('Option --context_type must be specified.');
@@ -208,7 +207,7 @@ class SaveCommand extends Command
     
         $this->io->table(['Saving Context:', $this->context->name], $rows);
         
-        if ($this->io->confirm("Write configuration for <question>{$this->context->type}</question> context <question>{$this->context->name}</question> to <question>{$this->context->config_path}</question>?")) {
+        if ($this->io->confirm("Write configuration for <fg=blue>{$this->context->type}</> context <fg=blue>{$this->context->name}</> to <fg=blue>{$this->context->config_path}</>?")) {
             if ($this->context->save()) {
                 $this->io->success("Configuration saved to {$this->context->config_path}");
             }
@@ -292,8 +291,8 @@ class SaveCommand extends Command
             ]);
 
             $this->io->writeln([
-                " Tip: When Provision asks you <info>a question</info>, it may provide a [<comment>default value</comment>].",
-                "      If you just hit enter, that default value will be used."
+                " <fg=blue>Tip: When Provision asks you <info>a question</info>, it may provide a [<comment>default value</comment>].",
+                "      If you just hit enter, that default value will be used.</>"
             ]);
             $this->input->setOption('context_type', 'server');
 
@@ -310,8 +309,6 @@ class SaveCommand extends Command
         if (empty($this->input->getOption('context_type'))) {
             throw new InvalidOptionException('context_type option is required.');
         }
-
-        $this->io->block("Please input context properties.");
 
         $class = Context::getClassName($this->input->getOption('context_type'));
         $options = $class::option_documentation();
