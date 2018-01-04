@@ -39,7 +39,8 @@ install:
 
 script:
 
-  - provision
+  # @TODO: Set non-interactive globally
+  - provision -n
   - provision status -n
 
   # Add server context.
