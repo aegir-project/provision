@@ -230,8 +230,8 @@ class SaveCommand extends Command
             $this->askForServiceSubscriptions();
         }
 
-        // Offer to verify.
-        if ($this->input->getOption('verify') || $this->io->confirm('Would you like to run `provision verify` on this ' . $this->input->getOption('context_type') . '?')) {
+        // Offer to verify. (only if --verify option was specified or is interactive and confirmation is made.
+        if ($this->input->getOption('verify') || ($this->input->isInteractive() && $this->io->confirm('Would you like to run `provision verify` on this ' . $this->input->getOption('context_type') . '?'))) {
             $command = $this->getApplication()->find('verify');
             $arguments['context_name'] = $this->context_name;
             $input = new ArrayInput($arguments);
