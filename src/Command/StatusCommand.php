@@ -73,18 +73,22 @@ class StatusCommand extends Command
                 $rows[] = [$context->name, $context->type];
             }
             $headers = ['Contexts'];
+            if (empty($rows)) {
+                $rows[] = 'There are no contexts. Run <comment>provision save</comment> to get started.';
+            }
             $this->io->table($headers, $rows);
     
             // Offer to output a context status.
             $options = $this->getProvision()->getAllContextsOptions();
-            $options['none'] = 'none';
-            $context = $this->io->choiceNoList('Get status for', $options, 'none');
-            
-            if ($context != 'none') {
-                $command = $this->getApplication()->find('status');
-                $arguments['context_name'] = $context;
-                $input = new ArrayInput($arguments);
-                exit($command->run($input, $this->output));
+            if (count($options)) {
+                $options['none'] = 'none';
+                $context = $this->io->choiceNoList('Get status for', $options, 'none');
+                if ($context != 'none') {
+                    $command = $this->getApplication()->find('status');
+                    $arguments['context_name'] = $context;
+                    $input = new ArrayInput($arguments);
+                    exit($command->run($input, $this->output));
+                }
             }
         }
     }
