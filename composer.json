@@ -9,6 +9,7 @@
         "consolidation/Robo": "^1.1",
         "consolidation/annotated-command": "~2",
         "drupal/console-core": "1.0.2",
+        "drush/drush": "8.x",
         "psr/log": "^1.0",
         "psy/psysh": "^0.8.11",
         "symfony/console": "^3.3",

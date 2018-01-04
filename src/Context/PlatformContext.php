@@ -206,7 +206,9 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
                 $tasks['platform.make'] = $this->getProvision()->newTask()
                     ->start('Building platform from makefile...')
                     ->execute(function () {
-                            return $this->getProvision()->getTasks()->taskExec("drush make")
+                        $drush = realpath(__DIR__ . '/../../bin/drush');
+                        return $this->getProvision()->getTasks()->taskExec($drush)
+                                ->arg('make')
                                 ->arg($this->getProperty('makefile'))
                                 ->arg($this->getProperty('root'))
                                 ->silent(!$this->getProvision()->getOutput()->isVerbose())
