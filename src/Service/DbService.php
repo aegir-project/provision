@@ -131,8 +131,7 @@ class DbService extends Service implements ServiceInterface
                 $this->connect();
             })
             ->start('Checking connection to database server...')
-            ->success('Provision can connect to Database server.')
-            ->failure('Unable to connect to database using credentials saved in context ' . $this->provider->name . '.')
+            ->failure('Checking connection to database server... Unable to connect using credentials saved in context ' . $this->provider->name . '.')
         ;
     
         // Confirm we have access to create databases.
@@ -140,14 +139,12 @@ class DbService extends Service implements ServiceInterface
             ->execute(function () {
                 return $this->can_create_database()? 0: 1;
             })
-            ->success('Provision can create new databases.')
-            ->failure('Unable to create new databases.')
+            ->start('Checking root database access...')
         ;
     
         // Confirm we can create database users.
         $tasks['db_grant'] = $this->getProvision()->newTask()
-            ->success('Provision can grant privileges on database users.')
-            ->failure('unable to grant privileges on database users.')
+            ->start('Checking access to grant privileges...')
             ->execute(function () {
                 return $this->can_grant_privileges()? 0: 1;
             })
