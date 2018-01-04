@@ -83,22 +83,50 @@ class Config extends ProvisionConfig
                 "The folder set to 'aegir_root' ({$this->get('aegir_root')}) is not writable. Fix this or change the aegir_root value in the file {$this->get('console_config_file')}"
             );
         }
-        // If config_path does not exist and we cannot create it...
-        if (!file_exists($this->get('contexts_path'))) {
+
+        // If config_path does not exist...
+        if (!file_exists($this->get('config_path'))) {
 
             // START: New User!
+            // @TODO: Break this out into it's own method or class.
             $this->io->title("Welcome to Provision!");
-            $this->io->block("It looks like this is your first time running Provision. You are missing the {$this->get('contexts_path')} folder.");
+            $this->io->block([
+                "It looks like this is your first time running Provision, because your config_path folder is missing. This is the place Provision stores your metadata and server configuration.",
+            ]);
 
-            if (!$this->input()->isInteractive() || $this->io->confirm('Would you like to create the folder ' . $this->get('contexts_path') . '?')) {
+            // Tell the user how to change the config path. Change language if they already have the .provision.yml file.
+            if (file_exists($this->get('console_config_path'))) {
+                $this->io->commentBlock([
+                    'If you would like to change the default Config Path, create a file ' . $this->get('console_config_file') . ' and add:',
+                    '    config_path: /path/to/my/provision/config'
+                ]);
+            }
+            else {
+                $this->io->commentBlock([
+                    'If you would like to change the default Config Path, add the following to the file ' . $this->get('console_config_file'),
+                    '    config_path: /path/to/my/provision/config'
+                ]);
+            }
+
+            // Offer to create the folder for the user.
+            if (!$this->input()->isInteractive() || $this->io->confirm('Should I create the folders ' . $this->get('config_path') . ' and ' . $this->get('contexts_path') . ' ?')) {
+                $this->fs->mkdir($this->get('config_path'), 0700);
                 $this->fs->mkdir($this->get('contexts_path'), 0700);
             }
         }
 
-        if (!is_writable($this->get('contexts_path'))) {
-            throw new InvalidOptionException(
-                "The folder set to 'contexts_path' ({$this->get('contexts_path')}) is not writable. Fix this or change the contexts_path value in the file {$this->get('console_config_file')}."
-            );
+
+        // Check for paths that need to be writable.
+        $writable_paths['config_path'] = $this->get('config_path');
+        $writable_paths['contexts_path'] = $this->get('contexts_path');
+        $errors = [];
+        foreach ($writable_paths as $name => $path) {
+            if (!is_writable($path)) {
+                $errors[] = "The folder set to '$name' ($path) is not writable. Fix this or change the $name value in the file {$this->get('console_config_file')}.";
+            }
+        }
+        if ($errors) {
+            throw new InvalidOptionException(implode("\n\n", $errors));
         }
 
         // Ensure that script_user is the user.
