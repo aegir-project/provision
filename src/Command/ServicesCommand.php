@@ -129,15 +129,19 @@ class ServicesCommand extends Command
         InputInterface $input,
         OutputInterface $output
     ) {
+
+        if ($input->getArgument('context_name') == 'add') {
+            $this->sub_command = $input->getArgument('context_name');
+            $input->setArgument('context_name', NULL);
+        }
+        else {
+            $this->sub_command = $input->getArgument('sub_command');
+        }
+
         parent::initialize(
             $input,
             $output
         );
-//        if (isset($this->context->type) && $this->context->type != 'server') {
-//            throw new \Exception('Context must be a server.');
-//        }
-
-        $this->sub_command = $input->getArgument('sub_command');
     }
 
     /**
