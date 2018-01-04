@@ -132,20 +132,10 @@ class SaveCommand extends Command
     {
         $options = $this->getProvision()->getAllContextsOptions();
 
+        // If this is a new context...
         if (empty($this->context)) {
 
-            if (!empty($options)) {
-                $this->io->comment("No context named '$this->context_name'. Creating a new one...");
-            }
-
-            if (empty($this->input->getOption('context_type'))) {
-                $context_type = $this->io->choice('Context Type?', Context::getContextTypeOptions());
-                $this->input->setOption('context_type', $context_type);
-            }
-            else {
-                $context_type = $this->input->getOption('context_type');
-            }
-            
+            $context_type = $input->getOption('context_type');
             // If context_type is still empty, throw an exception. Happens if using -n
             if (empty($context_type)) {
                 throw new \Exception('Option --context_type must be specified.');
@@ -168,7 +158,7 @@ class SaveCommand extends Command
             $exit = FALSE;
             $reqs = $this->getProvision()->checkServiceRequirements($context_type);
             if ($reqs) {
-                $this->io->customLite("Checking service requirements for context type {$context_type}...", ' ');
+                $this->io->block("Checking service requirements for context type {$context_type}...");
                 foreach ($reqs as $service => $available) {
                     if ($available) {
                         $this->io->successLite("Service $service: Available");
@@ -265,6 +255,28 @@ class SaveCommand extends Command
             $this->context_name = $this->io->choice($question, $options);
 
             if ($this->context_name == 'new') {
+
+                if (empty($this->input->getOption('context_type'))) {
+                    $type_options = Context::getContextTypeOptions();
+
+                    // Check for platforms. If none. don't allow sites.
+                    $platform_exists = FALSE;
+                    foreach ($options as $name => $type_and_name) {
+                        if (strpos($type_and_name, 'platform') === 0) {
+                            $platform_exists = TRUE;
+                        }
+                    }
+
+                    if (!$platform_exists) {
+                        unset($type_options['site']);
+                        $this->io->block("You cannot add a site until you have at least one platform.");
+                    }
+                    $context_type = $this->io->choice('Context Type?', $type_options);
+                }
+                else {
+                    $context_type = $this->input->getOption('context_type');
+                }
+                $this->input->setOption('context_type', $context_type);
                 $this->context_name = $this->io->ask('Context name');
             }
         }
