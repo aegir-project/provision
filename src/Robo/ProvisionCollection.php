@@ -42,7 +42,7 @@ class ProvisionCollection extends Collection {
                 
                 /** @var \Aegir\Provision\Task $task */
                 $task = $this->getConfig()->get($name);
-    
+
                 if ($this->getProvision()->getOutput()->isVerbose()) {
                     $this->getProvision()->io()->customLite('STARTED ' . $name, '○');
                 }
@@ -67,7 +67,7 @@ class ProvisionCollection extends Collection {
 
                 // END ROBO
     
-                if ($this->getProvision()->getInput()->isInteractive()) {
+                if (!$this->getProvision()->getOutput()->isVerbose()) {
     
                     // Erase lines
                     $lines = 1;
