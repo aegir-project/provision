@@ -143,7 +143,7 @@ class HttpApacheDockerService extends HttpApacheService
                   "AEGIR_SERVER_NAME={$this->provider->name}"
               )
               ->option('--build-arg', "AEGIR_UID=".posix_getuid())
-              ->silent(!$this->getProvision()->getOutput()->isVerbose())
+              ->silent(!$this->getProvision()->getOutput()->isVeryVerbose())
               ->run()
               ->getExitCode()
           ;
