@@ -109,9 +109,12 @@ class Config extends ProvisionConfig
             }
 
             // Offer to create the folder for the user.
-            if (!$this->input()->isInteractive() || $this->io->confirm('Should I create the folders ' . $this->get('config_path') . ' and ' . $this->get('contexts_path') . ' ?')) {
+            if ($this->input()->hasParameterOption(array('--no-interaction', '-n'), false) || $this->io->confirm('Should I create the folders ' . $this->get('config_path') . ' and ' . $this->get('contexts_path') . ' ?')) {
                 $this->fs->mkdir($this->get('config_path'), 0700);
                 $this->fs->mkdir($this->get('contexts_path'), 0700);
+
+                $this->io->successLite('Created paths successfully.');
+                $this->io->writeln('');
             }
         }
 
