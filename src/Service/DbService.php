@@ -17,6 +17,7 @@ use Aegir\Provision\Service;
 use Aegir\Provision\ServiceInterface;
 use Aegir\Provision\ServiceSubscription;
 use Aegir\Provision\Task;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -68,6 +69,14 @@ class DbService extends Service implements ServiceInterface
         parent::__construct($service_config, $provider_context);
 
         $this->creds = array_map('urldecode', parse_url($this->properties['master_db']));
+
+        // If credentials cannot be decoded, throw an exception.
+        if (empty($this->creds) || empty($this->creds['host']) || empty($this->creds['scheme'])) {
+            if (empty($this->properties['master_db'])) {
+                $this->properties['master_db'] = 'empty';
+            }
+            throw new InvalidConfigurationException("Unable to parse master_db connection for server '{$provider_context->name}'. Check the file {$provider_context->config_path} and try again. \n\nCurrent value: {$this->properties['master_db']}");
+        }
 
         if (!isset($this->creds['port'])) {
             $this->creds['port'] = '3306';
