@@ -130,8 +130,13 @@ class SaveCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $options = $this->getProvision()->getAllContextsOptions();
+
         if (empty($this->context)) {
-            $this->io->comment("No context named '$this->context_name'. Creating a new one...");
+
+            if (!empty($options)) {
+                $this->io->comment("No context named '$this->context_name'. Creating a new one...");
+            }
 
             if (empty($this->input->getOption('context_type'))) {
                 $context_type = $this->io->choice('Context Type?', Context::getContextTypeOptions());
@@ -161,17 +166,20 @@ class SaveCommand extends Command
 
             // Check for context type service requirements.
             $exit = FALSE;
-            $this->io->comment("Checking service requirements for context type {$context_type}...");
             $reqs = $this->getProvision()->checkServiceRequirements($context_type);
-            foreach ($reqs as $service => $available) {
-                if ($available) {
-                    $this->io->successLite("Service $service: Available");
-                }
-                else {
-                    $this->io->warningLite("There is no server that provides the service '$service'.");
-                    $exit = TRUE;
+            if ($reqs) {
+                $this->io->customLite("Checking service requirements for context type {$context_type}...", ' ');
+                foreach ($reqs as $service => $available) {
+                    if ($available) {
+                        $this->io->successLite("Service $service: Available");
+                    }
+                    else {
+                        $this->io->warningLite("There is no server that provides the service '$service'.");
+                        $exit = TRUE;
+                    }
                 }
             }
+
 
             if ($exit) {
                 $this->io->error('Service requirements are unfulfillable. Please create a new server (provision save) or add to an existing server (provision services).');
@@ -291,7 +299,7 @@ class SaveCommand extends Command
             throw new InvalidOptionException('context_type option is required.');
         }
 
-        $this->io->comment("Please input context properties.");
+        $this->io->block("Please input context properties.");
 
         $class = Context::getClassName($this->input->getOption('context_type'));
         $options = $class::option_documentation();
