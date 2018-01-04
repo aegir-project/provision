@@ -80,7 +80,7 @@ class StatusCommand extends Command
     
             // Offer to output a context status.
             $options = $this->getProvision()->getAllContextsOptions();
-            if (count($options)) {
+            if ($this->input->isInteractive() && count($options)) {
                 $options['context'] = 'context';
                 $context = $this->io->choiceNoList('Get status for', $options, 'select a context');
                 if ($context != 'select a context') {
