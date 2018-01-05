@@ -23,8 +23,27 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
      */
     public $type = 'server';
     const TYPE = 'server';
-    
-    
+
+    public $server_config_path;
+
+    /**
+     * ServerContext constructor.
+     *
+     * Prepares "server_config_path" as the place to store this server's service
+     * configuration files (apache configs, etc.).
+     *
+     * @param $name
+     * @param Provision $provision
+     * @param array $options
+     */
+    function __construct($name, Provision $provision, array $options = [])
+    {
+        // @TODO: Create a 'servers_path' to keep things nice and clean.
+        parent::__construct($name, $provision, $options);
+        $this->server_config_path = $this->getProvision()->getConfig()->get('config_path') . DIRECTORY_SEPARATOR . $name;
+        $this->properties['server_config_path'] = $this->server_config_path;
+    }
+
     /**
      * @return string|Property[]
      */
