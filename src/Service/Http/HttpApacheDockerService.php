@@ -97,7 +97,7 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
 
       $config->data['root'] = $this->mapContainerPath($root_on_host);
 
-      if ($this->context instanceof Context\SiteContext) {
+      if ($this->context->type == 'site' && isset($config->data['uri'])) {
           $config->data['site_path'] = $config->data['root'] . '/sites/' . $config->data['uri'];
       }
       
@@ -131,24 +131,8 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
       $compose_services = [];
       $filename = $this->provider->getProperty('server_config_path') . DIRECTORY_SEPARATOR . 'docker-compose.yml';
 
-      // Load docker compose data from each docker service.
-      $this->provider->getServices();
-      foreach ($this->provider->getServices() as $type => $service) {
-          if ($service instanceof DockerServiceInterface) {
-              $compose_services[$type] = $service->dockerComposeService();
-              $compose_services[$type]['hostname'] = $this->provider->name . '.' . $type;
-          }
-      }
-
-      // If there are any docker services in this server create a
-      // docker-compose file.
-      $compose = array(
-          'version' => '2',
-          'services' => $compose_services,
-      );
-
       // Write Apache configuration files.
-      $tasks['http.configuration'] = Provision::newTask()
+      $tasks['http.server.configuration'] = Provision::newTask()
               ->start('Writing web server configuration...')
               ->execute(function() {
                   return $this->writeConfigurations()? 0: 1;
@@ -159,7 +143,22 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
           ->start('Generating docker-compose.yml file...')
           ->success('Generating docker-compose.yml file... Saved to ' . $filename)
           ->failure('Generating docker-compose.yml file... Saved to ' . $filename)
-          ->execute(function () use ($compose, $filename) {
+          ->execute(function () use ($filename) {
+
+              // Load docker compose data from each docker service.
+              foreach ($this->provider->getServices() as $type => $service) {
+                  if ($service instanceof DockerServiceInterface) {
+                      $compose_services[$type] = $service->dockerComposeService();
+                      $compose_services[$type]['hostname'] = $this->provider->name . '.' . $type;
+                  }
+              }
+
+              // If there are any docker services in this server create a
+              // docker-compose file.
+              $compose = array(
+                  'version' => '2',
+                  'services' => $compose_services,
+              );
 
               $filename = $this->provider->getProperty('server_config_path') . DIRECTORY_SEPARATOR . 'docker-compose.yml';
               $server_name = $this->provider->name;
@@ -207,6 +206,31 @@ YML;
 
       return $tasks;
   }
+
+    /**
+     * React to the `provision verify` command on Site contexts
+     */
+    function verifySite() {
+        $this->subscription = $this->getContext()->getSubscription('http');
+
+        $server_tasks = $this->verifyServer();
+        $platform_tasks = $this->verifyPlatform();
+
+        $tasks = [];
+        $tasks['http.site.configuration'] =  $this->getProvision()->newTask()
+            ->start('Writing site web server configuration...')
+            ->execute(function () {
+                return $this->writeConfigurations($this->getContext())? 0: 1;
+            })
+        ;
+        $tasks['http.platform.configuration'] = $platform_tasks['http.platform.configuration'];
+        $tasks['http.server.configuration'] = $server_tasks['http.server.configuration'];
+
+        $tasks['docker.compose.write'] = $server_tasks['docker.compose.write'];
+        $tasks['docker.compose.up'] = $server_tasks['docker.compose.up'];
+
+        return $tasks;
+    }
 
     /**
      * Return the docker image name to use for this service.
@@ -273,6 +297,14 @@ YML;
 //            $volumes[] = "{$platforms_path_host}:{$platforms_path_container}:z";
 //        }
 
+        // Map a volume for every platform.
+        $platforms = $this->getProvision()->getAllPlatforms();
+        foreach ($platforms as $platform) {
+            if ($platform->getSubscription('http')->server->name == $this->provider->name) {
+                $volumes[] = $platform->getProperty('root') . ':' . $this->mapContainerPath($platform->getProperty('root'));
+            }
+        }
+
         return $volumes;
     }
 
@@ -282,7 +314,7 @@ YML;
      */
     function getEnvironment() {
         $environment = array();
-        $environment['AEGIR_SERVER_NAME'] = $this->getContext()->name;
+        $environment['AEGIR_SERVER_NAME'] = $this->provider->name;
         return $environment;
     }
 }

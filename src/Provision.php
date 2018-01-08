@@ -83,7 +83,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     /**
      * @var \Aegir\Provision\Context[]
      */
-    private $contexts = [];
+    public $contexts = [];
     
     /**
      * @var array[]
@@ -322,7 +322,27 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         }
         return $servers;
     }
-    
+
+
+    /**
+     * Return all available contexts.
+     *
+     * @return array|Context
+     */
+    public function getAllPlatforms() {
+        $platforms = [];
+        $context_files = $this->getAllContexts();
+        if (empty($context_files)) {
+            throw new \Exception('No contexts found. Use `provision save` to create one.');
+        }
+        foreach ($context_files as $context) {
+            if ($context->type == 'platform') {
+                $platforms[$context->name] = $context;
+            }
+        }
+        return $platforms;
+    }
+
     /**
      * Get a simple array of all contexts, for use in an options list.
      * @return array
