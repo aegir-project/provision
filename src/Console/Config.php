@@ -49,6 +49,7 @@ class Config extends ProvisionConfig
         
         $this->set('aegir_root', $this->getHomeDir());
         $this->set('script_user', $this->getScriptUser());
+        $this->set('script_uid', $this->getScriptUid());
 
         // If user has a ~/.config path, use it.
         if (file_exists($this->getHomeDir() . '/.config')) {
@@ -234,5 +235,12 @@ class Config extends ProvisionConfig
     static public function getScriptUser() {
         $real_script_user = posix_getpwuid(posix_geteuid());
         return $real_script_user['name'];
+    }
+
+    /**
+     * Determine the user running provision.
+     */
+    static public function getScriptUid() {
+        return posix_getuid();
     }
 }
