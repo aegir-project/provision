@@ -3,7 +3,9 @@ echo "𝙋𝙍𝙊 ║ Started httpd-foreground.sh ..."
 
 # Copied from official httpd container: https://github.com/docker-library/httpd/blob/fa5223d83a5225aa3fd5b23229b785c7764142bf/2.2/httpd-foreground
 
-set -e
+# Don't exit on apache service start failure, for debugging.
+# set -e
+
 #
 ## Apache gets grumpy about PID files pre-existing
 #rm -f /usr/local/apache2/logs/apache2.pid
