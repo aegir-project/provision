@@ -86,8 +86,17 @@ class DbService extends Service implements ServiceInterface
             $this->creds['pass'] = '';
         }
 
-        $this->dsn = sprintf("%s:host=%s;port=%s", 'mysql',  $this->creds['host'], $this->creds['port']);
+        $this->dsn = sprintf("%s:host=%s;port=%s", $this->creds['scheme'],  $this->creds['host'], $this->creds['port']);
 
+    }
+
+    /**
+     * Return the driver string to use for a site's DSN.
+     *
+     * @return string
+     */
+    private function getDriverName() {
+        return 'mysql';
     }
 
     /**
@@ -215,7 +224,7 @@ class DbService extends Service implements ServiceInterface
             $this->creds['port'] = '3306';
         }
     
-        $this->dsn = sprintf("%s:host=%s;port=%s;dbname=%s", $this::SERVICE_TYPE,  $this->creds['host'], $this->creds['port'], $this->subscription->properties['db_name']);
+        $this->dsn = sprintf("%s:host=%s;port=%s;dbname=%s", $this->getDriverName(),  $this->creds['host'], $this->creds['port'], $this->subscription->properties['db_name']);
     
         try {
             $this->connect();
