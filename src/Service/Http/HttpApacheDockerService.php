@@ -10,6 +10,7 @@ namespace Aegir\Provision\Service\Http;
 
 use Aegir\Provision\Configuration;
 use Aegir\Provision\Context;
+use Aegir\Provision\Provision;
 use Aegir\Provision\Robo\ProvisionExecutor;
 use Aegir\Provision\Robo\ProvisionTasks;
 use Aegir\Provision\Robo\Task\Log;
@@ -22,6 +23,7 @@ use Psr\Log\LogLevel;
 use Robo\Task\Base\Exec;
 use Robo\Task\Docker\Run;
 use Robo\Tasks;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class HttpApacheDockerService
@@ -115,303 +117,96 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
         $directory = array_pop($path_parts);
         return $this->provider->getProperty('aegir_root') . DIRECTORY_SEPARATOR . 'platforms' . DIRECTORY_SEPARATOR . $directory;
     }
-  
+
+    /**
+     * Run when a server is verified.
+     *
+     * @return array
+     */
   public function verifyServer() {
-//      $tasks = [];
-//
-//      $provision = $this->getProvision();
-//      $robo = $this->getProvision()->getTasks();
-//      $provider = $this->provider;
-//      $build_dir = __DIR__ . DIRECTORY_SEPARATOR . '/ApacheDocker/';
-//
-//      // Write Apache configuration files.
-//      $tasks['Saved Apache configuration files.'] = function () use ($provision) {
-//          $this->writeConfigurations();
-//      };
-//
-//      // Build Docker image.
-//      $tasks['http.docker.build'] = $this->getProvision()->newTask()
-//          ->start('Building new Docker image for Apache...')
-//          ->execute(function () use ($provision, $build_dir) {
-//              return $this->getProvision()->getTasks()->taskDockerBuild($build_dir)
-//              ->tag($this->containerTag)
-//              ->option(
-//                  '-f',
-//                  __DIR__.DIRECTORY_SEPARATOR.'/ApacheDocker/http.Dockerfile'
-//              )
-//              ->option(
-//                  '--build-arg',
-//                  "AEGIR_SERVER_NAME={$this->provider->name}"
-//              )
-//              ->option('--build-arg', "AEGIR_UID=".posix_getuid())
-//              ->silent(!$this->getProvision()->getOutput()->isVeryVerbose())
-//              ->run()
-//              ->getExitCode()
-//          ;
-//      });
-//
-//      // Docker run
-//      $tasks['Run docker image.'] = $this->getProvision()->newTask()
-//          ->start('Running Apache docker image...')
-//          ->execute(function () use ($provision, $build_dir, $provider) {
-//
-//          // Check for existing container.
-//          $containerExists = $provision->getTasks()
-//              ->taskExec("docker ps -a -q -f name={$this->containerName}")
-//              ->silent(!$this->getProvision()->getOutput()->isVerbose())
-//              ->printOutput(false)
-//              ->storeState('container_id')
-//              ->taskFileSystemStack()
-//              ->defer(
-//                  function ($task, $state) use ($provision, $provider) {
-//                      $container = $state['container_id'];
-//                      if ($container) {
-//
-//                          //Check that it is running
-//                          $provision->getTasks()
-//                              ->taskExec("docker inspect -f '{{.State.Running}}' {$this->containerName}")
-//                              ->silent(!$provision->getOutput()->isVerbose())
-//                              ->printOutput(false)
-//                              ->storeState('running')
-//                              ->taskFileSystemStack()
-//                              ->defer(
-//                                  function ($task, $state) use ($provision, $provider) {
-//
-//                                      if ($state['running'] == 'true') {
-////                                          $provision->io()->successLite('Container is already running: ' . $this->containerName);
-//                                          // @TODO: Figure out how to change the "success" message of a task.
-////                                          $this->success('Container is already running: ' . $this->containerName);
-//                                      }
-//                                      // If not running, try to start it.
-//                                      else {
-//                                          $startResult = $provision->getTasks()
-//                                              ->taskExec("docker start {$this->containerName}")
-//                                              ->silent(!$provision->getOutput()->isVerbose())
-//                                              ->run()
-//                                          ;
-//
-//                                          if ($startResult->wasSuccessful()) {
-////                                              $provision->io()->successLite('Existing container found. Restarted container ' . $this->containerName);
-//                                          }
-//                                          else {
-////                                              $provision->io()->errorLite('Unable to restart docker container: ' . $this->containerName);
-//                                              throw new \Exception('Unable to restart docker container: ' . $this->containerName);
-//                                          }
-//                                      }
-//                                  })
-//                              ->run();
-//
-//                      }
-//
-//                      # Docker container not found. Start it.
-//                      else {
-//                          $configVolumeHost = $provision->getConfig()->get('config_path') . DIRECTORY_SEPARATOR . $this->provider->name;
-//                          $configVolumeGuest = $this->provider->getProperty('aegir_root') . '/config/' . $this->provider->name;
-//
-//                          $container = $provision->getTasks()->taskDockerRun($this->containerTag)
-//                              ->detached()
-//                              ->publish($this->getProperty('http_port'), 80)
-//                              ->name($this->containerName)
-//                              ->volume($configVolumeHost, $configVolumeGuest)
-//                              ->silent(!$provision->getOutput()->isVerbose())
-//                              ->interactive();
-//
-//                          // Lookup all subscribers (all platforms that use this web service) and map volumes for root.
-//                          foreach ($this->getAllSubscribers() as $platform) {
-//                              if (!empty($platform->getProperty('root'))) {
-//                                  $container->volume($platform->getProperty('root'), $this->mapContainerPath($platform->getProperty('root')));
-//                              }
-//                          }
-//
-//                          $result = $container->run();
-//
-//                          if (!$result->wasSuccessful()) {
-//                              throw new \Exception('Unable to run docker container: ' . $this->containerName);
-//                          }
-//                      }
-//                  }
-//              )
-//              ->run();
-//          if ($containerExists->wasSuccessful()) {
-//              $this->getProvision()->getLogger()->info('All processes completed successfully.');
-//          }
-//          else {
-//              throw new \Exception('Something went wrong.');
-//          }
-//      });
-//
-      $tasks['http.restart'] = $this->getProvision()->newTask()
+      $tasks = [];
+      $provision = $this->getProvision();
+
+      $is_docker_server = FALSE;
+      $compose_services = [];
+      $filename = $this->provider->getProperty('server_config_path') . DIRECTORY_SEPARATOR . 'docker-compose.yml';
+
+      // Load docker compose data from each docker service.
+      $this->provider->getServices();
+      foreach ($this->provider->getServices() as $type => $service) {
+          if ($service instanceof DockerServiceInterface) {
+              $compose_services[$type] = $service->dockerComposeService();
+              $compose_services[$type]['hostname'] = $this->provider->name . '.' . $type;
+          }
+      }
+
+      // If there are any docker services in this server create a
+      // docker-compose file.
+      $compose = array(
+          'version' => '2',
+          'services' => $compose_services,
+      );
+
+      // Write Apache configuration files.
+      $tasks['http.configuration'] = Provision::newTask()
+              ->start('Writing web server configuration...')
+              ->execute(function() {
+                  return $this->writeConfigurations()? 0: 1;
+              });
+
+      // Write docker-compose.yml file.
+      $tasks['docker.compose.write'] = Provision::newTask()
+          ->start('Generating docker-compose.yml file...')
+          ->success('Generating docker-compose.yml file... Saved to ' . $filename)
+          ->failure('Generating docker-compose.yml file... Saved to ' . $filename)
+          ->execute(function () use ($compose, $filename) {
+
+              $filename = $this->provider->getProperty('server_config_path') . DIRECTORY_SEPARATOR . 'docker-compose.yml';
+              $server_name = $this->provider->name;
+              $yml_prefix = <<<YML
+# Provision Docker Compose File
+# =============================
+# Server: $server_name
+#
+# $filename
+# 
+# DO NOT EDIT THIS FILE.
+# This file was automatically generated by Provision CLI.
+#
+# To re-generate this file, run the command:
+#
+#    provision verify $server_name
+#
+# Soon there will be an easy way for you to modify this file automatically.
+# THANKS!
+
+YML;
+              $yml_dump = $yml_prefix . Yaml::dump($compose, 5, 2);
+              $debug_message = 'Generated Docker Compose file: ' . PHP_EOL . $yml_dump;
+              $this->getProvision()->getTasks()->taskLog($debug_message, LogLevel::INFO)->run()->getExitCode();
+
+              $this->provider->fs->dumpFile($filename, $yml_dump);
+          });
+
+      // Run docker-compose up -d --build
+      $tasks['docker.compose.up'] = Provision::newTask()
+          ->start("Running <info>docker-compose up -d</info> in <info>{$this->provider->server_config_path}</info> ...")
           ->execute(function() {
-              $this->restartService();
+
+              return Provision::getProvision()->getTasks()->taskExec('docker-compose')
+                  ->dir($this->provider->server_config_path)
+                  ->arg('up')
+                  ->arg('-d')
+                  ->arg('--build')
+                  ->silent(!$this->getProvision()->getOutput()->isVerbose())
+                  ->run()
+                  ->getExitCode()
+                  ;
           })
-          ->success('Restarted web service.')
-          ->failure('Unable to restart web service.');
-      
+      ;
+
       return $tasks;
   }
-
-  /**
-   * Override HttpService by adding 'docker exec' in front of it.
-   */
-  public function restartService() {
-      $this->properties['restart_command'] = "docker exec {$this->containerName}  {$this->properties['restart_command']}";
-      return parent::restartService();
-  }
-//
-//  public function verify2()
-//  {
-//      $provision = $this->getProvision();
-//      $provider = $this->provider;
-//      $logger = $this->getProvision()->getLogger();
-//      $collection = $this->getProvision()->getBuilder();
-//      $collection->addCode(
-//          function () use ($logger) {
-//              $this->writeConfigurations();
-//          }
-//      );
-//
-//      $tag = "provision/http:{$this->provider->name}";
-//      $name = "provision_http_{$this->provider->name}";
-//      $build_dir = __DIR__ . DIRECTORY_SEPARATOR . '/ApacheDocker/';
-//
-//      # Build Docker Image
-//      $collection->getCollection()->addCode(function () use ($provision, $tag, $name, $provider, $build_dir) {
-//          $buildResult = $this->getProvision()->getTasks()->taskDockerBuild($build_dir)
-//              ->tag($tag)
-//              ->option(
-//                  '-f',
-//                  __DIR__.DIRECTORY_SEPARATOR.'/ApacheDocker/http.Dockerfile'
-//              )
-//              ->option(
-//                  '--build-arg',
-//                  "AEGIR_SERVER_NAME={$this->provider->name}"
-//              )
-//              ->option('--build-arg', "AEGIR_UID=".posix_getuid())
-//              ->silent(!$this->getProvision()->getOutput()->isVerbose())
-//              ->run()
-//          ;
-//
-//          if ($buildResult->wasSuccessful()) {
-//              $provision->io()->successLite('Built new Docker image for Apache: ' . $tag);
-//          }
-//          else {
-//              $provision->io()->errorLite('Unable to build docker container with tag: ' . $tag);
-//              throw new \Exception('Unable to build docker container with tag: ' . $tag);
-//          }
-//      }, 'docker-build');
-//
-//      # Run Docker Image
-//      $collection->getCollection()->addCode(function () use ($provision, $tag, $name, $provider) {
-//
-//          // Check for existing container.
-//          $containerExists = $provision->getTasks()
-//              ->taskExec("docker ps -a -q -f name={$name}")
-//                    ->silent(!$this->getProvision()->getOutput()->isVerbose())
-//                  ->printOutput(false)
-//                  ->storeState('container_id')
-//              ->taskFileSystemStack()
-//                  ->defer(
-//                      function ($task, $state) use ($provision, $tag, $name, $provider) {
-//                          $container = $state['container_id'];
-//                          if ($container) {
-//
-//                              //Check that it is running
-//                              $provision->getTasks()
-//                                  ->taskExec("docker inspect -f '{{.State.Running}}' {$name}")
-//                                      ->silent(!$provision->getOutput()->isVerbose())
-//                                      ->printOutput(false)
-//                                      ->storeState('running')
-//                                  ->taskFileSystemStack()
-//                                      ->defer(
-//                                          function ($task, $state) use ($provision, $tag, $name, $provider) {
-//
-//                                              if ($state['running'] == 'true') {
-//                                                  $provision->io()->successLite('Container is already running: ' . $name);
-//                                              }
-//                                              // If not running, try to start it.
-//                                              else {
-//                                                  $startResult = $provision->getTasks()
-//                                                      ->taskExec("docker start {$name}")
-//                                                      ->silent(!$provision->getOutput()->isVerbose())
-//                                                      ->run()
-//                                                  ;
-//
-//                                                  if ($startResult->wasSuccessful()) {
-//                                                      $provision->io()->successLite('Existing container found. Restarted container ' . $name);
-//                                                  }
-//                                                  else {
-//                                                      $provision->io()->errorLite('Unable to restart docker container: ' . $name);
-//                                                      throw new \Exception('Unable to restart docker container: ' . $name);
-//                                                  }
-//                                              }
-//                                          })
-//                                  ->run();
-//
-//                          }
-//
-//                          # Docker container not found. Start it.
-//                          else {
-//                              $configVolumeHost = $provision->getConfig()->get('config_path') . DIRECTORY_SEPARATOR . $this->provider->name . DIRECTORY_SEPARATOR . '/apache';
-//                              $configVolumeGuest = $this->provider->getProperty('aegir_root') . '/config/' . $this->provider->name . DIRECTORY_SEPARATOR . '/apache';
-//
-//                              $result = $provision->getTasks()->taskDockerRun($tag)
-//                                  ->detached()
-//                                  ->publish(80)
-//                                  ->name($name)
-//                                  ->volume($configVolumeHost, $configVolumeGuest)
-//                                  ->silent(!$provision->getOutput()->isVerbose())
-//                                  ->interactive()
-//                                  ->run();
-//
-//                              if ($result->wasSuccessful()) {
-//                                  $provision->io()->successLite('Running Docker image ' . $tag);
-//                              }
-//                              else {
-//                                  $provision->io()->errorLite('Unable to run docker container: ' . $name);
-//                                  throw new \Exception('Unable to run docker container: ' . $name);
-//                              }
-//                          }
-//                      }
-//                  )
-//              ->run();
-//          if ($containerExists->wasSuccessful()) {
-//              $this->getProvision()->getLogger()->info('All processes completed successfully.');
-//          }
-//          else {
-//              throw new \Exception('Something went wrong.');
-//          }
-//      });
-//
-//      $collection->getCollection()->addCode(function () use ($provision, $tag, $name, $provider) {
-
-//          $this->getProvision()->application->console->runCollection($);
-//          $provision->io()->customLite('Waiting for godot...', '𝙋');
-//          $provision->io()->progressStart();
-//
-//
-//          sleep(1);
-//          $provision->io()->progressAdvance();
-//
-//          sleep(1);
-//          $provision->io()->progressAdvance();
-//
-//          sleep(1);
-//          $provision->io()->progressAdvance();
-//
-//          sleep(1);
-//          $provision->io()->progressAdvance();
-//
-//          sleep(1);
-//          $provision->io()->progressAdvance();
-//          sleep(1);
-//
-//          $provision->io()->progressFinish();
-//
-    
-//      });
-//      return $collection;
-//  }
-
 
     /**
      * Return the docker image name to use for this service.
@@ -420,12 +215,20 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
      */
     public function dockerImage()
     {
-        return 'aegir/web';
+        return 'aegir/web:' . $this->provider->name;
     }
 
     public function dockerComposeService(){
         return [
             'image'  => $this->dockerImage(),
+            'build' => [
+                'context' => __DIR__ . DIRECTORY_SEPARATOR . 'ApacheDocker',
+                'dockerfile' => 'http.Dockerfile',
+                'args' => [
+                    "AEGIR_UID" => $this->getProvision()->getConfig()->get('aegir_uid'),
+                    "AEGIR_SERVER_NAME" => $this->provider->name,
+                ],
+            ],
             'restart'  => 'always',
             'ports'  => array(
                 $this->getProperty('http_port') . ':80',
@@ -451,7 +254,7 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
         $volumes = array();
 
         $config_path_host = $config_path_container = $this->provider->getProperty('server_config_path');
-        $volumes[] = "{$config_path_host}:/var/aegir/config/server_{$this->provider->name}:z";
+        $volumes[] = "{$config_path_host}:/var/aegir/config/{$this->provider->name}:z";
 
 //        $platforms_path_host = $platforms_path_container = d()->http_platforms_path;
 //
