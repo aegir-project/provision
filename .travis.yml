@@ -102,5 +102,5 @@ script:
   - provision verify server_master
 
   - docker ps
-  - docker logs provision_http_server_master
-  - docker exec provision_http_server_master sudo apache2ctl -S
+  - docker logs servermaster_http_1
+  - docker exec servermaster_http_1 sudo apache2ctl -S
