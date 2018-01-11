@@ -59,9 +59,9 @@ script:
     --restart_command="sudo apache2ctl graceful"
 
   - provision services server_master add db -n
-    --service_type=mysql
-    --master_db="mysql://root:root@0.0.0.0:3307"
-    --db_grant_all_hosts=0
+    --service_type=mysqlDocker
+    --master_db="mysql://root:root@db:3306"
+    --db_grant_all_hosts=1
 
   - provision services server_master
 
