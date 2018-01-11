@@ -433,7 +433,7 @@ location ^~ /admin {
 ### Avoid caching /civicrm* and protect it from bots.
 ### Support i18n path prefixes, ex: /fr/civicrm*.
 ###
-location ~* ^/(\w\w/?)civicrm {
+location ~* ^/(\w\w/)?civicrm {
   if ($is_bot) {
     return 403;
   }
