@@ -22,6 +22,12 @@ ls -la /etc/apache2/conf-enabled
 echo "𝙋𝙍𝙊 ║ Checking folder  $AEGIR_ROOT/config"
 ls -la $AEGIR_ROOT/config/
 
+echo "𝙋𝙍𝙊 ║ Checking folder  $AEGIR_ROOT"
+ls -la $AEGIR_ROOT
+
+echo "𝙋𝙍𝙊 ║ Checking folder  $AEGIR_ROOT/platforms"
+ls -la $AEGIR_ROOT/platforms
+
 echo "𝙋𝙍𝙊 ║ Checking folder $AEGIR_ROOT/config/$AEGIR_SERVER_NAME:"
 ls -la $AEGIR_ROOT/config/$AEGIR_SERVER_NAME
 
