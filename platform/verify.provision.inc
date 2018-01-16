@@ -89,7 +89,9 @@ function drush_provision_drupal_pre_provision_verify() {
       $composer_directory = d()->repo_path;
     }
 
-    // Step 2: If composer directory is missing ./vendor, run composer install.
+    // Step 2: Run composer install if composer.json is present.
+    // If drush option provision-composer-install-on-every-verify is set to
+    // false, only run `composer-install` if ./vendor directory is missing.
     if (isset($composer_directory) && (!file_exists($composer_directory . DIRECTORY_SEPARATOR . 'vendor') || drush_get_option('provision-composer-install-on-every-verify', TRUE))) {
 
       // @TODO: We should make this command more dynamic. For example, if we know the platform is for production, we should use --no-dev option.
