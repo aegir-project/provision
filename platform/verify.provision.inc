@@ -80,6 +80,48 @@ function drush_provision_drupal_pre_provision_verify() {
       }
     }
 
+    // Detect composer-based platform and run composer install if it has not been run yet.
+    // Step 1: Look for composer directory. Could be Drupal root. Could be the git repo_root.
+    if (provision_file()->exists(d()->root . DIRECTORY_SEPARATOR . 'composer.json')->status()) {
+      $composer_directory = d()->root;
+    }
+    elseif (provision_file()->exists(d()->repo_path . DIRECTORY_SEPARATOR . 'composer.json')->status()) {
+      $composer_directory = d()->repo_path;
+    }
+
+    // Step 2: If composer directory is missing ./vendor, run composer install.
+    if (isset($composer_directory) && (!file_exists($composer_directory . DIRECTORY_SEPARATOR . 'vendor') || drush_get_option('provision-composer-install-on-every-verify', TRUE))) {
+
+      // @TODO: We should make this command more dynamic. For example, if we know the platform is for production, we should use --no-dev option.
+      // Composer Install command: Do not interact, do not show download progress.
+      $composer_command = 'composer install --no-interaction --no-progress';
+      drush_log(dt("Running command @command", array(
+        '@command' => $composer_command
+      )), 'ok');
+      $start = time();
+
+      // @TODO: Implement Symfony Process component for line-by-line output logging.
+      if (drush_shell_cd_and_exec($composer_directory, $composer_command)) {
+        $stop = time();
+
+        $output = implode("\n", drush_shell_exec_output());
+        $log_status = strpos($output, 'Warning:') === FALSE? 'success': 'warning';
+
+        drush_log($output, $log_status);
+        drush_log(dt(strpos($output, 'Warning:') . "Command ran successfully in @times: @command", array(
+          '@command' => $composer_command,
+          '@time' => $stop - $start,
+        )), $log_status);
+      }
+      else {
+        drush_log(implode("\n", drush_shell_exec_output()), 'error');
+        drush_set_error('DRUSH_COMPOSER_ERROR', dt('The composer command failed in @dir: @command', array(
+          '@dir' => $composer_directory,
+          '@command' => $composer_command,
+        )));
+      }
+    }
+
     // Re-set the ROOT PATH for Drush.
     // In cases where we just build the platform Drush would have cleared this value.
     // See Drush commit 3b74d40b1228f022464b92243c16127eb613c2df
