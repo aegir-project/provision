@@ -41,6 +41,7 @@ class Config extends ProvisionConfig
         $this->set('php_version', PHP_VERSION);
         $this->set('php_ini', get_cfg_var('cfg_file_path'));
         $this->set('script', $this->getProvisionScript());
+        $this->set('interactive_task_sleep', 500);
 
         $os_string = explode(' ', php_uname('v'));
         $os = array_shift($os_string);

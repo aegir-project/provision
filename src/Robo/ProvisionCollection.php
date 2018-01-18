@@ -55,7 +55,8 @@ class ProvisionCollection extends Collection {
 
                 // If being run interactively, pause momentarily to let user read start message, and replace start message with success or fail.
                 if (strpos($name, 'logging.') !== 0 && $this->getProvision()->getInput()->isInteractive()) {
-                    sleep(1);
+                    $this->getProvision()->getConfig()->get('interactive_task_sleep', 500);
+                    usleep($this->getProvision()->getConfig()->get('interactive_task_sleep', 500));
                 }
 
                 // ROBO
