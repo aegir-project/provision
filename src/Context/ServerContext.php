@@ -8,6 +8,7 @@ use Aegir\Provision\Property;
 use Aegir\Provision\Provision;
 use Aegir\Provision\Service\DockerServiceInterface;
 use Psr\Log\LogLevel;
+use Robo\ResultData;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
@@ -99,21 +100,28 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
     /**
      * Run a shell command on this server.
      *
-     * @TODO: Run remote commands correctly.
-     *
      * @param $cmd
      * @return string
      * @throws \Exception
      */
-    public function shell_exec($cmd) {
-        $output = '';
-        $exit = 0;
-        exec($cmd, $output, $exit);
+    public function shell_exec($cmd, $dir = NULL, $return = 'output') {
+        $cwd = getcwd();
+        $effective_wd = $dir? $dir:
+            $this->getProperty('server_config_path');
 
-        if ($exit != 0) {
+        $this->getProvision()->getLogger()->debug('Running command [{command}] in directory [{dir}]', [
+            'command' => $cmd,
+            'dir' => $effective_wd,
+        ]);
+
+        chdir($effective_wd);
+        exec($cmd, $output, $exit);
+        chdir($cwd);
+
+        if ($exit != ResultData::EXITCODE_OK) {
             throw new \Exception("Command failed: $cmd");
         }
 
-        return implode("\n", $output);
+        return ${$return};
     }
 }

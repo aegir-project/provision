@@ -72,10 +72,9 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
             ->option('password', $this->creds['pass'], '=')
             ->getCommand()
         ;
-        $this->getProvision()->getLogger()->debug('Running ' . $command);
-        $output = shell_exec($command);
+        $output = $this->provider->shell_exec($command);
 
-        if (trim($output) != 'mysqld is alive') {
+        if (trim($output[0]) != 'mysqld is alive') {
             throw new \PDOException("Unable to connect to database container using the command: " . $command);
         }
     }
@@ -104,12 +103,7 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
             ->getCommand();
         ;
 
-        $this->getProvision()->getLogger()->debug('Running ' . $command);
-        exec($command, $output, $exit);
-
-        if ($exit != 0) {
-            throw new RuntimeException("Command exited with a non-zero exit status [{$exit}]: {$command}");
-        }
+        $output = $this->provider->shell_exec($command);
 
         return new PDODummy($output);
     }
@@ -131,9 +125,7 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
             ->option('execute', 'SHOW TABLES')
             ->getCommand();
 
-        exec($command, $output, $exit);
-
-        return $exit == ResultData::EXITCODE_OK;
+        return $this->provider->shell_exec($command, NULL, 'exit') == ResultData::EXITCODE_OK;
     }
 
     /**
