@@ -41,9 +41,10 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
 
         // if the user entered no port, don't add ports array. If we do, a random public port is assigned.
         // We don't typically want this for db servers.
-        if (!empty($this->getProperty('db_port'))) {
-            $compose['ports'][] = $this->getProperty('db_port') . ':3306';
+        try {
+          $compose['ports'][] = $this->getProperty('db_port') . ':3306';
         }
+        catch (\Exception $e) {}
 
         return $compose;
     }
