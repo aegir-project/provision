@@ -64,18 +64,20 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
      * @throws \Exception
      */
     function connect() {
+
+        //@TODO: Detect if server can connect first, then do the loop.
         $command = $this->getProvision()->getTasks()->taskExec('docker-compose exec db')
             ->arg('mysqladmin')
             ->arg('ping')
             ->option('host', 'db', '=')
             ->option('user', $this->creds['user'], '=')
             ->option('password', $this->creds['pass'], '=')
-            ->getCommand()
-        ;
-        $output = $this->provider->shell_exec($command);
+            ->getCommand();
 
-        if (trim($output[0]) != 'mysqld is alive') {
-            throw new \PDOException("Unable to connect to database container using the command: " . $command);
+        while (!$this->getProvision()->getTasks()->taskExec("$command > /dev/null 2>&1")
+            ->run()->wasSuccessful()) {
+            sleep(3);
+            $this->getProvision()->getLogger()->info('Waiting for MySQL to become available...');
         }
     }
 
