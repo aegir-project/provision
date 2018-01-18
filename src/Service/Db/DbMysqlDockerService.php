@@ -6,6 +6,7 @@ use Aegir\Provision\Common\DockerContainerTrait;
 use Aegir\Provision\Context;
 use Aegir\Provision\Provision;
 use Aegir\Provision\Service\DockerServiceInterface;
+use Robo\ResultData;
 use Symfony\Component\Console\Exception\RuntimeException;
 
 /**
@@ -55,6 +56,112 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
             // 'MYSQL_ROOT_USER' => 'root',
             'MYSQL_ROOT_PASSWORD' => $this->creds['pass'],
         );
+    }
+
+    /**
+     * Attempt to connect to the database server using $this->creds
+     * @return \PDO
+     * @throws \Exception
+     */
+    function connect() {
+        $command = $this->getProvision()->getTasks()->taskExec('docker-compose exec db')
+            ->arg('mysqladmin')
+            ->arg('ping')
+            ->option('host', 'db', '=')
+            ->option('user', $this->creds['user'], '=')
+            ->option('password', $this->creds['pass'], '=')
+            ->getCommand()
+        ;
+        $this->getProvision()->getLogger()->debug('Running ' . $command);
+        $output = shell_exec($command);
+
+        if (trim($output) != 'mysqld is alive') {
+            throw new \PDOException("Unable to connect to database container using the command: " . $command);
+        }
+    }
+
+    /**
+     * Override parent::query() to use `mysql` command directly in the container instead of PDO.
+     * @param $query
+     */
+    function query($query) {
+        $args = func_get_args();
+        array_shift($args);
+        if (isset($args[0]) and is_array($args[0])) { // 'All arguments in one array' syntax
+            $args = $args[0];
+        }
+        $this->ensure_connected();
+        $this->query_callback($args, TRUE);
+        $query = preg_replace_callback($this::PROVISION_QUERY_REGEXP, array($this, 'query_callback'), $query);
+
+        $command = $this->getProvision()->getTasks()->taskExec('docker-compose exec db')
+            ->arg('mysql')
+            ->arg('-B')
+            ->option('host', 'db', '=')
+            ->option('user', $this->creds['user'], '=')
+            ->option('password', $this->creds['pass'], '=')
+            ->option('execute', $query, '=')
+            ->getCommand();
+        ;
+
+        $this->getProvision()->getLogger()->debug('Running ' . $command);
+        exec($command, $output, $exit);
+
+        if ($exit != 0) {
+            throw new RuntimeException("Command exited with a non-zero exit status [{$exit}]: {$command}");
+        }
+
+        return new PDODummy($output);
+    }
+
+    /**
+     * Override for parent::database_exists because we can't use PDO.
+     *
+     * @param $name
+     * @return bool
+     */
+    function database_exists($name) {
+
+        $command = $this->getProvision()->getTasks()->taskExec('docker-compose exec db')
+            ->arg('mysql')
+            ->option('host', 'db', '=')
+            ->option('user', $this->creds['user'], '=')
+            ->option('password', $this->creds['pass'], '=')
+            ->option('database', $name, '=')
+            ->option('execute', 'SHOW TABLES')
+            ->getCommand();
+
+        exec($command, $output, $exit);
+
+        return $exit == ResultData::EXITCODE_OK;
+    }
+
+    /**
+     * Overrides parent::query_callback so we can avoid using PDO::quote();
+     *
+     * This is legacy Aegir code... I had to change the numbers for the substr also, not sure why.
+     *
+     * @deprecated
+     */
+    function query_callback($match, $init = FALSE) {
+        static $args = NULL;
+        if ($init) {
+            $args = $match;
+            return;
+        }
+
+        switch ($match[1]) {
+            case '%d': // We must use type casting to int to convert FALSE/NULL/(TRUE?)
+                return (int) array_shift($args); // We don't need db_escape_string as numbers are db-safe
+            case '%s':
+                return substr(mysql_escape_string(array_shift($args)), 0);
+            case '%%':
+                return '%';
+            case '%f':
+                return (float) array_shift($args);
+            case '%b': // binary data
+                return mysql_escape_string(array_shift($args));
+        }
     }
 
 //
