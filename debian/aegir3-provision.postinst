@@ -51,6 +51,19 @@ case "$1" in
         # fix permissions on installed directories
         chown aegir:aegir "$VARLIB"
 
+        db_get "aegir/composer_version"
+
+        if [ "$COMPOSER_VERSION" = "stable" ]; then
+              # Install composer.
+              COMPOSER_HOME="$HOME/.composer"
+              curl -sS https://getcomposer.org/installer | php
+              mv composer.phar /usr/local/bin/composer
+
+              # Add composer's bin dir to the $PATH.
+              # TODO: This should be made idempotent.
+              echo "export PATH=\"\$HOME/.composer/vendor/bin:\$PATH\"" >>  ~aegir/.bashrc
+        fi
+
         db_get "aegir/drush_version"
         DRUSH_VERSION="$RET"
 
@@ -88,16 +101,8 @@ case "$1" in
 
           else  # Drush versions prior to 8 aren't available as .phar's.
 
-              # Install composer.
-              COMPOSER_HOME="$HOME/.composer"
-              curl -sS https://getcomposer.org/installer | php
-              mv composer.phar /usr/local/bin/composer
-
               # Install Drush.
               su -c "composer global require drush/drush:$DRUSH_VERSION" aegir
-
-              # Add composer's bin dir to the $PATH.
-              echo "export PATH=\"\$HOME/.composer/vendor/bin:\$PATH\"" >>  ~aegir/.bashrc
 
               # Rename an old drush executable.
               if [ -f /usr/local/bin/drush ]; then
