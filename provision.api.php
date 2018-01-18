@@ -34,6 +34,17 @@
  *   avoid having restores error out during operations such as cloning, migrating, and restoring from
  *   backup.  Default is FALSE.
  *
+ * provision_composer_install_platforms
+ *   Run composer install during a platform's verify task.
+ *   Default is TRUE.
+ *
+ * provision_composer_install_command
+ *   The composer command to run on platform verify.
+ *   Default is 'composer install --no-interaction --no-progress --no-dev'.
+ *
+ * provision_composer_install_platforms_verify_always
+ *   Run composer install even if the vendor dir already extsts.
+ *   Default is TRUE.
  */
 
 /**
