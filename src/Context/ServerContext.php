@@ -100,7 +100,10 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
     /**
      * Run a shell command on this server.
      *
-     * @param $cmd
+     * @param $cmd string The command to run
+     * @param $dir string The directory to run the command in. Defaults to this server's config path.
+     * @param $return string What to return. Can be 'output' or 'exit'.
+     *
      * @return string
      * @throws \Exception
      */
@@ -109,7 +112,7 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
         $effective_wd = $dir? $dir:
             $this->getProperty('server_config_path');
 
-        $this->getProvision()->getLogger()->debug('Running command [{command}] in directory [{dir}]', [
+        $this->getProvision()->getLogger()->info('Running command [{command}] in directory [{dir}]', [
             'command' => $cmd,
             'dir' => $effective_wd,
         ]);
@@ -118,8 +121,10 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
         exec($cmd, $output, $exit);
         chdir($cwd);
 
+        $response = implode("\n", $output);
+
         if ($exit != ResultData::EXITCODE_OK) {
-            throw new \Exception("Command failed: $cmd");
+            throw new \Exception("Command failed: $cmd | Output: ");
         }
 
         return ${$return};
