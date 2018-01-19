@@ -60,11 +60,14 @@ class ProvisionStyle extends DrupalStyle {
 
         $app_name = Provision::APPLICATION_FUN_NAME;
 
-        $message = "{$app_name} {$icon} {$op}";
+        $task_word = 'Task';
+        $message = "{$app_name} {$icon} {$task_word} {$op}";
         $timestamp = date('r');
-        $message_suffix = "{$timestamp} ┊ {$task_id}";
+        $message_suffix = $task_id;
         $spaces = $this::MAX_LINE_LENGTH - strlen($message . $message_suffix) - 2;
         $message .= str_repeat(' ', $spaces) . $message_suffix;
+        $message .= "\n" . $timestamp;
+
 
         $this->autoPrependBlock();
         $this->block(
