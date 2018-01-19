@@ -447,6 +447,18 @@ location ^~ /civicrm {
 }
 
 ###
+### Avoid caching /civicrm* and protect it from bots on a multi-lingual site
+###
+location ~* ^/\w\w/civicrm {
+  if ( $is_bot ) {
+    return 403;
+  }
+  access_log off;
+  set $nocache_details "Skip";
+  try_files $uri @drupal;
+}
+
+###
 ### Support for audio module.
 ###
 location ^~ /audio/download {
