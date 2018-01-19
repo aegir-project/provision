@@ -90,7 +90,7 @@ class Service implements BuilderAwareInterface
      */
     public function verify() {
         $method = 'verify' . ucfirst($this->getContext()->type);
-        $this->getProvision()->getLogger()->info("Running method {method} on class {class}", [
+        $this->getProvision()->getLogger()->debug("Running method {method} on class {class}", [
             'method' => $method,
             'class' => get_class($this),
         ]);
