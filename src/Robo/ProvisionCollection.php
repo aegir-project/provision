@@ -43,12 +43,15 @@ class ProvisionCollection extends Collection {
                 /** @var \Aegir\Provision\Task $task */
                 $task = $this->getConfig()->get($name);
 
-                if ($this->getProvision()->getOutput()->isVerbose()) {
-                    $this->getProvision()->io()->taskInfoBlock($name, 'start');
-                }
-
-                // Show starting message.
+                // If task is not in "logging" group
                 if (strpos($name, 'logging.') !== 0) {
+
+                    // If -v flag is used, show task start indicator.
+                    if ($this->getProvision()->getOutput()->isVerbose()) {
+                        $this->getProvision()->io()->taskInfoBlock($name, 'started');
+                    }
+
+                    // Show starting message.
                     $start_message = !empty($task->start)? $task->start: $name;
                     $this->getProvision()->io()->customLite($start_message , '☐');
                 }
