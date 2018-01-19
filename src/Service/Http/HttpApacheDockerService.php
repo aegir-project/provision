@@ -311,7 +311,7 @@ YML;
         $platforms = $this->getProvision()->getAllPlatforms();
         foreach ($platforms as $platform) {
             if ($platform->getSubscription('http')->server->name == $this->provider->name) {
-                $volumes[] = $platform->getProperty('root') . ':' . $this->mapContainerPath($platform->getProperty('root'));
+                $volumes[] = $platform->getProperty('root') . ':' . $this->mapContainerPath($platform->getProperty('root')) . ':z';
             }
         }
 
