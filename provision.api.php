@@ -22,8 +22,9 @@
  * provision_apache_conf_suffix
  *   Set to TRUE to generate apache vhost files with a .conf suffix, default FALSE.
  *   This takes advantage of the IncludeOptional statment introduced in Apache 2.3.6.
- *   WARNING: After turning this on you need to re-verify all your sites, then then servers,
+ *   WARNING: After turning this on you need to re-verify all your sites, then servers,
  *   and then cleanup the old configfiles (those without the .conf suffix).
+ *   Or run: `rename s/$/.conf/ /var/aegir/config/server_master/apache/vhost.d/*` for each server.
  *
  * provision_create_local_settings_file
  *   Create a site 'local.settings.php' file if one isn't found, default TRUE.
