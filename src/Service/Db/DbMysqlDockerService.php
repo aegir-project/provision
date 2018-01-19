@@ -165,13 +165,16 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
             case '%d': // We must use type casting to int to convert FALSE/NULL/(TRUE?)
                 return (int) array_shift($args); // We don't need db_escape_string as numbers are db-safe
             case '%s':
-                return substr(mysql_escape_string(array_shift($args)), 0);
+                # TODO: Remove the need for escaping at all. We have very limited number of queries, we don't need this.
+//                return substr(mysql_real_escape_string(array_shift($args)), 0);
+                return substr(array_shift($args), 0);
             case '%%':
                 return '%';
             case '%f':
                 return (float) array_shift($args);
             case '%b': // binary data
-                return mysql_escape_string(array_shift($args));
+                return array_shift($args);
+//                return mysql_real_escape_string(array_shift($args));
         }
     }
 
