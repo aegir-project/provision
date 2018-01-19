@@ -144,7 +144,13 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
             ->option('execute', 'SHOW TABLES')
             ->getCommand();
 
-        return $this->provider->shell_exec($command, NULL, 'exit') == ResultData::EXITCODE_OK;
+        try {
+            return $this->provider->shell_exec($command, NULL, 'exit') == ResultData::EXITCODE_OK;
+        }
+        catch (\Exception $e) {
+            return FALSE;
+        }
+
     }
 
     /**
