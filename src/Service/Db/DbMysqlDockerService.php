@@ -63,9 +63,10 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
      * @return \PDO
      * @throws \Exception
      */
-    function connect() {
+    function connect()
+    {
+        $start = time();
 
-        //@TODO: Detect if server can connect first, then do the loop.
         $command = $this->getProvision()->getTasks()->taskExec('docker-compose exec db')
             ->arg('mysqladmin')
             ->arg('ping')
@@ -74,9 +75,25 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
             ->option('password', $this->creds['pass'], '=')
             ->getCommand();
 
-        while (!$this->getProvision()->getTasks()->taskExec("$command > /dev/null 2>&1")
-            ->run()->wasSuccessful()) {
-            sleep(3);
+        // If it runs early enough, the docker exec doesn't work at all, throwing an exception.
+        // Loop until we're *not* throwing exceptions because the command failed.
+        $timeout = $this->getProvision()->getConfig()->get('database_wait_timeout', 30);
+        while (true) {
+            try {
+                $this->provider->shell_exec($command);
+                break;
+            } catch (\Exception $e) {
+                print '.';
+
+                if (time() - $start > $timeout) {
+                    throw new \Exception('Timed out waiting for database Docker container.');
+                }
+            }
+        }
+
+        // Loop until output of command is 'mysqld is alive'
+        while ('mysqld is alive' != trim(implode("\n", $this->provider->shell_exec($command)))) {
+            sleep(1);
             $this->getProvision()->getLogger()->info('Waiting for MySQL to become available...');
         }
     }
