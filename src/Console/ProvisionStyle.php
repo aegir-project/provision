@@ -2,6 +2,7 @@
 
 namespace Aegir\Provision\Console;
 
+use Aegir\Provision\Provision;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -30,6 +31,50 @@ class ProvisionStyle extends DrupalStyle {
         parent::__construct($input, $output);
     }
 
+    public function taskInfoBlock($task_id, $op, $status = 'none') {
+
+
+        switch ($op) {
+            case 'started':
+            default:
+                $bg = 'blue';
+                $fg = 'white';
+                $icon = '▷';
+                $op = ucfirst($op);
+                break;
+            case 'completed':
+                $bg = 'black';
+                $fg = 'green';
+                $icon = '🏁';
+                $op = ucfirst($op);
+                break;
+
+            case 'failed':
+                $bg = 'black';
+                $fg = 'red';
+                $icon = '🔥';
+                $op = ucfirst($op);
+                break;
+
+        }
+
+        $app_name = Provision::APPLICATION_FUN_NAME;
+
+        $message = "{$app_name} {$icon} {$op}";
+        $timestamp = date('r');
+        $message_suffix = "{$timestamp} ┊ {$task_id}";
+        $spaces = $this::MAX_LINE_LENGTH - strlen($message . $message_suffix) - 2;
+        $message .= str_repeat(' ', $spaces) . $message_suffix;
+
+        $this->autoPrependBlock();
+        $this->block(
+            $message,
+            NULL,
+            "bg=$bg;fg=$fg",
+            '  ',
+            TRUE
+        );
+    }
 
     public function commandBlock($message) {
         $this->autoPrependBlock();
