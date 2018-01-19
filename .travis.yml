@@ -97,6 +97,9 @@ script:
   - sudo rm -rf /home/travis/hostmaster
 
   - provision verify platform_hostmaster -v
+
+  - ls -la /home/travis/hostmaster
+
   - provision verify hostmaster -v
   
   - provision verify server_master
