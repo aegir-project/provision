@@ -137,21 +137,17 @@ class Service implements BuilderAwareInterface
      * @return bool
      */
     protected function restartService() {
-        if (empty($this->properties['restart_command'])) {
-            return TRUE;
+        if (empty($this->getProperty('restart_command'))) {
+            throw new \Exception('Unable to restart service: There is no restart_command specified.');
         }
         else {
-            $task = $this->getProvision()->getTasks()->taskExec($this->getProperty('restart_command'))
-                ->silent(!$this->getProvision()->getOutput()->isVerbose())
-            ;
 
-            /** @var \Robo\Result $result */
-            $result = $task->run();
-            if (!$result->wasSuccessful()) {
-                throw new \Exception('Unable to restart service using command: ' . $this->getProperty('restart_command'));
-            }
-            else {
+            try {
+                $this->provider->shell_exec($this->getProperty('restart_command'));
                 return TRUE;
+            }
+            catch (\Exception $e) {
+                throw new \Exception('Unable to restart service: ' . $e->getMessage());
             }
         }
     }
@@ -263,7 +259,18 @@ class Service implements BuilderAwareInterface
             throw new \Exception("Property '$name' on service '$this->type' does not exist.");
         }
     }
-    
+
+    /**
+     * Set a specific property.
+     *
+     * @param $name
+     * @return mixed
+     * @throws \Exception
+     */
+    public function setProperty($name, $value) {
+        $this->properties[$name] = $value;
+    }
+
     /**
      * Return the SERVICE_TYPE
      *
