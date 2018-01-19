@@ -11,18 +11,11 @@ namespace Aegir\Provision\Service\Http;
 use Aegir\Provision\Configuration;
 use Aegir\Provision\Context;
 use Aegir\Provision\Provision;
-use Aegir\Provision\Robo\ProvisionExecutor;
-use Aegir\Provision\Robo\ProvisionTasks;
-use Aegir\Provision\Robo\Task\Log;
 use Aegir\Provision\Service\DockerServiceInterface;
 use Aegir\Provision\Service\Http\Apache\Configuration\PlatformConfiguration;
 use Aegir\Provision\Service\Http\Apache\Configuration\SiteConfiguration;
 use Aegir\Provision\Service\Http\ApacheDocker\Configuration\ServerConfiguration;
-use Behat\Mink\Exception\Exception;
 use Psr\Log\LogLevel;
-use Robo\Task\Base\Exec;
-use Robo\Task\Docker\Run;
-use Robo\Tasks;
 use Symfony\Component\Yaml\Yaml;
 
 /**
