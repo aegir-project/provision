@@ -37,8 +37,8 @@ class ProvisionStyle extends DrupalStyle {
         switch ($op) {
             case 'started':
             default:
-                $bg = 'blue';
-                $fg = 'white';
+                $bg = 'black';
+                $fg = 'blue';
                 $icon = ' ▷';
                 $op = ucfirst($op);
                 break;
