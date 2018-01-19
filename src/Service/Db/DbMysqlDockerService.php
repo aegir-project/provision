@@ -65,6 +65,11 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
      */
     function connect()
     {
+        // If already connected, just return TRUE;
+        static $connected;
+        if ($connected) {
+            return TRUE;
+        }
         $start = time();
 
         $command = $this->getProvision()->getTasks()->taskExec('docker-compose exec db')
@@ -96,6 +101,9 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
             sleep(1);
             $this->getProvision()->getLogger()->info('Waiting for MySQL to become available...');
         }
+
+        // Set static variable to indicate we are connected.
+        $connected = TRUE;
     }
 
     /**
