@@ -39,7 +39,7 @@ class ProvisionStyle extends DrupalStyle {
             default:
                 $bg = 'blue';
                 $fg = 'white';
-                $icon = '▷';
+                $icon = ' ▷';
                 $op = ucfirst($op);
                 break;
             case 'completed':
