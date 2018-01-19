@@ -58,9 +58,21 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
 
       $this->containerName = "provision_http_{$this->provider->name}";
       $this->containerTag = "provision/http:{$this->provider->name}";
+
+      $this->setProperty('restart_command', $this->apache_restart_cmd());
   }
 
-  /**
+    /**
+     * The web restart command is fixed to our service because we have the Dockerfile and build the container.
+     *
+     * @return string
+     */
+    public static function apache_restart_cmd() {
+        return 'docker-compose exec http sudo apache2ctl graceful';
+    }
+
+
+    /**
    * Returns array of Configuration classes for this service.
    *
    * @see Provision_Service_http_apache::init_server();
@@ -203,6 +215,12 @@ YML;
                   ;
           })
       ;
+      // Run docker-compose up -d --build
+      $tasks['docker.http.restart'] = Provision::newTask()
+          ->start('Restarting web service...')
+          ->execute(function() {
+              return $this->restartService()? 0: 1;
+          });
 
       return $tasks;
   }
@@ -228,6 +246,7 @@ YML;
 
         $tasks['docker.compose.write'] = $server_tasks['docker.compose.write'];
         $tasks['docker.compose.up'] = $server_tasks['docker.compose.up'];
+        $tasks['docker.http.restart'] = $server_tasks['docker.http.restart'];
 
         return $tasks;
     }
