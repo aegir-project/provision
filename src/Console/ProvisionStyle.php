@@ -17,6 +17,7 @@ class ProvisionStyle extends DrupalStyle {
     protected $input;
     protected $lineLength;
 
+    const TERMINAL_COMMAND_INDICATOR = '$';
 
     public function __construct(InputInterface $input, OutputInterface $output)
     {
@@ -32,7 +33,7 @@ class ProvisionStyle extends DrupalStyle {
 
     public function commandBlock($message) {
         $this->autoPrependBlock();
-        $this->customLite($message, '<fg=yellow>$</>', '');
+        $this->customLite($message, '<fg=yellow>' . self::TERMINAL_COMMAND_INDICATOR . '</>', '');
     }
 
     public function outputBlock($message) {
