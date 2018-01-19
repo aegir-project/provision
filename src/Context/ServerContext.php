@@ -112,16 +112,21 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
         $effective_wd = $dir? $dir:
             $this->getProperty('server_config_path');
 
-        $this->getProvision()->getLogger()->info('Running command [{command}] in directory [{dir}]', [
-            'command' => $cmd,
-            'dir' => $effective_wd,
-        ]);
+        if ($this->getProvision()->getOutput()->isVerbose()) {
+            $this->getProvision()->io()->commandBlock($cmd);
+        }
+
 
         chdir($effective_wd);
         exec($cmd, $output, $exit);
         chdir($cwd);
 
-        $response = implode("\n", $output);
+
+        if (!empty($output)){
+            if ($this->getProvision()->getOutput()->isVerbose()) {
+                $this->getProvision()->io()->outputBlock($output);
+            }
+        }
 
         if ($exit != ResultData::EXITCODE_OK) {
             throw new \Exception("Command failed: $cmd");
