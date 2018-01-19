@@ -124,7 +124,7 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
         $response = implode("\n", $output);
 
         if ($exit != ResultData::EXITCODE_OK) {
-            throw new \Exception("Command failed: $cmd | Output: ");
+            throw new \Exception("Command failed: $cmd");
         }
 
         return ${$return};
