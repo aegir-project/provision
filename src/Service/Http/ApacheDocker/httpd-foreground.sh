@@ -17,7 +17,7 @@ tree /etc/apache2
 
 # Add symlink from our server's config to the apache include target.
 echo "𝙋𝙍𝙊 ║ Checking folder  $AEGIR_ROOT/config"
-tree $AEGIR_ROOT
+tree $AEGIR_ROOT/config
 
 # If there are no platforms assigned to the server, docker.conf and the docker config folders are never created.
 #if [ ! -f '$AEGIR_ROOT/config/$AEGIR_SERVER_NAME/apacheDocker.conf' ]; then
