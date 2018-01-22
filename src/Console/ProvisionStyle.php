@@ -79,9 +79,9 @@ class ProvisionStyle extends DrupalStyle {
         );
     }
 
-    public function commandBlock($message) {
+    public function commandBlock($message, $directory = '') {
         $this->autoPrependBlock();
-        $this->customLite($message, '<fg=yellow>' . self::TERMINAL_COMMAND_INDICATOR . '</>', '');
+        $this->customLite($message, $directory . ' <fg=yellow>' . self::TERMINAL_COMMAND_INDICATOR . '</>', '');
     }
 
     public function outputBlock($message) {
