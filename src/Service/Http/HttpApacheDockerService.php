@@ -202,16 +202,7 @@ YML;
       $tasks['docker.compose.up'] = Provision::newTask()
           ->start("Running <info>docker-compose up -d</info> in <info>{$this->provider->server_config_path}</info> ...")
           ->execute(function() {
-
-              return Provision::getProvision()->getTasks()->taskExec('docker-compose')
-                  ->dir($this->provider->server_config_path)
-                  ->arg('up')
-                  ->arg('-d')
-                  ->arg('--build')
-                  ->silent(!$this->getProvision()->getOutput()->isVerbose())
-                  ->run()
-                  ->getExitCode()
-                  ;
+              return $this->provider->shell_exec('docker-compose up -d', NULL, 'exit');
           })
       ;
       // Run docker-compose up -d --build
