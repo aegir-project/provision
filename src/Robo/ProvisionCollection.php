@@ -96,15 +96,15 @@ class ProvisionCollection extends Collection {
 
                     $failure_message .= ' <fg=red>FAILED</> in <fg=yellow>' . number_format($timer->elapsed(), 2) . 's</>';
 
-                    if ($this->getProvision()->getOutput()->isVerbose()) {
-                        $this->getProvision()->io()->taskInfoBlock($name, 'failed');
-                    }
-
                     $this->getProvision()->io()->errorLite($failure_message);
 
                     // If task failed and there is getMessage, it is the exception message.
                     if (!empty($result->getMessage())) {
-                        $this->getProvision()->io()->customLite($result->getMessage(), '   - ');
+                        $this->getProvision()->io()->outputBlock($result->getMessage());
+                    }
+
+                    if ($this->getProvision()->getOutput()->isVerbose()) {
+                        $this->getProvision()->io()->taskInfoBlock($name, 'failed');
                     }
 
                     $this->fail();
