@@ -61,7 +61,13 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
      * @return string
      */
     public static function apache_restart_cmd() {
-        return 'docker-compose exec http sudo apache2ctl graceful';
+//        return 'docker-compose exec http sudo apache2ctl graceful';
+
+        // @TODO: restarting apache gracefully results in zero downtime, but we need to restart the
+        // container to ensure volumes are mounted properly. If the root folder of the platform is deleted,
+        // docker will not see a new folder in that path in it's place. The container must restart to
+        // see the volume path.
+        return 'docker-compose restart http';
     }
 
 
