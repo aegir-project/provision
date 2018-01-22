@@ -88,16 +88,23 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
                 $this->provider->shell_exec($command);
                 break;
             } catch (\Exception $e) {
-                print '.';
+                // If docker client can't connect, bail and pass the error through to the exeception.
+                if (strpos($e->getMessage(), "Couldn't connect to Docker daemon") !== FALSE) {
+                    throw new \Exception($e->getMessage());
+                }
 
+                // If we hit our timeout while waiting for container, bail out.
                 if (time() - $start > $timeout) {
                     throw new \Exception('Timed out waiting for database Docker container.');
                 }
+
+                // Otherwise, print a waiting dot and try again.
+                print '.';
             }
         }
 
         // Loop until output of command is 'mysqld is alive'
-        while ('mysqld is alive' != trim(implode("\n", $this->provider->shell_exec($command)))) {
+        while ('mysqld is alive' != trim($this->provider->shell_exec($command))) {
             sleep(1);
             $this->getProvision()->getLogger()->info('Waiting for MySQL to become available...');
         }

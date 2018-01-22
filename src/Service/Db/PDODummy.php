@@ -15,7 +15,7 @@ class PDODummy {
 
     function __construct($lines)
     {
-        $this->lines = $lines;
+        $this->lines = explode(PHP_EOL, $lines);
     }
 
     /**
