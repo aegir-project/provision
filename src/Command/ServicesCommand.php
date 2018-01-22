@@ -212,6 +212,18 @@ class ServicesCommand extends Command
                 ]));
             }
 
+            if ($this->context->hasService($service)) {
+                $icon = Provision::ICON_EDIT;
+                $this->getProvision()->io()->block(
+                    "  {$icon}  Editing service {} provded by {$this->context->name} ",
+                    NULL,
+                    'bg=black;fg=blue',
+                    NULL,
+                    TRUE
+                );
+            }
+
+
             // Then ask for all options.
             $properties = $this->askForServiceProperties($service, $service_type);
 
@@ -276,7 +288,7 @@ class ServicesCommand extends Command
                 $property = Provision::newProperty($property);
             }
 
-            if ($this->context->getService($service)->getProperty($name)) {
+            if ($this->context->hasService($service) && $this->context->getService($service)->getProperty($name)) {
                 $property->default = $this->context->getService($service)->getProperty($name);
             }
 
