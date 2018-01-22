@@ -28,7 +28,7 @@ class Service implements BuilderAwareInterface
     public $properties;
     
     /**
-     * @var Context;
+     * @var ServerContext;
      * The context that provides this service.
      *
      * @see \Aegir\Provision\Context
