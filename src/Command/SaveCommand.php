@@ -244,6 +244,11 @@ class SaveCommand extends Command
 //        $command = 'drush provision-save '.$input->getArgument('context_name');
 //        $this->process($command);
 
+        // If editing a context, exit here.
+        if (!$this->newContext) {
+            return;
+        }
+
         // Offer to add services.
         if ($context_type == 'server') {
             $this->askForServices();
