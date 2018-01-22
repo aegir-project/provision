@@ -4,6 +4,7 @@ namespace Aegir\Provision\Command;
 
 use Aegir\Provision\Application;
 use Aegir\Provision\Command;
+use Aegir\Provision\Console\ProvisionStyle;
 use Aegir\Provision\Context;
 use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
@@ -190,7 +191,7 @@ class SaveCommand extends Command
             $this->context = new $class($input->getArgument('context_name'), $this->getProvision(), $options);
         }
         else {
-            $icon = $this->getProvision()->io()::ICON_EDIT;
+            $icon = ProvisionStyle::ICON_EDIT;
             $this->getProvision()->io()->block(
                 "  {$icon}  Editing context {$this->context->name} ",
                 NULL,
