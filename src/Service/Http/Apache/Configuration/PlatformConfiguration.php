@@ -26,7 +26,6 @@ class PlatformConfiguration extends Configuration {
     
     function process()
     {
-        $this->data['http_port']['root'] = 'yeahhh';
         parent::process();
     }
 }

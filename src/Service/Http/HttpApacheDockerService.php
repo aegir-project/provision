@@ -124,19 +124,19 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
 
       // Replace platform's stored root with server's root.
       if ($this->context instanceof Context\SiteContext) {
-          $root_on_host = $this->context->platform->getProperty('root');
+          $root_on_host = $this->context->platform->getProperty('document_root');
       }
       elseif ($this->context instanceof Context\PlatformContext) {
-          $root_on_host = $this->context->getProperty('root');
+          $root_on_host = $this->context->getProperty('document_root');
       }
       else {
           return;
       }
 
-      $config->data['root'] = $this->mapContainerPath($root_on_host);
+      $config->data['document_root'] = $this->mapContainerPath($root_on_host);
 
       if ($this->context->type == 'site' && isset($config->data['uri'])) {
-          $config->data['site_path'] = $config->data['root'] . '/sites/' . $config->data['uri'];
+          $config->data['site_path'] = $config->data['document_root'] . '/sites/' . $config->data['uri'];
       }
       
       // When running in docker, internal port is always 80.

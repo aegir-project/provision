@@ -44,6 +44,14 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
         // Load "web_server" context.
         // There is no need to validate for $this->properties['web_server'] because the config system does that.
 //        $this->web_server = $application->getContext($this->properties['web_server']);
+
+        // Make document root property absolute, and set to root if there is no docroot.
+        if ($this->getProperty('document_root')) {
+            $this->setProperty('document_root', $this->getProperty('root') . DIRECTORY_SEPARATOR . $this->getProperty('document_root'));
+        }
+        else {
+            $this->setProperty('document_root', $this->getProperty('root'));
+        }
     }
     
     static function option_documentation()
