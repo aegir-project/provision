@@ -107,29 +107,44 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
      * @return string
      * @throws \Exception
      */
-    public function shell_exec($cmd, $dir = NULL, $return = 'output') {
+    public function shell_exec($command, $dir = NULL, $return = 'stdout') {
         $cwd = getcwd();
+        $original_command = $command;
+
+        $tmpdir = sys_get_temp_dir() . '/provision';
+        if (!$this->fs->exists($tmpdir)){
+            $this->fs->mkdir($tmpdir);
+        }
+
+        $datestamp = date('c');
+        $tmp_output_file = tempnam($tmpdir, 'task.' . $datestamp . '.output.');
+        $tmp_error_file = tempnam($tmpdir, 'task.' . $datestamp . '.error.');
+
         $effective_wd = $dir? $dir:
             $this->getProperty('server_config_path');
 
         if ($this->getProvision()->getOutput()->isVerbose()) {
-            $this->getProvision()->io()->commandBlock($cmd);
+            $this->getProvision()->io()->commandBlock($command, $effective_wd);
         }
 
+        // Output and Errors to files.
+        $command .= "> $tmp_output_file 2> $tmp_error_file";
 
         chdir($effective_wd);
-        exec($cmd, $output, $exit);
+        exec($command, $output, $exit);
         chdir($cwd);
 
+        $stderr = file_get_contents($tmp_error_file);
+        $stdout = file_get_contents($tmp_output_file);
 
-        if (!empty($output)){
+        if (!empty($stdout)){
             if ($this->getProvision()->getOutput()->isVerbose()) {
-                $this->getProvision()->io()->outputBlock($output);
+                $this->getProvision()->io()->outputBlock($stdout);
             }
         }
 
         if ($exit != ResultData::EXITCODE_OK) {
-            throw new \Exception("Command failed: $cmd");
+            throw new \Exception($stderr);
         }
 
         return ${$return};
