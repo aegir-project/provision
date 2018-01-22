@@ -44,6 +44,14 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
         // Load "web_server" context.
         // There is no need to validate for $this->properties['web_server'] because the config system does that.
 //        $this->web_server = $application->getContext($this->properties['web_server']);
+
+        // Make document root property absolute, and set to root if there is no docroot.
+        if ($this->getProperty('document_root')) {
+            $this->setProperty('document_root', $this->getProperty('root') . DIRECTORY_SEPARATOR . $this->getProperty('document_root'));
+        }
+        else {
+            $this->setProperty('document_root', $this->getProperty('root'));
+        }
     }
     
     static function option_documentation()
@@ -51,7 +59,7 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
         $options = [
             'root' =>
                 Provision::newProperty()
-                    ->description('platform: path to the Drupal installation. You may use a relative or absolute path.')
+                    ->description('platform: path to the source code for this platform. You may use a relative or absolute path. May be different from document root.')
                     ->defaultValue(getcwd())
                     ->required(TRUE)
                     ->validate(function($path) {
@@ -134,6 +142,11 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
                         
                         return $git_url;
                     })
+            ,
+            'document_root' =>
+                Provision::newProperty()
+                    ->description('platform: Relative path to the "document root" in your source code. Leave blank if docroot is the root.')
+                    ->required(FALSE)
             ,
         ];
 

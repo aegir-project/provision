@@ -41,6 +41,7 @@ class Config extends ProvisionConfig
         $this->set('php_version', PHP_VERSION);
         $this->set('php_ini', get_cfg_var('cfg_file_path'));
         $this->set('script', $this->getProvisionScript());
+        $this->set('interactive_task_sleep', 500);
 
         $os_string = explode(' ', php_uname('v'));
         $os = array_shift($os_string);
@@ -49,6 +50,7 @@ class Config extends ProvisionConfig
         
         $this->set('aegir_root', $this->getHomeDir());
         $this->set('script_user', $this->getScriptUser());
+        $this->set('script_uid', $this->getScriptUid());
 
         // If user has a ~/.config path, use it.
         if (file_exists($this->getHomeDir() . '/.config')) {
@@ -234,5 +236,12 @@ class Config extends ProvisionConfig
     static public function getScriptUser() {
         $real_script_user = posix_getpwuid(posix_geteuid());
         return $real_script_user['name'];
+    }
+
+    /**
+     * Determine the user running provision.
+     */
+    static public function getScriptUid() {
+        return posix_getuid();
     }
 }

@@ -112,7 +112,6 @@ class HttpService extends Service implements ServiceInterface {
         ;
         $tasks['http.site.service'] =  $this->getProvision()->newTask()
             ->start('Restarting web server...')
-            ->failure('Unable to restart web service.')
             ->execute(function () {
                 return $this->restartService()? 0: 1;
             })

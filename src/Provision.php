@@ -7,6 +7,7 @@ use Aegir\Provision\Console\Config;
 use Aegir\Provision\Commands\ExampleCommands;
 
 use Aegir\Provision\Console\ConsoleOutput;
+use Aegir\Provision\Console\ProvisionStyle;
 use Aegir\Provision\Robo\ProvisionCollectionBuilder;
 use Aegir\Provision\Robo\ProvisionExecutor;
 use Aegir\Provision\Robo\ProvisionTasks;
@@ -53,7 +54,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      * The path within config_path to write contexts to.
      */
     const CONTEXTS_PATH = 'contexts';
-    
+
     use BuilderAwareTrait;
     use ConfigAwareTrait;
     use ContainerAwareTrait;
@@ -83,7 +84,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     /**
      * @var \Aegir\Provision\Context[]
      */
-    private $contexts = [];
+    public $contexts = [];
     
     /**
      * @var array[]
@@ -264,12 +265,12 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     /**
      * Provide access to DrupalStyle object.
      *
-     * @return \Drupal\Console\Core\Style\DrupalStyle
+     * @return ProvisionStyle
      */
     public function io()
     {
         if (!$this->io) {
-            $this->io = new DrupalStyle($this->input(), $this->output());
+            $this->io = new ProvisionStyle($this->input(), $this->output());
         }
         return $this->io;
     }
@@ -322,7 +323,27 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         }
         return $servers;
     }
-    
+
+
+    /**
+     * Return all available contexts.
+     *
+     * @return array|Context
+     */
+    public function getAllPlatforms() {
+        $platforms = [];
+        $context_files = $this->getAllContexts();
+        if (empty($context_files)) {
+            throw new \Exception('No contexts found. Use `provision save` to create one.');
+        }
+        foreach ($context_files as $context) {
+            if ($context->type == 'platform') {
+                $platforms[$context->name] = $context;
+            }
+        }
+        return $platforms;
+    }
+
     /**
      * Get a simple array of all contexts, for use in an options list.
      * @return array

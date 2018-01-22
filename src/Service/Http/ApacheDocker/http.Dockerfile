@@ -38,7 +38,8 @@ RUN apt-get -qq -o Dpkg::Use-Pty=0 update && DEBIAN_FRONTEND=noninteractive apt-
   git-core \
   unzip \
   wget \
-  mysql-client
+  mysql-client \
+  tree
 
 RUN echo "Creating user aegir with UID $AEGIR_UID and GID $AEGIR_GID and HOME $AEGIR_ROOT ..."
 

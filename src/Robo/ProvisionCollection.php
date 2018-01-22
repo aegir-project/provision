@@ -43,19 +43,23 @@ class ProvisionCollection extends Collection {
                 /** @var \Aegir\Provision\Task $task */
                 $task = $this->getConfig()->get($name);
 
-                if ($this->getProvision()->getOutput()->isVerbose()) {
-                    $this->getProvision()->io()->customLite('STARTED ' . $name, '○');
-                }
-
-                // Show starting message.
+                // If task is not in "logging" group
                 if (strpos($name, 'logging.') !== 0) {
+
+                    // If -v flag is used, show task start indicator.
+                    if ($this->getProvision()->getOutput()->isVerbose()) {
+                        $this->getProvision()->io()->taskInfoBlock($name, 'started');
+                    }
+
+                    // Show starting message.
                     $start_message = !empty($task->start)? $task->start: $name;
                     $this->getProvision()->io()->customLite($start_message , '☐');
                 }
 
                 // If being run interactively, pause momentarily to let user read start message, and replace start message with success or fail.
                 if (strpos($name, 'logging.') !== 0 && $this->getProvision()->getInput()->isInteractive()) {
-                    sleep(1);
+                    $this->getProvision()->getConfig()->get('interactive_task_sleep', 500);
+                    usleep($this->getProvision()->getConfig()->get('interactive_task_sleep', 500));
                 }
 
                 // ROBO
@@ -92,16 +96,17 @@ class ProvisionCollection extends Collection {
 
                     $failure_message .= ' <fg=red>FAILED</> in <fg=yellow>' . number_format($timer->elapsed(), 2) . 's</>';
 
+                    $this->getProvision()->io()->errorLite($failure_message);
+
+                    // If task failed and there is getMessage, it is the exception message.
+                    if (!empty($result->getMessage())) {
+                        $this->getProvision()->io()->outputBlock($result->getMessage());
+                    }
+
                     if ($this->getProvision()->getOutput()->isVerbose()) {
-                        $this->getProvision()->io()->errorLite('<options=bold>FAILED </> in' . $name);
+                        $this->getProvision()->io()->taskInfoBlock($name, 'failed');
                     }
-                    else {
-                        $this->getProvision()->io()->errorLite($failure_message);
-                        // If task failed and there is getMessage, it is the exception message.
-                        if (!empty($result->getMessage())) {
-                            $this->getProvision()->io()->customLite($result->getMessage(), '   - ');
-                        }
-                    }
+
                     $this->fail();
                     return $result;
                 }
@@ -121,11 +126,12 @@ class ProvisionCollection extends Collection {
 
                     $success_message .= ' <fg=yellow>' . number_format($timer->elapsed(), 2) . 's</>';
 
+                    $this->getProvision()->io()->successLite($success_message);
+
                     if ($this->getProvision()->getOutput()->isVerbose()) {
-                        $this->getProvision()->io()->successLite($success_message);
-                    }
-                    else {
-                        $this->getProvision()->io()->successLite($success_message);
+                        if ($this->getProvision()->getOutput()->isVerbose()) {
+                            $this->getProvision()->io()->taskInfoBlock($name, 'completed');
+                        }
                     }
                 }
             }

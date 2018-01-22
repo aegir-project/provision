@@ -4,6 +4,7 @@ namespace Aegir\Provision\Command;
 
 use Aegir\Provision\Application;
 use Aegir\Provision\Command;
+use Aegir\Provision\Console\ProvisionStyle;
 use Aegir\Provision\Context;
 use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
@@ -31,6 +32,11 @@ class SaveCommand extends Command
      * @var string
      */
     private $context_type;
+
+    /**
+     * @var bool
+     */
+    private $newContext = FALSE;
 
     /**
      * {@inheritdoc}
@@ -135,6 +141,8 @@ class SaveCommand extends Command
         // If this is a new context...
         if (empty($this->context)) {
 
+            $this->newContext = TRUE;
+
             // If context_type is still empty, throw an exception. Happens if using -n
             if (empty($context_type)) {
                 throw new \Exception('Option --context_type must be specified.');
@@ -175,13 +183,36 @@ class SaveCommand extends Command
                 exit(1);
             }
 
-
             $options = $this->askForContextProperties();
             $options['name'] = $this->context_name;
             $options['type'] = $this->context_type;
             
             $class = Context::getClassName($this->input->getOption('context_type'));
             $this->context = new $class($input->getArgument('context_name'), $this->getProvision(), $options);
+        }
+        else {
+            $icon = ProvisionStyle::ICON_EDIT;
+            $this->getProvision()->io()->block(
+                "  {$icon}  Editing context {$this->context->name} ",
+                NULL,
+                'bg=black;fg=blue',
+                NULL,
+                TRUE
+            );
+
+            // Save over existing contexts.
+            $this->newContext = FALSE;
+            $this->input->setOption('context_type', $this->context->type);
+            $properties = $this->askForContextProperties();
+
+            // Write over each property with new values.
+            foreach ($properties as $name => $value) {
+                $this->context->setProperty($name, $value);
+            }
+
+            $context_type = $this->context->type;
+            $this->input->setOption('context_type', $this->context->type);
+
         }
 
         // Delete context config.
@@ -199,12 +230,13 @@ class SaveCommand extends Command
         }
 
         foreach ($this->context->getProperties() as $name => $value) {
+            if ($name == 'services' || $name == 'service_subscriptions') {
+                continue;
+            }
             $value = is_array($value)? implode(', ', $value): $value;
             $rows[] = [$name, $value];
         }
-    
-    
-    
+
         $this->io->table(['Saving Context:', $this->context->name], $rows);
         
         if ($this->io->confirm("Write configuration for <fg=blue>{$this->context->type}</> context <fg=blue>{$this->context->name}</> to <fg=blue>{$this->context->config_path}</>?")) {
@@ -221,6 +253,11 @@ class SaveCommand extends Command
         }
 //        $command = 'drush provision-save '.$input->getArgument('context_name');
 //        $this->process($command);
+
+        // If editing a context, exit here.
+        if (!$this->newContext) {
+            return;
+        }
 
         // Offer to add services.
         if ($context_type == 'server') {
@@ -324,13 +361,18 @@ class SaveCommand extends Command
                 $property = Provision::newProperty($property);
             }
 
+            // If we are editing a context, override the default property.
+            if (!$this->newContext && $current_value = $this->context->getProperty($name)) {
+                $property->default = $current_value;
+            }
+
             // If option does not exist, ask for it.
             if (!empty($this->input->getOption($name))) {
                 $properties[$name] = $this->input->getOption($name);
                 $this->io->comment("Using option {$name}={$properties[$name]}");
             }
             else {
-                $properties[$name] = $this->io->ask("{$name}({$property->description})", $property->default, $property->validate);
+                $properties[$name] = $this->io->ask("{$name} ({$property->description})", $property->default, $property->validate);
             }
         }
         return $properties;

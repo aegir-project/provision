@@ -3,6 +3,7 @@
 namespace Aegir\Provision\Command;
 
 use Aegir\Provision\Command;
+use Aegir\Provision\Console\ProvisionStyle;
 use Aegir\Provision\Context;
 use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
@@ -212,6 +213,18 @@ class ServicesCommand extends Command
                 ]));
             }
 
+            if ($this->context->hasService($service)) {
+                $icon = ProvisionStyle::ICON_EDIT;
+                $this->getProvision()->io()->block(
+                    "  {$icon}  Editing service {} provded by {$this->context->name} ",
+                    NULL,
+                    'bg=black;fg=blue',
+                    NULL,
+                    TRUE
+                );
+            }
+
+
             // Then ask for all options.
             $properties = $this->askForServiceProperties($service, $service_type);
 
@@ -246,9 +259,9 @@ class ServicesCommand extends Command
 
         try {
             $this->context->config[$services_key][$service] = $service_info;
-            if (!empty($properties)) {
-                $this->context->config[$services_key][$service]['properties'] = $properties;
-            }
+            $this->context->config[$services_key][$service]['properties'] = $properties;
+
+            $this->context->setProperty($services_key, $this->context->config[$services_key]);
             $this->context->save();
             $this->io->success('Service saved to Context!');
         }
@@ -274,6 +287,10 @@ class ServicesCommand extends Command
             // Allows option_documentation to return array of strings for simple properties.
             if ( !$property instanceof Property) {
                 $property = Provision::newProperty($property);
+            }
+
+            if ($this->context->hasService($service) && $this->context->getService($service)->getProperty($name)) {
+                $property->default = $this->context->getService($service)->getProperty($name);
             }
 
             // If option does not exist, ask for it.

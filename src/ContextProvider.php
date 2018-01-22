@@ -64,6 +64,21 @@ class ContextProvider extends Context
             throw new \Exception("Service '$type' does not exist in the context '{$this->name}'.");
         }
     }
+
+    /**
+     * Whether or not this Server has a service.
+     *
+     * @param $type
+     * @return bool
+     */
+    public function hasService($type) {
+        if (isset($this->services[$type])) {
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
+    }
     
     /**
      * Return all services for this context.

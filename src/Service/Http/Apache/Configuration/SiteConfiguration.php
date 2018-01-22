@@ -29,10 +29,10 @@ class SiteConfiguration extends Configuration {
   function process() {
       parent::process();
       $this->data['http_port'] = $this->context->getSubscription('http')->service->getProperty('http_port');
-      $this->data['root'] = $this->context->platform->getProperty('root');
+      $this->data['document_root'] = $this->context->platform->getProperty('document_root');
       $this->data['uri'] = $this->context->getProperty('uri');
 
-      $this->data['site_path'] = $this->data['root'] . '/sites/' . $this->data['uri'];
+      $this->data['site_path'] = $this->data['document_root'] . '/sites/' . $this->data['uri'];
 
       $this->data['db_type'] = $this->context->getSubscription('db')->service->getType();
 
