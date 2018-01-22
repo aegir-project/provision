@@ -190,6 +190,14 @@ class SaveCommand extends Command
             $this->context = new $class($input->getArgument('context_name'), $this->getProvision(), $options);
         }
         else {
+            $icon = Provision::ICON_EDIT;
+            $this->getProvision()->io()->block(
+                "  {$icon}  Editing context {$this->context->name} ",
+                NULL,
+                'bg=black;fg=blue',
+                NULL,
+                TRUE
+            );
 
             // Save over existing contexts.
             $this->newContext = FALSE;
@@ -363,7 +371,7 @@ class SaveCommand extends Command
                 $this->io->comment("Using option {$name}={$properties[$name]}");
             }
             else {
-                $properties[$name] = $this->io->ask("{$name}({$property->description})", $property->default, $property->validate);
+                $properties[$name] = $this->io->ask("{$name} ({$property->description})", $property->default, $property->validate);
             }
         }
         return $properties;
