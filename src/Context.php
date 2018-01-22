@@ -427,6 +427,17 @@ class Context implements BuilderAwareInterface
     }
 
     /**
+     * Set a specific property.
+     *
+     * @param $name
+     * @return mixed
+     * @throws \Exception
+     */
+    public function setProperty($name, $value) {
+        $this->properties[$name] = $value;
+    }
+
+    /**
      * Saves the config class to file.
      *
      * @return bool

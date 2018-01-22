@@ -33,6 +33,11 @@ class SaveCommand extends Command
     private $context_type;
 
     /**
+     * @var bool
+     */
+    private $newContext = FALSE;
+
+    /**
      * {@inheritdoc}
      */
     protected function configure()
@@ -135,6 +140,8 @@ class SaveCommand extends Command
         // If this is a new context...
         if (empty($this->context)) {
 
+            $this->newContext = TRUE;
+
             // If context_type is still empty, throw an exception. Happens if using -n
             if (empty($context_type)) {
                 throw new \Exception('Option --context_type must be specified.');
@@ -175,13 +182,28 @@ class SaveCommand extends Command
                 exit(1);
             }
 
-
             $options = $this->askForContextProperties();
             $options['name'] = $this->context_name;
             $options['type'] = $this->context_type;
             
             $class = Context::getClassName($this->input->getOption('context_type'));
             $this->context = new $class($input->getArgument('context_name'), $this->getProvision(), $options);
+        }
+        else {
+
+            // Save over existing contexts.
+            $this->newContext = FALSE;
+            $this->input->setOption('context_type', $this->context->type);
+            $properties = $this->askForContextProperties();
+
+            // Write over each property with new values.
+            foreach ($properties as $name => $value) {
+                $this->context->setProperty($name, $value);
+            }
+
+            $context_type = $this->context->type;
+            $this->input->setOption('context_type', $this->context->type);
+
         }
 
         // Delete context config.
@@ -322,6 +344,11 @@ class SaveCommand extends Command
             // Allows option_documentation to return array of strings for simple properties.
             if ( !$property instanceof Property) {
                 $property = Provision::newProperty($property);
+            }
+
+            // If we are editing a context, override the default property.
+            if (!$this->newContext && $current_value = $this->context->getProperty($name)) {
+                $property->default = $current_value;
             }
 
             // If option does not exist, ask for it.
