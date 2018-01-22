@@ -108,5 +108,7 @@ script:
   # @TODO This fails right now.
   # - docker exec servermaster_http_1 sudo apache2ctl -S
 
+  # Adding this to see if it helps us get actual content.
+  - sleep 5
   - curl http://localhost
   - curl http://provision.local.computer
