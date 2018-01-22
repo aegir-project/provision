@@ -52,7 +52,8 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
       $this->containerName = "provision_http_{$this->provider->name}";
       $this->containerTag = "provision/http:{$this->provider->name}";
 
-      $this->setProperty('restart_command', $this->apache_restart_cmd());
+      $this->setProperty('restart_command', $this->default_restart_cmd());
+      $this->setProperty('web_group', $this->default_web_group());
   }
 
     /**
@@ -60,7 +61,7 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
      *
      * @return string
      */
-    public static function apache_restart_cmd() {
+    public static function default_restart_cmd() {
 //        return 'docker-compose exec http sudo apache2ctl graceful';
 
         // @TODO: restarting apache gracefully results in zero downtime, but we need to restart the
@@ -70,6 +71,32 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
         return 'docker-compose restart http';
     }
 
+    /**
+     * Return the name of the apache user group for the webserver.
+     * Docker is under our control, so this is not user configurable.
+     * @return string
+     */
+    public static function default_web_group() {
+        return 'www-data';
+    }
+
+
+
+    /**
+     * Implements Service::server_options()
+     *
+     * @return array
+     */
+    static function server_options()
+    {
+        return [
+            'http_port' => Provision::newProperty()
+                ->description('The port which the web service is running on.')
+                ->defaultValue(80)
+                ->required()
+            ,
+        ];
+    }
 
     /**
    * Returns array of Configuration classes for this service.
