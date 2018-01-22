@@ -29,6 +29,10 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
     public $type = 'server';
     const TYPE = 'server';
 
+    /**
+     * @var string
+     * The path to store the server's configuration files in.  ie. /var/aegir/config/server_master.
+     */
     public $server_config_path;
 
     /**
@@ -45,8 +49,15 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
     {
         // @TODO: Create a 'servers_path' to keep things nice and clean.
         parent::__construct($name, $provision, $options);
-        $this->server_config_path = $this->getProvision()->getConfig()->get('config_path') . DIRECTORY_SEPARATOR . $name;
-        $this->properties['server_config_path'] = $this->server_config_path;
+
+        // If server_config_path property is empty, generate it from provision config_path + server name.
+        if (empty($this->getProperty('server_config_path'))) {
+            $this->server_config_path = $this->getProvision()->getConfig()->get('config_path') . DIRECTORY_SEPARATOR . $name;
+            $this->setProperty('server_config_path', $this->server_config_path);
+        }
+        else {
+            $this->server_config_path = $this->getProperty('server_config_path');
+        }
 
         $this->fs = new Filesystem();
     }
@@ -84,7 +95,13 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
             'master_url' =>
                 Provision::newProperty()
                     ->description('server: Hostmaster URL')
+                    ->required(FALSE),
+
+            'server_config_path' =>
+                Provision::newProperty()
+                    ->description('server: The location to store the server\'s configuration files. If left empty, will be generated automatically.')
                     ->required(FALSE)
+            ,
         ];
     }
 
