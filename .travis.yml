@@ -94,8 +94,6 @@ script:
   - provision verify server_master -v
 
   # Docker creates the host path when docker run happens, in server verify.
-  - sudo rm -rf /home/travis/hostmaster
-
   - provision verify platform_hostmaster -v
 
   - ls -la /home/travis/hostmaster
@@ -110,4 +108,5 @@ script:
   # @TODO This fails right now.
   # - docker exec servermaster_http_1 sudo apache2ctl -S
 
+  - curl http://localhost
   - curl http://provision.local.computer
