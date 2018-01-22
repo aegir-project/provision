@@ -57,6 +57,10 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
         $uri = $this->getProperty('uri');
         $this->properties['site_path'] = "sites/{$uri}";
 
+        // If site_path property is empty, generate it from platform root + uri.
+        if (empty($this->getProperty('site_path'))) {
+            $this->setProperty('site_path', $this->platform->getConfig()->get('root') . DIRECTORY_SEPARATOR . $this->uri);
+        }
     }
 
     static function option_documentation()
@@ -72,6 +76,13 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
 //          'install_method' => 'site: How to install the site; default profile. When set to "profile" the install profile will be run automatically. Otherwise, an empty database will be created. Additional modules may provide additional install_methods.',
           'profile' => 'site: Drupal profile to use; default standard',
 //          'drush_aliases' => 'site: Comma-separated list of additional Drush aliases through which this site can be accessed.',
+
+            'site_path' =>
+                Provision::newProperty()
+                    ->description('site: The site configuration path (sites/domain.com). If left empty, will be generated automatically.')
+                    ->required(FALSE)
+            ,
+
         ];
     }
 
