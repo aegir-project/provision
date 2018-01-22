@@ -10,7 +10,7 @@ if (!$aegir_root && $server->aegir_root) {
 }
 ?>
 
-  DocumentRoot <?php print $this->root; ?>
+  DocumentRoot <?php print $document_root; ?>
 
   ServerName <?php print $this->uri; ?>
 
