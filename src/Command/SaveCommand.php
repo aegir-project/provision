@@ -221,12 +221,13 @@ class SaveCommand extends Command
         }
 
         foreach ($this->context->getProperties() as $name => $value) {
+            if ($name == 'services' || $name == 'service_subscriptions') {
+                continue;
+            }
             $value = is_array($value)? implode(', ', $value): $value;
             $rows[] = [$name, $value];
         }
-    
-    
-    
+
         $this->io->table(['Saving Context:', $this->context->name], $rows);
         
         if ($this->io->confirm("Write configuration for <fg=blue>{$this->context->type}</> context <fg=blue>{$this->context->name}</> to <fg=blue>{$this->context->config_path}</>?")) {
