@@ -450,7 +450,7 @@ class Context implements BuilderAwareInterface
         $dumper = new Dumper();
         
         try {
-            $fs->dumpFile($this->config_path, $dumper->dump($this->config, 10));
+            $fs->dumpFile($this->config_path, $dumper->dump($this->getProperties(), 10));
             return true;
         } catch (IOException $e) {
             return false;
