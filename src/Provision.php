@@ -55,11 +55,6 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      */
     const CONTEXTS_PATH = 'contexts';
 
-    /**
-     * Icons
-     */
-    const ICON_EDIT = '🖉';
-
     use BuilderAwareTrait;
     use ConfigAwareTrait;
     use ContainerAwareTrait;

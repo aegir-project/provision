@@ -190,7 +190,7 @@ class SaveCommand extends Command
             $this->context = new $class($input->getArgument('context_name'), $this->getProvision(), $options);
         }
         else {
-            $icon = Provision::ICON_EDIT;
+            $icon = $this->getProvision()->io()::ICON_EDIT;
             $this->getProvision()->io()->block(
                 "  {$icon}  Editing context {$this->context->name} ",
                 NULL,

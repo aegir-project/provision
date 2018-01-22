@@ -18,7 +18,14 @@ class ProvisionStyle extends DrupalStyle {
     protected $input;
     protected $lineLength;
 
-    const TERMINAL_COMMAND_INDICATOR = '$';
+    /**
+     * Icons
+     */
+    const ICON_EDIT = '🖉';
+    const ICON_START = '▷';
+    const ICON_FINISH = '🏁';
+    const ICON_FAILED = '🔥';
+    const ICON_COMMAND = '$';
 
     public function __construct(InputInterface $input, OutputInterface $output)
     {
@@ -39,20 +46,20 @@ class ProvisionStyle extends DrupalStyle {
             default:
                 $bg = 'black';
                 $fg = 'blue';
-                $icon = ' ▷';
+                $icon = ' ' . self::ICON_START;
                 $op = ucfirst($op);
                 break;
             case 'completed':
                 $bg = 'black';
                 $fg = 'green';
-                $icon = '🏁';
+                $icon = self::ICON_FINISH;
                 $op = ucfirst($op);
                 break;
 
             case 'failed':
                 $bg = 'black';
                 $fg = 'red';
-                $icon = '🔥';
+                $icon = self::ICON_FAILED;
                 $op = ucfirst($op);
                 break;
 
@@ -81,7 +88,7 @@ class ProvisionStyle extends DrupalStyle {
 
     public function commandBlock($message, $directory = '') {
         $this->autoPrependBlock();
-        $this->customLite($message, $directory . ' <fg=yellow>' . self::TERMINAL_COMMAND_INDICATOR . '</>', '');
+        $this->customLite($message, $directory . ' <fg=yellow>' . self::ICON_COMMAND . '</>', '');
     }
 
     public function outputBlock($message) {
