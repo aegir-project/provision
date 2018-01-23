@@ -94,6 +94,9 @@ script:
   - provision verify server_master -v
 
   # Docker creates the host path when docker run happens, in server verify.
+  # Platform verify uses drush make, which won't run if folder exists.
+  # @TODO: Figure out how to deal with this within provision.
+  - sudo rm -rf /home/travis/hostmaster
   - provision verify platform_hostmaster -v
 
   - ls -la /home/travis/hostmaster
