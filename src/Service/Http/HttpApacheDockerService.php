@@ -68,7 +68,9 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
         // container to ensure volumes are mounted properly. If the root folder of the platform is deleted,
         // docker will not see a new folder in that path in it's place. The container must restart to
         // see the volume path.
-        return 'docker-compose restart http';
+
+        // @TODO: docker-compose restart doesn't catch errors in the apache config! Another win for restarting apache, not the entire container.
+        return 'docker-compose exec http sudo apache2ctl graceful';
     }
 
     /**
