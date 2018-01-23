@@ -220,14 +220,18 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
                     ->start('Building platform from makefile...')
                     ->execute(function () {
                         $drush = realpath(__DIR__ . '/../../bin/drush');
-                        return $this->getProvision()->getTasks()->taskExec($drush)
+                        $command = $this->getProvision()->getTasks()->taskExec($drush)
                                 ->arg('make')
                                 ->arg($this->getProperty('makefile'))
                                 ->arg($this->getProperty('root'))
                                 ->silent(!$this->getProvision()->getOutput()->isVerbose())
-                                ->run()
-                                ->getExitCode()
-                                ;
+                                ->getCommand();
+
+                        if ($this->getProperty('make_working_copy')) {
+                            $command .= ' --working-copy --no-gitinfofile --no-gitinfofile --no-gitprojectinfo';
+                        }
+
+                        return $this->getService('http')->provider->shell_exec($command, NULL, 'exit');
                     });
 
             }
