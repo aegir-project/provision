@@ -108,9 +108,8 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
 
     
         $tasks['site.prepare'] = $this->getProvision()->newTask()
-            ->success('Prepared directories and settings file. NOT YET.')
-            ->failure('Failed to prepare directories.')
-            
+            ->start('Preparing Drupal site configuration...')
+
             /**
              * There are many ways to do this...
              * This way is very verbose and I cannot figure out how to quiet it down.
@@ -127,78 +126,43 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
                  * @see drush_provision_drupal_pre_provision_verify()
                  */
                 ->execute(function() {
-                    return 0;
-                    
-                    $uri = $this->getProperty('uri');
-                    $path = $this->platform->getProperty('root');
-    
+                    $docroot = $this->platform->getProperty('document_root');
+                    $site_path = $docroot . DIRECTORY_SEPARATOR . $this->getProperty('site_path');
+
                 // @TODO: These folders are how aegir works now. We might want to rethink what folders are created.
                     // Directories set to 755
                     $this->fs->mkdir([
-                        "$path/sites/$uri",
+                        "$site_path",
                         
                     ], 0755);
         
                     // Directories set to 02775
                     $this->fs->mkdir([
-                        "$path/sites/$uri/themes",
-                        "$path/sites/$uri/modules",
-                        "$path/sites/$uri/libraries",
+                        "$site_path/themes",
+                        "$site_path/modules",
+                        "$site_path/libraries",
                     ], 02775);
         
                     // Directories set to 02775
                     $this->fs->mkdir([
-                        "$path/sites/$uri/files",
-                        "$path/sites/$uri/files/tmp",
-                        "$path/sites/$uri/files/images",
-                        "$path/sites/$uri/files/pictures",
-                        "$path/sites/$uri/files/css",
-                        "$path/sites/$uri/files/js",
-                        "$path/sites/$uri/files/ctools",
-                        "$path/sites/$uri/files/imagecache",
-                        "$path/sites/$uri/files/locations",
-                        "$path/sites/$uri/files/styles",
-                        "$path/sites/$uri/private",
-                        "$path/sites/$uri/private/config",
-                        "$path/sites/$uri/private/config/sync",
-                        "$path/sites/$uri/private/files",
-                        "$path/sites/$uri/private/temp",
-                        "$path/sites/$uri/private/temp",
+                        "$site_path/files",
                     ], 02770);
                     
                     // Change certain folders to be in web server group.
-                    $this->fs->chgrp([
-                        "$path/sites/$uri/files",
-                        "$path/sites/$uri/files/tmp",
-                        "$path/sites/$uri/files/images",
-                        "$path/sites/$uri/files/pictures",
-                        "$path/sites/$uri/files/css",
-                        "$path/sites/$uri/files/js",
-                        "$path/sites/$uri/files/ctools",
-                        "$path/sites/$uri/files/imagecache",
-                        "$path/sites/$uri/files/locations",
-                        "$path/sites/$uri/files/styles",
-                        "$path/sites/$uri/private",
-                        "$path/sites/$uri/private/config",
-                        "$path/sites/$uri/private/config/sync",
-                        "$path/sites/$uri/private/files",
-                        "$path/sites/$uri/private/temp",
-                        "$path/sites/$uri/private/temp",
-                    ], $this->getSubscription('http')->service->getProperty('web_group'));
-                    
+                // @TODO: chgrp only works when running locally with apache.
+                // @TODO: Figure out a way to store host web group vs container web group, and get it working with docker web service.
+                // @TODO: Might want to do chgrp verification inside container?
+                    if ($this->platform->getService('http')->getType() == 'apache' || $this->platform->getService('http')->getType() == 'nginx') {
+                        $this->fs->chgrp([
+                            "$site_path/files",
+                        ], $this->platform->getService('http')->provider->getProperty('web_group'));
+                    }
                     // Copy Drupal's default settings.php file into place.
-                    $this->fs->copy("$path/sites/default/default.settings.php", "$path/sites/$uri/settings.php");
-                    
+                    $this->fs->copy("$docroot/sites/default/default.settings.php", "$site_path/settings.php");
+                    $this->fs->chmod("$site_path/settings.php", 02770);
+
                 });
-    
-        $tasks['site.settings'] = $this->getProvision()->newTask()
-            ->success('Provision did not write your settings.php automatically. You must do this yourself now. Use `provision status {name}` to view the correct credentials.')
-            ->failure('This wont fail, its a dummy placeholder.')
-            ->execute(function () {
-                return 0;
-            })
-            ;
-        
+
         // FROM verify.provision.inc  drush_provision_drupal_pre_provision_verify() line 118
 //        drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
 //        // This is the actual drupal provisioning requirements.
