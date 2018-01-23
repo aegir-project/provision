@@ -28,6 +28,8 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
   const SERVICE_TYPE = 'apacheDocker';
   const SERVICE_TYPE_NAME = 'Apache on Docker';
 
+  const DOCKER_COMPOSE_UP_COMMAND = 'docker-compose up -d --build --force-recreate';
+
 
     /**
    * @var string The name of this server's container.
@@ -228,10 +230,11 @@ YML;
           });
 
       // Run docker-compose up -d --build
+      $command = self::DOCKER_COMPOSE_UP_COMMAND;
       $tasks['docker.compose.up'] = Provision::newTask()
-          ->start("Running <info>docker-compose up -d --build</info> in <info>{$this->provider->server_config_path}</info> ...")
+          ->start("Running <info>{$command}</info> in <info>{$this->provider->server_config_path}</info> ...")
           ->execute(function() {
-              return $this->provider->shell_exec('docker-compose up -d --build', NULL, 'exit');
+              return $this->provider->shell_exec(self::DOCKER_COMPOSE_UP_COMMAND, NULL, 'exit');
           })
       ;
       // Run docker-compose up -d --build
