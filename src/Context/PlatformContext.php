@@ -46,12 +46,13 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
 //        $this->web_server = $application->getContext($this->properties['web_server']);
 
         // Make document root property absolute, and set to root if there is no docroot.
-        if ($this->getProperty('document_root')) {
+        if (!$this->fs->isAbsolutePath($this->getProperty('document_root')) && !empty($this->getProperty('document_root'))) {
             $this->setProperty('document_root', $this->getProperty('root') . DIRECTORY_SEPARATOR . $this->getProperty('document_root'));
         }
         else {
             $this->setProperty('document_root', $this->getProperty('root'));
         }
+        $this->getProperties();
     }
     
     static function option_documentation()
