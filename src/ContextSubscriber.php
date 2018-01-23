@@ -99,19 +99,4 @@ class ContextSubscriber extends Context
                 ->end()
             ->end();
     }
-
-    /**
-     * Whether or not this Server has a service.
-     *
-     * @param $type
-     * @return bool
-     */
-    public function hasService($type) {
-        if (isset($this->services[$type])) {
-            return TRUE;
-        }
-        else {
-            return FALSE;
-        }
-    }
 }

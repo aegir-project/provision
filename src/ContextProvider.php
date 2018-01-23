@@ -22,14 +22,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 class ContextProvider extends Context
 {
     const ROLE = 'provider';
-    
-    /**
-     * @var array
-     * A list of services provided by this context.
-     */
-    protected $services = [];
-    
-    
+
     /**
      * Load Service classes from config into Context.
      */
@@ -48,38 +41,7 @@ class ContextProvider extends Context
     public function getServices() {
         return $this->services;
     }
-    
-    /**
-     * Return a specific service provided by this context.
-     *
-     * @param $type
-     *
-     * @return \Aegir\Provision\Service
-     */
-    public function getService($type) {
-        if (isset($this->services[$type])) {
-            return $this->services[$type];
-        }
-        else {
-            throw new \Exception("Service '$type' does not exist in the context '{$this->name}'.");
-        }
-    }
 
-    /**
-     * Whether or not this Server has a service.
-     *
-     * @param $type
-     * @return bool
-     */
-    public function hasService($type) {
-        if (isset($this->services[$type])) {
-            return TRUE;
-        }
-        else {
-            return FALSE;
-        }
-    }
-    
     /**
      * Return all services for this context.
      *

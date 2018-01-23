@@ -37,7 +37,7 @@ class Context implements BuilderAwareInterface
 
     use BuilderAwareTrait;
     use ProvisionAwareTrait;
-    
+
     /**
      * @var string
      * Name for saving aliases and referencing.
@@ -71,7 +71,13 @@ class Context implements BuilderAwareInterface
      * init(), set defaults with setProperty().
      */
     protected $properties = [];
-    
+
+    /**
+     * @var array
+     * A list of services provided by or subscribed to by this context.
+     */
+    protected $services = [];
+
     /**
      * @var \Symfony\Component\Filesystem\Filesystem
      */
@@ -272,6 +278,38 @@ class Context implements BuilderAwareInterface
             'platform' => 'Platform',
             'site' => 'Site',
         ];
+    }
+
+
+    /**
+     * Return a specific service provided by this context.
+     *
+     * @param $type
+     *
+     * @return \Aegir\Provision\Service
+     */
+    public function getService($type) {
+        if (isset($this->services[$type])) {
+            return $this->services[$type];
+        }
+        else {
+            throw new \Exception("Service '$type' does not exist in the context '{$this->name}'.");
+        }
+    }
+
+    /**
+     * Whether or not this Server has a service.
+     *
+     * @param $type
+     * @return bool
+     */
+    public function hasService($type) {
+        if (isset($this->services[$type])) {
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
     }
 
     /**
