@@ -11,3 +11,8 @@ projects[hostmaster][type] = "profile"
 projects[hostmaster][download][type] = "git"
 projects[hostmaster][download][url] = "http://git.drupal.org/project/hostmaster.git"
 projects[hostmaster][download][branch] = "7.x-4.x"
+
+projects[hosting][type] = "profile"
+projects[hosting][download][type] = "git"
+projects[hosting][download][url] = "http://git.drupal.org/project/hosting.git"
+projects[hosting][download][branch] = "7.x-4.x"
