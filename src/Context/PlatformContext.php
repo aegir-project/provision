@@ -209,6 +209,7 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
             }
 
         }
+        // @TODO: I did get makefiles in git to work hosting_git-7.x-3.x. We can do it here as well.
         elseif ($this->getProperty('makefile')) {
 
             if ($this->fs->exists($this->getProperty('root'))) {
