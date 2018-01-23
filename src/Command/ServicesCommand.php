@@ -216,10 +216,10 @@ class ServicesCommand extends Command
             if ($this->context->hasService($service)) {
                 $icon = ProvisionStyle::ICON_EDIT;
                 $this->getProvision()->io()->block(
-                    "  {$icon}  Editing service {} provded by {$this->context->name} ",
+                    "{$icon} Editing service {$service} provded by server '{$this->context->name}'...",
                     NULL,
-                    'bg=black;fg=blue',
-                    NULL,
+                    'bg=black;fg=cyan',
+                    '  ',
                     TRUE
                 );
             }

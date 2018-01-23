@@ -21,7 +21,7 @@ class ProvisionStyle extends DrupalStyle {
     /**
      * Icons
      */
-    const ICON_EDIT = '🖉';
+    const ICON_EDIT = '✎';
     const ICON_START = '▷';
     const ICON_FINISH = '🏁';
     const ICON_FAILED = '🔥';
