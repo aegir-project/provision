@@ -287,7 +287,8 @@ YML;
                 'context' => __DIR__ . DIRECTORY_SEPARATOR . 'ApacheDocker',
                 'dockerfile' => 'http.Dockerfile',
                 'args' => [
-                    "AEGIR_UID" => $this->getProvision()->getConfig()->get('aegir_uid'),
+                    "AEGIR_UID" => $this->getProvision()->getConfig()->get('script_uid'),
+                    "APACHE_UID" => $this->getProvision()->getConfig()->get('web_user_uid'),
                     "AEGIR_SERVER_NAME" => $this->provider->name,
                 ],
             ],

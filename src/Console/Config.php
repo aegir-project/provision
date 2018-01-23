@@ -51,6 +51,9 @@ class Config extends ProvisionConfig
         $this->set('aegir_root', $this->getHomeDir());
         $this->set('script_user', $this->getScriptUser());
         $this->set('script_uid', $this->getScriptUid());
+        $this->set('web_user', $this->getWebUser());
+        $this->set('web_user_uid', $this->getWebUserUid());
+
 
         // If user has a ~/.config path, use it.
         if (file_exists($this->getHomeDir() . '/.config')) {
@@ -142,8 +145,8 @@ class Config extends ProvisionConfig
             );
         }
     }
-    
-    
+
+
     /**
      * Get the name of the source for this configuration object.
      *
@@ -243,5 +246,20 @@ class Config extends ProvisionConfig
      */
     static public function getScriptUid() {
         return posix_getuid();
+    }
+
+    /**
+     * Return the UID of the discovered web user group on the current system.
+     */
+    static public function getWebUser() {
+        return Provision::defaultWebGroup();
+    }
+
+    /**
+     * Return the UID of the discovered web user group on the current system.
+     */
+    static public function getWebUserUid() {
+        $info = posix_getpwnam(Provision::defaultWebGroup());
+        return $info['uid'];
     }
 }

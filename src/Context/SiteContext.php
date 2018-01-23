@@ -152,11 +152,11 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
                 // @TODO: chgrp only works when running locally with apache.
                 // @TODO: Figure out a way to store host web group vs container web group, and get it working with docker web service.
                 // @TODO: Might want to do chgrp verification inside container?
-                    if ($this->platform->getService('http')->getType() == 'apache' || $this->platform->getService('http')->getType() == 'nginx') {
-                        $this->fs->chgrp([
-                            "$site_path/files",
-                        ], $this->platform->getService('http')->provider->getProperty('web_group'));
-                    }
+
+                    $this->fs->chgrp([
+                        "$site_path/files",
+                    ], $this->getProvision()->getConfig()->get('web_user'));
+
                     // Copy Drupal's default settings.php file into place.
                     $this->fs->copy("$docroot/sites/default/default.settings.php", "$site_path/settings.php");
                     $this->fs->chmod("$site_path/settings.php", 02770);
