@@ -131,23 +131,30 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
 
                 // @TODO: These folders are how aegir works now. We might want to rethink what folders are created.
                     // Directories set to 755
-                    $this->fs->mkdir([
-                        "$site_path",
-                        
-                    ], 0755);
-        
+                    $this->fs->mkdir("$site_path");
+                    $this->fs->chmod($site_path, 0755);
+
                     // Directories set to 02775
                     $this->fs->mkdir([
                         "$site_path/themes",
                         "$site_path/modules",
                         "$site_path/libraries",
+                    ]);
+                    $this->fs->chmod([
+                        "$site_path/themes",
+                        "$site_path/modules",
+                        "$site_path/libraries",
                     ], 02775);
-        
+
+
                     // Directories set to 02775
                     $this->fs->mkdir([
                         "$site_path/files",
+                    ]);
+                    $this->fs->chmod([
+                        "$site_path/files",
                     ], 02770);
-                    
+
                     // Change certain folders to be in web server group.
                 // @TODO: chgrp only works when running locally with apache.
                 // @TODO: Figure out a way to store host web group vs container web group, and get it working with docker web service.
@@ -158,10 +165,14 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
                     ], $this->getProvision()->getConfig()->get('web_user'));
 
                     // Copy Drupal's default settings.php file into place.
-                    $this->fs->copy("$docroot/sites/default/default.settings.php", "$site_path/settings.php");
-                    $this->fs->chmod("$site_path/settings.php", 02770);
+                    if (!file_exists("$site_path/settings.php")) {
+                        $this->fs->copy("$docroot/sites/default/default.settings.php", "$site_path/settings.php");
+                    }
 
-                });
+                    $this->fs->chmod("$site_path/settings.php", 02770);
+                    $this->fs->chgrp("$site_path/settings.php", $this->getProvision()->getConfig()->get('web_user'));
+            });
+
 
         // FROM verify.provision.inc  drush_provision_drupal_pre_provision_verify() line 118
 //        drush_set_option('packages', _scrub_object(provision_drupal_system_map()), 'site');
