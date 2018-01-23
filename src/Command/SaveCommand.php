@@ -191,14 +191,7 @@ class SaveCommand extends Command
             $this->context = new $class($input->getArgument('context_name'), $this->getProvision(), $options);
         }
         else {
-            $icon = ProvisionStyle::ICON_EDIT;
-            $this->getProvision()->io()->block(
-                "  {$icon}  Editing context {$this->context->name} ",
-                NULL,
-                'bg=black;fg=blue',
-                NULL,
-                TRUE
-            );
+            $this->getProvision()->io()->helpBlock("Editing context {$this->context->name}...", ProvisionStyle::ICON_EDIT);
 
             // Save over existing contexts.
             $this->newContext = FALSE;

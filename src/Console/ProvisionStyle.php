@@ -21,6 +21,7 @@ class ProvisionStyle extends DrupalStyle {
     /**
      * Icons
      */
+    const ICON_HELP = '�';
     const ICON_EDIT = '✎';
     const ICON_START = '▷';
     const ICON_FINISH = '🏁';
@@ -86,6 +87,12 @@ class ProvisionStyle extends DrupalStyle {
         );
     }
 
+    /**
+     * Use to display a directory $ command.
+     *
+     * @param $message
+     * @param string $directory
+     */
     public function commandBlock($message, $directory = '') {
         $this->autoPrependBlock();
         $this->customLite($message, $directory . ' <fg=yellow>' . self::ICON_COMMAND . '</>', '');
@@ -99,6 +106,21 @@ class ProvisionStyle extends DrupalStyle {
             ' ╎ ',
             TRUE
             );
+    }
+
+    /**
+     * Display a block of text in the "Help" style.
+     * @param $message
+     * @param string $icon
+     */
+    function helpBlock($message, $icon = ProvisionStyle::ICON_HELP) {
+        $this->block(
+            " {$icon} {$message}",
+            NULL,
+            'bg=black;fg=cyan',
+            '  ',
+            TRUE
+        );
     }
 
     /**

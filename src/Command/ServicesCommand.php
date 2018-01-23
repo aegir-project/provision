@@ -214,16 +214,8 @@ class ServicesCommand extends Command
             }
 
             if ($this->context->hasService($service)) {
-                $icon = ProvisionStyle::ICON_EDIT;
-                $this->getProvision()->io()->block(
-                    "{$icon} Editing service {$service} provded by server '{$this->context->name}'...",
-                    NULL,
-                    'bg=black;fg=cyan',
-                    '  ',
-                    TRUE
-                );
+                $this->getProvision()->io()->helpBlock("Editing service {$service} provded by server '{$this->context->name}'...", ProvisionStyle::ICON_EDIT);
             }
-
 
             // Then ask for all options.
             $properties = $this->askForServiceProperties($service, $service_type);
