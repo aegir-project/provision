@@ -33,11 +33,11 @@ before_install:
 
   # In order for provision to set files permissions properly the script user needs to be in the web user group.
   # @TODO: Add this check to provision config.
-  - sudo adduser travis www-data
+#  - sudo adduser travis www-data
 
   # Switch to the new user enabling new group membershop.
   # Hack credit: https://superuser.com/questions/272061/reload-a-linux-users-group-assignments-without-logging-out
-  - gpasswd -a travis www-data
+  - sudo gpasswd -a travis www-data
 
 install:
   - composer install
