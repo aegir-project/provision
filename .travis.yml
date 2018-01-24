@@ -31,6 +31,10 @@ addons:
 before_install:
   - docker run --name provision_db -e MYSQL_ROOT_PASSWORD=root -d -p 3307:3306 mariadb
 
+  # In order for provision to set files permissions properly the script user needs to be in the web user group.
+  # @TODO: Add this check to provision config.
+  - sudo adduser travis www-data
+
 install:
   - composer install
   - sudo ln -s $PWD/bin/provision /usr/local/bin/provision
