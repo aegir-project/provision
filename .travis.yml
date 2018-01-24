@@ -36,8 +36,8 @@ before_install:
 #  - sudo adduser travis www-data
 
   # Switch to the new user enabling new group membershop.
-  # Hack credit: https://superuser.com/questions/272061/reload-a-linux-users-group-assignments-without-logging-out
-  - sudo gpasswd -a travis www-data
+  # https://docs.travis-ci.com/user/reference/trusty/#Group-membership
+  - sudo usermod -a -G www-data $USER
 
 install:
   - composer install
@@ -109,7 +109,8 @@ script:
 
   - ls -la /home/travis/hostmaster
 
-  - provision verify hostmaster -v
+  # Run with sudo su so the travis user's groups are reloaded.
+  - sudo -E su - $USER -c 'provision verify hostmaster -v'
   
   - provision verify server_master
 
