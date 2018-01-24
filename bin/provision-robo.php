@@ -19,7 +19,7 @@ if (file_exists($autoloadFile = __DIR__ . '/vendor/autoload.php')
 use Aegir\Provision\Console\ConsoleOutput;
 use Aegir\Provision\Console\Config;
 
-use Drupal\Console\Core\Style\DrupalStyle;
+use Aegir\Provision\Console\ProvisionStyle;
 use Robo\Common\TimeKeeper;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Exception\InvalidOptionException;
@@ -33,7 +33,7 @@ try {
     // Create input output objects.
     $input = new ArgvInput($argv);
     $output = new ConsoleOutput();
-    $io = new DrupalStyle($input, $output);
+    $io = new ProvisionStyle($input, $output);
     
     // Create a config object.
     $config = new Config($io);
