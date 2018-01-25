@@ -31,6 +31,20 @@ addons:
 before_install:
   - docker run --name provision_db -e MYSQL_ROOT_PASSWORD=root -d -p 3307:3306 mariadb
 
+  # In order for provision to set files permissions properly the script user needs to be in the web user group.
+  # @TODO: Add this check to provision config.
+#  - sudo adduser travis www-data
+
+  # Switch to the new user enabling new group membershop.
+  # https://docs.travis-ci.com/user/reference/trusty/#Group-membership
+  # - sudo usermod -a -G www-data $USER
+  - id
+
+  # We don't care which group the user is in, as long as it matches www-data inside the container.
+  # Provision uses these variables to build the container.
+  - 'echo "web_user: docker" >> ~/.provision.yml'
+  - 'echo "web_user_uid: 999" >> ~/.provision.yml'
+
 install:
   - composer install
   - sudo ln -s $PWD/bin/provision /usr/local/bin/provision
@@ -101,7 +115,8 @@ script:
 
   - ls -la /home/travis/hostmaster
 
-  - provision verify hostmaster -v
+  # Run with sudo su so the travis user's groups are reloaded.
+  - sudo -E su - $USER -c 'provision verify hostmaster -v'
   
   - provision verify server_master
 

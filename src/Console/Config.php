@@ -30,7 +30,7 @@ class Config extends ProvisionConfig
     /**
      * DefaultsConfig constructor.
      */
-    public function __construct(DrupalStyle $io = null)
+    public function __construct(ProvisionStyle $io = null)
     {
         parent::__construct();
         $this->io = $io;
@@ -74,6 +74,19 @@ class Config extends ProvisionConfig
         $this->extend(new EnvConfig());
 
         $this->validateConfig();
+    }
+
+    /**
+     * Override io() to return ProvisionStyle instead of SymfonyStyle.
+     *
+     * @return ProvisionStyle
+     */
+    protected function io()
+    {
+        if (!$this->io) {
+            $this->io = new ProvisionStyle($this->input(), $this->output());
+        }
+        return $this->io;
     }
     
     /**
@@ -138,12 +151,30 @@ class Config extends ProvisionConfig
         }
 
         // Ensure that script_user is the user.
-        $real_script_user = $this->getScriptUser();
-        if ($this->get('script_user') != $real_script_user) {
+        if ($this->get('script_user') != $this->getScriptUser()) {
             throw new InvalidOptionException(
-                "The user set as 'script_user' ({$this->get('script_user')}) is not the currently running user ({$real_script_user}). Change to user {$this->config->get('script_user')} or change the script_user value in the file {{$this->get('console_config_file')}}."
+                "The user set as 'script_user' ({$this->get('script_user')}) is not the currently running user ({$this->getScriptUser()}). Switch user to user {$this->get('script_user')} or change the script_user value in the file {{$this->get('console_config_file')}}."
             );
         }
+
+        // @TODO: Ensure that web_user exists. Right now all that matters is web_user_uid
+
+        // Ensure that script user is a member of web user group.
+        if (!$this->isUserInWebGroup($this->get('web_user_uid'))) {
+
+            $this->io()->warningLite("Your user is not in the web group.");
+            $this->io()->helpBlock([
+                "To add your user to the web user group, run one of the following commands:",
+                "",
+                "    mac: sudo dseditgroup -o edit -a {$this->get('script_user')} -t user {$this->get('web_user')}",
+                "    linux: sudo usermod -aG {$this->get('web_user')} {$this->get('script_user')}",
+            ]);
+
+          throw new InvalidOptionException(
+            "The current user ({$this->get('script_user')}) is not in the group '{$this->get('web_user')}' [{$this->get('web_user_uid')}]. Please add your user '{$this->config->get('script_user')}' to the group '{$this->get('web_user')}' or change the web_user or web_user_uid values in the file {{$this->get('console_config_file')}}.}"
+          );
+        }
+
     }
 
 
@@ -261,5 +292,13 @@ class Config extends ProvisionConfig
     static public function getWebUserUid() {
         $info = posix_getpwnam(Provision::defaultWebGroup());
         return $info['uid'];
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUserInWebGroup($web_user_uid) {
+        $gids = posix_getgroups();
+        return in_array($web_user_uid, $gids);
     }
 }
