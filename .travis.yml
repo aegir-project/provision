@@ -42,8 +42,8 @@ before_install:
 
   # We don't care which group the user is in, as long as it matches www-data inside the container.
   # Provision uses these variables to build the container.
-  - echo "web_user: docker" > ~/.provision.yml
-  - echo "web_user_uid: 999" > ~/.provision.yml
+  - 'echo "web_user: docker" >> ~/.provision.yml'
+  - 'echo "web_user_uid: 999" >> ~/.provision.yml'
 
 install:
   - composer install
