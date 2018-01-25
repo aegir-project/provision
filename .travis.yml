@@ -37,8 +37,13 @@ before_install:
 
   # Switch to the new user enabling new group membershop.
   # https://docs.travis-ci.com/user/reference/trusty/#Group-membership
-  - sudo usermod -a -G www-data $USER
+  # - sudo usermod -a -G www-data $USER
   - id
+
+  # We don't care which group the user is in, as long as it matches www-data inside the container.
+  # Provision uses these variables to build the container.
+  - echo "web_user: docker" > ~/.provision.yml
+  - echo "web_user_uid: 999" > ~/.provision.yml
 
 install:
   - composer install
