@@ -38,6 +38,7 @@ before_install:
   # Switch to the new user enabling new group membershop.
   # https://docs.travis-ci.com/user/reference/trusty/#Group-membership
   - sudo usermod -a -G www-data $USER
+  - id
 
 install:
   - composer install
