@@ -4,9 +4,13 @@ Provision is a command-line interface for managing servers and quickly deploying
 
 You can use it to launch Drupal quickly on your own computer, locally or on a server.
 
+Currently being developed on GitHub: [github.com/aegir-project/provision](https://github.com/aegir-project/provision)
+
 ## Origins
 
-Provision, prior to the 4.x branch, was the "back-end" command line interface for the Aegir Hosting Project, implemented as a set of Drush commands.
+Provision, prior to the 4.x branch, was the "back-end" command line interface for the Aegir Hosting Project, implemented as a set of Drush commands. It was designed simply as a way to let the "front-end" website to run commands to automatically configure the web server.
+
+Read more about Aegir at [www.aegirproject.org](https://www.aegirproject.org) and the original Provision at [www.drupal.org/project/provision.](https://www.drupal.org/project/provision)
 
 ## Mission
 
@@ -25,7 +29,7 @@ If this project is to succeed we must make it our mission for Provision to be:
 
 ## Target Users
 
-Provision is being designed for _everybody involved in building and hosting websites_: 
+Provision is being designed for _everybody involved in building and hosting websites_:
 
 * Site builders and HTML/CSS designers who just want Drupal running locally.
 * Web Developers who want to launch copies of websites quickly locally and in CI for testing.
@@ -34,7 +38,9 @@ Provision is being designed for _everybody involved in building and hosting webs
 
 Please join the conversation and submit an issue with your perspective on how we can improve how Provision works for your use case.
 
+## Architecture
 
+Provision 4.x is written in PHP, leveraging [Composer](https://getcomposer.org/) and [Symfony](https://symfony.com/components) components. Provision also leverages [Robo](http://robo.li/) as a framework.
 
 ## Documentation
 
