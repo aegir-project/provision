@@ -116,7 +116,7 @@ script:
   - ls -la /home/travis/hostmaster
 
   # Run with sudo su so the travis user's groups are reloaded.
-  - sudo -E su - $USER -c 'provision verify hostmaster -v'
+  - provision verify hostmaster -v
   
   - provision verify server_master
 
@@ -128,5 +128,5 @@ script:
 
   # Curling localhost is failing always. I'm commenting this out for now. This works!
   #- sleep 5
-  #- curl http://localhost
-  #- curl http://provision.local.computer
+  - curl http://localhost | true
+  - curl http://provision.local.computer | true
