@@ -160,9 +160,10 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
                 // @TODO: Figure out a way to store host web group vs container web group, and get it working with docker web service.
                 // @TODO: Might want to do chgrp verification inside container?
 
-                    $this->fs->chgrp([
-                        "$site_path/files",
-                    ], $this->getProvision()->getConfig()->get('web_user'));
+                    $dir = "$site_path/files";
+                    $user = $this->getProvision()->getConfig()->get('web_user');
+                    $this->getProvision()->getLogger()->info("Running chgrp {$dir} {$user}");
+                    $this->fs->chgrp($dir, $user);
 
                     // Copy Drupal's default settings.php file into place.
                     if (!file_exists("$site_path/settings.php")) {
