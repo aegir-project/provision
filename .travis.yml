@@ -121,5 +121,5 @@ script:
 
   # Curling localhost is failing always. I'm commenting this out for now. This works!
   #- sleep 5
-  #- curl http://localhost
-  #- curl http://provision.local.computer
+  - curl http://localhost | true
+  - curl http://provision.local.computer | true
