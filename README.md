@@ -4,7 +4,9 @@ Provision is a command-line interface for managing servers and quickly deploying
 
 You can use it to launch Drupal quickly on your own computer, locally or on a server.
 
-Currently being developed on GitHub: [github.com/aegir-project/provision](https://github.com/aegir-project/provision)
+Currently being developed on GitHub: [github.com/aegir-project/provision](https://github.com/aegir-project/provision).
+
+Documentation currently available at [aegir.gitbooks.io/provision](https://aegir.gitbooks.io/provision/).
 
 ## Origins
 
