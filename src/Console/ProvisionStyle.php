@@ -114,6 +114,9 @@ class ProvisionStyle extends DrupalStyle {
      * @param string $icon
      */
     function helpBlock($message, $icon = ProvisionStyle::ICON_HELP) {
+        if (is_array($message)) {
+            $message = implode("\n", $message);
+        }
         $this->block(
             " {$icon} {$message}",
             NULL,
