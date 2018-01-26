@@ -134,7 +134,7 @@ class HttpService extends Service implements ServiceInterface {
     /**
      * Return the default restart command for this service.
      */
-    static function default_restart_cmd() {
+    public static function default_restart_cmd() {
         return '';
     }
 

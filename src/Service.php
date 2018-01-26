@@ -243,6 +243,14 @@ class Service implements BuilderAwareInterface
         return $this::SERVICE;
     }
 
+    /**
+     * Return all properties for this context.
+     *
+     * @return array
+     */
+    public function getProperties() {
+        return $this->properties;
+    }
 
     /**
      * Get a specific property.

@@ -23,4 +23,11 @@ class ServerConfiguration extends Configuration {
       return FALSE;
     }
   }
+
+    function process() {
+        parent::process();
+
+        $this->data['script_user'] = $this->service->provider->getProperty('script_user');
+        $this->data['aegir_root'] = $this->service->provider->getProperty('aegir_root');
+    }
 }

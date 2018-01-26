@@ -117,8 +117,14 @@ class Configuration {
    * This is a stub to be implemented by subclasses.
    */
   function process() {
+      $this->data = [];
+
       if (!empty($this->context->getProperties())) {
           $this->data = $this->context->getProperties();
+      }
+
+      if (isset($this->service) && !empty($this->service->getProperties())) {
+          $this->data = array_merge($this->data, $this->service->getProperties());
       }
 
       // @TODO: Remove legacy code.

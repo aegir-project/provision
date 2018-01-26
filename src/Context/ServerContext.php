@@ -58,8 +58,6 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
         else {
             $this->server_config_path = $this->getProperty('server_config_path');
         }
-
-        $this->fs = new Filesystem();
     }
 
     /**
@@ -129,8 +127,8 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
         $original_command = $command;
 
         $tmpdir = sys_get_temp_dir() . '/provision';
-        if (!$this->fs->exists($tmpdir)){
-            $this->fs->mkdir($tmpdir);
+        if (!Provision::fs()->exists($tmpdir)){
+            Provision::fs()->mkdir($tmpdir);
         }
 
         $datestamp = date('c');
