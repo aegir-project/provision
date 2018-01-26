@@ -28,7 +28,7 @@ class SiteConfiguration extends Configuration {
 
     function process() {
         parent::process();
-        $this->data['http_port'] = $this->context->getSubscription('http')->service->getProperty('http_port');
+        $this->data['http_port'] = $this->context->platform->getSubscription('http')->service->getProperty('http_port');
         $this->data['document_root'] = $this->context->platform->getProperty('document_root');
         $this->data['uri'] = $this->context->getProperty('uri');
 
@@ -47,5 +47,18 @@ class SiteConfiguration extends Configuration {
         $this->data['db_port'] = $this->context->getSubscription('db')->service->getCreds()['port'];
 
         $this->data['extra_config'] = '';
+
+        $this->data['redirection'] = $this->context->getProperty('redirection');
+        $this->data['ssl_redirection'] = $this->context->getProperty('ssl_redirection');
+        $this->data['aliases'] = $this->context->getProperty('aliases');
+
+        $this->data['script_user'] = $this->context->platform->getService('http')->provider->getProperty('script_user');
+        $this->data['aegir_root'] = $this->service->provider->getProperty('aegir_root');
+        $this->data['root'] = $this->context->platform->getProperty('root');
+        $this->data['server_include_path'] = $this->context->platform->getProperty('root');
+
+        if (empty($this->data['db_port'])) {
+            $db_port = $this->context->getService('db')->getProperty('db_port ')? $this->context->getService('db')->getProperty('db_port ') : '3306';
+        }
     }
 }

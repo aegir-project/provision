@@ -204,9 +204,10 @@ class Service implements BuilderAwareInterface
             }
             catch (\Exception $e) {
                 $context->getProvision()->getLogger()->info(
-                    'Unable to write {description} to {path}.', [
+                    'Unable to write {description} to {path}: {message}', [
                         'description' => $config->description,
                         'path' => $config->filename(),
+                        'message' => $e->getMessage(),
                     ]
                 );
                 $success = FALSE;
