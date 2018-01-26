@@ -122,7 +122,7 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
      * @return string
      * @throws \Exception
      */
-    public function shell_exec($command, $dir = NULL, $return = 'stdout') {
+    public function shell_exec($command, $dir = NULL, $return = 'output') {
         $cwd = getcwd();
         $original_command = $command;
 
@@ -133,7 +133,6 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
 
         $datestamp = date('c');
         $tmp_output_file = tempnam($tmpdir, 'task.' . $datestamp . '.output.');
-        $tmp_error_file = tempnam($tmpdir, 'task.' . $datestamp . '.error.');
 
         $effective_wd = $dir? $dir:
             $this->getProperty('server_config_path');
@@ -143,23 +142,22 @@ class ServerContext extends ContextProvider implements ConfigurationInterface
         }
 
         // Output and Errors to files.
-        $command .= "> $tmp_output_file 2> $tmp_error_file";
+        $command .= "> $tmp_output_file 2>&1";
 
         chdir($effective_wd);
         exec($command, $output, $exit);
         chdir($cwd);
 
-        $stderr = file_get_contents($tmp_error_file);
-        $stdout = file_get_contents($tmp_output_file);
+        $output = file_get_contents($tmp_output_file);
 
-        if (!empty($stdout)){
+        if (!empty($output)){
             if ($this->getProvision()->getOutput()->isVerbose()) {
-                $this->getProvision()->io()->outputBlock($stdout);
+                $this->getProvision()->io()->outputBlock($output);
             }
         }
 
         if ($exit != ResultData::EXITCODE_OK) {
-            throw new \Exception($stderr);
+            throw new \Exception($output);
         }
 
         return ${$return};
