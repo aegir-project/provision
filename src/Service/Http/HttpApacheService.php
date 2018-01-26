@@ -38,18 +38,11 @@ class HttpApacheService extends HttpService
     return $configs;
   }
 
-
-    static function default_restart_cmd() {
-        return self::apache_restart_cmd();
-    }
-
     /**
-     * Guess at the likely value of the http_restart_cmd.
-     *
-     * This method is a static so that it can be re-used by the apache_ssl
-     * service, even though it does not inherit this class.
+     * Determine apache restart command based on available executables.
+     * @return string
      */
-    public static function apache_restart_cmd() {
+    static function default_restart_cmd() {
         $command = '/usr/sbin/apachectl'; // A proper default for most of the world
         foreach (explode(':', $_SERVER['PATH']) as $path) {
             $options[] = "$path/apache2ctl";
