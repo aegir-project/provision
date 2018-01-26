@@ -51,22 +51,21 @@ class HttpNginxService extends HttpService {
      */
     function __construct($service_config, ServerContext $provider_context) {
         parent::__construct($service_config, $provider_context);
-//
-//    }
-//
-//
-//    /**
-//     * Run when a `verify` command is invoked.
-//     *
-//     * @TODO: Should we move this to a different function? I don't want to store
-//     * these values in config files since they are read from the system.
-//     *
-//     * Are these values needed in other methods or commands? Is it ok for those
-//     * other methods to invoke verify() themselves if they need these properties?
-//     *
-//     * @return array
-//     */
-//    public function verify() {
+
+    }
+
+    /**
+     * Run when a `verify` command is invoked.
+     *
+     * @TODO: Should we move this to a different function? I don't want to store
+     * these values in config files since they are read from the system.
+     *
+     * Are these values needed in other methods or commands? Is it ok for those
+     * other methods to invoke verify() themselves if they need these properties?
+     *
+     * @return array
+     */
+    public function verify() {
 
         $nginx_config = $this->provider->shell_exec(self::getNginxExecutable() . ' -V');
         $this->setProperty('nginx_is_modern', preg_match("/nginx\/1\.((1\.(8|9|(1[0-9]+)))|((2|3|4|5|6|7|8|9|[1-9][0-9]+)\.))/", $nginx_config, $match));
@@ -106,6 +105,16 @@ class HttpNginxService extends HttpService {
         return parent::verify();
     }
 
+    /**
+     * No tasks to run
+     * @return array
+     */
+    function verifyPlatform() {
+        $tasks = [];
+        return $tasks;
+    }
+
+    /**
     /**
      * Override restart_command task to use our default_restart_cmd()
      *
