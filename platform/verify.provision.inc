@@ -3,27 +3,6 @@
 /**
  * @file
  * Code related to verify tasks.
- *
- * Composer-based Platforms Options
- * =================================
- *
- * There are a few drush options that control how `composer` is run on platform
- * verify:
- *
- *  provision_composer_install_platforms
- *      Set to FALSE to prevent provision from ever running `composer install`.
- *
- *  provision_composer_install_platforms_verify_always
- *      By default, provision will run `composer install` every time a platform
- *      is verified.
- *
- *      Set to FALSE to only run `composer install` once. If composer.json
- *      changes, you will have to run `composer install` manually.
- *
- *  provision_composer_install_command
- *      The specific command to run during platform verify.
- *      Defaults to 'composer install --no-interaction --no-progress --no-dev'
- *
  */
 
 /**
