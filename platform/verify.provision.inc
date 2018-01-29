@@ -103,7 +103,7 @@ function drush_provision_drupal_pre_provision_verify() {
 
     // Composer Install Support
     // If drush variable provision_composer_install_platforms is not set to FALSE, run composer install.
-    if (drush_get_option('provision_composer_install_platforms', TRUE)) {
+    if (drush_get_option('provision_composer_install_platforms', TRUE) && shell_exec('which composer')) {
       // Detect composer-based platform and run composer install if it has not been run yet.
       // Step 1: Look for composer directory. Could be Drupal root. Could be the git repo_root.
       if (provision_file()->exists(d()->root . DIRECTORY_SEPARATOR . 'composer.json')->status()) {

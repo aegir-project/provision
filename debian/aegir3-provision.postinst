@@ -51,6 +51,10 @@ case "$1" in
         # fix permissions on installed directories
         chown aegir:aegir "$VARLIB"
 
+        # Warn about missing composer, requiring it would break Jessie since it has no such package.
+        command -v composer >/dev/null 2>&1 || { echo "WARNING: System is missing PHP composer, please install a Debian package or see https://getcomposer.org/" >&2; }
+
+
         db_get "aegir/drush_version"
         DRUSH_VERSION="$RET"
 
@@ -88,16 +92,8 @@ case "$1" in
 
           else  # Drush versions prior to 8 aren't available as .phar's.
 
-              # Install composer.
-              COMPOSER_HOME="$HOME/.composer"
-              curl -sS https://getcomposer.org/installer | php
-              mv composer.phar /usr/local/bin/composer
-
               # Install Drush.
               su -c "composer global require drush/drush:$DRUSH_VERSION" aegir
-
-              # Add composer's bin dir to the $PATH.
-              echo "export PATH=\"\$HOME/.composer/vendor/bin:\$PATH\"" >>  ~aegir/.bashrc
 
               # Rename an old drush executable.
               if [ -f /usr/local/bin/drush ]; then
@@ -107,6 +103,9 @@ case "$1" in
               # Symlink Drush for other users to use.
               ln -s ~aegir/.composer/vendor/bin/drush /usr/local/bin
 
+              # Add composer's bin dir to the $PATH.
+              # TODO: This should be made idempotent.
+              echo "export PATH=\"\$HOME/.composer/vendor/bin:\$PATH\"" >>  ~aegir/.bashrc
           fi
         fi
 
