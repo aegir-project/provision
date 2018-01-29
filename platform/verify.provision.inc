@@ -3,6 +3,27 @@
 /**
  * @file
  * Code related to verify tasks.
+ *
+ * Composer-based Platforms Options
+ * =================================
+ *
+ * There are a few drush options that control how `composer` is run on platform
+ * verify:
+ *
+ *  provision_composer_install_platforms
+ *      Set to FALSE to prevent provision from ever running `composer install`.
+ *
+ *  provision_composer_install_platforms_verify_always
+ *      By default, provision will run `composer install` every time a platform
+ *      is verified.
+ *
+ *      Set to FALSE to only run `composer install` once. If composer.json
+ *      changes, you will have to run `composer install` manually.
+ *
+ *  provision_composer_install_command
+ *      The specific command to run during platform verify.
+ *      Defaults to 'composer install --no-interaction --no-progress --no-dev'
+ *
  */
 
 /**
@@ -80,6 +101,7 @@ function drush_provision_drupal_pre_provision_verify() {
       }
     }
 
+    // Composer Install Support
     // If drush variable provision_composer_install_platforms is not set to FALSE, run composer install.
     if (drush_get_option('provision_composer_install_platforms', TRUE)) {
       // Detect composer-based platform and run composer install if it has not been run yet.
@@ -87,7 +109,7 @@ function drush_provision_drupal_pre_provision_verify() {
       if (provision_file()->exists(d()->root . DIRECTORY_SEPARATOR . 'composer.json')->status()) {
         $composer_directory = d()->root;
       }
-      elseif (provision_file()->exists(d()->repo_path . DIRECTORY_SEPARATOR . 'composer.json')->status()) {
+      elseif (d()->repo_path && provision_file()->exists(d()->repo_path . DIRECTORY_SEPARATOR . 'composer.json')->status()) {
         $composer_directory = d()->repo_path;
       }
 
@@ -96,8 +118,8 @@ function drush_provision_drupal_pre_provision_verify() {
       // false, only run `composer-install` if ./vendor directory is missing.
       if (isset($composer_directory) && (!file_exists($composer_directory . DIRECTORY_SEPARATOR . 'vendor') || drush_get_option('provision_composer_install_platforms_verify_always', TRUE))) {
 
-        // @TODO: We should make this command more dynamic. For example, if we know the platform is for production, we should use --no-dev option.
         // Composer Install command: Do not interact, do not show download progress.
+        // Customizable by setting drush option 'provision_composer_install_command'
         $composer_command = drush_get_option('provision_composer_install_command', 'composer install --no-interaction --no-progress --no-dev');
         drush_log(dt("Running command @command", array(
           '@command' => $composer_command
