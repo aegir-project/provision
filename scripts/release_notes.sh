@@ -6,7 +6,7 @@
 #
 # To be used in the release notes on https://github.com/aegir-project/documentation/blob/3.x/docs/release-notes/
 
-modules="hostmaster provision hosting eldir hosting_civicrm hosting_git hosting_remote_import hosting_site_backup_manager hosting_tasks_extra"
+modules="hostmaster provision hosting eldir hosting_civicrm hosting_git hosting_remote_import hosting_site_backup_manager hosting_tasks_extra hosting_logs hosting_https"
 
 if [ -z "$1" ]; then
   echo "Usage: $0 <previous release tag>"
