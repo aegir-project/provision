@@ -186,10 +186,10 @@ if (isset($_SERVER['db_name'])) {
 
   # Additional host wide configuration settings. Useful for safely specifying configuration settings.
   if (is_readable('<?php print $this->platform->server->include_path  ?>/global.inc')) {
-    include_once('<?php print $this->platform->server->include_path  ?>/global.inc');
+    include('<?php print $this->platform->server->include_path  ?>/global.inc');
   }
 
   # Additional site configuration settings.
   if (is_readable('<?php print $this->site_path  ?>/local.settings.php')) {
-    include_once('<?php print $this->site_path  ?>/local.settings.php');
+    include('<?php print $this->site_path  ?>/local.settings.php');
   }
