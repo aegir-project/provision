@@ -576,7 +576,13 @@ function _provision_drupal_find_modules($scope, $key = '') {
       continue;
     }
     $install_file = sprintf("%s/%s.install", dirname($info->filename), $name);
-    $schema_version = 0;
+    // Drupal now enforces a minimum schema version see: https://www.drupal.org/node/2186315
+    if (drush_drupal_major_version() >= 8) {
+      $schema_version = drush_drupal_major_version() * 1000;
+    }
+    else {
+      $schema_version = 0;
+    }
     if (file_exists($install_file)) {
       $source = file_get_contents(trim($install_file));
       $source = str_replace("\r\n", "\n", $source);
@@ -585,7 +591,7 @@ function _provision_drupal_find_modules($scope, $key = '') {
         preg_match_all('!function\s*&?([a-zA-Z0-9_]+)_update_([0-9]+)\s*\(.*?\s*\{!', $source, $function_matches);
 
       if (sizeof($function_matches[0])) {
-        $schema_version = max($function_matches[2]);
+        $schema_version = max($schema_version, max($function_matches[2]));
       }
     }
     $files[$name]->schema_version = $schema_version;
