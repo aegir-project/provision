@@ -70,4 +70,44 @@ class HttpApacheService extends HttpService
             }
         }
     }
+
+    /**
+     * React to `provision verify` command when run on a subscriber, to verify the service's provider.
+     *
+     * This is used to allow skipping of the service restart.
+     */
+    function verifyServer()
+    {
+        $tasks['http.injection'] = $this->getProvision()->newTask()
+            ->start('Checking for apache configuration link...')
+->execute(function() {
+                $provision_apache_config_path = $this->provider->server_config_path . DIRECTORY_SEPARATOR . $this->getType() . '.conf';
+                $output = $this->provider->shell_exec( self::getApacheExecutable() . ' -S');
+
+                if (strpos($output, 'PROVISION_VERSION') !== FALSE) {
+                    return 0;
+                }
+                else {
+                    $path = '/path/to/apache2/conf.d';
+
+                    // Try to detect the apache restart command.
+                    $options[] = '/private/etc/apache2/other';
+                    $options[] = '/etc/apache/conf.d';
+                    $options[] = '/etc/apache2/conf.d';
+                    $options[] = '/etc/httpd/conf.d';
+
+                    foreach ($options as $test) {
+                        if (is_dir($test)) {
+                            $path = $test;
+                            break;
+                        }
+                    }
+
+                    throw new \Exception("Provision configuration is not being loaded by apache. \n \nRun the command: sudo ln -s {$provision_apache_config_path} {$path}/provision.conf");
+                }
+          });
+
+          $tasks = array_merge($tasks, parent::verifyServer());
+          return $tasks;
+    }
 }
