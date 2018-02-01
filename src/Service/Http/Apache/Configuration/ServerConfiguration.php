@@ -14,7 +14,9 @@
 
 namespace Aegir\Provision\Service\Http\Apache\Configuration;
 
+use Aegir\Provision\Application;
 use Aegir\Provision\Configuration;
+use Aegir\Provision\Provision;
 
 class ServerConfiguration extends Configuration {
   
@@ -47,5 +49,7 @@ class ServerConfiguration extends Configuration {
       $this->fs->mkdir($this->data['http_postd_path']);
       $this->fs->mkdir($this->data['http_platformd_path']);
       $this->fs->mkdir($this->data['http_vhostd_path']);
+
+      $this->data['provision_version'] = Provision::VERSION;
   }
 }

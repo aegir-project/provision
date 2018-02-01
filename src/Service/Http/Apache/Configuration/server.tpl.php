@@ -2,6 +2,7 @@
 
 NameVirtualHost *:<?php print $http_port; ?>
 
+Define PROVISION_VERSION <?php print $provision_version; ?>
 
 <VirtualHost *:<?php print $http_port; ?>>
     ServerName default
