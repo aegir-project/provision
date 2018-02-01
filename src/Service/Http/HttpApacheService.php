@@ -43,6 +43,16 @@ class HttpApacheService extends HttpService
      * @return string
      */
     static function default_restart_cmd() {
+        $command = self::getApacheExecutable();
+        return "sudo $command graceful";
+    }
+
+    /**
+     * Find the nginx executable and return the path to it.
+     *
+     * @return mixed|string
+     */
+    public static function getApacheExecutable() {
         $command = '/usr/sbin/apachectl'; // A proper default for most of the world
         foreach (explode(':', $_SERVER['PATH']) as $path) {
             $options[] = "$path/apache2ctl";
@@ -56,11 +66,8 @@ class HttpApacheService extends HttpService
 
         foreach ($options as $test) {
             if (is_executable($test)) {
-                $command = $test;
-                break;
+                return $command;
             }
         }
-
-        return "sudo $command graceful";
     }
 }
