@@ -169,8 +169,18 @@ function _provision_drupal_search_paths($scope, $key = '', $type = 'modules') {
       $searchpaths[] = sprintf("%s/sites/all/%s", $drupal_root, $type);
       break;
     case 'profiles':
-      foreach (_provision_find_profiles() as $profile) {
-        $searchpaths[] = $profile->path;
+      $profiles = _provision_find_profiles();
+      if ($key) {
+        if (isset($profiles[$key])) {
+          // Find $type within this single profile.
+          $searchpaths[] = sprintf("%s/%s", $profiles[$key]->path, $type);
+        }
+      }
+      else {
+        // Find $type within all profiles.
+        foreach ($profiles as $profile) {
+          $searchpaths[] = sprintf("%s/%s", $profile->path, $type);
+        }
       }
       break;
     default:
