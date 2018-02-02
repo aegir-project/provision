@@ -251,4 +251,14 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
         
 //        return parent::verify();
     }
+
+    /**
+     * Overrides Context::save() to remove the document_root_full property.
+     *
+     * @TODO: Figure out a better way to avoid storing system generated properties.
+     */
+    public function save(){
+        unset($this->properties['document_root_full']);
+        return parent::save();
+    }
 }
