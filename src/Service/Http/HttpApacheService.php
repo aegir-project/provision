@@ -78,7 +78,13 @@ class HttpApacheService extends HttpService
      */
     function verifyServer()
     {
-        $tasks['http.injection'] = $this->getProvision()->newTask()
+        $tasks['http.configuration'] = $this->getProvision()->newTask()
+            ->start('Writing web server configuration...')
+            ->execute(function() {
+                return $this->writeConfigurations()? 0: 1;
+            })
+        ;
+        $tasks['http.config_link'] = $this->getProvision()->newTask()
             ->start('Checking for apache configuration link...')
 ->execute(function() {
                 $provision_apache_config_path = $this->provider->server_config_path . DIRECTORY_SEPARATOR . $this->getType() . '.conf';
@@ -107,7 +113,12 @@ class HttpApacheService extends HttpService
                 }
           });
 
-          $tasks = array_merge($tasks, parent::verifyServer());
-          return $tasks;
+        $tasks['http.restart'] = $this->getProvision()->newTask()
+            ->start('Restarting web server...')
+            ->execute(function() {
+                return $this->restartService()? 0: 1;
+            })
+        ;
+        return $tasks;
     }
 }

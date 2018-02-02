@@ -82,19 +82,19 @@ class HttpService extends Service implements ServiceInterface {
      */
     function verifyServer()
     {
-        return [
-            'http.configuration' => $this->getProvision()->newTask()
-                ->start('Writing web server configuration...')
-                ->execute(function() {
-                    return $this->writeConfigurations()? 0: 1;
-                })
-            ,
-            'http.restart' => $this->getProvision()->newTask()
-                ->start('Restarting web server...')
-                ->execute(function() {
-                    return $this->restartService()? 0: 1;
-                })
-        ];
+        $tasks['http.configuration'] = $this->getProvision()->newTask()
+            ->start('Writing web server configuration...')
+            ->execute(function() {
+                return $this->writeConfigurations()? 0: 1;
+            })
+        ;
+        $tasks['http.restart'] = $this->getProvision()->newTask()
+            ->start('Restarting web server...')
+            ->execute(function() {
+                return $this->restartService()? 0: 1;
+            })
+        ;
+        return $tasks;
     }
 
     /**
