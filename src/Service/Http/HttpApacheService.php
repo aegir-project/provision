@@ -178,6 +178,8 @@ $full_error
                 }
 
                 // @TODO: Detect that mod_php is running too.
+                // @TODO: Check that mbstring settings are set to PASS
+    // MacOS default config does not support Drupal without changing this setting.
 
     });
 
