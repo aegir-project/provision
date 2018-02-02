@@ -126,7 +126,7 @@ class SiteContext extends ContextSubscriber implements ConfigurationInterface
                  * @see drush_provision_drupal_pre_provision_verify()
                  */
                 ->execute(function() {
-                    $docroot = $this->platform->getProperty('document_root');
+                    $docroot = $this->platform->getProperty('document_root_full');
                     $site_path = $docroot . DIRECTORY_SEPARATOR . $this->getProperty('site_path');
 
                 // @TODO: These folders are how aegir works now. We might want to rethink what folders are created.

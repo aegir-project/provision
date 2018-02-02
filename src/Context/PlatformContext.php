@@ -45,12 +45,12 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
         // There is no need to validate for $this->properties['web_server'] because the config system does that.
 //        $this->web_server = $application->getContext($this->properties['web_server']);
 
-        // Make document root property absolute, and set to root if there is no docroot.
-        if (!$this->fs->isAbsolutePath($this->getProperty('document_root')) && !empty($this->getProperty('document_root'))) {
-            $this->setProperty('document_root', $this->getProperty('root') . DIRECTORY_SEPARATOR . $this->getProperty('document_root'));
+        // Set document_root_full property with the full path to docroot.
+        if (empty($this->getProperty('document_root'))) {
+            $this->setProperty('document_root_full', $this->getProperty('root'));
         }
         else {
-            $this->setProperty('document_root', $this->getProperty('root'));
+            $this->setProperty('document_root_full', $this->getProperty('root') . DIRECTORY_SEPARATOR . $this->getProperty('document_root'));
         }
         $this->getProperties();
     }
@@ -168,7 +168,8 @@ class PlatformContext extends ContextSubscriber implements ConfigurationInterfac
      */
     public function verify()
     {
-        $this->getProvision()->io()->customLite($this->getProperty('root'), 'Root: ', 'info');
+        $this->getProvision()->io()->customLite($this->getProperty('root'), 'Code Root: ', 'info');
+        $this->getProvision()->io()->customLite($this->getProperty('root'), 'Document Root: ', 'info');
 
         if ($this->getProperty('makefile')) {
             $this->getProvision()->io()->customLite($this->getProperty('makefile'), 'Makefile: ', 'info');
