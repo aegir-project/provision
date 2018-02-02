@@ -1,4 +1,4 @@
-<Directory <?php print $document_root; ?>>
+<Directory <?php print $document_root_full; ?>>
     Order allow,deny
     Allow from all
     Satisfy any
@@ -20,7 +20,7 @@
 //  }
 ?>
   # Include the platform's htaccess file
-  Include <?php print $document_root ?>/.htaccess
+  Include <?php print $document_root_full ?>/.htaccess
 
   # Do not read any .htaccess in the platform
   AllowOverride none
