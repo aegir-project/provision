@@ -3,7 +3,7 @@
 namespace Aegir\Provision\Context;
 
 use Aegir\Provision\Application;
-use Aegir\Provision\ContextSubscriber;
+use Aegir\Provision\ServiceSubscriber;
 use Aegir\Provision\Provision;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -14,7 +14,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  *
  * @see \Provision_Context_platform
  */
-class PlatformContext extends ContextSubscriber implements ConfigurationInterface
+class PlatformContext extends ServiceSubscriber implements ConfigurationInterface
 {
     /**
      * @var string

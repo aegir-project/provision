@@ -10,13 +10,13 @@
 namespace Aegir\Provision;
 
 /**
- * Class ContextSubscriber
+ * Class ServiceSubscriber
  *
  * Context class for those consuming services, typically sites & platforms.
  *
  * @package Aegir\Provision
  */
-class ContextSubscriber extends Context
+class ServiceSubscriber extends Context
 {
     const ROLE = 'subscriber';
     
@@ -69,19 +69,11 @@ class ContextSubscriber extends Context
             throw new \Exception("Service subscription '$type' does not exist in the context '{$this->name}'.");
         }
     }
-    
+
     /**
-     * Return an array of Service classes.
-     * @return array
+     * Loads service_subscriptions properties into the config tree.
+     * @param $root_node
      */
-    public function getServices() {
-        $services = [];
-        foreach ($this->getSubscriptions() as $service => $subscription) {
-            $services[$service] = $subscription->service;
-        }
-        return $services;
-    }
-    
     protected function servicesConfigTree(&$root_node) {
         $root_node
             ->attribute('context', $this)

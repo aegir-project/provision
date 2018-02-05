@@ -313,6 +313,25 @@ class Context implements BuilderAwareInterface
     }
 
     /**
+     * Return all services this context provides.
+     *
+     * @return array
+     */
+    public function getServices() {
+        return $this->services;
+    }
+
+    /**
+     * Return all services for this context.
+     *
+     * @return \Aegir\Provision\Service
+     */
+    public function service($type)
+    {
+        return $this->getService($type);
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getConfigTreeBuilder()

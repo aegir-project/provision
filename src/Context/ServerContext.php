@@ -3,7 +3,7 @@
 namespace Aegir\Provision\Context;
 
 use Aegir\Provision\Console\Config;
-use Aegir\Provision\ContextProvider;
+use Aegir\Provision\ServiceProvider;
 use Aegir\Provision\Property;
 use Aegir\Provision\Provision;
 use Aegir\Provision\Service\DockerServiceInterface;
@@ -20,7 +20,7 @@ use Symfony\Component\Yaml\Yaml;
  *
  * @see \Provision_Context_server
  */
-class ServerContext extends ContextProvider implements ConfigurationInterface
+class ServerContext extends ServiceProvider implements ConfigurationInterface
 {
     /**
      * @var string
