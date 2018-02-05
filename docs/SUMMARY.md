@@ -1,5 +1,5 @@
 # Summary
 
 * [Introduction](README.md)
-* [Developing Provision](developing-provision.md)
+* [Developing Provision](docs/developing-provision.md)
 
