@@ -15,6 +15,7 @@ use Aegir\Provision\Service\DockerServiceInterface;
 use Aegir\Provision\Service\Http\Apache\Configuration\PlatformConfiguration;
 use Aegir\Provision\Service\Http\Apache\Configuration\SiteConfiguration;
 use Aegir\Provision\Service\Http\ApacheDocker\Configuration\ServerConfiguration;
+use Aegir\Provision\ServiceSubscriber;
 use Psr\Log\LogLevel;
 use Symfony\Component\Yaml\Yaml;
 
@@ -340,15 +341,15 @@ YML;
 //        }
 
         // Map a volume for every site.
-        $sites = $this->getProvision()->getAllSites();
-        foreach ($sites as $site) {
-            if ($site->getSubscription('http')->server->name == $this->provider->name) {
-                $container_path = $this->mapContainerPath($site->getProperty('root'));
-                $volumes[$container_path] = $site->getProperty('root') . ':' . $container_path . ':z';
+        $contexts = $this->getProvision()->getAllContexts();
+        foreach ($contexts as $context) {
+            if ($context instanceof ServiceSubscriber && $context->getSubscription('http')->server->name == $this->provider->name) {
+                $container_path = $this->mapContainerPath($context->getProperty('root'));
+                $volumes[$container_path] = $context->getProperty('root') . ':' . $container_path . ':z';
             }
         }
 
-        return $volumes;
+        return array_values($volumes);
     }
 
     /**
