@@ -12,6 +12,7 @@ use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Provision;
 use Aegir\Provision\Service\Http\Nginx\Configuration\PlatformConfiguration;
 use Aegir\Provision\Service\Http\Nginx\Configuration\ServerConfiguration;
+use Aegir\Provision\Service\Http\Nginx\Configuration\SiteCommonConfiguration;
 use Aegir\Provision\Service\Http\Nginx\Configuration\SiteConfiguration;
 use Aegir\Provision\Service\HttpService;
 
@@ -40,6 +41,11 @@ class HttpNginxService extends HttpService {
      * Path to NGINX Control mode file.
      */
     const NGINX_CONTROL_MODE_FILE = '/etc/nginx/basic_nginx.conf';
+
+    /**
+     *
+     */
+    const BOA_CONFIG_PATH = '/data/conf/global.inc';
 
     /**
      * HttpNginxService constructor.
@@ -90,22 +96,26 @@ class HttpNginxService extends HttpService {
 
         // Check if there is php-fpm listening on unix socket, otherwise use port 9000 to connect
         $this->setProperty('phpfpm_mode', self::getPhpFpmMode());
+        $this->setProperty('phpfpm_socket_path', self::getPhpFpmSocketPath());
 
         // @TODO: Work out a way for something like BOA to do this via a plugin.
         // Check if there is BOA specific global.inc file to enable extra Nginx locations
-//        if ($this->provider->fs->exists('/data/conf/global.inc')) {
-//            $this->setProperty('satellite_mode', 'boa');
-//            drush_log(dt('BOA mode detected -SAVE- YES file found @path.', array('@path' => '/data/conf/global.inc')));
-//        }
-//        else {
-//            $this->server->satellite_mode = 'vanilla';
-//            drush_log(dt('Vanilla mode detected -SAVE- NO file found @path.', array('@path' => '/data/conf/global.inc')));
-//        }
+        if ($this->provider->fs->exists(self::BOA_CONFIG_PATH)) {
+            $this->setProperty('satellite_mode', 'boa');
+            $this->getProvision()->getLogger()->debug('BOA mode detected -SAVE- YES file found {path}.', ['path' => self::BOA_CONFIG_PATH]);
+        }
+        else {
+            $this->setProperty('satellite_mode', 'vanilla');
+            $this->getProvision()->getLogger()->debug('Vanilla mode detected -SAVE- NO file found {path}.', ['path' => self::BOA_CONFIG_PATH]);
+        }
 
 //        // Set correct subdirs_support value on server save
 //        if (provision_hosting_feature_enabled('subdirs')) {
 //            $this->server->subdirs_support = TRUE;
 //        }
+
+        $this->setProperty('server_config_path', $this->provider->server_config_path);
+
         return parent::verify();
     }
 
@@ -148,6 +158,7 @@ class HttpNginxService extends HttpService {
     public function getConfigurations()
     {
         $configs['server'][] = ServerConfiguration::class;
+        $configs['server'][] = SiteCommonConfiguration::class;
         $configs['site'][] = SiteConfiguration::class;
         return $configs;
     }
@@ -216,4 +227,29 @@ class HttpNginxService extends HttpService {
         // Return the discovered mode.
         return $mode;
     }
+
+    /**
+     * Gets the PHP FPM unix socket path.
+     *
+     * If we're running in port mode, there is no socket path. FALSE would be
+     * returned in this case.
+     *
+     * @return string
+     *   The path, or FALSE if there isn't one.
+     */
+    public static function getPhpFpmSocketPath() {
+        // Simply return FALSE if we're in port mode.
+        if (self::getPhpFpmMode() == 'port') {
+            return FALSE;
+        }
+
+        // Return the socket path based on the PHP version.
+        if (strtok(phpversion(), '.') == 7) {
+            return self::SOCKET_PATH_PHP7;
+        }
+        else {
+            return self::SOCKET_PATH_PHP5;
+        }
+    }
+
 }

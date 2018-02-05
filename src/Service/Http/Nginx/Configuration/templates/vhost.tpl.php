@@ -107,7 +107,7 @@ if ($redirection || $ssl_redirection) {
   }
 }
 else {
-//  print "  include       " . $server->include_path . "/nginx_vhost_common.conf;\n";
+  print "  include       " . $server_config_path . "/nginx_vhost_common.conf;\n";
 }
 //$if_subsite = $this->data['http_subdird_path'] . '/' . $uri;
 //if (provision_hosting_feature_enabled('subdirs') && provision_file()->exists($if_subsite)->status()) {
