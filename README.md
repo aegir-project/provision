@@ -20,8 +20,7 @@ If this project is to succeed we must make it our mission for Provision to be:
 
 * Easy to use.
 * Easy to develop.
-* Flexible and simple.
-* Open to change, open to all.
+* Works Everywhere.
 
 ## Goals
 
