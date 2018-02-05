@@ -14,7 +14,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  *
  * @see \Provision_Context_site
  */
-class SiteContext extends ServiceSubscriber implements ConfigurationInterface
+class SiteContext extends PlatformContext implements ConfigurationInterface
 {
     /**
      * @var string
@@ -47,12 +47,19 @@ class SiteContext extends ServiceSubscriber implements ConfigurationInterface
 //        $this->db_server = $application->getContext($this->properties['db_server']);
 
         // Load platform context... @TODO: Automatically do this for required contexts?
-        $this->platform = $this->getProvision()->getContext($this->properties['platform']);
-    
-        // Add platform http service subscription.
-        $this->serviceSubscriptions['http'] = $this->platform->getSubscription('http');
-        $this->serviceSubscriptions['http']->setContext($this);
-        
+        if (!empty($this->properties['platform'])) {
+            $this->platform = $this->getProvision()->getContext($this->properties['platform']);
+        }
+        else {
+            $this->platform = NULL;
+        }
+
+        // Load http service from platform if site doesn't have them.
+        if (!$this->hasService('http') && $this->platform->hasService('http')) {
+            $this->serviceSubscriptions['http'] = $this->platform->getSubscription('http');
+            $this->serviceSubscriptions['http']->setContext($this);
+        }
+
         $uri = $this->getProperty('uri');
         $this->properties['site_path'] = "sites/{$uri}";
 
@@ -64,44 +71,57 @@ class SiteContext extends ServiceSubscriber implements ConfigurationInterface
 
     static function option_documentation()
     {
-        return [
-          'platform' => 'site: the platform the site is run on',
-//          'db_server' => 'site: the db server the site is run on',
-          'uri' => 'site: example.com URI, no http:// or trailing /',
-          'language' => 'site: site language; default en',
+        $options = parent::option_documentation();
+
+        $options['platform'] = Provision::newProperty()
+            ->description('site: The platform this site is run on. (Optional)')
+            ->required(FALSE)
+        ;
+        $options['uri'] = 'site: example.com URI, no http:// or trailing /';
+        $options['language'] = 'site: site language; default en';
+        $options['profile'] = 'site: Drupal profile to use; default standard';
+        $options['site_path'] = Provision::newProperty()
+            ->description('site: The site configuration path (sites/domain.com). If left empty, will be generated automatically.')
+            ->required(FALSE)
+        ;
+
+        return $options;
+
+
+//          'uri' => 'site: example.com URI, no http:// or trailing /',
+//          'language' => 'site: site language; default en',
 //          'aliases' => 'site: comma-separated URIs',
 //          'redirection' => 'site: boolean for whether --aliases should redirect; default false',
 //          'client_name' => 'site: machine name of the client that owns this site',
 //          'install_method' => 'site: How to install the site; default profile. When set to "profile" the install profile will be run automatically. Otherwise, an empty database will be created. Additional modules may provide additional install_methods.',
-          'profile' => 'site: Drupal profile to use; default standard',
+//          'profile' => 'site: Drupal profile to use; default standard',
 //          'drush_aliases' => 'site: Comma-separated list of additional Drush aliases through which this site can be accessed.',
-
-            'site_path' =>
-                Provision::newProperty()
-                    ->description('site: The site configuration path (sites/domain.com). If left empty, will be generated automatically.')
-                    ->required(FALSE)
-            ,
-
-        ];
+//
+//            'site_path' =>
+//                Provision::newProperty()
+//                    ->description('site: The site configuration path (sites/domain.com). If left empty, will be generated automatically.')
+//                    ->required(FALSE)
+//            ,
+//
+//        ];
     }
 
     public static function serviceRequirements() {
-        return ['db'];
+        $requirements[] = 'http';
+        $requirements[] = 'db';
+        return $requirements;
     }
-    
-    public static function contextRequirements() {
-        return [
-            'platform' => 'platform'
-        ];
-    }
-    
+
     /**
      * Output extra info before verifying.
      */
     public function verify()
     {
+
+        $tasks = parent::verify();
+
         $this->getProvision()->io()->customLite($this->getProperty('uri'), 'Site URL: ', 'info');
-        $this->getProvision()->io()->customLite($this->platform->getProperty('root'), 'Root: ', 'info');
+        $this->getProvision()->io()->customLite($this->getProperty('root'), 'Root: ', 'info');
         $this->getProvision()->io()->customLite($this->config_path, 'Configuration File: ', 'info');
         $this->getProvision()->io()->newLine();
 
@@ -125,7 +145,7 @@ class SiteContext extends ServiceSubscriber implements ConfigurationInterface
                  * @see drush_provision_drupal_pre_provision_verify()
                  */
                 ->execute(function() {
-                    $docroot = $this->platform->getProperty('document_root_full');
+                    $docroot = $this->getProperty('document_root_full');
                     $site_path = $docroot . DIRECTORY_SEPARATOR . $this->getProperty('site_path');
 
                 // @TODO: These folders are how aegir works now. We might want to rethink what folders are created.

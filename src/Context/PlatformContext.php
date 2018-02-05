@@ -169,7 +169,7 @@ class PlatformContext extends ServiceSubscriber implements ConfigurationInterfac
     public function verify()
     {
         $this->getProvision()->io()->customLite($this->getProperty('root'), 'Code Root: ', 'info');
-        $this->getProvision()->io()->customLite($this->getProperty('root'), 'Document Root: ', 'info');
+        $this->getProvision()->io()->customLite($this->getProperty('document_root'), 'Document Root: ', 'info');
 
         if ($this->getProperty('makefile')) {
             $this->getProvision()->io()->customLite($this->getProperty('makefile'), 'Makefile: ', 'info');

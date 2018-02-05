@@ -303,46 +303,49 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
             return $this->contexts;
         }
     }
-    
-    /**
-     * Load all server contexts.
-     *
-     * @param null $service
-     * @return mixed
-     * @throws \Exception
-     */
-    protected function getAllServers($service = NULL) {
-        $servers = [];
-        $context_files = $this->getAllContexts();
-        if (empty($context_files)) {
-            throw new \Exception('No server contexts found. Use `provision save` to create one.');
-        }
-        foreach ($context_files as $context) {
-            if ($context->type == 'server') {
-                $servers[$context->name] = $context;
-            }
-        }
-        return $servers;
-    }
-
 
     /**
      * Return all available contexts.
      *
-     * @return array|Context
+     * @return \Aegir\Provision\Context[]
      */
-    public function getAllPlatforms() {
-        $platforms = [];
+    public function getAllContextsByType($type) {
+        $contexts = [];
         $context_files = $this->getAllContexts();
-        if (empty($context_files)) {
-            throw new \Exception('No contexts found. Use `provision save` to create one.');
-        }
+
         foreach ($context_files as $context) {
-            if ($context->type == 'platform') {
-                $platforms[$context->name] = $context;
+            if ($context->type == $type) {
+                $contexts[$context->name] = $context;
             }
         }
-        return $platforms;
+        return $contexts;
+    }
+
+    /**
+     * Return all Servers.
+     *
+     * @return \Aegir\Provision\Context[]
+     */
+    protected function getAllServers() {
+        return $this->getAllContextsByType('server');
+    }
+
+    /**
+     * Return all Platforms.
+     *
+     * @return \Aegir\Provision\Context[]
+     */
+    public function getAllPlatforms() {
+        return $this->getAllContextsByType('platform');
+    }
+
+    /**
+     * Return all Platforms.
+     *
+     * @return \Aegir\Provision\Context[]
+     */
+    public function getAllSites() {
+        return $this->getAllContextsByType('site');
     }
 
     /**

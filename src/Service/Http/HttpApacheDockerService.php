@@ -113,6 +113,9 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
   {
     $configs['server'][] = ServerConfiguration::class;
     $configs['platform'][] = PlatformConfiguration::class;
+
+    // Make sure to write platform and site config when verifying site.
+    $configs['site'][] = PlatformConfiguration::class;
     $configs['site'][] = SiteConfiguration::class;
     return $configs;
   }
@@ -127,10 +130,7 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
   public function processConfiguration(Configuration &$config) {
 
       // Replace platform's stored root with server's root.
-      if ($this->context instanceof Context\SiteContext) {
-          $root_on_host = $this->context->platform->getProperty('document_root_full');
-      }
-      elseif ($this->context instanceof Context\PlatformContext) {
+      if ($this->context instanceof Context\SiteContext || $this->context instanceof Context\PlatformContext) {
           $root_on_host = $this->context->getProperty('document_root_full');
       }
       else {
@@ -339,11 +339,12 @@ YML;
 //            $volumes[] = "{$platforms_path_host}:{$platforms_path_container}:z";
 //        }
 
-        // Map a volume for every platform.
-        $platforms = $this->getProvision()->getAllPlatforms();
-        foreach ($platforms as $platform) {
-            if ($platform->getSubscription('http')->server->name == $this->provider->name) {
-                $volumes[] = $platform->getProperty('root') . ':' . $this->mapContainerPath($platform->getProperty('root')) . ':z';
+        // Map a volume for every site.
+        $sites = $this->getProvision()->getAllSites();
+        foreach ($sites as $site) {
+            if ($site->getSubscription('http')->server->name == $this->provider->name) {
+                $container_path = $this->mapContainerPath($site->getProperty('root'));
+                $volumes[$container_path] = $site->getProperty('root') . ':' . $container_path . ':z';
             }
         }
 
