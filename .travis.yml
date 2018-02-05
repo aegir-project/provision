@@ -82,6 +82,10 @@ script:
     --makefile=https://raw.githubusercontent.com/aegir-project/provision/7.x-3.x/provision-tests/makes/drupal7.make
     --make_working_copy=1
 
+  # add http service to platform.
+  # @TODO: This should already be done thanks to --server_http!!!
+  - provision services platform_hostmaster add http server_master
+
   # Add site context
   - provision save hostmaster -n
     --context_type=site
