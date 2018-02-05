@@ -32,6 +32,7 @@ use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Class Provision
@@ -465,6 +466,9 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
 
     /**
      * Determine the web user group on this server.
+     *
+     * @TODO: This should move to the Service class.
+     *
      * @return mixed|null
      */
     static function defaultWebGroup() {
@@ -508,5 +512,21 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
             $group = $info['name'];
         }
         return $group;
+    }
+
+    /**
+     * Return a new Symfony Filesystem component.
+     *
+     * Replacement for provision_file().
+     *
+     * Usage:
+     *
+     *   Provision::fs()->exists();
+     *
+     *
+     * @return \Symfony\Component\Filesystem\Filesystem
+     */
+    public static function fs() {
+        return new Filesystem();
     }
 }
