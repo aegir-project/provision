@@ -30,7 +30,7 @@ class ServerConfiguration extends Configuration {
         // Run verify to load in nginx properties.
         $this->service->verify();
 
-        $app_dir = $this->context->getProvision()->getConfig()->get('config_path') . '/' . $this->context->name . '/' . $this->service->getType();
+        $app_dir = $this->getContext()->server_config_path . DIRECTORY_SEPARATOR . $this->service->getType();
         $this->data['http_port'] = $this->service->properties['http_port'];
         $this->data['include_statement'] = '# INCLUDE STATEMENT';
         $this->data['http_pred_path'] = "{$app_dir}/pre.d";
