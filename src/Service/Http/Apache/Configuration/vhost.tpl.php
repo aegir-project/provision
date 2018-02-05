@@ -10,7 +10,7 @@
 //}
 ?>
 
-  DocumentRoot <?php print $document_root; ?>
+  DocumentRoot <?php print $document_root_full; ?>
 
   ServerName <?php print $uri; ?>
 
