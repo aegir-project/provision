@@ -183,6 +183,26 @@ class SaveCommand extends Command
                 exit(1);
             }
 
+            // Pass platform options into Site Options
+            if ($this->context_type == 'site') {
+                if ($input->getOption('platform') && $platform = $this->getProvision()->getContext($input->getOption('platform'))) {
+                    foreach ($platform->getProperties() as $name => $value) {
+                        if ($name != 'name' && $name != 'type' && $this->input->hasOption($name)) {
+                            $this->getProvision()->getLogger()->notice("Setting option '{name}' from platform to '{value}'.", [
+                                'name' => $name,
+                                'value' => $value,
+                            ]);
+
+                            // If the symfony console option is an empty string, it
+                            if (empty($value)) {
+                                $value = FALSE;
+                            }
+                            $this->input->setOption($name, $value);
+                        }
+                    }
+                }
+            }
+
             $options = $this->askForContextProperties();
             $options['name'] = $this->context_name;
             $options['type'] = $this->context_type;
@@ -359,8 +379,8 @@ class SaveCommand extends Command
                 $property->default = $current_value;
             }
 
-            // If option does not exist, ask for it.
-            if (!empty($this->input->getOption($name))) {
+            // If option does not exist, ask for it.  option is FALSE if loaded from platform with empty property. Prevents console from asking for it if empty.
+            if (!empty($this->input->getOption($name)) || $this->input->getOption($name) === FALSE) {
                 $properties[$name] = $this->input->getOption($name);
                 $this->io->comment("Using option {$name}={$properties[$name]}");
             }
