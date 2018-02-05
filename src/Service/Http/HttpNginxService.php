@@ -102,6 +102,10 @@ class HttpNginxService extends HttpService {
 //            drush_log(dt('Vanilla mode detected -SAVE- NO file found @path.', array('@path' => '/data/conf/global.inc')));
 //        }
 
+//        // Set correct subdirs_support value on server save
+//        if (provision_hosting_feature_enabled('subdirs')) {
+//            $this->server->subdirs_support = TRUE;
+//        }
         return parent::verify();
     }
 
