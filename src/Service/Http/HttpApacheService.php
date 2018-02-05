@@ -48,7 +48,7 @@ class HttpApacheService extends HttpService
     }
 
     /**
-     * Find the nginx executable and return the path to it.
+     * Determine apache command based on available executables.
      *
      * @return mixed|string
      */
