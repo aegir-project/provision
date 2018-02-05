@@ -55,7 +55,7 @@ class SiteContext extends PlatformContext implements ConfigurationInterface
         }
 
         // Load http service from platform if site doesn't have them.
-        if (!$this->hasService('http') && $this->platform->hasService('http')) {
+        if (!isset($this->serviceSubscriptions['http']) && $this->platform->hasService('http')) {
             $this->serviceSubscriptions['http'] = $this->platform->getSubscription('http');
             $this->serviceSubscriptions['http']->setContext($this);
         }
