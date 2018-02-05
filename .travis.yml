@@ -132,7 +132,7 @@ script:
 
   - provision verify hostmaster -v
 
-  - provision verify eight
+  - provision verify eight.local.computer
 
   - provision verify server_master
 
