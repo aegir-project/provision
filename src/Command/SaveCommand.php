@@ -389,6 +389,9 @@ class SaveCommand extends Command
     }
 
     protected function askForServiceSubscriptions() {
+        if (!$this->input->isInteractive()){
+            return;
+        }
 
         // Lookup servers.
         $all_services = Context::getServiceOptions();
@@ -414,6 +417,8 @@ class SaveCommand extends Command
             if (!empty($this->input->getOption($option))) {
                 $arguments['server'] = $this->input->getOption($option);
             }
+
+            // If server_http is not specified, but it exists in the platform use that.
             
             // Pass all options for this service to the services command.
             $service_class = Service::getClassName($type);
