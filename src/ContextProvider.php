@@ -51,7 +51,12 @@ class ContextProvider extends Context
     {
         return $this->getService($type);
     }
-    
+
+
+    /**
+     * Loads service properties into the config tree.
+     * @param $root_node
+     */
     protected function servicesConfigTree(&$root_node) {
         $root_node
             ->attribute('context', $this)
