@@ -1,3 +1,9 @@
+aegir3-provision (3.141) testing; urgency=medium
+
+  * Upgrade issue on a missing task_command property, see https://www.drupal.org/project/hostmaster/issues/2942500
+
+ -- Herman van Rink <helmo@initfour.nl>  Tue, 06 Feb 2018 21:43:30 +0100
+
 aegir3-provision (3.140) unstable; urgency=medium
 
   * Bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.14
