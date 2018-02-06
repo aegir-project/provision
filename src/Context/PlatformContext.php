@@ -108,6 +108,33 @@ class PlatformContext extends ServiceSubscriber implements ConfigurationInterfac
                         return $path;
                     })
                 ,
+            'git_url' =>
+                Provision::newProperty()
+                    ->description('platform: Git repository remote URL.')
+                    ->required(FALSE)
+                    ->validate(function($git_url) {
+                        if (empty(trim($git_url))) {
+                            return;
+                        }
+                        Provision::getProvision()->io()->comment('Checking git remote...');
+
+                        // Use git ls-remote to detect a valid and accessible git URL.
+                        $result = Provision::getProvision()->getTasks()->taskExec('git ls-remote')
+                            ->arg($git_url)
+                            ->silent(!Provision::getProvision()->getOutput()->isVerbose())
+                            ->run();
+
+                        if (!$result->wasSuccessful()) {
+                            throw new \RuntimeException("Unable to connect to git remote $git_url. Please check access and try again.");
+                        }
+
+                        Provision::getProvision()->io()->successLite('Connected to git remote.');
+
+                        // @TODO: Parse brances and tags.
+
+                        return $git_url;
+                    })
+            ,
             'makefile' =>
                 Provision::newProperty()
                     ->description('platform: Drush makefile to use for building the platform. May be a path or URL.')
@@ -154,33 +181,6 @@ class PlatformContext extends ServiceSubscriber implements ConfigurationInterfac
                 Provision::newProperty()
                     ->description('platform: Specifiy TRUE to build the platform with the Drush make --working-copy option.')
                     ->required(FALSE)
-            ,
-            'git_url' =>
-                Provision::newProperty()
-                    ->description('platform: Git repository remote URL.')
-                    ->required(FALSE)
-                    ->validate(function($git_url) {
-                        if (empty(trim($git_url))) {
-                            return;
-                        }
-                        Provision::getProvision()->io()->comment('Checking git remote...');
-                        
-                        // Use git ls-remote to detect a valid and accessible git URL.
-                        $result = Provision::getProvision()->getTasks()->taskExec('git ls-remote')
-                            ->arg($git_url)
-                            ->silent(!Provision::getProvision()->getOutput()->isVerbose())
-                            ->run();
-
-                        if (!$result->wasSuccessful()) {
-                            throw new \RuntimeException("Unable to connect to git remote $git_url. Please check access and try again.");
-                        }
-    
-                        Provision::getProvision()->io()->successLite('Connected to git remote.');
-
-                        // @TODO: Parse brances and tags.
-                        
-                        return $git_url;
-                    })
             ,
             'document_root' =>
                 Provision::newProperty()
