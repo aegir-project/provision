@@ -146,16 +146,22 @@ class PlatformContext extends ServiceSubscriber implements ConfigurationInterfac
                         $parsed = parse_url($makefile);
 
                         // If parsed is empty, it couldn't be read as a URL or filename.
+                        // This is the case if the makefile is in the git repo.
+                        // We have to trust the user here to give us the makefile that's in their repo.
                         if (empty($parsed)) {
-                            throw new \RuntimeException("The makefile at {$makefile} could not be read.");
+                            return $makefile;
                         }
+
                         // If array is only path, it is a file path.
                         elseif (count(array_keys($parsed)) == 1 && isset($parsed['path'])) {
-                            if (is_readable($parsed['path'])) {
+                            if (file_exists($parsed['path']) && is_readable($parsed['path'])) {
                                 return $makefile;
                             }
-                            else {
+                            elseif (file_exists($parsed['path']) && !is_readable($parsed['path'])) {
                                 throw new \RuntimeException("The makefile at {$makefile} could not be read.");
+                            }
+                            else {
+                                return $makefile;
                             }
                         }
                         // Otherwise, makefile is a URL. Check if we can access it.
@@ -249,22 +255,26 @@ class PlatformContext extends ServiceSubscriber implements ConfigurationInterfac
             }
 
         }
-        // @TODO: I did get makefiles in git to work hosting_git-7.x-3.x. We can do it here as well.
-        elseif ($this->getProperty('makefile')) {
 
-            if ($this->fs->exists($this->getProperty('root'))) {
+        if ($this->getProperty('makefile')) {
+
+            if ($this->fs->exists($this->getProperty('document_root_full'))) {
                 $tasks['platform.files'] = $this->getProvision()->newTask()
                     ->start('Building platform from makefile... Files already exist.');
             }
             else {
+                $makefile = $this->getProperty('makefile');
+                if (!Provision::fs()->isAbsolutePath($makefile)) {
+                    $makefile = $this->getProperty('root') . DIRECTORY_SEPARATOR . $makefile;
+                }
                 $tasks['platform.make'] = $this->getProvision()->newTask()
                     ->start('Building platform from makefile...')
-                    ->execute(function () {
+                    ->execute(function () use ($makefile) {
                         $drush = realpath(__DIR__ . '/../../bin/drush');
                         $command = $this->getProvision()->getTasks()->taskExec($drush)
                                 ->arg('make')
-                                ->arg($this->getProperty('makefile'))
-                                ->arg($this->getProperty('root'))
+                                ->arg($makefile)
+                                ->arg($this->getProperty('document_root_full'))
                                 ->silent(!$this->getProvision()->getOutput()->isVerbose())
                                 ->getCommand();
 
