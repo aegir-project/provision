@@ -38,6 +38,14 @@ class Property {
     public $default = NULL;
     public $required = FALSE;
     public $validate;
+
+    /**
+     * @var bool
+     *
+     * Force asking for this property. We don't want "root" property
+     * automatically setting itself to the default (current directory).
+     */
+    public $forceAsk = FALSE;
     
     /**
      * Allow "backwards" compatibility: return the description when converting to a string.
@@ -120,6 +128,18 @@ class Property {
      */
     public function validate($callable) {
         $this->validate = $callable;
+        return $this;
+    }
+
+    /**
+     * Set this property to always ask the user, even though it provides a default.
+     *
+     * @param bool $force
+     *
+     * @return $this
+     */
+    public function forceAsk($force = TRUE) {
+        $this->forceAsk = $force;
         return $this;
     }
 }
