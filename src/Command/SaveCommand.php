@@ -426,9 +426,6 @@ class SaveCommand extends Command
     }
     
     protected function askForServices() {
-        if (!$this->input->isInteractive()){
-            return;
-        }
         $command = $this->getApplication()->find('services');
         $arguments = [
             'context_name' => $this->input->getArgument('context_name'),
@@ -443,9 +440,6 @@ class SaveCommand extends Command
     }
 
     protected function askForServiceSubscriptions() {
-        if (!$this->input->isInteractive()){
-            return;
-        }
 
         // Lookup servers.
         $all_services = Context::getServiceOptions();
