@@ -3,6 +3,7 @@
 namespace Aegir\Provision\Context;
 
 use Aegir\Provision\Application;
+use Aegir\Provision\Console\Config;
 use Aegir\Provision\ServiceSubscriber;
 use Aegir\Provision\Provision;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -57,16 +58,53 @@ class PlatformContext extends ServiceSubscriber implements ConfigurationInterfac
     
     static function option_documentation()
     {
+        $default_root = getcwd();
+        if ($default_root == Config::getHomeDir() || !is_writable($default_root)) {
+            $default_root = null;
+        }
+
         $options = [
             'root' =>
                 Provision::newProperty()
-                    ->description('platform: path to the source code for this platform. You may use a relative or absolute path. May be different from document root.')
-                    ->defaultValue(getcwd())
+                    ->description('Path to source code. Enter an absolute path or relative to ' . getcwd() . ". If path does not exist, it will be created.")
+                    ->defaultValue($default_root)
                     ->required(TRUE)
+                    ->forceAsk(TRUE)
                     ->validate(function($path) {
-                        if (strpos($path, '/') !== 0) {
-                            $path = getcwd() . DIRECTORY_SEPARATOR . $path;
+                        if (!Provision::fs()->isAbsolutePath($path)) {
+
+                            // realpath() doesn't work if file is missing.
+                            // Our root might not exist until verify.
+                            // Using realpath() helps us verify relative path with "." or ".." in it.
+                            if (file_exists($path)) {
+                                $path = realpath($path);
+                            }
+                            // elseif !empty is to prevent appending DIRECTORY_SEPARATOR when there is not path.
+                            elseif (!empty($path)) {
+
+                                // Attempt to use realpath on the first part of the path
+                                $path_parts = explode(DIRECTORY_SEPARATOR, $path);
+                                $path_last_dir = array_pop($path_parts);
+                                $path = getcwd() . DIRECTORY_SEPARATOR . $path;
+
+                                $parent_path = realpath(rtrim($path, $path_last_dir));
+
+                                if (!empty($parent_path)) {
+                                    $path = $parent_path . DIRECTORY_SEPARATOR . $path_last_dir;
+                                }
+                            }
                         }
+                        if (empty($path)){
+                            throw new \Exception('Path cannot be empty.');
+                        }
+                        if ($path == Config::getHomeDir()) {
+                            throw new \Exception("You can't use your home directory as code root. Please try again.");
+                        }
+                        if (file_exists($path) && !is_writable($path)) {
+                            throw new \Exception("That path is not writable using the current user. Please try again.");
+                        }
+                        Provision::getProvision()->io()->successLite('Using root ' . $path);
+
                         return $path;
                     })
                 ,
