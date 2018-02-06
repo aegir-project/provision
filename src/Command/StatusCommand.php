@@ -68,16 +68,22 @@ class StatusCommand extends Command
             $this->io->table($headers, $rows);
     
             // Lookup all contexts
-            $rows = [];
+            $tables = [];
             foreach ($this->getProvision()->getAllContexts() as $context) {
-                $rows[] = [$context->name, $context->type];
+                $tables[$context->type]['headers'] = [ucfirst($context->type) . 's'];
+
+                $tables[$context->type]['rows'][] = [$context->name, $context->type];
             }
-            $headers = ['Contexts'];
-            if (empty($rows)) {
-                $rows[] = 'There are no contexts. Run <comment>provision save</comment> to get started.';
+            if (empty($tables)) {
+                $this->getProvision()->io()->warningLite('There are no contexts. Run <comment>provision save</comment> to get started.');
+                return;
             }
-            $this->io->table($headers, $rows);
-    
+
+            foreach ($tables as $type => $table) {
+
+                $this->io->table($table['headers'], $table['rows']);
+            }
+
             // Offer to output a context status.
             $options = $this->getProvision()->getAllContextsOptions();
             if ($this->input->isInteractive() && count($options)) {
