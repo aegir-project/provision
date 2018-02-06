@@ -6,6 +6,7 @@ use Aegir\Provision\Application;
 use Aegir\Provision\ServiceSubscriber;
 use Aegir\Provision\Provision;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Console\Input\ArgvInput;
 
 /**
  * Class SiteContext
@@ -77,11 +78,21 @@ class SiteContext extends PlatformContext implements ConfigurationInterface
             ->description('site: The platform this site is run on. (Optional)')
             ->required(FALSE)
         ;
-        $options['uri'] = 'site: example.com URI, no http:// or trailing /';
-        $options['language'] = 'site: site language; default en';
-        $options['profile'] = 'site: Drupal profile to use; default standard';
+        // @TODO: check for other sites with the URI.
+        $options['uri'] = Provision::newProperty()
+            ->description('site: example.com URI, no http:// or trailing /')
+        ;
+
+        $options['language'] = Provision::newProperty('site: site language; default en')
+            //@TODO: Language handling across provision, and an arbitrary site install values tool.
+            ->defaultValue('en')
+        ;
+        $options['profile'] = Provision::newProperty('site: Drupal profile to use; default standard')
+            ->defaultValue('standard')
+        ;
         $options['site_path'] = Provision::newProperty()
             ->description('site: The site configuration path (sites/domain.com). If left empty, will be generated automatically.')
+            ->defaultValue('sites/default')
             ->required(FALSE)
         ;
 
