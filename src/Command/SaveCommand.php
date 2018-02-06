@@ -86,6 +86,13 @@ class SaveCommand extends Command
           'Run a verify command after saving the context.'
         );
 
+        $inputDefinition[] = new InputOption(
+            'ask-defaults',
+            'a',
+            InputOption::VALUE_NONE,
+            'Ask for property values even if a default is provided.'
+        );
+
       // Load all Aegir\Provision\Context and inject their options.
       // @TODO: Use CommandFileDiscovery to include all classes that inherit Aegir\Provision\Context
       $contexts[] = SiteContext::class;
@@ -386,6 +393,7 @@ class SaveCommand extends Command
                 continue;
             }
             
+            // Convert string into Property object.
             // Allows option_documentation to return array of strings for simple properties.
             if ( !$property instanceof Property) {
                 $property = Provision::newProperty($property);
@@ -402,7 +410,16 @@ class SaveCommand extends Command
                 $this->io->comment("Using option {$name}={$properties[$name]}");
             }
             else {
-                $properties[$name] = $this->io->ask("{$name} ({$property->description})", $property->default, $property->validate);
+
+                // If --ask-defaults is not set and there is a default, use it and do not ask the user.
+                if (!$this->input->getOption('ask-defaults') && !empty($property->default)) {
+                    $properties[$name] = $property->default;
+                    $this->io->comment("Using option {$name}={$properties[$name]}");
+                }
+                // If user has specifically asked to be asked with the --ask-defaults option, then ask for it.
+                else {
+                    $properties[$name] = $this->io->ask("{$name} ({$property->description})", $property->default, $property->validate);
+                }
             }
         }
         return $properties;
