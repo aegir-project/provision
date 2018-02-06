@@ -49,7 +49,7 @@ install:
 script:
 
   # @TODO: Set non-interactive globally
-  - provision -n
+  - provision -n -v
   - provision status -n
 
   # Add server context.
