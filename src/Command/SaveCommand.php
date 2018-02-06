@@ -424,7 +424,10 @@ class SaveCommand extends Command
         }
         return $properties;
     }
-    
+
+    /**
+     * When a server is being added, offer to add services to it interactively.
+     */
     protected function askForServices() {
         if (!$this->input->isInteractive()){
             return;
@@ -442,6 +445,9 @@ class SaveCommand extends Command
         }
     }
 
+    /**
+     * After a Service Subscriber is added, offer to setup service subscriptions.
+     */
     protected function askForServiceSubscriptions() {
 
         // Lookup servers.
