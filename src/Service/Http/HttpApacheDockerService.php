@@ -132,13 +132,19 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
 
       // Replace platform's stored root with server's root.
       if ($this->context instanceof Context\SiteContext || $this->context instanceof Context\PlatformContext) {
-          $root_on_host = $this->context->getProperty('document_root_full');
+          $root_on_host = $this->context->getProperty('root');
       }
       else {
           return;
       }
 
-      $config->data['document_root_full'] = $this->mapContainerPath($root_on_host);
+      // Recalculate document root full inside container. Don't map container path with docroot.
+      if ($this->context->getProperty('document_root')) {
+          $config->data['document_root_full'] = $this->mapContainerPath($root_on_host) . DIRECTORY_SEPARATOR . $this->context->getProperty('document_root');
+      }
+      else {
+          $config->data['document_root_full'] = $this->mapContainerPath($root_on_host);
+      }
 
       if ($this->context->type == 'site' && isset($config->data['uri'])) {
           $config->data['site_path'] = $config->data['document_root'] . '/sites/' . $config->data['uri'];
@@ -155,7 +161,9 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
      *
      * @return string
      */
-    function mapContainerPath($root_on_host) {
+    function mapContainerPath($root_on_host, $docroot = '') {
+
+
         $path_parts = explode(DIRECTORY_SEPARATOR, $root_on_host);
         $directory = array_pop($path_parts);
         return $this->provider->getProperty('aegir_root') . DIRECTORY_SEPARATOR . 'platforms' . DIRECTORY_SEPARATOR . $directory;
