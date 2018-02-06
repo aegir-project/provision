@@ -62,15 +62,20 @@ class StatusCommand extends Command
             $this->context->showServices($this->io);
         }
         else {
-            $headers = ['Provision CLI Configuration'];
-            $rows = [];
-            $config = $this->getProvision()->getConfig()->toArray();
-            unset($config['options']);
-            foreach ($config as $key => $value) {
-                $rows[] = [$key, $value];
+            if ($this->output->isVerbose()) {
+                $headers = ['Provision Console Configuration'];
+                $rows = [];
+                $config = $this->getProvision()->getConfig()->toArray();
+                unset($config['options']);
+                foreach ($config as $key => $value) {
+                    $rows[] = [$key, $value];
+                }
+                $this->io->table($headers, $rows);
+                $this->getProvision()->getLogger()->info('You can modify your console configuration using the file {path}', [
+                    'path ' => $this->getProvision()->getConfig()->get('console_config_path'),
+                ]);
             }
-            $this->io->table($headers, $rows);
-    
+
             // Lookup all contexts
             $tables = [];
 
