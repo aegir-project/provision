@@ -125,13 +125,13 @@ script:
   # Platform verify uses drush make, which won't run if folder exists.
   # @TODO: Figure out how to deal with this within provision.
   - sudo rm -rf /home/travis/hostmaster
-  - sudo rm -rf /home/travis/eight
   - provision verify platform_hostmaster -v
 
   - ls -la /home/travis/hostmaster
 
   - provision verify hostmaster -v
 
+  - sudo rm -rf /home/travis/eight
   - provision verify eight.local.computer
 
   - provision verify server_master
