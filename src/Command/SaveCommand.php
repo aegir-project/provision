@@ -70,7 +70,8 @@ class SaveCommand extends Command
           'context_type',
           null,
           InputOption::VALUE_OPTIONAL,
-          'server, platform, or site'
+          'server, platform, or site',
+          'site'
         );
         $inputDefinition[] = new InputOption(
           'delete',
@@ -412,9 +413,9 @@ class SaveCommand extends Command
             else {
 
                 // If --ask-defaults is not set and there is a default, use it and do not ask the user.
-                if (!$this->input->getOption('ask-defaults') && !empty($property->default)) {
+                if (!$property->forceAsk && !$this->input->getOption('ask-defaults') && !empty($property->default)) {
                     $properties[$name] = $property->default;
-                    $this->io->comment("Using option {$name}={$properties[$name]}");
+                    $this->io->comment("Using default option {$name}={$properties[$name]}");
                 }
                 // If user has specifically asked to be asked with the --ask-defaults option, then ask for it.
                 else {
