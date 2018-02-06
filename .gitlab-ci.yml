@@ -265,4 +265,4 @@ upgradetest:debian-jessie-aegir3-apt-upgrade:
     - rm -v /etc/apt/sources.list.d/aegir-stable.list
     - echo "deb http://debian.aegirproject.org unstable main" | sudo tee -a /etc/apt/sources.list.d/aegir-unstable.list
     - sudo apt-get update
-    - sudo apt-get --yes upgrade
+    - sudo apt-get --yes dist-upgrade
