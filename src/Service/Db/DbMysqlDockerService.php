@@ -19,6 +19,14 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
     const SERVICE_TYPE = 'mysqlDocker';
     const SERVICE_TYPE_NAME = 'MySQL on Docker';
 
+    public function __construct($service_config, \Aegir\Provision\Context $provider_context) {
+        parent::__construct($service_config, $provider_context);
+
+        // Force remote host for db servers to match the service type.
+        // @TODO: Should this be done in the docker interface?
+        $this->provider->setProperty('remote_host', 'db');
+    }
+
     /**
      * Return the docker image name to use for this service.
      *
@@ -27,6 +35,15 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
     public function dockerImage()
     {
         return 'mariadb';
+    }
+
+    /**
+     * Normally this returns self::SERVICE_TYPE. We have to override because this
+     * is what is used in settings.php files.
+     * @return string
+     */
+    public function getType() {
+        return 'mysql';
     }
 
     public function dockerComposeService(){

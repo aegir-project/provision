@@ -233,6 +233,8 @@ class SaveCommand extends Command
             }
         }
 
+        $this->context->preSave();
+
         foreach ($this->context->getProperties() as $name => $value) {
             if ($name == 'services' || $name == 'service_subscriptions') {
                 continue;

@@ -495,6 +495,11 @@ class Context implements BuilderAwareInterface
     }
 
     /**
+     * Subclasses can implement to modify properties before saving.
+     */
+    public function preSave() {}
+
+    /**
      * Saves the config class to file.
      *
      * @return bool

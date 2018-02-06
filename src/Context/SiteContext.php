@@ -54,19 +54,14 @@ class SiteContext extends PlatformContext implements ConfigurationInterface
         else {
             $this->platform = NULL;
         }
-// @TODO: Remove. Sites should require HTTP server natively. A platform just provides the default for new sites, and that is handled by SaveCommand::.
-//        // Load http service from platform if site doesn't have them.
-//        if (!isset($this->serviceSubscriptions['http']) && isset($this->platform) && $this->platform->hasService('http')) {
-//            $this->serviceSubscriptions['http'] = $this->platform->getSubscription('http');
-//            $this->serviceSubscriptions['http']->setContext($this);
-//        }
+    }
 
-        $uri = $this->getProperty('uri');
-        $this->properties['site_path'] = "sites/{$uri}";
-
-        // If site_path property is empty, generate it from platform root + uri.
+    /**
+     *
+     */
+    public function preSave() {
         if (empty($this->getProperty('site_path'))) {
-            $this->setProperty('site_path', $this->platform->getConfig()->get('root') . DIRECTORY_SEPARATOR . $this->uri);
+            $this->setProperty('site_path', 'sites/' . DIRECTORY_SEPARATOR . $this->getProperty('uri'));
         }
     }
 
@@ -202,6 +197,33 @@ class SiteContext extends PlatformContext implements ConfigurationInterface
 
                     $this->fs->chmod("$site_path/settings.php", 02770);
                     $this->fs->chgrp("$site_path/settings.php", $this->getProvision()->getConfig()->get('web_user'));
+
+                    // @TODO: This is only true for Drupal version 7.50 and up. See Provision/Config/Drupal/Settings.php
+                    // We are treading more and more into the Drupal-only world, so I'm leaving this hard coded to TRUE until we develop something else.
+                    $database_settings = <<<PHP
+                        
+// PROVISION SETTINGS
+\$databases['default']['default'] = array(
+    'driver' => \$_SERVER['db_type'],
+    'database' => \$_SERVER['db_name'],
+    'username' => \$_SERVER['db_user'],
+    'password' => \$_SERVER['db_passwd'],
+    'host' => \$_SERVER['db_host'],
+    /* Drupal interprets \$databases['db_port'] as a string, whereas Drush sees
+     * it as an integer. To maintain consistency, we cast it to a string. This
+     * should probably be fixed in Drush.
+     */
+    'port' => (string) \$_SERVER['db_port'],
+    'charset' => 'utf8mb4',
+    'collation' => 'utf8mb4_general_ci',
+  );
+
+\$db_url['default'] = \$_SERVER['db_type'] . '://' . \$_SERVER['db_user'] . ':' . \$_SERVER['db_passwd'] . '@' . \$_SERVER['db_host'] . ':' . \$_SERVER['db_port'] . '/' . \$_SERVER['db_name'];
+
+PHP;
+                if (strpos(file_get_contents("$site_path/settings.php"), "// PROVISION SETTINGS") === FALSE) {
+                    $this->fs->appendToFile("$site_path/settings.php", $database_settings);
+                }
             });
 
 
