@@ -184,24 +184,7 @@ class SaveCommand extends Command
             }
 
             // Pass platform options into Site Options
-            if ($this->context_type == 'site') {
-                if ($input->getOption('platform') && $platform = $this->getProvision()->getContext($input->getOption('platform'))) {
-                    foreach ($platform->getProperties() as $name => $value) {
-                        if ($name != 'name' && $name != 'type' && $this->input->hasOption($name)) {
-                            $this->getProvision()->getLogger()->notice("Setting option '{name}' from platform to '{value}'.", [
-                                'name' => $name,
-                                'value' => $value,
-                            ]);
-
-                            // If the symfony console option is an empty string, it
-                            if (empty($value)) {
-                                $value = FALSE;
-                            }
-                            $this->input->setOption($name, $value);
-                        }
-                    }
-                }
-            }
+            $this->loadPlatformProperties();
 
             $options = $this->askForContextProperties();
             $options['name'] = $this->context_name;
@@ -288,6 +271,40 @@ class SaveCommand extends Command
             exit($command->run($input, $this->output));
         }
 
+    }
+
+    /**
+     * Takes --platform option, loads it, and parses properties from that into
+     * input options for the site.
+     */
+    private function loadPlatformProperties() {
+        if ($this->context_type == 'site') {
+            if ($this->input->getOption('platform') && $platform = $this->getProvision()->getContext($this->input->getOption('platform'))) {
+
+                // Convert HTTP server to server_http option.
+                if ($platform->hasService('http')) {
+                    $this->input->setOption('server_http', $platform->service('http')->provider->name);
+                }
+
+                // Convert all platform properties to $input options.
+                foreach ($platform->getProperties() as $name => $value) {
+                    if ($name != 'name' && $name != 'type' && $this->input->hasOption($name)) {
+                        $this->getProvision()->getLogger()->notice("Setting option '{name}' from platform to '{value}'.", [
+                            'name' => $name,
+                            'value' => $value,
+                        ]);
+
+                        // Detect empty values, and pass FALSE instead.
+                        // If we don't, $this->>askForContextProperties() will
+                        // not see the option and will ask for it.
+                        if (empty($value)) {
+                            $value = FALSE;
+                        }
+                        $this->input->setOption($name, $value);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -439,7 +456,7 @@ class SaveCommand extends Command
             }
 
             // If server_http is not specified, but it exists in the platform use that.
-            
+
             // Pass all options for this service to the services command.
             $service_class = Service::getClassName($type);
             $options_method = $this->input->getOption('context_type') . "_options";

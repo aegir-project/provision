@@ -53,12 +53,12 @@ class SiteContext extends PlatformContext implements ConfigurationInterface
         else {
             $this->platform = NULL;
         }
-
-        // Load http service from platform if site doesn't have them.
-        if (!isset($this->serviceSubscriptions['http']) && isset($this->platform) && $this->platform->hasService('http')) {
-            $this->serviceSubscriptions['http'] = $this->platform->getSubscription('http');
-            $this->serviceSubscriptions['http']->setContext($this);
-        }
+// @TODO: Remove. Sites should require HTTP server natively. A platform just provides the default for new sites, and that is handled by SaveCommand::.
+//        // Load http service from platform if site doesn't have them.
+//        if (!isset($this->serviceSubscriptions['http']) && isset($this->platform) && $this->platform->hasService('http')) {
+//            $this->serviceSubscriptions['http'] = $this->platform->getSubscription('http');
+//            $this->serviceSubscriptions['http']->setContext($this);
+//        }
 
         $uri = $this->getProperty('uri');
         $this->properties['site_path'] = "sites/{$uri}";
