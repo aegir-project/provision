@@ -102,14 +102,14 @@ class Config extends ProvisionConfig
             );
         }
 
-        // If config_path does not exist...
-        if (!file_exists($this->get('config_path'))) {
+        // If config_path or contexts_path does not exist...
+        if (!file_exists($this->get('config_path')) || !file_exists($this->get('contexts_path'))) {
 
             // START: New User!
             // @TODO: Break this out into it's own method or class.
             $this->io->title("Welcome to Provision!");
             $this->io->block([
-                "It looks like this is your first time running Provision, because your config_path folder is missing. This is the place Provision stores your metadata and server configuration.",
+                "It looks like this is your first time running Provision, because the config directory is missing. This is the place Provision stores your metadata and server configuration.",
             ]);
 
             // Tell the user how to change the config path. Change language if they already have the .provision.yml file.
@@ -142,7 +142,18 @@ class Config extends ProvisionConfig
         $writable_paths['contexts_path'] = $this->get('contexts_path');
         $errors = [];
         foreach ($writable_paths as $name => $path) {
-            if (!is_writable($path)) {
+            if (!file_exists($path)) {
+
+                if ($this->io()->confirm("The folder set to '$name' ($path) does not exist. Would you like to create it?")) {
+                    Provision::fs()->mkdir($path);
+                }
+                else {
+                    $errors[] = "The folder set to '$name' ($path) does not exist. You must create it or change the $name value in the file {$this->get('console_config_file')}.";
+                }
+
+                $errors[] = "The folder set to '$name' ($path) does not exist. Fix this or change the $name value in the file {$this->get('console_config_file')}.";
+            }
+            elseif (!is_writable($path)) {
                 $errors[] = "The folder set to '$name' ($path) is not writable. Fix this or change the $name value in the file {$this->get('console_config_file')}.";
             }
         }
