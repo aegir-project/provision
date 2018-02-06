@@ -426,6 +426,9 @@ class SaveCommand extends Command
     }
     
     protected function askForServices() {
+        if (!$this->input->isInteractive()){
+            return;
+        }
         $command = $this->getApplication()->find('services');
         $arguments = [
             'context_name' => $this->input->getArgument('context_name'),
