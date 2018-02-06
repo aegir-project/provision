@@ -82,6 +82,10 @@ script:
     --makefile=https://raw.githubusercontent.com/aegir-project/provision/7.x-3.x/provision-tests/makes/drupal7.make
     --make_working_copy=1
 
+  # add http service to platform.
+  # @TODO: This should already be done thanks to --server_http!!!
+  - provision services platform_hostmaster add http server_master
+
   # Add site context
   - provision save hostmaster -n
     --context_type=site
@@ -94,23 +98,42 @@ script:
     --db_user=drupal
     --db_password=drupal
 
+  # Add a site context without a platform!
+  - provision save eight.local.computer -n
+    --context_type=site
+    --server_db=server_master
+    --server_http=server_master
+    --uri=eight.local.computer
+    --language=en
+    --profile=atrium
+    --db_name=atrium
+    --db_user=atrium
+    --db_password=atrium
+    --root=/home/travis/eight
+    --makefile=https://raw.githubusercontent.com/aegir-project/provision/7.x-3.x/provision-tests/makes/drupal8.make
+
   - provision status -n
   - provision status server_master
   - provision status platform_hostmaster
   - provision status hostmaster
+  - provision status eight.local.computer
 
 
-  - provision verify server_master -v
+  - provision verify server_master
 
   # Docker creates the host path when docker run happens, in server verify.
   # Platform verify uses drush make, which won't run if folder exists.
   # @TODO: Figure out how to deal with this within provision.
   - sudo rm -rf /home/travis/hostmaster
-  - provision verify platform_hostmaster -v
+  - provision verify platform_hostmaster
 
   - ls -la /home/travis/hostmaster
 
-  - provision verify hostmaster -v
+  - provision verify hostmaster
+
+  - sudo rm -rf /home/travis/eight
+  - provision verify eight.local.computer
+
   - provision verify server_master
 
   - docker ps

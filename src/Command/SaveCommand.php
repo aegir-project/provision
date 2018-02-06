@@ -70,7 +70,8 @@ class SaveCommand extends Command
           'context_type',
           null,
           InputOption::VALUE_OPTIONAL,
-          'server, platform, or site'
+          'server, platform, or site',
+          'site'
         );
         $inputDefinition[] = new InputOption(
           'delete',
@@ -84,6 +85,13 @@ class SaveCommand extends Command
           null,
           InputOption::VALUE_NONE,
           'Run a verify command after saving the context.'
+        );
+
+        $inputDefinition[] = new InputOption(
+            'ask-defaults',
+            'a',
+            InputOption::VALUE_NONE,
+            'Ask for property values even if a default is provided.'
         );
 
       // Load all Aegir\Provision\Context and inject their options.
@@ -183,6 +191,9 @@ class SaveCommand extends Command
                 exit(1);
             }
 
+            // Pass platform options into Site Options
+            $this->loadPlatformProperties();
+
             $options = $this->askForContextProperties();
             $options['name'] = $this->context_name;
             $options['type'] = $this->context_type;
@@ -271,6 +282,40 @@ class SaveCommand extends Command
     }
 
     /**
+     * Takes --platform option, loads it, and parses properties from that into
+     * input options for the site.
+     */
+    private function loadPlatformProperties() {
+        if ($this->context_type == 'site') {
+            if ($this->input->getOption('platform') && $platform = $this->getProvision()->getContext($this->input->getOption('platform'))) {
+
+                // Convert HTTP server to server_http option.
+                if ($platform->hasService('http')) {
+                    $this->input->setOption('server_http', $platform->service('http')->provider->name);
+                }
+
+                // Convert all platform properties to $input options.
+                foreach ($platform->getProperties() as $name => $value) {
+                    if ($name != 'name' && $name != 'type' && $this->input->hasOption($name)) {
+                        $this->getProvision()->getLogger()->notice("Setting option '{name}' from platform to '{value}'.", [
+                            'name' => $name,
+                            'value' => $value,
+                        ]);
+
+                        // Detect empty values, and pass FALSE instead.
+                        // If we don't, $this->>askForContextProperties() will
+                        // not see the option and will ask for it.
+                        if (empty($value)) {
+                            $value = FALSE;
+                        }
+                        $this->input->setOption($name, $value);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Override  to add options
      * @param string $question
      */
@@ -349,6 +394,7 @@ class SaveCommand extends Command
                 continue;
             }
             
+            // Convert string into Property object.
             // Allows option_documentation to return array of strings for simple properties.
             if ( !$property instanceof Property) {
                 $property = Provision::newProperty($property);
@@ -359,18 +405,30 @@ class SaveCommand extends Command
                 $property->default = $current_value;
             }
 
-            // If option does not exist, ask for it.
-            if (!empty($this->input->getOption($name))) {
+            // If option does not exist, ask for it.  option is FALSE if loaded from platform with empty property. Prevents console from asking for it if empty.
+            if (!empty($this->input->getOption($name)) || $this->input->getOption($name) === FALSE) {
                 $properties[$name] = $this->input->getOption($name);
                 $this->io->comment("Using option {$name}={$properties[$name]}");
             }
             else {
-                $properties[$name] = $this->io->ask("{$name} ({$property->description})", $property->default, $property->validate);
+
+                // If --ask-defaults is not set and there is a default, use it and do not ask the user.
+                if (!$property->forceAsk && !$this->input->getOption('ask-defaults') && !empty($property->default)) {
+                    $properties[$name] = $property->default;
+                    $this->io->comment("Using default option {$name}={$properties[$name]}");
+                }
+                // If user has specifically asked to be asked with the --ask-defaults option, then ask for it.
+                else {
+                    $properties[$name] = $this->io->ask("{$name} ({$property->description})", $property->default, $property->validate);
+                }
             }
         }
         return $properties;
     }
-    
+
+    /**
+     * When a server is being added, offer to add services to it interactively.
+     */
     protected function askForServices() {
         if (!$this->input->isInteractive()){
             return;
@@ -388,6 +446,9 @@ class SaveCommand extends Command
         }
     }
 
+    /**
+     * After a Service Subscriber is added, offer to setup service subscriptions.
+     */
     protected function askForServiceSubscriptions() {
 
         // Lookup servers.
@@ -414,7 +475,9 @@ class SaveCommand extends Command
             if (!empty($this->input->getOption($option))) {
                 $arguments['server'] = $this->input->getOption($option);
             }
-            
+
+            // If server_http is not specified, but it exists in the platform use that.
+
             // Pass all options for this service to the services command.
             $service_class = Service::getClassName($type);
             $options_method = $this->input->getOption('context_type') . "_options";

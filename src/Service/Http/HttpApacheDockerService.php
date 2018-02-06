@@ -15,6 +15,7 @@ use Aegir\Provision\Service\DockerServiceInterface;
 use Aegir\Provision\Service\Http\Apache\Configuration\PlatformConfiguration;
 use Aegir\Provision\Service\Http\Apache\Configuration\SiteConfiguration;
 use Aegir\Provision\Service\Http\ApacheDocker\Configuration\ServerConfiguration;
+use Aegir\Provision\ServiceSubscriber;
 use Psr\Log\LogLevel;
 use Symfony\Component\Yaml\Yaml;
 
@@ -113,6 +114,9 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
   {
     $configs['server'][] = ServerConfiguration::class;
     $configs['platform'][] = PlatformConfiguration::class;
+
+    // Make sure to write platform and site config when verifying site.
+    $configs['site'][] = PlatformConfiguration::class;
     $configs['site'][] = SiteConfiguration::class;
     return $configs;
   }
@@ -127,17 +131,20 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
   public function processConfiguration(Configuration &$config) {
 
       // Replace platform's stored root with server's root.
-      if ($this->context instanceof Context\SiteContext) {
-          $root_on_host = $this->context->platform->getProperty('document_root_full');
-      }
-      elseif ($this->context instanceof Context\PlatformContext) {
-          $root_on_host = $this->context->getProperty('document_root_full');
+      if ($this->context instanceof Context\SiteContext || $this->context instanceof Context\PlatformContext) {
+          $root_on_host = $this->context->getProperty('root');
       }
       else {
           return;
       }
 
-      $config->data['document_root_full'] = $this->mapContainerPath($root_on_host);
+      // Recalculate document root full inside container. Don't map container path with docroot.
+      if ($this->context->getProperty('document_root')) {
+          $config->data['document_root_full'] = $this->mapContainerPath($root_on_host) . DIRECTORY_SEPARATOR . $this->context->getProperty('document_root');
+      }
+      else {
+          $config->data['document_root_full'] = $this->mapContainerPath($root_on_host);
+      }
 
       if ($this->context->type == 'site' && isset($config->data['uri'])) {
           $config->data['site_path'] = $config->data['document_root'] . '/sites/' . $config->data['uri'];
@@ -154,7 +161,9 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
      *
      * @return string
      */
-    function mapContainerPath($root_on_host) {
+    function mapContainerPath($root_on_host, $docroot = '') {
+
+
         $path_parts = explode(DIRECTORY_SEPARATOR, $root_on_host);
         $directory = array_pop($path_parts);
         return $this->provider->getProperty('aegir_root') . DIRECTORY_SEPARATOR . 'platforms' . DIRECTORY_SEPARATOR . $directory;
@@ -339,15 +348,16 @@ YML;
 //            $volumes[] = "{$platforms_path_host}:{$platforms_path_container}:z";
 //        }
 
-        // Map a volume for every platform.
-        $platforms = $this->getProvision()->getAllPlatforms();
-        foreach ($platforms as $platform) {
-            if ($platform->getSubscription('http')->server->name == $this->provider->name) {
-                $volumes[] = $platform->getProperty('root') . ':' . $this->mapContainerPath($platform->getProperty('root')) . ':z';
+        // Map a volume for every site.
+        $contexts = $this->getProvision()->getAllContexts();
+        foreach ($contexts as $context) {
+            if ($context instanceof ServiceSubscriber && $context->getSubscription('http')->server->name == $this->provider->name) {
+                $container_path = $this->mapContainerPath($context->getProperty('root'));
+                $volumes[$container_path] = $context->getProperty('root') . ':' . $container_path . ':z';
             }
         }
 
-        return $volumes;
+        return array_values($volumes);
     }
 
     /**
