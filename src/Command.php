@@ -3,10 +3,12 @@
 namespace Aegir\Provision;
 
 use Aegir\Provision\Common\ProvisionAwareTrait;
+use Aegir\Provision\Console\ProvisionStyle;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Robo\Common\ConfigAwareTrait;
 use Symfony\Component\Console\Command\Command as BaseCommand;
 use Drupal\Console\Core\Command\Shared\CommandTrait;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
@@ -37,7 +39,7 @@ abstract class Command extends BaseCommand
     protected $output;
     
     /**
-     * @var DrupalStyle;
+     * @var ProvisionStyle;
      */
     protected $io;
 
@@ -67,7 +69,7 @@ abstract class Command extends BaseCommand
         $this->input = $input;
         $this->output = $output;
         
-        $this->io = new DrupalStyle($input, $output);
+        $this->io = new ProvisionStyle($input, $output);
         
         // Load active context if a command uses the argument.
         if ($this->input->hasArgument('context_name') && !empty($this->input->getArgument('context_name'))) {
@@ -92,7 +94,7 @@ abstract class Command extends BaseCommand
         }
         
         // If context_name is not specified, ask for it.
-        elseif ($this->getDefinition()->getArgument('context_name')->isRequired() && $this->input->hasArgument('context_name') && empty($this->input->getArgument('context_name'))) {
+        elseif ($this->input->hasArgument('context_name') && $this->getDefinition()->getArgument('context_name')->isRequired() && empty($this->input->getArgument('context_name'))) {
             $this->askForContext();
             $this->input->setArgument('context_name', $this->context_name);
 

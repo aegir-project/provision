@@ -2,11 +2,14 @@
 
 namespace Aegir\Provision\Console;
 
+use Aegir\Provision\Common\NotSetupException;
+use Aegir\Provision\Common\ProvisionAwareTrait;
 use Aegir\Provision\Provision;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Robo\Common\IO;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Exception\InvalidOptionException;
+use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 
@@ -21,6 +24,7 @@ class Config extends ProvisionConfig
     const CONFIG_FILENAME = '.provision.yml';
 
     use IO;
+    use ProvisionAwareTrait;
 
     /**
      * @var Filesystem
@@ -30,7 +34,7 @@ class Config extends ProvisionConfig
     /**
      * DefaultsConfig constructor.
      */
-    public function __construct(ProvisionStyle $io = null)
+    public function __construct(ProvisionStyle $io = null, $validate = TRUE)
     {
         parent::__construct();
         $this->io = $io;
@@ -68,12 +72,20 @@ class Config extends ProvisionConfig
 
         $file = $this->get('user_home') . DIRECTORY_SEPARATOR . Config::CONFIG_FILENAME;
         $this->set('console_config_file', $file);
-        
-        $this->extend(new YamlConfig($this->get('user_home') . DIRECTORY_SEPARATOR . Config::CONFIG_FILENAME));
+
+        try {
+            $this->extend(new YamlConfig($this->get('user_home') . DIRECTORY_SEPARATOR . Config::CONFIG_FILENAME));
+        }
+        catch (\TypeError $e) {
+            throw new \Exception('Unable to parse YAML file from ' . $this->get('user_home') . DIRECTORY_SEPARATOR . Config::CONFIG_FILENAME);
+        }
+
         $this->extend(new DotEnvConfig(getcwd()));
         $this->extend(new EnvConfig());
 
-        $this->validateConfig();
+        if ($validate) {
+            $this->validateConfig();
+        }
     }
 
     /**
@@ -102,38 +114,13 @@ class Config extends ProvisionConfig
             );
         }
 
-        // If config_path or contexts_path does not exist...
-        if (!file_exists($this->get('config_path')) || !file_exists($this->get('contexts_path'))) {
-
-            // START: New User!
-            // @TODO: Break this out into it's own method or class.
-            $this->io->title("Welcome to Provision!");
-            $this->io->block([
-                "It looks like this is your first time running Provision, because the config directory is missing. This is the place Provision stores your metadata and server configuration.",
-            ]);
-
-            // Tell the user how to change the config path. Change language if they already have the .provision.yml file.
-            if (file_exists($this->get('console_config_path'))) {
-                $this->io->commentBlock([
-                    'If you would like to change the default Config Path, create a file ' . $this->get('console_config_file') . ' and add:',
-                    '    config_path: /path/to/my/provision/config'
-                ]);
-            }
-            else {
-                $this->io->block([
-                    'Tip: If you would like to change the default Config Path, add the following to the file ' . $this->get('console_config_file'),
-                    '    config_path: /path/to/my/provision/config'
-                ], NULL, 'fg=blue');
-            }
-
-            // Offer to create the folder for the user.
-            if ($this->input()->hasParameterOption(array('--no-interaction', '-n'), false) || $this->io->confirm('Should I create the folders ' . $this->get('config_path') . ' and ' . $this->get('contexts_path') . ' ?')) {
-                $this->fs->mkdir($this->get('config_path'), 0700);
-                $this->fs->mkdir($this->get('contexts_path'), 0700);
-
-                $this->io->successLite('Created paths successfully.');
-                $this->io->writeln('');
-            }
+        // Check for missing everything. Tell the user to run the setup command.
+        // @TODO: Run the setup command here instead. I poked and prodded but could not get it to work. Config is instantiated before Application
+        if (
+            !file_exists($this->get('config_path')) &&
+            !file_exists($this->get('console_config_file'))
+        ) {
+            throw new NotSetupException();
         }
 
 
@@ -144,21 +131,15 @@ class Config extends ProvisionConfig
         foreach ($writable_paths as $name => $path) {
             if (!file_exists($path)) {
 
-                if ($this->io()->confirm("The folder set to '$name' ($path) does not exist. Would you like to create it?")) {
-                    Provision::fs()->mkdir($path);
-                }
-                else {
-                    $errors[] = "The folder set to '$name' ($path) does not exist. You must create it or change the $name value in the file {$this->get('console_config_file')}.";
-                }
+                $errors[] = "The '$name' folder ($path) does not exist. You must create it or change the value for '$name' in the file {$this->get('console_config_file')}.";
 
-                $errors[] = "The folder set to '$name' ($path) does not exist. Fix this or change the $name value in the file {$this->get('console_config_file')}.";
             }
             elseif (!is_writable($path)) {
-                $errors[] = "The folder set to '$name' ($path) is not writable. Fix this or change the $name value in the file {$this->get('console_config_file')}.";
+                $errors[] = "The '$name' folder ($path) is not writable. Fix this or change the value for '$name' in the file {$this->get('console_config_file')}.";
             }
         }
         if ($errors) {
-            throw new InvalidOptionException(implode("\n\n", $errors));
+            throw new NotSetupException(implode("\n\n", $errors));
         }
 
         // Ensure that script_user is the user.

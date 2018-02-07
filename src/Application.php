@@ -4,6 +4,7 @@ namespace Aegir\Provision;
 
 use Aegir\Provision\Command\SaveCommand;
 use Aegir\Provision\Command\ServicesCommand;
+use Aegir\Provision\Command\SetupCommand;
 use Aegir\Provision\Command\ShellCommand;
 use Aegir\Provision\Command\StatusCommand;
 use Aegir\Provision\Command\VerifyCommand;
@@ -145,6 +146,7 @@ class Application extends BaseApplication
         $commands[] = new HelpCommand();
         $commands[] = new ListCommand();
         $commands[] = new SaveCommand();
+        $commands[] = new SetupCommand();
         $commands[] = new ServicesCommand();
 //        $commands[] = new ShellCommand();
         $commands[] = new StatusCommand();

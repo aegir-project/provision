@@ -4,6 +4,8 @@ namespace Aegir\Provision\Console;
 
 use Aegir\Provision\Provision;
 use Drupal\Console\Core\Style\DrupalStyle;
+use Robo\Common\InputAwareTrait;
+use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -21,9 +23,9 @@ class ProvisionStyle extends DrupalStyle {
     /**
      * Icons
      */
-    const ICON_HELP = '�';
+    const ICON_HELP = '♥';
     const ICON_EDIT = '✎';
-    const ICON_START = '▷';
+    const ICON_START = '➤';
     const ICON_FINISH = '🏁';
     const ICON_FAILED = '🔥';
     const ICON_COMMAND = '$';
@@ -121,6 +123,24 @@ class ProvisionStyle extends DrupalStyle {
             " {$icon} {$message}",
             NULL,
             'bg=black;fg=cyan',
+            '  ',
+            TRUE
+        );
+    }
+
+    /**
+     * Display a block of text in the "Help" style.
+     * @param $message
+     * @param string $icon
+     */
+    function titleBlock($message) {
+        if (is_array($message)) {
+            $message = implode("\n", $message);
+        }
+        $this->block(
+            $message,
+            NULL,
+            'bg=blue;fg=white',
             '  ',
             TRUE
         );
