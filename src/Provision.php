@@ -155,24 +155,29 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      */
     private function loadAllContexts()
     {
-        $folder = $this->getConfig()->get('contexts_path');
-        $finder = new \Symfony\Component\Finder\Finder();
-        $finder->files()->name("*.yml")->in($folder);
-        foreach ($finder as $file) {
-            $context_type = substr($file->getFilename(), 0, strpos($file->getFilename(), '.'));
-            $context_name = substr($file->getFilename(), strpos($file->getFilename(), '.') + 1, strlen($file->getFilename()) - strlen($context_type) - 5);
-        
-            $this->context_files[$context_name] = [
-                'name' => $context_name,
-                'type' => $context_type,
-                'file' => $file,
-            ];
-        }
+        try {
+            $folder = $this->getConfig()->get('contexts_path');
+            $finder = new \Symfony\Component\Finder\Finder();
+            $finder->files()->name("*.yml")->in($folder);
+            foreach ($finder as $file) {
+                $context_type = substr($file->getFilename(), 0, strpos($file->getFilename(), '.'));
+                $context_name = substr($file->getFilename(), strpos($file->getFilename(), '.') + 1, strlen($file->getFilename()) - strlen($context_type) - 5);
 
-        // Load Context classes from files metadata.
-        foreach ($this->context_files as $context) {
-            $class = Context::getClassName($context['type']);
-            $this->contexts[$context['name']] = new $class($context['name'], $this);
+                $this->context_files[$context_name] = [
+                    'name' => $context_name,
+                    'type' => $context_type,
+                    'file' => $file,
+                ];
+            }
+
+            // Load Context classes from files metadata.
+            foreach ($this->context_files as $context) {
+                $class = Context::getClassName($context['type']);
+                $this->contexts[$context['name']] = new $class($context['name'], $this);
+            }
+        }
+        catch (\Exception $e) {
+            $this->contexts = [];
         }
     }
     
