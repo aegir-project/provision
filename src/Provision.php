@@ -8,6 +8,7 @@ use Aegir\Provision\Commands\ExampleCommands;
 
 use Aegir\Provision\Console\ConsoleOutput;
 use Aegir\Provision\Console\ProvisionStyle;
+use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Robo\ProvisionCollectionBuilder;
 use Aegir\Provision\Robo\ProvisionExecutor;
 use Aegir\Provision\Robo\ProvisionTasks;
@@ -331,7 +332,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      *
      * @return \Aegir\Provision\Context[]
      */
-    protected function getAllServers() {
+    public function getAllServers() {
         return $this->getAllContextsByType('server');
     }
 

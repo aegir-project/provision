@@ -8,7 +8,10 @@ use Aegir\Provision\Context\PlatformContext;
 use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Context\SiteContext;
 use Aegir\Provision\Provision;
+use Consolidation\AnnotatedCommand\ExitCodeInterface;
 use Drupal\Console\Core\Style\DrupalStyle;
+use Psr\Log\LogLevel;
+use Robo\ResultData;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -42,10 +45,22 @@ class SetupCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output) {
 
+        $this->setupConfig();
+        $this->setupServer();
+    }
+
+    /**
+     * Step 1: Check and prepare config files and directories.
+     * @throws \Exception
+     */
+    protected function setupConfig() {
         $console_config_file =  $this->getProvision()->getConfig()->get('console_config_file');
 
         $this->io->titleBlock('Welcome to the Provision Setup Wizard!');
-        $this->io->helpBlock("This command will guide you through configuring your system.");
+
+        $this->io->title('Console Configuration');
+
+        $this->io->helpBlock("Ensure console configuration file and directories exist.");
 
         // Check for .provision.yml file.
         if (file_exists($this->getProvision()->getConfig()->get('console_config_file'))) {
@@ -94,7 +109,7 @@ YML;
                 $this->io->successLite("Contexts Path <comment>{$this->getProvision()->getConfig()->get('contexts_path')}</comment> created.");
             }
             else {
-                FAIL;
+                throw new \Exception('The config_path and contexts_path folders must exist for Provision to function. Create them manually, or run `provision setup`.');
             }
         }
         else {
@@ -116,6 +131,60 @@ YML;
                     throw new \Exception('Unable to create paths: ' . $e->getMessage());
 
                 }
+            }
+            else {
+                throw new \Exception('The config_path and contexts_path folders must exist for Provision to function. Create them manually, or run `provision setup`.');
+            }
+        }
+
+        $this->io->block('Provision CLI configuration check is complete.');
+
+    }
+
+    /**
+     * Step 2: Check and prepare config files and directories.
+     * @throws \Exception
+     */
+    protected function setupServer() {
+
+        $this->io->title('Server Setup');
+
+        $this->io->helpBlock('Inform provision about services available on your system.');
+
+        $this->io->block('Tips:');
+        $this->io->bulletLite("Provision stores information about your servers and sites in objects called 'Contexts', represented by YML files.");
+        $this->io->bulletLite('You can use the <comment>provision save</comment> command to add additional sites and servers to the system.');
+        $this->io->bulletLite('When Provision asks you <info>a question</info>, it may provide a [<comment>default value</comment>]. If you just hit enter, that default value will be used.');
+
+        $this->io->writeln('');
+
+        $num_servers = count($this->getProvision()->getAllServers());
+        if ($num_servers) {
+            $this->io->successLite("<comment>$num_servers</comment> Server Context found.");
+
+            if (!$this->input->isInteractive()){
+                exit(0);
+            }
+        }
+        else {
+            $this->io->warningLite("No servers found.");
+            if (!$this->input->isInteractive()){
+                exit(1);
+            }
+
+            $this->io->block("You must save at least one server context. Follow the steps below to save information about your system.");
+
+            // Run `provision save` command.
+            $command = $this->getApplication()->find('save');
+            $input = new ArrayInput($_SERVER['argv']);
+            $exit_code = $command->run($input, $this->output);
+
+            if ($exit_code != ResultData::EXITCODE_OK) {
+                throw new \Exception('Something went wrong when running `provision save`. Please try again.');
+            }
+            else {
+                $this->io->successLite("Server Context added! You can now add sites or platforms with the `provision save` command. Have fun!");
+
             }
         }
     }

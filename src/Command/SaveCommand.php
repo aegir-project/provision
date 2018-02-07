@@ -358,19 +358,19 @@ class SaveCommand extends Command
         }
         // If there are no options, just ask for the name to create.
         else {
-
-            // FIRST CONTEXT!
-            // @TODO: Move this to it's own class and methods for onboarding.
-            $this->io->title('Welcome to Provision!');
-
-            $this->io->block([
-                "The first context you need to create is a server. It is recommended to call this server 'server_master' but you can call it whatever you'd like.",
-            ]);
-
-            $this->io->writeln([
-                " <fg=blue>Tip: When Provision asks you <info>a question</info>, it may provide a [<comment>default value</comment>].",
-                "      If you just hit enter, that default value will be used.</>"
-            ]);
+//
+//            // FIRST CONTEXT!
+//            // @TODO: Move this to it's own class and methods for onboarding.
+//            $this->io->title('Welcome to Provision!');
+//
+//            $this->io->block([
+//                "The first context you need to create is a server. It is recommended to call this server 'server_master' but you can call it whatever you'd like.",
+//            ]);
+//
+//            $this->io->writeln([
+//                " <fg=blue>Tip: When Provision asks you <info>a question</info>, it may provide a [<comment>default value</comment>].",
+//                "      If you just hit enter, that default value will be used.</>"
+//            ]);
             $this->input->setOption('context_type', 'server');
 
             $this->context_name = $this->io->ask('Context name', 'server_master');
@@ -415,7 +415,7 @@ class SaveCommand extends Command
             else {
 
                 // If --ask-defaults is not set and there is a default, use it and do not ask the user.
-                if (!$property->forceAsk && !$this->input->getOption('ask-defaults') && !empty($property->default)) {
+                if ($property->hidden || !$property->forceAsk && !$this->input->getOption('ask-defaults') && !empty($property->default)) {
                     $properties[$name] = $property->default;
                     $this->io->comment("Using default option {$name}={$properties[$name]}");
                 }

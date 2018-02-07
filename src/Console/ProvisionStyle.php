@@ -29,6 +29,7 @@ class ProvisionStyle extends DrupalStyle {
     const ICON_FINISH = '🏁';
     const ICON_FAILED = '🔥';
     const ICON_COMMAND = '$';
+    const ICON_BULLET = '➤';
 
     public function __construct(InputInterface $input, OutputInterface $output)
     {
@@ -158,5 +159,9 @@ class ProvisionStyle extends DrupalStyle {
         }
         //Prepend new line for each non LF chars (This means no blank line was output before)
         $this->newLine(1 - substr_count($chars, "\n"));
+    }
+
+    public function bulletLite($message) {
+        return $this->customLite($message, '<fg=blue>' . self::ICON_BULLET . '</>');
     }
 }

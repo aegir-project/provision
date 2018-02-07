@@ -37,6 +37,7 @@ class Property {
     public $description = '';
     public $default = NULL;
     public $required = FALSE;
+    public $hidden = FALSE;
     public $validate;
 
     /**
@@ -140,6 +141,18 @@ class Property {
      */
     public function forceAsk($force = TRUE) {
         $this->forceAsk = $force;
+        return $this;
+    }
+
+    /**
+     * Do not ask the user for this property.
+     *
+     * @param bool $force
+     *
+     * @return $this
+     */
+    public function hidden($hidden = TRUE) {
+        $this->hidden = $hidden;
         return $this;
     }
 }

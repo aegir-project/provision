@@ -132,7 +132,12 @@ class Context implements BuilderAwareInterface
             else {
                 // Load command line options into properties
                 foreach ($this->option_documentation() as $option => $description) {
-                    $this->properties[$option] = $options[$option];
+                    if (isset($options[$option])) {
+                        $this->properties[$option] = $options[$option];
+                    }
+                    else {
+                        $this->properties[$option] = NULL;
+                    }
                 }
             }
             

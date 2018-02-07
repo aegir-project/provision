@@ -91,16 +91,17 @@ class ServerContext extends ServiceProvider implements ConfigurationInterface
                     ->description('server: aegir user home directory')
                     ->required(TRUE)
                     ->defaultValue(Config::getHomeDir()),
-            // @TODO: Why do server contexts need a master_url?
-            'master_url' =>
-                Provision::newProperty()
-                    ->description('server: Hostmaster URL')
-                    ->required(FALSE),
+//            // @TODO: Why do server contexts need a master_url?
+//            'master_url' =>
+//                Provision::newProperty()
+//                    ->description('server: Hostmaster URL')
+//                    ->required(FALSE),
 
             'server_config_path' =>
                 Provision::newProperty()
                     ->description('server: The location to store the server\'s configuration files. If left empty, will be generated automatically.')
                     ->required(FALSE)
+                    ->hidden()
             ,
         ];
     }
