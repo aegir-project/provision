@@ -64,11 +64,11 @@ case "$1" in
 
           if [ "$DRUSH_VERSION" = "stable" ]; then
 
-              DRUSH_PHAR_URL="http://files.drush.org/drush.phar"
+              DRUSH_PHAR_URL="https://github.com/drush-ops/drush/releases/download/8.1.16/drush.phar"
 
           elif [ "$DRUSH_VERSION" = "unstable" ]; then
 
-              DRUSH_PHAR_URL="http://files.drush.org/drush-unstable.phar"
+              DRUSH_PHAR_URL="https://github.com/drush-ops/drush/releases/download/8.1.16/drush.phar"
 
           elif [ "$DRUSH_MAJOR_VERSION" -ge "8" ]; then
 
