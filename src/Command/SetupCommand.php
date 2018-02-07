@@ -169,7 +169,7 @@ YML;
         else {
             $this->io->warningLite("No servers found.");
             if (!$this->input->isInteractive()){
-                exit(1);
+                exit(0);
             }
 
             $this->io->block("You must save at least one server context. Follow the steps below to save information about your system.");
