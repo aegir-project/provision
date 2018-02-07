@@ -53,8 +53,9 @@ try {
             $io->warningLite(' Running `provision setup` command to fix the problems... ');
         }
 
-
-        $argv = [$argv[0], 'setup'];
+        $command = $input->getFirstArgument();
+        $command_key = array_search($input->getFirstArgument(), $argv);
+        $argv[$command_key] = 'setup';
         $input = new ArgvInput($argv);
         $io = new ProvisionStyle($input, $output);
         $config = new Config($io, FALSE);
