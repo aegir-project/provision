@@ -146,3 +146,6 @@ script:
   #- sleep 5
   - curl http://localhost | true
   - curl http://provision.local.computer | true
+
+  - provision -n -v
+  - provision status -n
