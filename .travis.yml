@@ -58,7 +58,6 @@ script:
     --remote_host=provision.local.computer
     --aegir_root=/var/aegir
     --script_user=aegir
-    --master_url=provision.local.computer
 
   # Add services to server_master context.
   - provision services server_master add http -n
