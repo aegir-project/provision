@@ -53,9 +53,15 @@ try {
             $io->warningLite(' Running `provision setup` command to fix the problems... ');
         }
 
+        // Replace given command with "setup", unless there is no command, then append to argv.
         $command = $input->getFirstArgument();
         $command_key = array_search($input->getFirstArgument(), $argv);
-        $argv[$command_key] = 'setup';
+        if (empty($command_key)) {
+            $argv[] = 'setup';
+        }
+        else {
+            $argv[$command_key] = 'setup';
+        }
         $input = new ArgvInput($argv);
         $io = new ProvisionStyle($input, $output);
         $config = new Config($io, FALSE);
