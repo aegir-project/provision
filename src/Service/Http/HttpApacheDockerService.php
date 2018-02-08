@@ -166,7 +166,7 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
 
         $path_parts = explode(DIRECTORY_SEPARATOR, $root_on_host);
         $directory = array_pop($path_parts);
-        return $this->provider->getProperty('aegir_root') . DIRECTORY_SEPARATOR . 'platforms' . DIRECTORY_SEPARATOR . $directory;
+        return '/var/aegir/platforms/' . $directory;
     }
 
     /**
