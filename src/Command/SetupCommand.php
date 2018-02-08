@@ -12,6 +12,7 @@ use Consolidation\AnnotatedCommand\ExitCodeInterface;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Psr\Log\LogLevel;
 use Robo\ResultData;
+use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -133,7 +134,7 @@ YML;
                 }
             }
             else {
-                throw new \Exception('The config_path and contexts_path folders must exist for Provision to function. Create them manually, or run `provision setup`.');
+                throw new RuntimeException('The config_path and contexts_path folders must exist for Provision to function. Create them manually, or run `provision setup`.');
             }
         }
 
