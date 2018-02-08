@@ -178,7 +178,7 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
             }
         }
         catch (\Exception $e) {
-            $this->contexts = [];
+            throw new \Exception($e->getMessage(), null, $e);
         }
     }
     
