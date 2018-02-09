@@ -14,7 +14,7 @@ Provision works by abstracting the services needed by your web sites and by know
 
 For example, Provision knows that Drupal requires two services: a database server and a web server. Provision knows how to configure Apache, NGINX and Docker. It knows how to create a database and configure the permissions. It knows how to set file permissions.
 
-You add your site's URLs and path to your source code and run `provision verify`, and Provision does everything else for you.
+You add your site's URLs and path to your source code using `provision save`and run `provision verify`, and Provision does everything else for you to get a running website.
 
 ## Development
 
