@@ -245,7 +245,7 @@ class SaveCommand extends Command
 
         $this->io->table(['Saving Context:', $this->context->name], $rows);
         
-        if ($this->io->confirm("Write configuration for <fg=blue>{$this->context->type}</> context <fg=blue>{$this->context->name}</> to <fg=blue>{$this->context->config_path}</>?")) {
+        if ($this->io->confirm("Save <comment>{$this->context->type}</comment> context <comment>{$this->context->name}</comment> to <fg=white>{$this->context->config_path}</>?")) {
             if ($this->context->save()) {
                 $this->io->success("Configuration saved to {$this->context->config_path}");
             }
