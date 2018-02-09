@@ -29,6 +29,7 @@ use Robo\LoadAllTasks;
 use Robo\Robo;
 use Robo\Runner as RoboRunner;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\Console\Exception\InvalidOptionException;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
@@ -177,8 +178,20 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
                 $this->contexts[$context['name']] = new $class($context['name'], $this);
             }
         }
+
+        // Thrown when there is invalid configuration in a context.
+        catch (InvalidOptionException $e) {
+            throw new InvalidConfigurationException($e->getMessage(), null, $e);
+        }
+
+        // Thrown when the contexts_path doesn't exist.
+        // We catch this here and don't throw so that the system can kick the user over to the 'setup' command.
+        catch (\InvalidArgumentException $e) {
+            $this->getLogger()->debug('Preventing InvalidArgumentException from being thrown so system will redirect to "setup" command: ' . $e->getMessage());
+        }
+
         catch (\Exception $e) {
-            $this->contexts = [];
+            throw new \Exception($e->getMessage(), null, $e);
         }
     }
     

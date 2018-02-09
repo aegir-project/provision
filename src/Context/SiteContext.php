@@ -67,16 +67,18 @@ class SiteContext extends PlatformContext implements ConfigurationInterface
 
     static function option_documentation()
     {
-        $options = parent::option_documentation();
+
+        // @TODO: check for other sites with the URI.
+        $options['uri'] = Provision::newProperty()
+            ->description('site: example.com URI, no http:// or trailing /')
+        ;
 
         $options['platform'] = Provision::newProperty()
             ->description('site: The platform this site is run on. (Optional)')
             ->required(FALSE)
         ;
-        // @TODO: check for other sites with the URI.
-        $options['uri'] = Provision::newProperty()
-            ->description('site: example.com URI, no http:// or trailing /')
-        ;
+
+        $options = array_merge($options, parent::option_documentation());
 
         $options['language'] = Provision::newProperty('site: site language; default en')
             //@TODO: Language handling across provision, and an arbitrary site install values tool.
