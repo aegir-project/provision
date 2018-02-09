@@ -164,4 +164,12 @@ class ProvisionStyle extends DrupalStyle {
     public function bulletLite($message) {
         return $this->customLite($message, '<fg=blue>' . self::ICON_BULLET . '</>');
     }
+
+    /**
+     * Wait for a user to press ENTER. Actually just a askHidden() call.
+     * @param string $text
+     */
+    public function pause($text = 'Press ENTER to continue...') {
+        $this->askHidden($text, function () {return TRUE;});
+    }
 }
