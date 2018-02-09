@@ -1,12 +1,28 @@
-# The New Provision
+# Provision CLI
 
-Provision is a command-line interface for managing servers and quickly deploying websites and services.
+![](/assets/server-verify.png)
 
-You can use it to launch Drupal quickly on your own computer, locally or on a server.
+Provision is a command-line interface for quickly launching websites on any computer for development, testing, or production.
+
+Provision is awesome because it's designed to work with any system and because it's written in PHP making it familiar to web developers.
+
+Provision is stable because it comes from a long history of automating Drupal hosting within the [Aegir Project](https://www.aegirproject.org/).
+
+## How it Works
+
+Provision works by abstracting the services needed by your web sites and by knowing how to configure the underlying services automatically. Once setup, you can add new sites simply by telling it a URL and the path to your source code.
+
+For example, Provision knows that Drupal requires two services: a database server and a web server. Provision knows how to configure Apache, NGINX and Docker. It knows how to create a database and configure the permissions. It knows how to set file permissions.
+
+You add your site's URLs and path to your source code and run `provision verify`, and Provision does everything else for you.
+
+## Development
+
+Provision 4.x is a work in progress. If you want open source Drupal hosting now, please see [the Aegir Project](https://www.aegirproject.org/).
 
 Currently being developed on GitHub: [github.com/aegir-project/provision](https://github.com/aegir-project/provision).
 
-Documentation currently available at [aegir.gitbooks.io/provision](https://aegir.gitbooks.io/provision/).
+Documentation is still in progress, currently available at [aegir.gitbooks.io/provision](https://aegir.gitbooks.io/provision/).
 
 ## Origins
 
