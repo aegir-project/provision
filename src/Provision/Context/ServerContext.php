@@ -58,8 +58,6 @@ class ServerContext extends ServiceProvider implements ConfigurationInterface
         else {
             $this->server_config_path = $this->getProperty('server_config_path');
         }
-
-        $this->fs = new Filesystem();
     }
 
     /**
