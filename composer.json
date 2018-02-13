@@ -46,6 +46,6 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {
-        "psr-4": {"Aegir\\Provision\\": "src"}
+        "psr-4": {"Aegir\\Provision\\": "src/Provision"}
     }
 }

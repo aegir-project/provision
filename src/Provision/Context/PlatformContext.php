@@ -270,7 +270,7 @@ class PlatformContext extends ServiceSubscriber implements ConfigurationInterfac
                 $tasks['platform.make'] = $this->getProvision()->newTask()
                     ->start('Building platform from makefile...')
                     ->execute(function () use ($makefile) {
-                        $drush = realpath(__DIR__ . '/../../bin/drush');
+                        $drush = realpath(__DIR__ . '/../../../bin/drush');
                         $command = $this->getProvision()->getTasks()->taskExec($drush)
                                 ->arg('make')
                                 ->arg($makefile)

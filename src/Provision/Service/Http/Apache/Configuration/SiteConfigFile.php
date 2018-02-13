@@ -9,9 +9,9 @@
 
 namespace Aegir\Provision\Service\Http\Apache\Configuration;
 
-use Aegir\Provision\Configuration;
+use Aegir\Provision\ConfigFile;
 
-class SiteConfiguration extends Configuration {
+class SiteConfigFile extends ConfigFile {
   
   const SERVICE_TYPE = 'apache';
   

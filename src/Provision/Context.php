@@ -373,7 +373,7 @@ class Context implements BuilderAwareInterface
         foreach ($this->contextRequirements() as $property => $type) {
             $root_node
                 ->children()
-                    ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
+                    ->setNodeClass('context', 'Aegir\Provision\Console\ConfigContextNodeDefinition')
                     ->node($property, 'context')
                         ->isRequired()
                         ->attribute('context_type', $type)

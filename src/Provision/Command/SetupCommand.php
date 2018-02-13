@@ -60,8 +60,9 @@ class SetupCommand extends Command
         $this->io->titleBlock('Welcome to the Provision Setup Wizard!');
 
         $this->io->title('Console Configuration');
+        $this->io->block('In this section, we will make sure your Provision CLI configuration and folders are created.');
 
-        $this->io->helpBlock("Ensure console configuration file and directories exist.");
+
 
         // Check for .provision.yml file.
         if (file_exists($this->getProvision()->getConfig()->get('console_config_file'))) {
@@ -70,8 +71,16 @@ class SetupCommand extends Command
         else {
             $this->io->warningLite("Provision CLI configuration file was not found at <comment>{$console_config_file}</comment>");
 
-          if ($this->io->confirm("Would you like to create the file? {$console_config_file}")) {
-              $config_path = $this->io->ask('Where would you like Provision to store context and server configuration? (Just hit enter to use the default)', $this->getProvision()->getConfig()->get('config_path'));
+            $this->io->block('Helpful Tips:');
+            $this->io->bulletLite('The <comment>~/.provision.yml</comment> file determines the <comment>config_path</comment> and <comment>contexts_path</comment> settings.');
+            $this->io->bulletLite('The <comment>config_path</comment> is where Provision stores server configuration. Each server gets a folder inside this path to store their configuration files, such as Apache virtualhosts. The default config path is <comment>' . $this->getProvision()->getConfig()->get('config_path') . '</comment>');
+            $this->io->bulletLite('The <comment>contexts_path</comment> is where Provision stores the metadata about your servers and sites, called <info>Contexts</info>. Contexts are saved as YML files in this folder. The default contexts path is <comment>' . $this->getProvision()->getConfig()->get('contexts_path') . '</comment>');
+            $this->io->bulletLite('When Provision asks you <info>a question</info>, it may provide a [<comment>default value</comment>]. If you just hit enter, that default value will be used.');
+
+            $config_path = $this->io->ask('Where would you like Provision to store its configuration?', $this->getProvision()->getConfig()->get('config_path'));
+            $contexts_path = $this->io->ask('Where would you like Provision to store its contexts?', $config_path . DIRECTORY_SEPARATOR . 'contexts');
+
+            if ($this->io->confirm("Would you like to create the file {$console_config_file} ?")) {
 
               if (!Provision::fs()->isAbsolutePath($config_path)) {
                   $config_path = getcwd() . DIRECTORY_SEPARATOR . $config_path;
@@ -79,7 +88,6 @@ class SetupCommand extends Command
 
               $this->io->successLite("Setting Provision config_path to <comment>{$config_path}</comment>");
 
-              $contexts_path = $config_path . DIRECTORY_SEPARATOR . 'contexts';
               $this->getProvision()->getConfig()->set('config_path', $config_path);
               $this->getProvision()->getConfig()->set('contexts_path', $contexts_path);
 
@@ -95,7 +103,10 @@ YML;
               }
 
               $this->io->successLite("Provision CLI configuration written to <comment>{$console_config_file}</comment>");
-          }
+            }
+            else {
+                $this->io->errorLite("If you do not have a CLI configuration file, Provision will use the default config_path <comment>{$config_path}</comment>");
+            }
         }
 
         // If config_path or contexts_path does not exist...
@@ -138,8 +149,12 @@ YML;
             }
         }
 
-        $this->io->block('Provision CLI configuration check is complete.');
-
+        if ($this->input->isInteractive()) {
+            $this->io->pause('Provision CLI configuration check is complete. Press ENTER to continue');
+        }
+        else {
+            $this->io->block('Provision CLI configuration check is complete.');
+        }
     }
 
     /**
@@ -150,12 +165,11 @@ YML;
 
         $this->io->title('Server Setup');
 
-        $this->io->helpBlock('Inform provision about services available on your system.');
+        $this->io->block('In this section, we will inform provision about services available on your system.');
 
-        $this->io->block('Tips:');
-        $this->io->bulletLite("Provision stores information about your servers and sites in objects called 'Contexts', represented by YML files.");
+        $this->io->block('Helpful Tips:');
         $this->io->bulletLite('You can use the <comment>provision save</comment> command to add additional sites and servers to the system.');
-        $this->io->bulletLite('When Provision asks you <info>a question</info>, it may provide a [<comment>default value</comment>]. If you just hit enter, that default value will be used.');
+        $this->io->bulletLite('You can use the <comment>provision services</comment> command to add services to your servers and sites.');
 
         $this->io->writeln('');
 
@@ -173,11 +187,14 @@ YML;
                 exit(0);
             }
 
-            $this->io->block("You must save at least one server context. Follow the steps below to save information about your system.");
+            $this->io->pause("You must save at least one server context. Press ENTER to create a server context for your system");
 
             // Run `provision save` command.
             $command = $this->getApplication()->find('save');
-            $input = new ArrayInput($_SERVER['argv']);
+            $parameters = $_SERVER['argv'];
+            $parameters['--context_type'] = 'server';
+            $parameters['context_name'] = 'server_master';
+            $input = new ArrayInput($parameters);
             $exit_code = $command->run($input, $this->output);
 
             if ($exit_code != ResultData::EXITCODE_OK) {
