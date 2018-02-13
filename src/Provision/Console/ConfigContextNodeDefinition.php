@@ -1,13 +1,13 @@
 <?php
 
-namespace Aegir\Provision\ConfigDefinition;
+namespace Aegir\Provision\Console;
 
 use Aegir\Provision\Common\ProvisionAwareTrait;
 use Symfony\Component\Config\Definition\Builder\ScalarNodeDefinition;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 /**
- * Class ContextNodeDefinition
+ * Class ConfigContextNodeDefinition
  *
  * Provides another config "node type" called "context" that validates
  * as an available context.
@@ -16,7 +16,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *
  *   $root_node
  *      ->children()
- *          ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
+ *          ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ConfigContextNodeDefinition')
 
  *          ->node('web_server', 'context')
  *      ->end()
@@ -26,7 +26,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  *
  * @package Aegir\Provision\ConfigDefinition
  */
-class ContextNodeDefinition extends ScalarNodeDefinition
+class ConfigContextNodeDefinition extends ScalarNodeDefinition
 {
     use ProvisionAwareTrait;
 

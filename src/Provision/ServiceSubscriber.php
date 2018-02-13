@@ -81,7 +81,7 @@ class ServiceSubscriber extends Context
                 ->arrayNode('service_subscriptions')
                 ->prototype('array')
                     ->children()
-                    ->setNodeClass('context', 'Aegir\Provision\ConfigDefinition\ContextNodeDefinition')
+                    ->setNodeClass('context', 'Aegir\Provision\Console\ConfigContextNodeDefinition')
                     ->node('server', 'context')
                         ->isRequired()
                         ->attribute('context_type', 'server')
