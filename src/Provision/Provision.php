@@ -9,6 +9,8 @@ use Aegir\Provision\Commands\ExampleCommands;
 use Aegir\Provision\Console\ConsoleOutput;
 use Aegir\Provision\Console\ProvisionStyle;
 use Aegir\Provision\Context\ServerContext;
+use Aegir\Provision\Context\ServerContextLocal;
+use Aegir\Provision\Context\ServerContextDockerCompose;
 use Aegir\Provision\Robo\ProvisionCollectionBuilder;
 use Aegir\Provision\Robo\ProvisionExecutor;
 use Aegir\Provision\Robo\ProvisionTasks;
@@ -174,7 +176,11 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
 
             // Load Context classes from files metadata.
             foreach ($this->context_files as $context) {
-                $class = Context::getClassName($context['type']);
+                $class = Context::getClassFromFilename($context['file']->getPathname());
+
+                if (!class_exists($class)) {
+                    throw new \Exception("Context configuration for '{$context['name']}' specifies a missing class: {$class}.  Check your configuration and try again: {$context['file']->getPathname()}");
+                }
                 $this->contexts[$context['name']] = new $class($context['name'], $this);
             }
         }

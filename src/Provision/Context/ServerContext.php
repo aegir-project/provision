@@ -66,6 +66,11 @@ class ServerContext extends ServiceProvider implements ConfigurationInterface
     static function option_documentation()
     {
         return [
+            'context_class' => Provision::newProperty()
+                ->description('The name of the class to load for this context.')
+                ->hidden()
+                ->defaultValue(self::getClassName(self::TYPE))
+            ,
             'remote_host' =>
                 Provision::newProperty()
                     ->description('server: host name')
@@ -107,7 +112,7 @@ class ServerContext extends ServiceProvider implements ConfigurationInterface
     /**
      * @return array
      */
-    public function verify()
+    public function preVerify()
     {
         // Create the server/service directory. We put this here because we need to make sure this is always run before any other tasks.
         Provision::fs()->mkdir($this->server_config_path);

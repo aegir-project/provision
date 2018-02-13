@@ -8,6 +8,8 @@ namespace Aegir\Provision;
 
 use Aegir\Provision\Common\ProvisionAwareTrait;
 use Aegir\Provision\Console\Config;
+use Aegir\Provision\Robo\ProvisionCollection;
+use Aegir\Provision\Robo\ProvisionCollectionBuilder;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Robo\Collection\CollectionBuilder;
@@ -540,6 +542,17 @@ class Context implements BuilderAwareInterface
             return false;
         }
     }
+
+    static function getClassFromFilename($config_path) {
+        $context_data = Yaml::parse(file_get_contents($config_path));
+
+        if (isset($context_data['context_class']) && !empty($context_data['context_class'])) {
+            return $context_data['context_class'];
+        }
+        else {
+            return self::getClassName($context_data['type']);
+        }
+    }
     
     /**
      * Retrieve the class name of a specific context type.
@@ -571,11 +584,9 @@ class Context implements BuilderAwareInterface
     {
         $collection = $this->getProvision()->getBuilder();
 
-        $pre_tasks = $this->verify();
-        foreach ($pre_tasks as $pre_task_title => $pre_task) {
-            $collection->getConfig()->set($pre_task_title, $pre_task);
-            $this->prepareTask($collection, $pre_task_title, $pre_task);
-        }
+        // Add preVerify() tasks to the collection.
+        $this->prepareTasks($collection, $this->preVerify());
+
         foreach ($this->getServices() as $type => $service) {
             $friendlyName = $service->getFriendlyName();
             $tasks = [];
@@ -595,7 +606,16 @@ class Context implements BuilderAwareInterface
             }
             $tasks = [];
         }
-        
+
+        // Add postVerify() tasks to the collection.
+        $postTasks = $this->postVerify();
+        if (count($postTasks)) {
+            $this->prepareTask($collection, 'logging.post', function() use ($friendlyName, $type) {
+                $this->getProvision()->io()->section("Verify server: Finalize");
+            });
+
+            $this->prepareTasks($collection, $this->postVerify());
+        }
         $result = $collection->run();
         
         if ($result->wasSuccessful()) {
@@ -603,6 +623,20 @@ class Context implements BuilderAwareInterface
         }
         else {
             throw new RuntimeException('Some services did not verify. Check your configuration, or run with the verbose option (-v) for more information.');
+        }
+    }
+
+    /**
+     * Maps array of tasks into a collection.
+     * @param $collection
+     * @param $tasks
+     *
+     * @throws \Exception
+     */
+    protected function prepareTasks(ProvisionCollectionBuilder $collection, $tasks) {
+        foreach ($tasks as $task_title => $task) {
+            $collection->getConfig()->set($task_title, $task);
+            $this->prepareTask($collection, $task_title, $task);
         }
     }
 
@@ -649,6 +683,16 @@ class Context implements BuilderAwareInterface
     function verify() {
        return [];
     }
+
+    /**
+     * Stub to be implemented by context types.
+     *
+     * Run extra tasks before services take over.
+     */
+    function postVerify() {
+       return [];
+    }
+
 //
 //
 //        $return_codes = [];
