@@ -1,9 +1,9 @@
 <?php
 namespace Aegir\Provision\Service\Http\ApacheDocker\Configuration;
 
-use Aegir\Provision\Service\Http\Apache\Configuration\ServerConfiguration as BaseServerConfiguration;
+use Aegir\Provision\Service\Http\Apache\Configuration\ServerConfigFile as BaseServerConfiguration;
 
-class ServerConfiguration extends BaseServerConfiguration {
+class ServerConfigFile extends BaseServerConfiguration {
   
     public $template = '../../Apache/Configuration/server.tpl.php';
     

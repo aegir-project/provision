@@ -8,13 +8,13 @@
 
 namespace Aegir\Provision\Service\Http;
 
-use Aegir\Provision\Configuration;
+use Aegir\Provision\ConfigFile;
 use Aegir\Provision\Context;
 use Aegir\Provision\Provision;
 use Aegir\Provision\Service\DockerServiceInterface;
-use Aegir\Provision\Service\Http\Apache\Configuration\PlatformConfiguration;
-use Aegir\Provision\Service\Http\Apache\Configuration\SiteConfiguration;
-use Aegir\Provision\Service\Http\ApacheDocker\Configuration\ServerConfiguration;
+use Aegir\Provision\Service\Http\Apache\Configuration\PlatformConfigFile;
+use Aegir\Provision\Service\Http\Apache\Configuration\SiteConfigFile;
+use Aegir\Provision\Service\Http\ApacheDocker\Configuration\ServerConfigFile;
 use Aegir\Provision\ServiceSubscriber;
 use Psr\Log\LogLevel;
 use Symfony\Component\Yaml\Yaml;
@@ -112,12 +112,12 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
    */
   public function getConfigurations()
   {
-    $configs['server'][] = ServerConfiguration::class;
-    $configs['platform'][] = PlatformConfiguration::class;
+    $configs['server'][] = ServerConfigFile::class;
+    $configs['platform'][] = PlatformConfigFile::class;
 
     // Make sure to write platform and site config when verifying site.
-    $configs['site'][] = PlatformConfiguration::class;
-    $configs['site'][] = SiteConfiguration::class;
+    $configs['site'][] = PlatformConfigFile::class;
+    $configs['site'][] = SiteConfigFile::class;
     return $configs;
   }
 
@@ -126,9 +126,9 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
      *
      * Apache config must reflect the path inside the container.
      *
-     * @param Configuration $config
+     * @param ConfigFile $config
      */
-  public function processConfiguration(Configuration &$config) {
+  public function processConfiguration(ConfigFile &$config) {
 
       // Replace platform's stored root with server's root.
       if ($this->context instanceof Context\SiteContext || $this->context instanceof Context\PlatformContext) {

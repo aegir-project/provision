@@ -15,10 +15,10 @@
 namespace Aegir\Provision\Service\Http\Apache\Configuration;
 
 use Aegir\Provision\Application;
-use Aegir\Provision\Configuration;
+use Aegir\Provision\ConfigFile;
 use Aegir\Provision\Provision;
 
-class ServerConfiguration extends Configuration {
+class ServerConfigFile extends ConfigFile {
   
   const SERVICE_TYPE = 'apache';
   

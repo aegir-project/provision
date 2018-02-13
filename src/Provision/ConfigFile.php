@@ -17,7 +17,7 @@ use Symfony\Component\Filesystem\Filesystem;
  *
  * @package Aegir\Provision
  */
-class Configuration {
+class ConfigFile {
   
   use ContextAwareTrait;
   

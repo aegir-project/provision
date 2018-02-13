@@ -9,9 +9,9 @@
 namespace Aegir\Provision\Service\Http;
 
 use Aegir\Provision\Robo\ProvisionCollectionBuilder;
-use Aegir\Provision\Service\Http\Apache\Configuration\PlatformConfiguration;
-use Aegir\Provision\Service\Http\Apache\Configuration\ServerConfiguration;
-use Aegir\Provision\Service\Http\Apache\Configuration\SiteConfiguration;
+use Aegir\Provision\Service\Http\Apache\Configuration\PlatformConfigFile;
+use Aegir\Provision\Service\Http\Apache\Configuration\ServerConfigFile;
+use Aegir\Provision\Service\Http\Apache\Configuration\SiteConfigFile;
 use Aegir\Provision\Service\HttpService;
 use Aegir\Provision\ServiceSubscription;
 use Robo\Result;
