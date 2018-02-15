@@ -7,5 +7,5 @@ projects[drupal][type] = "core"
 ; The release.sh script updates the version of hostmaster.
 projects[hostmaster][type] = "profile"
 projects[hostmaster][download][type] = "git"
-projects[hostmaster][download][tag] = "7.x-3.141"
+projects[hostmaster][download][tag] = "7.x-3.143"
 projects[hostmaster][download][url] = "http://git.drupal.org/project/hostmaster.git"
