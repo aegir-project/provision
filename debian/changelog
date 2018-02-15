@@ -1,3 +1,15 @@
+aegir3-provision (3.143) testing; urgency=medium
+
+  * Update Entity API, see SA-CONTRIB-2018-013 - https://www.drupal.org/sa-contrib-2018-013
+
+ -- Herman van Rink <helmo@initfour.nl>  Thu, 15 Feb 2018 20:11:36 +0100
+
+aegir3-provision (3.142) testing; urgency=medium
+
+  * Drush download location is gone, see https://www.drupal.org/project/provision/issues/2942743
+
+ -- Herman van Rink <helmo@initfour.nl>  Wed, 07 Feb 2018 21:56:26 +0100
+
 aegir3-provision (3.141) testing; urgency=medium
 
   * Upgrade issue on a missing task_command property, see https://www.drupal.org/project/hostmaster/issues/2942500
