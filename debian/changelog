@@ -1,3 +1,9 @@
+aegir3-provision (3.144) testing; urgency=medium
+
+  * Dummy release to include Drupal 7.57, see https://www.drupal.org/project/drupal/releases/7.57
+
+ -- Herman van Rink <helmo@initfour.nl>  Thu, 22 Feb 2018 13:53:18 +0100
+
 aegir3-provision (3.143) testing; urgency=medium
 
   * Update Entity API, see SA-CONTRIB-2018-013 - https://www.drupal.org/sa-contrib-2018-013
