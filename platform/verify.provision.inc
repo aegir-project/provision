@@ -178,7 +178,8 @@ function drush_provision_drupal_pre_provision_verify() {
     _provision_drupal_create_settings_file();
 
     // If this is the hostmaster site, save the ~/.drush/drushrc.php file.
-    if (d()->root == d('@hostmaster')->root && d()->uri == d('@hostmaster')->uri) {
+    $hostmaster = provision_sitealias_get_record('@hostmaster');
+    if (d()->root == $hostmaster['root'] && d()->uri == $hostmaster['uri']) {
       $aegir_drushrc = new Provision_Config_Drushrc_Aegir();
       $aegir_drushrc->write();
 
