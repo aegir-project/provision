@@ -157,7 +157,7 @@ test:ubuntu-bionic-aegir3-apt:
     - echo "exit 0" >> /usr/sbin/policy-rc.d
     - apt-get install --yes sudo curl
 
-  script: "scripts/ci-aegir-dev-install-apt-ubuntu-artful.sh"
+  script: "scripts/ci-aegir-dev-install-apt-ubuntu-bionic.sh"
 
 test:debian-stretch-aegir3-cluster-slave-apt:
   stage: test
