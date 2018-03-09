@@ -148,7 +148,6 @@ test:ubuntu-bionic-aegir3-apt:
     - 7.x-3.x
     - /^7\.x-3\.\d+\.x/
     - /-runalltests$/
-    - feature/ubuntu-bionic-test
 
   before_script:
     - apt-get update
