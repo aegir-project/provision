@@ -69,7 +69,7 @@ Description: mass Drupal hosting system
 
 Package: aegir3-cluster-slave
 Architecture: all
-Depends: ${misc:Depends}, php5-mysql | php7.0-mysql | php7.1-mysql | php7.2-mysql, sudo, apache2, adduser, ucf, libapache2-mod-php5 | libapache2-mod-php7.0 | libapache2-mod-php7.1 libapache2-mod-php7.2, rsync, nfs-client, mysql-client
+Depends: ${misc:Depends}, php5-mysql | php7.0-mysql | php7.1-mysql | php7.2-mysql, sudo, apache2, adduser, ucf, libapache2-mod-php5 | libapache2-mod-php7.0 | libapache2-mod-php7.1, libapache2-mod-php7.2, rsync, nfs-client, mysql-client
 Recommends: php5-gd | php7.0-gd | php7.1-gd | php7.2-gd, php5 | php7.0 | php7.1 | php7.2
 Conflicts: aegir-cluster-slave, aegir-cluster-slave2, aegir2-cluster-slave, aegir3
 Replaces: aegir-cluster-slave, aegir-cluster-slave2, aegir2-cluster-slave
