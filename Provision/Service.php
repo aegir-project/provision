@@ -284,7 +284,7 @@ class Provision_Service extends Provision_ChainedState {
           drush_log(dt('%service on %server has been restarted', array(
             '%service' => $service,
             '%server' => $this->server->remote_host))
-          );
+          , 'success');
 
           return TRUE;
         }
