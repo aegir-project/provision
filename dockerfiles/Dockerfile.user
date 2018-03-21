@@ -1,5 +1,5 @@
 # Use this Dockerfile for building a new image with your desired UID.
-ARG IMAGE_NAME=wrong
+ARG IMAGE_NAME=http
 ARG IMAGE_TAG=php7
 
 FROM provision4/$IMAGE_NAME:$IMAGE_TAG
