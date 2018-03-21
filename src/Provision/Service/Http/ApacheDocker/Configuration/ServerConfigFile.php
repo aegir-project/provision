@@ -12,7 +12,7 @@ class ServerConfigFile extends BaseServerConfiguration {
         parent::process();
         
         # Home directory inside the container is not dynamic.
-        $app_dir = '/var/aegir/config/'.$this->context->name.'/'
+        $app_dir = '/var/provision/config/'.$this->context->name.'/'
             .$this->service->getType();
         $this->data['http_port'] = $this->service->properties['http_port'];
         $this->data['include_statement'] = '# INCLUDE STATEMENT';

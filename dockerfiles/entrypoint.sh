@@ -3,8 +3,8 @@
 PREFIX='𝙋𝙍𝙊𝙑𝙄𝙎𝙄𝙊𝙉 entrypoint.sh ║'
 echo "$PREFIX Started httpd-foreground.sh ..."
 
-echo "$PREFIX Running ln -sf /var/$USER_NAME/config/$SERVER_NAME/apacheDocker.conf /var/$USER_NAME/config/provision.conf"
-ln -sf /var/$USER_NAME/config/$SERVER_NAME/apacheDocker.conf /var/$USER_NAME/config/provision.conf
+echo "$PREFIX Running ln -sf /var/$USER_NAME/config/$SERVER_NAME/apacheDocker.conf /var/$USER_NAME/config/apache.conf"
+ln -sf /var/$USER_NAME/config/$SERVER_NAME/apacheDocker.conf /var/$USER_NAME/config/apache.conf
 
 echo "$PREFIX Running sudo /usr/sbin/apache2ctl start"
 sudo /usr/sbin/apache2ctl start

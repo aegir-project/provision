@@ -29,11 +29,13 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
   const SERVICE_TYPE = 'apacheDocker';
   const SERVICE_TYPE_NAME = 'Apache on Docker';
 
+  const DOCKER_USER_NAME = 'provision';
+
   const DOCKER_COMPOSE_UP_COMMAND = 'docker-compose up';
   const DOCKER_COMPOSE_UP_OPTIONS = ' -d --build --force-recreate ';
 
 
-    /**
+  /**
    * @var string The name of this server's container.
    */
   private $containerName;
@@ -252,7 +254,7 @@ YML;
           $command = "docker-compose -f docker-compose.yml -f docker-compose-overrides.yml up";
       }
       else {
-        $command = self::DOCKER_COMPOSE_UP_COMMAND;
+        $command = self::DOCKER_COMPOSE_UP_COMMAND . self::DOCKER_COMPOSE_UP_OPTIONS;
       }
 
       $tasks['docker.compose.up'] = Provision::newTask()
@@ -311,12 +313,13 @@ YML;
         return [
             'image'  => $this->dockerImage(),
             'build' => [
-                'context' => __DIR__ . DIRECTORY_SEPARATOR . 'ApacheDocker',
-                'dockerfile' => 'http.Dockerfile',
+                'context' => dirname(dirname(dirname(dirname(__DIR__)))) . DIRECTORY_SEPARATOR . 'dockerfiles',
+                'dockerfile' => 'Dockerfile.user',
                 'args' => [
-                    "AEGIR_UID" => $this->getProvision()->getConfig()->get('script_uid'),
-                    "APACHE_UID" => $this->getProvision()->getConfig()->get('web_user_uid'),
-                    "AEGIR_SERVER_NAME" => $this->provider->name,
+                    'IMAGE_NAME' => 'http',
+                    'IMAGE_TAG' => 'php7',
+                    'NEW_UID' => $this->getProvision()->getConfig()->get('script_uid'),
+                    "NEW_GID" => $this->getProvision()->getConfig()->get('web_user_uid'),
                 ],
             ],
             'restart'  => 'always',
@@ -344,7 +347,7 @@ YML;
         $volumes = array();
 
         $config_path_host = $config_path_container = $this->provider->getProperty('server_config_path');
-        $volumes[] = "{$config_path_host}:/var/aegir/config/{$this->provider->name}:z";
+        $volumes[] = "{$config_path_host}:/var/provision/config/{$this->provider->name}:z";
 
 //        $platforms_path_host = $platforms_path_container = d()->http_platforms_path;
 //
@@ -381,7 +384,7 @@ YML;
      */
     function getEnvironment() {
         $environment = array();
-        $environment['AEGIR_SERVER_NAME'] = $this->provider->name;
+        $environment['SERVER_NAME'] = $this->provider->name;
         return $environment;
     }
 }
