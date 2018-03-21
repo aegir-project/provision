@@ -251,7 +251,7 @@ YML;
 
       // Generated the docker-compose command. If any docker-compose-overrides.yml files are found, include them in the docker-compose command.
       if (file_exists($this->provider->server_config_path . DIRECTORY_SEPARATOR . 'docker-compose-overrides.yml')) {
-          $command = "docker-compose -f docker-compose.yml -f docker-compose-overrides.yml up";
+          $command = "docker-compose -f docker-compose.yml -f docker-compose-overrides.yml up" . self::DOCKER_COMPOSE_UP_OPTIONS;
       }
       else {
         $command = self::DOCKER_COMPOSE_UP_COMMAND . self::DOCKER_COMPOSE_UP_OPTIONS;
