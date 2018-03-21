@@ -29,7 +29,8 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
   const SERVICE_TYPE = 'apacheDocker';
   const SERVICE_TYPE_NAME = 'Apache on Docker';
 
-  const DOCKER_COMPOSE_UP_COMMAND = 'docker-compose up -d --build --force-recreate';
+  const DOCKER_COMPOSE_UP_COMMAND = 'docker-compose up';
+  const DOCKER_COMPOSE_UP_OPTIONS = ' -d --build --force-recreate ';
 
 
     /**
@@ -227,8 +228,16 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
 #
 #    provision verify $server_name
 #
-# Soon there will be an easy way for you to modify this file automatically.
-# THANKS!
+#
+# Overrides
+# =========
+#
+# To customize this Docker cluster, create a docker-compose-overrides.yml file 
+# in the same folder as this file. 
+#
+# If this file exists, it will be included in the `docker-compose` command when
+# the `provision verify` command is run.
+#
 
 YML;
               $yml_dump = $yml_prefix . Yaml::dump($compose, 5, 2);
@@ -238,12 +247,18 @@ YML;
               $this->provider->fs->dumpFile($filename, $yml_dump);
           });
 
-      // Run docker-compose up -d --build
-      $command = self::DOCKER_COMPOSE_UP_COMMAND;
+      // Generated the docker-compose command. If any docker-compose-overrides.yml files are found, include them in the docker-compose command.
+      if (file_exists($this->provider->server_config_path . DIRECTORY_SEPARATOR . 'docker-compose-overrides.yml')) {
+          $command = "docker-compose -f docker-compose.yml -f docker-compose-overrides.yml up";
+      }
+      else {
+        $command = self::DOCKER_COMPOSE_UP_COMMAND;
+      }
+
       $tasks['docker.compose.up'] = Provision::newTask()
           ->start("Running <info>{$command}</info> in <info>{$this->provider->server_config_path}</info> ...")
-          ->execute(function() {
-              return $this->provider->shell_exec(self::DOCKER_COMPOSE_UP_COMMAND, NULL, 'exit');
+          ->execute(function() use ($command) {
+              return $this->provider->shell_exec($command, NULL, 'exit');
           })
       ;
       // Run docker-compose up -d --build
