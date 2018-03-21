@@ -12,8 +12,8 @@
         "drush/drush": "8.x",
         "psr/log": "^1.0",
         "psy/psysh": "^0.8.11",
-        "symfony/console": "^3.3",
-        "symfony/yaml": "^3.3"
+        "symfony/console": "^3.2",
+        "symfony/yaml": "^3.2"
     },
     "bin": ["bin/provision"],
     "authors": [
