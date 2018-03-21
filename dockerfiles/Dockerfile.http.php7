@@ -1,0 +1,50 @@
+FROM provision4/base
+USER root
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN (apt-get -qq -o=Dpkg::Use-Pty=0 update && apt-get -qq -o=Dpkg::Use-Pty=0 install\
+    apache2 \
+    php7.0-common \
+    php7.0-cli \
+    php7.0-dev \
+    php7.0-fpm \
+    libpcre3-dev \
+    php7.0-gd \
+    php7.0-curl \
+    php7.0-imap \
+    php7.0-json \
+    php7.0-opcache \
+    php7.0-xml \
+    php7.0-mbstring \
+    php7.0-mysql \
+    php-sqlite3 \
+    php-apcu \
+    libapache2-mod-php \
+    postfix \
+    mysql-client \
+    ) > /dev/null
+
+RUN a2enmod rewrite
+
+RUN adduser $USER_NAME www-data
+RUN ln -s /var/$USER_NAME/config/apache.conf /etc/apache2/conf-available/$USER_NAME.conf
+RUN ln -s /etc/apache2/conf-available/$USER_NAME.conf /etc/apache2/conf-enabled/$USER_NAME.conf
+
+RUN mkdir -p /var/$USER_NAME/config
+RUN chown $USER_NAME:$USER_NAME /var/$USER_NAME -R
+RUN ls -la /var/$USER_NAME
+
+COPY sudoers.$USER_NAME /etc/sudoers.d/$USER_NAME
+
+COPY entrypoint.sh /usr/local/bin/entrypoint
+RUN chmod +x /usr/local/bin/entrypoint
+
+RUN echo "Hello, Provision." > /var/log/$USER_NAME.log
+RUN chown $USER_NAME:$USER_NAME /var/log/$USER_NAME.log -R
+
+ENV SERVER_NAME server_master
+
+USER $USER_NAME
+
+ENTRYPOINT []
+CMD ["entrypoint"]

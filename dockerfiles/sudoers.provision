@@ -1,0 +1,2 @@
+Defaults:provision  !requiretty
+provision ALL=NOPASSWD: /usr/sbin/apache2ctl

@@ -11,11 +11,14 @@ RUN apt-get -qq update && apt-get -qq install\
 
 ENV USER_UID 1111
 ENV USER_NAME provision
+ENV SERVER_NAME server_master
+
 RUN echo "Creating user $USER_NAME with UID $USER_UID and GID $USER_UID"
 RUN addgroup --gid $USER_UID $USER_NAME
 RUN adduser --uid $USER_UID --gid $USER_UID --system --home /var/$USER_NAME $USER_NAME
 
 USER $USER_NAME
 WORKDIR /var/$USER_NAME
-VOLUME /var/$USER_NAME
-ENTRYPOINT bash
+
+ENTRYPOINT []
+CMD bash
