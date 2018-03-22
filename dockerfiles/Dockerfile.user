@@ -18,6 +18,13 @@ ENV PROVISION_USER_NAME provision
 
 USER root
 
+COPY set-user-ids.sh /usr/local/bin/set-user-uids
+RUN chmod +x /usr/local/bin/set-user-uids
+
+COPY entrypoint.sh /usr/local/bin/entrypoint
+RUN chmod +x /usr/local/bin/entrypoint
+
+
 ENV RUN_PREFIX '𝙋𝙍𝙊𝙑𝙄𝙎𝙄𝙊𝙉 Dockerfile.user ║'
 
 RUN echo "$RUN_PREFIX Running /usr/local/bin/set-user-uids $PROVISION_USER_NAME $PROVISION_USER_UID $PROVISION_WEB_UID"
