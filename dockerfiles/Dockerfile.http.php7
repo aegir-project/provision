@@ -26,25 +26,25 @@ RUN (apt-get -qq -o=Dpkg::Use-Pty=0 update && apt-get -qq -o=Dpkg::Use-Pty=0 ins
 
 RUN a2enmod rewrite
 
-RUN adduser $USER_NAME www-data
-RUN ln -s /var/$USER_NAME/config/apache.conf /etc/apache2/conf-available/$USER_NAME.conf
-RUN ln -s /etc/apache2/conf-available/$USER_NAME.conf /etc/apache2/conf-enabled/$USER_NAME.conf
+RUN adduser $PROVISION_BASE_USER_NAME www-data
+RUN ln -s /var/$PROVISION_BASE_USER_NAME/config/apache.conf /etc/apache2/conf-available/$PROVISION_BASE_USER_NAME.conf
+RUN ln -s /etc/apache2/conf-available/$PROVISION_BASE_USER_NAME.conf /etc/apache2/conf-enabled/$PROVISION_BASE_USER_NAME.conf
 
-RUN mkdir -p /var/$USER_NAME/config
-RUN chown $USER_NAME:$USER_NAME /var/$USER_NAME -R
-RUN ls -la /var/$USER_NAME
+RUN mkdir -p /var/$PROVISION_BASE_USER_NAME/config
+RUN chown $PROVISION_BASE_USER_NAME:$PROVISION_BASE_USER_NAME /var/$PROVISION_BASE_USER_NAME -R
+RUN ls -la /var/$PROVISION_BASE_USER_NAME
 
-COPY sudoers.$USER_NAME /etc/sudoers.d/$USER_NAME
+COPY sudoers.$PROVISION_BASE_USER_NAME /etc/sudoers.d/$PROVISION_BASE_USER_NAME
 
 COPY entrypoint.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint
 
-RUN echo "Hello, Provision." > /var/log/$USER_NAME.log
-RUN chown $USER_NAME:$USER_NAME /var/log/$USER_NAME.log -R
+RUN echo "Hello, Provision." > /var/log/$SERVER_NAME.log
+RUN chown $PROVISION_BASE_USER_NAME:$PROVISION_BASE_USER_NAME /var/log/$SERVER_NAME.log -R
 
 ENV SERVER_NAME server_master
 
-USER $USER_NAME
+USER $PROVISION_BASE_USER_NAME
 
 ENTRYPOINT []
 CMD ["entrypoint"]

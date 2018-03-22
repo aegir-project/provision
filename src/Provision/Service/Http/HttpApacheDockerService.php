@@ -320,8 +320,8 @@ YML;
                 'args' => [
                     'IMAGE_NAME' => 'http',
                     'IMAGE_TAG' => 'php7',
-                    'NEW_UID' => $this->getProvision()->getConfig()->get('script_uid'),
-                    "NEW_GID" => $this->getProvision()->getConfig()->get('web_user_uid'),
+                    'PROVISION_USER_UID' => $this->getProvision()->getConfig()->get('script_uid'),
+                    "PROVISION_WEB_UID" => $this->getProvision()->getConfig()->get('web_user_uid'),
                 ],
             ],
             'restart'  => 'always',

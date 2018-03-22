@@ -8,21 +8,26 @@ ENV IMAGE_TAG ${IMAGE_TAG:-php7}
 ENV IMAGE_NAME ${IMAGE_NAME:-http}
 
 # The UID and GID for the USER_NAME user.
-ARG NEW_UID=3333
-ENV NEW_UID ${NEW_UID:-3333}
+ARG PROVISION_USER_UID=1000
+ENV PROVISION_USER_UID ${PROVISION_USER_UID:-1000}
 
-ARG NEW_GID=3333
-ENV NEW_GID ${NEW_GID:-3333}
+ARG PROVISION_WEB_UID=2000
+ENV PROVISION_WEB_UID ${PROVISION_WEB_UID:-2000}
 
-ENV USER_NAME provision
+ENV PROVISION_USER_NAME provision
 
 USER root
 
-RUN echo "Hi! Attempting to update user $USER_NAME to UID $NEW_UID and GID $NEW_GID..."
-RUN usermod -u $NEW_UID $USER_NAME
-RUN groupmod -g $NEW_GID $USER_NAME
+COPY set-user-ids.sh /usr/local/bin/set-user-uids
+RUN chmod +x /usr/local/bin/set-user-uids
 
-RUN echo "Attempting to change ownership of /var/$USER_NAME to $USER_NAME:$USER_NAME ..."
-RUN chown $USER_NAME:$USER_NAME /var/$USER_NAME -R
+COPY entrypoint.sh /usr/local/bin/entrypoint
+RUN chmod +x /usr/local/bin/entrypoint
 
-USER $USER_NAME
+
+ENV RUN_PREFIX '𝙋𝙍𝙊𝙑𝙄𝙎𝙄𝙊𝙉 Dockerfile.user ║'
+
+RUN echo "$RUN_PREFIX Running /usr/local/bin/set-user-uids $PROVISION_USER_NAME $PROVISION_USER_UID $PROVISION_WEB_UID"
+RUN /usr/local/bin/set-user-uids $PROVISION_USER_NAME $PROVISION_USER_UID $PROVISION_WEB_UID
+
+USER $PROVISION_USER_NAME
