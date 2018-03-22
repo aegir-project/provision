@@ -12,8 +12,8 @@ class ServerConfigFile extends BaseServerConfiguration {
         parent::process();
         
         # Home directory inside the container is not dynamic.
-        $app_dir = '/var/provision/config/'.$this->context->name.'/'
-            .$this->service->getType();
+        $user = property_exists($this->service, 'docker_user_name')? $this->service->docker_user_name: 'aegir';
+        $app_dir = "/var/{$user}/config/{$this->context->name}/{$this->service->getType()}";
         $this->data['http_port'] = $this->service->properties['http_port'];
         $this->data['include_statement'] = '# INCLUDE STATEMENT';
         $this->data['http_pred_path'] = "{$app_dir}/pre.d";

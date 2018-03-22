@@ -30,6 +30,7 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
   const SERVICE_TYPE_NAME = 'Apache on Docker';
 
   const DOCKER_USER_NAME = 'provision';
+  public $docker_user_name = 'provision';
 
   const DOCKER_COMPOSE_UP_COMMAND = 'docker-compose up';
   const DOCKER_COMPOSE_UP_OPTIONS = ' -d --build --force-recreate ';
@@ -169,7 +170,8 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
 
         $path_parts = explode(DIRECTORY_SEPARATOR, $root_on_host);
         $directory = array_pop($path_parts);
-        return '/var/aegir/platforms/' . $directory;
+        $username = $this::DOCKER_USER_NAME;
+        return "/var/{$username}/platforms/{$directory}/{$docroot}";
     }
 
     /**
