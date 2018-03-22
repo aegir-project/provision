@@ -39,8 +39,12 @@ COPY sudoers.$PROVISION_BASE_USER_NAME /etc/sudoers.d/$PROVISION_BASE_USER_NAME
 COPY entrypoint.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint
 
-RUN echo "Hello, Provision." > /var/log/$SERVER_NAME.log
-RUN chown $PROVISION_BASE_USER_NAME:$PROVISION_BASE_USER_NAME /var/log/$SERVER_NAME.log -R
+RUN echo "$RUN_PREFIX Creating set-user-ids script..."
+COPY set-user-ids.sh /usr/local/bin/set-user-ids
+RUN chmod +x /usr/local/bin/set-user-ids
+
+RUN echo "Hello, Provision." > /var/log/$PROVISION_BASE_USER_NAME.log
+RUN chown $PROVISION_BASE_USER_NAME:$PROVISION_BASE_USER_NAME /var/log/$PROVISION_BASE_USER_NAME.log -R
 
 ENV SERVER_NAME server_master
 
