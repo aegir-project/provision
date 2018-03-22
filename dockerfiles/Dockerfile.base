@@ -18,6 +18,9 @@ RUN echo "$RUN_PREFIX Creating user $PROVISION_BASE_USER_NAME with UID $PROVISIO
 RUN addgroup --gid $PROVISION_BASE_USER_UID $PROVISION_BASE_USER_NAME
 RUN adduser --uid $PROVISION_BASE_USER_UID --gid $PROVISION_BASE_USER_UID --system --home /var/$PROVISION_BASE_USER_NAME $PROVISION_BASE_USER_NAME
 
+COPY set-user-ids.sh /usr/local/bin/set-user-uids
+RUN chmod +x /usr/local/bin/set-user-uids
+
 USER $PROVISION_BASE_USER_NAME
 WORKDIR /var/$PROVISION_BASE_USER_NAME
 
