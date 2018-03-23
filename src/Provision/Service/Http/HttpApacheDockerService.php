@@ -190,6 +190,18 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
                   if ($service instanceof DockerServiceInterface) {
                       $compose_services[$type] = $service->dockerComposeService();
                       $compose_services[$type]['hostname'] = $this->provider->name . '.' . $type;
+
+                      // Look for Dockerfile overrides for this service.
+                      $dockerfile_override_path = $this->provider->server_config_path . DIRECTORY_SEPARATOR . 'Dockerfile.' . $type;
+                      if (file_exists($dockerfile_override_path)) {
+                        $this->getProvision()->getTasks()->taskLog("Found custom Dockerfile for service {$type}: {$dockerfile_override_path}", LogLevel::INFO)->run()->getExitCode();
+
+                        $compose_services[$type]['image'].= '-custom';
+                        $compose_services[$type]['build']['context'] = '.';
+                        $compose_services[$type]['build']['dockerfile'] = 'Dockerfile.' . $type;
+                        $compose_services[$type]['environment']['PROVISION_CUSTOM_DOCKERFILE'] = $dockerfile_override_path;
+                      }
+
                   }
               }
 
