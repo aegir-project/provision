@@ -8,20 +8,22 @@ Each server has a "config path" where all server configuration is stored, such a
 
 ```
 ~/.config/provision/$SERVER_NAME
-   /docker-compose.yml  # Generated on provision verify
-   /docker-compose-overrides.yml   # (Optional) Merged into docker-compose.yml on provision verify** 
-   /.provision.yml      # (Optional) YML file with hooks to run on verify.  
-   /mysql.cnf           # (Optional) MySQL configuration can be put into this file.*** 
-   /php.ini             # (Optional) Custom PHP configuration.****
-   /php-cli.ini         # (Optional) Custom PHP configuration for CLI only.
-   /Dockerfile.http     # (Optional) Custom dockerfile for the http service.*****
-   /Dockerfile.db       # (Optional) Custom dockerfile to use the db service.
-   /apacheDocker.conf   # Generated on provision verify
-   /apacheDocker
-     /platform.d        # Generated Platform apache configs. 
-     /pre.d             # Custom Apache configs can be put in here.
-     /post.d            # Custom Apache configs can be put in here.
-     /vhost.d           # Generated Site virtualhost configs.
+   /.env                            # Generated on provision verify. Includes the COMPOSE_FILE variable to include all found docker-compose yml files.
+   /.env-custom                     # (Optional) Included in .env when it is generated. See https://docs.docker.com/compose/reference/envvars/ for available environment variables.
+   /docker-compose-provision.yml    # Generated on provision verify
+   /docker-compose*.yml             # (Optional) Additional files named docker-compose*.yml are detected and written to .env, so any calls to docker-compose in this directory load all files. 
+   /.provision.yml                  # (Optional) YML file with hooks to run on verify.  
+   /mysql.cnf                       # (Optional) MySQL configuration can be put into this file.*** 
+   /php.ini                         # (Optional) Custom PHP configuration.****
+   /php-cli.ini                     # (Optional) Custom PHP configuration for CLI only.
+   /Dockerfile.http                 # (Optional) Custom dockerfile for the http service.*****
+   /Dockerfile.db                   # (Optional) Custom dockerfile to use the db service.
+   /apacheDocker.conf               # Generated on provision verify
+   /apacheDocker            
+     /platform.d                    # Generated Platform apache configs. 
+     /pre.d                         # Custom Apache configs can be put in here.
+     /post.d                        # Custom Apache configs can be put in here.
+     /vhost.d                       # Generated Site virtualhost configs.
      /platform.d
 ```
 
