@@ -14,6 +14,7 @@ Each server has a "config path" where all server configuration is stored, such a
    /Dockerfile.http     # (Optional) Custom dockerfile for the http service. ****
    /Dockerfile.db       # (Optional) Custom dockerfile to use the db service.
    /apacheDocker.conf   # Generated on provision verify
+   /apacheDocker
      /platform.d        # Generated Platform apache configs. 
      /pre.d             # Custom Apache configs can be put in here.
      /post.d            # Custom Apache configs can be put in here.
