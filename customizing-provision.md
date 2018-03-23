@@ -4,11 +4,7 @@
 
 When using Provision's Docker services, a docker-compose.yml file is automatically generated, using pre-built images for Database & Web servers.
 
-You can override the docker stack in the following ways
-
-### 1. Create docker-compose-overrides.yml
-
-Each server has a "config path" where all server configuration is stored, such as apache config. Check `provision status` for the server config path. The server config path looks like this:
+Each server has a "config path" where all server configuration is stored, such as apache config. Check `provision status` for the server config path. The server config folder is filled with files. Most files are generated automaticaly by provision verify. You can create the files labelled \(Optional\) below to customize the behavior of this server's stack.
 
 ```
 ~/.config/provision/$SERVER_NAME
@@ -29,10 +25,10 @@ Each server has a "config path" where all server configuration is stored, such a
 
 ```
 [mysqld]
-max_allowed_packet	= 32M
+max_allowed_packet    = 32M
 ```
 
-
+### 
 
 
 
