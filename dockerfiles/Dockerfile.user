@@ -24,7 +24,7 @@ RUN chmod +x /usr/local/bin/set-user-ids
 
 ENV RUN_PREFIX '𝙋𝙍𝙊𝙑𝙄𝙎𝙄𝙊𝙉 Dockerfile.user ║'
 
-RUN echo "$RUN_PREFIX Running /usr/local/bin/set-user-uids $PROVISION_USER_NAME $PROVISION_USER_UID $PROVISION_WEB_UID"
-RUN /usr/local/bin/set-user-uids $PROVISION_USER_NAME $PROVISION_USER_UID $PROVISION_WEB_UID
+RUN echo "$RUN_PREFIX Running /usr/local/bin/set-user-ids $PROVISION_USER_NAME $PROVISION_USER_UID $PROVISION_WEB_UID"
+RUN /usr/local/bin/set-user-ids $PROVISION_USER_NAME $PROVISION_USER_UID $PROVISION_WEB_UID
 
 USER $PROVISION_USER_NAME
