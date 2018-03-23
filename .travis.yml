@@ -39,6 +39,7 @@ before_install:
   # Provision uses these variables to build the container.
   - 'echo "web_user: docker" >> ~/.provision.yml'
   - 'echo "web_user_uid: 999" >> ~/.provision.yml'
+  - 'echo "config_path: /home/travis/config" >> ~/.provision.yml'
 
 install:
   - composer install
