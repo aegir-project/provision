@@ -32,6 +32,7 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
   const DOCKER_USER_NAME = 'provision';
   public $docker_user_name = 'provision';
 
+  const DOCKER_COMPOSE_COMMAND = 'docker-compose';
   const DOCKER_COMPOSE_UP_COMMAND = 'docker-compose up';
   const DOCKER_COMPOSE_UP_OPTIONS = ' -d --build --force-recreate ';
 
@@ -59,26 +60,9 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
       $this->containerName = "provision_http_{$this->provider->name}";
       $this->containerTag = "provision/http:{$this->provider->name}";
 
-      $this->setProperty('restart_command', $this->default_restart_cmd());
+      $this->setProperty('restart_command', $this->dockerComposeCommand('exec http sudo apache2ctl graceful'));
       $this->setProperty('web_group', $this->default_web_group());
   }
-
-    /**
-     * The web restart command is fixed to our service because we have the Dockerfile and build the container.
-     *
-     * @return string
-     */
-    public static function default_restart_cmd() {
-//        return 'docker-compose exec http sudo apache2ctl graceful';
-
-        // @TODO: restarting apache gracefully results in zero downtime, but we need to restart the
-        // container to ensure volumes are mounted properly. If the root folder of the platform is deleted,
-        // docker will not see a new folder in that path in it's place. The container must restart to
-        // see the volume path.
-
-        // @TODO: docker-compose restart doesn't catch errors in the apache config! Another win for restarting apache, not the entire container.
-        return 'docker-compose exec http sudo apache2ctl graceful';
-    }
 
     /**
      * Return the name of the apache user group for the webserver.
@@ -251,13 +235,7 @@ YML;
               $this->provider->fs->dumpFile($filename, $yml_dump);
           });
 
-      // Generated the docker-compose command. If any docker-compose-overrides.yml files are found, include them in the docker-compose command.
-      if (file_exists($this->provider->server_config_path . DIRECTORY_SEPARATOR . 'docker-compose-overrides.yml')) {
-          $command = "docker-compose -f docker-compose.yml -f docker-compose-overrides.yml up" . self::DOCKER_COMPOSE_UP_OPTIONS;
-      }
-      else {
-        $command = self::DOCKER_COMPOSE_UP_COMMAND . self::DOCKER_COMPOSE_UP_OPTIONS;
-      }
+      $command = $this->dockerComposeCommand('up', self::DOCKER_COMPOSE_UP_OPTIONS);
 
       $tasks['docker.compose.up'] = Provision::newTask()
           ->start("Running <info>{$command}</info> in <info>{$this->provider->server_config_path}</info> ...")
@@ -273,6 +251,24 @@ YML;
           });
 
       return $tasks;
+  }
+
+  /**
+   * Return the base docker-compose command with options automatically populated.
+   */
+  function dockerComposeCommand($command = '', $options = '') {
+
+    // @TODO: Add a file lookup class to find docker-compose.yml files in various places, like the root of sites.
+    // @TODO: Add a way to set a config value to pass to docker-compose.
+    // Generate the docker-compose command. If any docker-compose-overrides.yml files are found, include them in the docker-compose command.
+    $docker_compose = self::DOCKER_COMPOSE_COMMAND;
+    if (file_exists($this->provider->server_config_path . DIRECTORY_SEPARATOR . 'docker-compose-overrides.yml')) {
+      $command = "{$docker_compose} -f docker-compose.yml -f docker-compose-overrides.yml {$command} {$options}";
+    }
+    else {
+      $command = "{$docker_compose} {$command} {$options}";
+    }
+    return $command;
   }
 
     /**
