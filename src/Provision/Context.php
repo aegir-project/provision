@@ -875,6 +875,7 @@ class Context implements BuilderAwareInterface
     $env = getenv();
 
     $env['PROVISION_CONTEXT'] = $this->name;
+    $env['PROVISION_CONTEXT_CONFIG_FILE'] = $this->config_path;
 
     foreach ($this->services as $service_type => $service) {
       $env['PROVISION_CONTEXT_SERVER_' . strtoupper($service_type)] = $service->provider->name;
