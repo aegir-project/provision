@@ -4,6 +4,8 @@ namespace Aegir\Provision;
 
 class Task {
 
+  public $startPrefix = '☐';
+
     function __construct()
     {
         $this->callable = function () {
@@ -28,6 +30,10 @@ class Task {
     }
     function failure($message) {
         $this->failure = $message;
+        return $this;
+    }
+    function startPrefix($prefix) {
+        $this->startPrefix = $prefix;
         return $this;
     }
 }
