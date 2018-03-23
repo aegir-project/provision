@@ -17,6 +17,7 @@ use Aegir\Provision\Service\Http\Apache\Configuration\SiteConfigFile;
 use Aegir\Provision\Service\Http\ApacheDocker\Configuration\ServerConfigFile;
 use Aegir\Provision\ServiceSubscriber;
 use Psr\Log\LogLevel;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -137,11 +138,11 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
       if ($this->context->type == 'site' && isset($config->data['uri'])) {
           $config->data['site_path'] = $config->data['document_root'] . '/sites/' . $config->data['uri'];
       }
-      
+
       // When running in docker, internal port is always 80.
       $config->data['http_port'] = 80;
   }
-    
+
     /**
      * Convert a path on the host like /home/jon/hostmaster to /var/aegir/hostmaster
      *
@@ -169,7 +170,7 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
 
       $is_docker_server = FALSE;
       $compose_services = [];
-      $filename = $this->provider->getProperty('server_config_path') . DIRECTORY_SEPARATOR . 'docker-compose.yml';
+      $filename = $this->provider->getProperty('server_config_path') . DIRECTORY_SEPARATOR . 'docker-compose-provision.yml';
 
       // Write Apache configuration files.
       $tasks['http.server.configuration'] = Provision::newTask()
@@ -212,7 +213,6 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
                   'services' => $compose_services,
               );
 
-              $filename = $this->provider->getProperty('server_config_path') . DIRECTORY_SEPARATOR . 'docker-compose.yml';
               $server_name = $this->provider->name;
               $yml_prefix = <<<YML
 # Provision Docker Compose File
@@ -245,6 +245,30 @@ YML;
               $this->getProvision()->getTasks()->taskLog($debug_message, LogLevel::INFO)->run()->getExitCode();
 
               $this->provider->fs->dumpFile($filename, $yml_dump);
+
+              // Write .env file to tell docker-compose to use all of the docker-compose-*.yml files.
+              $dc_files = $this->findDockerComposeFiles();
+              $files = [];
+              foreach ($dc_files as $file) {
+                $files[] = $file->getFilename();
+              }
+              $dc_files_path = implode(':', $files);
+
+              // Allow users to set a .env-custom file to allow additional ENV for the folder to be preserved.
+              $env_file_path = $this->provider->getProperty('server_config_path') . '/.env';
+              $env_custom_path = $this->provider->getProperty('server_config_path') . '/.env-custom';
+              $env_custom = file_exists($env_custom_path)? '# LOADED FROM .env-custom: ' . PHP_EOL . file_get_contents($env_custom_path): '';
+              $env_file_contents = <<<ENV
+# Provision-generated file. Do not edit.
+# Add a file .env-custom and it will be included here on `provision-verify`
+# For available docker-compose env vars, see https://docs.docker.com/compose/reference/envvars/
+COMPOSE_PATH_SEPARATOR=:
+COMPOSE_FILE=$dc_files_path
+$env_custom
+ENV;
+            $this->provider->fs->dumpFile($env_file_path, $env_file_contents);
+            $debug_message = 'Generated .env file for docker-compose: ' . PHP_EOL . $yml_dump;
+            $this->getProvision()->getTasks()->taskLog($debug_message, LogLevel::INFO)->run()->getExitCode();
           });
 
       $command = $this->dockerComposeCommand('up', self::DOCKER_COMPOSE_UP_OPTIONS);
@@ -266,20 +290,42 @@ YML;
   }
 
   /**
-   * Return the base docker-compose command with options automatically populated.
+   * @return \Symfony\Component\Finder\SplFileInfo[]
    */
-  function dockerComposeCommand($command = '', $options = '') {
+  function findDockerComposeFiles() {
+    $finder = new Finder();
+    $finder->in($this->provider->getProperty('server_config_path'));
+    $finder->files()->name('docker-compose*.yml');
+    foreach ($finder as $file) {
+      $dc_files[] = $file;
+    }
+    return $dc_files;
+  }
 
-    // @TODO: Add a file lookup class to find docker-compose.yml files in various places, like the root of sites.
-    // @TODO: Add a way to set a config value to pass to docker-compose.
-    // Generate the docker-compose command. If any docker-compose-overrides.yml files are found, include them in the docker-compose command.
+  /**
+   * Return the base docker-compose command with options automatically populated.
+   *
+   * @param string $command
+   * @param string $options
+   * @param bool $load_files Set to TRUE if you are not running docker-compose
+   *   command in the server_config_path. If TRUE, all docker-compose*.tml files
+   *   will be found and added using the `-f` option.
+   *
+   * @return string
+   */
+  function dockerComposeCommand($command = '', $options = '', $load_files = FALSE) {
+
+    // Generate the docker-compose command.
     $docker_compose = self::DOCKER_COMPOSE_COMMAND;
-    if (file_exists($this->provider->server_config_path . DIRECTORY_SEPARATOR . 'docker-compose-overrides.yml')) {
-      $command = "{$docker_compose} -f docker-compose.yml -f docker-compose-overrides.yml {$command} {$options}";
+
+    // If told to load files, do it.
+    if ($load_files) {
+      foreach ($this->findDockerComposeFiles() as $file) {
+        $docker_compose .= ' -f ' . $file->getPathname();
+      }
     }
-    else {
-      $command = "{$docker_compose} {$command} {$options}";
-    }
+
+    $command = "{$docker_compose} {$command} {$options}";
     return $command;
   }
 
