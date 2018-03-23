@@ -385,6 +385,16 @@ YML;
             }
         }
 
+        // Look up php.ini override file.
+        if (file_exists($this->provider->server_config_path . '/php.ini')) {
+          $volumes[] = $this->provider->server_config_path . '/php.ini' . ':/etc/php/7.0/apache2/conf.d/99-provision.ini';
+        }
+
+        // Look up php-cli.ini override file.
+        if (file_exists($this->provider->server_config_path . '/php-cli.ini')) {
+          $volumes[] = $this->provider->server_config_path . '/php-cli.ini' . ':/etc/php/7.0/cli/conf.d/99-provision.ini';
+        }
+
         return array_values($volumes);
     }
 
