@@ -101,13 +101,13 @@ class ProvisionStyle extends DrupalStyle {
         $this->customLite($message, $directory . ' <fg=yellow>' . self::ICON_COMMAND . '</>', '');
     }
 
-    public function outputBlock($message) {
+    public function outputBlock($message, $padding = TRUE, $newline = TRUE) {
         $this->block(
             $message,
             NULL,
             'fg=yellow;bg=black',
             ' ╎ ',
-            TRUE
+            $padding
             );
     }
 
