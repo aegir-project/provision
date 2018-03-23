@@ -10,6 +10,7 @@ Each server has a "config path" where all server configuration is stored, such a
 ~/.config/provision/$SERVER_NAME
    /docker-compose.yml  # Generated on provision verify
    /docker-compose-overrides.yml   # (Optional) Merged into docker-compose.yml on provision verify** 
+   /.provision.yml      # (Optional) YML file with hooks to run on verify.  
    /mysql.cnf           # (Optional) MySQL configuration can be put into this file.*** 
    /php.ini             # (Optional) Custom PHP configuration.****
    /php-cli.ini         # (Optional) Custom PHP configuration for CLI only.
@@ -44,3 +45,34 @@ memory_limit=512M
 #### Remember...
 
 After modifying any optional configuration files, run `provision verify` on your server to enable the changes.
+
+## Hooks Files
+
+### .provision.yml
+
+You can put a file called `.provision.yml` in the root of a site, or in the server config folder.
+
+Currently only "pre-verify" hooks are possible.
+
+The format should be like so:
+
+```yml
+hooks:
+  verify:
+    pre: |
+      echo "Do something here before verifying anything."
+      echo "You can use the 'env' command to see what environment variables are available."
+      echo "Commands are run on the host. If you need to run a command inside a container, use something like:"
+      echo "docker-compose exec http $COMMAND"
+      env
+      
+      echo "Increasing PHP's memory_limit..."
+      echo "memory_limit=512M" > php.ini
+```
+
+There are a few environment variables you might find helpful:
+
+  - `PROVISION_CONTEXT` - The name of the server context providing HTTP service.
+  - `PROVISION_CONTEXT_CONFIG_FILE` - The path on the host to this context's YML configuration file.
+  - `PROVISION_CONTEXT_SERVER_HTTP` - The name of the server context providing HTTP service.
+  - `PROVISION_CONTEXT_SERVER_HTTP_CONFIG_PATH` - Full path on the host to the HTTP server's configuration. This is the folder the `docker-compose.yml` file is in. (If this is a server context, the hooks are run in this folder.)
