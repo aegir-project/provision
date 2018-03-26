@@ -31,6 +31,7 @@ RUN ln -s /var/$PROVISION_BASE_USER_NAME/config/apache.conf /etc/apache2/conf-av
 RUN ln -s /etc/apache2/conf-available/$PROVISION_BASE_USER_NAME.conf /etc/apache2/conf-enabled/$PROVISION_BASE_USER_NAME.conf
 
 RUN mkdir -p /var/$PROVISION_BASE_USER_NAME/config
+RUN mkdir -p /var/$PROVISION_BASE_USER_NAME/platforms
 RUN chown $PROVISION_BASE_USER_NAME:$PROVISION_BASE_USER_NAME /var/$PROVISION_BASE_USER_NAME -R
 RUN ls -la /var/$PROVISION_BASE_USER_NAME
 
@@ -51,7 +52,7 @@ ENV SERVER_NAME server_master
 ENV COMPOSER_VERSION 1b137f8bf6db3e79a38a5bc45324414a6b1f9df2
 RUN echo "$RUN_PREFIX Installing Composer version $COMPOSER_VERSION"
 RUN wget https://raw.githubusercontent.com/composer/getcomposer.org/$COMPOSER_VERSION/web/installer -O - -q | php -- --quiet
-RUN cp composer.phar /usr/local/bin/composer
+RUN mv composer.phar /usr/local/bin/composer
 
 ENV DRUSH_VERSION 8.1.16
 RUN wget https://github.com/drush-ops/drush/releases/download/8.1.16/drush.phar -O - -q > /usr/local/bin/drush
