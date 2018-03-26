@@ -340,6 +340,27 @@ class Context implements BuilderAwareInterface
     }
 
     /**
+     * Call method $callback on each of the context's service objects.
+     *
+     * @param $callback
+     *   A Provision_Service method.
+     * @return
+     *   An array of return values from method implementations.
+     */
+    function servicesInvoke(string $callback, array $args = array()) {
+      $results = array();
+      // fetch the merged list of services.
+      // These may be on different servers entirely.
+      $services = $this->getServices();
+      foreach ($services as $service_name => $service) {
+        if (method_exists($service, $callback)) {
+          $results[$service_name] = call_user_func_array(array($service, $callback), $args);
+        }
+      }
+      return $results;
+    }
+
+  /**
      * {@inheritdoc}
      */
     public function getConfigTreeBuilder()
