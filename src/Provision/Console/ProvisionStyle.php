@@ -5,7 +5,6 @@ namespace Aegir\Provision\Console;
 use Aegir\Provision\Provision;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Robo\Common\InputAwareTrait;
-use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
