@@ -470,4 +470,10 @@ ENV;
       $lines[] = "  CustomLog /var/log/provision.log custom";
       return implode("\n", $lines);
     }
+
+    public function getCommandClasses() {
+      return [
+        \Aegir\Provision\Service\Http\ApacheDocker\ApacheDockerCommands::class
+      ];
+    }
 }

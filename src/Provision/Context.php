@@ -53,7 +53,7 @@ class Context implements BuilderAwareInterface
      */
     public $type = null;
     const TYPE = null;
-    
+
     /**
      * The role of this context, either 'subscriber' or 'provider'.
      *
@@ -85,7 +85,7 @@ class Context implements BuilderAwareInterface
      * @var \Symfony\Component\Filesystem\Filesystem
      */
     public $fs;
-    
+
     /**
      * Context constructor.
      *
@@ -98,13 +98,13 @@ class Context implements BuilderAwareInterface
         $options = [])
     {
         $this->name = $name;
-    
+
         $this->setProvision($provision);
         $this->setBuilder($this->getProvision()->getBuilder());
-        
+
         $this->loadContextConfig($options);
         $this->prepareServices();
-        
+
         $this->fs = new Filesystem();
     }
 
@@ -143,14 +143,14 @@ class Context implements BuilderAwareInterface
                     }
                 }
             }
-            
+
             $this->properties['type'] = $this->type;
             $this->properties['name'] = $this->name;
-            
+
             $configs[] = $this->properties;
 
             $this->config = $processor->processConfiguration($this, $configs);
-            
+
         } catch (\Exception $e) {
             throw new InvalidOptionException(
                 strtr("There is an error with the configuration for !type '!name'. Check the file !file and try again. \n \nError: !message", [
@@ -392,7 +392,7 @@ class Context implements BuilderAwareInterface
                     ->end()
                 ->end();
         }
-    
+
         // Load contextRequirements into config as ContextNodes.
         foreach ($this->contextRequirements() as $property => $type) {
             $root_node
@@ -405,14 +405,14 @@ class Context implements BuilderAwareInterface
                     ->end()
                 ->end();
         }
-        
+
         if (method_exists($this, 'configTreeBuilder')) {
             $this->configTreeBuilder($root_node);
         }
 
         return $tree_builder;
     }
-    
+
     /**
      * Prepare either services or service subscriptions config tree.
      */
@@ -457,15 +457,15 @@ class Context implements BuilderAwareInterface
      * Output a list of all services for this context.
      */
     public function showServices(DrupalStyle $io) {
-        
+
         $services = $this->isProvider()? $this->getServices(): $this->getSubscriptions();
         if (!empty($services)) {
             $rows = [];
-            
+
             $headers = $this->isProvider()?
                 ['Services']:
                 ['Service', 'Server', 'Type'];
-            
+
             foreach ($services as $name => $service) {
                 if ($this::ROLE == 'provider') {
                     $rows[] = [$name, $service->type];
@@ -535,11 +535,11 @@ class Context implements BuilderAwareInterface
      */
     public function save()
     {
-        
+
         // Create config folder if it does not exist.
         $fs = new Filesystem();
         $dumper = new Dumper();
-        
+
         try {
             $fs->dumpFile($this->config_path, $dumper->dump($this->getProperties(), 10));
             return true;
@@ -564,7 +564,7 @@ class Context implements BuilderAwareInterface
             return false;
         }
     }
-    
+
     /**
      * Retrieve the class name of a specific context type.
      *
@@ -581,7 +581,7 @@ class Context implements BuilderAwareInterface
 //    public function verify() {
 //        return "Provision Context";
 //    }
-    
+
     /**
      * Verify this context.
      *
@@ -620,9 +620,9 @@ class Context implements BuilderAwareInterface
             }
             $tasks = [];
         }
-        
+
         $result = $collection->run();
-        
+
         if ($result->wasSuccessful()) {
             $this->getProvision()->io()->success('Verification Complete!');
         }
@@ -793,7 +793,7 @@ class Context implements BuilderAwareInterface
     public static function contextRequirements() {
         return [];
     }
-    
+
     /**
      * Whether or not this context is a provider.
      *
@@ -915,4 +915,15 @@ class Context implements BuilderAwareInterface
     });
     return $process->getExitCode();
   }
+
+    /**
+     * return list of command classes.
+     */
+    function getServiceCommandClasses() {
+        $classes = [];
+        foreach ($this->servicesInvoke('getCommandClasses') as $class) {
+            $classes += $class;
+        }
+        return $classes;
+    }
 }

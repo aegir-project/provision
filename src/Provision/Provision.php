@@ -8,6 +8,7 @@ use Aegir\Provision\Commands\ExampleCommands;
 
 use Aegir\Provision\Console\ConsoleOutput;
 use Aegir\Provision\Console\ProvisionStyle;
+use Aegir\Provision\Console\ArgvInput;
 use Aegir\Provision\Context\ServerContext;
 use Aegir\Provision\Robo\ProvisionCollectionBuilder;
 use Aegir\Provision\Robo\ProvisionExecutor;
@@ -30,7 +31,6 @@ use Robo\Robo;
 use Robo\Runner as RoboRunner;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Console\Exception\InvalidOptionException;
-use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -88,6 +88,11 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
      * @var \Aegir\Provision\Context[]
      */
     public $contexts = [];
+
+    /**
+     * @var \Aegir\Provision\Context The currently active context.
+     */
+    public $activeContext;
     
     /**
      * @var array[]
@@ -150,6 +155,10 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         $this->console->setProvision($this);
         
         $this->loadAllContexts();
+
+        if ($input->activeContextName) {
+            $this->activeContext = $this->getContext($input->activeContextName);
+        }
     }
     
     /**
@@ -208,7 +217,14 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
     }
     
     public function run(InputInterface $input, OutputInterface $output) {
-        $status_code = $this->runner->run($input, $output);
+
+        $commandClasses = [];
+
+        // Look up any robofiles in each service.
+        if ($this->activeContext && method_exists($this->activeContext, 'getServiceCommandClasses')) {
+            $commandClasses += $this->activeContext->getServiceCommandClasses();
+        }
+        $status_code = $this->runner->run($input, $output, $this->getApplication(), $commandClasses);
 
         return $status_code;
     }

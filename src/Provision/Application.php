@@ -176,7 +176,7 @@ class Application extends BaseApplication
         $exitCode = parent::doRunCommand($command, $input, $output);
         return $exitCode;
     }
-    
+
     /**
      * {@inheritdoc}
      *
@@ -187,9 +187,9 @@ class Application extends BaseApplication
         $inputDefinition = parent::getDefaultInputDefinition();
         $inputDefinition->addOption(
           new InputOption(
-            '--target',
-            '-t',
-            InputOption::VALUE_NONE,
+            '--context',
+            '-c',
+            InputOption::VALUE_OPTIONAL,
             'The target context to act on.'
           )
         );

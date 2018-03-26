@@ -22,7 +22,7 @@ use Aegir\Provision\Common\NotSetupException;
 
 use Aegir\Provision\Console\ProvisionStyle;
 use Robo\Common\TimeKeeper;
-use Symfony\Component\Console\Input\ArgvInput;
+use Aegir\Provision\Console\ArgvInput;
 use Symfony\Component\Console\Exception\InvalidOptionException;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 
@@ -68,10 +68,10 @@ try {
     }
     
     // Create the app.
-    $app = new \Aegir\Provision\Provision($config, $input, $output);
+    $provision = new \Aegir\Provision\Provision($config, $input, $output);
     
     // Run the app.
-    $status_code = $app->run($input, $output);
+    $status_code = $provision->run($input, $output);
     
 }
 catch (Exception $e) {
