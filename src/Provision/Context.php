@@ -347,7 +347,7 @@ class Context implements BuilderAwareInterface
      * @return
      *   An array of return values from method implementations.
      */
-    function servicesInvoke(string $callback, array $args = array()) {
+    function servicesInvoke($callback, array $args = array()) {
       $results = array();
       // fetch the merged list of services.
       // These may be on different servers entirely.
