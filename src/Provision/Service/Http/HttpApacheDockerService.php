@@ -453,4 +453,21 @@ ENV;
         $environment['SERVER_NAME'] = $this->provider->name;
         return $environment;
     }
+
+    /**
+     * Output additional configuration to the virtualhost config file.
+     * @param $configFile
+     *
+     * @return string
+     */
+    function extraApacheConfig($configFile) {
+
+      $lines[] = "  # Write all logs to the logfile. the default entrypoint tails this file.";
+      $lines[] = '  ErrorLogFormat "ERROR  | %v [%t] [client %a] [%l] %M';
+      $lines[] = '  LogFormat "ACCESS | %v %t [client %a] [%>s] [%b bytes] %r" custom';
+
+      $lines[] = "  ErrorLog /var/log/provision.log ";
+      $lines[] = "  CustomLog /var/log/provision.log custom";
+      return implode("\n", $lines);
+    }
 }

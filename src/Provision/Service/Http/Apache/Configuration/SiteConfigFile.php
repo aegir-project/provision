@@ -45,7 +45,8 @@ class SiteConfigFile extends ConfigFile {
 
       $this->data['db_port'] = $this->context->getSubscription('db')->service->getCreds()['port'];
 
-      $this->data['extra_config'] = '';
+      $extra_apache_configs = $this->getContext()->servicesInvoke('extraApacheConfig', [$this]);
+      $this->data['extra_config'] = implode("\n", $extra_apache_configs);
 
 //    if ($this->aliases && !is_array($this->aliases)) {
 //      $this->aliases = explode(",", $this->aliases);
