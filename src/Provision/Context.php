@@ -8,6 +8,7 @@ namespace Aegir\Provision;
 
 use Aegir\Provision\Common\ProvisionAwareTrait;
 use Aegir\Provision\Console\Config;
+use Aegir\Provision\Console\ProvisionStyle;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Robo\Collection\CollectionBuilder;
@@ -677,7 +678,7 @@ class Context implements BuilderAwareInterface
             ->start("Running <comment>hooks:verify:pre</comment> from {$yml_file_path}")
             ->success("Successfully ran <comment>hooks:verify:pre</comment> from {$yml_file_path}")
             ->failure("Errors while running <comment>hooks:verify:pre</comment> from {$yml_file_path}")
-            ->startPrefix("<fg=blue>" . $this->getProvision()->io()::ICON_BULLET . "</>")
+            ->startPrefix("<fg=blue>" . ProvisionStyle::ICON_BULLET . "</>")
             ->execute(function () use ($yml_file_path){
               $this->getProvision()->getOutput()->writeln([]);
               $this->getProvision()->getOutput()->writeln([]);
