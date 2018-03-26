@@ -650,6 +650,7 @@ class Context implements BuilderAwareInterface
      * any other verify takes place.
      */
     function preVerify() {
+      $tasks = [];
 
       // Lookup possible hook files.
       // @TODO: create methods on the contexts to do this.
