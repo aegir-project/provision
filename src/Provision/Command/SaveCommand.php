@@ -27,12 +27,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class SaveCommand extends Command
 {
-
-    /**
-     * This command needs a context.
-     */
-    const CONTEXT_REQUIRED = TRUE;
-
     /**
      * @var string
      */
