@@ -26,7 +26,7 @@ class ArgvInput extends ArgvInputBase {
         }
         // If --context option is used, use that.
         elseif ($argv_filtered = array_filter($argv, function ($key) {
-            return strpos($key, '--context') === 0;
+            return strpos($key, '--context=') === 0;
         })) {
             $context_option = array_pop($argv_filtered);
             $context_name = substr($context_option, strlen('--context='));
