@@ -12,20 +12,7 @@ use Symfony\Component\Console\Input\ArgvInput;
 class ApacheDockerCommands extends \Robo\Tasks
 {
 
-    /**
-   * @param $context_name The context name to act on.
-   * @param array $opts
-   *
-   * @throws \Psr\Container\ContainerExceptionInterface
-   * @throws \Psr\Container\NotFoundExceptionInterface
-   */
-  public function dockerCommand(
-    $docker_compose_command,
-    $opts = [
-        'context' => 'The site or server to run the docker command in.',
-      'docker-compose-options' => 'the options to pass to docker compose '
-    ]
-  ) {
+  public function dockerCompose($docker_compose_command = 'Docker compose command to run.') {
       /** @var \Aegir\Provision\Application $application */
       $application = $this->getContainer()->get('application');
 
