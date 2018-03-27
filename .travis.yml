@@ -61,13 +61,13 @@ script:
     --script_user=aegir
 
   # Add services to server_master context.
-  - provision services server_master add http -n
+  - provision @server_master services add http -n
     --service_type=apacheDocker
     --http_port=80
     --web_group=www-data
     --restart_command="sudo apache2ctl graceful"
 
-  - provision services server_master add db -n
+  - provision @server_master services add db -n
     --service_type=mysqlDocker
     --master_db="mysql://root:root@db:3306"
     --db_grant_all_hosts=1
@@ -84,7 +84,7 @@ script:
 
   # add http service to platform.
   # @TODO: This should already be done thanks to --server_http!!!
-  - provision services platform_hostmaster add http server_master
+  - provision @platform_hostmaster services add http server_master
 
   # Add site context
   - provision save --context=hostmaster -n
@@ -113,28 +113,28 @@ script:
     --makefile=https://raw.githubusercontent.com/aegir-project/provision/7.x-3.x/provision-tests/makes/drupal8.make
 
   - provision status -n
-  - provision status server_master
-  - provision status platform_hostmaster
-  - provision status hostmaster
-  - provision status eight.local.computer
+  - provision @server_master status
+  - provision @platform_hostmaster status
+  - provision @hostmaster status
+  - provision @eight.local.computer status
 
 
-  - provision verify server_master
+  - provision @server_master verify
 
   # Docker creates the host path when docker run happens, in server verify.
   # Platform verify uses drush make, which won't run if folder exists.
   # @TODO: Figure out how to deal with this within provision.
   - sudo rm -rf /home/travis/hostmaster
-  - provision verify platform_hostmaster
+  - provision @platform_hostmaster verify
 
   - ls -la /home/travis/hostmaster
 
-  - provision verify hostmaster
+  - provision @hostmaster verify
 
   - sudo rm -rf /home/travis/eight
-  - provision verify eight.local.computer
+  - provision @eight.local.computer verify
 
-  - provision verify server_master
+  - provision @server_master verify
 
   - docker ps
   - docker logs servermaster_http_1
