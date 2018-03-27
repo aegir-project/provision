@@ -16,7 +16,7 @@ class ArgvInput extends ArgvInputBase {
     * @param array|null           $argv       An array of parameters from the CLI (in the argv format)
     * @param InputDefinition|null $definition A InputDefinition instance
     */
-    public function __construct(array $argv = null, InputDefinition $definition = null)
+    public function __construct(array $argv = [], InputDefinition $definition = null)
     {
         // If @alias is used, swap it out with --context=
         if (isset($argv[1]) && strpos($argv[1], '@') === 0) {
