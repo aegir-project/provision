@@ -156,8 +156,10 @@ class Provision implements ConfigAwareInterface, ContainerAwareInterface, Logger
         
         $this->loadAllContexts();
 
-        if ($input->activeContextName) {
+        try {
             $this->activeContext = $this->getContext($input->activeContextName);
+        } catch (\Exception $e) {
+
         }
     }
     
