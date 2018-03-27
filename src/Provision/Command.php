@@ -96,7 +96,9 @@ abstract class Command extends BaseCommand
         }
         
         // If context_name is not specified, ask for it.
-        elseif ($this::CONTEXT_REQUIRED && empty($this->input->getOption('context'))) {
+        elseif (($this::CONTEXT_REQUIRED && empty($this->input->getOption('context')))
+            || ($this->getName() == 'save' && empty($this->input->getOption('context')))
+        ) {
             $this->askForContext();
             $this->input->setOption('context', $this->context_name);
 
