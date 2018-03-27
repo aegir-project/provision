@@ -2,7 +2,7 @@
 
 namespace Aegir\Provision\Service\Http\ApacheDocker;
 
-use Symfony\Component\Console\Input\ArgvInput;
+use Aegir\Provision\Console\ArgvInput;
 
 /**
  * This is project's console commands configuration for Robo task runner.
