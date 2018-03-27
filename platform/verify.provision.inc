@@ -119,10 +119,19 @@ function drush_provision_drupal_pre_provision_verify() {
           $log_status = strpos($output, 'Warning:') === FALSE? 'success': 'warning';
 
           drush_log($output, $log_status);
-          drush_log(dt(strpos($output, 'Warning:') . "Command ran successfully in @times: @command", array(
-            '@command' => $command,
-            '@time' => $stop - $start,
-          )), $log_status);
+
+          if ($log_status == 'success') {
+            drush_log(dt("Command ran successfully in @times: @command", array(
+              '@command' => $command,
+              '@time' => $stop - $start,
+            )), $log_status);
+          }
+          else {
+            drush_log(dt("Command ran successfully (with warnings) in @times: @command", array(
+              '@command' => $command,
+              '@time' => $stop - $start,
+            )), $log_status);
+          }
         }
         else {
           drush_log(implode("\n", drush_shell_exec_output()), 'error');
