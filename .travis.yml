@@ -72,7 +72,7 @@ script:
     --master_db="mysql://root:root@db:3306"
     --db_grant_all_hosts=1
 
-  - provision services server_master
+  - provision @server_master services
 
   # Add platform context
   - provision save --context=platform_hostmaster -n
