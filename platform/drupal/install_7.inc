@@ -152,7 +152,7 @@ function install_main() {
   }
   catch (Exception $e) {
     drush_set_error('DRUPAL_INSTALL_FAILED');
-    drush_log('Site installation caused an exception.', 'error');
+    drush_log('Site installation caused an exception: ' . $e->getMessage(), 'error');
     dlm($e);
   }
   _provision_drupal_create_directories();
