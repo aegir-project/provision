@@ -5,6 +5,7 @@
  *
  * @see drush.api.php
  * @see drush_command_invoke_all()
+ * @see http://docs.aegirproject.org/en/3.x/extend/altering-behaviours/
  */
 
 /**
@@ -150,6 +151,30 @@ function drush_hook_provision_apache_dir_config($data) {
  *   URI for the site.
  * @param $data
  *   Associative array of data from Provision_Config_Apache_Site::data.
+ *   For example:
+ *   Array (
+ *       [server] => Provision_Context_server Object()
+ *       [application_name] => apache
+ *       [http_pred_path] => /var/aegir/config/server_master/apache/pre.d
+ *       [http_postd_path] => /var/aegir/config/server_master/apache/post.d
+ *       [http_platformd_path] => /var/aegir/config/server_master/apache/platform.d
+ *       [http_vhostd_path] => /var/aegir/config/server_master/apache/vhost.d
+ *       [http_subdird_path] => /var/aegir/config/server_master/apache/subdir.d
+ *       [http_port] => 80
+ *       [redirect_url] => http://example.com
+ *       [db_type] => mysql
+ *       [db_host] => localhost
+ *       [db_port] => 3306
+ *       [db_passwd] => ***
+ *       [db_name] => ***
+ *       [db_user] => ***
+ *       [packages] => Array of package information...
+ *       [installed] => 1
+ *       [config-file] => /var/aegir/platforms/drupal-7.58/sites/example.com/drushrc.php
+ *       [context-path] => /var/aegir/platforms/drupal-7.58/sites/example.com/drushrc.php
+ *       [https_port] => 443
+ *       [extra_config] => # Extra configuration from modules:
+ *   )
  *
  * @return
  *   Lines to add to the configuration file.
