@@ -97,7 +97,7 @@ class StatusCommand extends Command
                 $context = $this->io->choiceNoList('Get status for', $options, 'select a context');
                 if ($context != 'select a context') {
                     $command = $this->getApplication()->find('status');
-                    $arguments['context_name'] = $context;
+                    $arguments['--context'] = $context;
                     $input = new ArrayInput($arguments);
                     exit($command->run($input, $this->output));
                 }

@@ -270,7 +270,7 @@ class SaveCommand extends Command
         // Offer to verify. (only if --verify option was specified or is interactive and confirmation is made.
         if ($this->input->getOption('verify') || ($this->input->isInteractive() && $this->io->confirm('Would you like to run `provision verify` on this ' . $this->input->getOption('context_type') . '?'))) {
             $command = $this->getApplication()->find('verify');
-            $arguments['context_name'] = $this->context_name;
+            $arguments['--context'] = $this->context_name;
             $input = new ArrayInput($arguments);
             exit($command->run($input, $this->output));
         }
@@ -462,7 +462,7 @@ class SaveCommand extends Command
 
             $command = $this->getApplication()->find('services');
             $arguments = [
-                'context_name' => $this->input->getOption('context'),
+                '--context' => $this->input->getOption('context'),
                 'sub_command' => 'add',
                 'service' => $type,
             ];

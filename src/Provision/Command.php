@@ -77,7 +77,7 @@ abstract class Command extends BaseCommand
         if ($this->input->getOption('context') && !empty($this->input->getOption('context'))) {
 
             try {
-                // Load context from context_name argument.
+                // Load context from context_name option.
                 $this->context_name = $this->input->getOption('context');
                 $this->context = $this->getProvision()->getContext($this->context_name);
             }
