@@ -1,3 +1,9 @@
+aegir3-provision (3.145) testing; urgency=high
+
+  * Dummy release to include Drupal 7.58, see https://www.drupal.org/project/drupal/releases/7.58
+
+ -- Herman van Rink <helmo@initfour.nl>  Wed, 28 Feb 2018 20:00:42 +0100
+
 aegir3-provision (3.144) testing; urgency=medium
 
   * Dummy release to include Drupal 7.57, see https://www.drupal.org/project/drupal/releases/7.57
