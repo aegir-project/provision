@@ -64,8 +64,7 @@ class SaveCommand extends Command
           'context_type',
           null,
           InputOption::VALUE_OPTIONAL,
-          'server, platform, or site',
-          'site'
+          'server, platform, or site'
         );
         $inputDefinition[] = new InputOption(
           'delete',
