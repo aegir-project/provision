@@ -327,19 +327,6 @@ class SaveCommand extends Command
 
                 if (empty($this->input->getOption('context_type'))) {
                     $type_options = Context::getContextTypeOptions();
-
-                    // Check for platforms. If none. don't allow sites.
-                    $platform_exists = FALSE;
-                    foreach ($options as $name => $type_and_name) {
-                        if (strpos($type_and_name, 'platform') === 0) {
-                            $platform_exists = TRUE;
-                        }
-                    }
-
-                    if (!$platform_exists) {
-                        unset($type_options['site']);
-                        $this->io->block("You cannot add a site until you have at least one platform.");
-                    }
                     $context_type = $this->io->choice('Context Type?', $type_options);
                 }
                 else {
