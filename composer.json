@@ -1,0 +1,33 @@
+{
+    "name": "aegir/provision",
+    "description": "Drush commands powering the back-end of Aegir",
+    "type": "drupal-drush",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name":      "Drupal Console Contributors",
+            "homepage":  "https://github.com/hechoendrupal/drupal-console/graphs/contributors"
+        }
+    ],
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/provision",
+        "forum": "https://gitter.im/hechoendrupal/DrupalConsole",
+        "docs": "https://docs.drupalconsole.com/"
+    },
+    "require": {},
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "5.3.2"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-0": {
+            "Provision_": [
+                "Provision"
+            ]
+        }
+    }
+}
