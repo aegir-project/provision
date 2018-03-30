@@ -66,7 +66,7 @@ class HttpApacheService extends HttpService
 
         foreach ($options as $test) {
             if (is_executable($test)) {
-                return $command;
+                return $test;
             }
         }
     }
