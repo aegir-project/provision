@@ -7,8 +7,6 @@
 
 namespace Aegir\Provision\Service\Http\Nginx\Configuration;
 
-use Aegir\Provision\Configuration;
-
 class SiteCommonConfiguration extends ServerConfiguration {
 
     public $template = 'templates/vhost_include.tpl.php';

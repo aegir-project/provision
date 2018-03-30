@@ -7,9 +7,9 @@
 
 namespace Aegir\Provision\Service\Http\Nginx\Configuration;
 
-use Aegir\Provision\Configuration;
+use Aegir\Provision\ConfigFile;
 
-class ServerConfiguration extends Configuration {
+class ServerConfiguration extends ConfigFile {
   
   public $template = 'templates/server.tpl.php';
   public $description = 'web server configuration file';
