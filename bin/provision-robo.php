@@ -18,10 +18,11 @@ if (file_exists($autoloadFile = __DIR__ . '/vendor/autoload.php')
 
 use Aegir\Provision\Console\ConsoleOutput;
 use Aegir\Provision\Console\Config;
+use Aegir\Provision\Common\NotSetupException;
 
 use Aegir\Provision\Console\ProvisionStyle;
 use Robo\Common\TimeKeeper;
-use Symfony\Component\Console\Input\ArgvInput;
+use Aegir\Provision\Console\ArgvInput;
 use Symfony\Component\Console\Exception\InvalidOptionException;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 
@@ -34,15 +35,43 @@ try {
     $input = new ArgvInput($argv);
     $output = new ConsoleOutput();
     $io = new ProvisionStyle($input, $output);
-    
-    // Create a config object.
-    $config = new Config($io);
+
+    // Try to load config. If there are no files detected, Config::__construct()
+    // will throw a NotSetupException.
+    // When that happens, run the 'setup' command instead of whatever command was run by overriding $argv.
+    try {
+        // Create a config object.
+        $config = new Config($io);
+    }
+    catch (NotSetupException $e) {
+
+        if ($e->getMessage()) {
+            $io->warningLite('There were problems detected with your system: ');
+
+            $io->outputBlock($e->getMessage());
+
+            $io->warningLite(' Running `provision setup` command to fix the problems... ');
+        }
+
+        // Replace given command with "setup", unless there is no command, then append to argv.
+        $command = $input->getFirstArgument();
+        $command_key = array_search($input->getFirstArgument(), $argv);
+        if (empty($command_key)) {
+            $argv[] = 'setup';
+        }
+        else {
+            $argv[$command_key] = 'setup';
+        }
+        $input = new ArgvInput($argv);
+        $io = new ProvisionStyle($input, $output);
+        $config = new Config($io, FALSE);
+    }
     
     // Create the app.
-    $app = new \Aegir\Provision\Provision($config, $input, $output);
+    $provision = new \Aegir\Provision\Provision($config, $input, $output);
     
     // Run the app.
-    $status_code = $app->run($input, $output);
+    $status_code = $provision->run($input, $output);
     
 }
 catch (Exception $e) {
