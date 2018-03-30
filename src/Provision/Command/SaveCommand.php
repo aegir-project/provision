@@ -417,7 +417,7 @@ class SaveCommand extends Command
         }
         $command = $this->getApplication()->find('services');
         $arguments = [
-            'context_name' => $this->input->getOption('context'),
+            '--context' => $this->input->getOption('context'),
             'sub_command' => 'add',
         ];
         while ($this->io->confirm('Add a service?')) {
