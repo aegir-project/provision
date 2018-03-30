@@ -29,6 +29,11 @@ class ServicesCommand extends Command
 {
 
     /**
+     * This command needs a context.
+     */
+    const CONTEXT_REQUIRED = TRUE;
+
+    /**
      * "list" (default), "add", "remove", or "configure"
      * @var string
      */
@@ -45,7 +50,8 @@ class ServicesCommand extends Command
           ->setHelp(
             'Use this command to add new services to servers, or to add service subscriptions to platforms and sites.'
           )
-          ->setDefinition($this->getCommandDefinition());
+          ->setDefinition($this->getCommandDefinition())
+        ;
     }
 
     /**
@@ -56,11 +62,7 @@ class ServicesCommand extends Command
     protected function getCommandDefinition()
     {
         $inputDefinition = $this::getCommandOptions();
-        $inputDefinition[] = new InputArgument(
-          'context_name',
-          InputArgument::REQUIRED,
-          'Server to work on.'
-        );
+
         $inputDefinition[] = new InputArgument(
           'sub_command',
           InputArgument::OPTIONAL,
@@ -83,7 +85,6 @@ class ServicesCommand extends Command
           InputOption::VALUE_OPTIONAL,
           'The name of the service type to use.'
         );
-        
         return new InputDefinition($inputDefinition);
     }
     
@@ -130,14 +131,15 @@ class ServicesCommand extends Command
         InputInterface $input,
         OutputInterface $output
     ) {
-
-        if ($input->getArgument('context_name') == 'add') {
-            $this->sub_command = $input->getArgument('context_name');
-            $input->setArgument('context_name', NULL);
-        }
-        else {
-            $this->sub_command = $input->getArgument('sub_command');
-        }
+//
+//        if ($input->getOption('context_name') == 'add') {
+//            $this->sub_command = $input->getArgument('context_name');
+//            $input->setArgument('context_name', NULL);
+//        }
+//        else {
+//            $this->sub_command = $input->getArgument('sub_command');
+//        }
+        $this->sub_command = $input->getArgument('sub_command');
 
         parent::initialize(
             $input,

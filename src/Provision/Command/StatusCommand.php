@@ -32,13 +32,6 @@ class StatusCommand extends Command
           ->setName('status')
           ->setDescription('Display system status.')
           ->setHelp('Lists helpful information about your system.')
-          ->setDefinition([
-              new InputArgument(
-                  'context_name',
-                  InputArgument::OPTIONAL,
-                  'Context to show info for.'
-              )
-          ])
         ;
     }
 
@@ -49,14 +42,14 @@ class StatusCommand extends Command
     {
         $this->getProvision();
         
-        if ($input->getArgument('context_name')) {
+        if ($input->getOption('context')) {
             $rows = [['Configuration File', $this->context->config_path]];
             foreach ($this->context->getProperties() as $name => $value) {
                 if (is_string($value)) {
                     $rows[] = [$name, $value];
                 }
             }
-            $this->io->table(['Provision Context:', $input->getArgument('context_name')], $rows);
+            $this->io->table(['Provision Context:', $input->getOption('context')], $rows);
 
             // Display services.
             $this->context->showServices($this->io);
@@ -104,7 +97,7 @@ class StatusCommand extends Command
                 $context = $this->io->choiceNoList('Get status for', $options, 'select a context');
                 if ($context != 'select a context') {
                     $command = $this->getApplication()->find('status');
-                    $arguments['context_name'] = $context;
+                    $arguments['--context'] = $context;
                     $input = new ArrayInput($arguments);
                     exit($command->run($input, $this->output));
                 }

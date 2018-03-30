@@ -193,7 +193,7 @@ YML;
             $command = $this->getApplication()->find('save');
             $parameters = $_SERVER['argv'];
             $parameters['--context_type'] = 'server';
-            $parameters['context_name'] = 'server_master';
+            $parameters['--context'] = 'server_master';
             $input = new ArrayInput($parameters);
             $exit_code = $command->run($input, $this->output);
 

@@ -53,7 +53,7 @@ class ProvisionCollection extends Collection {
 
                     // Show starting message.
                     $start_message = !empty($task->start)? $task->start: $name;
-                    $this->getProvision()->io()->customLite($start_message , '☐');
+                    $this->getProvision()->io()->customLite($start_message , $task->startPrefix);
                 }
 
                 // If being run interactively, pause momentarily to let user read start message, and replace start message with success or fail.

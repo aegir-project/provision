@@ -39,6 +39,7 @@ before_install:
   # Provision uses these variables to build the container.
   - 'echo "web_user: docker" >> ~/.provision.yml'
   - 'echo "web_user_uid: 999" >> ~/.provision.yml'
+  - 'echo "config_path: /home/travis/config" >> ~/.provision.yml'
 
 install:
   - composer install
@@ -53,28 +54,28 @@ script:
   - provision status -n
 
   # Add server context.
-  - provision save server_master -n
+  - provision save --context=server_master -n
     --context_type=server
     --remote_host=provision.local.computer
     --aegir_root=/var/aegir
     --script_user=aegir
 
   # Add services to server_master context.
-  - provision services server_master add http -n
+  - provision @server_master services add http -n
     --service_type=apacheDocker
     --http_port=80
     --web_group=www-data
     --restart_command="sudo apache2ctl graceful"
 
-  - provision services server_master add db -n
+  - provision @server_master services add db -n
     --service_type=mysqlDocker
     --master_db="mysql://root:root@db:3306"
     --db_grant_all_hosts=1
 
-  - provision services server_master
+  - provision @server_master services
 
   # Add platform context
-  - provision save platform_hostmaster -n
+  - provision save --context=platform_hostmaster -n
     --context_type=platform
     --root=/home/travis/hostmaster
     --server_http=server_master
@@ -83,10 +84,10 @@ script:
 
   # add http service to platform.
   # @TODO: This should already be done thanks to --server_http!!!
-  - provision services platform_hostmaster add http server_master
+  - provision @platform_hostmaster services add http server_master
 
   # Add site context
-  - provision save hostmaster -n
+  - provision save --context=hostmaster -n
     --context_type=site
     --platform=platform_hostmaster
     --server_db=server_master
@@ -98,7 +99,7 @@ script:
     --db_password=drupal
 
   # Add a site context without a platform!
-  - provision save eight.local.computer -n
+  - provision save --context=eight.local.computer -n
     --context_type=site
     --server_db=server_master
     --server_http=server_master
@@ -112,28 +113,28 @@ script:
     --makefile=https://raw.githubusercontent.com/aegir-project/provision/7.x-3.x/provision-tests/makes/drupal8.make
 
   - provision status -n
-  - provision status server_master
-  - provision status platform_hostmaster
-  - provision status hostmaster
-  - provision status eight.local.computer
+  - provision @server_master status
+  - provision @platform_hostmaster status
+  - provision @hostmaster status
+  - provision @eight.local.computer status
 
 
-  - provision verify server_master
+  - provision @server_master verify
 
   # Docker creates the host path when docker run happens, in server verify.
   # Platform verify uses drush make, which won't run if folder exists.
   # @TODO: Figure out how to deal with this within provision.
   - sudo rm -rf /home/travis/hostmaster
-  - provision verify platform_hostmaster
+  - provision @platform_hostmaster verify
 
   - ls -la /home/travis/hostmaster
 
-  - provision verify hostmaster
+  - provision @hostmaster verify
 
   - sudo rm -rf /home/travis/eight
-  - provision verify eight.local.computer
+  - provision @eight.local.computer verify
 
-  - provision verify server_master
+  - provision @server_master verify
 
   - docker ps
   - docker logs servermaster_http_1

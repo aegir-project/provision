@@ -28,6 +28,8 @@ abstract class Command extends BaseCommand
     use ProvisionAwareTrait;
     use LoggerAwareTrait;
 
+    const CONTEXT_REQUIRED = FALSE;
+
     /**
      * @var \Symfony\Component\Console\Input\InputInterface
      */
@@ -72,11 +74,11 @@ abstract class Command extends BaseCommand
         $this->io = new ProvisionStyle($input, $output);
         
         // Load active context if a command uses the argument.
-        if ($this->input->hasArgument('context_name') && !empty($this->input->getArgument('context_name'))) {
+        if ($this->input->getOption('context') && !empty($this->input->getOption('context'))) {
 
             try {
-                // Load context from context_name argument.
-                $this->context_name = $this->input->getArgument('context_name');
+                // Load context from context_name option.
+                $this->context_name = $this->input->getOption('context');
                 $this->context = $this->getProvision()->getContext($this->context_name);
             }
             catch (\Exception $e) {
@@ -94,9 +96,11 @@ abstract class Command extends BaseCommand
         }
         
         // If context_name is not specified, ask for it.
-        elseif ($this->input->hasArgument('context_name') && $this->getDefinition()->getArgument('context_name')->isRequired() && empty($this->input->getArgument('context_name'))) {
+        elseif (($this::CONTEXT_REQUIRED && empty($this->input->getOption('context')))
+            || ($this->getName() == 'save' && empty($this->input->getOption('context')))
+        ) {
             $this->askForContext();
-            $this->input->setArgument('context_name', $this->context_name);
+            $this->input->setOption('context', $this->context_name);
 
             try {
                 $this->context = $this->getProvision()->getContext($this->context_name);

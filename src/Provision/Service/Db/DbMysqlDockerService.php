@@ -64,6 +64,11 @@ class DbMysqlDockerService extends DbMysqlService implements DockerServiceInterf
         }
         catch (\Exception $e) {}
 
+        // Look up a mysql conf override file.
+        if (file_exists($this->provider->server_config_path . '/mysql.cnf')) {
+          $compose['volumes'][] = $this->provider->server_config_path . '/mysql.cnf' . ':/etc/mysql/conf.d/provision.cnf';
+        }
+
         return $compose;
     }
 

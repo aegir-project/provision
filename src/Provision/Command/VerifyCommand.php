@@ -26,6 +26,11 @@ class VerifyCommand extends Command
 {
 
     /**
+     * This command needs a context.
+     */
+    const CONTEXT_REQUIRED = TRUE;
+
+    /**
      * {@inheritdoc}
      */
     protected function configure()
@@ -47,11 +52,6 @@ class VerifyCommand extends Command
     protected function getCommandDefinition()
     {
         $inputDefinition = [];
-        $inputDefinition[] = new InputArgument(
-          'context_name',
-          InputArgument::REQUIRED,
-          'Context to verify'
-        );
         return new InputDefinition($inputDefinition);
     }
 

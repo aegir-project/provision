@@ -27,7 +27,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class SaveCommand extends Command
 {
-    
     /**
      * @var string
      */
@@ -61,17 +60,11 @@ class SaveCommand extends Command
     protected function getCommandDefinition()
     {
         $inputDefinition = ServicesCommand::getCommandOptions();
-        $inputDefinition[] = new InputArgument(
-          'context_name',
-          InputArgument::REQUIRED,
-          'Context to save'
-        );
         $inputDefinition[] = new InputOption(
           'context_type',
           null,
           InputOption::VALUE_OPTIONAL,
-          'server, platform, or site',
-          'site'
+          'server, platform, or site'
         );
         $inputDefinition[] = new InputOption(
           'delete',
@@ -135,7 +128,7 @@ class SaveCommand extends Command
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         parent::initialize($input,$output);
-        $this->context_name = $input->getArgument('context_name');
+        $this->context_name = $input->getOption('context');
         $this->context_type = $input->getOption('context_type');
     }
 
@@ -199,7 +192,7 @@ class SaveCommand extends Command
             $options['type'] = $this->context_type;
             
             $class = Context::getClassName($this->input->getOption('context_type'));
-            $this->context = new $class($input->getArgument('context_name'), $this->getProvision(), $options);
+            $this->context = new $class($input->getOption('context'), $this->getProvision(), $options);
         }
         else {
             $this->getProvision()->io()->helpBlock("Editing context {$this->context->name}...", ProvisionStyle::ICON_EDIT);
@@ -257,7 +250,7 @@ class SaveCommand extends Command
             $this->io->warningLite('Context not saved.');
             return;
         }
-//        $command = 'drush provision-save '.$input->getArgument('context_name');
+//        $command = 'drush provision-save '.$input->getOption('context');
 //        $this->process($command);
 
         // If editing a context, exit here.
@@ -276,7 +269,7 @@ class SaveCommand extends Command
         // Offer to verify. (only if --verify option was specified or is interactive and confirmation is made.
         if ($this->input->getOption('verify') || ($this->input->isInteractive() && $this->io->confirm('Would you like to run `provision verify` on this ' . $this->input->getOption('context_type') . '?'))) {
             $command = $this->getApplication()->find('verify');
-            $arguments['context_name'] = $this->context_name;
+            $arguments['--context'] = $this->context_name;
             $input = new ArrayInput($arguments);
             exit($command->run($input, $this->output));
         }
@@ -334,19 +327,6 @@ class SaveCommand extends Command
 
                 if (empty($this->input->getOption('context_type'))) {
                     $type_options = Context::getContextTypeOptions();
-
-                    // Check for platforms. If none. don't allow sites.
-                    $platform_exists = FALSE;
-                    foreach ($options as $name => $type_and_name) {
-                        if (strpos($type_and_name, 'platform') === 0) {
-                            $platform_exists = TRUE;
-                        }
-                    }
-
-                    if (!$platform_exists) {
-                        unset($type_options['site']);
-                        $this->io->block("You cannot add a site until you have at least one platform.");
-                    }
                     $context_type = $this->io->choice('Context Type?', $type_options);
                 }
                 else {
@@ -437,7 +417,7 @@ class SaveCommand extends Command
         }
         $command = $this->getApplication()->find('services');
         $arguments = [
-            'context_name' => $this->input->getArgument('context_name'),
+            'context_name' => $this->input->getOption('context'),
             'sub_command' => 'add',
         ];
         while ($this->io->confirm('Add a service?')) {
@@ -468,7 +448,7 @@ class SaveCommand extends Command
 
             $command = $this->getApplication()->find('services');
             $arguments = [
-                'context_name' => $this->input->getArgument('context_name'),
+                '--context' => $this->input->getOption('context'),
                 'sub_command' => 'add',
                 'service' => $type,
             ];

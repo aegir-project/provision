@@ -5,7 +5,6 @@ namespace Aegir\Provision\Console;
 use Aegir\Provision\Provision;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Robo\Common\InputAwareTrait;
-use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -101,13 +100,13 @@ class ProvisionStyle extends DrupalStyle {
         $this->customLite($message, $directory . ' <fg=yellow>' . self::ICON_COMMAND . '</>', '');
     }
 
-    public function outputBlock($message) {
+    public function outputBlock($message, $padding = TRUE, $newline = TRUE) {
         $this->block(
             $message,
             NULL,
             'fg=yellow;bg=black',
             ' ╎ ',
-            TRUE
+            $padding
             );
     }
 

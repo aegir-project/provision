@@ -6,7 +6,6 @@ use Aegir\Provision\Application;
 use Aegir\Provision\ServiceSubscriber;
 use Aegir\Provision\Provision;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
-use Symfony\Component\Console\Input\ArgvInput;
 
 /**
  * Class SiteContext

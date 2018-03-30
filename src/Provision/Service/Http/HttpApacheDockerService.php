@@ -17,6 +17,7 @@ use Aegir\Provision\Service\Http\Apache\Configuration\SiteConfigFile;
 use Aegir\Provision\Service\Http\ApacheDocker\Configuration\ServerConfigFile;
 use Aegir\Provision\ServiceSubscriber;
 use Psr\Log\LogLevel;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -29,8 +30,15 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
   const SERVICE_TYPE = 'apacheDocker';
   const SERVICE_TYPE_NAME = 'Apache on Docker';
 
+  const DOCKER_USER_NAME = 'provision';
+  public $docker_user_name = 'provision';
 
-    /**
+  const DOCKER_COMPOSE_COMMAND = 'docker-compose';
+  const DOCKER_COMPOSE_UP_COMMAND = 'docker-compose up';
+  const DOCKER_COMPOSE_UP_OPTIONS = ' -d --build --force-recreate ';
+
+
+  /**
    * @var string The name of this server's container.
    */
   private $containerName;
@@ -53,26 +61,9 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
       $this->containerName = "provision_http_{$this->provider->name}";
       $this->containerTag = "provision/http:{$this->provider->name}";
 
-      $this->setProperty('restart_command', $this->default_restart_cmd());
+      $this->setProperty('restart_command', $this->dockerComposeCommand('exec http sudo apache2ctl graceful'));
       $this->setProperty('web_group', $this->default_web_group());
   }
-
-    /**
-     * The web restart command is fixed to our service because we have the Dockerfile and build the container.
-     *
-     * @return string
-     */
-    public static function default_restart_cmd() {
-//        return 'docker-compose exec http sudo apache2ctl graceful';
-
-        // @TODO: restarting apache gracefully results in zero downtime, but we need to restart the
-        // container to ensure volumes are mounted properly. If the root folder of the platform is deleted,
-        // docker will not see a new folder in that path in it's place. The container must restart to
-        // see the volume path.
-
-        // @TODO: docker-compose restart doesn't catch errors in the apache config! Another win for restarting apache, not the entire container.
-        return 'docker-compose exec http sudo apache2ctl graceful';
-    }
 
     /**
      * Return the name of the apache user group for the webserver.
@@ -147,11 +138,11 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
       if ($this->context->type == 'site' && isset($config->data['uri'])) {
           $config->data['site_path'] = $config->data['document_root'] . '/sites/' . $config->data['uri'];
       }
-      
+
       // When running in docker, internal port is always 80.
       $config->data['http_port'] = 80;
   }
-    
+
     /**
      * Convert a path on the host like /home/jon/hostmaster to /var/aegir/hostmaster
      *
@@ -164,7 +155,8 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
 
         $path_parts = explode(DIRECTORY_SEPARATOR, $root_on_host);
         $directory = array_pop($path_parts);
-        return '/var/aegir/platforms/' . $directory;
+        $username = $this::DOCKER_USER_NAME;
+        return "/var/{$username}/platforms/{$directory}/{$docroot}";
     }
 
     /**
@@ -173,8 +165,6 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
      * @return array
      */
   public function verifyServer() {
-      $tasks = [];
-
       // Write Apache configuration files.
       $tasks['http.server.configuration'] = Provision::newTask()
           ->start('Writing web server configuration...')
@@ -183,6 +173,62 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
           });
 
       return $tasks;
+  }
+
+  /**
+   * @return array
+   */
+  public function postVerify() {
+
+    // Run docker-compose up -d --build
+    $tasks['docker.http.restart'] = Provision::newTask()
+      ->start('Restarting web service...')
+      ->execute(function() {
+        return $this->restartService()? 0: 1;
+      });
+
+    return $tasks;
+
+  }
+
+  /**
+   * @return \Symfony\Component\Finder\SplFileInfo[]
+   */
+  function findDockerComposeFiles() {
+    $finder = new Finder();
+    $finder->in($this->provider->getProperty('server_config_path'));
+    $finder->files()->name('docker-compose*.yml');
+    foreach ($finder as $file) {
+      $dc_files[] = $file;
+    }
+    return $dc_files;
+  }
+
+  /**
+   * Return the base docker-compose command with options automatically populated.
+   *
+   * @param string $command
+   * @param string $options
+   * @param bool $load_files Set to TRUE if you are not running docker-compose
+   *   command in the server_config_path. If TRUE, all docker-compose*.tml files
+   *   will be found and added using the `-f` option.
+   *
+   * @return string
+   */
+  function dockerComposeCommand($command = '', $options = '', $load_files = FALSE) {
+
+    // Generate the docker-compose command.
+    $docker_compose = self::DOCKER_COMPOSE_COMMAND;
+
+    // If told to load files, do it.
+    if ($load_files) {
+      foreach ($this->findDockerComposeFiles() as $file) {
+        $docker_compose .= ' -f ' . $file->getPathname();
+      }
+    }
+
+    $command = "{$docker_compose} {$command} {$options}";
+    return $command;
   }
 
     /**
@@ -225,12 +271,13 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
         return [
             'image'  => $this->dockerImage(),
             'build' => [
-                'context' => __DIR__ . DIRECTORY_SEPARATOR . 'ApacheDocker',
-                'dockerfile' => 'http.Dockerfile',
+                'context' => dirname(dirname(dirname(dirname(__DIR__)))) . DIRECTORY_SEPARATOR . 'dockerfiles',
+                'dockerfile' => 'Dockerfile.user',
                 'args' => [
-                    "AEGIR_UID" => $this->getProvision()->getConfig()->get('script_uid'),
-                    "APACHE_UID" => $this->getProvision()->getConfig()->get('web_user_uid'),
-                    "AEGIR_SERVER_NAME" => $this->provider->name,
+                    'IMAGE_NAME' => 'http',
+                    'IMAGE_TAG' => 'php7',
+                    'PROVISION_USER_UID' => $this->getProvision()->getConfig()->get('script_uid'),
+                    "PROVISION_WEB_UID" => $this->getProvision()->getConfig()->get('web_user_uid'),
                 ],
             ],
             'restart'  => 'always',
@@ -258,7 +305,7 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
         $volumes = array();
 
         $config_path_host = $config_path_container = $this->provider->getProperty('server_config_path');
-        $volumes[] = "{$config_path_host}:/var/aegir/config/{$this->provider->name}:z";
+        $volumes[] = "{$config_path_host}:/var/provision/config/{$this->provider->name}:z";
 
 //        $platforms_path_host = $platforms_path_container = d()->http_platforms_path;
 //
@@ -286,6 +333,16 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
             }
         }
 
+        // Look up php.ini override file.
+        if (file_exists($this->provider->server_config_path . '/php.ini')) {
+          $volumes[] = $this->provider->server_config_path . '/php.ini' . ':/etc/php/7.0/apache2/conf.d/99-provision.ini';
+        }
+
+        // Look up php-cli.ini override file.
+        if (file_exists($this->provider->server_config_path . '/php-cli.ini')) {
+          $volumes[] = $this->provider->server_config_path . '/php-cli.ini' . ':/etc/php/7.0/cli/conf.d/99-provision.ini';
+        }
+
         return array_values($volumes);
     }
 
@@ -295,7 +352,30 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
      */
     function getEnvironment() {
         $environment = array();
-        $environment['AEGIR_SERVER_NAME'] = $this->provider->name;
+        $environment['SERVER_NAME'] = $this->provider->name;
         return $environment;
+    }
+
+    /**
+     * Output additional configuration to the virtualhost config file.
+     * @param $configFile
+     *
+     * @return string
+     */
+    function extraApacheConfig($configFile) {
+
+      $lines[] = "  # Write all logs to the logfile. the default entrypoint tails this file.";
+      $lines[] = '  ErrorLogFormat "ERROR  | %v [%t] [client %a] [%l] %M';
+      $lines[] = '  LogFormat "ACCESS | %v %t [client %a] [%>s] [%b bytes] %r" custom';
+
+      $lines[] = "  ErrorLog /var/log/provision.log ";
+      $lines[] = "  CustomLog /var/log/provision.log custom";
+      return implode("\n", $lines);
+    }
+
+    public function getCommandClasses() {
+      return [
+        \Aegir\Provision\Service\Http\ApacheDocker\ApacheDockerCommands::class
+      ];
     }
 }

@@ -10,12 +10,14 @@ use Aegir\Provision\Common\ProvisionAwareTrait;
 use Aegir\Provision\Console\Config;
 use Aegir\Provision\Robo\ProvisionCollection;
 use Aegir\Provision\Robo\ProvisionCollectionBuilder;
+use Aegir\Provision\Console\ProvisionStyle;
 use Consolidation\AnnotatedCommand\CommandFileDiscovery;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Robo\Collection\CollectionBuilder;
 use Robo\Common\BuilderAwareTrait;
 use Robo\Common\ProgressIndicator;
 use Robo\Contract\BuilderAwareInterface;
+use Robo\ResultData;
 use Robo\Tasks;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Processor;
@@ -24,6 +26,7 @@ use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Yaml;
 
@@ -52,7 +55,7 @@ class Context implements BuilderAwareInterface
      */
     public $type = null;
     const TYPE = null;
-    
+
     /**
      * The role of this context, either 'subscriber' or 'provider'.
      *
@@ -84,7 +87,7 @@ class Context implements BuilderAwareInterface
      * @var \Symfony\Component\Filesystem\Filesystem
      */
     public $fs;
-    
+
     /**
      * Context constructor.
      *
@@ -97,13 +100,13 @@ class Context implements BuilderAwareInterface
         $options = [])
     {
         $this->name = $name;
-    
+
         $this->setProvision($provision);
         $this->setBuilder($this->getProvision()->getBuilder());
-        
+
         $this->loadContextConfig($options);
         $this->prepareServices();
-        
+
         $this->fs = new Filesystem();
     }
 
@@ -142,14 +145,14 @@ class Context implements BuilderAwareInterface
                     }
                 }
             }
-            
+
             $this->properties['type'] = $this->type;
             $this->properties['name'] = $this->name;
-            
+
             $configs[] = $this->properties;
 
             $this->config = $processor->processConfiguration($this, $configs);
-            
+
         } catch (\Exception $e) {
             throw new InvalidOptionException(
                 strtr("There is an error with the configuration for !type '!name'. Check the file !file and try again. \n \nError: !message", [
@@ -339,6 +342,27 @@ class Context implements BuilderAwareInterface
     }
 
     /**
+     * Call method $callback on each of the context's service objects.
+     *
+     * @param $callback
+     *   A Provision_Service method.
+     * @return
+     *   An array of return values from method implementations.
+     */
+    function servicesInvoke($callback, array $args = array()) {
+      $results = array();
+      // fetch the merged list of services.
+      // These may be on different servers entirely.
+      $services = $this->getServices();
+      foreach ($services as $service_name => $service) {
+        if (method_exists($service, $callback)) {
+          $results[$service_name] = call_user_func_array(array($service, $callback), $args);
+        }
+      }
+      return $results;
+    }
+
+  /**
      * {@inheritdoc}
      */
     public function getConfigTreeBuilder()
@@ -370,7 +394,7 @@ class Context implements BuilderAwareInterface
                     ->end()
                 ->end();
         }
-    
+
         // Load contextRequirements into config as ContextNodes.
         foreach ($this->contextRequirements() as $property => $type) {
             $root_node
@@ -383,14 +407,14 @@ class Context implements BuilderAwareInterface
                     ->end()
                 ->end();
         }
-        
+
         if (method_exists($this, 'configTreeBuilder')) {
             $this->configTreeBuilder($root_node);
         }
 
         return $tree_builder;
     }
-    
+
     /**
      * Prepare either services or service subscriptions config tree.
      */
@@ -435,15 +459,15 @@ class Context implements BuilderAwareInterface
      * Output a list of all services for this context.
      */
     public function showServices(DrupalStyle $io) {
-        
+
         $services = $this->isProvider()? $this->getServices(): $this->getSubscriptions();
         if (!empty($services)) {
             $rows = [];
-            
+
             $headers = $this->isProvider()?
                 ['Services']:
                 ['Service', 'Server', 'Type'];
-            
+
             foreach ($services as $name => $service) {
                 if ($this::ROLE == 'provider') {
                     $rows[] = [$name, $service->type];
@@ -513,11 +537,11 @@ class Context implements BuilderAwareInterface
      */
     public function save()
     {
-        
+
         // Create config folder if it does not exist.
         $fs = new Filesystem();
         $dumper = new Dumper();
-        
+
         try {
             $fs->dumpFile($this->config_path, $dumper->dump($this->getProperties(), 10));
             return true;
@@ -553,7 +577,7 @@ class Context implements BuilderAwareInterface
             return self::getClassName($context_data['type']);
         }
     }
-    
+
     /**
      * Retrieve the class name of a specific context type.
      *
@@ -570,7 +594,7 @@ class Context implements BuilderAwareInterface
 //    public function verify() {
 //        return "Provision Context";
 //    }
-    
+
     /**
      * Verify this context.
      *
@@ -586,6 +610,7 @@ class Context implements BuilderAwareInterface
 
         // Add preVerify() tasks to the collection.
         $this->prepareTasks($collection, $this->preVerify());
+        $this->prepareTasks($collection, $this->verify());
 
         foreach ($this->getServices() as $type => $service) {
             $friendlyName = $service->getFriendlyName();
@@ -606,7 +631,6 @@ class Context implements BuilderAwareInterface
             }
             $tasks = [];
         }
-
         // Add postVerify() tasks to the collection.
         $postTasks = $this->postVerify();
         if (count($postTasks)) {
@@ -617,7 +641,7 @@ class Context implements BuilderAwareInterface
             $this->prepareTasks($collection, $this->postVerify());
         }
         $result = $collection->run();
-        
+
         if ($result->wasSuccessful()) {
             $this->getProvision()->io()->success('Verification Complete!');
         }
@@ -674,6 +698,58 @@ class Context implements BuilderAwareInterface
         }
     }
 
+
+    /**
+     * Stub to be implemented by context types. Return tasks to be run before
+     * any other verify takes place.
+     */
+    function preVerify() {
+      $tasks = [];
+
+      // Lookup possible hook files.
+      // @TODO: create methods on the contexts to do this.
+      if ($this->type == 'server') {
+        $lookup_paths[] = $this->server_config_path;
+      }
+      elseif ($this->type == 'site' || $this->type == 'platform') {
+        $lookup_paths[] = $this->getProperty('root');
+      }
+
+      foreach ($lookup_paths as $i => $path) {
+        $yml_file_path = $path . '/.provision.yml';
+        $yml_file_path_machine_name = preg_replace('/[^a-zA-Z0-9\']/', '_', $yml_file_path);
+
+        if (file_exists($yml_file_path)) {
+          $tasks['yml_hooks_found'] = Provision::newTask()
+            ->start("Custom hooks file found: <comment>{$yml_file_path}</comment>")
+            ->failure("Custom hooks file found: <comment>{$yml_file_path}</comment>: Unable to parse YAML.")
+            ->execute(function () use ($yml_file_path) {
+              // Attempt to parse Yml here so we alert the user early.
+              $this->custom_yml_data = Yaml::parseFile($yml_file_path);
+              })
+          ;
+
+          $tasks['yml_hooks_' . $yml_file_path_machine_name] = Provision::newTask()
+            ->start("Running <comment>hooks:verify:pre</comment> from {$yml_file_path}")
+            ->success("Successfully ran <comment>hooks:verify:pre</comment> from {$yml_file_path}")
+            ->failure("Errors while running <comment>hooks:verify:pre</comment> from {$yml_file_path}")
+            ->startPrefix("<fg=blue>" . ProvisionStyle::ICON_BULLET . "</>")
+            ->execute(function () use ($yml_file_path){
+              $this->getProvision()->getOutput()->writeln([]);
+              $this->getProvision()->getOutput()->writeln([]);
+              $this->getProvision()->getOutput()->writeln([]);
+
+              // @TODO: Put this in it's own method, it probably needs a whole class, really.
+              if (isset($this->custom_yml_data['hooks']['verify']['pre'])) {
+                $command = 'set -e; ' . $this->custom_yml_data['hooks']['verify']['pre'];
+                return $this->process_exec($command);
+              }
+            })
+          ;
+        }
+      }
+       return $tasks;
+    }
 
     /**
      * Stub to be implemented by context types.
@@ -760,7 +836,7 @@ class Context implements BuilderAwareInterface
     public static function contextRequirements() {
         return [];
     }
-    
+
     /**
      * Whether or not this context is a provider.
      *
@@ -798,4 +874,99 @@ class Context implements BuilderAwareInterface
 //        }
 //        return $services;
 //    }
+
+  /**
+   * Run a shell command on this server.
+   *
+   * @param $cmd string The command to run
+   * @param $dir string The directory to run the command in. Defaults to this server's config path.
+   * @param $return string What to return. Can be 'output' or 'exit'.
+   *
+   * @return string
+   * @throws \Exception
+   */
+  public function shell_exec($command, $dir = NULL, $return = 'stdout') {
+    $cwd = getcwd();
+    $original_command = $command;
+
+    $tmpdir = sys_get_temp_dir() . '/provision';
+    if (!$this->fs->exists($tmpdir)){
+      $this->fs->mkdir($tmpdir);
+    }
+
+    $datestamp = date('c');
+    $tmp_output_file = tempnam($tmpdir, 'task.' . $datestamp . '.output.');
+    $tmp_error_file = tempnam($tmpdir, 'task.' . $datestamp . '.error.');
+
+    $effective_wd = $dir? $dir:
+      $this->type == 'server'? $this->getProperty('server_config_path'):
+      $this->getProperty('root')
+    ;
+
+    if ($this->getProvision()->getOutput()->isVerbose()) {
+      $this->getProvision()->io()->commandBlock($command, $effective_wd);
+    }
+
+    // Output and Errors to files.
+    $command .= "> $tmp_output_file 2> $tmp_error_file";
+
+    chdir($effective_wd);
+    exec($command, $output, $exit);
+    chdir($cwd);
+
+    $stderr = file_get_contents($tmp_error_file);
+    $stdout = file_get_contents($tmp_output_file);
+
+    if (!empty($stdout)){
+      if ($this->getProvision()->getOutput()->isVerbose()) {
+        $this->getProvision()->io()->outputBlock($stdout);
+      }
+    }
+
+    if ($exit != ResultData::EXITCODE_OK) {
+      throw new \Exception($stderr);
+    }
+
+    return ${$return};
+  }
+
+  /**
+   * @param $command
+   * @param null $dir
+   * @param string $return
+   */
+  public function process_exec($command, $dir = NULL) {
+
+    $process = new Process($command);
+    $env = getenv();
+
+    $env['PROVISION_CONTEXT'] = $this->name;
+    $env['PROVISION_CONTEXT_CONFIG_FILE'] = $this->config_path;
+
+    foreach ($this->services as $service_type => $service) {
+      $env['PROVISION_CONTEXT_SERVER_' . strtoupper($service_type)] = $service->provider->name;
+      $env['PROVISION_CONTEXT_SERVER_' . strtoupper($service_type) . '_CONFIG_PATH'] = $service->provider->server_config_path;
+    }
+
+    $process->setEnv($env);
+    if ($dir){
+      $process->setWorkingDirectory($dir);
+    }
+    $io = $this->getProvision()->io();
+    $process->run(function ($type, $buffer) use ($io) {
+        $io->outputBlock(trim($buffer));
+    });
+    return $process->getExitCode();
+  }
+
+    /**
+     * return list of command classes.
+     */
+    function getServiceCommandClasses() {
+        $classes = [];
+        foreach ($this->servicesInvoke('getCommandClasses') as $class) {
+            $classes += $class;
+        }
+        return $classes;
+    }
 }

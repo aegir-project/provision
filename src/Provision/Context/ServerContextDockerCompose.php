@@ -20,32 +20,42 @@ class ServerContextDockerCompose extends ServerContext {
         $tasks = parent::preVerify();
         $filename = $this->getProperty('server_config_path') . DIRECTORY_SEPARATOR . 'docker-compose.yml';
 
-        // Write docker-compose.yml file.
-        $tasks['docker.compose.write'] = Provision::newTask()
-            ->start('SERVER Generating docker-compose.yml file...')
-            ->success('Generating docker-compose.yml file... Saved to ' . $filename)
-            ->failure('Generating docker-compose.yml file... Saved to ' . $filename)
-            ->execute(function () use ($filename) {
+      // Write docker-compose.yml file.
+      $tasks['docker.compose.write'] = Provision::newTask()
+        ->start('Generating docker-compose.yml file...')
+        ->success('Generating docker-compose.yml file... Saved to ' . $filename)
+        ->failure('Generating docker-compose.yml file... Saved to ' . $filename)
+        ->execute(function () use ($filename) {
 
-                // Load docker compose data from each docker service.
-                $compose_services = [];
-                foreach ($this->getServices() as $type => $service) {
-                    if ($service instanceof DockerServiceInterface) {
-                        $compose_services[$type] = $service->dockerComposeService();
-                        $compose_services[$type]['hostname'] = $this->name . '.' . $type;
-                    }
-                }
+          // Load docker compose data from each docker service.
+          foreach ($this->provider->getServices() as $type => $service) {
+            if ($service instanceof DockerServiceInterface) {
+              $compose_services[$type] = $service->dockerComposeService();
+              $compose_services[$type]['hostname'] = $this->provider->name . '.' . $type;
 
-                // If there are any docker services in this server create a
-                // docker-compose file.
-                $compose = array(
-                    'version' => '2',
-                    'services' => $compose_services,
-                );
+              // Look for Dockerfile overrides for this service.
+              $dockerfile_override_path = $this->provider->server_config_path . DIRECTORY_SEPARATOR . 'Dockerfile.' . $type;
+              if (file_exists($dockerfile_override_path)) {
+                $this->getProvision()->getTasks()->taskLog("Found custom Dockerfile for service {$type}: {$dockerfile_override_path}", LogLevel::INFO)->run()->getExitCode();
 
-                $filename = $this->getProperty('server_config_path') . DIRECTORY_SEPARATOR . 'docker-compose.yml';
-                $server_name = $this->name;
-                $yml_prefix = <<<YML
+                $compose_services[$type]['image'].= '-custom';
+                $compose_services[$type]['build']['context'] = '.';
+                $compose_services[$type]['build']['dockerfile'] = 'Dockerfile.' . $type;
+                $compose_services[$type]['environment']['PROVISION_CUSTOM_DOCKERFILE'] = $dockerfile_override_path;
+              }
+
+            }
+          }
+
+          // If there are any docker services in this server create a
+          // docker-compose file.
+          $compose = array(
+            'version' => '2',
+            'services' => $compose_services,
+          );
+
+          $server_name = $this->provider->name;
+          $yml_prefix = <<<YML
 # Provision Docker Compose File
 # =============================
 # Server: $server_name
@@ -59,17 +69,48 @@ class ServerContextDockerCompose extends ServerContext {
 #
 #    provision verify $server_name
 #
-# Soon there will be an easy way for you to modify this file automatically.
-# THANKS!
+#
+# Overrides
+# =========
+#
+# To customize this Docker cluster, create a docker-compose-overrides.yml file 
+# in the same folder as this file. 
+#
+# If this file exists, it will be included in the `docker-compose` command when
+# the `provision verify` command is run.
+#
 
 YML;
-                $yml_dump = $yml_prefix . Yaml::dump($compose, 5, 2);
-                $debug_message = 'Generated Docker Compose file: ' . PHP_EOL . $yml_dump;
-                $this->getProvision()->getTasks()->taskLog($debug_message, LogLevel::INFO)->run()->getExitCode();
+          $yml_dump = $yml_prefix . Yaml::dump($compose, 5, 2);
+          $debug_message = 'Generated Docker Compose file: ' . PHP_EOL . $yml_dump;
+          $this->getProvision()->getTasks()->taskLog($debug_message, LogLevel::INFO)->run()->getExitCode();
 
-                Provision::fs()->dumpFile($filename, $yml_dump);
-            });
+          $this->provider->fs->dumpFile($filename, $yml_dump);
 
+          // Write .env file to tell docker-compose to use all of the docker-compose-*.yml files.
+          $dc_files = $this->findDockerComposeFiles();
+          $files = [];
+          foreach ($dc_files as $file) {
+            $files[] = $file->getFilename();
+          }
+          $dc_files_path = implode(':', $files);
+
+          // Allow users to set a .env-custom file to allow additional ENV for the folder to be preserved.
+          $env_file_path = $this->provider->getProperty('server_config_path') . '/.env';
+          $env_custom_path = $this->provider->getProperty('server_config_path') . '/.env-custom';
+          $env_custom = file_exists($env_custom_path)? '# LOADED FROM .env-custom: ' . PHP_EOL . file_get_contents($env_custom_path): '';
+          $env_file_contents = <<<ENV
+# Provision-generated file. Do not edit.
+# Add a file .env-custom and it will be included here on `provision-verify`
+# For available docker-compose env vars, see https://docs.docker.com/compose/reference/envvars/
+COMPOSE_PATH_SEPARATOR=:
+COMPOSE_FILE=$dc_files_path
+$env_custom
+ENV;
+          $this->provider->fs->dumpFile($env_file_path, $env_file_contents);
+          $debug_message = 'Generated .env file for docker-compose: ' . PHP_EOL . $yml_dump;
+          $this->getProvision()->getTasks()->taskLog($debug_message, LogLevel::INFO)->run()->getExitCode();
+        });
 
         return $tasks;
     }

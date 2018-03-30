@@ -5,11 +5,11 @@ namespace Aegir\Provision\Console;
 use Aegir\Provision\Common\NotSetupException;
 use Aegir\Provision\Common\ProvisionAwareTrait;
 use Aegir\Provision\Provision;
+use Aegir\Provision\Console\ArgvInput;
 use Drupal\Console\Core\Style\DrupalStyle;
 use Robo\Common\IO;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Exception\InvalidOptionException;
-use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 
