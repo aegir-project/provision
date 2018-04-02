@@ -920,12 +920,9 @@ location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tin
     return 403;
   }
   try_files    $uri =404;
-<?php if ($satellite_mode == 'boa'): ?>
-  fastcgi_pass unix:/var/run/$user_socket.fpm.socket;
-<?php elseif ($phpfpm_mode == 'port'): ?>
-  fastcgi_pass 127.0.0.1:9000;
-<?php else: ?>
-  fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
+
+<?php if (!empty($php_fpm_socket_location)): ?>
+  fastcgi_pass <?php print $php_fpm_socket_location; ?>
 <?php endif; ?>
 }
 
