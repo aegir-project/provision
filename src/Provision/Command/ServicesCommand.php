@@ -99,21 +99,25 @@ class ServicesCommand extends Command
     
         // Load all service options
         $options = Context::getServiceOptions();
-    
+
         // For each service type...
         foreach ($options as $service => $service_name) {
         
-            $class = Service::getClassName($service);
-        
-            // Load option_documentation() into input options.
-            foreach (Context::getContextTypeOptions() as $type => $type_name) {
-                $method = "{$type}_options";
-                foreach ($class::$method() as $option => $description) {
-                    $description = "$type_name $service service: $description";
-                    $inputDefinition[] = new InputOption($option, NULL, InputOption::VALUE_OPTIONAL, $description);
+            // Load every available service type.
+            foreach (Context::getServiceTypeOptions($service) as $service_type => $service_name) {
+                $class = Service::getClassName($service, $service_type);
+
+                Provision::getProvision()->getLogger()->debug("Loading options from $class $service_type");
+
+                // Load option_documentation() into input options.
+                foreach (Context::getContextTypeOptions() as $type => $type_name) {
+                    $method = "{$type}_options";
+                    foreach ($class::$method() as $option => $description) {
+                      $description = "$type_name $service $service_name service: $description";
+                      $inputDefinition[] = new InputOption($option, NULL, InputOption::VALUE_OPTIONAL, $description);
+                    }
                 }
             }
-        
         }
         
         return $inputDefinition;
@@ -288,7 +292,7 @@ class ServicesCommand extends Command
             }
 
             // If option does not exist, ask for it.
-            if (!empty($this->input->getOption($name))) {
+            if ($this->input->hasOption($name) && !empty($this->input->getOption($name))) {
                 $properties[$name] = $this->input->getOption($name);
                 $this->io->comment("Using option {$name}={$properties[$name]}");
             }
