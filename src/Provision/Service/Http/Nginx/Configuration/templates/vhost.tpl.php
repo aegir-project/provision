@@ -89,7 +89,7 @@ server {
         }
       }
     } ?>;
-  root          <?php print "{$root}"; ?>;
+  root          <?php print "{$document_root_full}"; ?>;
   <?php print $extra_config; ?>
 <?php
 if ($redirection || $ssl_redirection) {
