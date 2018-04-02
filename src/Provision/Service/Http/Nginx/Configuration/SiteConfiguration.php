@@ -1,8 +1,10 @@
 <?php
 /**
- * @file SiteConfiguration.php
+ * @file Site.php
  *
- * NGINX Configuration for Site Context.
+ *       Apache Configuration for Server Context.
+ * @see \Provision_Config_Apache_Site
+ * @see \Provision_Config_Http_Site
  */
 
 namespace Aegir\Provision\Service\Http\Nginx\Configuration;
@@ -13,6 +15,9 @@ class SiteConfiguration extends BaseSiteConfigFile {
 
     const SERVICE_TYPE = 'nginx';
 
-    public $template = 'templates/vhost.tpl.php';
+    function process() {
+        parent::process();
+        $this->data['php_sock_location'] = $this->context->getSubscription('http')->getProperty('php_sock_location');;
+    }
 
 }

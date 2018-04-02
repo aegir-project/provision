@@ -252,4 +252,31 @@ class HttpNginxService extends HttpService {
         }
     }
 
+    /**
+     * Find the path to PHP FPM socket from common options.
+     *
+     * @return mixed
+     */
+    public static function getPhpFpmLocation() {
+        $options[] = '/run/php-fpm/www.sock';
+        $options[] = '/run/php/php7.2-fpm.sock';
+        $options[] = '/run/php/php7.1-fpm.sock';
+        $options[] = '/run/php/php7.0-fpm.sock';
+        $options[] = '/var/run/php7-fpm.sock';
+        $options[] = '/var/run/php5-fpm.sock';
+        $options[] = '/var/run/php/php7.2-fpm.sock';
+        $options[] = '/var/run/php/php7.1-fpm.sock';
+        $options[] = '/var/run/php/php7.0-fpm.sock';
+        $options[] = '/opt/remi/php72/root/tmp/php-fpm.sock';
+        $options[] = '/opt/remi/php71/root/tmp/php-fpm.sock';
+        $options[] = '/opt/remi/php70/root/tmp/php-fpm.sock';
+
+        foreach ($options as $test) {
+            if (Provision::fs()->exists($test)) {
+                return $test;
+            }
+        }
+
+        return '127.0.0.1:5000';
+    }
 }
