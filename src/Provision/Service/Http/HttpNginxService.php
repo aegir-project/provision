@@ -273,7 +273,7 @@ class HttpNginxService extends HttpService {
 
         foreach ($options as $test) {
             if (Provision::fs()->exists($test)) {
-                return $test;
+                return 'unix:' . $test;
             }
         }
 
