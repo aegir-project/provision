@@ -13,8 +13,10 @@ use Aegir\Provision\Service\Http\Apache\Configuration\SiteConfigFile as BaseSite
 
 class SiteConfiguration extends BaseSiteConfigFile {
 
+    const SERVICE_TYPE = 'nginx';
+
     function process() {
         parent::process();
-        $this->data['php_fpm_sock_location'] = $this->service->getProperty('php_fpm_sock_location');
+        $this->data['php_sock_location'] = $this->context->getSubscription('http')->getProperty('php_sock_location');;
     }
 }

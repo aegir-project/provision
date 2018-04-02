@@ -145,6 +145,11 @@ class HttpNginxService extends HttpService {
             })
             ->required()
             ;
+        $options['php_fpm_sock_location'] = Provision::newProperty()
+            ->description('Path to PHP FPM socket, or address and port that PHP-FPM is listening on (127.0.0.1:5000). NOTE: If installed using yum or apt, you may already have a configured "upstream" named "php-fpm", if so use "php-fpm" here.')
+            ->defaultValue(self::getPhpFpmLocation())
+            ->hidden()
+        ;
         return $options;
     }
 
@@ -180,7 +185,7 @@ class HttpNginxService extends HttpService {
     /**
      * Find the nginx executable and return the path to it.
      *
-     * @return mixed|string
+     * @return array
      */
     public static function getNginxExecutable() {
         $command = '/etc/init.d/nginx'; // A proper default for most of the world
