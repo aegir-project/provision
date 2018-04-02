@@ -287,7 +287,7 @@ class ServicesCommand extends Command
                 $property = Provision::newProperty($property);
             }
 
-            if ($this->context->hasService($service) && $this->context->getService($service)->getProperty($name)) {
+            if ($this->context->hasService($service) && $this->context->getService($service)->hasProperty($name) && $this->context->getService($service)->getProperty($name)) {
                 $property->default = $this->context->getService($service)->getProperty($name);
             }
 
