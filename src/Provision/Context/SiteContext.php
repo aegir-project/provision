@@ -199,8 +199,14 @@ class SiteContext extends PlatformContext implements ConfigurationInterface
                     $this->fs->chmod("$site_path/settings.php", 02770);
                     $this->fs->chgrp("$site_path/settings.php", $this->getProvision()->getConfig()->get('web_user'));
 
-                    // @TODO: This is only true for Drupal version 7.50 and up. See Provision/Config/Drupal/Settings.php
-                    // We are treading more and more into the Drupal-only world, so I'm leaving this hard coded to TRUE until we develop something else.
+
+                    if (strpos(file_get_contents("$site_path/settings.php"), "// PROVISION SETTINGS") === FALSE) {
+
+                        require_once $this->getProperty('root') . '/' . $this->getProperty('document_root') . '/core/lib/Drupal/Component/Utility/Crypt.php';
+                        $hash_salt = \Drupal\Component\Utility\Crypt::randomBytesBase64(55);
+
+                        // @TODO: This is only true for Drupal version 7.50 and up. See Provision/Config/Drupal/Settings.php
+                            // We are treading more and more into the Drupal-only world, so I'm leaving this hard coded to TRUE until we develop something else.
                     $database_settings = <<<PHP
                         
 // PROVISION SETTINGS
@@ -221,8 +227,9 @@ class SiteContext extends PlatformContext implements ConfigurationInterface
 
 \$db_url['default'] = \$_SERVER['db_type'] . '://' . \$_SERVER['db_user'] . ':' . \$_SERVER['db_passwd'] . '@' . \$_SERVER['db_host'] . ':' . \$_SERVER['db_port'] . '/' . \$_SERVER['db_name'];
 
+\$settings['hash_salt'] = '$hash_salt';
+
 PHP;
-                if (strpos(file_get_contents("$site_path/settings.php"), "// PROVISION SETTINGS") === FALSE) {
                     $this->fs->appendToFile("$site_path/settings.php", $database_settings);
                 }
             });
