@@ -1239,7 +1239,7 @@ location = /index.php {
   tcp_nopush    off;
   keepalive_requests 0;
   try_files     $uri =404; ### check for existence of php file first
-  fastcgi_pass  provision-php-fpm
+  fastcgi_pass  provision-php-fpm;
 <?php if ($nginx_has_upload_progress): ?>
   track_uploads uploads 60s; ### required for upload progress
 <?php endif; ?>
