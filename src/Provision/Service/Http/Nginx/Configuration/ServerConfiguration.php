@@ -24,7 +24,7 @@ class ServerConfiguration extends ConfigFile {
     }
   }
 
-    function process() {
+  function process() {
         parent::process();
 
         // Run verify to load in nginx properties.
@@ -46,5 +46,8 @@ class ServerConfiguration extends ConfigFile {
 
         $this->data['script_user'] = $this->service->provider->getProperty('script_user');
         $this->data['aegir_root'] = $this->service->provider->getProperty('aegir_root');
-    }
+
+        $this->data['php_fpm_sock_location'] = $this->service->getProperty('php_fpm_sock_location');
+
+  }
 }

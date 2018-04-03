@@ -197,6 +197,13 @@ default  '';
     }
     }
 
+    # PHP-FPM FastCGI server
+    # network or unix domain socket configuration
+
+    upstream provision-php-fpm {
+        server <?php print $php_fpm_sock_location; ?>;
+    }
+
     #######################################################
     ###  nginx virtual domains
     #######################################################
