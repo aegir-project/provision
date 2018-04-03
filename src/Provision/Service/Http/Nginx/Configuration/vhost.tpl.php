@@ -113,17 +113,8 @@ if (!$db_port) {
         # Security note: If you're running a version of PHP older than the
         # latest 5.3, you should have "cgi.fix_pathinfo = 0;" in php.ini.
         # See http://serverfault.com/q/627903/94922 for details.
-        include fastcgi_params;
-        # Block httpoxy attacks. See https://httpoxy.org/.
-        fastcgi_param HTTP_PROXY "";
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
-        fastcgi_param QUERY_STRING $query_string;
         fastcgi_intercept_errors on;
-        # PHP 5 socket location.
-        #fastcgi_pass unix:/var/run/php5-fpm.sock;
-        # PHP 7 socket location.
-        fastcgi_pass <?php print $php_sock_location ?>;
+        fastcgi_pass <?php print $php_fpm_sock_location ?>;
     }
 
     # Fighting with Styles? This little gem is amazing.
