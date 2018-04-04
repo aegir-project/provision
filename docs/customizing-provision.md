@@ -25,6 +25,7 @@ Each server has a "config path" where all server configuration is stored, such a
      /post.d                        # Custom Apache configs can be put in here.
      /vhost.d                       # Generated Site virtualhost configs.
      /platform.d
+   /RoboFile.php                    # Commands from a RoboFile here will be loaded into the provision CLI when using `provision @context`
 ```
 
 \*\* The docker-compose command supports automatic merging of docker-compose.yml files, by passing multiple `-f` options. Provision detects if this file is present and automatically adds this for you when you run `provision verify`
