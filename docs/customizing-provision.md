@@ -79,3 +79,44 @@ There are a few environment variables you might find helpful:
   - `PROVISION_CONTEXT_CONFIG_FILE` - The path on the host to this context's YML configuration file.
   - `PROVISION_CONTEXT_SERVER_HTTP` - The name of the server context providing HTTP service.
   - `PROVISION_CONTEXT_SERVER_HTTP_CONFIG_PATH` - Full path on the host to the HTTP server's configuration. This is the folder the `docker-compose.yml` file is in. (If this is a server context, the hooks are run in this folder.)
+
+## Robo Files
+
+Provision can now include `RoboFile.php` files from your server config path or site codebase.
+
+Robo is a task runner written in PHP. Provision 4.x includes Robo. If you create a RoboFile.php in your site's root, Provision will include those commands in the main `provision` command.
+
+1. Change directory to your site root or server config root.
+2. Create a file named `RoboFile.php` with the following:
+    
+    ```php
+    <?php
+    /**
+     * This is project's console commands configuration for Robo task runner.
+     *
+     * @see http://robo.li/
+     */
+    class RoboFile extends \Robo\Tasks
+    {
+        /**
+         * Output the current working directory and the __DIR__ variable.
+         */
+        public function mysiteTest() {
+            $this->say("CWD: " . getcwd());
+            $this->say("__DIR__: " . __DIR__);
+        }
+    }
+    ```
+    
+    NOTE: If you have the `robo` command [installed globally](https://robo.li), you can run `robo init` to create this file.
+
+3. Run `provision @mycontextname` and you will see your commands listed:
+
+    ```
+      mysite:test  Output the current working directory and the __DIR__ variable.
+
+    ```
+    
+    You can now run this command from any directory if you specify the right context name.
+    
+4. Since this is just a `RoboFile.php` you can also run it with the `robo` command, if you have it installed.  Just be aware that if you are using Provision to run the commands, you shouldn't rely on `getcwd()` if you need the directory of the RoboFile. Use `__DIR__` instead.    
