@@ -42,7 +42,7 @@ class ShellCommand extends Command
 
             // @TODO: Detect a docker hosted site and run docker exec instead.
             $dir = $this->context->getProperty('root');
-            $ps1 = Provision::APPLICATION_FUN_NAME . ' ['  . $this->context_name . '] \w $ ';
+            $ps1 = Provision::APPLICATION_FUN_NAME . ' \[\e[33m\]'  . $this->context_name . '\[\e[m\] \w \[\e[36;40m\]\\$\[\e[m\] ';
             $process->setCommandLine("cd $dir && PS1='$ps1' bash");
             $messages[] = "Opening bash shell in " . $dir;
 
