@@ -499,6 +499,21 @@ class Context implements BuilderAwareInterface
     }
 
     /**
+     * Whether or not this Context has a property.
+     *
+     * @param $type
+     * @return bool
+     */
+    public function hasProperty($name) {
+        if (isset($this->properties[$name])) {
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
+    }
+
+    /**
      * Return all properties for this context.
      *
      * @return array
