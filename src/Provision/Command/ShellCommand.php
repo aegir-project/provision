@@ -3,6 +3,7 @@
 namespace Aegir\Provision\Command;
 
 use Aegir\Provision\Command;
+use Aegir\Provision\Provision;
 use Psy\Shell;
 use Psy\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,14 +34,17 @@ class ShellCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
+        $messages = [];
         $process = new \Symfony\Component\Process\Process("bash");
         $process->setTty(TRUE);
 
         if ($this->context->type == 'site') {
+
+            // @TODO: Detect a docker hosted site and run docker exec instead.
             $dir = $this->context->getProperty('root');
-            $process->setCommandLine("cd $dir && bash");
-            $this->io->simple("Opening bash shell in " . $dir);
+            $ps1 = Provision::APPLICATION_FUN_NAME .' \u@\h:\w ['  . $this->context_name . '] $ ';
+            $process->setCommandLine("cd $dir && PS1='$ps1' bash");
+            $messages[] = "Opening bash shell in " . $dir;
 
             //@TODO: Allow services to set environment variables for both shell command and virtualhost config.
             $env = $_SERVER;
@@ -50,8 +54,6 @@ class ShellCommand extends Command
             $env['db_passwd'] = $this->context->getSubscription('db')->getProperty('db_password');
             $env['db_host'] = $this->context->getSubscription('db')->service->provider->getProperty('remote_host');
             $env['db_port'] = $this->context->getSubscription('db')->service->getCreds()['port'];
-
-            $env['PWD'] = $this->context->getProperty('root');
 
             // If bin dir is found, add to path
             if (file_exists($this->context->getProperty('root') . '/bin')) {
@@ -64,9 +66,13 @@ class ShellCommand extends Command
             $process->setEnv($env);
         }
         else {
-            $this->io->simple("Opening bash shell in " . getcwd());
+           $messages[] = "Opening bash shell in " . getcwd() . ' ( Site ' . $this->context_name . ')';
         }
 
+        $messages[] = 'The commands composer, drupal, drush and more are available.';
+        $messages[] = 'Type "exit" to leave.';
+
+        $this->io->commentBlock($messages);
         $process->run();
     }
 }
