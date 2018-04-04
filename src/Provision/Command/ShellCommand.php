@@ -15,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ShellCommand extends Command
 {
+    const CONTEXT_REQUIRED = TRUE;
 
     /**
      * {@inheritdoc}
