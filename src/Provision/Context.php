@@ -939,6 +939,23 @@ class Context implements BuilderAwareInterface
         foreach ($this->servicesInvoke('getCommandClasses') as $class) {
             $classes += $class;
         }
+
+        // Load RoboFile from site root or server_config_path, if there is one.
+        if ($this->hasProperty('root')) {
+            $robofile_path = $this->getProperty('root') . DIRECTORY_SEPARATOR . 'RoboFile.php';
+            if (file_exists($robofile_path)) {
+                include($robofile_path);
+                $classes[] = 'RoboFile';
+            }
+        }
+        elseif ($this->hasProperty('server_config_path')) {
+            $robofile_path = $this->getProperty('server_config_path') . DIRECTORY_SEPARATOR . 'RoboFile.php';
+            if (file_exists($robofile_path)) {
+                include($robofile_path);
+                $classes[] = 'RoboFile';
+            }
+        }
+
         return $classes;
     }
 }
