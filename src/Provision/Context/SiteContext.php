@@ -132,7 +132,16 @@ class SiteContext extends PlatformContext implements ConfigurationInterface
         $this->getProvision()->io()->customLite($this->config_path, 'Configuration File: ', 'info');
         $this->getProvision()->io()->newLine();
 
-    
+        // If a composer.json file is found, run composer install.
+        if (Provision::fs()->exists($this->getProperty('root') . '/composer.json') && $composer_command = $this->getProperty('composer_install_command')) {
+            $dir = $this->getProperty('root');
+            $tasks['composer.install'] = $this->getProvision()->newTask()
+                ->start("Running <comment>$composer_command</comment> in <comment>$dir</comment> ...")
+                ->execute(function () use ($composer_command) {
+                    return $this->shell_exec($composer_command, NULL, 'exit');
+                });
+        }
+
         $tasks['site.prepare'] = $this->getProvision()->newTask()
             ->start('Preparing Drupal site configuration...')
 

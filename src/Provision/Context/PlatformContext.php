@@ -24,6 +24,11 @@ class PlatformContext extends ServiceSubscriber implements ConfigurationInterfac
     const TYPE = 'platform';
 
     /**
+     * @TODO: Move to PlatformType class for PHP once we have it.
+     */
+    const COMPOSER_INSTALL_DEFAULT = 'composer install --no-interaction';
+
+    /**
      * @var \Aegir\Provision\Context\ServerContext;
      */
     public $web_server;
@@ -191,6 +196,13 @@ class PlatformContext extends ServiceSubscriber implements ConfigurationInterfac
             'document_root' =>
                 Provision::newProperty()
                     ->description('platform: Relative path to the "document root" in your source code. Leave blank if docroot is the root.')
+                    ->required(FALSE)
+            ,
+            'composer_install_command' =>
+                Provision::newProperty()
+                    ->description('The command to run immediately after cloning or pulling new code. If this is a production site, you would should add "--no-dev".')
+                    ->forceAsk()
+                    ->defaultValue(self::COMPOSER_INSTALL_DEFAULT)
                     ->required(FALSE)
             ,
         ];

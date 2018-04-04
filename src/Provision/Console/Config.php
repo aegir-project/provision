@@ -22,6 +22,7 @@ use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 class Config extends ProvisionConfig
 {
     const CONFIG_FILENAME = '.provision.yml';
+    const COMPOSER_INSTALL_DEFAULT = 'composer install --no-interaction';
 
     use IO;
     use ProvisionAwareTrait;
