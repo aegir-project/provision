@@ -42,7 +42,7 @@ class ShellCommand extends Command
 
             // @TODO: Detect a docker hosted site and run docker exec instead.
             $dir = $this->context->getProperty('root');
-            $ps1 = Provision::APPLICATION_FUN_NAME .' \u@\h:'  . $this->context_name . ' $ ';
+            $ps1 = Provision::APPLICATION_FUN_NAME . ' ['  . $this->context_name . '] \w $ ';
             $process->setCommandLine("cd $dir && PS1='$ps1' bash");
             $messages[] = "Opening bash shell in " . $dir;
 
@@ -52,6 +52,8 @@ class ShellCommand extends Command
             $env['db_name'] = $this->context->getSubscription('db')->getProperty('db_name');
             $env['db_user'] = $this->context->getSubscription('db')->getProperty('db_user');
             $env['db_passwd'] = $this->context->getSubscription('db')->getProperty('db_password');
+
+            // @TODO: We shouldn't always rely on what remote_host says.
             $env['db_host'] = $this->context->getSubscription('db')->service->provider->getProperty('remote_host');
             $env['db_port'] = $this->context->getSubscription('db')->service->getCreds()['port'];
 
