@@ -58,6 +58,8 @@ class ServerContext extends ServiceProvider implements ConfigurationInterface
         else {
             $this->server_config_path = $this->getProperty('server_config_path');
         }
+
+        $this->fs = new Filesystem();
     }
 
     /**
@@ -114,5 +116,56 @@ class ServerContext extends ServiceProvider implements ConfigurationInterface
 
         $tasks = [];
         return $tasks;
+    }
+
+    /**
+     * Run a shell command on this server.
+     *
+     * @param $cmd string The command to run
+     * @param $dir string The directory to run the command in. Defaults to this server's config path.
+     * @param $return string What to return. Can be 'output' or 'exit'.
+     *
+     * @return string
+     * @throws \Exception
+     */
+    public function shell_exec($command, $dir = NULL, $return = 'output') {
+        $cwd = getcwd();
+        $original_command = $command;
+
+        $tmpdir = sys_get_temp_dir() . '/provision';
+        if (!Provision::fs()->exists($tmpdir)){
+            Provision::fs()->mkdir($tmpdir);
+        }
+
+        $datestamp = date('c');
+        $tmp_output_file = tempnam($tmpdir, 'task.' . $datestamp . '.output.');
+
+        $effective_wd = $dir? $dir:
+            $this->getProperty('server_config_path');
+
+        if ($this->getProvision()->getOutput()->isVerbose()) {
+            $this->getProvision()->io()->commandBlock($command, $effective_wd);
+        }
+
+        // Output and Errors to files.
+        $command .= "> $tmp_output_file 2>&1";
+
+        chdir($effective_wd);
+        exec($command, $output, $exit);
+        chdir($cwd);
+
+        $output = file_get_contents($tmp_output_file);
+
+        if (!empty($output)){
+            if ($this->getProvision()->getOutput()->isVerbose()) {
+                $this->getProvision()->io()->outputBlock($output);
+            }
+        }
+
+        if ($exit != ResultData::EXITCODE_OK) {
+            throw new \Exception($output);
+        }
+
+        return ${$return};
     }
 }

@@ -48,6 +48,10 @@ class SiteConfigFile extends ConfigFile {
       $extra_apache_configs = $this->getContext()->servicesInvoke('extraApacheConfig', [$this]);
       $this->data['extra_config'] = implode("\n", $extra_apache_configs);
 
+      $this->data['aliases'] = [];
+      $this->data['redirection'] = FALSE;
+      $this->data['ssl_redirection'] = FALSE;
+
 //    if ($this->aliases && !is_array($this->aliases)) {
 //      $this->aliases = explode(",", $this->aliases);
 //    }
