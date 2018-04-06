@@ -196,7 +196,7 @@ class SiteContext extends PlatformContext implements ConfigurationInterface
                 // @TODO: Might want to do chgrp verification inside container?
 
                     $dir = "$site_path/files";
-                    $user = $this->service('http')->getProperty('web_group');
+                    $user = $this->getProvision()->getConfig()->get('web_user');
                     $this->getProvision()->getLogger()->info("Running chgrp {$dir} {$user}");
                     $this->fs->chgrp($dir, $user);
 
@@ -206,7 +206,7 @@ class SiteContext extends PlatformContext implements ConfigurationInterface
                     }
 
                     $this->fs->chmod("$site_path/settings.php", 02770);
-                    $this->fs->chgrp("$site_path/settings.php", $user);
+                    $this->fs->chgrp("$site_path/settings.php", $this->getProvision()->getConfig()->get('web_user'));
 
 
                     if (strpos(file_get_contents("$site_path/settings.php"), "// PROVISION SETTINGS") === FALSE) {
