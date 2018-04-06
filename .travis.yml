@@ -45,7 +45,7 @@ before_install:
 install:
   - composer install
   - sudo ln -s $PWD/bin/provision /usr/local/bin/provision
-  - mkdir /home/travis/config
+  - mkdir /home/travis/config/contexts -p
   - ls -la
 
 script:
