@@ -203,12 +203,13 @@ class Service implements BuilderAwareInterface
                 );
             }
             catch (\Exception $e) {
-                $context->getProvision()->getLogger()->info(
-                    'Unable to write {description} to {path}.', [
-                        'description' => $config->description,
-                        'path' => $config->filename(),
+                throw new \Exception(strtr(
+                    'Unable to write {description} to {path}: {message}', [
+                        '{description}' => $config->description,
+                        '{path}' => $config->filename(),
+                        '{message}' => $e->getMessage(),
                     ]
-                );
+                ));
                 $success = FALSE;
             }
         }
@@ -243,6 +244,21 @@ class Service implements BuilderAwareInterface
         return $this::SERVICE;
     }
 
+
+    /**
+     * Whether or not this Services has a property.
+     *
+     * @param $type
+     * @return bool
+     */
+    public function hasProperty($name) {
+        if (isset($this->properties[$name])) {
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
+    }
 
     /**
      * Get a specific property.

@@ -40,11 +40,12 @@ before_install:
   - 'echo "web_user: docker" >> ~/.provision.yml'
   - 'echo "web_user_uid: 999" >> ~/.provision.yml'
   - 'echo "config_path: /home/travis/config" >> ~/.provision.yml'
+  - 'echo "contexts_path: /home/travis/config/contexts" >> ~/.provision.yml'
 
 install:
   - composer install
   - sudo ln -s $PWD/bin/provision /usr/local/bin/provision
-  - mkdir /home/travis/config
+  - mkdir /home/travis/config/contexts -p
   - ls -la
 
 script:
