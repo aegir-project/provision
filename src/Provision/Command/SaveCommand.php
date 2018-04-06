@@ -45,9 +45,9 @@ class SaveCommand extends Command
         $this
             ->setName('save')
             ->setAliases(['add'])
-            ->setDescription('Save Provision Context.')
+            ->setDescription('Create or update a site, platform, or server.')
             ->setHelp(
-                'Saves a ProvisionContext object to file. Currently just passes to "drush provision-save".'
+                'Use this command to interactively setup a new site, platform or server (known as "contexts"). Metadata is saved to .yml files in the "config_path" folder. Once you have create a context, use the `provision status` command to view the list of added contexts.'
             )
             ->setDefinition($this->getCommandDefinition());
     }
