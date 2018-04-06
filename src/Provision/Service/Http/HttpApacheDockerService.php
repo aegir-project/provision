@@ -89,6 +89,11 @@ class HttpApacheDockerService extends HttpApacheService implements DockerService
                 ->defaultValue(80)
                 ->required()
             ,
+            'web_group' => Provision::newProperty()
+                ->description('Web server group.')
+                ->defaultValue(Provision::defaultWebGroup())
+                ->required()
+            ,
         ];
     }
 
