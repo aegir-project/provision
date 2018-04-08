@@ -211,8 +211,14 @@ class SiteContext extends PlatformContext implements ConfigurationInterface
 
                     if (strpos(file_get_contents("$site_path/settings.php"), "// PROVISION SETTINGS") === FALSE) {
 
-                        require_once $this->getProperty('root') . '/' . $this->getProperty('document_root') . '/core/lib/Drupal/Component/Utility/Crypt.php';
-                        $hash_salt = \Drupal\Component\Utility\Crypt::randomBytesBase64(55);
+                        $crypt = $this->getProperty('root') . '/' . $this->getProperty('document_root') . '/core/lib/Drupal/Component/Utility/Crypt.php';
+                        if (file_exists($crypt)) {
+                            require_once $crypt;
+                            $hash_salt = \Drupal\Component\Utility\Crypt::randomBytesBase64(55);
+                        }
+                        else {
+                            $hash_salt = uniqid();
+                        }
 
                         // @TODO: This is only true for Drupal version 7.50 and up. See Provision/Config/Drupal/Settings.php
                             // We are treading more and more into the Drupal-only world, so I'm leaving this hard coded to TRUE until we develop something else.
