@@ -117,12 +117,12 @@ class Config extends ProvisionConfig
 
         // Check for missing everything. Tell the user to run the setup command.
         // @TODO: Run the setup command here instead. I poked and prodded but could not get it to work. Config is instantiated before Application
-        if (
-            !file_exists($this->get('config_path')) &&
-            !file_exists($this->get('console_config_file'))
-        ) {
-            throw new NotSetupException();
-        }
+//        if (
+//            !file_exists($this->get('config_path')) &&
+//            !file_exists($this->get('console_config_file'))
+//        ) {
+//            throw new NotSetupException();
+//        }
 
 
         // Check for paths that need to be writable.
@@ -140,7 +140,7 @@ class Config extends ProvisionConfig
             }
         }
         if ($errors) {
-            throw new NotSetupException(implode("\n\n", $errors));
+            throw new Exception(implode("\n\n", $errors));
         }
 
         // Ensure that script_user is the user.
