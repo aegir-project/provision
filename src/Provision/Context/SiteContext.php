@@ -211,14 +211,7 @@ class SiteContext extends PlatformContext implements ConfigurationInterface
 
                     if (strpos(file_get_contents("$site_path/settings.php"), "// PROVISION SETTINGS") === FALSE) {
 
-                        $crypt = $this->getProperty('root') . '/' . $this->getProperty('document_root') . '/core/lib/Drupal/Component/Utility/Crypt.php';
-                        if (file_exists($crypt)) {
-                            require_once $crypt;
-                            $hash_salt = \Drupal\Component\Utility\Crypt::randomBytesBase64(55);
-                        }
-                        else {
-                            $hash_salt = uniqid();
-                        }
+                      $hash_salt = self::randomBytesBase64(55);
 
                         // @TODO: This is only true for Drupal version 7.50 and up. See Provision/Config/Drupal/Settings.php
                             // We are treading more and more into the Drupal-only world, so I'm leaving this hard coded to TRUE until we develop something else.
@@ -281,5 +274,46 @@ PHP;
             "sites/$uri",
             "sites/$uri/files",
         ];
+    }
+
+
+    /**
+     * Replacement for Drupal\Component\Utility\Crypt::randomBytes(),
+     * used for generating settings.php hash_salt.
+     *
+     * @param $count
+     * @return bool|string
+     */
+    public static function randomBytes($count) {
+        $random_state = print_r($_SERVER, TRUE);
+        if (function_exists('getmypid')) {
+            // Further initialize with the somewhat random PHP process ID.
+            $random_state .= getmypid();
+        }
+        $bytes = '';
+// Ensure mt_rand() is reseeded before calling it the first time.
+        mt_srand();
+        do {
+            $random_state = hash('sha256', microtime() . mt_rand() . $random_state);
+            $bytes .= hash('sha256', mt_rand() . $random_state, TRUE);
+        } while (strlen($bytes) < $count);
+        $output = substr($bytes, 0, $count);
+        $bytes = substr($bytes, $count);
+        return $output;
+    }
+
+    /**
+     * Returns a URL-safe, base64 encoded string of highly randomized bytes.
+     *
+     * @param $count
+     *   The number of random bytes to fetch and base64 encode.
+     *
+     * @return string
+     *   The base64 encoded result will have a length of up to 4 * $count.
+     *
+     * @see \Drupal\Component\Utility\Crypt::randomBytes()
+     */
+    public static function randomBytesBase64($count = 32) {
+        return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode(static::randomBytes($count)));
     }
 }
