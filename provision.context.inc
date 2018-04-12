@@ -71,7 +71,7 @@ function & d($name = NULL, $_root_object = FALSE, $allow_creation = TRUE) {
       $instances[$name]->type_invoke('init');
 
       // Allow drush modules to alter the class being loaded.
-      drush_command_invoke_all_ref('provision_context_alter',$instances[$name]);
+      drush_command_invoke_all_ref('provision_context_alter', $instances[$name]);
 
     }
     return $instances[$name];
