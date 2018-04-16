@@ -83,6 +83,22 @@ function hook_provision_services() {
 }
 
 /**
+ * Alter a Context immediately after it is loaded and the 'init' methods are run.
+ *
+ * If replacing the context with a new object, be sure to implement the methods
+ * $context->method_invoke('init) and $context->type_invoke('init');
+ *
+ * @param $context \Provision_Context|\Provision_Context_server|\Provision_Context_site|\Provision_Context_platform
+ *
+ * @see provision.context.inc#72
+ */
+function hook_provision_context_alter(&$context) {
+  $context = new Provision_Context_Server_alternate($context->name);
+  $context->method_invoke('init');
+  $context->type_invoke('init');
+}
+
+/**
  * Append PHP code to Drupal's settings.php file.
  *
  * To use templating, return an include statement for the template.
