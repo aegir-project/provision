@@ -5,14 +5,13 @@
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name":      "Drupal Console Contributors",
-            "homepage":  "https://github.com/hechoendrupal/drupal-console/graphs/contributors"
+            "name":      "Aegir maintainers",
+            "homepage":  "http://docs.aegirproject.org/en/3.x/community/core-team/"
         }
     ],
     "support": {
         "issues": "https://www.drupal.org/project/issues/provision",
-        "forum": "https://gitter.im/hechoendrupal/DrupalConsole",
-        "docs": "https://docs.drupalconsole.com/"
+        "docs": "http://docs.aegirproject.org/"
     },
     "require": {},
     "config": {
