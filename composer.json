@@ -1,0 +1,32 @@
+{
+    "name": "aegir/provision",
+    "description": "Drush commands powering the back-end of Aegir",
+    "type": "drupal-drush",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name":      "Aegir maintainers",
+            "homepage":  "http://docs.aegirproject.org/en/3.x/community/core-team/"
+        }
+    ],
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/provision",
+        "docs": "http://docs.aegirproject.org/"
+    },
+    "require": {},
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "5.3.2"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-0": {
+            "Provision_": [
+                "Provision"
+            ]
+        }
+    }
+}

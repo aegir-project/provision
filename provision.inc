@@ -7,6 +7,8 @@
  * structure to the provisioning modules.
  */
 
+require_once __DIR__ . '/vendor/autoload.php';
+
 drush_errors_on();
 
 /**
@@ -18,8 +20,7 @@ function provision_autoload() {
   static $instance = NULL;
 
   if (is_null($instance)) {
-    require_once dirname(__FILE__) . '/Symfony/Component/ClassLoader/UniversalClassLoader.php';
-    $instance = new UniversalClassLoader();
+    $instance = new \Composer\Autoload\ClassLoader();
     // Activate the autoloader.
     $instance->register();
   }
@@ -58,7 +59,7 @@ function provision_autoload_register_prefix($prefix, $dir, $prepend = FALSE) {
   }
 
   // Set the prefixes.
-  provision_autoload()->registerPrefix($prefix, $dirs);
+  provision_autoload()->add($prefix, $dirs);
 }
 
 // Add our prefix to the autoloader.
