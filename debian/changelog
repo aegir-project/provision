@@ -1,3 +1,9 @@
+aegir3-provision (3.150) unstable; urgency=medium
+
+  * Bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.15
+
+ -- Herman van Rink <helmo@initfour.nl>  Wed, 02 May 2018 11:45:22 +0200
+
 aegir3-provision (3.146) testing; urgency=high
 
   * Dummy release to include Drupal 7.59, see https://www.drupal.org/project/drupal/releases/7.59
