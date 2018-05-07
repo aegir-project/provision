@@ -190,8 +190,8 @@ if (isset($_SERVER['db_name'])) {
   }
 
   # Additional platform wide configuration settings.
-  if (is_readable('<?php print $this->platform->publish_path  ?>/sites/all/platform.settings.php')) {
-    include('<?php print $this->platform->publish_path ?>/sites/all/platform.settings.php');
+  if (is_readable('<?php print $this->platform->root  ?>/sites/all/platform.settings.php')) {
+    include('<?php print $this->platform->root ?>/sites/all/platform.settings.php');
   }
 
   # Additional site configuration settings.
