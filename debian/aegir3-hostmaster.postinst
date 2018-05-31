@@ -121,7 +121,7 @@ case "$1" in
             # Determin if we create a db accoount or ask for it.
             # Starting from MariaDB 10.1... https://www.drupal.org/node/2770819
             # TODO: Work with future versions
-            if mysql --database=mysql --execute="show tables;" > /dev/null 2>&1
+            if mysql --host=$AEGIR_DB_HOST --database=mysql --execute="show tables;" > /dev/null 2>&1
             then
               # MariaDB = 10.1
               CREATEUSER=1
@@ -160,7 +160,7 @@ case "$1" in
               # Random password, will be stored in /var/aegir/.drush/server_localhost.alias.drushrc.php
               AEGIR_DB_PASS=$(openssl rand -base64 12)
 
-              /usr/bin/mysql -e "GRANT ALL ON *.* TO '$AEGIR_DB_USER'@'localhost' IDENTIFIED BY '$AEGIR_DB_PASS' WITH GRANT OPTION"
+              /usr/bin/mysql -e "GRANT ALL ON *.* TO '$AEGIR_DB_USER'@'$AEGIR_DB_HOST' IDENTIFIED BY '$AEGIR_DB_PASS' WITH GRANT OPTION"
             fi
             
             if [ -d $AEGIRHOME/.drush/provision ]; then
