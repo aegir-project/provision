@@ -45,11 +45,11 @@ if ($this->redirection || $ssl_redirection) {
     print " RewriteRule ^/*(.*)$ https://%{HTTP_HOST}/$1 [NE,L,R=301]\n";
   }
   elseif ($ssl_redirection && $this->redirection) {
-    print " # Redirect all aliases + main uri to the main https uri.\n";
+    print " # Redirect all aliases + main uri to the selected alias https uri.\n";
     print " RewriteRule ^/*(.*)$ https://{$this->redirection}/$1 [NE,L,R=301]\n";
   }
   elseif (!$ssl_redirection && $this->redirection) {
-    print " # Redirect all aliases to the main http url.\n";
+    print " # Redirect all aliases to the selected alias.\n";
     print " RewriteCond %{HTTP_HOST} !^{$this->redirection}$ [NC]\n";
     print " RewriteRule ^/*(.*)$ http://{$this->redirection}/$1 [NE,L,R=301]\n";
   }
