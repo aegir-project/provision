@@ -173,7 +173,7 @@ if (isset($_SERVER['db_name'])) {
   $esc_uri = str_replace('.', '\.', $this->uri);
   print "    '^{$esc_uri}\$',\n";
   foreach ($this->aliases as $alias_url) {
-    $esc_alias = str_replace('.', '\.', $alias_url);
+    $esc_alias = preg_replace(['/\./', '/\/.+/'], ['\.', ''], $alias_url);
     print "    '^{$esc_alias}\$',\n";
   }
 ?>
