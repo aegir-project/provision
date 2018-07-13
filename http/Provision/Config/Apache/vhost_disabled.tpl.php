@@ -15,6 +15,11 @@
     ?>
 
     RewriteEngine on
+
+    # Redirect ALL visitors to a configured url.
+    # Except for /.well-known/acme-challenge/ to prevent potential problems with Let's Encrypt
+    RewriteCond %{REQUEST_URI} '!/.well-known/acme-challenge/'\n";
+
     # the ? at the end is to remove any query string in the original url
     RewriteRule ^(.*)$ <?php print $this->platform->server->web_disable_url . '/' . $this->uri ?>?
 

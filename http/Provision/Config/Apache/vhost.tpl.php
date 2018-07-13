@@ -42,10 +42,14 @@ if ($this->redirection || $ssl_redirection) {
 
   if ($ssl_redirection && !$this->redirection) {
     print " # Redirect aliases in non-ssl to the same alias on ssl.\n";
+    print " # Except for /.well-known/acme-challenge/ to prevent potential problems with Let's Encrypt\n";
+    print " RewriteCond %{REQUEST_URI} '!/.well-known/acme-challenge/'\n";
     print " RewriteRule ^/*(.*)$ https://%{HTTP_HOST}/$1 [NE,L,R=301]\n";
   }
   elseif ($ssl_redirection && $this->redirection) {
     print " # Redirect all aliases + main uri to the selected alias https uri.\n";
+    print " # Except for /.well-known/acme-challenge/ to prevent potential problems with Let's Encrypt\n";
+    print " RewriteCond %{REQUEST_URI} '!/.well-known/acme-challenge/'\n";
     print " RewriteRule ^/*(.*)$ https://{$this->redirection}/$1 [NE,L,R=301]\n";
   }
   elseif (!$ssl_redirection && $this->redirection) {
