@@ -921,7 +921,7 @@ location ~* /(?:cross-?domain)\.xml$ {
 ###
 ### Allow some known php files (like serve.php in the ad module).
 ###
-location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tinymce|wysiwyg_spellcheck|ecc|civicrm|fbconnect|radioactivity)/.*\.php$ {
+location ~* /(?:modules|libraries)/(?:contrib/)?(?:ad|tinybrowser|f?ckeditor|tinymce|wysiwyg_spellcheck|ecc|civicrm|fbconnect|radioactivity|statistics)/.*\.php$ {
 <?php if ($satellite_mode == 'boa'): ?>
   limit_conn   limreq 88;
 <?php endif; ?>
