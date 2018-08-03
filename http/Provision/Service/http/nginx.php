@@ -2,9 +2,10 @@
 
 class Provision_Service_http_nginx extends Provision_Service_http_public {
 
-  // Define socket file locations for various PHP versions.
+  // Define static socket file locations for various PHP versions.
+  // These are dynamic in PHP 7.
   const SOCKET_PATH_PHP5 = '/var/run/php5-fpm.sock';
-  const SOCKET_PATH_PHP7 = '/var/run/php/php7.0-fpm.sock';
+  const SOCKET_PATH_PHP7_BASE = '/var/run/php';
 
   protected $application_name = 'nginx';
   protected $has_restart_cmd = TRUE;
@@ -171,9 +172,9 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
         $mode = 'socket';
         $socket_path = self::SOCKET_PATH_PHP5;
       break;
-      case provision_file()->exists(self::SOCKET_PATH_PHP7)->status():
+      case provision_file()->exists(static::getPhp7FpmSocketPath())->status():
         $mode = 'socket';
-        $socket_path = self::SOCKET_PATH_PHP7;
+        $socket_path = static::getPhp7FpmSocketPath();
       break;
       default:
         $mode = 'port';
@@ -187,7 +188,7 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
         '@mode' => ($mode == 'socket') ? 'unix socket' : 'port',
         '@task' => strtoupper($server_task),
         '@yes_or_no' => ($mode == 'socket') ? 'YES' : 'NO',
-        '@path' => ($socket_path ? $socket_path : self::SOCKET_PATH_PHP5 . ' or ' . self::SOCKET_PATH_PHP7),
+        '@path' => ($socket_path ? $socket_path : self::SOCKET_PATH_PHP5 . ' or ' . static::getPhp7FpmSocketPath()),
       )));
     }
 
@@ -212,11 +213,32 @@ class Provision_Service_http_nginx extends Provision_Service_http_public {
 
     // Return the socket path based on the PHP version.
     if (strtok(phpversion(), '.') == 7) {
-      return self::SOCKET_PATH_PHP7;
+      return static::getPhp7FpmSocketPath();
     }
     else {
       return self::SOCKET_PATH_PHP5;
     }
+  }
+
+  /**
+   * Gets the PHP FPM unix socket path for PHP 7.
+   *
+   * In PHP 7, there isn't a fixed socked path.  It could be any one of the
+   * following:
+   *   * php7.0-fpm.sock
+   *   * php7.2-fpm.sock
+   *   * ...
+   *
+   * @return string
+   *   The path, or FALSE if there isn't one.
+   */
+  public static function getPhp7FpmSocketPath() {
+    foreach (scandir(static::SOCKET_PATH_PHP7_BASE, SCANDIR_SORT_DESCENDING) as $file) {
+      if (strpos($file, 'fpm.sock')) {
+        return static::SOCKET_PATH_PHP7_BASE . '/' . $file;
+      }
+    }
+    return FALSE;
   }
 
   /**
