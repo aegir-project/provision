@@ -433,6 +433,46 @@ function provision_backend_invoke($target, $command, $arguments = array(), $data
 }
 
 /**
+ * Run a Symfony Process saving to drush logs.
+ */
+function provision_process($command, $cwd = null, $label = 'Process', $env = array(), $log_output = TRUE, $error_message = 'Process Failed') {
+  drush_log("[$label] $command", 'p_command');
+
+  // Merge in env vars, inheriting the CLI's
+  if (is_array($env)) {
+    $env = array_merge($_SERVER, $env);
+  }
+  else {
+    $env = $_SERVER;
+  }
+
+  // Make sure colors always come through
+  $env['TERM'] = 'xterm';
+
+  $process = new \Symfony\Component\Process\Process(escapeshellcmd($command), $cwd, $env);
+  $process->setTimeout(NULL);
+  if ($log_output) {
+    $exit_code = $process->run(function ($type, $buffer) {
+      drush_log($buffer, 'p_info');
+    });
+  }
+  else {
+    $exit_code = $process->run();
+  }
+
+  // check exit code
+  if ($exit_code === 0) {
+    drush_log('', 'p_ok');
+    return $process->getOutput();
+  }
+  else {
+    drush_log('', 'p_error');
+    drush_set_error('PROVISION_PROCESS_ERROR', dt($error_message));
+    return $process->getErrorOutput();
+  }
+}
+
+/**
  * the aegir version of the backend
  *
  * @return string

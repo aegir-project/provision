@@ -13,7 +13,9 @@
         "issues": "https://www.drupal.org/project/issues/provision",
         "docs": "http://docs.aegirproject.org/"
     },
-    "require": {},
+    "require": {
+        "symfony/process": "^3.3"
+    },
     "config": {
         "sort-packages": true,
         "platform": {

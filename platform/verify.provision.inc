@@ -104,31 +104,10 @@ function drush_provision_drupal_pre_provision_verify() {
         // Composer Install command: Do not interact, do not show download progress.
         // Customizable by setting drush option 'provision_composer_install_command'
         $composer_command = drush_get_option('provision_composer_install_command', 'composer install --no-interaction --no-progress --no-dev');
-        drush_log(dt("Running command @command", array(
-          '@command' => $composer_command
-        )), 'ok');
-        $start = time();
 
-        // @TODO: Implement Symfony Process component for line-by-line output logging.
-        if (drush_shell_cd_and_exec($composer_directory, $composer_command)) {
-          $stop = time();
 
-          $output = implode("\n", drush_shell_exec_output());
-          $log_status = strpos($output, 'Warning:') === FALSE? 'success': 'warning';
-
-          drush_log($output, $log_status);
-          drush_log(dt(strpos($output, 'Warning:') . "Command ran successfully in @times: @command", array(
-            '@command' => $composer_command,
-            '@time' => $stop - $start,
-          )), $log_status);
-        }
-        else {
-          drush_log(implode("\n", drush_shell_exec_output()), 'error');
-          drush_set_error('DRUSH_COMPOSER_ERROR', dt('The composer command failed in @dir: @command', array(
-            '@dir' => $composer_directory,
-            '@command' => $composer_command,
-          )));
-        }
+        // Implement Symfony Process component for line-by-line output logging.
+        provision_process($composer_command, $composer_directory);
       }
     }
 
