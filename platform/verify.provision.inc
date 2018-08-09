@@ -108,6 +108,9 @@ function drush_provision_drupal_pre_provision_verify() {
 
         // Implement Symfony Process component for line-by-line output logging.
         provision_process($composer_command, $composer_directory);
+        $process = drush_get_context('provision_process_result');
+
+        drush_log(print_r($process, 1), 'devshop_log');
       }
     }
 

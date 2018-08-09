@@ -413,7 +413,7 @@ function _scrub_object($input) {
 
 /**
  * Execute a command against a specific context object.
- *
+ * 
  * @param $target
  *   the context to operate on, @ prefix is optional.
  * @param $command
@@ -433,7 +433,15 @@ function provision_backend_invoke($target, $command, $arguments = array(), $data
 }
 
 /**
- * Run a Symfony Process saving to drush logs.
+ * Run a command, sending output to drush logs in real time.
+ * 
+ * The Symfony\Component\Process\Process Object is used to run this command.
+ * After implementing provision_process(), you can get the Process result object
+ * via drush context:
+ * 
+ *   $process = drush_get_context('provision_process_result');
+ *   print $process->getExitCode();
+ *
  */
 function provision_process($command, $cwd = null, $label = 'Process', $env = array(), $log_output = TRUE, $error_message = 'Process Failed') {
   drush_log("[$label] $command", 'p_command');
@@ -459,6 +467,9 @@ function provision_process($command, $cwd = null, $label = 'Process', $env = arr
   else {
     $exit_code = $process->run();
   }
+
+  // Save the Provision Process object to Drush Context so that implementors can access the full object.
+  drush_set_context('provision_process_result', $process);
 
   // check exit code
   if ($exit_code === 0) {
