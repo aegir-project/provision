@@ -444,6 +444,9 @@ function provision_backend_invoke($target, $command, $arguments = array(), $data
  *
  */
 function provision_process($command, $cwd = null, $label = 'Process', $env = array(), $log_output = TRUE, $error_message = 'Process Failed') {
+  if (empty($command)) {
+    return;
+  }
   drush_log("[$label] $command", 'p_command');
 
   // Merge in env vars, inheriting the CLI's
