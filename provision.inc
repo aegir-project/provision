@@ -443,7 +443,7 @@ function provision_backend_invoke($target, $command, $arguments = array(), $data
  *   print $process->getExitCode();
  *
  */
-function provision_process($command, $cwd = null, $label = 'Process', $env = array(), $log_output = TRUE, $error_message = 'Process Failed') {
+function provision_process($command, $cwd = null, $label = 'Process', $env = array(), $log_output = TRUE, $error_message = NULL) {
   if (empty($command)) {
     return;
   }
