@@ -11,5 +11,5 @@ projects[drupal][patch][2925449] = "https://www.drupal.org/files/issues/2018-04-
 ; The release.sh script updates the version of hostmaster.
 projects[hostmaster][type] = "profile"
 projects[hostmaster][download][type] = "git"
-projects[hostmaster][download][tag] = "7.x-3.160"
+projects[hostmaster][download][tag] = "7.x-3.0-dev"
 projects[hostmaster][download][url] = "http://git.drupal.org/project/hostmaster.git"
