@@ -1,3 +1,9 @@
+aegir3-provision (3.160) unstable; urgency=medium
+
+  * Bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.16
+
+ -- Herman van Rink <helmo@initfour.nl>  Wed, 19 Sep 2018 10:05:55 +0200
+
 aegir3-provision (3.151) testing; urgency=medium
 
   * Fixup the drupal-org.make file
