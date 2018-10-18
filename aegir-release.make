@@ -3,7 +3,9 @@ api = 2
 
 ; This makefile fetches the latest release of Drupal from Drupal.org.
 projects[drupal][type] = "core"
-projects[drupal][version] = 7.59
+projects[drupal][version] = 7.60
+
+; Sync manually with drupal-org-core.make in the hostmaster repo.
 
 ; Sync manually with drupal-org-core.make in the hostmaster repo.
 
