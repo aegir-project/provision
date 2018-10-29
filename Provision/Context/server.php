@@ -151,10 +151,10 @@ class Provision_Context_server extends Provision_Context {
    */
   function shell_exec($command) {
     if (provision_is_local_host($this->remote_host)) {
-      return drush_shell_exec(escapeshellcmd($command));
+      return provision_process(escapeshellcmd($command));
     }
     else {
-      return drush_shell_exec('ssh ' . drush_get_option('ssh-options', '-o PasswordAuthentication=no') . ' %s %s', $this->script_user . '@' . $this->remote_host, escapeshellcmd($command));
+      return provision_process('ssh ' . drush_get_option('ssh-options', '-o PasswordAuthentication=no') . ' %s %s', $this->script_user . '@' . $this->remote_host, escapeshellcmd($command));
     }
   }
 
