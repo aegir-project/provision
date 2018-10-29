@@ -491,6 +491,7 @@ function provision_process($command, $cwd = null, $label = 'Process', $env = arr
 
   // Save the Provision Process object to Drush Context so that implementors can access the full object.
   drush_set_context('provision_process_result', $process);
+  drush_log("Provision process command exited with $exit_code", 'debug');
 
   // check exit code
   if ($exit_code === 0) {
