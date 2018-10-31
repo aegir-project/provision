@@ -158,7 +158,7 @@ test:ubuntu-bionic-aegir3-apt:
 
   script: "scripts/ci-aegir-dev-install-apt-ubuntu-bionic.sh"
 
-test:debian-stretch-aegir3-cluster-slave-apt:
+test:cluster-slave-debian-stretch-apt:
   stage: test
   image: debian:stretch
   allow_failure: false
