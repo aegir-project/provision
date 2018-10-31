@@ -28,8 +28,6 @@ postfix postfix/main_mailer_type select Local only
 
 EOF
 
-
-# TODO: remove --allow-unauthenticated when https://www.drupal.org/node/2882620 is fixed
-sudo DPKG_DEBUG=developer apt-get install --yes aegir3 --allow-unauthenticated
+sudo DPKG_DEBUG=developer apt-get install --yes aegir3
 
 
