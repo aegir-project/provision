@@ -70,8 +70,10 @@ class Provision_Context {
 
     // If $this->name refers to a basic drush alias (not an aegir managed site),
     // and the property exists in drush alias, return it.
-    elseif ($drush_alias = provision_sitealias_get_record($this->name)) { //&& isset($drush_alias[$name])) {
-      return $drush_alias[$name];
+    elseif ($drush_alias = provision_sitealias_get_record($this->name)) {
+      if (isset($drush_alias[$name])) {
+        return $drush_alias[$name];
+      }
     }
   }
 
