@@ -41,6 +41,13 @@ class Provision_Context {
    * proper. Properties that refer to Provision_Context objects will be run
    * through d(), see is_oid().
    *
+   * If value does not exist in $this->properties, and $this->name refers to a
+   * normal drush alias instead of a Provision context, and the property exists,
+   * return that value.
+   *
+   * This way, d('@drushalias')->uri will work for normal drush aliases or
+   * Provision Contexts.
+   *
    * TODO: consider returning a reference to the value, so we can do things like:
    *       `$this->options['option'] = 'value'` and it will correctly set it in the
    *       drush context cache.
@@ -59,6 +66,12 @@ class Provision_Context {
       else {
         return $this->properties[$name];
       }
+    }
+
+    // If $this->name refers to a basic drush alias (not an aegir managed site),
+    // and the property exists in drush alias, return it.
+    elseif ($drush_alias = provision_sitealias_get_record($this->name)) { //&& isset($drush_alias[$name])) {
+      return $drush_alias[$name];
     }
   }
 
