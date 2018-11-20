@@ -264,6 +264,11 @@ function drush_provision_hostmaster_install($site = NULL) {
     'client_email' => drush_get_option('client_email'),
     'profile' => $profile,
     'drush_aliases' => 'hm',
+    'command-specific' => array (
+      'pm-download' => array (
+        'destination' => "sites/$site/modules/contrib",
+      ),
+    ),
   ));
 
   drush_log('Starting with the hostmaster frontend installation.', 'notice');
