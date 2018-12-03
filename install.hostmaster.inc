@@ -266,7 +266,7 @@ function drush_provision_hostmaster_install($site = NULL) {
     'drush_aliases' => 'hm',
     'command-specific' => array (
       'pm-download' => array (
-        'destination' => "sites/$site/modules/contrib",
+        'use-site-dir' => 1,
       ),
     ),
   ));
