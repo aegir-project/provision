@@ -146,6 +146,11 @@ We are making the following assumptions:
       'uri' => $site,
       'profile' => 'hostmaster',
       'drush_aliases' => 'hm',
+      'command-specific' => array (
+        'pm-download' => array (
+          'use-site-dir' => 1,
+        ),
+      ),
     ));
     provision_backend_invoke($site_name, 'provision-verify');
     drush_set_option('site_name', $site_name);
