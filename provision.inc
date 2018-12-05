@@ -508,7 +508,7 @@ function provision_process($command, $cwd = null, $label = 'Process', $env = arr
     }
 
     if ($throw_drush_error) {
-      drush_set_error('PROVISION_PROCESS_ERROR', dt($error_message));
+      drush_set_error('PROVISION_PROCESS_ERROR', !empty($error_message)? $error_message: $process->getErrorOutput());
     }
     return $process->getErrorOutput();
   }
