@@ -48,6 +48,7 @@ function drush_provision_drupal_provision_delete() {
       drush_set_error(dt('Existing sites were found on this platform. These sites will need to be deleted before this platform can be deleted.'));
     }
     else {
+      drush_invoke_process('@none', 'provision-save', array(d()->name), array('delete' => TRUE));
       _provision_recursive_delete(d()->root);
       d()->service('http')->sync(d()->root);
     }
