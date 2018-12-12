@@ -83,7 +83,7 @@ if ($this->redirection || $ssl_redirection) {
     # Prevent direct reading of files in the private dir.
     # This is for Drupal7 compatibility, which would normally drop
     # a .htaccess in those directories, but we explicitly ignore those
-    <Directory "<?php print $this->site_path; ?>/private/" >
+    <Directory ~ "sites/.*/private">
       <Files *>
         SetHandler This_is_a_Drupal_security_line_do_not_remove
       </Files>

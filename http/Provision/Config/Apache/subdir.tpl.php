@@ -39,7 +39,7 @@ Alias /<?php print $subdir; ?> <?php print $this->root; ?>
 # Prevent direct reading of files in the private dir.
 # This is for Drupal7 compatibility, which would normally drop
 # a .htaccess in those directories, but we explicitly ignore those
-<Directory "<?php print $this->site_path; ?>/private/" >
+<Directory ~ "sites/.*/private">
    SetHandler This_is_a_Drupal_security_line_do_not_remove
    Deny from all
    Options None
