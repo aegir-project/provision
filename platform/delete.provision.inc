@@ -53,4 +53,7 @@ function drush_provision_drupal_provision_delete() {
       d()->service('http')->sync(d()->root);
     }
   }
+  elseif (d()->type === 'server') {
+    drush_invoke_process('@none', 'provision-save', array(d()->name), array('delete' => TRUE));
+  }
 }
