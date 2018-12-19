@@ -1,3 +1,11 @@
+aegir3-provision (3.170) unstable; urgency=high
+
+  * Bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.17
+  * Fixes a number of security issues.
+  * Include Drupal 7.61
+
+ -- Herman van Rink <helmo@initfour.nl>  Wed, 19 Dec 2018 16:50:53 +0100
+
 aegir3-provision (3.161) testing; urgency=medium
 
   * Minor bugfix release
