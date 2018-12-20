@@ -1,5 +1,5 @@
 
-<?php if ($this->ssl_enabled && $this->ssl_key) : ?>
+<?php if ($this->ssl_enabled && $this->ssl_key && $this->ssl_cert_ok) : ?>
 
   <VirtualHost <?php print "{$ip_address}:{$http_ssl_port}"; ?>>
   <?php if ($this->site_mail) : ?>
