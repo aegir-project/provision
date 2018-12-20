@@ -14,8 +14,6 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
   public $description = 'encrypted virtual host configuration';
 
   function write() {
-    parent::write();
-
     if ($this->ssl_enabled && $this->ssl_key) {
       $path = dirname($this->data['ssl_cert']);
       // Make sure the ssl.d directory in the server ssl.d exists. 
@@ -50,6 +48,7 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
       // If cert is not ok, turn off ssl_redirection.
       if ($this->ssl_cert_ok == FALSE) {
         $this->data['ssl_redirection'] = FALSE;
+        drush_log(dt('SSL Certificate preparation failed. SSL has been disabled for this site.'), 'warning');
       }
 
       // Sync the key directory to the remote server.
@@ -57,6 +56,10 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
        'exclude' => "{$path}/*.receipt",  // Don't need to synch the receipts
      ));
     }
+
+    // Call parent's write AFTER ensuring the certificates are in place to prevent
+    // the vhost from referencing missing files.
+    parent::write();
   }
 
   /**
