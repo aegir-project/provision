@@ -9,6 +9,7 @@
 class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
   public $template = 'vhost_ssl.tpl.php';
   public $disabled_template = 'vhost_ssl_disabled.tpl.php';
+  public $ssl_cert_ok = TRUE;
 
   public $description = 'encrypted virtual host configuration';
 
@@ -28,23 +29,29 @@ class Provision_Config_Http_Ssl_Site extends Provision_Config_Http_Site {
       // XXX: test. data structure may not be sound. try d($this->uri)
       // if $this fails
       Provision_Service_http_ssl::assign_certificate_site($this->ssl_key, $this);
-
+      
       // Copy the certificates to the server's ssl.d directory.
-      provision_file()->copy(
-        $this->data['ssl_cert_source'],
-        $this->data['ssl_cert'])
-        || drush_set_error('SSL_CERT_COPY_FAIL', dt('failed to copy SSL certificate in place'));
-      provision_file()->copy(
-        $this->data['ssl_cert_key_source'],
-        $this->data['ssl_cert_key'])
-        || drush_set_error('SSL_KEY_COPY_FAIL', dt('failed to copy SSL key in place'));
+      if (!provision_file()->copy($this->data['ssl_cert_source'], $this->data['ssl_cert'])->status()) {
+        drush_set_error('SSL_CERT_COPY_FAIL', dt('failed to copy SSL certificate in place'));
+        $this->ssl_cert_ok = FALSE;
+      }
+      if (!provision_file()->copy($this->data['ssl_cert_key_source'], $this->data['ssl_cert_key'])->status()) {
+        drush_set_error('SSL_KEY_COPY_FAIL', dt('failed to copy SSL key in place'));
+        $this->ssl_cert_ok = FALSE;
+      }
       // Copy the chain certificate, if it is set.
       if (!empty($this->data['ssl_chain_cert_source'])) {
-	      provision_file()->copy(
-          $this->data['ssl_chain_cert_source'],
-          $this->data['ssl_chain_cert'])
-        || drush_set_error('SSL_CHAIN_COPY_FAIL', dt('failed to copy SSL certficate chain in place'));
+        if (!provision_file()->copy($this->data['ssl_chain_cert_source'], $this->data['ssl_chain_cert'])->status()) {
+          drush_set_error('SSL_CHAIN_COPY_FAIL', dt('failed to copy SSL certficate chain in place'));
+          $this->ssl_cert_ok = FALSE;
+        }
       }
+
+      // If cert is not ok, turn off ssl_redirection.
+      if ($this->ssl_cert_ok == FALSE) {
+        $this->data['ssl_redirection'] = FALSE;
+      }
+
       // Sync the key directory to the remote server.
       $this->data['server']->sync($path, array(
        'exclude' => "{$path}/*.receipt",  // Don't need to synch the receipts
