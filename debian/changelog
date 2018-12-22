@@ -1,3 +1,9 @@
+aegir3-provision (3.171) testing; urgency=medium
+
+  * Fix regression in hosting_https, #3020747
+
+ -- Herman van Rink <helmo@initfour.nl>  Sat, 22 Dec 2018 20:22:16 +0100
+
 aegir3-provision (3.170) unstable; urgency=high
 
   * Bugfixes and UI improvements, see http://aegir.readthedocs.org/en/3.x/release-notes/3.17
