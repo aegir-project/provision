@@ -75,7 +75,13 @@ $subdir_dot = str_replace('/', '.', $subdir);
   // use this simple fallback to guarantee that empty db_port does not
   // break Nginx reload which results with downtime for the affected vhosts.
   if (!$db_port) {
-    $db_port = $this->server->db_port ? $this->server->db_port : '3306';
+    $ctrlf = '/data/conf/' . $script_user . '_use_proxysql.txt';
+    if (provision_file()->exists($ctrlf)->status()) {
+      $db_port = '6033';
+    }
+    else {
+      $db_port = $this->server->db_port ? $this->server->db_port : '3306';
+    }
   }
 ?>
 #######################################################
@@ -97,11 +103,24 @@ if ($subdir_main_site_name = '') {
   set $subdir_main_site_name "$server_name";
 }
 
+# Mitigation for https://www.drupal.org/SA-CORE-2018-002
+set $rce "ZZ";
+if ( $query_string ~* (23value|23default_value|element_parents=%23) ) {
+  set $rce "A";
+}
+
+if ( $request_method = POST ) {
+  set $rce "${rce}B";
+}
+
+if ( $rce = "AB" ) {
+  return 403;
+}
+
 <?php if ($nginx_config_mode == 'extended'): ?>
 ###
 ### Add recommended HTTP headers
 ###
-add_header Access-Control-Allow-Origin *;
 add_header X-Content-Type-Options nosniff;
 add_header X-XSS-Protection "1; mode=block";
 
@@ -109,6 +128,10 @@ add_header X-XSS-Protection "1; mode=block";
 ### Helper locations to avoid 404 on legacy images paths
 ###
 location ^~ /<?php print $subdir; ?>/sites/default/files {
+
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
 
   root  <?php print "{$this->root}"; ?>;
 
@@ -118,7 +141,7 @@ location ^~ /<?php print $subdir; ?>/sites/default/files {
     expires    30d;
     set $nocache_details "Skip";
     rewrite ^/<?php print $subdir; ?>/sites/default/files/imagecache/(.*)$ /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/imagecache/$1 last;
-    try_files  $uri @drupal_<?php print $subdir_loc; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
   location ~* ^/<?php print $subdir; ?>/sites/default/files/styles {
     access_log off;
@@ -126,7 +149,7 @@ location ^~ /<?php print $subdir; ?>/sites/default/files {
     expires    30d;
     set $nocache_details "Skip";
     rewrite ^/<?php print $subdir; ?>/sites/default/files/styles/(.*)$ /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/styles/$1 last;
-    try_files  $uri @drupal_<?php print $subdir_loc; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
   location ~* ^/<?php print $subdir; ?>/sites/default/files {
     access_log off;
@@ -205,7 +228,7 @@ location ^~ /<?php print $subdir; ?> {
     location ~* ^/<?php print $subdir; ?>/httprl_async_function_callback {
       access_log off;
       set $nocache_details "Skip";
-      try_files /httprl_async_function_callback $uri @nobots_<?php print $subdir_loc; ?>;
+      try_files /httprl_async_function_callback $uri @drupal_<?php print $subdir_loc; ?>;
     }
   }
 
@@ -216,7 +239,7 @@ location ^~ /<?php print $subdir; ?> {
     location ~* ^/<?php print $subdir; ?>/admin/httprl-test {
       access_log off;
       set $nocache_details "Skip";
-      try_files /admin/httprl-test $uri @nobots_<?php print $subdir_loc; ?>;
+      try_files /admin/httprl-test $uri @drupal_<?php print $subdir_loc; ?>;
     }
   }
 
@@ -231,7 +254,7 @@ location ^~ /<?php print $subdir; ?> {
     gzip_http_version 1.0;
     if_modified_since exact;
     set $nocache_details "Skip";
-    location ~* ^/<?php print $subdir; ?>/(cdn/farfuture/.+\.(?:css|js|jpe?g|gif|png|ico|bmp|svg|swf|pdf|docx?|xlsx?|pptx?|tiff?|txt|rtf|class|otf|ttf|woff|eot|less))$ {
+    location ~* ^/<?php print $subdir; ?>/(cdn/farfuture/.+\.(?:css|js|jpe?g|gif|png|ico|bmp|svg|swf|pdf|docx?|xlsx?|pptx?|tiff?|txt|rtf|class|otf|ttf|woff2?|eot|less))$ {
       expires max;
       add_header X-Header "CDN Far Future Generator 1.0";
       add_header Cache-Control "no-transform, public";
@@ -240,7 +263,7 @@ location ^~ /<?php print $subdir; ?> {
       add_header X-Content-Type-Options nosniff;
       add_header X-XSS-Protection "1; mode=block";
       rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
-      try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
+      try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
     }
     location ~* ^/<?php print $subdir; ?>/(cdn/farfuture/) {
       expires epoch;
@@ -250,9 +273,9 @@ location ^~ /<?php print $subdir; ?> {
       add_header X-Content-Type-Options nosniff;
       add_header X-XSS-Protection "1; mode=block";
       rewrite ^/<?php print $subdir; ?>/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
-      try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
+      try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
     }
-    try_files $uri @nobots_<?php print $subdir_loc; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
 <?php endif; ?>
 
@@ -263,6 +286,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log    off;
     log_not_found off;
     expires       30d;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files     /sites/$subdir_main_site_name/files/favicon.ico /sites/$host/files/favicon.ico /favicon.ico $uri =204;
   }
 
@@ -273,6 +299,9 @@ location ^~ /<?php print $subdir; ?> {
   location = /<?php print $subdir; ?>/robots.txt {
     access_log    off;
     log_not_found off;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
 <?php if ($nginx_config_mode == 'extended'): ?>
     try_files /sites/$subdir_main_site_name/files/$host.robots.txt /sites/$subdir_main_site_name/files/robots.txt /sites/$host/files/robots.txt /robots.txt $uri @cache_<?php print $subdir_loc; ?>;
 <?php else: ?>
@@ -345,10 +374,10 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ^~ /<?php print $subdir; ?>/search {
     location ~* ^/<?php print $subdir; ?>/search {
-      if ($is_bot) {
+      if ( $is_bot ) {
         return 403;
       }
-      try_files /search $uri @cache_<?php print $subdir_loc; ?>;
+      try_files /search $uri @drupal_<?php print $subdir_loc; ?>;
     }
   }
 
@@ -357,7 +386,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ^~ /<?php print $subdir; ?>/js/ {
     location ~* ^/<?php print $subdir; ?>/js/ {
-      if ($is_bot) {
+      if ( $is_bot ) {
         return 403;
       }
       rewrite ^/<?php print $subdir; ?>/(.*)$ /js.php?q=$1 last;
@@ -403,7 +432,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Support for backup_migrate module download/restore/delete actions.
   ###
   location ^~ /<?php print $subdir; ?>/admin {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
@@ -415,7 +444,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Avoid caching /civicrm* and protect it from bots.
   ###
   location ^~ /<?php print $subdir; ?>/civicrm {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     set $nocache_details "Skip";
@@ -427,7 +456,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ^~ /<?php print $subdir; ?>/audio/download {
     location ~* ^/<?php print $subdir; ?>/(audio/download/.*/.*\.(?:mp3|mp4|m4a|ogg))$ {
-      if ($is_bot) {
+      if ( $is_bot ) {
         return 403;
       }
       tcp_nopush off;
@@ -483,7 +512,7 @@ location ^~ /<?php print $subdir; ?> {
     rewrite ^/<?php print $subdir; ?>/(.*)\.r(\.(?:jpe?g|png|gif))$ /<?php print $subdir; ?>/$1$2 last;
     access_log off;
     set $nocache_details "Skip";
-    try_files  $uri @drupal_<?php print $subdir_loc; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -496,7 +525,7 @@ location ^~ /<?php print $subdir; ?> {
     }
     access_log off;
     set $nocache_details "Skip";
-    try_files  $uri @drupal_<?php print $subdir_loc; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
 <?php endif; ?>
 
@@ -504,6 +533,10 @@ location ^~ /<?php print $subdir; ?> {
   ### Map /<?php print $subdir; ?>/files/ shortcut early to avoid overrides in other locations.
   ###
   location ^~ /<?php print $subdir; ?>/files/ {
+
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
 
     ###
     ### Sub-location to support files/styles with short URIs.
@@ -536,7 +569,7 @@ location ^~ /<?php print $subdir; ?> {
       try_files  /<?php print $subdir; ?>/sites/$subdir_main_site_name/files/imagecache/$1 $uri @drupal_<?php print $subdir_loc; ?>;
     }
 
-    location ~* ^.+\.(?:pdf|jpe?g|gif|png|ico|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rtf|vcard|vcf|cgi|bat|pl|dll|class|otf|ttf|woff|eot|less|avi|mpe?g|mov|wmv|mp3|ogg|ogv|wav|midi|zip|tar|t?gz|rar|dmg|exe|apk|pxl|ipa|css|js)$ {
+    location ~* ^.+\.(?:pdf|jpe?g|gif|png|ico|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rtf|vcard|vcf|cgi|bat|pl|dll|class|otf|ttf|woff2?|eot|less|avi|mpe?g|mov|wmv|mp3|ogg|ogv|wav|midi|zip|tar|t?gz|rar|dmg|exe|apk|pxl|ipa|css|js)$ {
       expires       30d;
       tcp_nodelay   off;
       access_log    off;
@@ -545,9 +578,9 @@ location ^~ /<?php print $subdir; ?> {
       try_files   $uri =404;
     }
 <?php if ($nginx_config_mode == 'extended'): ?>
-    try_files $uri @cache_<?php print $subdir_loc; ?>;
+    try_files /$1 $uri @cache_<?php print $subdir_loc; ?>;
 <?php else: ?>
-    try_files $uri @drupal_<?php print $subdir_loc; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
 <?php endif; ?>
   }
 
@@ -559,6 +592,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log off;
     log_not_found off;
     expires    30d;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
 <?php if ($nginx_config_mode == 'extended'): ?>
     set $nocache_details "Skip";
 <?php endif; ?>
@@ -572,6 +608,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log off;
     log_not_found off;
     expires    30d;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
 <?php if ($nginx_config_mode == 'extended'): ?>
     set $nocache_details "Skip";
 <?php endif; ?>
@@ -600,7 +639,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Note: this location doesn't work with X-Accel-Redirect.
   ###
   location ~* ^/<?php print $subdir; ?>/(sites/.*/files/private/.*) {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
@@ -617,7 +656,7 @@ location ^~ /<?php print $subdir; ?> {
   ###
   location ~* ^/<?php print $subdir; ?>/sites/.*/private/ {
 <?php if ($nginx_config_mode == 'extended'): ?>
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
 <?php endif; ?>
@@ -631,7 +670,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Note: this location works with X-Accel-Redirect.
   ###
   location ~* /<?php print $subdir; ?>/files/private/ {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
@@ -644,7 +683,10 @@ location ^~ /<?php print $subdir; ?> {
   location ~* ^/<?php print $subdir; ?>/(.*/wysiwyg_fields/(?:plugins|scripts)/.*\.(?:js|css)) {
     access_log off;
     log_not_found off;
-    try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -664,7 +706,7 @@ location ^~ /<?php print $subdir; ?> {
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection "1; mode=block";
     set $nocache_details "Skip";
-    try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
 
   ###
@@ -674,6 +716,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log  off;
     tcp_nodelay off;
     expires     max; #if using aggregator
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files   /cache/perm/$host${uri}_.css /$1 $uri =404;
   }
 
@@ -684,6 +729,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log  off;
     tcp_nodelay off;
     expires     max; # if using aggregator
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files   /cache/perm/$host${uri}_.js /$1 $uri =404;
   }
 
@@ -694,6 +742,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log  off;
     tcp_nodelay off;
     expires     max; ### if using aggregator
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files   /cache/normal/$host${uri}_.json /$1 $uri =404;
   }
 
@@ -701,7 +752,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Support for dynamic .json requests.
   ###
   location ~* (.*\.json)$ {
-    try_files /$1 $uri @cache_<?php print $subdir_loc; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
   }
 <?php endif; ?>
 
@@ -709,11 +760,14 @@ location ^~ /<?php print $subdir; ?> {
   ### Serve & no-log static files & images directly,
   ### without all standard drupal rewrites, php-fpm etc.
   ###
-  location ~* ^/<?php print $subdir; ?>/(.+\.(?:jpe?g|gif|png|ico|bmp|svg|swf|pdf|docx?|xlsx?|pptx?|tiff?|txt|rtf|vcard|vcf|cgi|bat|pl|dll|aspx?|class|otf|ttf|woff|eot|less))$ {
+  location ~* ^/<?php print $subdir; ?>/(.+\.(?:jpe?g|gif|png|ico|bmp|svg|swf|pdf|docx?|xlsx?|pptx?|tiff?|txt|rtf|vcard|vcf|cgi|bat|pl|dll|aspx?|class|otf|ttf|woff2?|eot|less))$ {
     expires       30d;
     tcp_nodelay   off;
     access_log    off;
     log_not_found off;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files   /$1 $uri =404;
   }
 
@@ -727,6 +781,9 @@ location ^~ /<?php print $subdir; ?> {
     tcp_nopush  off;
     access_log    off;
     log_not_found off;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files   /$1 $uri =404;
   }
 
@@ -737,6 +794,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log  off;
     tcp_nodelay off;
     expires     30d;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files   /$1 $uri =404;
   }
 
@@ -776,7 +836,7 @@ location ^~ /<?php print $subdir; ?> {
     tcp_nopush   off;
     keepalive_requests 0;
     access_log   off;
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     try_files    /$1 $uri =404;
@@ -793,14 +853,14 @@ location ^~ /<?php print $subdir; ?> {
   ### Deny crawlers and never cache known AJAX requests.
   ###
   location ~* ^/<?php print $subdir; ?>/(.*(?:ahah|ajax|batch|autocomplete|done|progress/|x-progress-id|js/.*).*)$ {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
     log_not_found off;
 <?php if ($nginx_config_mode == 'extended'): ?>
     set $nocache_details "Skip";
-    try_files /$1 $uri @nobots_<?php print $subdir_loc; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
 <?php else: ?>
     try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
 <?php endif; ?>
@@ -810,12 +870,15 @@ location ^~ /<?php print $subdir; ?> {
   ### Serve & no-log static helper files used in some wysiwyg editors.
   ###
   location ~* ^/<?php print $subdir; ?>/(sites/.*/(?:modules|libraries)/(?:contrib/)?(?:tinybrowser|f?ckeditor|tinymce|flowplayer|jwplayer|videomanager)/.*\.(?:html?|xml))$ {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log      off;
     tcp_nodelay     off;
     expires         30d;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files /$1 $uri =404;
   }
 
@@ -828,6 +891,9 @@ location ^~ /<?php print $subdir; ?> {
     access_log      off;
     tcp_nodelay     off;
     expires         30d;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     try_files /$1 $uri =404;
   }
 
@@ -859,7 +925,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Deny bots on never cached uri.
   ###
   location ~* ^/<?php print $subdir; ?>/((?:.*/)?(?:admin|user|cart|checkout|logout|comment/reply)) {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
@@ -871,7 +937,7 @@ location ^~ /<?php print $subdir; ?> {
   ### Protect from DoS attempts on never cached uri.
   ###
   location ~* ^/<?php print $subdir; ?>/((?:.*/)?(?:node/[0-9]+/edit|node/add)) {
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
@@ -886,7 +952,7 @@ location ^~ /<?php print $subdir; ?> {
     if ($cache_uid = '') {
       return 403;
     }
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 403;
     }
     access_log off;
@@ -929,9 +995,9 @@ location ^~ /<?php print $subdir; ?> {
     return 403;
   }
 <?php endif; ?>
-    try_files $uri @cache_<?php print $subdir_loc; ?>;
+    try_files /$1 $uri @cache_<?php print $subdir_loc; ?>;
 <?php else: ?>
-    try_files $uri @drupal_<?php print $subdir_loc; ?>;
+    try_files /$1 $uri @drupal_<?php print $subdir_loc; ?>;
 <?php endif; ?>
   }
 
@@ -945,7 +1011,7 @@ location ^~ /<?php print $subdir; ?> {
 <?php endif; ?>
 <?php if ($satellite_mode == 'boa'): ?>
     limit_conn   limreq 88;
-    if ($is_bot) {
+    if ( $is_bot ) {
       return 404;
     }
 <?php endif; ?>
@@ -1025,7 +1091,6 @@ location ^~ /<?php print $subdir; ?> {
     add_header X-This-Proto "$http_x_forwarded_proto";
     add_header X-Server-Sub-Name "$subdir_main_site_name";
     add_header X-Response-Status "$status";
-    add_header Access-Control-Allow-Origin *;
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection "1; mode=block";
 <?php endif; ?>
@@ -1084,6 +1149,7 @@ location ^~ /<?php print $subdir; ?> {
     fastcgi_cache_valid 200 10s;
     fastcgi_cache_valid 301 1m;
     fastcgi_cache_valid 302 403 404 1s;
+    fastcgi_cache_valid any 3s;
     fastcgi_cache_lock on;
     fastcgi_ignore_headers Cache-Control Expires;
     fastcgi_pass_header Set-Cookie;
@@ -1148,65 +1214,34 @@ location @cache_<?php print $subdir_loc; ?> {
 ### Send all not cached requests to drupal with clean URLs support.
 ###
 location @drupal_<?php print $subdir_loc; ?> {
-<?php if ($nginx_config_mode == 'extended'): ?>
-  error_page 418 = @nobots_<?php print $subdir_loc; ?>;
-  if ($args) {
+  set $core_detected "Legacy";
+  ###
+  ### For Drupal >= 7
+  ###
+  if ( -e $document_root/web.config ) {
+    set $core_detected "Regular";
+  }
+  if ( -e $document_root/core ) {
+    set $core_detected "Modern";
+  }
+  error_page 418 = @modern_<?php print $subdir_loc; ?>;
+  if ( $core_detected ~ (?:NotForD7|Modern) ) {
     return 418;
   }
-<?php endif; ?>
   ###
-  ### For Drupal >= 7
-  ###
-  if ($sent_http_x_generator) {
-    add_header X-Info-Gen "Modern";
-    rewrite ^ /<?php print $subdir; ?>/index.php?$query_string last;
-  }
-  ###
-  ### For Drupal <= 6
+  ### For Drupal 6
   ###
   rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
+}
+
+###
+### Special location for Drupal 7+.
+###
+location @modern_<?php print $subdir_loc; ?> {
+  try_files $uri /<?php print $subdir; ?>/index.php?$query_string;
 }
 
 <?php if ($nginx_config_mode == 'extended'): ?>
-###
-### Special location for bots custom restrictions; can be overridden.
-###
-location @nobots_<?php print $subdir_loc; ?> {
-  ###
-  ### Support for Accelerated Mobile Pages (AMP) when bots are redirected below
-  ###
-  # if ( $query_string ~ "^amp$" ) {
-  #   rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
-  # }
-
-  ###
-  ### Send all known bots to $args free URLs (optional)
-  ###
-  # if ($is_bot) {
-  #   return 301 $scheme://$host$request_uri;
-  # }
-
-  ###
-  ### Return 404 on special PHP URLs to avoid revealing version used,
-  ### even indirectly. See also: https://drupal.org/node/2116387
-  ###
-  if ( $args ~* "=PHP[A-Z0-9]{8}-" ) {
-    return 404;
-  }
-
-  ###
-  ### For Drupal >= 7
-  ###
-  if ($sent_http_x_generator) {
-    add_header X-Info-Gen "Modern";
-    rewrite ^ /<?php print $subdir; ?>/index.php?$query_string last;
-  }
-  ###
-  ### For Drupal <= 6
-  ###
-  rewrite ^/<?php print $subdir; ?>/(.*)$  /<?php print $subdir; ?>/index.php?q=$1 last;
-}
-
 ###
 ### Internal location for /authorize.php and /update.php restricted access.
 ###
