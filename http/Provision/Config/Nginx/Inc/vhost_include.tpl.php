@@ -170,7 +170,7 @@ location ^~ /httprl_async_function_callback {
   location ~* ^/httprl_async_function_callback {
     access_log off;
     set $nocache_details "Skip";
-    try_files  $uri @nobots;
+    try_files  $uri @drupal;
   }
 }
 
@@ -181,7 +181,7 @@ location ^~ /admin/httprl-test {
   location ~* ^/admin/httprl-test {
     access_log off;
     set $nocache_details "Skip";
-    try_files  $uri @nobots;
+    try_files  $uri @drupal;
   }
 }
 
@@ -209,7 +209,7 @@ location ^~ /cdn/farfuture/ {
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection "1; mode=block";
     rewrite ^/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
-    try_files $uri @nobots;
+    try_files $uri @drupal;
   }
   location ~* ^/cdn/farfuture/ {
     expires epoch;
@@ -219,9 +219,9 @@ location ^~ /cdn/farfuture/ {
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection "1; mode=block";
     rewrite ^/cdn/farfuture/[^/]+/[^/]+/(.+)$ /$1 break;
-    try_files $uri @nobots;
+    try_files $uri @drupal;
   }
-  try_files $uri @nobots;
+  try_files $uri @drupal;
 }
 <?php endif; ?>
 
@@ -335,7 +335,7 @@ location ^~ /search {
     if ($is_bot) {
       return 403;
     }
-    try_files $uri @cache;
+    try_files $uri @drupal;
   }
 }
 
@@ -423,7 +423,7 @@ location ^~ /hosting {
   }
   access_log off;
   set $nocache_details "Skip";
-  try_files $uri @cache;
+  try_files $uri @drupal;
 }
 
 <?php if ($satellite_mode == 'boa'): ?>
@@ -546,7 +546,7 @@ location ~* (?:validation|aggregator|vote_up_down|captcha|vbulletin|glossary/) {
     return 403;
   }
   access_log off;
-  try_files $uri @cache;
+  try_files $uri @drupal;
 }
 
 ###
@@ -737,7 +737,7 @@ location ~* files/advagg_(?:css|js)/ {
   add_header X-Content-Type-Options nosniff;
   add_header X-XSS-Protection "1; mode=block";
   set $nocache_details "Skip";
-  try_files  $uri @nobots;
+  try_files  $uri @drupal;
 }
 
 ###
@@ -1063,7 +1063,7 @@ location ~* /(?:ahah|ajax|batch|autocomplete|done|progress/|x-progress-id|js/.*)
   log_not_found off;
 <?php if ($nginx_config_mode == 'extended'): ?>
   set $nocache_details "Skip";
-  try_files $uri @nobots;
+  try_files $uri @drupal;
 <?php else: ?>
   try_files $uri @drupal;
 <?php endif; ?>
@@ -1311,63 +1311,32 @@ location @cache {
 ### Send all not cached requests to drupal with clean URLs support.
 ###
 location @drupal {
-<?php if ($nginx_config_mode == 'extended'): ?>
-  error_page 418 = @nobots;
-  if ($args) {
-    return 418;
-  }
-<?php endif; ?>
+  set $core_detected "Legacy";
   ###
   ### For Drupal >= 7
   ###
-  if ($sent_http_x_generator) {
-    add_header X-Info-Gen "Modern";
-    rewrite ^ /index.php?$query_string last;
+  if ( -e $document_root/web.config ) {
+    set $core_detected "Regular";
+  }
+  if ( -e $document_root/core ) {
+    set $core_detected "Modern";
+  }
+  error_page 418 = @modern;
+  if ( $core_detected ~ (?:NotForD7|Modern) ) {
+    return 418;
   }
   ###
-  ### For Drupal <= 6
+  ### For Drupal 6
   ###
   rewrite ^/(.*)$ /index.php?q=$1 last;
 }
 
 <?php if ($nginx_config_mode == 'extended'): ?>
 ###
-### Special location for bots custom restrictions; can be overridden.
-###
-location @nobots {
+### Special location for Drupal 7+.
   ###
-  ### Support for Accelerated Mobile Pages (AMP) when bots are redirected below
-  ###
-  # if ( $query_string ~ "^amp$" ) {
-  #  rewrite ^/(.*)$  /index.php?q=$1 last;
-  # }
-
-  ###
-  ### Send all known bots to $args free URLs (optional)
-  ###
-  # if ($is_bot) {
-  #   return 301 $scheme://$host$request_uri;
-  # }
-
-  ###
-  ### Return 404 on special PHP URLs to avoid revealing version used,
-  ### even indirectly. See also: https://drupal.org/node/2116387
-  ###
-  if ( $args ~* "=PHP[A-Z0-9]{8}-" ) {
-    return 404;
-  }
-
-  ###
-  ### For Drupal >= 7
-  ###
-  if ($sent_http_x_generator) {
-    add_header X-Info-Gen "Modern";
-    rewrite ^ /index.php?$query_string last;
-  }
-  ###
-  ### For Drupal <= 6
-  ###
-  rewrite ^/(.*)$ /index.php?q=$1 last;
+location @modern {
+  try_files $uri /index.php?$query_string;
 }
 
 ###
@@ -1381,6 +1350,7 @@ location = /index.php {
   add_header X-GeoIP-Country-Name "$geoip_country_name";
 <?php endif; ?>
 <?php if ($nginx_config_mode == 'extended'): ?>
+  add_header X-Core-Variant "$core_detected";
   add_header X-Speed-Cache "$upstream_cache_status";
   add_header X-Speed-Cache-UID "$cache_uid";
   add_header X-Speed-Cache-Key "$key_uri";
