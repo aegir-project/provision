@@ -134,7 +134,6 @@ if ($is_denied) {
 ###
 ### Add recommended HTTP headers
 ###
-add_header Access-Control-Allow-Origin *;
 add_header X-Content-Type-Options nosniff;
 add_header X-XSS-Protection "1; mode=block";
 <?php endif; ?>
@@ -233,6 +232,9 @@ location = /favicon.ico {
   access_log    off;
   log_not_found off;
   expires       30d;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
   try_files  /sites/$main_site_name/files/favicon.ico $uri =204;
 }
 
@@ -243,6 +245,9 @@ location = /favicon.ico {
 location = /robots.txt {
   access_log    off;
   log_not_found off;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
 <?php if ($nginx_config_mode == 'extended'): ?>
   try_files /sites/$main_site_name/files/$host.robots.txt /sites/$main_site_name/files/robots.txt $uri @cache;
 <?php else: ?>
@@ -579,6 +584,9 @@ location ~* /sites/.*/files/styles/(.*)$ {
   access_log off;
   log_not_found off;
   expires    30d;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
 <?php if ($nginx_config_mode == 'extended'): ?>
   set $nocache_details "Skip";
 <?php endif; ?>
@@ -592,6 +600,9 @@ location ~* /s3/files/styles/(.*)$ {
   access_log off;
   log_not_found off;
   expires    30d;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
 <?php if ($nginx_config_mode == 'extended'): ?>
   set $nocache_details "Skip";
 <?php endif; ?>
@@ -605,6 +616,9 @@ location ~* /sites/.*/files/imagecache/(.*)$ {
   access_log off;
   log_not_found off;
   expires    30d;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
 <?php if ($nginx_config_mode == 'extended'): ?>
   # fix common problems with old paths after import from standalone to Aegir multisite
   rewrite ^/sites/(.*)/files/imagecache/(.*)/sites/default/files/(.*)$ /sites/$main_site_name/files/imagecache/$2/$3 last;
@@ -699,7 +713,10 @@ location ~* /files/private/ {
 location ~* wysiwyg_fields/(?:plugins|scripts)/.*\.(?:js|css) {
   access_log off;
   log_not_found off;
-  try_files $uri @nobots;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+  try_files $uri @drupal;
 }
 
 ###
@@ -737,6 +754,9 @@ location ~* \.css$ {
   access_log  off;
   tcp_nodelay off;
   expires     max; #if using aggregator
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
   try_files   /cache/perm/$host${uri}_.css $uri =404;
 }
 
@@ -754,6 +774,9 @@ location ~* \.(?:js|htc)$ {
   access_log  off;
   tcp_nodelay off;
   expires     max; # if using aggregator
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
   try_files   /cache/perm/$host${uri}_.js $uri =404;
 }
 
@@ -768,6 +791,9 @@ location ~* ^/sites/.*/files/.*\.json$ {
   access_log  off;
   tcp_nodelay off;
   expires     max; ### if using aggregator
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
   try_files   /cache/normal/$host${uri}_.json $uri =404;
 }
 
@@ -791,6 +817,48 @@ location @uncached {
 ### Map /files/ shortcut early to avoid overrides in other locations.
 ###
 location ^~ /files/ {
+
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
+
+<?php if ($satellite_mode == 'boa'): ?>
+  ###
+  ### Sub-location to support Flash Video (FLV) files with short URIs.
+  ###
+  location ~* /files/.+\.flv$ {
+    flv;
+    tcp_nodelay off;
+    tcp_nopush off;
+    expires 30d;
+    access_log    off;
+    log_not_found off;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    rewrite  ^/files/(.*)$  /sites/$main_site_name/files/$1 last;
+    try_files   $uri =404;
+  }
+
+  ###
+  ### Sub-location to support H.264/AAC files with short URIs.
+  ###
+  location ~* /files/.+\.(?:mp4|m4a)$ {
+    mp4;
+    mp4_buffer_size 1m;
+    mp4_max_buffer_size 5m;
+    tcp_nodelay off;
+    tcp_nopush off;
+    expires 30d;
+    access_log    off;
+    log_not_found off;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    rewrite  ^/files/(.*)$  /sites/$main_site_name/files/$1 last;
+    try_files   $uri =404;
+  }
+<?php endif; ?>
 
   ###
   ### Sub-location to support files/styles with short URIs.
@@ -847,6 +915,9 @@ location ^~ /downloads/ {
     tcp_nodelay   off;
     access_log    off;
     log_not_found off;
+    add_header Access-Control-Allow-Origin *;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
     rewrite  ^/downloads/(.*)$  /sites/$main_site_name/files/downloads/$1 last;
     try_files   $uri =404;
   }
@@ -866,6 +937,9 @@ location ~* ^.+\.(?:jpe?g|gif|png|ico|bmp|svg|swf|docx?|xlsx?|pptx?|tiff?|txt|rt
   tcp_nodelay   off;
   access_log    off;
   log_not_found off;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
   rewrite     ^/images/(.*)$  /sites/$main_site_name/files/images/$1 last;
   rewrite     ^/.+/sites/.+/files/(.*)$  /sites/$main_site_name/files/$1 last;
   try_files   $uri =404;
@@ -881,6 +955,9 @@ location ~* ^.+\.(?:avi|mpe?g|mov|wmv|ogg|ogv|zip|tar|t?gz|rar|dmg|exe|apk|pxl|i
   tcp_nopush  off;
   access_log    off;
   log_not_found off;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
   rewrite     ^/.+/sites/.+/files/(.*)$  /sites/$main_site_name/files/$1 last;
   try_files   $uri =404;
 }
@@ -896,6 +973,9 @@ location ~* ^/sites/.+/files/.+\.(?:pdf|aspx?)$ {
   tcp_nodelay   off;
   access_log    off;
   log_not_found off;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
   try_files   $uri =404;
 }
 
@@ -910,6 +990,9 @@ location ~* ^.+\.flv$ {
   expires 30d;
   access_log    off;
   log_not_found off;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
   try_files $uri =404;
 }
 
@@ -925,6 +1008,9 @@ location ~* ^.+\.(?:mp4|m4a)$ {
   expires 30d;
   access_log    off;
   log_not_found off;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
   try_files $uri =404;
 }
 <?php endif; ?>
@@ -936,6 +1022,9 @@ location ~* /(?:cross-?domain)\.xml$ {
   access_log  off;
   tcp_nodelay off;
   expires     30d;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
   try_files   $uri =404;
 }
 
@@ -990,6 +1079,9 @@ location ~* ^/sites/.*/(?:modules|libraries)/(?:contrib/)?(?:tinybrowser|f?ckedi
   access_log      off;
   tcp_nodelay     off;
   expires         30d;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
   try_files $uri =404;
 }
 
@@ -1000,6 +1092,9 @@ location ~* ^/sites/.*/files/ {
   access_log      off;
   tcp_nodelay     off;
   expires         30d;
+  add_header Access-Control-Allow-Origin *;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection "1; mode=block";
   try_files $uri =404;
 }
 
@@ -1101,7 +1196,6 @@ location ~ ^/(?<esi>esi/.*)"$ {
   add_header X-This-Proto "$http_x_forwarded_proto";
   add_header X-Server-Name "$main_site_name";
   add_header Cache-Control "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
-  add_header Access-Control-Allow-Origin *;
   add_header X-Content-Type-Options nosniff;
   add_header X-XSS-Protection "1; mode=block";
   ###
@@ -1293,7 +1387,6 @@ location = /index.php {
   add_header X-NoCache "$nocache_details";
   add_header X-This-Proto "$http_x_forwarded_proto";
   add_header X-Server-Name "$main_site_name";
-  add_header Access-Control-Allow-Origin *;
   add_header X-Content-Type-Options nosniff;
   add_header X-XSS-Protection "1; mode=block";
 <?php endif; ?>
