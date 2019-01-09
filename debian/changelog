@@ -1,3 +1,9 @@
+aegir3-provision (3.172) testing; urgency=medium
+
+  * Fix regression in legacy hosting_ssl: the logic for determining a certificate wasn't good, in the legacy module. #3020747
+
+ -- Jon Pugh <jon@thinkdrop.net>  Wed, 09 Jan 2019 10:50:08 -0500
+
 aegir3-provision (3.171) testing; urgency=medium
 
   * Fix regression in hosting_https, #3020747
